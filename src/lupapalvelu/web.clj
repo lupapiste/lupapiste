@@ -442,6 +442,9 @@
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
+  (defjson "/dev/fileinfo/:id" {:keys [id]}
+    (dissoc (mongo/download id) :content))
+
   (defjson "/dev/hgnotes" [] (env/hgnotes))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}

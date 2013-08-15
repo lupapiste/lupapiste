@@ -68,11 +68,15 @@
     body))
 
 (defn current-user [apikey]
-  (let [resp (c/get
-               (str (server-address) "/dev/user")
-               {:headers {"authorization" (str "apikey=" apikey)}})]
-    (fact (:status resp) => 200)
-    (-> resp :body json/parse-string keywordize-keys)))
+  (let [resp (decode-response (c/get (str (server-address) "/dev/user")
+                                     {:headers {"authorization" (str "apikey=" apikey)}}))]
+    (assert (= 200 (:status resp)))
+    (:body resp)))
+
+(defn file-info [id]
+  (let [resp (c/get (str (server-address) "/dev/fileinfo/" id) {:throw-exceptions false})]
+    (when (= 200 (:status resp))
+      (:body (decode-response resp)))))
 
 (facts "uploading user attachment"
   (apply-remote-minimal)
@@ -89,7 +93,7 @@
 
   (upload-user-attachment pena "examination" true)
   (let [file-1 (get-in (current-user pena) [:attachment :examination])
-        att-1 (mongo/download (:file-id file-1))]
+        att-1 (file-info (:file-id file-1))]
     (fact "filename of file 1"    file-1  => (contains {:filename "test-attachment.txt"}))
     (fact "db has same filename"  att-1   => (contains {:file-name "test-attachment.txt"}))
     (fact "file 1 metadata"       att-1   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})}))
@@ -100,9 +104,9 @@
 
     (upload-user-attachment pena "examination" true)
     (let [file-2 (get-in (current-user pena) [:attachment :examination])
-          att-2 (mongo/download (:file-id file-2))]
+          att-2 (file-info (:file-id file-2))]
       (fact "filename of file 2"   file-2  => (contains {:filename "test-attachment.txt"}))
       (fact "db has same filename" att-2   => (contains {:file-name "test-attachment.txt"}))
       (fact "file 2 metadata"      att-2   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})})))
 
-    (fact "old file is deleted"  (mongo/download (:file-id file-1)) => nil?)))
+    (fact "old file is deleted"  (file-info (:file-id file-1)) => nil?)))
