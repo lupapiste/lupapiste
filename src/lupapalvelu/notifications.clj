@@ -1,6 +1,7 @@
 (ns lupapalvelu.notifications
   (:use [monger.operators]
         [sade.strings :only [suffix]]
+        [clojure.set :only [difference]]
         [lupapalvelu.i18n :only [loc]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [clojure.java.io :as io]
@@ -66,8 +67,11 @@
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
 
+; emails are sent to everyone in auth array except statement persons
 (defn get-email-recipients-for-application [application]
-  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
+  (difference 
+    (set (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
+    (set (map (fn [a] (:username a)) (:auth application)))))
 
 (defn template [s]
   (->
