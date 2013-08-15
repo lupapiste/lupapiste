@@ -419,6 +419,17 @@
       return false;
     };
 
+    self.refreshktj = function(model) {
+      var applicationId = self.id();
+      ajax.command("refresh-ktj", { id: applicationId})
+        .success(function() {
+          repository.load(applicationId);
+        })//FIXME parempi/tyylikaampi virheilmoitus
+        .error(function(resp) {alert(resp.text);})
+        .call();
+      return false;
+    };
+
     self.removeInvite = function(model) {
       var applicationId = self.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
@@ -725,10 +736,10 @@
   }();
 
   function createMap(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); }
-  
+
   function getOrCreateMap(kind) {
     if (kind === "application") {
-      if (!applicationMap) applicationMap = createMap("application-map"); 
+      if (!applicationMap) applicationMap = createMap("application-map");
       return applicationMap;
     } else if (kind === "inforequest") {
       if (!inforequestMap) inforequestMap = createMap("inforequest-map");
@@ -737,7 +748,7 @@
       throw "Unknown kind: " + kind;
     }
   }
-  
+
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];

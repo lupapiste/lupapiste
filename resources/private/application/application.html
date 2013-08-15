@@ -116,6 +116,10 @@
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
+          <button data-bind="click: refreshktj,    visible: $root.authorization.ok('refresh-ktj'),     enable: $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn btn-primary">
+            <span data-bind="ltext: 'application.refreshKTJ'"></span>
+            <span class="icon send left-align"></span>
+          </button>
         </div>
 
         <!-- Tabs: -->
