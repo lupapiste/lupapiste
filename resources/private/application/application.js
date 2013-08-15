@@ -411,6 +411,7 @@
       var applicationId = self.id();
       ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
+        //FIXME parempi tapa ilmoittaa onnistumisesta
           notify.success("hakemus hyv\u00E4ksytty",model);
           repository.load(applicationId);
         })//FIXME parempi/tyylikaampi virheilmoitus
@@ -419,10 +420,12 @@
       return false;
     };
 
-    self.refreshktj = function(model) {
+    self.refreshKTJ = function(model) {
       var applicationId = self.id();
       ajax.command("refresh-ktj", { id: applicationId})
         .success(function() {
+          //FIXME parempi tapa ilmoittaa onnistumisesta
+          notify.success("KTJ tiedot p\u00e4ivitetty",model);
           repository.load(applicationId);
         })//FIXME parempi/tyylikaampi virheilmoitus
         .error(function(resp) {alert(resp.text);})

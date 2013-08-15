@@ -454,11 +454,8 @@
    :roles      [:authority]
    :states     [:draft :open :submitted :complement-needed]
    :validators [validate-owner-or-writer]}
-  [{{:keys [host]} :web :keys [created] :as command}]
-  (with-application command
-    (fn [application]
-      (println "55555555")
-      (autofill-rakennuspaikka application (now)))))
+  [{:keys [application]}]
+  (autofill-rakennuspaikka application (now)))
 
 (defcommand save-application-shape
   {:parameters [:id shape]

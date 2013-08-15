@@ -10,7 +10,7 @@ Mikko wants to build a water slide
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22
+  Create application  ${appname}  753  753-416-25-22
   Add comment  Lapsille vesiliuku
   Logout
 
