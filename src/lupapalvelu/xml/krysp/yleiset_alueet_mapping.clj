@@ -130,8 +130,7 @@
                      }]}]})
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-
-  (let [file-name  (str output-dir "/" (:id application))
+  (let [file-name  (str output-dir "/" (:_id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
@@ -158,9 +157,9 @@
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
     ;(println xml-s)
     (validate xml-s)
+    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
-    (fs/mkdirs output-dir)
 ;    (write-attachments attachments output-dir)
 ;    (write-statement-attachments statement-attachments output-dir)
 
