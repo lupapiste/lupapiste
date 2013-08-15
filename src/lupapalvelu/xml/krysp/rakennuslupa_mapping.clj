@@ -17,7 +17,8 @@
 ;RakVal
 
 (def ^:private huoneisto {:tag :huoneisto
-                          :child [{:tag :huoneluku}
+                          :child [{:tag :muutostapa}
+                                  {:tag :huoneluku}
                                   {:tag :keittionTyyppi}
                                   {:tag :huoneistoala}
                                   {:tag :varusteet
