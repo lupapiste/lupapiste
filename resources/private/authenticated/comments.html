@@ -58,6 +58,8 @@
                          optionsCaption: loc('comment-request-prompt')"
               data-test-id="application-assigneed-authority">
             </select>
+            <label data-bind="ltext: 'comment-request-mark-answered-label'"></label>
+            <input type="checkbox" data-bind="checked: $parent.markAnswered" data-test-id="comment-request-mark-answered" />
           </div>
         </form>
       </div>
