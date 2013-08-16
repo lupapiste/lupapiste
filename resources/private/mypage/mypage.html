@@ -5,38 +5,124 @@
 
     <div class="fifty">
       <form id="own-info-form">
-        <h2 data-bind="ltext: 'mypage.title'"></h2>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
-          <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
-        </div>
-
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
-          <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
-        </div>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
-          <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
-          <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
-          <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
-          <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
-          <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
-        </div>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
-          <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
-        </div>
-        
-        <div data-bind="if: features.enabled('architect-info')">
-          <div class="feature"><span class="legend">neighbors</span>
-        
-            <div class="form-entry">
-              <label data-bind="ltext: 'userinfo.architect'" for="architect" class="form-label"></label>
-              <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
-            </div>
+        <div class="own-info">
+          <h2 data-bind="ltext: 'mypage.title'"></h2>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
+            <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
           </div>
-        </div> <!-- feature flagging -->
+
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
+            <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
+            <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
+            <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
+            <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
+            <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
+            <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
+            <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
+          </div>
+        </div>
+        <div data-bind="if: features.enabled('architect-info')"><div class="feature"><span class="legend">neighbors</span>
+        <div class="architect-info">
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect'" for="architect" class="form-label"></label>
+            <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
+          </div>
+          
+          <div data-bind="visible: architect">
+          
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.company.name'" for="architect.company.name" class="form-label"></label>
+              <input data-bind="value: companyName" id="architect.company.name" type="text" class="form-input"></input>
+            </div>
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.company.id'" for="architect.company.id" class="form-label"></label>
+              <input data-bind="value: companyId" id="architect.company.id" type="text" class="form-input"></input>
+            </div>
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.company.street'" for="architect.company.street" class="form-label"></label>
+              <input data-bind="value: companyStreet" id="architect.company.street" type="text" class="form-input"></input>
+            </div>
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.company.zip'" for="architect.company.zip" class="form-label"></label>
+              <input data-bind="value: companyZip" id="architect.company.zip" type="text" class="form-input"></input>
+            </div>
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
+              <input data-bind="value: companyCity" id="architect.company.city" type="text" class="form-input"></input>
+            </div>
+            
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
+              <input data-bind="value: degree" id="architect.degree" type="text" class="form-input"></input>
+            </div>
+    
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.experience'" for="architect.experience" class="form-label"></label>
+              <input data-bind="value: experience" id="architect.experience" type="text" class="form-input"></input>
+            </div>
+    
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
+              <input data-bind="value: fise" id="architect.fise" type="text" class="form-input"></input>
+            </div>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.qualification'" for="architect.qualification" class="form-label"></label>
+              <select
+                  data-bind="options: availableQualifications,
+                             value: qualification,
+                             optionsCaption: loc('userinfo.architect.qualification.choose')"
+                  id="architect.qualification">
+              </select>
+            </div>
+
+            <div class="form-entry">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                    <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
+                    <td>
+                      <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + examination.fileId()}, visible: examination.filename, text: examination.filename" href="#" target="_blank"></a>
+                      <a data-bind="click: remove(examination), visible: examination.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                      <a data-bind="click: upload(examination), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
+                    <td>
+                      <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + proficiency.fileId()}, visible: proficiency.filename, text: proficiency.filename" href="#" target="_blank"></a>
+                      <a data-bind="click: remove(proficiency), visible: proficiency.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                      <a data-bind="click: upload(proficiency), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
+                    <td>
+                      <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + cv.fileId()}, visible: cv.filename, text: cv.filename" href="#" target="_blank"></a>
+                      <a data-bind="click: remove(cv), visible: cv.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                      <a data-bind="click: upload(cv), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>        
+          </div>
+        </div>
+        </div></div> <!-- feature flagging -->
         
         <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
         <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
@@ -44,95 +130,7 @@
         <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
       </form>
     </div>
-    
-    <div class="fifty">
-      <div data-bind="if: features.enabled('architect-info')"><div class="feature"><span class="legend">neighbors</span>
-        
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.company.name'" for="architect.company.name" class="form-label"></label>
-            <input data-bind="value: companyName" id="architect.company.name" type="text" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.company.id'" for="architect.company.id" class="form-label"></label>
-            <input data-bind="value: companyId" id="architect.company.id" type="text" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.company.street'" for="architect.company.street" class="form-label"></label>
-            <input data-bind="value: companyStreet" id="architect.company.street" type="text" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.company.zip'" for="architect.company.zip" class="form-label"></label>
-            <input data-bind="value: companyZip" id="architect.company.zip" type="text" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
-            <input data-bind="value: companyCity" id="architect.company.city" type="text" class="form-input"></input>
-          </div>
-          
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
-            <input data-bind="value: degree" id="architect.degree" type="text" class="form-input"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.experience'" for="architect.experience" class="form-label"></label>
-            <input data-bind="value: experience" id="architect.experience" type="text" class="form-input"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
-            <input data-bind="value: fise" id="architect.fise" type="text" class="form-input"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.architect.qualification'" for="architect.qualification" class="form-label"></label>
-            <select
-                data-bind="options: availableQualifications,
-                           value: qualification,
-                           optionsCaption: loc('userinfo.architect.qualification.choose')"
-                id="architect.qualification">
-            </select>
-          </div>
-
-          <div class="form-entry">
-            <table>
-              <thead>
-                <tr>
-                  <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
-                  <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
-                  <td>
-                    <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + examination.fileId()}, visible: examination.filename, text: examination.filename" href="#" target="_blank"></a>
-                    <a data-bind="click: remove(examination), visible: examination.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                    <a data-bind="click: upload(examination), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                  </td>
-                </tr>
-                <tr>
-                  <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
-                  <td>
-                    <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + proficiency.fileId()}, visible: proficiency.filename, text: proficiency.filename" href="#" target="_blank"></a>
-                    <a data-bind="click: remove(proficiency), visible: proficiency.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                    <a data-bind="click: upload(proficiency), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                  </td>
-                </tr>
-                <tr>
-                  <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
-                  <td>
-                    <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + cv.fileId()}, visible: cv.filename, text: cv.filename" href="#" target="_blank"></a>
-                    <a data-bind="click: remove(cv), visible: cv.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                    <a data-bind="click: upload(cv), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>              
-        </div>
-      </div> <!-- feature flagging -->
-    </div> 
+   
     <div class="fifty">
       <form id="pw-form">
         <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
