@@ -20,7 +20,7 @@ var comments = (function() {
         .applicationId(application.id)
         .target(target || {type: "application"})
         .text("")
-        .markAnswered(true);
+        .markAnswered(false);
       var filteredComments =
         _.filter(application.comments,
             function(comment) {

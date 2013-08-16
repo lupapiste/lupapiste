@@ -48,18 +48,24 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
-          <div data-bind="with: $parent.authorities, visible: $root.authorization.ok('can-target-comment-to-authority')" class="comment-request">
-            <label data-bind="ltext: 'comment-request-label'"></label>
-            <select
-              data-bind="options: $data,
-                         optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
-                         optionsValue: 'id',
-                         value: $parent.to,
-                         optionsCaption: loc('comment-request-prompt')"
-              data-test-id="application-assigneed-authority">
-            </select>
-            <label data-bind="ltext: 'comment-request-mark-answered-label'"></label>
-            <input type="checkbox" data-bind="checked: $parent.markAnswered" data-test-id="comment-request-mark-answered" />
+          <div data-bind="with: $parent.authorities, visible: $root.authorization.ok('can-target-comment-to-authority')" class="comment-controls">
+            <div class="mark-answered">
+              <input type="checkbox" data-bind="checked: $parent.markAnswered" data-test-id="comment-request-mark-answered" id="mark-answered" />
+              <label data-bind="ltext: 'comment-request-mark-answered-label'" for="mark-answered"></label>
+              
+            </div>
+            <div class="comment-request">
+              <label data-bind="ltext: 'comment-request-label'"></label>
+              <select
+                data-bind="options: $data,
+                           optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                           optionsValue: 'id',
+                           value: $parent.to,
+                           optionsCaption: loc('comment-request-prompt')"
+                data-test-id="application-assigneed-authority">
+              </select>
+            </div>
+
           </div>
         </form>
       </div>
