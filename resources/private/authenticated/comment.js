@@ -13,6 +13,8 @@ var comments = (function() {
     self.to = ko.observable();
     self.markAnswered = ko.observable();
     
+    self.to.subscribe(function(value) { if (value) self.markAnswered(false); });
+    
     self.refresh = function(application, target) {
       self
         .applicationId(application.id)
