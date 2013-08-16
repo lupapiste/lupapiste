@@ -611,7 +611,7 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (autofill-rakennuspaikka (mongo/by-id :applications id) (now)))
+      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand convert-to-application
