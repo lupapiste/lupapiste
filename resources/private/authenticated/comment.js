@@ -10,9 +10,10 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-
+    self.applicationId = null;
+    
     self.refresh = function(application, target) {
-      self.setApplicationId(application.id);
+      self.applicationId = application.id;
       self.target(target || {type: "application"});
       self.text("");
       var filteredComments =
@@ -26,10 +27,6 @@ var comments = (function() {
     self.isForMe = function(model) {
       return model.to && model.to.id && model.to.id() === currentUser.id();
     }
-
-    self.setApplicationId = function(applicationId) {
-      self.applicationId = applicationId;
-    };
 
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(self.text());
