@@ -44,7 +44,8 @@
                   :html ["selectm.html"]
                   :css  ["selectm.css"]}
 
-   :licenses     {:html ["licenses.html"]}
+   :licenses     {:html ["licenses.html"]
+                  :js ["licenses.js"]}
    
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
