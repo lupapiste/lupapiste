@@ -4,18 +4,21 @@ var comments = (function() {
   function CommentModel(takeAll) {
     var self = this;
 
+    self.applicationId = ko.observable();
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-    self.applicationId = null;
+    self.markAnswered = ko.observable();
     
     self.refresh = function(application, target) {
-      self.applicationId = application.id;
-      self.target(target || {type: "application"});
-      self.text("");
+      self
+        .applicationId(application.id)
+        .target(target || {type: "application"})
+        .text("")
+        .markAnswered(true);
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
@@ -33,13 +36,18 @@ var comments = (function() {
     });
 
     self.submit = function(model) {
-      var id = self.applicationId;
-      ajax.command("add-comment", { id: id, text: model.text(), target: self.target(), to: self.to()})
+      var id = self.applicationId();
+      ajax.command("add-comment", {
+          id: id,
+          text: model.text(),
+          target: self.target(),
+          to: self.to(),
+          "mark-answered": self.markAnswered()
+        })
         .processing(self.processing)
         .pending(self.pending)
         .success(function() {
-          model.text("");
-          self.to(undefined);
+          model.text("").to(undefined).markAnswered(true);
           repository.load(id);
         })
         .call();
