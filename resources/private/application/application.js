@@ -585,7 +585,6 @@
       inviteModel.setApplicationId(app.id);
 
       // Comments:
-      commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
 
       // Verdict details

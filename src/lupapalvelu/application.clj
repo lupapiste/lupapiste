@@ -279,9 +279,9 @@
 (defcommand add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
-   :validators [applicant-cant-set-to ]
+   :validators [applicant-cant-set-to]
    :notify     "new-comment"}
-  [{{:keys [text target to]} :data {:keys [host]} :web :keys [user created] :as command}]
+  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
       (let [to-user   (and to (or (security/get-non-private-userinfo to)
@@ -304,8 +304,8 @@
                              :state    :open
                              :opened   created}}))
 
-          ;; LUPA-371
-          :info (when (security/authority? user)
+          ;; LUPA-371, LUPA-745
+          :info (when (and mark-answered (security/authority? user))
                   (update-application command
                     {$set {:state    :answered
                            :modified created}}))
