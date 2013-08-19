@@ -36,7 +36,7 @@
                                   [clj-ssh "0.5.6"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
-                             [lein-nitpicker "0.3.0"]
+                             [lein-nitpicker "0.4.0"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]]
                    :source-paths ["test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
@@ -50,14 +50,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"[\/\\]jquery"
-                         #"[\/\\]theme[\/\\]default"
-                         #"[\/\\]public[\/\\]lib"
-                         #"[\/\\]test[\/\\]"
-                         #"openlayers"
-                         #"underscore"
-                         #"lodash"
-                         #"hgnotes"]}
+              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"

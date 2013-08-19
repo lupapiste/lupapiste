@@ -4,17 +4,23 @@ var comments = (function() {
   function CommentModel(takeAll) {
     var self = this;
 
+    self.applicationId = ko.observable();
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-
+    self.markAnswered = ko.observable();
+    
+    self.to.subscribe(function(value) { if (value) self.markAnswered(false); });
+    
     self.refresh = function(application, target) {
-      self.setApplicationId(application.id);
-      self.target(target || {type: "application"});
-      self.text("");
+      self
+        .applicationId(application.id)
+        .target(target || {type: "application"})
+        .text("")
+        .markAnswered(false);
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
@@ -27,22 +33,23 @@ var comments = (function() {
       return model.to && model.to.id && model.to.id() === currentUser.id();
     }
 
-    self.setApplicationId = function(applicationId) {
-      self.applicationId = applicationId;
-    };
-
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(self.text());
     });
 
     self.submit = function(model) {
-      var id = self.applicationId;
-      ajax.command("add-comment", { id: id, text: model.text(), target: self.target(), to: self.to()})
+      var id = self.applicationId();
+      ajax.command("add-comment", {
+          id: id,
+          text: model.text(),
+          target: self.target(),
+          to: self.to(),
+          "mark-answered": self.markAnswered()
+        })
         .processing(self.processing)
         .pending(self.pending)
         .success(function() {
-          model.text("");
-          self.to(undefined);
+          model.text("").to(undefined).markAnswered(true);
           repository.load(id);
         })
         .call();

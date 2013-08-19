@@ -1,7 +1,6 @@
 (ns lupapalvelu.user
   (:use [monger.operators]
-        [lupapalvelu.core]
-        [lupapalvelu.i18n :only [*lang*]])
+        [lupapalvelu.core])
   (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
             [slingshot.slingshot :refer [throw+]]
             [lupapalvelu.mongo :as mongo]

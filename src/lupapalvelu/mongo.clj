@@ -211,6 +211,13 @@
           pw   (-> conf :credentials :password)
           ssl  (:ssl conf)]
       (connect! server-list db user pw ssl)))
+  ([^String host ^Long port]
+    (let [conf (env/value :mongodb)
+          db   (:dbname conf)
+          user (-> conf :credentials :username)
+          pw   (-> conf :credentials :password)
+          ssl  (:ssl conf)]
+      (connect! (m/server-address host port) db user pw ssl)))
   ([servers db username password ssl]
     (if @connected
       (debug "Already connected!")
