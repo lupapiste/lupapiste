@@ -73,7 +73,7 @@
 
 (def ^:private operation-tree-for-P
   {:permit-type permit/P
-   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut"]})
+   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
 
 (def ^:private operation-tree-for-Y
   {:permit-type permit/Y
@@ -262,9 +262,9 @@
                                  :permit-type "R"
                                  :required  common-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :suunnittelutarveratkaisu    {:schema "suunnittelutarveratkaisun-lisaosa"
+   :poikkeamis                  {:schema "poikkeamis"
                                  :permit-type "P"
-                                 :required  (conj common-schemas "rakennushanke" "poikkeamishakemuksen-lisaosa")
+                                 :required  (conj common-schemas "rakennushanke" "suunnittelutarveratkaisun-lisaosa")
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :meluilmoitus                {:schema "meluilmoitus"
                                  :permit-type "R"

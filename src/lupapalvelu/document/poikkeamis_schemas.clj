@@ -183,7 +183,7 @@
                             {:name "kerrosala" :type "string" :subtype :number :unit "m2" :size "s"}
                             {:name "kokonaisala" :type "string" :subtype :number :unit "m2" :size "s"}]}]})
 
-(def poikkeuslupa-lisasa {:info {:name "poikkeamishakemuksen-lisaosa"
+(def poikkeuslupa-lisasa {:info {:name "poikkeamis"
              :order 51}
       :body [{:name "perustelut" :type :text :max-len 4000 :layout :full-width}
              {:name "vaikutukset" :type :text :max-len 4000 :layout :full-width}
