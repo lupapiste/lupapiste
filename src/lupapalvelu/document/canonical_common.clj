@@ -47,6 +47,6 @@
                                                       {:Puolto
                                                        {:puolto ((keyword (:status statement)) puolto-mapping)}}}}))))
 
-(defn- get-statements [statements]
+(defn get-statements [statements]
   ;Returing vector because this element to be Associative
   (vec (map get-statement statements)))
