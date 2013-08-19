@@ -26,3 +26,27 @@
 
 (defn by-type [documents]
   (group-by #(keyword (get-in % [:schema :info :name])) documents))
+
+
+(def puolto-mapping {:condition "ehdoilla"
+                     :no "ei puolla"
+                     :yes "puoltaa"})
+
+(defn- get-statement [statement]
+  (let [lausunto {:Lausunto
+                  {:id (:id statement)
+                   :viranomainen (get-in statement [:person :text])
+                   :pyyntoPvm (to-xml-date (:requested statement))}}]
+    (if-not (:status statement)
+      lausunto
+      (assoc-in lausunto [:Lausunto :lausuntotieto] {:Lausunto
+                                                     {:viranomainen (get-in statement [:person :text])
+                                                      :lausunto (:text statement)
+                                                      :lausuntoPvm (to-xml-date (:given statement))
+                                                      :puoltotieto
+                                                      {:Puolto
+                                                       {:puolto ((keyword (:status statement)) puolto-mapping)}}}}))))
+
+(defn- get-statements [statements]
+  ;Returing vector because this element to be Associative
+  (vec (map get-statement statements)))

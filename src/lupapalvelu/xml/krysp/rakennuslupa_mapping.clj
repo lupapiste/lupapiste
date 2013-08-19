@@ -5,12 +5,12 @@
          [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
          [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.attachment :only [encode-filename]])
+         [lupapalvelu.xml.krysp.validator :only [validate]])
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
          #_[sade.env :as env]
          [me.raynes.fs :as fs]
          [lupapalvelu.ke6666 :as ke6666]
+         [lupapalvelu.core :as core]
          [lupapalvelu.mongo :as mongo])
   #_(:import [java.util.zip ZipOutputStream ZipEntry]))
 
@@ -94,13 +94,37 @@
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
 
+(def lausunto {:tag :Lausunto
+               :child [{:tag :viranomainen :ns "yht"}
+                       {:tag :pyyntoPvm :ns "yht"}
+                       {:tag :lausuntotieto :ns "yht"
+                        :child [{:tag :Lausunto
+                                 :child [{:tag :viranomainen}
+                                         {:tag :lausunto}
+                                         {:tag :liitetieto
+                                          :child [{:tag :Liite
+                                                   :child [{:tag :kuvaus :ns "yht"}
+                                                           {:tag :linkkiliitteeseen :ns "yht"}
+                                                           {:tag :muokkausHetki :ns "yht"}
+                                                           {:tag :versionumero :ns "yht"}
+                                                           {:tag :tekija :ns "yht"
+                                                            :child [{:tag :kuntaRooliKoodi}
+                                                                    {:tag :VRKrooliKoodi}
+                                                                    mapping-common/henkilo
+                                                                    mapping-common/yritys]}
+                                                           {:tag :tyyppi :ns "yht"}]}]}
+                                         {:tag :lausuntoPvm}
+                                         {:tag :puoltotieto
+                                          :child [{:tag :Puolto
+                                                   :child [{:tag :puolto}]}]}]}]}]})
+
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta
    :ns "rakval"
    :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
                                http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
                                http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.1/rakennusvalvonta.xsd"
+                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"
           :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
           :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
           :xmlns:xlink "http://www.w3.org/1999/xlink"
@@ -144,8 +168,7 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
-                             {:tag :lausuntotieto :child [mapping-common/lausunto] }
-
+                             {:tag :lausuntotieto :child [lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
@@ -173,28 +196,19 @@
 ;; *** TODO: Naita common fileen? ***
 ;;
 
-(defn- get-file-name-on-server [file-id file-name]
-  (str file-id "_" (encode-filename file-name)))
-
-(defn- get-submitted-filename [application-id]
-  (str application-id "_submitted_application.pdf"))
-
-(defn- get-current-filename [application-id]
-  (str application-id "_current_application.pdf"))
-
 (defn- get-Liite [title link attachment type file-id]
    {:kuvaus title
     :linkkiliitteeseen link
     :muokkausHetki (to-xml-datetime (:modified attachment))
     :versionumero 1
     :tyyppi type
-    :fileId file-id})
+    :fileId file-id})  ;;TODO: Kysy Terolta mika tama on
 
 (defn- get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
-        attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+        attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)]
     {:Liite (get-Liite title link attachment type file-id)}))
 
@@ -216,7 +230,7 @@
                                     :let [type (get-in attachment [:type :type-id] )
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                                          attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
                                 {:Liite (get-Liite title link attachment type file-id)})]
     (not-empty canonical-attachments)))
@@ -226,7 +240,7 @@
     (let [file-id (get-in attachment [:Liite :fileId])
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
-          attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name attachment-file)))
+          attachment-file-name (str output-dir "/" (mapping-common/get-file-name-on-server file-id (:file-name attachment-file)))
           attachment-file (file attachment-file-name)
           ]
       (with-open [out (output-stream attachment-file)
@@ -241,8 +255,8 @@
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
-        submitted-file (file (str output-dir "/" (get-submitted-filename id)))
-        current-file (file (str output-dir "/"  (get-current-filename id)))]
+        submitted-file (file (str output-dir "/" (mapping-common/get-submitted-filename id)))
+        current-file (file (str output-dir "/"  (mapping-common/get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
@@ -265,23 +279,26 @@
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
-                                              {:Liite
-                                               {:kuvaus "Application when submitted"
-                                                :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
-                                                :muokkausHetki (to-xml-datetime (:submitted application))
-                                                :versionumero 1
-                                                :tyyppi "hakemus_vireilletullessa"}}
-                                              {:Liite
-                                               {:kuvaus "Application when sent from Lupapiste"
-                                                :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
-                                                :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
-                                                :versionumero 1
-                                                :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
+                                          {:Liite
+                                           {:kuvaus "Application when submitted"
+                                            :linkkiliitteeseen (str begin-of-link (mapping-common/get-submitted-filename (:id application)))
+                                            :muokkausHetki (to-xml-datetime (:submitted application))
+                                            :versionumero 1
+                                            :tyyppi "hakemus_vireilletullessa"}}
+                                          {:Liite
+                                           {:kuvaus "Application when sent from Lupapiste"
+                                            :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
+                                            :muokkausHetki (to-xml-datetime (core/now))
+                                            :versionumero 1
+                                            :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
         canonical-with-statement-attachments  (add-statement-attachments canonical-without-attachments statement-attachments)
-        canonical (assoc-in canonical-with-statement-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
+        canonical (assoc-in
+                    canonical-with-statement-attachments
+                    [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
+                    attachments-with-generated-pdfs)
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
-    ;(clojure.pprint/pprint(:attachments application))
+    ;(clojure.pprint/pprint (:attachments application))
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
     ;(println xml-s)
     (validate xml-s)

@@ -1,4 +1,6 @@
-(ns lupapalvelu.xml.krysp.mapping-common)
+(ns lupapalvelu.xml.krysp.mapping-common
+  (:use [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
+        [lupapalvelu.attachment :only [encode-filename]]))
 
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -158,26 +160,13 @@
                         {:tag :kuntakoodi :ns "yht"}
                         {:tag :kielitieto :ns "yht"}])
 
-(def lausunto {:tag :Lausunto
-               :child [{:tag :viranomainen :ns "yht"}
-                       {:tag :pyyntoPvm :ns "yht"}
-                       {:tag :lausuntotieto :ns "yht"
-                        :child [{:tag :Lausunto
-                                 :child [{:tag :viranomainen}
-                                         {:tag :lausunto}
-                                         {:tag :liitetieto
-                                          :child [{:tag :Liite
-                                                   :child [{:tag :kuvaus :ns "yht"}
-                                                           {:tag :linkkiliitteeseen :ns "yht"}
-                                                           {:tag :muokkausHetki :ns "yht"}
-                                                           {:tag :versionumero :ns "yht"}
-                                                           {:tag :tekija :ns "yht"
-                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                    {:tag :VRKrooliKoodi}
-                                                                    henkilo
-                                                                    yritys]}
-                                                           {:tag :tyyppi :ns "yht"}]}]}
-                                         {:tag :lausuntoPvm}
-                                         {:tag :puoltotieto
-                                          :child [{:tag :Puolto
-                                                   :child [{:tag :puolto}]}]}]}]}]})
+
+(defn get-file-name-on-server [file-id file-name]
+  (str file-id "_" (encode-filename file-name)))
+
+(defn get-submitted-filename [application-id]
+  (str application-id "_submitted_application.pdf"))
+
+(defn get-current-filename [application-id]
+  (str application-id "_current_application.pdf"))
+
