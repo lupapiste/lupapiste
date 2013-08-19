@@ -76,7 +76,8 @@ Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
-  Click enabled by test id  comment-request-mark-answered
+  Wait until  Page should contain element  //*[@data-test-id='comment-request-mark-answered']
+  Select Checkbox  //*[@data-test-id='comment-request-mark-answered']
   Add comment   oletko miettinyt tuulivoimaa?
   Wait until  Inforequest state is  Vastattu
   Logout
