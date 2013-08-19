@@ -68,7 +68,7 @@
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
 
 ; emails are sent to everyone in auth array except statement persons
-(defn get-email-recipients-for-application [{:keys [auth]} included-roles excluded-roles]
+(defn get-email-recipients-for-application [{:keys [auth statements]} included-roles excluded-roles]
   (let [included-users   (if (seq included-roles) 
                            (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
                            auth)
@@ -78,7 +78,7 @@
     (if (some #(= "statementGiver" %) excluded-roles)
       (difference 
         (set auth-user-emails) 
-        (map #(-> % :person :email) (:statements application)))
+        (map #(-> % :person :email) statements))
       auth-user-emails)))
 
 (defn template [s]
@@ -149,7 +149,7 @@
 
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
-    (let [recipients (get-email-recipients-for-application application)
+    (let [recipients (get-email-recipients-for-application application nil ["statementGiver"])
           msg        (get-message-for-new-comment application host)
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
@@ -168,13 +168,13 @@
 
 (defn send-notifications-on-application-state-change! [{:keys [id]} host]
   (let [application (mongo/by-id :applications id)
-        recipients  (get-email-recipients-for-application application)
+        recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         msg         (get-message-for-application-state-change application host)
         title       (get-email-title application "state-change")]
     (send-mail-to-recipients! recipients title msg)))
 
 (defn send-notifications-on-verdict! [application host]
-  (let [recipients  (get-email-recipients-for-application application)
+  (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         msg         (message
                       (template "application-verdict.html")
                       (replace-application-links "#verdict-link" application "/verdict" host))
