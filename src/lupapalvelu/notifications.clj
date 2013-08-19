@@ -68,10 +68,18 @@
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
 
 ; emails are sent to everyone in auth array except statement persons
-(defn get-email-recipients-for-application [application]
-  (difference 
-    (set (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
-    (set (map (fn [a] (:username a)) (:auth application)))))
+(defn get-email-recipients-for-application [{:keys [auth]} included-roles excluded-roles]
+  (let [included-users   (if (seq included-roles) 
+                           (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
+                           auth)
+        auth-user-emails (->> included-users
+                           (filter (fn [user] (not (some #(= (:role user) %) excluded-roles))))
+                           (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
+    (if (some #(= "statementGiver" %) excluded-roles)
+      (difference 
+        (set auth-user-emails) 
+        (map #(-> % :person :email) (:statements application)))
+      auth-user-emails)))
 
 (defn template [s]
   (->

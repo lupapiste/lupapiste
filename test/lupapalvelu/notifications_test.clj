@@ -18,11 +18,48 @@
 (fact "Email for new comment contains link to application"
   (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000") => (contains "http://localhost:8000/app/fi/applicant?hashbang=!/application/123/conversation#!/application/123/conversation"))
 
-(fact "All application users get emails"
-  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"} {:id "b" :role "writer"} {:id "c" :role "unknown"}] :title "title" }) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
-  (provided (mongo/by-id :users "a") => {:email "a@foo.com"}
-    (mongo/by-id :users "b") => {:email "b@foo.com"}
-    (mongo/by-id :users "c") => {:email "c@foo.com"}))
+(fact "Every user gets an email"
+  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"} 
+                                                 {:id "b" :role "writer"} 
+                                                 {:id "c" :role "unknown"}] :title "title" } 
+                                        nil nil) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
+  (provided 
+    (mongo/by-id :users "a" {:email 1}) => {:email "a@foo.com"}
+    (mongo/by-id :users "b" {:email 1}) => {:email "b@foo.com"}
+    (mongo/by-id :users "c" {:email 1}) => {:email "c@foo.com"}))
+
+(fact "Every user except with role unknown get email"
+  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"} 
+                                                 {:id "b" :role "writer"} 
+                                                 {:id "c" :role "unknown"}] :title "title" } 
+                                        nil ["unknown"]) => [ "a@foo.com" "b@foo.com"]
+  (provided 
+    (mongo/by-id :users "a" {:email 1}) => {:email "a@foo.com"}
+    (mongo/by-id :users "b" {:email 1}) => {:email "b@foo.com"}))
+
+(fact "Only writers get email"
+  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"} 
+                                                 {:id "w1" :role "writer"}
+                                                 {:id "w2" :role "writer"}
+                                                 {:id "w3" :role "writer"}
+                                                 {:id "c" :role "unknown"}] :title "title" }
+                                        ["writer"] nil) => [ "w1@foo.com" "w2@foo.com" "w3@foo.com"]
+  (provided 
+    (mongo/by-id :users "w1" {:email 1}) => {:email "w1@foo.com"}
+    (mongo/by-id :users "w2" {:email 1}) => {:email "w2@foo.com"}
+    (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
+
+(fact "Only writers get email (when excluded)"
+  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"} 
+                                                 {:id "w1" :role "writer"}
+                                                 {:id "w2" :role "writer"}
+                                                 {:id "w3" :role "writer"}
+                                                 {:id "c" :role "unknown"}] :title "title" }
+                                        ["owner" "writer"] ["owner"]) => [ "w1@foo.com" "w2@foo.com" "w3@foo.com"]
+  (provided 
+    (mongo/by-id :users "w1" {:email 1}) => {:email "w1@foo.com"}
+    (mongo/by-id :users "w2" {:email 1}) => {:email "w2@foo.com"}
+    (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
 
 (fact "Email for application open is like"
   (let [msg (get-message-for-application-state-change { :id 123 :state "open"} "http://localhost:8000")]
@@ -31,3 +68,5 @@
 
 (fact "Email for application submitted contains the state string."
   (get-message-for-application-state-change { :state "submitted"} ..host..) => (contains "Vireill\u00E4"))
+
+(fact "")
