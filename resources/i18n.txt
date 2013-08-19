@@ -1,0 +1,7 @@
+application.refreshKTJ: Päivitä kiinteistön tiedot
+uusiRakennus.huoneistot.muutostapa.poisto: Poisto
+uusiRakennus.huoneistot.muutostapa.lisäys: Lisäys
+uusiRakennus.huoneistot.muutostapa.muutos: Muutos
+uusiRakennus.huoneistot.muutostapa.ei tiedossa: Ei tiedossa
+uusiRakennus.huoneistot.muutostapa._group_label: Huoneiston muutos
+uusiRakennus.huoneistot.muutostapa.help: Ilmoitetaan, jos huoneiston tiedot muuttuvat esimerkiksi huoneistoja yhdistettäessä tai jaettaessa.
