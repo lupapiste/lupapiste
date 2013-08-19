@@ -16,7 +16,7 @@
           style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
         <a class="btn attachment-back inline-block" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment"> <span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a>
         <div data-bind="with: $root.approve" class="inline-block">
-          <button id="test-attachment-approve" data-bind="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-approve" data-bind="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
           <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
         </div>
 
@@ -79,12 +79,12 @@
             class="btn"
             data-window-id="upload-dialog"
             data-bind="click: newAttachmentVersion, ltext: 'attachment.addVersion', visible: $root.authorization.ok('upload-attachment'),  enable: $root.authorization.ok('upload-attachment')">
-          Lisää uusi versio
+          Lis&auml;&auml; uusi versio
         </button>
       </div>
 
       <div class="attachment-file-conversation">
-        <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
+        <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteest&auml;:</h3>
         <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </div>
 
