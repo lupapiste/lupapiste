@@ -62,19 +62,18 @@
                              {:tag :sahkopostiosoite}
                              {:tag :rooliKoodi}]}])
 
-(def liitetieto [{:tag :liitetieto
-                  :child [{:tag :Liite
-                           :child [{:tag :kuvaus}
-                                   {:tag :linkkiliitteeseen}
-                                   {:tag :muokkausHetki}
-                                   {:tag :versionumero}
-                                   {:tag :tekija
-                                    :child osapuoli}
-                                   {:tag :tyyppi}
-                                   {:tag :metatietotieto
-                                    :child [{:tag :Metatieto
-                                             :child [{:tag :metatietoArvo}
-                                                     {:tag :metatietoNimi}]}]}]}]}])
+(def liitetieto [{:tag :Liite
+                  :child [{:tag :kuvaus :ns "yht"}
+                          {:tag :linkkiliitteeseen :ns "yht"}
+                          {:tag :muokkausHetki :ns "yht"}
+                          {:tag :versionumero :ns "yht"}
+                          {:tag :tekija
+                           :child osapuoli}
+                          {:tag :tyyppi}
+                          {:tag :metatietotieto
+                           :child [{:tag :Metatieto
+                                    :child [{:tag :metatietoArvo}
+                                            {:tag :metatietoNimi}]}]}]}])
 
 (def lausunto [{:tag :Lausunto
                 :child [{:tag :viranomainen}
@@ -137,9 +136,6 @@
                                        :child maksaja}]}
                              {:tag :liitetieto
                               :child liitetieto}
-                             #_{:tag :paatostieto
-                              :child [{:tag :Paatos
-                                       :child [{:tag :takuuaikaPaivat}]}]}
                              {:tag :lausuntotieto
                               :child lausunto}
                              {:tag :lupaAsianKuvaus}
@@ -319,7 +315,6 @@
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
 
-    ;; TODO:  Laita nama takaisin!  Nyt tulee NullPointerException...
     (write-attachments attachments output-dir)   ;;TODO: Tehdaanko attachmenteilla muuta kuin kirjoitetaan levylle?
     (write-statement-attachments statement-attachments output-dir)
 
