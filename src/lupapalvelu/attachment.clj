@@ -109,6 +109,7 @@
     (condp = (keyword permit-type)
       :R  attachment-types-R
       :YA attachment-types-YA
+      :P attachment-types-R
       (fail! "unsupported permit-type"))))
 
 ;; TODO: return attachment type based on what types of operations the given organization is having.
