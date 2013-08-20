@@ -28,7 +28,8 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [clj-time.format :as tf]))
+            [clj-time.format :as tf]
+            [clojure.tools.trace :as trace] ))
 
 ;; Validators
 
@@ -462,7 +463,8 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created operation organization-id & {:keys [target]}]
+(trace/deftrace make-attachments [created operation organization-id & {:keys [target]}]
+
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
@@ -541,8 +543,6 @@
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
-          _ (println op)
-          _ (println operation)
           info-request? (boolean infoRequest)
           state         (cond
                           info-request?              :info
@@ -576,6 +576,9 @@
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
           application   (domain/set-software-version application)]
+
+      (println "ööööö")
+      (println "ÄÄÄÄÄÄ")
       (mongo/insert :applications application)
       (autofill-rakennuspaikka application created)
       (ok :id id))))
