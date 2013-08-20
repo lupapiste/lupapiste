@@ -20,10 +20,7 @@
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
-            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -465,7 +462,8 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created operation organization-id & {:keys [target]}]
+(defn make-attachments [created operation organization-id & {:keys [target]}]
+
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
@@ -575,6 +573,7 @@
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
           application   (domain/set-software-version application)]
+
       (mongo/insert :applications application)
       (autofill-rakennuspaikka application created)
       (ok :id id))))
