@@ -358,7 +358,7 @@
       (fact "tyomaasta-vastaava-yksityinen-postinumero" (:postinumero tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
       (fact "tyomaasta-vastaava-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
 
-      ;; Käytön alku/loppu pvm
+      ;; Kayton alku/loppu pvm
       (fact "alkuPvm" alkuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
       (fact "loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
 
