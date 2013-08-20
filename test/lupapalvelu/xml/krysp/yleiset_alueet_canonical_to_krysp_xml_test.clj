@@ -1,6 +1,5 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-canonical-to-krysp-xml-test
   (:use [midje.sweet]
-        #_[lupapalvelu.document.canonical-common :only [by-type]]
         [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :only [application-to-canonical]]
         [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :only [application]]
         [lupapalvelu.xml.emit]
