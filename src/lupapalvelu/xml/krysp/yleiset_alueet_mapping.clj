@@ -9,9 +9,7 @@
          [lupapalvelu.xml.krysp.validator :only [validate]])
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [me.raynes.fs :as fs]
-            #_[sade.env :as env]
-            [lupapalvelu.mongo :as mongo])  ;; used in "write-attachments"
-  #_(:import [java.util.zip ZipOutputStream ZipEntry]))
+            [lupapalvelu.mongo :as mongo]))   ;; used in "write-attachments"
 
 
 ;; tags changed:
@@ -162,7 +160,9 @@
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
-        attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+        attachment-file-name (mapping-common/get-file-name-on-server
+                               file-id
+                               (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)]
     {:Liite (get-Liite title link attachment type file-id)}))
 
@@ -176,21 +176,9 @@
                                       (filter
                                         (fn-> :target :type (= "statement"))
                                         (:attachments application)))
-;        _    (println "statement-attachments-by-id: " statement-attachments-by-id)
         canonical-attachments (for [[id attachments] statement-attachments-by-id]
                                 {id (for [attachment attachments]
-                                      #_(do
-                                        (println "*****")
-                                        (println "1) statement-attachments-by-id: " statement-attachments-by-id)
-                                        (println "2) attachment: " attachment)
-                                        (println "3) (-> attachment :target :type): " (-> attachment :target :type))
-                                        (get-liite-for-lausunto attachment application begin-of-link))
                                       (get-liite-for-lausunto attachment application begin-of-link))})]
-
-;    (println "\n  get-statement-attachments-as-canonical, canonical-attachments: ")
-;    (clojure.pprint/pprint canonical-attachments)
-;    (println "\n")
-
     (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link]
@@ -239,17 +227,7 @@
     canonical
     (reduce
       (fn [c a]
-;        (println "\n *****  add-statement-attachments, c: ")
-;        (clojure.pprint/pprint c)
-;        (println "\n  add-statement-attachments, a: ")
-;        (clojure.pprint/pprint a)
-;        (println "*****\n")
-
         (let [lausuntotieto (get-in c [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :lausuntotieto])
-;              _  (do
-;                   (println "\n *****  add-statement-attachments, lausuntotieto: ")
-;                   (clojure.pprint/pprint lausuntotieto)
-;                   (println "\n"))
               lausunto-id (name (first (keys a)))
               paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
@@ -265,11 +243,6 @@
       canonical
       statement-attachments)))
 
-;;
-;;   **** TODO: Miten testataan attachmentteja ja statementteja? ****
-;;              Tuleeko canonicaliin vain statement attachmentit, mutta ei tavallisia ("attachments")?
-;;
-
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
@@ -284,7 +257,7 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :liitetieto]
                     attachments)
-        xml (element-to-xml canonical #_canonical-without-attachments kaivulupa_to_krysp)
+        xml (element-to-xml canonical kaivulupa_to_krysp)
         xml-s (indent-str xml)]
 
     ;(clojure.pprint/pprint (:attachments application))
@@ -315,7 +288,7 @@
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
 
-    (write-attachments attachments output-dir)   ;;TODO: Tehdaanko attachmenteilla muuta kuin kirjoitetaan levylle?
+    (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)
 
     (when (fs/exists? outfile) (fs/delete outfile))
