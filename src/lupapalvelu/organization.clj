@@ -17,8 +17,6 @@
   (and id (mongo/select-one :organizations {:_id id})))
 
 (defn get-organization-attachments-for-operation [organization operation]
-  (clojure.pprint/pprint organization)
-  (println "ÖÄÖÄÖÄÖÄÖÄÖÄ")
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
 (defn municipality-by-propertyId [id]
