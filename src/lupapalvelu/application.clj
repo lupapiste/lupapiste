@@ -20,15 +20,12 @@
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
-            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
             [clj-time.format :as tf]))
@@ -154,6 +151,26 @@
         (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
     names))
 
+(def ktj-format (tf/formatter "yyyyMMdd"))
+(def output-format (tf/formatter "dd.MM.yyyy"))
+
+(defn- autofill-rakennuspaikka [application time]
+   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
+         kiinteistotunnus (:propertyId application)
+         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
+     (when ktj-tiedot
+       (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                      [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                      [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                      [[:kiinteisto :rekisterointipvm] (or (try
+                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                         (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+         (commands/persist-model-updates
+           (:id application)
+           rakennuspaikka
+           updates
+           time)))))
+
 (defquery party-document-names
   {:parameters [:id]
    :authenticated true}
@@ -262,9 +279,9 @@
 (defcommand add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
-   :validators [applicant-cant-set-to ]
+   :validators [applicant-cant-set-to]
    :notify     "new-comment"}
-  [{{:keys [text target to]} :data {:keys [host]} :web :keys [user created] :as command}]
+  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
       (let [to-user   (and to (or (security/get-non-private-userinfo to)
@@ -287,8 +304,8 @@
                              :state    :open
                              :opened   created}}))
 
-          ;; LUPA-371
-          :info (when (security/authority? user)
+          ;; LUPA-371, LUPA-745
+          :info (when (and mark-answered (security/authority? user))
                   (update-application command
                     {$set {:state    :answered
                            :modified created}}))
@@ -398,7 +415,7 @@
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application lang submitted-application organization)
+        (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -429,6 +446,14 @@
           ; This is ok. Only the first submit is saved.
             )))))
 
+(defcommand refresh-ktj
+  {:parameters [:id]
+   :roles      [:authority]
+   :states     [:draft :open :submitted :complement-needed]
+   :validators [validate-owner-or-writer]}
+  [{:keys [application]}]
+  (autofill-rakennuspaikka application (now)))
+
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
@@ -437,7 +462,8 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created operation organization-id & {:keys [target]}]
+(defn make-attachments [created operation organization-id & {:keys [target]}]
+
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
@@ -490,26 +516,6 @@
     :name (keyword op-name)
     :created created
     :operation-type (:operation-type (operations/operations (keyword op-name)))})
-
- (def ktj-format (tf/formatter "yyyyMMdd"))
- (def output-format (tf/formatter "dd.MM.yyyy"))
-
- (defn- autofill-rakennuspaikka [application created]
-   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
-         kiinteistotunnus (:propertyId application)
-         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
-     (when ktj-tiedot
-       (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                      [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                      [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                      [[:kiinteisto :rekisterointipvm] (or (try
-                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                         (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-         (commands/persist-model-updates
-           (:id application)
-           rakennuspaikka
-           updates
-           created)))))
 
  (defn user-is-authority-in-organization? [user-id organization-id]
    (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
@@ -567,6 +573,7 @@
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
           application   (domain/set-software-version application)]
+
       (mongo/insert :applications application)
       (autofill-rakennuspaikka application created)
       (ok :id id))))
@@ -574,7 +581,7 @@
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]
+   :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created] :as command}]
@@ -597,11 +604,13 @@
                       validate-x validate-y]}
   [{:keys [created application]}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
-    (mongo/update-by-id :applications id {$set {:location      (->location x y)
-                                                :address       (trim address)
-                                                :propertyId    propertyId
-                                                :title         (trim address)
-                                                :modified      created}})
+    (do
+      (mongo/update-by-id :applications id {$set {:location      (->location x y)
+                                                  :address       (trim address)
+                                                  :propertyId    propertyId
+                                                  :title         (trim address)
+                                                  :modified      created}})
+      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand convert-to-application

@@ -1,9 +1,9 @@
 (ns lupapalvelu.singlepage
-  (:use [clj-time.coerce :only [from-long to-date]]
-        [lupapalvelu.components.ui-components :only [ui-components]])
+  (:use [lupapalvelu.components.ui-components :only [ui-components]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
             [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
+            [clj-time.coerce :as tc]
             [sade.env :as env]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
@@ -76,7 +76,7 @@
   (format "%s-%s %3$tF %3$tT [%4$s]"
           env/target-env
           (:build-number env/buildinfo)
-          (to-date (from-long (:time env/buildinfo)))
+          (tc/to-date (tc/from-long (:time env/buildinfo)))
           (name env/mode)))
 
 (defn inject-content [t {:keys [header nav page footer]} component]

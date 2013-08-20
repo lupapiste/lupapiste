@@ -24,8 +24,8 @@
 
 (def encoding "ISO-8859-1")
 
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
-(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
 
 (def constants
   {:url       (env/value :vetuma :url)
@@ -41,7 +41,7 @@
    :errurl    "{host}/api/vetuma/error"
    :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   :extradata "VTJTT=VTJ-VETUMA-Perus"
+   ;;:extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
@@ -122,7 +122,7 @@
 
 (defn- user-extracted [m]
   (merge (extract-subjectdata m)
-         (extract-vtjdata m)
+         #_(extract-vtjdata m)
          (extract-userid m)
          (extract-request-id m)))
 

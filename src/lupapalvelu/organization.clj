@@ -105,18 +105,22 @@
   (ok :operations (operations/municipality-operations municipality)))
 
 (defn resolve-organization [municipality permit-type]
-  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType permit-type}]})]
+  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality :permitType permit-type}}})]
     (when (> (count organizations) 1)
-      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type))
+      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
 (defquery "organization-details"
   {:parameters [:municipality :operation] :verified true}
   [{{:keys [municipality operation]} :data}]
-  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
-    (ok :links (:links result)
+  (let [permit-type (:permit-type ((keyword operation) operations/operations))]
+    (if-let [result (mongo/select-one
+                      :organizations
+                      {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
+                      {"links" 1 "operations-attachments" 1})]
+      (ok :links (:links result)
         :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
-    (fail :unknown-organization)))
+      (fail :unknown-organization))))
 
 (defcommand "organization-operations-attachments"
   {:parameters [:operation :attachments]

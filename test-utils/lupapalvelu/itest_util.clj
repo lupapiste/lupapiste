@@ -76,8 +76,8 @@
       body)))
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (query sonja "apply-fixture" :name fixture-name)]
-    (assert (:ok resp))))
+  (let [resp (decode-response (c/get (str (server-address) "/dev/fixture/" fixture-name)))]
+    (assert (-> resp :body :ok))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
