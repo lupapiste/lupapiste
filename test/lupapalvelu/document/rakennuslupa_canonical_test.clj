@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.rakennuslupa_canonical-test
   (:use [lupapalvelu.document.canonical-test-common]
+        [lupapalvelu.document.canonical-common]
         [lupapalvelu.document.rakennuslupa_canonical]
         [sade.util :only [contains-value?]]
         [midje.sweet]
@@ -239,7 +240,8 @@
 (validate-all-documents documents)
 
 (def application
-  {:municipality municipality,
+  {:permitType "R",
+   :municipality municipality,
    :auth
    [{:lastName "Panaani",
      :firstName "Pena",
