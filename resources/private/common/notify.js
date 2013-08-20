@@ -18,7 +18,7 @@ var notify = (function() {
   }
 
   function error(title, data) {
-    debug(title, data);
+    LUPAPISTE.ModalDialog.showDynamicError(title, data);
   }
 
   function info(title, data) {

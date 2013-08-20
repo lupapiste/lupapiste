@@ -9,3 +9,7 @@ uusiRakennus.huoneistot.muutostapa._group_label: Huoneiston muutos
 uusiRakennus.huoneistot.muutostapa.help: Ilmoitetaan, jos huoneiston tiedot muuttuvat esimerkiksi huoneistoja yhdistettäessä tai jaettaessa.
 
 error.vrk:CR327: Tilavuus ylittää rakennuksen käyttötarkoituksen mukaisen maksimitilavuuden
+
+error.user.not.found: Käyttäjää ei löydy
+error.dialog.title: Virhe
+button.ok: OK
