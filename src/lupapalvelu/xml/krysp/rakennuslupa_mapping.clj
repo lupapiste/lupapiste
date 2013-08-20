@@ -11,8 +11,7 @@
   (:require [sade.env :as env]
             [me.raynes.fs :as fs]
             [lupapalvelu.ke6666 :as ke6666]
-            [lupapalvelu.mongo :as mongo])
-  (:import [java.util.zip ZipOutputStream ZipEntry]))
+            [lupapalvelu.mongo :as mongo]))
 
 ;RakVal
 
@@ -95,7 +94,7 @@
                :child yht-rakennus})
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.0/rakennusvalvonta.xsd"
+  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"
                                         :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
                                         :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
                                         :xmlns:xlink "http://www.w3.org/1999/xlink"
