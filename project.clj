@@ -30,7 +30,8 @@
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.12"]
                  [slingshot "0.10.3"]
-                 [com.google.zxing/javase "2.2"]]
+                 [com.google.zxing/javase "2.2"]
+                 [org.clojure/tools.trace "0.7.5"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
