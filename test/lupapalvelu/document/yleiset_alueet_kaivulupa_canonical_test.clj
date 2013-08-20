@@ -47,14 +47,14 @@
 
 (def yritys (merge
               {:osoite osoite,
-               :vastuuhenkilo {:henkilotiedot nimi,
+               :yhteyshenkilo {:henkilotiedot nimi,
                                :yhteystiedot yhteystiedot}}
               yritys-nimi-ja-tunnus))
 
 (def hakija {:id "51cc1cab23e74941fee4f498",
              :created 1372331179008,
              :schema {:info
-                      {:name "hakija-public-area",
+                      {:name "hakija-ya",
                        :removable true,
                        :repeating true,
                        :type "party",
@@ -111,6 +111,12 @@
                 tyoaika])
 
 
+(def authority {:id "777777777777777777000023",
+                :username "sonja",
+                :firstName "Sonja",
+                :lastName "Sibbo",
+                :role "authority"})
+
 (def municipality 753)
 
 (def attachments [{:id "51cc1e7c23e74941fee4f519",
@@ -164,19 +170,12 @@
    :created 1372331179008,
    :opened 1372331643985,
    :modified 1372342070624,
-; TODO: Mista tama pitaisi saada? (ei ole Kaivuluvassa luonnostaan mukana).
-;       Tarvitaan kasittelytietoon (on tosin vapaaehtoinen).
-;   :authority {:id "777777777777777777000023",
-;               :username "sonja",
-;               :firstName "Sonja",
-;               :lastName "Sibbo",
-;               :role "authority"},
+   :authority authority,
    :state "open",
    :title "Latokuja 1",
    :address "Latokuja 1",
    :location {:x 404335.789, :y 6693783.426},
    :attachments [],
-;   :attachments attachments,
    :propertyId "75341600550007",
    :documents documents,
    :municipality municipality
@@ -194,6 +193,8 @@
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
+        Kasittelytieto-kasittelija (:kasittelija Kasittelytieto) => truthy
+        Kasittelytieto-kasittelija-nimi (-> Kasittelytieto-kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
@@ -258,8 +259,11 @@
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
       (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified application)))
-      (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "0 Kesken")
+      (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
       (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id application))
+      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened application)))
+      (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName authority))
+      (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName authority))
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => "kaivu- tai katuty\u00f6lupa")
       (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false) ;; TODO: Onko tama checkki ok?
@@ -317,9 +321,9 @@
       (fact "Vastuuhenkilo-henkilo-rooliKoodi"
         (:rooliKoodi Vastuuhenkilo-henkilo) => rooliKoodi-tyomaastavastaava)
       (fact "Vastuuhenkilo-henkilo-etunimi"
-        (:etunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :etunimi :value))
+        (:etunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :yhteyshenkilo :henkilotiedot :etunimi :value))
       (fact "Vastuuhenkilo-henkilo-sukunimi"
-        (:sukunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :sukunimi :value))
+        (:sukunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :yhteyshenkilo :henkilotiedot :sukunimi :value))
       (fact "Vastuuhenkilo-henkilo-osoite-osoitenimi"
         (-> Vastuuhenkilo-henkilo-osoite :osoitenimi :teksti) => (-> tyomaasta-vastaava :data :yritys :osoite :katu :value))
       (fact "Vastuuhenkilo-henkilo-osoite-postinumero"
@@ -327,9 +331,9 @@
       (fact "Vastuuhenkilo-henkilo-osoite-postitoimipaikannimi"
         (:postitoimipaikannimi Vastuuhenkilo-henkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postitoimipaikannimi :value))
       (fact "Vastuuhenkilo-henkilo-puhelinnumero"
-        (:puhelinnumero Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :puhelin :value))
+        (:puhelinnumero Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :yhteyshenkilo :yhteystiedot :puhelin :value))
       (fact "Vastuuhenkilo-henkilo-sahkopostiosoite"
-        (:sahkopostiosoite Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :email :value))
+        (:sahkopostiosoite Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :yhteyshenkilo :yhteystiedot :email :value))
 
       (fact "Vastuuhenkilo-yritys-nimi"
         (:nimi Vastuuhenkilo-yritys-Yritys) => (-> tyomaasta-vastaava :data :yritys :yritysnimi :value))

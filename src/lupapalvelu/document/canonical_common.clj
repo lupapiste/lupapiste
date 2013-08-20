@@ -10,6 +10,20 @@
 ; NOT the same as the state of the application!
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
+(def application-state-to-krysp-state
+  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
+   :open "vireill\u00e4"
+   :sent "vireill\u00e4"
+   :submitted "vireill\u00e4"
+   :complement-needed "vireill\u00e4"})
+
+(def state-timestamps
+  {:draft :created
+   :open :opened
+   :complement-needed :opened
+   ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
+   :submitted :opened})
+
 (defn to-xml-date [timestamp]
   (let [d (tc/from-long timestamp)]
     (if-not (nil? timestamp)
@@ -28,7 +42,7 @@
   (group-by #(keyword (get-in % [:schema :info :name])) documents))
 
 
-(def puolto-mapping {:condition "ehdoilla"
+(def ^:private puolto-mapping {:condition "ehdoilla"
                      :no "ei puolla"
                      :yes "puoltaa"})
 

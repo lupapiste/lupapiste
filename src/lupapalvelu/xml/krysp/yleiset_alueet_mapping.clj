@@ -106,12 +106,15 @@
                                        :child [{:tag :muutosHetki :ns "yht"}
                                                {:tag :hakemuksenTila :ns "yht"}
                                                {:tag :asiatunnus :ns "yht"}
-;; TODO: Lisaa nama? Mita naihin tulisi?
 ;                                               {:tag :tilanMuutosHetki :ns "yht"}
 ;                                               {:tag :kunnanYhteyshenkilo :ns "yht"}
-;                                               {:tag :paivaysPvm :ns "yht"}
-;                                               {:tag :kasittelija}
-                                               ]}]}
+                                               {:tag :paivaysPvm :ns "yht"}
+                                               {:tag :kasittelija
+                                                :child [{:tag :henkilotieto
+                                                         :child [{:tag :Henkilo
+                                                                  :child [{:tag :nimi :ns "yht"
+                                                                           :child [{:tag :etunimi}
+                                                                                   {:tag :sukunimi}]}]}]}]}]}]}
                              {:tag :alkuPvm}
                              {:tag :loppuPvm}
                              {:tag :sijaintitieto
@@ -187,7 +190,6 @@
 ;  (println "\n")
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
-                                    ;; TODO: Onko tyyppi "statement" vai "Lausunto"?
                                     :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
                                     :let [type (get-in attachment [:type :type-id] )
                                           title (str (:title application) ": " type "-" (:id attachment))

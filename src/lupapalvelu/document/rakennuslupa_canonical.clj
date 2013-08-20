@@ -11,13 +11,6 @@
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
 
-(def application-state-to-krysp-state
-  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
-   :open "vireill\u00e4"
-   :sent "vireill\u00e4"
-   :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"})
-
 (defn- get-simple-osoite [osoite]
   {:osoitenimi {:teksti (-> osoite :katu :value)}
    :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)
@@ -157,13 +150,6 @@
   (into
     (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
     (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
-
-(def state-timestamps
-  {:draft :created
-   :open :opened
-   :complement-needed :opened
-   ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened})
 
 (defn- get-state [application]
   (let [state (keyword (:state application))]
