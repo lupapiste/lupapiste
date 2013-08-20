@@ -90,7 +90,12 @@
 (def kaivulupa_to_krysp
   {:tag :YleisetAlueet
    :ns "yak"
-   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
+   :attr {:xsi:schemaLocation
+          "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
+           http://www.paikkatietopalvelu.fi/gml/yhteiset
+           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
+           http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
+           http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
           :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
           :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
           :xmlns:gml "http://www.opengis.net/gml"
