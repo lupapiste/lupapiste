@@ -183,12 +183,6 @@
                             {:name "kerrosala" :type "string" :subtype :number :unit "m2" :size "s"}
                             {:name "kokonaisala" :type "string" :subtype :number :unit "m2" :size "s"}]}]})
 
-(def poikkeuslupa-lisasa {:info {:name "poikkeamis"
-             :order 51}
-      :body [{:name "perustelut" :type :text :max-len 4000 :layout :full-width}
-             {:name "vaikutukset" :type :text :max-len 4000 :layout :full-width}
-             {:name "lisatiedot" :type :text :max-len 4000 :layout :full-width}]})
-
 (def suunnittelutarveratkaisun-lisaosa {:info {:name "suunnittelutarveratkaisun-lisaosa"
              :order 52}
       :body [{:name "kaavoituksen_ja_alueiden_tilanne":type :group
@@ -233,5 +227,4 @@
 
 (defschemas
   [rakennushanke
-   suunnittelutarveratkaisun-lisaosa
-   poikkeuslupa-lisasa])
+   suunnittelutarveratkaisun-lisaosa])

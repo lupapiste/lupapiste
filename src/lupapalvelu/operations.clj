@@ -262,9 +262,9 @@
                                  :permit-type "R"
                                  :required  common-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :poikkeamis                  {:schema "poikkeamis"
+   :poikkeamis                  {:schema "rakennushanke"
                                  :permit-type "P"
-                                 :required  (conj common-schemas "rakennushanke" "suunnittelutarveratkaisun-lisaosa")
+                                 :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :meluilmoitus                {:schema "meluilmoitus"
                                  :permit-type "R"
