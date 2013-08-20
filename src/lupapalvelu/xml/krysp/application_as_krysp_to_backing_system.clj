@@ -14,11 +14,11 @@
                    :YA ya-mapping/save-application-as-krysp
                    :R  rl-mapping/save-application-as-krysp)
         sftp-user ((condp = permit-type
-                     :YA :yleiset-alueet-ftp-user               ;; TODO: Mika tama pitaa olla?
+                     :YA :yleiset-alueet-ftp-user
                      :R  :rakennus-ftp-user)
                     organization)
         rakennusvalvonta-directory (condp = permit-type
-                                     :YA "/yleiset-alueet"      ;; TODO: Mika tama pitaa olla?
+                                     :YA "/yleiset-alueet"
                                      :R  "/rakennus")
         dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
         output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
