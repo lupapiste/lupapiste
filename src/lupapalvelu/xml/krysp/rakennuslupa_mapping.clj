@@ -7,12 +7,10 @@
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]])
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-         #_[sade.env :as env]
          [me.raynes.fs :as fs]
          [lupapalvelu.ke6666 :as ke6666]
          [lupapalvelu.core :as core]
-         [lupapalvelu.mongo :as mongo])
-  #_(:import [java.util.zip ZipOutputStream ZipEntry]))
+         [lupapalvelu.mongo :as mongo]))
 
 ;RakVal
 
