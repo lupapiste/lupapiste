@@ -68,8 +68,7 @@
                          :schema {:info
                                   {:op {:id "51cc1cab23e74941fee4f495",
                                         :created 1372331179008,
-                                        :name "yleiset-alueet-kaivuulupa",
-                                        :operation-type "publicArea"},
+                                        :name "yleiset-alueet-kaivuulupa"},
                                    :name "tyomaastaVastaava",
                                    :removable true,
                                    :type "party",
