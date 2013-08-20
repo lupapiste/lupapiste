@@ -582,7 +582,7 @@
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]
+   :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created] :as command}]
