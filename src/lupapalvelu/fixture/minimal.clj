@@ -33,7 +33,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :organizations ["753-R"]
+    :organizations ["753-R" "753-P"]
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -272,6 +272,22 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
+                    {:id "753-P"
+                     :name {:fi "Sipoon poikkari"}
+                     :municipalities ["753"]
+                     :scope [{:municipality "753" :permitType "P"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     ;;:legacy "http://212.213.116.162/geoserver/wfs"}
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :poikkeus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}
+
                     {:id "837-R"
                      :name {:fi "Tampereen rakennusvalvonta"}
                      :municipalities ["837"]

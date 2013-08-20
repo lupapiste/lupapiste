@@ -1,7 +1,7 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.poikkeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.domain :as domain]
@@ -73,9 +73,7 @@
 
 (def ^:private operation-tree-for-P
   {:permit-type permit/P
-   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut"
-          [["Poikkeuslupa" :poikkeuslupa]
-           ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]})
+   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
 
 (def ^:private operation-tree-for-Y
   {:permit-type permit/Y
@@ -264,13 +262,9 @@
                                  :permit-type "R"
                                  :required  common-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :suunnittelutarveratkaisu    {:schema "suunnittelutarveratkaisun-lisaosa"
-                                 :permit-type "R"
-                                 :required  (conj common-schemas "rakennushanke")
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
-                                 :permit-type "R"
-                                 :required  (conj common-schemas "rakennushanke")
+   :poikkeamis                  {:schema "rakennushanke"
+                                 :permit-type "P"
+                                 :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :meluilmoitus                {:schema "meluilmoitus"
                                  :permit-type "R"
