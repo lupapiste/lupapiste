@@ -78,6 +78,7 @@
                       <span data-bind="dateTimeString: created"></span>
                     </td>
                     <td>
+                      <a data-bind="ltext: 'userinfo.architect.attachments.load', attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}" href="#" target="_blank"></a>
                       <a data-bind="ltext: 'userinfo.architect.attachments.remove', click: $parent.remove" href="#"></a>
                     </td>
                   </tr>
