@@ -39,12 +39,19 @@ Mikko adds party maksaja
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
 
 Mikko changes application address
+  Sleep  1
   Page should not contain  ${newName}
+  Sleep  1
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Sleep  1
   Click element  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Sleep  1
   Wait Until  Element Should Be Visible  //input[@data-test-id="application-new-address"]
+  Sleep  1
   Input text by test id  application-new-address  ${newName}
+  Sleep  1
   Click enabled by test id  change-location-save
+  Sleep  1
   Wait Until  Page should contain  ${newName}
 
 Mikko decides to submit application
