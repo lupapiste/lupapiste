@@ -119,7 +119,7 @@
                       {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
                       {"links" 1 "operations-attachments" 1})]
       (ok :links (:links result)
-        :attachmentsForOp (-> result :operations-attachments (keyword operation)))
+        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
       (fail :unknown-organization))))
 
 (defcommand "organization-operations-attachments"
