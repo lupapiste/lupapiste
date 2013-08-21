@@ -16,6 +16,7 @@
             [noir.core :refer [defpage]]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.attachment :refer [encode-filename]]
             [noir.response :as resp]))
 
 (defn applicationpage-for [role]
@@ -160,7 +161,8 @@
     {:status 200
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
-               "Content-Length" (str (:content-length attachment))}}
+               "Content-Length" (str (:content-length attachment))
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment)))}}
     {:status 404
      :body (str "can't file attachment: id=" attachment-id)}))
 
