@@ -170,7 +170,13 @@ LUPAPISTE.ModalDialog.showDynamicOk = function(title, content, okButton, renderO
   return dialog$;
 };
 
-LUPAPISTE.ModalDialog.showDynamicError = function(title, message) {
+LUPAPISTE.ModalDialog.showDynamicError = function(message) {
+  "use strict";
+  return LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), message, 
+      {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+};
+
+LUPAPISTE.ModalDialog.showDynamicErrorWithTitle = function(title, message) {
   "use strict";
   return LUPAPISTE.ModalDialog.showDynamicOk(title, message, 
       {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
