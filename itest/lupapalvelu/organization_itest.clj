@@ -1,6 +1,12 @@
 (ns lupapalvelu.organization-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet])
-  (:require [lupapalvelu.domain :as domain]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.organization :refer :all]
+            [lupapalvelu.core :refer [ok?]]
+            [lupapalvelu.itest-util :refer [pena query]]
+            [sade.util :refer [fn->]]))
 
-(fact "no facts")
+(fact "Operation details query"
+   (let [resp  (query pena "organization-details" :municipality "753" :operation "asuinrakennus")]
+     resp => ok?
+     resp => (fn-> :attachmentsForOp count (> 0))
+     resp => (fn-> :links count (> 0))))
