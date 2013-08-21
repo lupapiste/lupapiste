@@ -536,6 +536,11 @@
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
       .success(function() {authorizationModel.refresh(currentId);})
+      .error(function(data) {
+        var msg = loc(data.text) + ": " + data.id;
+        LUPAPISTE.ModalDialog.showDynamicError(loc("error.dialog.title"), msg);
+        application.assignee(null);
+      })
       .call();
   }
 
