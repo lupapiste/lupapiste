@@ -185,7 +185,6 @@
     self.attachmentType = ko.observable();
     self.csrf = ko.observable();
     self.canStart = ko.computed(function() {
-      console.log("canStart:", !_.isBlank(self.filename()) && self.attachmentType(), self.filename(), self.attachmentType());
       return !_.isBlank(self.filename()) && self.attachmentType();
     });
     
