@@ -42,6 +42,7 @@ Mikko changes application address
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
   Click element  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Wait Until  Element Should Be Visible  //input[@data-test-id="application-new-address"]
   Input text by test id  application-new-address  ${newName}
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}
