@@ -42,6 +42,7 @@
   (when-let [user (load-user username)]
     (and
       (check-password password (-> user :private :password))
+      (:enabled user)
       (non-private user))))
 
 (defn login-with-apikey
