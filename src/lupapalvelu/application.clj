@@ -374,8 +374,9 @@
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
     (if (or assignee (nil? assigneeId))
       (update-application command
-                          {$set   {:authority (security/summary assignee)}}
-                          {$unset {:authority ""}})
+                          (if assignee
+                            {$set   {:authority (security/summary assignee)}}
+                            {$unset {:authority ""}}))
       (fail "error.user.not.found" :id assigneeId))))
 
 ;;
