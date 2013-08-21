@@ -147,6 +147,11 @@
     (template "application-new-comment.html")
     (replace-application-links "#conversation-link" application "/conversation" host)))
 
+(defn get-message-for-targeted-comment [application host]
+  (message
+    (template "application-targeted-comment.html")
+    (replace-application-links "#conversation-link" application "/conversation" host)))
+
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
     (let [recipients (get-email-recipients-for-application application nil ["statementGiver"])
@@ -155,7 +160,7 @@
       (send-mail-to-recipients! recipients title msg))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
-  (let [msg        (get-message-for-new-comment application host)
+  (let [msg        (get-message-for-targeted-comment application host)
         title      (get-email-title application "new-comment")]
     (send-mail-to-recipients! [to-email] title msg)))
 

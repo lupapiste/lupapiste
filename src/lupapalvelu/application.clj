@@ -516,8 +516,7 @@
  (defn- make-op [op-name created]
    {:id (mongo/create-id)
     :name (keyword op-name)
-    :created created
-    :operation-type (:operation-type (operations/operations (keyword op-name)))})
+    :created created})
 
  (defn user-is-authority-in-organization? [user-id organization-id]
    (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
