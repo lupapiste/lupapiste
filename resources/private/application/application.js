@@ -535,7 +535,12 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {authorizationModel.refresh(currentId);})
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        })
+      .error(function(data) {
+        LUPAPISTE.ModalDialog.showDynamicError(loc(data.text) + ": " + data.id);
+      })
       .call();
   }
 

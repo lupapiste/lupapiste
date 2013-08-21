@@ -2,3 +2,8 @@ userinfo.architect.attachments.no-attachments: Sinulla ei ole omia liitteitä
 
 userinfo.architect.upload.state.init  Valitse tiedosto
 userinfo.architect.attachments.load: Lataa
+
+error.vrk:CR327: Tilavuus ylittää rakennuksen käyttötarkoituksen mukaisen maksimitilavuuden
+error.user.not.found: Käyttäjää ei löydy
+error.dialog.title: Virhe
+button.ok: OK
