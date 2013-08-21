@@ -1,1 +1,3 @@
+userinfo.architect.attachments.no-attachments: Sinulla ei ole omia liitteitä
 
+userinfo.architect.upload.state.init  Valitse tiedosto
