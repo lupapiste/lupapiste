@@ -71,15 +71,22 @@
                 </thead>
                 <tbody data-bind="foreach: attachments">
                   <tr>
-                    <td>
-                      <span data-bind="text: $data['attachment-type']"></span>
-                      <span data-bind="text: filename"></span>
-                      (<span data-bind="size: size"></span>)
-                      <span data-bind="dateTimeString: created"></span>
+                    <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
+                      <span data-bind="text: loc('userinfo.architect.attachments.name', $data['attachment-type'])" data-test-id="attachment-type"></span>
+                      <span data-bind="text: filename" data-test-id="filename"></span>
                     </td>
                     <td>
-                      <a data-bind="ltext: 'userinfo.architect.attachments.load', attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}" href="#" target="_blank"></a>
-                      <a data-bind="ltext: 'userinfo.architect.attachments.remove', click: $parent.remove" href="#"></a>
+                      <a data-bind="ltext: 'userinfo.architect.attachments.load',
+                                    attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
+                         data-test-id="load"
+                         href="#"
+                         target="_blank">
+                       </a>
+                      <a data-bind="ltext: 'userinfo.architect.attachments.remove',
+                                    click: $parent.remove"
+                         data-test-id="remove"
+                         href="#">
+                      </a>
                     </td>
                   </tr>
                 </tbody>
