@@ -271,7 +271,7 @@
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
                     {:id "753-YA"
-                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :name {:fi "Sipoon yleisten alueiden rakentaminen"}
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
