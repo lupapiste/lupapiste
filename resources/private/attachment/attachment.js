@@ -194,6 +194,8 @@ var attachment = (function() {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
       return;
     }
+    
+    $('#file-preview-iframe').attr('src','');
 
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
