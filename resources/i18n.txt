@@ -7,3 +7,4 @@ error.vrk:CR327: Tilavuus ylittää rakennuksen käyttötarkoituksen mukaisen ma
 error.user.not.found: Käyttäjää ei löydy
 error.dialog.title: Virhe
 button.ok: OK
+attachment.pdf.preview.link: Avaa pdf-tiedosto esikatseluun
