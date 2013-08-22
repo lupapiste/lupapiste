@@ -44,7 +44,7 @@ var ajax = (function() {
     self.successHandler = function(e) { };
     self.errorHandler = function(e) {
       error("AJAX: ERROR", self.request.url, e.text);
-      notify.error("error",e);
+      notify.error(loc("error.dialog.title"), loc(e.text));
       };
     self.failHandler = function(jqXHR, textStatus, errorThrown) {error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);};
     self.completeHandler = function() { };

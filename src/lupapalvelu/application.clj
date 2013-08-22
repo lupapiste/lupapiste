@@ -125,7 +125,7 @@
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
-  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
+  (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
 
 (defquery application
   {:authenticated true
@@ -371,10 +371,13 @@
   {:parameters  [:id assigneeId]
    :roles       [:authority]}
   [{user :user :as command}]
-  (update-application command
-    (if assigneeId
-      {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-      {$unset {:authority ""}})))
+  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
+    (if (or assignee (nil? assigneeId))
+      (update-application command
+                          (if assignee
+                            {$set   {:authority (security/summary assignee)}}
+                            {$unset {:authority ""}}))
+      (fail "error.user.not.found" :id assigneeId))))
 
 ;;
 ;;
@@ -514,8 +517,7 @@
  (defn- make-op [op-name created]
    {:id (mongo/create-id)
     :name (keyword op-name)
-    :created created
-    :operation-type (:operation-type (operations/operations (keyword op-name)))})
+    :created created})
 
  (defn user-is-authority-in-organization? [user-id organization-id]
    (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
@@ -575,7 +577,8 @@
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
-      (autofill-rakennuspaikka application created)
+      (try (autofill-rakennuspaikka application created)
+        (catch Exception e (error e "KTJ data was not updatet.")))
       (ok :id id))))
 
 (defcommand add-operation
