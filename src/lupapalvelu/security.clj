@@ -41,6 +41,7 @@
   [username password]
   (when-let [user (load-user username)]
     (and
+      (:enabled user)
       (check-password password (-> user :private :password))
       (non-private user))))
 

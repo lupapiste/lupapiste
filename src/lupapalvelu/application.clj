@@ -125,7 +125,7 @@
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
-  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
+  (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
 
 (defquery application
   {:authenticated true
@@ -371,10 +371,13 @@
   {:parameters  [:id assigneeId]
    :roles       [:authority]}
   [{user :user :as command}]
-  (update-application command
-    (if assigneeId
-      {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-      {$unset {:authority ""}})))
+  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
+    (if (or assignee (nil? assigneeId))
+      (update-application command
+                          (if assignee
+                            {$set   {:authority (security/summary assignee)}}
+                            {$unset {:authority ""}}))
+      (fail "error.user.not.found" :id assigneeId))))
 
 ;;
 ;;
