@@ -577,7 +577,8 @@
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
-      (autofill-rakennuspaikka application created)
+      (try (autofill-rakennuspaikka application created)
+        (catch Exception e (error e "KTJ data was not updatet.")))
       (ok :id id))))
 
 (defcommand add-operation
