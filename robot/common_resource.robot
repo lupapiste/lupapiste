@@ -252,7 +252,7 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Wait until  Element should be visible  user-name
   # Prevent this by sleep: The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  3
+  Sleep  5
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
@@ -261,7 +261,7 @@ Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Wait until  Element should be visible  user-name
   # Prevent this by sleep: The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  3
+  Sleep  5
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
