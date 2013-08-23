@@ -1,4 +1,4 @@
-(ns lupapalvelu.vetuma
+(ns lupapalvelu.vetuma_test
   (:use lupapalvelu.vetuma
         clojure.test
         midje.sweet))
