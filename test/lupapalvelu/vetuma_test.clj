@@ -1,6 +1,5 @@
 (ns lupapalvelu.vetuma_test
   (:use lupapalvelu.vetuma
-        clojure.test
         midje.sweet))
 
 (def test-parameters "***REMOVED***1&VETUMA-APP2&20061218151424309&6&0,1,2,3,6&LOGIN&EXTAUTH&fi&https://localhost/Show.asp&https://localhost/ShowCancel.asp&https://localhost/ShowError.asp&***REMOVED***&trid1234567890&***REMOVED***1-***REMOVED***&")
