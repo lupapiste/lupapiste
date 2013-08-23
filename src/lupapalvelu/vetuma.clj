@@ -24,8 +24,8 @@
 
 (def encoding "ISO-8859-1")
 
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
-(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
 (def constants
   {:url       (env/value :vetuma :url)
@@ -41,7 +41,7 @@
    :errurl    "{host}/api/vetuma/error"
    :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   ;;:extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
+   :extradata "VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
@@ -78,7 +78,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
+(defn mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -102,7 +102,7 @@
 ;; response parsing
 ;;
 
-(defn- extract-subjectdata [{s :subjectdata}]
+(defn extract-subjectdata [{s :subjectdata}]
   (-> s
     (string/split #", ")
     (->> (map #(string/split % #"=")))
@@ -120,9 +120,9 @@
 (defn- extract-request-id [{id :trid}]
   {:stamp id})
 
-(defn- user-extracted [m]
+(defn user-extracted [m]
   (merge (extract-subjectdata m)
-         #_(extract-vtjdata m)
+         (extract-vtjdata m)
          (extract-userid m)
          (extract-request-id m)))
 
@@ -130,7 +130,7 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn- request-data [host]
+(defn request-data [host]
   (-> constants
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
@@ -142,7 +142,7 @@
     (dissoc :host)
     keys-as-strings))
 
-(defn- parsed [m]
+(defn parsed [m]
   (-> m
     keys-as-keywords
     (assoc :key (:key constants))
