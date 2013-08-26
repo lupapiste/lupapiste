@@ -3,9 +3,40 @@
 <body>
   <section class="page container" id="mypage">
 
-    <div class="fifty">
+    <div class="">
       <form id="own-info-form">
-        <div data-bind="if: features.enabled('architect-info')" class="architect-info"><div class="feature"><span class="legend">architect-info</span>
+        <div class="own-info form-group">
+          <h2 data-bind="ltext: 'mypage.title'"></h2>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
+            <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
+          </div>
+
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
+            <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
+          </div>
+
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
+            <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
+            <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
+            <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
+            <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
+          </div>
+          
+        </div>
+        
+        <div data-bind="if: features.enabled('architect-info')" class="architect-info form-group"><div class="feature"><span class="legend">architect-info</span>
         <div >
           <div class="form-entry architect-toggle">
             <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
@@ -96,32 +127,6 @@
           </div>
         </div>
         </div></div> <!-- feature flagging -->
-
-        <div class="own-info">
-          <h2 data-bind="ltext: 'mypage.title'"></h2>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
-            <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
-          </div>
-
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
-            <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
-            <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
-            <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
-            <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
-            <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
-            <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
-            <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
-          </div>
-        </div>
-        
         
         <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
         <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
@@ -130,7 +135,7 @@
       </form>
     </div>
    
-    <div class="fifty">
+    <div class="">
       <form id="pw-form">
         <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
   
