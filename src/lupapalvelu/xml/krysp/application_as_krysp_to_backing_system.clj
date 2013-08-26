@@ -18,8 +18,8 @@
                      :R  :rakennus-ftp-user)
                     organization)
         sftp-directory (condp = permit-type
-                                     :YA "/yleiset_alueet"
-                                     :R  "/rakennus")
+                         :YA "/yleiset_alueet"
+                         :R  "/rakennus")
         dynamic-part-of-outgoing-directory (str sftp-user sftp-directory)
         output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
         fileserver-address (env/value :fileserver-address)
