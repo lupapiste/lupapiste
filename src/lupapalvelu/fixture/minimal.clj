@@ -274,11 +274,7 @@
                      :name {:fi "Sipoon yleisten alueiden rakentaminen"}
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                              :url "http://sipoo.fi"}
-                             ;; TODO: Lisaa tahan oikea linkki
-                             #_{:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     ;; TODO: Add some :operations-attachments
+                              :url "http://sipoo.fi"}]
                      :yleiset-alueet-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
