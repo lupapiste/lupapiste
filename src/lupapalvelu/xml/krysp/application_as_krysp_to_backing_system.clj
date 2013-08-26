@@ -18,7 +18,7 @@
                      :R  :rakennus-ftp-user)
                     organization)
         rakennusvalvonta-directory (condp = permit-type
-                                     :YA "/yleiset-alueet"
+                                     :YA "/yleiset_alueet"
                                      :R  "/rakennus")
         dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
         output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
