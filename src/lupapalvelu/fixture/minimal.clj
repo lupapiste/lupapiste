@@ -283,7 +283,8 @@
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
+                                         :name "Sonja Sibbo"}]
+                     :operations-attachments {:yleiset-alueet-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "753-P"
                      :name {:fi "Sipoon poikkari"}
