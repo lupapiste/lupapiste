@@ -73,6 +73,13 @@
                 {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
+(def suunnittelija-old-schema-LUPA-771
+  {:id "suunnittelija-old-schema-LUPA771" :schema {:info {:name "suunnittelija"}}
+   :data (merge suunnittelija-henkilo
+                {:patevyys {:koulutus {:value "Koulutus"}
+                            :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
+                            :patevyysluokka {:value "B"}}})})
+
 (def maksaja1
   {:id "maksaja1" :schema {:info {:name "maksaja"}}
    :data {:henkilo henkilo}})
@@ -373,6 +380,14 @@
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
+
+(facts "Transforming old schema to canonical model is correct"
+  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-old-schema-LUPA-771) :suunnittelija)]
+    (fact suunnittelija-model => truthy)
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [maksaja-model (get-osapuoli-data (:data maksaja1) :maksaja)
