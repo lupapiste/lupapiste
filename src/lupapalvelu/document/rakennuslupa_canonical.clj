@@ -56,9 +56,10 @@
     empty-tag))
 
 (def kuntaRoolikoodit
-  {:paasuunnittelija "p\u00e4\u00e4suunnittelija"
-   :hakija  "Rakennusvalvonta-asian hakija"
-   :maksaja "Rakennusvalvonta-asian laskun maksaja"})
+  {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
+   :hakija                 "Rakennusvalvonta-asian hakija"
+   :maksaja                "Rakennusvalvonta-asian laskun maksaja"
+   :rakennuksenomistaja    "Rakennuksen omistaja"})
 
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
@@ -76,10 +77,10 @@
    "RAK-rakennesuunnittelija"       "erityissuunnittelija"
    "ARK-rakennussuunnittelija"      "rakennussuunnittelija"
    "ei tiedossa"                    "ei tiedossa"
+   "Rakennuksen omistaja"           "rakennuksen omistaja"
 
    ; TODO mappings for the rest
    :rakennuspaikanomistaja          "rakennuspaikan omistaja"
-   :rakennuksenomistaja             "rakennuksen omistaja"
    :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
    :naapuri                         "naapuri"
    :lisatietojenantaja              "lis\u00e4tietojen antaja"
