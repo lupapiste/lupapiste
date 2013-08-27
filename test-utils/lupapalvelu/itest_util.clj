@@ -1,5 +1,6 @@
 (ns lupapalvelu.itest-util
   (:use [lupapalvelu.fixture.minimal :only [users]]
+        [lupapalvelu.core :only [fail!]]
         [clojure.walk :only [keywordize-keys]]
         [swiss-arrows.core]
         [midje.sweet])
@@ -198,7 +199,7 @@
 ;; Stuffin' data in
 ;;
 
-(defn upload-attachment [apikey application-id attachment-id expect-to-succeed]
+(defn upload-attachment [apikey application-id attachment-id expect-to-succeed permit-type]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
@@ -206,7 +207,12 @@
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
                                    {:name "Content/type"   :content "text/plain"}
-                                   {:name "attachmentType" :content "paapiirustus.asemapiirros"}
+                                   {:name "attachmentType" :content (condp = (keyword permit-type)
+                                                                      :R "paapiirustus.asemapiirros"
+                                                                      :YA "yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista"
+                                                                      :Y "paapiirustus.asemapiirros"  ;;TODO: Change this
+                                                                      :P "paapiirustus.asemapiirros"  ;;TODO: Change this
+                                                                      (fail! "unsupported permit-type"))}
                                    {:name "attachmentId"   :content attachment-id}
                                    {:name "upload"         :content uploadfile}]})]
     (if expect-to-succeed
@@ -246,7 +252,7 @@
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment-id (get-attachment-ids application)]
-    (upload-attachment pena (:id application) attachment-id true)))
+    (upload-attachment pena (:id application) attachment-id true "R")))
 
 ;;
 ;; Vetuma
