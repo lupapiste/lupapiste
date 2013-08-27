@@ -80,6 +80,13 @@
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :patevyysluokka {:value "B"}}})})
 
+(def suunnittelija-blank-role
+  {:id "suunnittelija-blank-role" :schema {:info {:name "suunnittelija"}}
+   :data (merge suunnittelija-henkilo
+                {:kuntaRoolikoodi {:value ""}}
+                {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
+                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
+
 (def maksaja1
   {:id "maksaja1" :schema {:info {:name "maksaja"}}
    :data {:henkilo henkilo}})
@@ -388,6 +395,12 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")))
+
+(facts "Canonical suunnittelija-blank-role model is correct"
+  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-blank-role) :suunnittelija)]
+    (fact suunnittelija-model => truthy)
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ei tiedossa")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "ei tiedossa")))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [maksaja-model (get-osapuoli-data (:data maksaja1) :maksaja)
