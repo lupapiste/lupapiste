@@ -224,6 +224,7 @@
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (when statement-id
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query apikey :application :id application-id)
@@ -245,7 +246,7 @@
       ;(facts "Statement upload should fail"
        ; (fact "Status code" (:status resp) => 302)
       ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0))
-      )))
+      ))))
 
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
