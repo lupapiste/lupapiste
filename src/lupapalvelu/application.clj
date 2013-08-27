@@ -403,7 +403,6 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-;; FIXME: does not set state if complement-needed
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
@@ -420,10 +419,10 @@
           (executed "assign-to-me" command))
         (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
           (mongo/update
-            :applications {:_id (:id application) :state new-state}
+            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
             {$set {:state :sent}})
           (catch org.xml.sax.SAXParseException e
-            (.printStackTrace e)
+            (info e "Invalid KRYSM XML message")
             (fail (.getMessage e))))))))
 
 (defcommand submit-application
