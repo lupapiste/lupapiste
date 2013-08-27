@@ -155,8 +155,8 @@
         (:state application) => "verdictGiven"
 
         (let [attachment-id (first (get-attachment-ids application))]
-          (upload-attachment sonja (:id application) attachment-id true)
-          (upload-attachment pena (:id application) attachment-id false))))))
+          (upload-attachment sonja (:id application) attachment-id true "R")
+          (upload-attachment pena (:id application) attachment-id false "R"))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)
