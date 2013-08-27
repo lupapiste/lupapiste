@@ -61,12 +61,15 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
+(def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)
-    (get-in party [:kuntaRoolikoodi :value]
-            ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
-            (get-in party [:patevyys :kuntaRoolikoodi :value] "ei tiedossa"))))
+    (let [code (or (get-in party [:kuntaRoolikoodi :value])
+                   ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
+                   (get-in party [:patevyys :kuntaRoolikoodi :value])
+                   default-role)]
+      (if (s/blank? code) default-role code))))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
