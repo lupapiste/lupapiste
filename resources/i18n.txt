@@ -1,1 +1,2 @@
 architect.title: Suunnittelijan tiedot ja kokemus
+userinfo.architect.upload.state.init: Valitse liitteen tyyppi

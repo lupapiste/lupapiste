@@ -103,8 +103,8 @@
                 <tbody data-bind="foreach: attachments">
                   <tr>
                     <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                      <span data-bind="text: loc('userinfo.architect.attachments.name', $data['attachment-type'])" data-test-id="attachment-type"></span>
-                      <span data-bind="text: filename" data-test-id="filename"></span>
+                      <div data-bind="text: loc('userinfo.architect.attachments.name', $data['attachment-type'])" data-test-id="attachment-type"></div>
+                      <div data-bind="text: filename" data-test-id="filename"></div>
                     </td>
                     <td>
                       <a data-bind="ltext: 'userinfo.architect.attachments.load',
@@ -175,21 +175,25 @@
         <div data-bind="visible: state() === stateDone, ltext: 'userinfo.architect.upload.state.ready'"></div>
         <div data-bind="visible: state() === stateError, ltext: 'userinfo.architect.upload.state.error'"></div>
 
-        <form>
+        <form >
+
           <select data-bind="options: availableAttachmentTypes, value: attachmentType, optionsText: 'name', optionsCaption: loc('userinfo.architect.qualification.choose')"></select>
-          <input type="file" name="files[]"></input>
+          <div class="clear"></div>
+          <input type="file" name="files[]" class="file-upload"></input>
           <input data-bind="attr: {value: attachmentType() && attachmentType().id}" type="hidden" name="attachmentType"></input>
           <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"></input>
         </form>
 
         <div>
           <div data-bind="visible: !filename()">
-            <span data-bind="ltext: 'userinfo.architect.upload.no-file'"></span>
+            <p data-bind="ltext: 'userinfo.architect.upload.no-file'"></p>
           </div>
           <div data-bind="visible: filename">
-            <span data-bind="ltext: 'userinfo.architect.upload.filename'"></span>
-            <span data-bind="text: filename"></span>
-            <span data-bind="size: filesize"></span>
+            <p>
+              <span data-bind="ltext: 'userinfo.architect.upload.filename'"></span>
+              <span data-bind="text: filename"></span>
+              <span data-bind="size: filesize"></span>
+            </p>
           </div>
         </div>
 
