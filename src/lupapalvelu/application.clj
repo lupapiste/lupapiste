@@ -330,7 +330,7 @@
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand set-user-to-document
-  {:parameters [:id documentId userId path]
+  {:parameters [id documentId userId path]
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
@@ -340,21 +340,12 @@
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
                        (security/same-user? user subject))
-        henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
-        full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-    (info "setting-user-to-document, with hetu: " with-hetu)
+        updates      (-> (domain/->henkilo subject :with-hetu with-hetu) tools/unwrapped tools/path-vals)]
     (if-not document
       (fail :error.document-not-found)
-      ;; TODO: update via model
       (do
-        (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :documents {$elemMatch {:id documentId}}}
-          {$set {full-path henkilo
-                 :modified created}})))))
-
+        (infof "merging user %s with best effort into %s %s" subject schema-name documentId)
+        (commands/persist-model-updates id document updates created)))))
 
 ;;
 ;; Assign
