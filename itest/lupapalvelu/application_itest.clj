@@ -189,6 +189,26 @@
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
 
+(facts "Set user to document"
+  (let [application-id   (create-app-id mikko :municipality sonja-muni)
+        application      (:application (query mikko :application :id application-id))
+        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
+        documentId       (:id paasuunnittelija)
+        userId           (get-in (query mikko :user) [:user :id])]
+
+    (fact "there is no paasuunnittelija"
+       paasuunnittelija => truthy
+       (get-in paasuunnittelija [:data :henkilotiedot]) => nil)
+
+    (command mikko :set-user-to-document :id application-id :documentId documentId :userId userId :path "") => ok?
+
+    (let [new-application       (:application (query mikko :application :id application-id))
+          new-paasuunnittelija (domain/get-document-by-name new-application "paasuunnittelija")]
+
+      (fact "new paasuunnittelija is set"
+        (get-in new-paasuunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
+        (get-in new-paasuunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"))))
+
 (comment
   (apply-remote-minimal)
   ; Do 70 applications in each municipality:
