@@ -271,19 +271,16 @@
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
                     {:id "753-YA"
-                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :name {:fi "Sipoon yleisten alueiden rakentaminen"}
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                              :url "http://sipoo.fi"}
-                             ;; TODO: Lisaa tahan oikea linkki
-                             #_{:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     ;; TODO: Add some :operations-attachments
+                              :url "http://sipoo.fi"}]
                      :yleiset-alueet-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
+                                         :name "Sonja Sibbo"}]
+                     :operations-attachments {:yleiset-alueet-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "753-P"
                      :name {:fi "Sipoon poikkari"}

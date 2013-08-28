@@ -259,15 +259,17 @@
     (ke6666/generate application lang current-file)))
 
 (defn- add-statement-attachments [canonical statement-attachments]
-  (reduce (fn [c a]
-            (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
-                  lausunto-id (name (first (keys a)))
-                  paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
-                  index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-                  paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
-                  paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-              (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
-            ) canonical statement-attachments))
+  (if (empty? statement-attachments)
+    canonical
+    (reduce (fn [c a]
+              (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+                    lausunto-id (name (first (keys a)))
+                    paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
+                    index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
+                    paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
+                    paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
+                (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
+              ) canonical statement-attachments)))
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))

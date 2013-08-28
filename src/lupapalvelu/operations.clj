@@ -283,7 +283,10 @@
                                  :permit-type "YA"
                                  :schema-data [[["_selected" :value] "yritys"]]
                                  :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa" "tyoaika")
-                                 :attachments []} ;; TODO: Mita attachmentteihin?
+                                 ;; TODO: Mita attachmentteihin?
+                                 :attachments []
+;                                 :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
+                                 }
    :yleiset-alueet-kayttolupa   {:schema "tyoaika"
                                  :permit-type "YA"
                                  :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")

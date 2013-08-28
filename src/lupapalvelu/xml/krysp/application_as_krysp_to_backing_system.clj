@@ -17,12 +17,12 @@
                      :YA :yleiset-alueet-ftp-user
                      :R  :rakennus-ftp-user)
                     organization)
-        rakennusvalvonta-directory (condp = permit-type
-                                     :YA "/yleiset-alueet"
-                                     :R  "/rakennus")
-        dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
+        sftp-directory (condp = permit-type
+                         :YA "/yleiset_alueet"
+                         :R  "/rakennus")
+        dynamic-part-of-outgoing-directory (str sftp-user sftp-directory)
         output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
         fileserver-address (env/value :fileserver-address)
-        begin-of-link (str fileserver-address rakennusvalvonta-directory "/")]
+        begin-of-link (str fileserver-address sftp-directory "/")]
 
     (krysp-fn application lang submitted-application output-dir begin-of-link)))
