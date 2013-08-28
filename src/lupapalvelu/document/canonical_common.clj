@@ -22,7 +22,9 @@
    :open :opened
    :complement-needed :opened
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened})
+   :submitted :opened
+   ; Enables XML to be formed from sent applications
+   :sent :opened})
 
 (defn to-xml-date [timestamp]
   (let [d (tc/from-long timestamp)]
