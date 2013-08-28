@@ -70,21 +70,4 @@
           (command veikko :assign-to-me :id id) => unauthorized?)
 
         (fact "Sonja must be able to assign to herself!"
-          (command sonja :assign-to-me :id id) => ok?)
-
-        (fact "Assigning to document"
-          (let [paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
-                documentId       (:id paasuunnittelija)
-                userId           (get-in (query mikko :user) [:user :id])]
-
-            (fact "there is no paasuunnittelija"
-              (get-in paasuunnittelija [:data :henkilotiedot]) => nil)
-
-            (command mikko :set-user-to-document :id id :documentId documentId :userId userId :path "") => ok?
-
-            (let [new-application       (:application (query mikko :application :id id))
-                  new-paasuunnittelija (domain/get-document-by-name new-application "paasuunnittelija")]
-
-              (fact "new paasuunnittelija is set"
-                (get-in new-paasuunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
-                (get-in new-paasuunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"))))))))
+          (command sonja :assign-to-me :id id) => ok?)))))
