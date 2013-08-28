@@ -411,8 +411,7 @@
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (let [new-state :submitted
-            application-id (:id application)
+      (let [application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
