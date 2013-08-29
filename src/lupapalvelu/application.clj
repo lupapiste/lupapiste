@@ -1,12 +1,12 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim]]
+        [clojure.string :only [blank? join trim split]]
         [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -340,11 +340,15 @@
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
                        (security/same-user? user subject))
-        updates      (-> (domain/->henkilo subject :with-hetu with-hetu) tools/unwrapped tools/path-vals)]
+        person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+        model        (if-not (blank? path)
+                       (assoc-in {} (map keyword (split path #"\.")) person)
+                       person)
+        updates      (tools/path-vals model)]
     (if-not document
       (fail :error.document-not-found)
       (do
-        (infof "merging user %s with best effort into %s %s" subject schema-name documentId)
+        (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
         (commands/persist-model-updates id document updates created)))))
 
 ;;
