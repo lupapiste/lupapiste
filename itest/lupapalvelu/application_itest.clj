@@ -189,23 +189,30 @@
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
 
+(defn- set-and-check-person [api-key application-id initial-document]
+   (fact "initially there is no person data"
+       initial-document => truthy
+       (get-in initial-document [:data :henkilotiedot]) => nil)
+
+    (fact "new person is set"
+      (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path "") => ok?
+      (let [updated-app (:application (query mikko :application :id application-id))
+            update-doc (domain/get-document-by-id updated-app (:id initial-document))]
+        (get-in update-doc [:data :henkilotiedot :etunimi :value]) => "Mikko"
+        (get-in update-doc [:data :henkilotiedot :sukunimi :value]) => "Intonen"))
+  )
+
 (facts "Set user to document"
   (let [application-id   (create-app-id mikko :municipality sonja-muni)
         application      (:application (query mikko :application :id application-id))
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
-        ]
+        hakija     (domain/get-document-by-name application "hakija")
+        maksaja    (domain/get-document-by-name application "maksaja")]
 
-    (fact "there is no paasuunnittelija"
-       paasuunnittelija => truthy
-       (get-in paasuunnittelija [:data :henkilotiedot]) => nil)
-
-    (fact "new paasuunnittelija is set"
-      (command mikko :set-user-to-document :id application-id :documentId (:id paasuunnittelija) :userId mikko-id :path "") => ok?
-      (let [new-application       (:application (query mikko :application :id application-id))
-            new-paasuunnittelija (domain/get-document-by-name new-application "paasuunnittelija")]
-        (get-in new-paasuunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
-        (get-in new-paasuunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"))
+    (set-and-check-person mikko application-id paasuunnittelija)
+    (set-and-check-person mikko application-id hakija)
+    (set-and-check-person mikko application-id maksaja)
 
     (fact "there is no suunnittelija"
        suunnittelija => truthy
