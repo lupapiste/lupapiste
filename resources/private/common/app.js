@@ -120,7 +120,17 @@ var LUPAPISTE = LUPAPISTE || {};
     if (wasLoggedIn) {
       LUPAPISTE.ModalDialog.mask.unbind("click");
       LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
-          {title: loc("session-dead.logout"), fn: function() {hub.send("logout");return false;}});
+          {title: loc("session-dead.logout"), fn: function() {
+              var href = window.location.href;
+              var hash = window.location.hash;
+              var withHashbang = href;
+              if (hash && hash.length > 0) {
+                var withoutHash = href.substring(0, href.indexOf("#"));
+                withHashbang = withoutHash + "?hashbang=" + encodeURIComponent(hash.substring(1, hash.length));
+              }
+              window.location = withHashbang;
+              return false;
+            }});
     }
   });
 
