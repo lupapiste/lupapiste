@@ -6,7 +6,7 @@
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
