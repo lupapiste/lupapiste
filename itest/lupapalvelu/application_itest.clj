@@ -189,6 +189,47 @@
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
 
+(facts "Set user to document"
+  (let [application-id   (create-app-id mikko :municipality sonja-muni)
+        application      (:application (query mikko :application :id application-id))
+        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
+        suunnittelija    (domain/get-document-by-name application "suunnittelija")
+        ]
+
+    (fact "there is no paasuunnittelija"
+       paasuunnittelija => truthy
+       (get-in paasuunnittelija [:data :henkilotiedot]) => nil)
+
+    (fact "new paasuunnittelija is set"
+      (command mikko :set-user-to-document :id application-id :documentId (:id paasuunnittelija) :userId mikko-id :path "") => ok?
+      (let [new-application       (:application (query mikko :application :id application-id))
+            new-paasuunnittelija (domain/get-document-by-name new-application "paasuunnittelija")]
+        (get-in new-paasuunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
+        (get-in new-paasuunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"))
+
+    (fact "there is no suunnittelija"
+       suunnittelija => truthy
+       (get-in suunnittelija [:data :henkilotiedot]) => nil)
+
+    (let [doc-id (:id suunnittelija)
+          code "RAK-rakennesuunnittelija"]
+
+      (fact "suunnittelija kuntaroolikoodi is set"
+        (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code]]) => ok?
+        (let [updated-app          (:application (query mikko :application :id application-id))
+              updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
+          updated-suunnittelija => truthy
+          (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))
+
+      (fact "new suunnittelija is set"
+        (command mikko :set-user-to-document :id application-id :documentId (:id suunnittelija) :userId mikko-id :path "") => ok?
+        (let [updated-app           (:application (query mikko :application :id application-id))
+              updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
+          (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
+          (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
+          (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
+            (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
+
 (comment
   (apply-remote-minimal)
   ; Do 70 applications in each municipality:
