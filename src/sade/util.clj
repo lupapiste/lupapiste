@@ -90,4 +90,5 @@
        ~@body
        (catch Throwable e#
          (println (format "unhandled exception in future at %s:%d: %s" *file* ~(-> &form meta :line) e#))
-         (.printStackTrace e#)))))
+         (.printStackTrace e#)
+         (throw e#)))))
