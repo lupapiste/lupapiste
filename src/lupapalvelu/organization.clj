@@ -120,7 +120,7 @@
                       {"links" 1 "operations-attachments" 1})]
       (ok :links (:links result)
         :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
-      (fail :unknown-organization))))
+      (fail :error.unknown-organization))))
 
 (defcommand "organization-operations-attachments"
   {:parameters [:operation :attachments]
@@ -138,7 +138,7 @@
   (let [organization (first organizations)]
     (if-let [result (mongo/select-one :organizations {:_id organization} {"legacy" 1})]
       (ok :legacy (:legacy result))
-      (fail :unknown-organization))))
+      (fail :error.unknown-organization))))
 
 (defcommand "set-legacy-system"
   {:parameters [:legacy]
@@ -148,7 +148,7 @@
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
       (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
-      (fail :legacy_is_dead))))
+      (fail :error.legacy_is_dead))))
 
 ;;
 ;; Helpers
