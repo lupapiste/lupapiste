@@ -7,7 +7,8 @@
             [clojure.zip :as zip]
             [sade.env :as env])
   (:use [clojure.data.zip.xml :only [xml-> text]]
-        [sade.strings :only [starts-with-i]]))
+        [sade.strings :only [starts-with-i]]
+        [sade.util :only [future*]]))
 
 ;;
 ;; config:
@@ -183,7 +184,7 @@
         request (assoc base-request
                        :basic-auth (auth url)
                        param-key q)
-        task (future (exec-http http-fn url request))
+        task (future* (exec-http http-fn url request))
         [status data] (deref task timeout [:timeout])]
     (condp = status
       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
