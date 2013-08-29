@@ -158,6 +158,6 @@ var LUPAPISTE = LUPAPISTE || {};
       allowAnonymous: self.allowAnonymous
     };
 
-    $("nav").applyBindings(model);
+    $("nav").applyBindings(model).css("visibility", "visible");
   };
 };
