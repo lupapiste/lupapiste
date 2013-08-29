@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [sade.strings :only [suffix]]
         [clojure.set :only [difference]]
-        [lupapalvelu.i18n :only [loc]])
+        [lupapalvelu.i18n :only [loc]]
+        [sade.util :only [future*]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -53,7 +54,7 @@
   (replace-links-in-fi-sv e selector (partial get-application-link application suffix host)))
 
 (defn send-mail-to-recipients! [recipients title msg]
-  (future
+  (future*
     (doseq [recipient recipients]
       (if (email/send-mail recipient title :html msg)
         (error "email could not be delivered." recipient title msg)
