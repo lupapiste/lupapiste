@@ -169,6 +169,19 @@ LUPAPISTE.ModalDialog.showDynamicOk = function(title, content, okButton, renderO
   LUPAPISTE.ModalDialog.open(dialog$);
   return dialog$;
 };
+
+LUPAPISTE.ModalDialog.showDynamicError = function(message) {
+  "use strict";
+  return LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), message, 
+      {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+};
+
+LUPAPISTE.ModalDialog.showDynamicErrorWithTitle = function(title, message) {
+  "use strict";
+  return LUPAPISTE.ModalDialog.showDynamicOk(title, message, 
+      {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+};
+
 /**
  * Initializes modal dialog elements
  */

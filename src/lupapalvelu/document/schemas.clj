@@ -46,6 +46,8 @@
 ;; schema sniplets
 ;;
 
+(def select-one-of-key "_selected")
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector}
@@ -118,12 +120,12 @@
                        yhteystiedot)}))
 
 (def party (body
-             {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+             {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
              {:name "henkilo" :type :group :body henkilo}
              {:name "yritys" :type :group :body yritys}))
 
 (def party-with-required-hetu (body
-                                [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                                [{:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
                                  {:name "henkilo" :type :group :body henkilo-with-required-hetu}
                                  {:name "yritys" :type :group :body yritys}]))
 
@@ -162,8 +164,14 @@
                      henkilo-valitsin
                      designer-basic
                      {:name "patevyys" :type :group :body patevyys}))
+(def muutostapa {:name "muutostapa" :type :select
+                 :body [{:name "poisto"}
+                        {:name "lis\u00e4ys"}
+                        {:name "muutos"}
+                        {:name "ei tiedossa"}]})
 
-(def huoneisto [{:name "huoneistoTunnus" :type :group
+(def huoneisto [muutostapa
+                {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                         {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}

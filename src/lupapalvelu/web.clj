@@ -52,18 +52,21 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body [request]
+  (let [json-body (if (ss/starts-with (:content-type request) "application/json")
+                    (if-let [body (:body request)]
+                      (-> body
+                        (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                        json/parse-stream
+                        keywordize-keys)
+                      {}))]
+    (if json-body
+      (assoc request :json json-body :params json-body)
+      (assoc request :json nil))))
+
 (defn parse-json-body-middleware [handler]
   (fn [request]
-    (let [json-body (if (ss/starts-with (:content-type request) "application/json")
-                      (if-let [body (:body request)]
-                        (-> body
-                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                          json/parse-stream
-                          keywordize-keys)
-                        {}))
-          request (assoc request :json json-body)
-          request (if json-body (assoc request :params json-body) request)]
-      (handler request))))
+    (handler (parse-json-body request))))
 
 (defn from-json [request]
   (:json request))
@@ -132,8 +135,11 @@
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
 
+(defn- execute-query [name params]
+  (execute (enriched (core/query name params))))
+
 (defjson "/api/query/:name" {name :name}
-  (execute (enriched (core/query name (from-query)))))
+  (execute-query name (from-query)))
 
 (defpage "/api/raw/:name" {name :name}
   (let [response (execute (enriched (core/raw name (from-query))))]
@@ -301,7 +307,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (spy (parse "apikey" authorization))))
+    (parse "apikey" authorization)))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
@@ -319,9 +325,9 @@
 ;; File upload
 ;;
 
-(defpage [:post "/api/upload"]
+(defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
-  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
+  (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
@@ -342,7 +348,6 @@
                                              (dissoc :upload)
                                              (dissoc ring.middleware.anti-forgery/token-key)
                                              (assoc  :errorMessage (result :text)))))))))
-
 ;;
 ;; Server is alive
 ;;
@@ -377,17 +382,11 @@
 ;;
 
 (defn- csrf-attack-hander [request]
-  (warn "CSRF attempt blocked."
-    "Client IP:" (client-ip request)
-    "Referer:" (get-in request [:headers "referer"]))
-  (resp/json (fail :error.invalid-csrf-token))
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (current-user request) "???")}
-    (warn "CSRF attempt blocked."
-          "Client IP:" (client-ip request)
-          "Referer:" (get-in request [:headers "referer"]))
-    (resp/json (fail :error.invalid-csrf-token))))
+    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (client-ip request) (get-in request [:headers "referer"]))
+    (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf
   [handler]
@@ -434,11 +433,17 @@
   (defjson "/dev/user" []
     (current-user))
 
+  (defjson "/dev/fixture/:name" {:keys [name]}
+    (execute-query "apply-fixture" {:name name}))
+
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
+
+  (defjson "/dev/fileinfo/:id" {:keys [id]}
+    (dissoc (mongo/download id) :content))
 
   (defjson "/dev/hgnotes" [] (env/hgnotes))
 

@@ -23,14 +23,23 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn current-user
-  "fetches the current user"
+  "fetches the current user from session"
   ([] (current-user (request/ring-request)))
   ([request] (request :user)))
+
+(defn- load-user [username]
+  (mongo/select-one :users {:username username}))
+
+(defn load-current-user
+  "fetch the current user from db"
+  []
+  (when-let [user (load-user (:username (current-user)))]
+    (non-private user)))
 
 (defn login
   "returns non-private information of enabled user with the username and password"
   [username password]
-  (when-let [user (mongo/select-one :users {:username username})]
+  (when-let [user (load-user username)]
     (and
       (:enabled user)
       (check-password password (-> user :private :password))
@@ -57,7 +66,7 @@
 (defn valid-password? [password]
   (>= (count password) (env/value :password :minlength)))
 
-(defn create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
+(defn create-user-entity [email password userid role firstname lastname phone city street zip enabled organizations]
   (let [email             (util/lower-case email)
         salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
@@ -80,7 +89,7 @@
   (let [email             (util/lower-case email)
         id                (mongo/create-id)
         old-user          (get-user-by-email email)
-        new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled organizations)
+        new-user-base     (create-user-entity email password userid role firstname lastname phone city street zip enabled organizations)
         new-user          (assoc new-user-base :id id)]
     (info "register user:" (dissoc user :password))
     (try

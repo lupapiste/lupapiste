@@ -30,14 +30,15 @@
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.12"]
                  [slingshot "0.10.3"]
-                 [com.google.zxing/javase "2.2"]]
+                 [com.google.zxing/javase "2.2"]
+                 [org.clojure/tools.trace "0.7.5"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
-                             [lein-nitpicker "0.3.0"]
-                             [lein-hgnotes "0.1.0"]]
+                             [lein-nitpicker "0.4.0"]
+                             [lein-hgnotes "0.2.0-SNAPSHOT"]]
                    :source-paths ["test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
                               "-Xmx1G" "-XX:MaxPermSize=256M"]}
@@ -50,13 +51,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"[\/\\]jquery"
-                         #"[\/\\]theme[\/\\]default"
-                         #"[\/\\]public[\/\\]lib"
-                         #"[\/\\]test[\/\\]"
-                         #"openlayers"
-                         #"underscore"
-                         #"lodash"]}
+              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"

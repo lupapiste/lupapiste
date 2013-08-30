@@ -411,7 +411,21 @@
       var applicationId = self.id();
       ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
+        //FIXME parempi tapa ilmoittaa onnistumisesta
           notify.success("hakemus hyv\u00E4ksytty",model);
+          repository.load(applicationId);
+        })//FIXME parempi/tyylikaampi virheilmoitus
+        .error(function(resp) {alert(resp.text);})
+        .call();
+      return false;
+    };
+
+    self.refreshKTJ = function(model) {
+      var applicationId = self.id();
+      ajax.command("refresh-ktj", { id: applicationId})
+        .success(function() {
+          //FIXME parempi tapa ilmoittaa onnistumisesta
+          notify.success("KTJ tiedot p\u00e4ivitetty",model);
           repository.load(applicationId);
         })//FIXME parempi/tyylikaampi virheilmoitus
         .error(function(resp) {alert(resp.text);})
@@ -521,7 +535,12 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {authorizationModel.refresh(currentId);})
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        })
+      .error(function(data) {
+        LUPAPISTE.ModalDialog.showDynamicError(loc(data.text) + ": " + data.id);
+      })
       .call();
   }
 
@@ -571,7 +590,6 @@
       inviteModel.setApplicationId(app.id);
 
       // Comments:
-      commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
 
       // Verdict details
@@ -725,10 +743,10 @@
   }();
 
   function createMap(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); }
-  
+
   function getOrCreateMap(kind) {
     if (kind === "application") {
-      if (!applicationMap) applicationMap = createMap("application-map"); 
+      if (!applicationMap) applicationMap = createMap("application-map");
       return applicationMap;
     } else if (kind === "inforequest") {
       if (!inforequestMap) inforequestMap = createMap("inforequest-map");
@@ -737,7 +755,7 @@
       throw "Unknown kind: " + kind;
     }
   }
-  
+
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];

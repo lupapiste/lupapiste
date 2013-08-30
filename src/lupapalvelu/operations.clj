@@ -1,7 +1,7 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.poikkeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.domain :as domain]
@@ -73,9 +73,7 @@
 
 (def ^:private operation-tree-for-P
   {:permit-type permit/P
-   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut"
-          [["Poikkeuslupa" :poikkeuslupa]
-           ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]})
+   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
 
 (def ^:private operation-tree-for-Y
   {:permit-type permit/Y
@@ -264,13 +262,9 @@
                                  :permit-type "R"
                                  :required  common-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :suunnittelutarveratkaisu    {:schema "suunnittelutarveratkaisun-lisaosa"
-                                 :permit-type "R"
-                                 :required  (conj common-schemas "rakennushanke")
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
-                                 :permit-type "R"
-                                 :required  (conj common-schemas "rakennushanke")
+   :poikkeamis                  {:schema "rakennushanke"
+                                 :permit-type "P"
+                                 :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :meluilmoitus                {:schema "meluilmoitus"
                                  :permit-type "R"
@@ -288,23 +282,22 @@
    :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
                                  :permit-type "YA"
                                  :schema-data [[["_selected" :value] "yritys"]]
-                                 :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa" "tyoaika")
-                                 :attachments []} ;; TODO: Mita attachmentteihin?
+                                 ;; TODO: Mita attachmentteihin?
+                                 :attachments []
+;                                 :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
+                                 }
    :yleiset-alueet-kayttolupa   {:schema "tyoaika"
                                  :permit-type "YA"
-                                 :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
                                  :attachments []} ;; TODO: Mita attachmentteihin?
    :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                  :permit-type "YA"
-                                 :operation-type :publicArea
                                  :required yleiset-alueet-common-schemas
                                  :attachments []} ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-sijoituslupa {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                  :permit-type "YA"
                                  :schema-data [[["_selected" :value] "yritys"]]
-                                 :operation-type :publicArea
                                  :required ["sijoituslupa-sijoituksen-tarkoitus"]
                                  :attachments []} ;; TODO: Mita attachmentteihin?
 

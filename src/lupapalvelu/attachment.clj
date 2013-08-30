@@ -8,7 +8,7 @@
   (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [sade.util :refer [fn-> fn->>]]
+            [sade.util :refer [fn-> fn->> future*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [sade.strings :as ss]
@@ -96,7 +96,9 @@
                     :tyyppiratkaisu
                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
                     :liitoslausunto
-                    :asemapiirros]])
+                    :asemapiirros]
+   ;; This is needed for statement attachments to work.
+   :muut [:muu]])
 
 ;;
 ;; Api
@@ -109,6 +111,7 @@
     (condp = (keyword permit-type)
       :R  attachment-types-R
       :YA attachment-types-YA
+      :P attachment-types-R
       (fail! "unsupported permit-type"))))
 
 ;; TODO: return attachment type based on what types of operations the given organization is having.
@@ -268,7 +271,7 @@
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
   [{:keys [id attachments] :as application} attachmentId]
   (info "1/3 deleting files of attachment" attachmentId)
-  (dorun (map mongo/delete-file (attachment-file-ids application attachmentId)))
+  (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachmentId)))
   (info "2/3 deleted files of attachment" attachmentId)
   (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
   (info "3/3 deleted meta-data of attachment" attachmentId))
@@ -278,7 +281,7 @@
   [{:keys [id attachments] :as application} attachmentId fileId]
   (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
     (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
-    (mongo/delete-file fileId)
+    (mongo/delete-file-by-id fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
     (mongo/update
       :applications
@@ -388,12 +391,12 @@
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (if (> size 0)
     (let [file-id (mongo/create-id)
-          sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+          sanitazed-filename (mime/sanitize-filename filename)]
       (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
       (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
-            (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+            (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
             (.delete (io/file tempfile))
             (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
@@ -581,7 +584,7 @@
     (with-open [in ((:content (mongo/download fileId)))
                 out (io/output-stream temp-file)]
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
-    (mongo/upload application-id new-file-id filename contentType temp-file created)
+    (mongo/upload new-file-id filename contentType temp-file :application application-id)
     (let [new-version (if re-stamp?
                         (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
                         (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true))]
@@ -609,7 +612,7 @@
 
 (defn- make-stamp-job [file-infos context]
   (let [job (job/start (zipmap (keys file-infos) (repeat :pending)) stamp-job-status)]
-    (future (stamp-attachments! file-infos (assoc context :job-id (:id job))))
+    (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
 (defcommand stamp-attachments

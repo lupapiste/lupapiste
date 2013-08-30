@@ -223,7 +223,7 @@ Input text by test id
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Input text  xpath=//input[@data-test-id="${id}"]  ${value}
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -232,20 +232,16 @@ Select From List by test id
 
 Click by test id
   [Arguments]  ${id}
-  Wait until  Page should contain element  xpath=//*[@data-test-id='${id}']
-  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  Execute Javascript  window.scrollTo(0, $("[data-test-id='${id}']").position().top - 130);
-  # IE8
-  Focus  xpath=//*[@data-test-id='${id}']
-  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
-  Click element  xpath=//*[@data-test-id='${id}']
+  ${selector} =   Set Variable  $("[data-test-id='${id}']:visible")
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Wait For Condition  return ${selector}.length===1;  10
+  Execute Javascript  ${selector}.click();
 
 Click enabled by test id
   [Arguments]  ${id}
-  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
-  Focus  xpath=//*[@data-test-id='${id}']
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
+  ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
+  Wait until  Page should contain element  ${path}
+  Wait Until  Element should be enabled  ${path}
   Click by test id  ${id}
 
 #
@@ -254,20 +250,18 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Wait until  Element should be visible  user-name  
-  # Temporarily an extra sleep to prevent this:
-  # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  2
+  Wait until  Element should be visible  user-name
+  # Prevent this by sleep: The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
+  Sleep  5
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Wait until  Element should be visible  user-name  
-  # Temporarily an extra sleep to prevent this:
-  # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  2
+  Wait until  Element should be visible  user-name
+  # Prevent this by sleep: The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
+  Sleep  5
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
@@ -298,9 +292,8 @@ Prepare new request
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Execute Javascript  $("select[data-test-id='create-municipality-select']").show();
-  Execute Javascript  $("input[data-test-id='create-property-id']").removeAttr("readonly").removeAttr("disabled");
+  Execute Javascript  $("input[data-test-id='create-property-id']").removeAttr("readonly").removeAttr("disabled").val("${propertyId}").change();
   Input text by test id  create-address  ${address}
-  Input text by test id  create-property-id  ${propertyId}
   Select From List by test id  create-municipality-select  ${municipality}
   Set animations off
   Click enabled by test id  create-continue
@@ -343,11 +336,13 @@ Open the request
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  inforequest
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
@@ -385,7 +380,10 @@ Comment count is
 #
 
 Apply minimal fixture now
+  # sleep because some problem here sometimes:  The element 'debug-apply-done' should be visible, but it is not.
+  Sleep  1
   Show dev-box
+  Sleep  1
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
   Kill dev-box
