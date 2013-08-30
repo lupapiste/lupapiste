@@ -230,7 +230,7 @@ var docgen = (function () {
         var cmd = verb + "-doc";
         var title = loc("document." + verb);
         return $(makeButton(self.docId + "_" + verb, title))
-        .addClass(cssClass).addClass("btn-narrow")
+        .addClass(cssClass).addClass("btn-auto")
         .click(function () {
           ajax.command(cmd, cmdArgs)
           .success(function () {
