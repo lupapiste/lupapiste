@@ -9,7 +9,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
             [sade.security :as sadesecurity]
-            [sade.util :refer [lower-case trim] :as util]
+            [sade.util :refer [lower-case trim future*] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [noir.session :as session]
@@ -57,7 +57,7 @@
           (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
           (if-let [user (security/create-user (merge data vetuma-data {:email email}))]
             (do
-              (future (sadesecurity/send-activation-mail-for user))
+              (future* (sadesecurity/send-activation-mail-for user))
               (vetuma/consume-user stamp)
               (ok :id (:_id user)))
             (fail :error.create-user))

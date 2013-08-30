@@ -33,7 +33,7 @@
 
 (facts "user entity mongo model"
   (fact "is a map with all the data"
-     (create-use-entity "Foo@Bar.Com" some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     (create-user-entity "Foo@Bar.Com" some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
      => (contains {:email        "foo@bar.com"
                    :personId     ..userid..
                    :role         ..role..
@@ -46,7 +46,7 @@
                    :enabled      ..enabled..}))
 
   (fact "does not contain plaintext password"
-     (let [entity   (create-use-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     (let [entity   (create-user-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
            password (get-in entity [:private :password])]
        password => truthy
        (.contains password some-password) => false
@@ -54,15 +54,15 @@
 
   (fact "applicant does not have organizations"
      (:organizations
-       (create-use-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
+       (create-user-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
      => nil)
 
   (fact "authority does have organizations"
-     (create-use-entity ..email.. some-password ..userid.. :authority ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     (create-user-entity ..email.. some-password ..userid.. :authority ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
      => (contains {:organizations ..organizations..}))
 
   (fact "authorityAdmin does have organizations"
-     (create-use-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     (create-user-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
      => (contains {:organizations ..organizations..})))
 
 (facts "same-user?"

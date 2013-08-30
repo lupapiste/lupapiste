@@ -1,12 +1,12 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim]]
+        [clojure.string :only [blank? join trim split]]
         [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -330,7 +330,7 @@
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand set-user-to-document
-  {:parameters [:id documentId userId path]
+  {:parameters [id documentId userId path]
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
@@ -340,21 +340,16 @@
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
                        (security/same-user? user subject))
-        henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
-        full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-    (info "setting-user-to-document, with hetu: " with-hetu)
+        person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+        model        (if-not (blank? path)
+                       (assoc-in {} (map keyword (split path #"\.")) person)
+                       person)
+        updates      (tools/path-vals model)]
     (if-not document
       (fail :error.document-not-found)
-      ;; TODO: update via model
       (do
-        (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :documents {$elemMatch {:id documentId}}}
-          {$set {full-path henkilo
-                 :modified created}})))))
-
+        (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
+        (commands/persist-model-updates id document updates created)))))
 
 ;;
 ;; Assign
@@ -403,7 +398,6 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-;; FIXME: does not set state if complement-needed
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
@@ -412,18 +406,17 @@
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (let [new-state :submitted
-            application-id (:id application)
+      (let [application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
         (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
           (mongo/update
-            :applications {:_id (:id application) :state new-state}
+            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
             {$set {:state :sent}})
           (catch org.xml.sax.SAXParseException e
-            (.printStackTrace e)
+            (info e "Invalid KRYSM XML message")
             (fail (.getMessage e))))))))
 
 (defcommand submit-application

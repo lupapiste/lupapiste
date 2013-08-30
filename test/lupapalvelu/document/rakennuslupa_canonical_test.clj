@@ -73,6 +73,20 @@
                 {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
+(def suunnittelija-old-schema-LUPA-771
+  {:id "suunnittelija-old-schema-LUPA771" :schema {:info {:name "suunnittelija"}}
+   :data (merge suunnittelija-henkilo
+                {:patevyys {:koulutus {:value "Koulutus"}
+                            :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
+                            :patevyysluokka {:value "B"}}})})
+
+(def suunnittelija-blank-role
+  {:id "suunnittelija-blank-role" :schema {:info {:name "suunnittelija"}}
+   :data (merge suunnittelija-henkilo
+                {:kuntaRoolikoodi {:value ""}}
+                {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
+                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
+
 (def maksaja1
   {:id "maksaja1" :schema {:info {:name "maksaja"}}
    :data {:henkilo henkilo}})
@@ -374,6 +388,20 @@
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
+(facts "Transforming old sunnittelija schema to canonical model is correct"
+  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-old-schema-LUPA-771) :suunnittelija)]
+    (fact suunnittelija-model => truthy)
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")))
+
+(facts "Canonical suunnittelija-blank-role model is correct"
+  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-blank-role) :suunnittelija)]
+    (fact suunnittelija-model => truthy)
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ei tiedossa")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "ei tiedossa")))
+
 (facts "Canonical maksaja/henkilo model is correct"
   (let [maksaja-model (get-osapuoli-data (:data maksaja1) :maksaja)
         henkilo (:henkilo maksaja-model)
@@ -532,6 +560,8 @@
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "012 kahden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
     (fact "rakennuksen omistajalaji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
+    (fact "KuntaRooliKoodi" (:kuntaRooliKoodi rakennuksen-omistajatieto) => "Rakennuksen omistaja")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "asianTiedot" asianTiedot => truthy)
