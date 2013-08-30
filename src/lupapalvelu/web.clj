@@ -343,7 +343,7 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.8.0.html"
                                            (-> (:params (request/ring-request))
                                              (dissoc :upload)
                                              (dissoc ring.middleware.anti-forgery/token-key)
