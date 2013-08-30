@@ -367,19 +367,23 @@ var docgen = (function () {
 
       var span = makeEntrySpan(subSchema, myPath);
 
-      // TODO: readonly support
-
       span.appendChild(makeLabel("date", myPath));
 
       // date
-      $("<input>", {
+      var input = $("<input>", {
         id: pathStrToID(myPath),
         name: docId + "." + myPath,
         type: "text",
         "class": "form-input text form-date",
-        value: value,
-        change: save
-      }).datepicker($.datepicker.regional[lang]).appendTo(span);
+        value: value
+      });
+
+      if (subSchema.readonly) {
+        input.attr("readonly", true);
+      } else {
+        input.datepicker($.datepicker.regional[lang]).change(save);
+      }
+      input.appendTo(span);
 
       return span;
     }
@@ -499,6 +503,7 @@ var docgen = (function () {
       //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
+
       select.onchange = function (e) {
         var event = getEvent(e);
         var target = event.target;
@@ -829,7 +834,7 @@ var docgen = (function () {
 
     function disableBasedOnOptions() {
       if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
-        $(self.element).find('input, textarea').attr("readonly", true);
+        $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
       }
