@@ -1,6 +1,13 @@
 var repository = (function() {
   "use strict";
 
+  var schemas = {};
+  
+  ajax
+    .query("schemas")
+    .success(function(data) { schemas = data.schemas; })
+    .call();
+  
   function load(id, pending) {
     ajax
       .query("application", {id: id})
