@@ -343,13 +343,11 @@
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          var callObj =
-            ajax.query("organization-details",
-                {municipality: model.municipality().id,
-                 operation: v.op,
-                 lang: loc.getCurrentLanguage()});
-          var errHandler = callObj.errorHandler;
-          callObj.success(function(d) {
+          ajax.query("organization-details",
+              {municipality: model.municipality().id,
+               operation: v.op,
+               lang: loc.getCurrentLanguage()})
+          .success(function(d) {
             self.inforequestsDisabled(false);
             self.newApplicationsDisabled(false);
             model.organization(d);
@@ -370,7 +368,7 @@
               model.newApplicationsDisabled(true);
             }
             model.organization(d);
-            errHandler(d);
+            notify.error(loc("error.dialog.title"), loc(d.text));
           })
           .call();
         } else {
