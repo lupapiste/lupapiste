@@ -348,8 +348,8 @@
                operation: v.op,
                lang: loc.getCurrentLanguage()})
           .success(function(d) {
-            self.inforequestsDisabled(false);
-            self.newApplicationsDisabled(false);
+            model.inforequestsDisabled(false);
+            model.newApplicationsDisabled(false);
             model.organization(d);
           })
           .error(function(d) {
