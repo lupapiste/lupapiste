@@ -374,7 +374,7 @@ var docgen = (function () {
       // date
       $("<input>", {
         id: pathStrToID(myPath),
-        name: docId + "." + path,
+        name: docId + "." + myPath,
         type: "text",
         "class": "form-input text form-date",
         value: value,
