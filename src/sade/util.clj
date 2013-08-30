@@ -83,3 +83,12 @@
    but produce the value of the first expression"
   [expr & body]
   `(let [~'% ~expr] ~@body ~'%))
+
+(defmacro future* [& body]
+  `(future
+     (try
+       ~@body
+       (catch Throwable e#
+         (println (format "unhandled exception in future at %s:%d: %s" *file* ~(-> &form meta :line) e#))
+         (.printStackTrace e#)
+         (throw e#)))))

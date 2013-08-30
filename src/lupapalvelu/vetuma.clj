@@ -78,7 +78,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
+(defn mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -102,7 +102,7 @@
 ;; response parsing
 ;;
 
-(defn- extract-subjectdata [{s :subjectdata}]
+(defn extract-subjectdata [{s :subjectdata}]
   (-> s
     (string/split #", ")
     (->> (map #(string/split % #"=")))
@@ -120,7 +120,7 @@
 (defn- extract-request-id [{id :trid}]
   {:stamp id})
 
-(defn- user-extracted [m]
+(defn user-extracted [m]
   (merge (extract-subjectdata m)
          (extract-vtjdata m)
          (extract-userid m)
@@ -130,7 +130,7 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn- request-data [host]
+(defn request-data [host]
   (-> constants
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
@@ -142,7 +142,7 @@
     (dissoc :host)
     keys-as-strings))
 
-(defn- parsed [m]
+(defn parsed [m]
   (-> m
     keys-as-keywords
     (assoc :key (:key constants))

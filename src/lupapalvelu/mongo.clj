@@ -244,7 +244,7 @@
   (debug "ensure-indexes")
   (mc/ensure-index :users {:username 1} {:unique true})
   (mc/ensure-index :users {:email 1} {:unique true})
-  (mc/ensure-index :users {:municipality 1} {:sparse true})
+  (mc/ensure-index :users {:organizations 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
   (mc/ensure-index :users {:personId 1} {:unique true :sparse true})
   (mc/ensure-index :applications {:municipality 1})
@@ -254,7 +254,9 @@
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :activation {:email 1})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
-  (mc/ensure-index :organizations {:municipalities 1}))
+  (mc/ensure-index :vetuma {:user.stamp 1})
+  (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
+  (mc/ensure-index :fs.chunks {:files_id 1 :n 1 }))
 
 (defn clear! []
   (if-let [mode (db-mode)]

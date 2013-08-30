@@ -65,3 +65,6 @@
   (trim " a")   => "a"
   (trim "a ")   => "a"
   (trim " a ")  => "a")
+
+(facts future*
+  (deref (future* (/ 1 0))) => (throws java.util.concurrent.ExecutionException "java.lang.ArithmeticException: Divide by zero"))

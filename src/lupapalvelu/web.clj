@@ -307,7 +307,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (spy (parse "apikey" authorization))))
+    (parse "apikey" authorization)))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then

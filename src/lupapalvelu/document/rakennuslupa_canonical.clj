@@ -1,47 +1,15 @@
 (ns lupapalvelu.document.rakennuslupa_canonical
   (:use [lupapalvelu.core :only [now]]
         [sade.strings]
-        [clj-time.coerce :only [from-long]]
-        [lupapalvelu.i18n :only [with-lang loc]])
+        [lupapalvelu.i18n :only [with-lang loc]]
+        [lupapalvelu.document.canonical-common])
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.string :as s]
-            [clj-time.format :as timeformat]))
+            [clojure.string :as s]))
 
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
-
-; Empty String will be rendered as empty XML element
-(def empty-tag "")
-
-; State of the content when it is send over KRYSP
-; NOT the same as the state of the application!
-(def toimituksenTiedot-tila "keskener\u00e4inen")
-
-(def application-state-to-krysp-state
-  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
-   :open "vireill\u00e4"
-   :sent "vireill\u00e4"
-   :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"})
-
-(defn to-xml-date [timestamp]
-  (let [d (from-long timestamp)]
-    (if-not (nil? timestamp)
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") d))))
-
-(defn to-xml-datetime [timestamp]
-  (let [d (from-long timestamp)]
-    (if-not (nil? timestamp)
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
-
-(defn to-xml-datetime-from-string [date-as-string]
-  (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
-
-(defn by-type [documents]
-  (group-by #(keyword (get-in % [:schema :info :name])) documents))
 
 (defn- get-simple-osoite [osoite]
   {:osoitenimi {:teksti (-> osoite :katu :value)}
@@ -88,14 +56,20 @@
     empty-tag))
 
 (def kuntaRoolikoodit
-  {:paasuunnittelija "p\u00e4\u00e4suunnittelija"
-   :hakija  "Rakennusvalvonta-asian hakija"
-   :maksaja "Rakennusvalvonta-asian laskun maksaja"})
+  {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
+   :hakija                 "Rakennusvalvonta-asian hakija"
+   :maksaja                "Rakennusvalvonta-asian laskun maksaja"
+   :rakennuksenomistaja    "Rakennuksen omistaja"})
 
+(def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)
-    (get-in party [:kuntaRoolikoodi :value] "ei tiedossa")))
+    (let [code (or (get-in party [:kuntaRoolikoodi :value])
+                   ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
+                   (get-in party [:patevyys :kuntaRoolikoodi :value])
+                   default-role)]
+      (if (s/blank? code) default-role code))))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -106,10 +80,10 @@
    "RAK-rakennesuunnittelija"       "erityissuunnittelija"
    "ARK-rakennussuunnittelija"      "rakennussuunnittelija"
    "ei tiedossa"                    "ei tiedossa"
+   "Rakennuksen omistaja"           "rakennuksen omistaja"
 
    ; TODO mappings for the rest
    :rakennuspaikanomistaja          "rakennuspaikan omistaja"
-   :rakennuksenomistaja             "rakennuksen omistaja"
    :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
    :naapuri                         "naapuri"
    :lisatietojenantaja              "lis\u00e4tietojen antaja"
@@ -182,13 +156,6 @@
   (into
     (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
     (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
-
-(def state-timestamps
-  {:draft :created
-   :open :opened
-   :complement-needed :opened
-   ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened})
 
 (defn- get-state [application]
   (let [state (keyword (:state application))]
@@ -331,7 +298,7 @@
   (let [toimenpide (:data purku-doc)]
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
                                    {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
-                                   {:poistumaPvm (to-xml-datetime-from-string (-> toimenpide :poistumanAjankohta :value))})
+                                   {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta :value))})
                   :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
      :created (:created purku-doc)}))
 
@@ -392,29 +359,6 @@
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
-
-(def puolto-mapping {:condition "ehdoilla"
-                     :no "ei puolla"
-                     :yes "puoltaa"})
-
-(defn- get-statement [statement]
-  (let [lausunto {:Lausunto
-                  {:id (:id statement)
-                   :viranomainen (get-in statement [:person :text])
-                   :pyyntoPvm (to-xml-date (:requested statement))}}]
-    (if-not (:status statement)
-      lausunto
-      (assoc-in lausunto [:Lausunto :lausuntotieto] {:Lausunto
-                                                     {:viranomainen (get-in statement [:person :text])
-                                                      :lausunto (:text statement)
-                                                      :lausuntoPvm (to-xml-date (:given statement))
-                                                      :puoltotieto
-                                                      {:Puolto
-                                                       {:puolto ((keyword (:status statement)) puolto-mapping)}}}}))))
-
-(defn- get-statements [statements]
-  ;Returing vector because this element to be Associative
-  (vec (map get-statement statements)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
