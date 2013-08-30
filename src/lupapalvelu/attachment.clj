@@ -8,7 +8,7 @@
   (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [sade.util :refer [fn-> fn->>]]
+            [sade.util :refer [fn-> fn->> future*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [sade.strings :as ss]
@@ -612,7 +612,7 @@
 
 (defn- make-stamp-job [file-infos context]
   (let [job (job/start (zipmap (keys file-infos) (repeat :pending)) stamp-job-status)]
-    (future (stamp-attachments! file-infos (assoc context :job-id (:id job))))
+    (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
 (defcommand stamp-attachments
