@@ -233,9 +233,9 @@
                                 :energiatehokkuusluku (-> luokitus :energiatehokkuusluku :value)
                                 :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko :value)
                                 :paloluokka (-> luokitus :paloluokka :value)
-                                :lammitystapa (if (= lammitystapa "suorasahk\u00f6")
-                                                "suora s\u00e4hk\u00f6"
-                                                lammitystapa)
+                                :lammitystapa (cond (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
+                                                    (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
+                                                :else lammitystapa)
                                 :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
                                             :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin :value))
                                             :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
