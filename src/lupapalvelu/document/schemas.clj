@@ -478,7 +478,7 @@
 ;;
 
 (defschemas
-  [{:info {:name "hankkeen-kuvaus"  :approvable true
+  [{:info {:name "hankkeen-kuvaus" :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
@@ -505,6 +505,7 @@
             :order 3
             :removable true
             :repeating true
+            :approvable true
             :type :party}
      :body party}
 
@@ -512,12 +513,14 @@
             :order 3
             :removable true
             :repeating true
+            :approvable true
             :type :party}
      :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
 
     {:info {:name "paasuunnittelija"
             :order 4
             :removable false
+            :approvable true
             :type :party}
      :body paasuunnittelija}
 
@@ -525,6 +528,7 @@
             :repeating true
             :order 5
             :removable true
+            :approvable true
             :type :party}
      :body suunnittelija}
 
@@ -532,6 +536,7 @@
             :repeating true
             :order 6
             :removable true
+            :approvable true
             :type :party}
      :body (body
              party
