@@ -201,7 +201,6 @@ var docgen = (function () {
       return span;
     }
 
-    // TODO WIP
     self.makeApprovalButtons = function (path, model) {
       var btnContainer$ = $("<span>").addClass("form-buttons");
       var statusContainer$ = $("<span>");
@@ -500,24 +499,27 @@ var docgen = (function () {
 
       select.id = pathStrToID(myPath);
 
-      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
 
-      select.onchange = function (e) {
-        var event = getEvent(e);
-        var target = event.target;
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = function (e) {
+          var event = getEvent(e);
+          var target = event.target;
 
-        var buildingId = target.value;
-        ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
-          .success(function () {
-            save(event);
-            repository.load(self.appId);
-          })
-          .call();
-        return false;
-      };
+          var buildingId = target.value;
+          ajax
+            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
+            .success(function () {
+              save(event);
+              repository.load(self.appId);
+            })
+            .call();
+          return false;
+        };
+      }
 
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
