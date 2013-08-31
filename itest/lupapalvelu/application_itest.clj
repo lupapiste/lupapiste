@@ -200,7 +200,6 @@
       (let [updated-app (:application (query mikko :application :id application-id))
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
             schema-name  (get-in update-doc [:schema :info :name])
-            schema       (schemas/get-schema schema-name)
             person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
 
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
