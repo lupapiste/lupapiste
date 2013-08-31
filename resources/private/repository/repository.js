@@ -1,27 +1,39 @@
 var repository = (function() {
   "use strict";
 
-  var schemas = {};
-  
-  ajax
+  var loadingSchemas = ajax
     .query("schemas")
-    .success(function(data) { schemas = data.schemas; })
+    .error(function(e) { error("can't load schemas"); })
     .call();
   
+  function findSchema(name, version) {
+    // Sanity check
+    if (!name || !vertsion) throw "illegal argument";
+    var s = schemas[name] || schemaNotFound(name, version);
+    return s[version] || schemaNotFound(name, version);
+  }
+  
+  function schemaNotFound(name, version) {
+    // TODO, now what?
+    error("unknown schema, name='" + name + "', version='" + version + "'");
+    return undefined;
+  }
+  
   function load(id, pending) {
-    ajax
+    var loadingApp = ajax
       .query("application", {id: id})
       .pending(pending)
-      .success(function(data) {
-        hub.send("application-loaded", {applicationDetails: data});
-      })
       .error(function(e) {
         error("Application " + id + " not found", e);
         LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
       })
       .call();
+    $.when(loadingSchemas, loadingApp).then(function(schemas, appResponse) {
+      console.log("success:", schemas[0], appResponse[0]);
+      hub.send("application-loaded", {applicationDetails: appResponse[0]});
+    }); 
   }
-
+  
   function loaded(pages, f) {
     if (!_.isFunction(f)) throw "f is not a function: f=" + f;
     hub.subscribe("application-loaded", function(e) {
