@@ -146,13 +146,6 @@
   "Checks weather document is valid."
   [document] (empty? (validate document)))
 
-(defn validate-against-current-schema
-  "Validates document against the latest schema and returns list of errors."
-  [{{{schema-name :name} :info} :schema document-data :data :as document}]
-  (let [latest-schema (schemas/get-schema schema-name)
-        pimped-doc    (assoc document :schema latest-schema)]
-    (validate pimped-doc)))
-
 (defn has-errors?
   [results]
   (->>
