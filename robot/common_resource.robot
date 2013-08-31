@@ -398,16 +398,20 @@ Permit type should be
 # Proxy control:
 #
 
- Set integration proxy on
+Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
   Wait for jQuery
-  Execute Javasrcipt   ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
- Set integration proxy off
+Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
   Wait for jQuery
   Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery
 
 #
