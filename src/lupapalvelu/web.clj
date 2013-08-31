@@ -434,8 +434,11 @@
   (defjson "/dev/user" []
     (current-user))
 
-  (defjson "/dev/fixture/:name" {:keys [name]}
-    (execute-query "apply-fixture" {:name name}))
+  (defpage "/dev/fixture/:name" {:keys [name]}
+    (let [response (execute-query "apply-fixture" {:name name})]
+      (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
+        {:status 200 :body (str response)}
+        (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId]}
     (let [parts    (vec (map #(Integer/parseInt %) (rest (re-matches #"(\d+)-(\d+)-(\d+)-(\d+)" propertyId))))
