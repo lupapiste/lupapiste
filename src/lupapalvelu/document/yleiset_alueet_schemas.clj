@@ -80,6 +80,7 @@
 
 
 (defschemas
+  1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
@@ -99,6 +100,7 @@
     :body tyo-aika}])
 
 (defschemas
+  1
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
            ;            :removable false  ;; TODO: Miten voi poistaa raksin?
@@ -106,6 +108,7 @@
     :body mainostus-tai-viitoitus-tapahtuma-valinta}])
 
 (defschemas
+  1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :order 65}
     :body hankkeen-kuvaus-sijoituslupa}

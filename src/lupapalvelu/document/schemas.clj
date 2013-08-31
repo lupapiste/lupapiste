@@ -7,19 +7,28 @@
 
 (defonce ^:private registered-schemas (atom {}))
 
-(defn get-schemas [] @registered-schemas)
+(defn get-all-schemas [] @registered-schemas)
+(defn get-schemas [version] (get @registered-schemas version))
 
-(defn defschema [data]
+(defn defschema [version data]
   (let [schema-name (name (get-in data [:info :name]))]
-    (swap! registered-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
+    (swap! registered-schemas
+      assoc-in
+      [version schema-name]
+      (-> data
+        (assoc-in [:info :name] schema-name)
+        (assoc-in [:info :version] version)))))
 
-(defn defschemas [schemas]
+(defn defschemas [version schemas]
   (doseq [schema schemas]
-    (defschema schema)))
+    (defschema version schema)))
 
-(defn get-schema [schema-name]
-  {:pre [(not= nil schema-name)]}
-  (@registered-schemas (name schema-name)))
+(defn get-schema [schema-version schema-name]
+  {:pre [(not= nil schema-version) (not= nil schema-name)]}
+  (get-in @registered-schemas [schema-version (name schema-name)]))
+
+(defn get-latest-schema-version []
+  (->> @registered-schemas keys (sort >) first))
 
 ;;
 ;; helpers
@@ -474,6 +483,7 @@
 ;;
 
 (defschemas
+  1
   [{:info {:name "hankkeen-kuvaus"
            :order 1}
     :body [kuvaus
