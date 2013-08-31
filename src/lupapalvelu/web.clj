@@ -129,8 +129,9 @@
      :userId        (get-in action [:user :id])}
     (core/execute action)))
 
-(defn- execute-command [name]
-  (execute (enriched (core/command name (from-json (request/ring-request))))))
+(defn- execute-command
+  ([name] (execute-command name (from-json (request/ring-request))))
+  ([name params] (execute (enriched (core/command name params)))))
 
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
@@ -435,6 +436,15 @@
 
   (defjson "/dev/fixture/:name" {:keys [name]}
     (execute-query "apply-fixture" {:name name}))
+
+  (defpage "/dev/create" {:keys [infoRequest propertyId]}
+    (let [parts    (vec (map #(Integer/parseInt %) (rest (re-matches #"(\d+)-(\d+)-(\d+)-(\d+)" propertyId))))
+          property (format "%03d%03d%04d%04d" (get parts 0) (get parts 1) (get parts 2) (get parts 3))
+          response (execute-command "create-application" (assoc (from-query) :propertyId property))]
+      (if (core/ok? response)
+        (redirect "fi" (str (user/applicationpage-for (:role (current-user)))
+                            "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
+        {:status 400 :body (str response)})))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt

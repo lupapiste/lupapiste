@@ -18,7 +18,8 @@ ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
-${FIXTURE URL}                  ${SERVER}/fixture
+${FIXTURE URL}                  ${SERVER}/dev/fixture
+${CREATE URL}                   ${SERVER}/dev/create
 
 ${SELENIUM}                     ${EMPTY}
 
@@ -36,7 +37,7 @@ Open browser to login page
 
 Go to login page
   Go to  ${LOGIN URL}
-  Title should be  Lupapiste
+  Wait Until  Title should be  Lupapiste
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -89,6 +90,7 @@ Show dev-box
 
 Go to page
   [Arguments]  ${page}
+  Wait for jQuery
   Execute Javascript  window.location.hash = "!/${page}";
   Wait until  Element should be visible  ${page}
 
@@ -102,7 +104,8 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
-  Go to  ${LOGOUT URL}
+  ${secs} =  Get Time  epoch
+  Go to  ${LOGOUT URL}?s=${secs}
   Wait until page contains element  login-username
 
 #
@@ -250,22 +253,13 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Wait until  Element should be visible  user-name
-  # Prevent this by sleep: The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  5
-  Wait for jQuery
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
-  Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Wait until  Element should be visible  user-name
-  # Prevent this by sleep: The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  5
-  Wait for jQuery
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
@@ -315,6 +309,7 @@ Close current application
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Focus  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
   Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  ${modalId}
 
@@ -333,8 +328,8 @@ Submit application
 Open the request
   [Arguments]  ${address}
   Go to page  applications
-  Wait for jQuery
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+  Wait for jQuery
 
 Open application
   [Arguments]  ${address}  ${propertyId}
@@ -370,7 +365,6 @@ Add comment
 Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
 
@@ -383,13 +377,9 @@ Comment count is
 #
 
 Apply minimal fixture now
-  # sleep because some problem here sometimes:  The element 'debug-apply-done' should be visible, but it is not.
-  Sleep  1
-  Show dev-box
-  Sleep  1
-  Click element  debug-apply-minimal
-  Wait until  Element should be visible  debug-apply-done
-  Kill dev-box
+  Go to  ${FIXTURE URL}/minimal
+  Page should contain  true
+  Go to login page
 
 #
 # Application state check:
@@ -408,11 +398,17 @@ Permit type should be
 # Proxy control:
 #
 
-Set integration proxy on
+ Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
+  Wait for jQuery
+  Execute Javasrcipt   ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
 
-Set integration proxy off
+ Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
 
 #
 # Animations control:
