@@ -313,16 +313,6 @@
     (throw (Exception. (format "Operation %s does not have permit-type set." op)))))
 
 ;;
-;; Sanity scheck
-;;
-
-; TODO: Move to unit-tests:
-(doseq [[op {:keys [schema required]}] operations
-        schema (cons schema required)]
-  (if-not (schemas/get-schema schema)
-    (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
-
-;;
 ;; Actions
 ;;
 
