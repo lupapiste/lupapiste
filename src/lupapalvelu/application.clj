@@ -335,7 +335,7 @@
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
         schema-name  (get-in document [:schema :info :name])
-        schema       (schemas/get-schema schema-name)
+        schema       (schemas/get-schema (:schema-version application) schema-name)
         subject      (security/get-non-private-userinfo userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
@@ -469,6 +469,7 @@
     (fn [body [data-path data-value]]
       (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
             val (if (fn? data-value) (data-value application) data-value)]
+        ; FIXME: why not assoc-in?
         (update-in body path (constantly val))))
     {} schema-data))
 
@@ -477,8 +478,9 @@
   (let [op-info               (operations/operations (keyword (:name op)))
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
+        schema-version        (:schema-version application)
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema (schemas/get-schema schema-name)
+                                                 :schema (schemas/get-schema schema-version schema-name)
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
@@ -519,7 +521,7 @@
    (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
-(defcommand "create-application"
+(defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
@@ -543,22 +545,23 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
-          application   {:id            id
-                         :created       created
-                         :opened        (when (#{:open :info} state) created)
-                         :modified      created
-                         :permitType    permit-type
-                         :infoRequest   info-request?
-                         :operations    [op]
-                         :state         state
-                         :municipality  municipality
-                         :location      (->location x y)
-                         :organization  organization-id
-                         :address       address
-                         :propertyId    propertyId
-                         :title         address
-                         :auth          [owner]
-                         :comments      (map make-comment messages)}
+          application   {:id              id
+                         :created         created
+                         :opened          (when (#{:open :info} state) created)
+                         :modified        created
+                         :permitType      permit-type
+                         :infoRequest     info-request?
+                         :operations      [op]
+                         :state           state
+                         :municipality    municipality
+                         :location        (->location x y)
+                         :organization    organization-id
+                         :address         address
+                         :propertyId      propertyId
+                         :title           address
+                         :auth            [owner]
+                         :comments        (map make-comment messages)
+                         :schema-version  (schemas/get-latest-schema-version)}
           application   (merge application
                           (if info-request?
                             {:attachments            []
