@@ -6,14 +6,14 @@ var repository = (function() {
     .error(function(e) { error("can't load schemas"); })
     .call();
   
-  function findSchema(name, version) {
+  function findSchema(schemas, name, version) {
     // Sanity check
-    if (!name || !vertsion) throw "illegal argument";
-    var s = schemas[name] || schemaNotFound(name, version);
-    return s[version] || schemaNotFound(name, version);
+    if (!schemas || !name || !version) throw "illegal argument";
+    var v = schemas[version] || schemaNotFound(schemas, name, version);
+    return v[name] || schemaNotFound(schemas, name, version);
   }
   
-  function schemaNotFound(name, version) {
+  function schemaNotFound(schemas, name, version) {
     // TODO, now what?
     error("unknown schema, name='" + name + "', version='" + version + "'");
     return undefined;
@@ -28,9 +28,17 @@ var repository = (function() {
         LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
       })
       .call();
-    $.when(loadingSchemas, loadingApp).then(function(schemas, appResponse) {
-      console.log("success:", schemas[0], appResponse[0]);
-      hub.send("application-loaded", {applicationDetails: appResponse[0]});
+    $.when(loadingSchemas, loadingApp).then(function(schemasResponse, createResponse) {
+      var schemas = schemasResponse[0].schemas,
+          create = createResponse[0],
+          application = create.application,
+          schemaVersion = application["schema-version"],
+          docs = application["documents"];
+      _.each(docs, function(doc) {
+        var schemaInfo = doc["schema-info"];
+        doc["schema"] = findSchema(schemas, schemaInfo.name, schemaVersion);
+      });
+      hub.send("application-loaded", {applicationDetails: create});
     }); 
   }
   
