@@ -481,16 +481,16 @@
         permit-type           (keyword (permit/permit-type application))
         schema-version        (:schema-version application)
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema (schemas/get-schema schema-version schema-name)
+                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
                                                          {})})
-        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+        existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
-        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        op-doc                (update-in (make op-schema-name) [:schema-info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
@@ -499,7 +499,10 @@
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
             hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
             hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
-        (conj new-docs hakija)))))
+        (let [r (conj new-docs hakija)]
+          (println "NEW DOCS:")
+          (println new-docs)
+          r)))))
 
  (defn- ->location [x y]
    {:x (->double x) :y (->double y)})
