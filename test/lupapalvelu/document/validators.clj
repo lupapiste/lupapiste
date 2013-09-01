@@ -19,7 +19,7 @@
     (or (fact (validate document) => (has not-every? (contains {:result result}))) true)))
 
 (defn dummy-doc [schema-name]
-  (let [schema (schemas/get-schema schema-name)
+  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
         data   (create-document-data schema dummy-values)]
     {:schema schema
      :data   data}))
