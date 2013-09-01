@@ -35,8 +35,10 @@ var repository = (function() {
           schemaVersion = application["schema-version"],
           docs = application["documents"];
       _.each(docs, function(doc) {
-        var schemaInfo = doc["schema-info"];
-        doc["schema"] = findSchema(schemas, schemaInfo.name, schemaVersion);
+        var schemaInfo = doc["schema-info"],
+            schema = findSchema(schemas, schemaInfo.name, schemaVersion);
+        schema.info = schemaInfo; // FIXME: DO NOT MOD SHARED SCHEMA DATA!
+        doc["schema"] = schema;
       });
       hub.send("application-loaded", {applicationDetails: create});
     }); 

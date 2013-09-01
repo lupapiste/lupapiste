@@ -134,13 +134,15 @@
 (defn validate
   "Validates document against it's local schema and document level rules
    retuning list of validation errors."
-  [{{schema-body :body} :schema data :data :as document}]
-  (and data
-    (flatten
-      (concat
-        (validate-fields schema-body nil data [])
-        (validate-required-fields schema-body [] data [])
-        (validator/validate document)))))
+  [{schema-info :schema-info data :data :as document}]
+  (let [schema (schemas/get-schema (:version schema-info) (:name schema-info))
+        schema-body (:body schema)]
+    (and data
+      (flatten
+        (concat
+          (validate-fields schema-body nil data [])
+          (validate-required-fields schema-body [] data [])
+          (validator/validate document))))))
 
 (defn valid-document?
   "Checks weather document is valid."
@@ -249,7 +251,7 @@
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]
-  {:id      (mongo/create-id)
-   :created created
-   :schema  schema
-   :data    {}})
+  {:id           (mongo/create-id)
+   :created      created
+   :schema-info  (:info schema)
+   :data         {}})

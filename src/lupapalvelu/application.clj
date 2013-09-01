@@ -335,7 +335,7 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
-        schema-name  (get-in document [:schema :info :name])
+        schema-name  (get-in document [:schema-info :name])
         schema       (schemas/get-schema (:schema-version application) schema-name)
         subject      (security/get-non-private-userinfo userId)
         with-hetu    (and
@@ -346,11 +346,10 @@
                        (assoc-in {} (map keyword (split path #"\.")) person)
                        person)
         updates      (tools/path-vals model)]
-    (if-not document
-      (fail :error.document-not-found)
-      (do
-        (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
-        (commands/persist-model-updates id document updates created)))))
+    (when-not document (fail! :error.document-not-found))
+    (when-not schema (fail! :error.schema-not-found))
+    (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
+    (commands/persist-model-updates id document updates created)))
 
 ;;
 ;; Assign
@@ -499,10 +498,7 @@
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
             hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
             hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
-        (let [r (conj new-docs hakija)]
-          (println "NEW DOCS:")
-          (println new-docs)
-          r)))))
+        (conj new-docs hakija)))))
 
  (defn- ->location [x y]
    {:x (->double x) :y (->double y)})
