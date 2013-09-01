@@ -57,6 +57,7 @@ Open latest email
 
 Clicking the first link in email should redirect to front page
   Click link  xpath=//a
+  Wait until page contains element  login-username
   Wait Until  Title should be  Lupapiste
 
 Application is shown after login
