@@ -632,7 +632,7 @@
         $('#application-map').css("display", "inline-block");
       }
 
-      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application")
+      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
       if (application.shapes && application.shapes().length > 0) map.drawShape(application.shapes()[0]);
 
