@@ -247,7 +247,8 @@
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (when (-> toimenpide :rakennusnro :value)
-                                   {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
+                                   {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value) ;jnumero juokse toimenpide numero
+                                                     ;manuaaliunen rakkennustunnus
                                                     :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})

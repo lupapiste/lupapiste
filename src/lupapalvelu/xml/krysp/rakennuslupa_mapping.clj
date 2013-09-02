@@ -271,11 +271,26 @@
                 (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
               ) canonical statement-attachments)))
 
+(defn statements-ids-with-status [application]
+  (let [lausunto (get-in application [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+        ]
+    (println "!!!!!!!!!!!!!!!!!!!")
+    (clojure.pprint/pprint lausunto)
+    (println "!!!!!!!!!!!!!!!!!!!"))
+  lausunto
+  )
+
+
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
+
+        ;list stament ideistä joillaon lausunto annettu
+        statements-ids-with-status (statements-ids-with-status application)
+        _ (println statements-ids-with-status)
+
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
