@@ -9,8 +9,12 @@
 ;; parsing time (TODO: might be copy-pasted from krysp)
 ;;
 
-(defn parse-datetime [s]
-  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss'Z'") s))
+(defn parse-datetime
+  ([^String s]
+    (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss'Z'") s))
+  ([format ^String s]
+    (assert (keyword? format))
+    (timeformat/parse (timeformat/formatters format) s)))
 
 (defn unparse-datetime [format dt]
   (timeformat/unparse (timeformat/formatters format) dt))
