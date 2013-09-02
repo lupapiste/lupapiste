@@ -135,21 +135,21 @@
             ]
 
         ;; both :inforequest-enabled and :new-application-enabled exists
-        (if (and (= inforequests-enabled true) (= new-applications-enabled true))
+        (if (and (true? inforequests-enabled) (true? new-applications-enabled))
           (ok
             :links (:links result)
             :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
           #_(apply ok links-and-attachments)
 
           ;; neither :inforequest-enabled nor :new-application-enabled exists
-          (if (and (= inforequests-enabled false) (= new-applications-enabled false))
+          (if (and (false? inforequests-enabled) (false? new-applications-enable))
             (fail :error.organization.inforequests-and-new-applications-disabled
               :organization-name org-name
               :links (:links result)
               :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
 
             ;; one of them exists...
-            (if (= inforequests-enabled true)
+            (if (true? inforequests-enable)
               (fail :error.organization.new-applications-disabled
                 :organization-name org-name
                 :links (:links result)
