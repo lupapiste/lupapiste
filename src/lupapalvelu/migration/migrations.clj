@@ -8,34 +8,44 @@
   {:apply-when (pos? (mongo/count :applications {:permitType {$exists false}}))}
   (mongo/update :applications {:permitType {$exists false}} {$set {:permitType "R"}} :multi true))
 
-(def enabled-organizations ["186-R"       ;; Jarvenpaa
-                            "529-R"       ;; Naantali
-                            "753-R"       ;; Sipoo
-                            "491-R"])     ;; Mikkeli
 
-(defn- add-key-to-database [key]
-  {:apply-when (pos? (mongo/count :organizations {key {$exists false}}))}
-  (let [without-key (mongo/select :organizations {key {$exists false}})]
-    (condp = key
-      :scope (doseq [{:keys [id municipalities]} without-key]
-               (let [scope (map (fn [municipality] {:municipality municipality :permitType "R"}) municipalities)]
-                 (mongo/update-by-id :organizations id {$set {key scope}})))
-      :inforequest-enabled (doseq [{:keys [id]} without-key]
-                             (let [enabled-value (if (some #(= id %) enabled-organizations) true false)]
-                               (mongo/update-by-id :organizations id {$set {:inforequest-enabled enabled-value}})))
-      :new-application-enabled (doseq [{:keys [id]} without-key]
-                                 (let [enabled-value (if (some #(= id %) enabled-organizations) true false)]
-                                   (mongo/update-by-id :organizations id {$set {:new-application-enabled enabled-value}}))))
+(def ^:private enabled-organizations #{"186-R"       ;; Jarvenpaa
+                                       "529-R"       ;; Naantali
+                                       "753-R"       ;; Sipoo
+                                       "491-R"})     ;; Mikkeli
+
+(defn- get-value-to-update [db-key id municipalities]
+  (condp = db-key
+    :scope (map (fn [municipality] {:municipality municipality :permitType "R"}) municipalities)
+    :inforequest-enabled (if-not (nil? (enabled-organizations id)) true false)
+    :new-application-enabled (if-not (nil? (enabled-organizations id)) true false)))
+
+(defn- add-key-to-database [db-key]
+  (let [without-key (mongo/select :organizations {db-key {$exists false}})]
+    (doseq [{:keys [id municipalities]} without-key]
+      (let [value-to-update (get-value-to-update db-key id municipalities)]
+        (mongo/update-by-id :organizations id {$set {db-key value-to-update}})))
     {:fixed-organizations   (count without-key)
      :organizations-total   (mongo/count :organizations)}))
 
 (defmigration add-scope-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:scope {$exists false}}))}
   (add-key-to-database :scope))
 
-(def muutostapa-not-exits-query {:documents {$elemMatch {"schema.info.name"
-                                                         {$in  ["uusiRakennus" "rakennuksen-muuttaminen" "rakennuksen-laajentaminen" "purku"]}
-                                                         "schema.body" {$not {$elemMatch {"name" "huoneistot"
-                                                                                          "body.name" "muutostapa"}}}}}})
+(defmigration add-inforequest-enabled-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:inforequest-enabled {$exists false}}))}
+  (add-key-to-database :inforequest-enabled))
+
+(defmigration add-new-application-enabled-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:new-application-enabled {$exists false}}))}
+  (add-key-to-database :new-application-enabled))
+
+
+(def muutostapa-not-exits-query
+  {:documents {$elemMatch {"schema.info.name"
+                           {$in  ["uusiRakennus" "rakennuksen-muuttaminen" "rakennuksen-laajentaminen" "purku"]}
+                           "schema.body" {$not {$elemMatch {"name" "huoneistot"
+                                                            "body.name" "muutostapa"}}}}}})
 
 (defn update-rakennuslupa-documents-schemas [application]
   (let [updated (map (fn [document] (let [name (get-in document [:schema :info :name])
@@ -46,10 +56,6 @@
     (mongo/update :applications {:_id (:id updated-application)} updated-application)))
 
 (defmigration add-muutostapa-to-huoneistot
-  :apply-when (pos? (mongo/count :applications muutostapa-not-exits-query))
+  {:apply-when (pos? (mongo/count :applications muutostapa-not-exits-query))}
   (doseq [application (mongo/select :applications muutostapa-not-exits-query)]
     (update-rakennuslupa-documents-schemas application)))
-
-(defmigration add-enableds-for-inforequest-and-new-application-to-organizations
-  (add-key-to-database :inforequest-enabled)
-  (add-key-to-database :new-application-enabled))
