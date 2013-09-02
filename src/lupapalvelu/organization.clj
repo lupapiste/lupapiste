@@ -142,14 +142,14 @@
           #_(apply ok links-and-attachments)
 
           ;; neither :inforequest-enabled nor :new-application-enabled exists
-          (if (and (false? inforequests-enabled) (false? new-applications-enable))
+          (if (and (false? inforequests-enabled) (false? new-applications-enabled))
             (fail :error.organization.inforequests-and-new-applications-disabled
               :organization-name org-name
               :links (:links result)
               :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
 
             ;; one of them exists...
-            (if (true? inforequests-enable)
+            (if (true? inforequests-enabled)
               (fail :error.organization.new-applications-disabled
                 :organization-name org-name
                 :links (:links result)
