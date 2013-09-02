@@ -7,16 +7,16 @@ var repository = (function() {
     .call();
   
   function findSchema(schemas, name, version) {
-    // Sanity check
-    if (!schemas || !name || !version) throw "illegal argument";
     var v = schemas[version] || schemaNotFound(schemas, name, version);
-    return v[name] || schemaNotFound(schemas, name, version);
+    var s = v[name] || schemaNotFound(schemas, name, version);
+    return _.clone(s);
   }
   
   function schemaNotFound(schemas, name, version) {
     // TODO, now what?
-    error("unknown schema, name='" + name + "', version='" + version + "'");
-    return undefined;
+    var message = "unknown schema, name='" + name + "', version='" + version + "'";
+    error(message);
+    throw message;
   }
   
   function load(id, pending) {
@@ -28,19 +28,18 @@ var repository = (function() {
         LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
       })
       .call();
-    $.when(loadingSchemas, loadingApp).then(function(schemasResponse, createResponse) {
+    $.when(loadingSchemas, loadingApp).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
-          create = createResponse[0],
-          application = create.application,
-          schemaVersion = application["schema-version"],
-          docs = application["documents"];
-      _.each(docs, function(doc) {
+          loading = loadingResponse[0],
+          application = loading.application,
+          schemaVersion = application["schema-version"];
+      _.each(application.documents, function(doc) {
         var schemaInfo = doc["schema-info"],
             schema = findSchema(schemas, schemaInfo.name, schemaVersion);
-        schema.info = schemaInfo; // FIXME: DO NOT MOD SHARED SCHEMA DATA!
-        doc["schema"] = schema;
+        schema.info = schemaInfo;
+        doc.schema = schema;
       });
-      hub.send("application-loaded", {applicationDetails: create});
+      hub.send("application-loaded", {applicationDetails: loading});
     }); 
   }
   
@@ -69,7 +68,8 @@ var repository = (function() {
 
   return {
     load: load,
-    loaded: loaded
+    loaded: loaded,
+    schemas: loadingSchemas.promise() // for debugging
   };
 
 })();
