@@ -348,26 +348,26 @@
                operation: v.op,
                lang: loc.getCurrentLanguage()})
           .success(function(d) {
-            model.inforequestsDisabled(false);
-            model.newApplicationsDisabled(false);
+            model.inforequestsDisabled(d["inforequests-disabled"]);
+            model.newApplicationsDisabled(d["new-applications-disabled"]);
+
+            if (d["inforequests-disabled"] === true && d["new-applications-disabled"] === true) {
+              notify.error(loc("new-applications-or-inforequests-disabled.dialog.title"),
+                           loc("error.organization.inforequests-and-new-applications-disabled"));
+            }
+            else if (d["inforequests-disabled"] === true) {
+              notify.error(loc("new-applications-or-inforequests-disabled.dialog.title"),
+                           loc("error.organization.inforequests-disabled"));
+            }
+            else if (d["new-applications-disabled"] === true) {
+              notify.error(loc("new-applications-or-inforequests-disabled.dialog.title"),
+                           loc("error.organization.new-applications-disabled"));
+            }
             model.organization(d);
           })
           .error(function(d) {
-            if (d.text === "error.organization.inforequests-and-new-applications-disabled") {
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            }
-            else if (d.text === "error.organization.inforequests-disabled") {
-              model.inforequestsDisabled(true);
-            }
-            else if (d.text === "error.organization.new-applications-disabled") {
-              model.newApplicationsDisabled(true);
-            }
-            else if (d.text === "error.unknown-organization") {
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            }
-            model.organization(d);
+            model.inforequestsDisabled(true);
+            model.newApplicationsDisabled(true);
             notify.error(loc("error.dialog.title"), loc(d.text));
           })
           .call();
