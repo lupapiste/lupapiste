@@ -3,7 +3,8 @@
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.format :as timeformat]
-            [clj-http.client :as http]))
+            [clj-http.client :as http]
+            [sade.strings :as ss]))
 
 ;;
 ;; parsing time (TODO: might be copy-pasted from krysp)
@@ -57,9 +58,35 @@
         "false" false
         v))
 
+(defn to-int
+  "Converts strings looking like decimal numbers to ints"
+  [v] (if (ss/numeric? v) (Integer/parseInt v 10) v))
+
+(defn to-timestamp
+  "Parses yyyy-mm-dd date and converts to timestamp"
+  [v] (if (re-matches #"^\d{4}-\d{2}-\d{2}" v) (clj-time.coerce/to-long (parse-date v)) v))
+
+(defn convert-values
+  "Runs a recursive conversion"
+  ([m f]
+    (postwalk-map (partial map (fn [[k v]] [k (f v)])) m))
+  ([m pred f]
+    (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
+
 (defn convert-booleans
-  "changes recursively all stringy boolean values to booleans"
-  [m] (postwalk-map (partial map (fn [[k v]] [k (to-boolean v)])) m))
+  "Changes recursively all stringy boolean values to booleans"
+  [m] (convert-values m to-boolean))
+
+(defn convert-values-of-keys [m keys converter]
+  (convert-values m (fn [k _] ((set keys) k)) converter))
+
+(defn convert-keys-to-ints
+  "Changes recursively all decimal integer string values to ints"
+  [m keys] (convert-values-of-keys m keys to-int))
+
+(defn convert-keys-to-timestamps
+  "Changes recursively all string values to timestamps (longs)"
+  [m keys] (convert-values-of-keys m keys to-timestamp))
 
 (defn strip-xml-namespaces
   "strips namespace-part of xml-element-keys"

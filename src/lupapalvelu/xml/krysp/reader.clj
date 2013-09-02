@@ -140,24 +140,29 @@
 
 
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
-  (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+  (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+    (cr/convert-keys-to-ints [:autopaikkojaEnintaan :autopaikkojaVahintaan :autopaikkojaRakennettava :autopaikkojaRakennettu :autopaikkojaKiinteistolla :autopaikkojaUlkopuolella])
+    (cr/convert-keys-to-timestamps [:maaraysaika :toteutusHetki])
+    )
     ; WIP
   )
 
-(defn- get-dates [paatos v]
+(defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))
                        s      (get-text paatos xml-kw)]
-                   [% (when s (cr/parse-date s))]) v)))
+                   [% (when s (clj-time.coerce/to-long (cr/parse-date s)))]) v)))
 
 (defn- ->paatospoytakirja [paatos-xml-without-ns]
   ; WIP
-  (cr/all-of paatos-xml-without-ns :poytakirja)
+  (-> (cr/all-of paatos-xml-without-ns :poytakirja)
+    (cr/convert-keys-to-ints [:pykala])
+    (cr/convert-keys-to-timestamps [:paatospvm]))
   )
 
 (defn- ->permit [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
-   :paivamaarat    (get-dates paatos-xml-without-ns
-                              [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+   :paivamaarat    (get-pvm-dates paatos-xml-without-ns
+                                  [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
    :poytakirjat    (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))})
 
 (defn ->permits [xml]
