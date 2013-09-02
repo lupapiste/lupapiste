@@ -5,10 +5,11 @@
 
 (def id "75300301050006")
 
-(def local-test-legacy  (str (server-address) "/krysp/building.xml"))
+(def local-building-legacy  (str (server-address) "/krysp/building.xml"))
+(def local-permit-legacy  (str (server-address) "/krysp/permit.xml"))
 
 (fact "two buildings can be extracted"
-  (let [xml (building-xml local-test-legacy id)]
+  (let [xml (building-xml local-building-legacy id)]
     xml => truthy
 
     (let [buildings (->buildings xml)]
@@ -29,8 +30,8 @@
                                :usage      "021 rivitalot"
                                :created    "1998"}))))
 
-(fact "converting krysp to lupapiste domain model"
-  (let [xml (building-xml local-test-legacy id)]
+(fact "converting building krysp to lupapiste domain model"
+  (let [xml (building-xml local-building-legacy id)]
     xml => truthy
 
     (fact "invalid buildingid returns nil"
@@ -113,3 +114,9 @@
                                        :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"}})
         ))))
+
+(fact "converting permit krysp to lupapiste domain model"
+  (let [xml (application-xml local-permit-legacy id)]
+    xml => truthy
+    (clojure.pprint/pprint xml)
+))
