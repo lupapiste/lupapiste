@@ -11,7 +11,7 @@
 (def enabled-organizations ["186-R"       ;; Jarvenpaa
                             "529-R"       ;; Naantali
                             "753-R"       ;; Sipoo
-                            #_"491-R"])   ;; Mikkeli
+                            "491-R"])     ;; Mikkeli
 
 (defn- add-key-to-database [key]
   {:apply-when (pos? (mongo/count :organizations {key {$exists false}}))}
