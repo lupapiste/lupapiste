@@ -129,14 +129,18 @@
      :userId        (get-in action [:user :id])}
     (core/execute action)))
 
-(defn- execute-command [name]
-  (execute (enriched (core/command name (from-json (request/ring-request))))))
+(defn- execute-command
+  ([name] (execute-command name (from-json (request/ring-request))))
+  ([name params] (execute (enriched (core/command name params)))))
 
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
 
+(defn- execute-query [name params]
+  (execute (enriched (core/query name params))))
+
 (defjson "/api/query/:name" {name :name}
-  (execute (enriched (core/query name (from-query)))))
+  (execute-query name (from-query)))
 
 (defpage "/api/raw/:name" {name :name}
   (let [response (execute (enriched (core/raw name (from-query))))]
@@ -304,7 +308,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (spy (parse "apikey" authorization))))
+    (parse "apikey" authorization)))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
@@ -340,7 +344,7 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.8.0.html"
                                            (-> (:params (request/ring-request))
                                              (dissoc :upload)
                                              (dissoc ring.middleware.anti-forgery/token-key)
@@ -430,11 +434,29 @@
   (defjson "/dev/user" []
     (current-user))
 
+  (defpage "/dev/fixture/:name" {:keys [name]}
+    (let [response (execute-query "apply-fixture" {:name name})]
+      (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
+        {:status 200 :body (str response)}
+        (resp/json response))))
+
+  (defpage "/dev/create" {:keys [infoRequest propertyId]}
+    (let [parts    (vec (map #(Integer/parseInt %) (rest (re-matches #"(\d+)-(\d+)-(\d+)-(\d+)" propertyId))))
+          property (format "%03d%03d%04d%04d" (get parts 0) (get parts 1) (get parts 2) (get parts 3))
+          response (execute-command "create-application" (assoc (from-query) :propertyId property))]
+      (if (core/ok? response)
+        (redirect "fi" (str (user/applicationpage-for (:role (current-user)))
+                            "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
+        {:status 400 :body (str response)})))
+
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
+
+  (defjson "/dev/fileinfo/:id" {:keys [id]}
+    (dissoc (mongo/download id) :content))
 
   (defjson "/dev/hgnotes" [] (env/hgnotes))
 

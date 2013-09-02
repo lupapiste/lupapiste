@@ -41,6 +41,7 @@
   [username password]
   (when-let [user (load-user username)]
     (and
+      (:enabled user)
       (check-password password (-> user :private :password))
       (non-private user))))
 
@@ -65,7 +66,7 @@
 (defn valid-password? [password]
   (>= (count password) (env/value :password :minlength)))
 
-(defn create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
+(defn create-user-entity [email password userid role firstname lastname phone city street zip enabled organizations]
   (let [email             (util/lower-case email)
         salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
@@ -88,7 +89,7 @@
   (let [email             (util/lower-case email)
         id                (mongo/create-id)
         old-user          (get-user-by-email email)
-        new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled organizations)
+        new-user-base     (create-user-entity email password userid role firstname lastname phone city street zip enabled organizations)
         new-user          (assoc new-user-base :id id)]
     (info "register user:" (dissoc user :password))
     (try

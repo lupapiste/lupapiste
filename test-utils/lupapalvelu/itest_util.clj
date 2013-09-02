@@ -1,5 +1,6 @@
 (ns lupapalvelu.itest-util
   (:use [lupapalvelu.fixture.minimal :only [users]]
+        [lupapalvelu.core :only [fail!]]
         [clojure.walk :only [keywordize-keys]]
         [swiss-arrows.core]
         [midje.sweet])
@@ -76,8 +77,8 @@
       body)))
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (query sonja "apply-fixture" :name fixture-name)]
-    (assert (:ok resp))))
+  (let [resp (decode-response (c/get (str (server-address) "/dev/fixture/" fixture-name)))]
+    (assert (-> resp :body :ok))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
@@ -198,7 +199,7 @@
 ;; Stuffin' data in
 ;;
 
-(defn upload-attachment [apikey application-id attachment-id expect-to-succeed]
+(defn upload-attachment [apikey application-id attachment-id expect-to-succeed permit-type]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
@@ -206,7 +207,12 @@
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
                                    {:name "Content/type"   :content "text/plain"}
-                                   {:name "attachmentType" :content "paapiirustus.asemapiirros"}
+                                   {:name "attachmentType" :content (condp = (keyword permit-type)
+                                                                      :R "paapiirustus.asemapiirros"
+                                                                      :YA "yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista"
+                                                                      :Y "paapiirustus.asemapiirros"  ;;TODO: Change this
+                                                                      :P "paapiirustus.asemapiirros"  ;;TODO: Change this
+                                                                      (fail! "unsupported permit-type"))}
                                    {:name "attachmentId"   :content attachment-id}
                                    {:name "upload"         :content uploadfile}]})]
     (if expect-to-succeed
@@ -215,9 +221,10 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.0.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (when statement-id
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query apikey :application :id application-id)
@@ -238,15 +245,15 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       ;(facts "Statement upload should fail"
        ; (fact "Status code" (:status resp) => 302)
-      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0))
-      )))
+      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.0.html") => 0))
+      ))))
 
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment-id (get-attachment-ids application)]
-    (upload-attachment pena (:id application) attachment-id true)))
+    (upload-attachment pena (:id application) attachment-id true "R")))
 
 ;;
 ;; Vetuma

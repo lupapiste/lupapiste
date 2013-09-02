@@ -116,9 +116,9 @@
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
-          <button data-bind="click: refreshKTJ,    visible: $root.authorization.ok('refresh-ktj'),     enable: $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn btn-primary">
+          <button data-bind="click: refreshKTJ,    visible: $root.authorization.ok('refresh-ktj'),     enable: $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
-            <span class="icon send left-align"></span>
+            <span class="icon refresh-grey left-align"></span>
           </button>
         </div>
 
@@ -382,7 +382,7 @@
             </div>
 
             <div data-bind="if: $data.statements && statements().length>0">
-              <table class="table table-striped tablesorter">
+              <table class="table table-striped tablesorter" data-test-id="application-statements">
                 <thead>
                   <tr>
                     <th data-bind="ltext: 'application.statement.desc'"></th>
@@ -405,7 +405,7 @@
                     <td data-bind="text: person.name"></td>
                     <td data-bind="dateString: requested"></td>
                     <td data-bind="dateString: given"></td>
-                    <td data-bind="text: status() && loc('statement.'+status())"></td>
+                    <td data-bind="text: status() && loc('statement.'+status()), attr: {'data-test-name' : person.name}"></td>
                   </tr>
                 </tbody>
               </table>
@@ -541,7 +541,7 @@
          <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
-          <div data-bind="foreach: data()">
+          <div data-bind="foreach: data()" class="scrolling-content">
             <input class="form-input" type="checkbox" data-test-id="check-statement-person" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'check-statement-person-' + $index()}" />
             <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
           </div>

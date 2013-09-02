@@ -1,12 +1,12 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim]]
+        [clojure.string :only [blank? join trim split]]
         [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -20,15 +20,12 @@
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
-            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
             [clj-time.format :as tf]
@@ -129,7 +126,7 @@
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
-  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
+  (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
 
 (defquery application
   {:authenticated true
@@ -283,9 +280,9 @@
 (defcommand add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
-   :validators [applicant-cant-set-to ]
+   :validators [applicant-cant-set-to]
    :notify     "new-comment"}
-  [{{:keys [text target to]} :data {:keys [host]} :web :keys [user created] :as command}]
+  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
       (let [to-user   (and to (or (security/get-non-private-userinfo to)
@@ -308,8 +305,8 @@
                              :state    :open
                              :opened   created}}))
 
-          ;; LUPA-371
-          :info (when (security/authority? user)
+          ;; LUPA-371, LUPA-745
+          :info (when (and mark-answered (security/authority? user))
                   (update-application command
                     {$set {:state    :answered
                            :modified created}}))
@@ -334,7 +331,7 @@
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand set-user-to-document
-  {:parameters [:id documentId userId path]
+  {:parameters [id documentId userId path]
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
@@ -344,21 +341,16 @@
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
                        (security/same-user? user subject))
-        henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
-        full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-    (info "setting-user-to-document, with hetu: " with-hetu)
+        person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+        model        (if-not (blank? path)
+                       (assoc-in {} (map keyword (split path #"\.")) person)
+                       person)
+        updates      (tools/path-vals model)]
     (if-not document
       (fail :error.document-not-found)
-      ;; TODO: update via model
       (do
-        (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :documents {$elemMatch {:id documentId}}}
-          {$set {full-path henkilo
-                 :modified created}})))))
-
+        (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
+        (commands/persist-model-updates id document updates created)))))
 
 ;;
 ;; Assign
@@ -375,10 +367,13 @@
   {:parameters  [:id assigneeId]
    :roles       [:authority]}
   [{user :user :as command}]
-  (update-application command
-    (if assigneeId
-      {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-      {$unset {:authority ""}})))
+  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
+    (if (or assignee (nil? assigneeId))
+      (update-application command
+                          (if assignee
+                            {$set   {:authority (security/summary assignee)}}
+                            {$unset {:authority ""}}))
+      (fail "error.user.not.found" :id assigneeId))))
 
 ;;
 ;;
@@ -404,7 +399,6 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-;; FIXME: does not set state if complement-needed
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
@@ -413,18 +407,17 @@
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (let [new-state :submitted
-            application-id (:id application)
+      (let [application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application lang submitted-application organization)
+        (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
           (mongo/update
-            :applications {:_id (:id application) :state new-state}
+            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
             {$set {:state :sent}})
           (catch org.xml.sax.SAXParseException e
-            (.printStackTrace e)
+            (info e "Invalid KRYSM XML message")
             (fail (.getMessage e))))))))
 
 (defcommand submit-application
@@ -466,7 +459,8 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created operation organization-id & {:keys [target]}]
+(defn make-attachments [created operation organization-id & {:keys [target]}]
+
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
@@ -517,8 +511,7 @@
  (defn- make-op [op-name created]
    {:id (mongo/create-id)
     :name (keyword op-name)
-    :created created
-    :operation-type (:operation-type (operations/operations (keyword op-name)))})
+    :created created})
 
  (defn user-is-authority-in-organization? [user-id organization-id]
    (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
@@ -576,14 +569,16 @@
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
           application   (domain/set-software-version application)]
+
       (mongo/insert :applications application)
-      (autofill-rakennuspaikka application created)
+      (try (autofill-rakennuspaikka application created)
+        (catch Exception e (error e "KTJ data was not updatet.")))
       (ok :id id))))
 
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]
+   :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created] :as command}]
@@ -612,13 +607,20 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (autofill-rakennuspaikka (mongo/by-id :applications id) (now)))
+      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
     (fail :error.property-in-other-muinicipality)))
+
+(defn- validate-new-applications-enabled [command {:keys [organization]}]
+  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
+    (if (= (:new-application-enabled org) true)
+      nil
+      (fail :error.new-applications.disabled))))
 
 (defcommand convert-to-application
   {:parameters [id]
    :roles      [:applicant]
-   :states     [:draft :info :answered]}
+   :states     [:draft :info :answered]
+   :validators [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]

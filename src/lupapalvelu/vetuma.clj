@@ -27,7 +27,7 @@
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
-(def constants
+(defn config []
   {:url       (env/value :vetuma :url)
    :rcvid     (env/value :vetuma :rcvid)
    :appid     "Lupapiste"
@@ -45,7 +45,7 @@
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
-(doseq [[k v] constants]
+(doseq [[k v] (config)]
   (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
 
 ;;
@@ -78,7 +78,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
+(defn mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -102,7 +102,7 @@
 ;; response parsing
 ;;
 
-(defn- extract-subjectdata [{s :subjectdata}]
+(defn extract-subjectdata [{s :subjectdata}]
   (-> s
     (string/split #", ")
     (->> (map #(string/split % #"=")))
@@ -120,7 +120,7 @@
 (defn- extract-request-id [{id :trid}]
   {:stamp id})
 
-(defn- user-extracted [m]
+(defn user-extracted [m]
   (merge (extract-subjectdata m)
          (extract-vtjdata m)
          (extract-userid m)
@@ -130,8 +130,8 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn- request-data [host]
-  (-> constants
+(defn request-data [host]
+  (-> (config)
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     (assoc :host  host)
@@ -142,10 +142,10 @@
     (dissoc :host)
     keys-as-strings))
 
-(defn- parsed [m]
+(defn parsed [m]
   (-> m
     keys-as-keywords
-    (assoc :key (:key constants))
+    (assoc :key (:key (config)))
     mac-verified
     (dissoc :key)))
 
@@ -184,7 +184,7 @@
       (do
         (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths} :upsert true)
         (html
-          (form-to [:post (:url constants)]
+          (form-to [:post (:url (config))]
                    (map field (request-data (host :secure)))
                    (submit-button "submit")))))))
 

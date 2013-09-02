@@ -1,7 +1,9 @@
 (ns lupapalvelu.notifications
   (:use [monger.operators]
         [sade.strings :only [suffix]]
-        [lupapalvelu.i18n :only [loc]])
+        [clojure.set :only [difference]]
+        [lupapalvelu.i18n :only [loc]]
+        [sade.util :only [future*]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -52,7 +54,7 @@
   (replace-links-in-fi-sv e selector (partial get-application-link application suffix host)))
 
 (defn send-mail-to-recipients! [recipients title msg]
-  (future
+  (future*
     (doseq [recipient recipients]
       (if (email/send-mail recipient title :html msg)
         (error "email could not be delivered." recipient title msg)
@@ -66,8 +68,19 @@
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
 
-(defn get-email-recipients-for-application [application]
-  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
+; emails are sent to everyone in auth array except statement persons
+(defn get-email-recipients-for-application [{:keys [auth statements]} included-roles excluded-roles]
+  (let [included-users   (if (seq included-roles) 
+                           (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
+                           auth)
+        auth-user-emails (->> included-users
+                           (filter (fn [user] (not (some #(= (:role user) %) excluded-roles))))
+                           (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
+    (if (some #(= "statementGiver" %) excluded-roles)
+      (difference 
+        (set auth-user-emails) 
+        (map #(-> % :person :email) statements))
+      auth-user-emails)))
 
 (defn template [s]
   (->
@@ -135,15 +148,20 @@
     (template "application-new-comment.html")
     (replace-application-links "#conversation-link" application "/conversation" host)))
 
+(defn get-message-for-targeted-comment [application host]
+  (message
+    (template "application-targeted-comment.html")
+    (replace-application-links "#conversation-link" application "/conversation" host)))
+
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
-    (let [recipients (get-email-recipients-for-application application)
+    (let [recipients (get-email-recipients-for-application application nil ["statementGiver"])
           msg        (get-message-for-new-comment application host)
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
-  (let [msg        (get-message-for-new-comment application host)
+  (let [msg        (get-message-for-targeted-comment application host)
         title      (get-email-title application "new-comment")]
     (send-mail-to-recipients! [to-email] title msg)))
 
@@ -156,13 +174,13 @@
 
 (defn send-notifications-on-application-state-change! [{:keys [id]} host]
   (let [application (mongo/by-id :applications id)
-        recipients  (get-email-recipients-for-application application)
+        recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         msg         (get-message-for-application-state-change application host)
         title       (get-email-title application "state-change")]
     (send-mail-to-recipients! recipients title msg)))
 
 (defn send-notifications-on-verdict! [application host]
-  (let [recipients  (get-email-recipients-for-application application)
+  (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         msg         (message
                       (template "application-verdict.html")
                       (replace-application-links "#verdict-link" application "/verdict" host))

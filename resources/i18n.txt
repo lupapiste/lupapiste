@@ -1,0 +1,6 @@
+XXX-laita-tama-email-templateen-add-statement-person: Teidät on lisätty lausunnon antajaksi organisaatioon <organisaatio> nimikkeellä <nimike>
+error.organization.new-applications-disabled: Et voi jättää tähän toimenpiteeseen liittyvää lupahakemusta Lupapisteen kautta. Jättääksesi lupahakemuksen ota yhteyttä kuntasi viranomaiseen.
+error.organization.inforequests-disabled: Et voi jättää tähän toimenpiteeseen liittyvää neuvontapyyntöä Lupapisteen kautta. Jättääksesi neuvontapyynnön ota yhteyttä kuntasi viranomaiseen.
+error.organization.inforequests-and-new-applications-disabled: Et voi jättää tähän toimenpiteeseen liittyvää neuvontapyyntöä tai lupahakemusta Lupapisteen kautta. Näin tehdäksesi ota yhteyttä kuntasi viranomaiseen.
+architect.title: Suunnittelijan tiedot ja kokemus
+userinfo.architect.upload.state.init: Valitse liitteen tyyppi

@@ -542,7 +542,12 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {authorizationModel.refresh(currentId);})
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        })
+      .error(function(data) {
+        LUPAPISTE.ModalDialog.showDynamicError(loc(data.text) + ": " + data.id);
+      })
       .call();
   }
 
@@ -592,7 +597,6 @@
       inviteModel.setApplicationId(app.id);
 
       // Comments:
-      commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
 
       // Verdict details
@@ -635,7 +639,7 @@
         $('#application-map').css("display", "inline-block");
       }
 
-      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application")
+      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
       if (application.shapes && application.shapes().length > 0) map.drawShape(application.shapes()[0]);
 

@@ -105,18 +105,61 @@
   (ok :operations (operations/municipality-operations municipality)))
 
 (defn resolve-organization [municipality permit-type]
-  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType permit-type}]})]
+  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality :permitType permit-type}}})]
     (when (> (count organizations) 1)
-      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type))
+      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
 (defquery "organization-details"
-  {:parameters [:municipality :operation] :verified true}
-  [{{:keys [municipality operation]} :data}]
-  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
-    (ok :links (:links result)
-        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
-    (fail :unknown-organization)))
+  {:parameters [:municipality :operation :lang] :verified true}
+  [{{:keys [municipality operation lang]} :data}]
+  (let [permit-type (:permit-type ((keyword operation) operations/operations))]
+    (if-let [result (mongo/select-one
+                      :organizations
+                      {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
+                      {"name" 1
+                       "links" 1
+                       "operations-attachments" 1
+                       "inforequest-enabled" 1
+                       "new-application-enabled" 1})]
+      (let [inforequests-enabled (:inforequest-enabled result)
+            new-applications-enabled (:new-application-enabled result)
+            name-map (-> result :name)
+            ;; if name of the organization is not set in current language, then use the name that is set for it
+            org-name (if ((keyword lang) name-map)
+                       ((keyword lang) name-map)
+                       (first (vals name-map)))
+;            links-and-attachments {:links (:links result)
+;                                   :attachmentsForOp (-> result :operations-attachments ((keyword operation)))}
+;            links-and-attachments-with-org-name (merge links-and-attachments {:organization-name org-name})
+            ]
+
+        ;; both :inforequest-enabled and :new-application-enabled exists
+        (if (and (true? inforequests-enabled) (true? new-applications-enabled))
+          (ok
+            :links (:links result)
+            :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
+          #_(apply ok links-and-attachments)
+
+          ;; neither :inforequest-enabled nor :new-application-enabled exists
+          (if (and (false? inforequests-enabled) (false? new-applications-enabled))
+            (fail :error.organization.inforequests-and-new-applications-disabled
+              :organization-name org-name
+              :links (:links result)
+              :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
+
+            ;; one of them exists...
+            (if (true? inforequests-enabled)
+              (fail :error.organization.new-applications-disabled
+                :organization-name org-name
+                :links (:links result)
+                :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
+              (fail :error.organization.inforequests-disabled
+                :organization-name org-name
+                :links (:links result)
+                :attachmentsForOp (-> result :operations-attachments ((keyword operation))))))))
+
+      (fail :error.unknown-organization))))
 
 (defcommand "organization-operations-attachments"
   {:parameters [:operation :attachments]
@@ -134,7 +177,7 @@
   (let [organization (first organizations)]
     (if-let [result (mongo/select-one :organizations {:_id organization} {"legacy" 1})]
       (ok :legacy (:legacy result))
-      (fail :unknown-organization))))
+      (fail :error.unknown-organization))))
 
 (defcommand "set-legacy-system"
   {:parameters [:legacy]
@@ -144,7 +187,7 @@
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
       (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
-      (fail :legacy_is_dead))))
+      (fail :error.legacy_is_dead))))
 
 ;;
 ;; Helpers

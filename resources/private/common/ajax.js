@@ -42,8 +42,15 @@ var ajax = (function() {
     };
 
     self.successHandler = function(e) { };
-    self.errorHandler = function(e) { notify.error("error",e); };
-    self.failHandler = function(jqXHR, textStatus, errorThrown) {error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);};
+    self.errorHandler = function(e) {
+      error("AJAX: ERROR", self.request.url, e.text);
+      notify.error(loc("error.dialog.title"), loc(e.text));
+      };
+    self.failHandler = function(jqXHR, textStatus, errorThrown) {
+      if (jqXHR && jqXHR.status > 0 && jqXHR.readyState > 0) {
+        error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
+      }
+    };
     self.completeHandler = function() { };
     self.headers = {};
 

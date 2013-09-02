@@ -2,7 +2,8 @@
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
         [lupapalvelu.factlet]
-        [clojure.pprint :only [pprint]])
+        [clojure.pprint :only [pprint]]
+        [clojure.string :only [join]])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
@@ -155,8 +156,8 @@
         (:state application) => "verdictGiven"
 
         (let [attachment-id (first (get-attachment-ids application))]
-          (upload-attachment sonja (:id application) attachment-id true)
-          (upload-attachment pena (:id application) attachment-id false))))))
+          (upload-attachment sonja (:id application) attachment-id true "R")
+          (upload-attachment pena (:id application) attachment-id false "R"))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)
@@ -188,6 +189,57 @@
 (fact "create-and-submit-application"
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
+
+(defn- set-and-check-person [api-key application-id initial-document path]
+  (fact "initially there is no person data"
+       initial-document => truthy
+       (get-in initial-document [:data :henkilotiedot]) => nil)
+
+    (fact "new person is set"
+      (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
+      (let [updated-app (:application (query mikko :application :id application-id))
+            update-doc (domain/get-document-by-id updated-app (:id initial-document))
+            schema-name  (get-in update-doc [:schema :info :name])
+            schema       (schemas/get-schema schema-name)
+            person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
+
+        (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
+        (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen")))
+
+(facts "Set user to document"
+  (let [application-id   (create-app-id mikko :municipality sonja-muni)
+        application      (:application (query mikko :application :id application-id))
+        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
+        suunnittelija    (domain/get-document-by-name application "suunnittelija")
+        hakija     (domain/get-document-by-name application "hakija")
+        maksaja    (domain/get-document-by-name application "maksaja")]
+
+    (set-and-check-person mikko application-id paasuunnittelija [])
+    (set-and-check-person mikko application-id hakija ["henkilo"])
+    (set-and-check-person mikko application-id maksaja ["henkilo"])
+
+    (fact "there is no suunnittelija"
+       suunnittelija => truthy
+       (get-in suunnittelija [:data :henkilotiedot]) => nil)
+
+    (let [doc-id (:id suunnittelija)
+          code "RAK-rakennesuunnittelija"]
+
+      (fact "suunnittelija kuntaroolikoodi is set"
+        (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code]]) => ok?
+        (let [updated-app          (:application (query mikko :application :id application-id))
+              updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
+          updated-suunnittelija => truthy
+          (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))
+
+      (fact "new suunnittelija is set"
+        (command mikko :set-user-to-document :id application-id :documentId (:id suunnittelija) :userId mikko-id :path "") => ok?
+        (let [updated-app           (:application (query mikko :application :id application-id))
+              updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
+          (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
+          (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
+          (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
+            (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
 
 (comment
   (apply-remote-minimal)

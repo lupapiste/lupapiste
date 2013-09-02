@@ -9,8 +9,8 @@ Resource        ../../common_resource.robot
 Mikko creates two new inforequests
   Mikko logs in
   ${secs} =  Get Time  epoch
-  Set Suite Variable  ${inforequest-handling}  inforequest-handlings${secs}
-  Set Suite Variable  ${inforequest-cancelling}  inforequest-cancelling${secs}
+  Set Suite Variable  ${inforequest-handling}  ir-h${secs}
+  Set Suite Variable  ${inforequest-cancelling}  ir-c${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
   Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  Jiihaa
@@ -46,9 +46,11 @@ Mikko opens inforequest for renaming and cancellation
   Open inforequest  ${inforequest-cancelling}  ${propertyId}
 
 Mikko changes inforequest address
+  Page should contain  ${inforequest-cancelling}
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
   Click element  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
+  Textfield Value Should Be  xpath=//input[@data-test-id="application-new-address"]  ${inforequest-cancelling}
   Input text by test id  application-new-address  ${newName}
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}
@@ -76,6 +78,8 @@ Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
+  Wait until  Page should contain element  //section[@id='inforequest']//input[@data-test-id='comment-request-mark-answered']
+  Select Checkbox  //section[@id='inforequest']//input[@data-test-id='comment-request-mark-answered']
   Add comment   oletko miettinyt tuulivoimaa?
   Wait until  Inforequest state is  Vastattu
   Logout

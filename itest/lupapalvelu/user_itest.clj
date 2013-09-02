@@ -1,6 +1,5 @@
 (ns lupapalvelu.user-itest
   (:require [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.java.io :as io]
@@ -68,41 +67,52 @@
     body))
 
 (defn current-user [apikey]
-  (let [resp (c/get
-               (str (server-address) "/dev/user")
-               {:headers {"authorization" (str "apikey=" apikey)}})]
-    (fact (:status resp) => 200)
-    (-> resp :body json/parse-string keywordize-keys)))
+  (let [resp (decode-response (c/get (str (server-address) "/dev/user")
+                                     {:headers {"authorization" (str "apikey=" apikey)}}))]
+    (assert (= 200 (:status resp)))
+    (:body resp)))
+
+(defn file-info [id]
+  (let [resp (c/get (str (server-address) "/dev/fileinfo/" id) {:throw-exceptions false})]
+    (when (= 200 (:status resp))
+      (:body (decode-response resp)))))
 
 (facts "uploading user attachment"
   (apply-remote-minimal)
 
   ;
-  ; Initially pena does not have examination?
+  ; Initially pena does not have attachments?
   ;
 
-  (fact "Initially pena does not have examination?" (:examination (current-user pena)) => nil?)
+  (fact "Initially pena does not have attachments?" (:attachments (query pena "user-attachments")) => nil?)
 
   ;
   ; Pena uploads an examination:
   ;
 
-  (upload-user-attachment pena "examination" true)
-  (let [file-1 (get-in (current-user pena) [:attachment :examination])
-        att-1 (mongo/download (:file-id file-1))]
-    (fact "filename of file 1"    file-1  => (contains {:filename "test-attachment.txt"}))
-    (fact "db has same filename"  att-1   => (contains {:file-name "test-attachment.txt"}))
-    (fact "file 1 metadata"       att-1   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})}))
+  (let [attachment-id (:attachment-id (upload-user-attachment pena "examination" true))]
+    
+    ; Now Pena has attachment
 
-    ;
-    ; Pena updates the examination:
-    ;
+    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => (contains {:attachment-id attachment-id :attachment-type "examination"})
 
-    (upload-user-attachment pena "examination" true)
-    (let [file-2 (get-in (current-user pena) [:attachment :examination])
-          att-2 (mongo/download (:file-id file-2))]
-      (fact "filename of file 2"   file-2  => (contains {:filename "test-attachment.txt"}))
-      (fact "db has same filename" att-2   => (contains {:file-name "test-attachment.txt"}))
-      (fact "file 2 metadata"      att-2   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})})))
+    ; Attachment is in GridFS
 
-    (fact "old file is deleted"  (mongo/download (:file-id file-1)) => nil?)))
+    (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id)]
+      (:status resp) => 200
+      (:body resp) => "This is test file for file upload in itest.")
+
+    ; Sonja can not get attachment
+    
+    (let [resp (raw sonja "download-user-attachment" :attachment-id attachment-id)]
+      (:status resp) => 404)
+
+    ; Sonja can not delete attachment
+    
+    (command sonja "remove-user-attachment" :attachment-id attachment-id)
+    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) =not=> nil?
+    
+    ; Pena can delete attachment
+    
+    (command pena "remove-user-attachment" :attachment-id attachment-id)
+    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))

@@ -201,7 +201,6 @@ var docgen = (function () {
       return span;
     }
 
-    // TODO WIP
     self.makeApprovalButtons = function (path, model) {
       var btnContainer$ = $("<span>").addClass("form-buttons");
       var statusContainer$ = $("<span>");
@@ -230,7 +229,7 @@ var docgen = (function () {
         var cmd = verb + "-doc";
         var title = loc("document." + verb);
         return $(makeButton(self.docId + "_" + verb, title))
-        .addClass(cssClass).addClass("btn-narrow")
+        .addClass(cssClass).addClass("btn-auto")
         .click(function () {
           ajax.command(cmd, cmdArgs)
           .success(function () {
@@ -367,19 +366,23 @@ var docgen = (function () {
 
       var span = makeEntrySpan(subSchema, myPath);
 
-      // TODO: readonly support
-
       span.appendChild(makeLabel("date", myPath));
 
       // date
-      $("<input>", {
+      var input = $("<input>", {
         id: pathStrToID(myPath),
-        name: docId + "." + path,
+        name: docId + "." + myPath,
         type: "text",
         "class": "form-input text form-date",
-        value: value,
-        change: save
-      }).datepicker($.datepicker.regional[lang]).appendTo(span);
+        value: value
+      });
+
+      if (subSchema.readonly) {
+        input.attr("readonly", true);
+      } else {
+        input.datepicker($.datepicker.regional[lang]).change(save);
+      }
+      input.appendTo(span);
 
       return span;
     }
@@ -496,23 +499,27 @@ var docgen = (function () {
 
       select.id = pathStrToID(myPath);
 
-      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
-      select.onchange = function (e) {
-        var event = getEvent(e);
-        var target = event.target;
 
-        var buildingId = target.value;
-        ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
-          .success(function () {
-            save(event);
-            repository.load(self.appId);
-          })
-          .call();
-        return false;
-      };
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = function (e) {
+          var event = getEvent(e);
+          var target = event.target;
+
+          var buildingId = target.value;
+          ajax
+            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
+            .success(function () {
+              save(event);
+              repository.load(self.appId);
+            })
+            .call();
+          return false;
+        };
+      }
 
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
@@ -829,7 +836,7 @@ var docgen = (function () {
 
     function disableBasedOnOptions() {
       if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
-        $(self.element).find('input, textarea').attr("readonly", true);
+        $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
       }
