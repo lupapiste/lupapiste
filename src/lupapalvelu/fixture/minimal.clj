@@ -251,8 +251,8 @@
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
                     {:id "753-R"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Sipoon rakennusvalvonta"}
                      :scope [{:municipality "753" :permitType "R"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
