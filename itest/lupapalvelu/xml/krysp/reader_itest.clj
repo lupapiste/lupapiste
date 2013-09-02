@@ -118,5 +118,5 @@
 (fact "converting permit krysp to lupapiste domain model"
   (let [xml (application-xml local-permit-legacy id)]
     xml => truthy
-    (clojure.pprint/pprint xml)
+    (->permits xml)
 ))

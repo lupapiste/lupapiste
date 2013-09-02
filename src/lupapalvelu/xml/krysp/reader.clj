@@ -133,3 +133,26 @@
                                                   :huoneluku       (get-text huoneisto :huoneluku)}
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
                                :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
+
+
+(defn- get-dates [paatos v]
+  (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))
+                       s      (get-text paatos xml-kw)]
+                   [% (when s (cr/parse-datetime :year-month-day s))]) v)))
+
+(defn- ->permit [paatos-xml-without-ns]
+  {:paivamaarat (get-dates paatos-xml-without-ns
+                           [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+   ; WIP
+   })
+
+(defn ->permits [xml]
+  (let [stripped  (cr/strip-xml-namespaces xml)
+        paatokset (select stripped [:RakennusvalvontaAsia :paatostieto :Paatos])
+        permit-models (map ->permit paatokset)
+        ]
+; WIP
+    permit-models
+    ))
+
+
