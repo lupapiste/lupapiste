@@ -36,6 +36,9 @@
   (doseq [application (mongo/select :applications muutostapa-not-exits-query)]
     (update-rakennuslupa-documents-schemas application)))
 
+;(defmigration move-turvakielto-to-correct-place
+ ; )
+
 
 
 
