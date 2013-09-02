@@ -31,7 +31,8 @@
     (cr/get-xml url)))
 
 (defn application-xml [server id]
-  (let [url (str server "?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&outputFormat=KRYSP&maxFeatures=1")]
+  (let [filter (str  "<PropertyIsEqualTo><PropertyName>rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</PropertyName><Literal>" id "</Literal></PropertyIsEqualTo>")
+        url (str server "?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&outputFormat=KRYSP&filter=" filter)]
     (cr/get-xml url)))
 
 
