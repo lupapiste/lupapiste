@@ -1,13 +1,14 @@
 (ns lupapalvelu.xml.krysp.reader
   (:use sade.xml)
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug]]
+            [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [lupapalvelu.document.schemas :as schema]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
             [clj-http.client :as http]
+            [ring.util.codec :as codec]
             [sade.common-reader :as cr]))
-
 
 ;;
 ;; Test urls
@@ -26,13 +27,30 @@
     (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
     (catch Exception e false)))
 
+;; Object types (URL encoded)
+(def building-type "typeName=rakval%3AValmisRakennus")
+(def case-type     "typeName=rakval%3ARakennusvalvontaAsia")
+
+;; For building filters
+(def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
+(def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+
+(defn property-equals
+  "Returns URL-encoded search parameter suitable for 'filter'"
+  [property value]
+  (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
+
+(defn wfs-krysp-url [server object-type filter]
+  (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
+
 (defn building-xml [server id]
-  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
+  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
+    (debug "Get building: " url)
     (cr/get-xml url)))
 
 (defn application-xml [server id]
-  (let [filter (str  "<PropertyIsEqualTo><PropertyName>rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</PropertyName><Literal>" id "</Literal></PropertyIsEqualTo>")
-        url (str server "?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&outputFormat=KRYSP&filter=" filter)]
+  (let [url (wfs-krysp-url server case-type (property-equals asian-lp-lupatunnus id))]
+    (debug "Get application: " url)
     (cr/get-xml url)))
 
 
