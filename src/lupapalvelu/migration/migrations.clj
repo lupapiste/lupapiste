@@ -8,15 +8,29 @@
   {:apply-when (pos? (mongo/count :applications {:permitType {$exists false}}))}
   (mongo/update :applications {:permitType {$exists false}} {$set {:permitType "R"}} :multi true))
 
-(defmigration add-scope-to-organizations
-  {:apply-when (pos? (mongo/count :organizations {:scope {$exists false}}))}
-  (let [without-scope (mongo/select :organizations {:scope {$exists false}})]
-    (doseq [{:keys [id municipalities]} without-scope]
-      (let [scopes (map (fn [municipality] {:municipality municipality :permitType "R"}) municipalities)]
-        (mongo/update-by-id :organizations id {$set {:scope scopes}})))
-    {:fixed-organizations   (count without-scope)
+(def enabled-organizations ["186-R"       ;; Jarvenpaa
+                            "529-R"       ;; Naantali
+                            "753-R"       ;; Sipoo
+                            "491-R"])     ;; Mikkeli
+
+(defn- add-key-to-database [key]
+  {:apply-when (pos? (mongo/count :organizations {key {$exists false}}))}
+  (let [without-key (mongo/select :organizations {key {$exists false}})]
+    (condp = key
+      :scope (doseq [{:keys [id municipalities]} without-key]
+               (let [scope (map (fn [municipality] {:municipality municipality :permitType "R"}) municipalities)]
+                 (mongo/update-by-id :organizations id {$set {key scope}})))
+      :inforequest-enabled (doseq [{:keys [id]} without-key]
+                             (let [enabled-value (if (some #(= id %) enabled-organizations) true false)]
+                               (mongo/update-by-id :organizations id {$set {:inforequest-enabled enabled-value}})))
+      :new-application-enabled (doseq [{:keys [id]} without-key]
+                                 (let [enabled-value (if (some #(= id %) enabled-organizations) true false)]
+                                   (mongo/update-by-id :organizations id {$set {:new-application-enabled enabled-value}}))))
+    {:fixed-organizations   (count without-key)
      :organizations-total   (mongo/count :organizations)}))
 
+(defmigration add-scope-to-organizations
+  (add-key-to-database :scope))
 
 (def muutostapa-not-exits-query {:documents {$elemMatch {"schema.info.name"
                                                          {$in  ["uusiRakennus" "rakennuksen-muuttaminen" "rakennuksen-laajentaminen" "purku"]}
@@ -36,6 +50,6 @@
   (doseq [application (mongo/select :applications muutostapa-not-exits-query)]
     (update-rakennuslupa-documents-schemas application)))
 
-
-
-
+(defmigration add-enableds-for-inforequest-and-new-application-to-organizations
+  (add-key-to-database :inforequest-enabled)
+  (add-key-to-database :new-application-enabled))
