@@ -134,25 +134,35 @@
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
                                :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
 
+; TODO delete this
+(def permit (parse (slurp "resources/public/krysp/permit.xml")))
+
+
+
+(defn- ->lupamaaraukset [paatos-xml-without-ns]
+  (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+    ; WIP
+  )
 
 (defn- get-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))
                        s      (get-text paatos xml-kw)]
-                   [% (when s (cr/parse-datetime :year-month-day s))]) v)))
+                   [% (when s (cr/parse-date s))]) v)))
+
+(defn- ->paatospoytakirja [paatos-xml-without-ns]
+  ; WIP
+  (cr/all-of paatos-xml-without-ns :poytakirja)
+  )
 
 (defn- ->permit [paatos-xml-without-ns]
-  {:paivamaarat (get-dates paatos-xml-without-ns
-                           [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-   ; WIP
-   })
+  {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
+   :paivamaarat    (get-dates paatos-xml-without-ns
+                              [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+   :poytakirjat    (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))})
 
 (defn ->permits [xml]
   (let [stripped  (cr/strip-xml-namespaces xml)
-        paatokset (select stripped [:RakennusvalvontaAsia :paatostieto :Paatos])
-        permit-models (map ->permit paatokset)
-        ]
-; WIP
-    permit-models
-    ))
+        paatokset (select stripped [:RakennusvalvontaAsia :paatostieto :Paatos])]
+    (map ->permit paatokset)))
 
 
