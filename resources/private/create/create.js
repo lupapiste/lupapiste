@@ -63,10 +63,12 @@
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable();
+    self.inforequestsDisabled = ko.observable(false);
+    self.newApplicationsDisabled = ko.observable(false);
     self.pending = ko.observable();
 
     self.municipalityCode.subscribe(function(code) {
-      if(code) { self.findOperations(code); }
+      if (code) { self.findOperations(code); }
       if (self.useManualEntry()) { municipalities.findById(code, self.municipality); }
     });
 
@@ -341,9 +343,34 @@
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          ajax.query("organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          ajax.query("organization-details",
+              {municipality: model.municipality().id,
+               operation: v.op,
+               lang: loc.getCurrentLanguage()})
+          .success(function(d) {
+            model.inforequestsDisabled(false);
+            model.newApplicationsDisabled(false);
             model.organization(d);
-          }).call();
+          })
+          .error(function(d) {
+            if (d.text === "error.organization.inforequests-and-new-applications-disabled") {
+              model.inforequestsDisabled(true);
+              model.newApplicationsDisabled(true);
+            }
+            else if (d.text === "error.organization.inforequests-disabled") {
+              model.inforequestsDisabled(true);
+            }
+            else if (d.text === "error.organization.new-applications-disabled") {
+              model.newApplicationsDisabled(true);
+            }
+            else if (d.text === "error.unknown-organization") {
+              model.inforequestsDisabled(true);
+              model.newApplicationsDisabled(true);
+            }
+            model.organization(d);
+            notify.error(loc("error.dialog.title"), loc(d.text));
+          })
+          .call();
         } else {
           model.operation(null);
           model.organization(null);

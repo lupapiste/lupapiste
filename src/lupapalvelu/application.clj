@@ -612,10 +612,17 @@
       (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
     (fail :error.property-in-other-muinicipality)))
 
+(defn- validate-new-applications-enabled [command {:keys [organization]}]
+  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
+    (if (= (:new-application-enabled org) true)
+      nil
+      (fail :error.new-applications.disabled))))
+
 (defcommand convert-to-application
   {:parameters [id]
    :roles      [:applicant]
-   :states     [:draft :info :answered]}
+   :states     [:draft :info :answered]
+   :validators [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]
