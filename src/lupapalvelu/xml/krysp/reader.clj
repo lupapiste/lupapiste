@@ -167,7 +167,12 @@
 
 (defn ->permits [xml]
   (let [stripped  (cr/strip-xml-namespaces xml)
-        paatokset (select stripped [:RakennusvalvontaAsia :paatostieto :Paatos])]
-    (map ->permit paatokset)))
+        asiat     (select stripped :RakennusvalvontaAsia)]
+    (map
+      (fn [asia]
+        (let [paatokset (select asia [:paatostieto :Paatos])]
+          {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+           :paatokset (map ->permit paatokset)}))
+      asiat)))
 
 
