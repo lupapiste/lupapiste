@@ -511,8 +511,8 @@
 
     {:info {:name "hakija-ya"
             :order 3
-            :removable true
-            :repeating true
+            :removable false
+            :repeating false
             :approvable true
             :type :party}
      :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
