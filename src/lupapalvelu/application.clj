@@ -487,6 +487,7 @@
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
+        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema :info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
