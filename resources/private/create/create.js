@@ -38,7 +38,7 @@
       } else {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
-            loc("error.organization.inforequests-disabled"),
+            loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
             {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
       }
     };
@@ -309,7 +309,7 @@
         if(model.newApplicationsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("error.organization.inforequests-disabled"),
+              loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
               {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
           return;
         }
@@ -317,7 +317,7 @@
         if(model.newApplicationsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("error.organization.new-applications-disabled"),
+              loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
               {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
           return;
         }
