@@ -74,6 +74,11 @@
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
 
+(defn get-applicant-document
+  "returns first applicant document from application"
+  [application]
+  (first (filter (comp (partial = "hakija") :subtype :info :schema) (:documents application))))
+
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))
 
