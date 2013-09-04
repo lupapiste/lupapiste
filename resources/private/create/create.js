@@ -31,9 +31,16 @@
     };
 
     self.goPhase3 = function() {
-      $("#create-part-2").hide();
-      $("#create-part-3").show();
-      window.scrollTo(0, 0);
+      if (!self.inforequestsDisabled()) {
+        $("#create-part-2").hide();
+        $("#create-part-3").show();
+        window.scrollTo(0, 0);
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicOk(
+            loc("new-applications-or-inforequests-disabled.dialog.title"),
+            loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
+            {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+      }
     };
 
      self.returnPhase2 = function() {
@@ -298,6 +305,24 @@
     };
 
     self.create = function(infoRequest) {
+      if (infoRequest) {
+        if(model.newApplicationsDisabled()) {
+          LUPAPISTE.ModalDialog.showDynamicOk(
+              loc("new-applications-or-inforequests-disabled.dialog.title"),
+              loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
+              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+          return;
+        }
+      } else {
+        if(model.newApplicationsDisabled()) {
+          LUPAPISTE.ModalDialog.showDynamicOk(
+              loc("new-applications-or-inforequests-disabled.dialog.title"),
+              loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
+              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+          return;
+        }
+      }
+
       ajax.command("create-application", {
         infoRequest: infoRequest,
         operation: self.operation(),
@@ -350,19 +375,6 @@
           .success(function(d) {
             model.inforequestsDisabled(d["inforequests-disabled"]);
             model.newApplicationsDisabled(d["new-applications-disabled"]);
-
-            if (d["inforequests-disabled"] === true && d["new-applications-disabled"] === true) {
-              notify.error(loc("new-applications-or-inforequests-disabled.dialog.title"),
-                           loc("error.organization.inforequests-and-new-applications-disabled"));
-            }
-            else if (d["inforequests-disabled"] === true) {
-              notify.error(loc("new-applications-or-inforequests-disabled.dialog.title"),
-                           loc("error.organization.inforequests-disabled"));
-            }
-            else if (d["new-applications-disabled"] === true) {
-              notify.error(loc("new-applications-or-inforequests-disabled.dialog.title"),
-                           loc("error.organization.new-applications-disabled"));
-            }
             model.organization(d);
           })
           .error(function(d) {
