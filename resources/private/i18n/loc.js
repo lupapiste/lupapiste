@@ -11,6 +11,13 @@ var loc;
     if (_.some(arguments, not)) return null;
 
     if (arguments.length > 1) {
+
+
+      // jari TODO: Testausta varten,    TODO:  poista tämä ->
+      debug("Korjaa taman lokalisaation kaytto koodissa: ", arguments );
+      return "$$Korjaa-taman-lokalisaation-kaytto-koodissa$$:" + arguments
+      // <- jari TODO
+
       len = arguments.length;
       for (i = 1; i < len; i++) {
         key = key + "." + arguments[i];
@@ -32,6 +39,8 @@ var loc;
     var key = args[0];
     var params = args.slice(1);
     var term = loc.terms[key];
+
+    if (_.some(arguments, not)) return null;
 
     if (term !== undefined) {
 
