@@ -134,10 +134,6 @@
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
                                :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
 
-; TODO delete this
-(def permit (parse (slurp "resources/public/krysp/permit.xml")))
-
-
 
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
@@ -146,10 +142,12 @@
     (cr/ensure-sequental :maarays)
     (#(assoc % :maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :toteutusHetki])))
     (dissoc :maarays)
-    (cr/convert-keys-to-ints [:autopaikkojaEnintaan :autopaikkojaVahintaan :autopaikkojaRakennettava :autopaikkojaRakennettu :autopaikkojaKiinteistolla :autopaikkojaUlkopuolella])
-    )
-    ; WIP
-  )
+    (cr/convert-keys-to-ints [:autopaikkojaEnintaan
+                              :autopaikkojaVahintaan
+                              :autopaikkojaRakennettava
+                              :autopaikkojaRakennettu
+                              :autopaikkojaKiinteistolla
+                              :autopaikkojaUlkopuolella])))
 
 (defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))
@@ -157,7 +155,7 @@
                    [% (when s (clj-time.coerce/to-long (cr/parse-date s)))]) v)))
 
 (defn- ->paatospoytakirja [paatos-xml-without-ns]
-  ; WIP
+  ; WIP, not tested
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm]))
