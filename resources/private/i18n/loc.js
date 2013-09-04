@@ -27,6 +27,33 @@ var loc;
     return term;
   };
 
+  loc.getFormatted = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var key = args[0];
+    var params = args.slice(1);
+    var term = loc.terms[key];
+
+    if (term !== undefined) {
+
+      if (_.isEmpty(params)) {
+        return term;
+      } else {
+        var paramsStr = _.map(params, String);
+        var formatted = term;
+        for(var argIndex in paramsStr) {
+          formatted = formatted.replace('{' + argIndex + '}', paramsStr[argIndex]);
+        }
+        return formatted;
+      }
+
+    } else {
+      debug("Missing localization key", key);
+      return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
+    }
+  };
+
+
+
   hub.subscribe("change-lang", function(e) {
     var lang = e.lang;
     if (_.contains(loc.supported, lang)) {
