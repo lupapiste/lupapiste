@@ -105,7 +105,7 @@
                 <tbody data-bind="foreach: attachments">
                   <tr>
                     <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                      <div data-bind="text: loc('userinfo.architect.attachments.name', $data['attachment-type'])" data-test-id="attachment-type"></div>
+                      <div data-bind="text: loc($data['attachment-type'] ? 'userinfo.architect.attachments.name.' + $data['attachment-type'] : undefined)" data-test-id="attachment-type"></div>
                       <div data-bind="text: filename" data-test-id="filename"></div>
                     </td>
                     <td>
