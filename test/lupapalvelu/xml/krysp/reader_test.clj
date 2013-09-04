@@ -10,15 +10,15 @@
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
 (let [xml (sade.xml/parse (slurp "resources/public/krysp/permit.xml"))
-      permits (->permits xml)]
+      cases (->permits xml)]
 
-  (fact "xml is parsed" permits => truthy)
-  (fact "xml has 2 cases" (count permits) => 2)
-  (fact "second case has 2 permits" (-> permits last count) => 2)
+  (fact "xml is parsed" cases => truthy)
+  (fact "xml has 2 cases" (count cases) => 2)
+  (fact "second case has 2 permits" (-> cases last count) => 2)
 
-  (fact "kuntalupatunnus" (:kuntalupatunnus (last permits)) => "13-0185-R")
+  (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
 
-  (let [permit (first (:paatokset (last permits)))
+  (let [permit (first (:paatokset (last cases)))
         lupamaaraykset (:lupamaaraykset permit)
         paivamaarat    (:paivamaarat permit)
         poytakirjat    (:poytakirjat permit)]
@@ -44,8 +44,16 @@
           (count maaraykset) => 2
           (:sisalto (first maaraykset)) => "Maarays 1"
           (:maaraysaika (first maaraykset)) => (coerce/to-long (coerce/from-string "2013-08-28"))
-          (:toteutusHetki (last maaraykset)) => (coerce/to-long (coerce/from-string "2013-08-31"))
-          )))
+          (:toteutusHetki (last maaraykset)) => (coerce/to-long (coerce/from-string "2013-08-31"))))
+
+      (facts "second permit"
+        (let [katselmukset2 (-> cases last :paatokset last :lupamaaraykset :vaaditutKatselmukset)]
+          (count katselmukset2) => 1
+          katselmukset2 => sequential?)
+        (let [maaraykset2 (-> cases last :paatokset last :lupamaaraykset :maaraykset)]
+          (count maaraykset2) => 1
+          maaraykset2 => sequential?))
+      )
 
     (facts "paivamaarat data is correct"
       paivamaarat    => truthy

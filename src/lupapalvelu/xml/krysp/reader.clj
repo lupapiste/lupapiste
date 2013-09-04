@@ -141,7 +141,9 @@
 
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+    (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+    (cr/ensure-sequental :maarays)
     (#(assoc % :maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :toteutusHetki])))
     (dissoc :maarays)
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan :autopaikkojaVahintaan :autopaikkojaRakennettava :autopaikkojaRakennettu :autopaikkojaKiinteistolla :autopaikkojaUlkopuolella])

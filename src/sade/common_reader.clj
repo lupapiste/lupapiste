@@ -2,6 +2,7 @@
   (:use sade.xml)
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
+            [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
             [clj-http.client :as http]
             [sade.strings :as ss]))
@@ -64,7 +65,7 @@
 
 (defn to-timestamp
   "Parses yyyy-mm-dd date and converts to timestamp"
-  [v] (if (re-matches #"^\d{4}-\d{2}-\d{2}" v) (clj-time.coerce/to-long (parse-date v)) v))
+  [v] (if (re-matches #"^\d{4}-\d{2}-\d{2}" v) (coerce/to-long (parse-date v)) v))
 
 (defn convert-values
   "Runs a recursive conversion"
@@ -87,6 +88,10 @@
 (defn convert-keys-to-timestamps
   "Changes recursively all string values to timestamps (longs)"
   [m keys] (convert-values-of-keys m keys to-timestamp))
+
+(defn ensure-sequental
+  "Makes sure that the value of key k in map m is sequental"
+  [m k] (let [v (k m)] (if-not (sequential? v) (assoc m k [v]) m)))
 
 (defn strip-xml-namespaces
   "strips namespace-part of xml-element-keys"
