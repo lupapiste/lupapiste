@@ -487,7 +487,8 @@
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
-        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
+        op-doc                (update-in (make op-schema-name) [:schema :info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
@@ -609,10 +610,17 @@
       (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
     (fail :error.property-in-other-muinicipality)))
 
+(defn- validate-new-applications-enabled [command {:keys [organization]}]
+  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
+    (if (= (:new-application-enabled org) true)
+      nil
+      (fail :error.new-applications.disabled))))
+
 (defcommand convert-to-application
   {:parameters [id]
    :roles      [:applicant]
-   :states     [:draft :info :answered]}
+   :states     [:draft :info :answered]
+   :validators [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]

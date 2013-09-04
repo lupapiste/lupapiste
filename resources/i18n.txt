@@ -1,2 +1,1 @@
-architect.title: Suunnittelijan tiedot ja kokemus
-userinfo.architect.upload.state.init: Valitse liitteen tyyppi
+XXX-laita-tama-email-templateen-add-statement-person: Teidät on lisätty lausunnon antajaksi organisaatioon <organisaatio> nimikkeellä <nimike>
