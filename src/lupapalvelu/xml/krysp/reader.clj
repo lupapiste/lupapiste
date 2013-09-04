@@ -141,8 +141,10 @@
 
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+    (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+    (#(assoc % :maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :toteutusHetki])))
+    (dissoc :maarays)
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan :autopaikkojaVahintaan :autopaikkojaRakennettava :autopaikkojaRakennettu :autopaikkojaKiinteistolla :autopaikkojaUlkopuolella])
-    (cr/convert-keys-to-timestamps [:maaraysaika :toteutusHetki])
     )
     ; WIP
   )
@@ -166,13 +168,10 @@
    :poytakirjat    (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))})
 
 (defn ->permits [xml]
-  (let [stripped  (cr/strip-xml-namespaces xml)
-        asiat     (select stripped :RakennusvalvontaAsia)]
-    (map
-      (fn [asia]
-        (let [paatokset (select asia [:paatostieto :Paatos])]
-          {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
-           :paatokset (map ->permit paatokset)}))
-      asiat)))
+  (map
+    (fn [asia]
+      {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+       :paatokset       (map ->permit (select asia [:paatostieto :Paatos]))})
+    (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
 
 
