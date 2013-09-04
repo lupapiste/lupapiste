@@ -3,6 +3,9 @@
         [lupapalvelu.xml.krysp.reader])
   (:require [clj-time.coerce :as coerce]))
 
+(defn- to-timestamp [yyyy-mm-dd]
+  (coerce/to-long (coerce/from-string yyyy-mm-dd)))
+
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
@@ -43,8 +46,8 @@
         (facts "m\u00e4\u00e4r\u00e4ykset"
           (count maaraykset) => 2
           (:sisalto (first maaraykset)) => "Maarays 1"
-          (:maaraysaika (first maaraykset)) => (coerce/to-long (coerce/from-string "2013-08-28"))
-          (:toteutusHetki (last maaraykset)) => (coerce/to-long (coerce/from-string "2013-08-31"))))
+          (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+          (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))
 
       (facts "second permit"
         (let [katselmukset2 (-> cases last :paatokset last :lupamaaraykset :vaaditutKatselmukset)]
@@ -57,8 +60,13 @@
 
     (facts "paivamaarat data is correct"
       paivamaarat    => truthy
-      )
-
+      (:aloitettava paivamaarat) => (to-timestamp "2013-09-01")
+      (:lainvoimainen paivamaarat) => (to-timestamp "2013-09-02")
+      (:voimassaHetki paivamaarat) => (to-timestamp "2013-09-03")
+      (:raukeamis paivamaarat) => (to-timestamp "2013-09-04")
+      (:anto paivamaarat) => (to-timestamp "2013-09-05")
+      (:viimeinenValitus paivamaarat) => (to-timestamp "2013-09-06")
+      (:julkipano paivamaarat) => (to-timestamp "2013-09-07"))
 
     (facts "p\u00f6yt\u00e4kirjat data is correct"
       poytakirjat    => truthy
