@@ -70,6 +70,13 @@
 
     (facts "p\u00f6yt\u00e4kirjat data is correct"
       poytakirjat    => truthy
-      (count poytakirjat) => 2)
+      (count poytakirjat) => 2
+
+      (facts "second permit"
+        (let [poytakirjat2 (-> cases last :paatokset last :poytakirjat)]
+          (count poytakirjat2) => 1
+          poytakirjat2 => sequential?)))
+
+
     )
   )
