@@ -2,7 +2,8 @@
   (:require [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.document.tools :as tools]))
 
 (defmigration add-default-permit-type
   {:apply-when (pos? (mongo/count :applications {:permitType {$exists false}}))}
