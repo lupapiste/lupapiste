@@ -105,7 +105,7 @@
                 <tbody data-bind="foreach: attachments">
                   <tr>
                     <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                      <div data-bind="text: loc('userinfo.architect.attachments.name', [$data['attachment-type']])" data-test-id="attachment-type"></div>
+                      <div data-bind="text: loc(['userinfo.architect.attachments.name', $data['attachment-type']])" data-test-id="attachment-type"></div>
                       <div data-bind="text: filename" data-test-id="filename"></div>
                     </td>
                     <td>
@@ -149,7 +149,7 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
             <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
-            <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+            <span data-bind="text: loc(['mypage.quality', quality()]), attr: {'class': quality}, visible: newPassword().length > 0"></span>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>

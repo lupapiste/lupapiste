@@ -1,5 +1,10 @@
 var loc;
 
+//loc(foo, bar, baz)
+//loc([foo, bar, baz])
+//loc(pattern, 1, 2, 3)
+//loc([patternPart1, part2, part3], 1, 2, 3) === loc(patternPart1 +"."+ part2 +"."+ part3, 1, 2, 3)
+
 ;(function() {
   "use strict";
 
@@ -11,46 +16,33 @@ var loc;
       //debug("Not valid loc params found, the arguments passed for loc: ", args);
       return null;
     }
+
     var key = args[0];
-    var params = args.slice(1);
-    var formatParams = undefined;
-
-    // If we only got key, return the term corresponding it.
-    // If the argument after key, in index 1, is an array,
-    //   the keys in the array are concatenated with the key using '.' as a separator.
-    // Otherwise, extra parameters are used to format the key.
-
-    if (!_.isEmpty(params)) {
-
-      if (_.isArray(params[0])) {
-        var concatParams = params[0];
-        if (_.some(concatParams, notValidLocParam)) {
-          //debug("Not valid loc params found, key & params: ", key, concatParams);
-          return null;
-        }
-        for (var i in concatParams) {
-          key = key + "." + concatParams[i];
-        }
-      } else {
-        formatParams = params;
+    if (_.isArray(key)) {
+      if (_.some(key, notValidLocParam)) {
+        //debug("Not valid loc params found, the arguments passed for loc: ", args);
+        debug("Not valid loc params found in key: ", key);
+        return null;
       }
+      key = key.join(".");
     }
 
+    var formatParams = args.slice(1);
     var term = loc.terms[key];
 
     if (term !== undefined) {
-      // If we have some format params, lets format the key with the params.
-      if (formatParams !== undefined) {
-        var formatParamsStr = _.map(formatParams, String);
-        for(var argIndex in formatParamsStr) {
-          term = term.replace('{' + argIndex + '}', formatParamsStr[argIndex]);
+      if (!_.isEmpty(formatParams)) {
+        formatParams = _.map(formatParams, String);
+        for(var argIndex in formatParams) {
+          term = term.replace('{' + argIndex + '}', formatParams[argIndex]);
         }
       }
-      return term;
     } else {
       debug("Missing localization key", key);
-      return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
+      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
+
+    return term;
   };
 
   loc.supported = [];
@@ -112,3 +104,4 @@ var loc;
   });
 
 })();
+
