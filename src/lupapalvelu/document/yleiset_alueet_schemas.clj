@@ -13,6 +13,11 @@
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
     {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
 
+(def tyomaasta-vastaava
+  (schema-body-without-element-by-name
+    (schema-body-without-element-by-name party "turvakieltoKytkin")
+    "hetu"))
+
 (def yleiset-alueet-maksaja
   (body
     (schema-body-without-element-by-name party "turvakieltoKytkin")
@@ -82,20 +87,27 @@
 (defschemas
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+           :type :group
+           :removable false
+           :repeating false
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
+           :removable false
+           :repeating false
            :order 61}
-    :body (schema-body-without-element-by-name
-            (schema-body-without-element-by-name party "turvakieltoKytkin")
-            "hetu")}
+    :body tyomaasta-vastaava}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :type :party
+           :removable false
+           :repeating false
            :order 62}
     :body yleiset-alueet-maksaja}
    {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
            :type :group
+           :removable false
+           :repeating false
            :order 63}
     :body tyo-aika}])
 
@@ -103,16 +115,21 @@
   1
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
-           ;            :removable false  ;; TODO: Miten voi poistaa raksin?
+           :removable false
+           :repeating false
            :order 64}
     :body mainostus-tai-viitoitus-tapahtuma-valinta}])
 
 (defschemas
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+           :removable false
+           :repeating false
            :order 65}
     :body hankkeen-kuvaus-sijoituslupa}
    {:info {:name "sijoituslupa-sijoituksen-tarkoitus"
+           :removable false
+           :repeating false
            :order 66}
     :body sijoituslupa-sijoituksen-tarkoitus}])
 

@@ -517,15 +517,17 @@
             :removable true
             :repeating true
             :approvable true
-            :type :party}
+            :type :party
+            :subtype :hakija}
      :body party}
 
     {:info {:name "hakija-ya"
             :order 3
-            :removable true
-            :repeating true
+            :removable false
+            :repeating false
             :approvable true
-            :type :party}
+            :type :party
+            :subtype :hakija}
      :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
 
     {:info {:name "paasuunnittelija"

@@ -31,9 +31,16 @@
     };
 
     self.goPhase3 = function() {
-      $("#create-part-2").hide();
-      $("#create-part-3").show();
-      window.scrollTo(0, 0);
+      if (!self.inforequestsDisabled()) {
+        $("#create-part-2").hide();
+        $("#create-part-3").show();
+        window.scrollTo(0, 0);
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicOk(
+            loc("new-applications-or-inforequests-disabled.dialog.title"),
+            loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
+            {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+      }
     };
 
      self.returnPhase2 = function() {
@@ -298,6 +305,24 @@
     };
 
     self.create = function(infoRequest) {
+      if (infoRequest) {
+        if(model.inforequestsDisabled()) {
+          LUPAPISTE.ModalDialog.showDynamicOk(
+              loc("new-applications-or-inforequests-disabled.dialog.title"),
+              loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
+              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+          return;
+        }
+      } else {
+        if(model.newApplicationsDisabled()) {
+          LUPAPISTE.ModalDialog.showDynamicOk(
+              loc("new-applications-or-inforequests-disabled.dialog.title"),
+              loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
+              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+          return;
+        }
+      }
+
       ajax.command("create-application", {
         infoRequest: infoRequest,
         operation: self.operation(),
@@ -348,26 +373,13 @@
                operation: v.op,
                lang: loc.getCurrentLanguage()})
           .success(function(d) {
-            model.inforequestsDisabled(false);
-            model.newApplicationsDisabled(false);
+            model.inforequestsDisabled(d["inforequests-disabled"]);
+            model.newApplicationsDisabled(d["new-applications-disabled"]);
             model.organization(d);
           })
           .error(function(d) {
-            if (d.text === "error.organization.inforequests-and-new-applications-disabled") {
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            }
-            else if (d.text === "error.organization.inforequests-disabled") {
-              model.inforequestsDisabled(true);
-            }
-            else if (d.text === "error.organization.new-applications-disabled") {
-              model.newApplicationsDisabled(true);
-            }
-            else if (d.text === "error.unknown-organization") {
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            }
-            model.organization(d);
+            model.inforequestsDisabled(true);
+            model.newApplicationsDisabled(true);
             notify.error(loc("error.dialog.title"), loc(d.text));
           })
           .call();
