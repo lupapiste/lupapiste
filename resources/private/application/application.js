@@ -15,7 +15,7 @@
   }
 
   var transparencies = _.map([0,25,50,75,100], function(v) {
-    return {text: loc("stamp.transparency." + v.toString()), value: Math.round(255 * v / 100.0)};
+    return {text: loc("stamp.transparency", [v.toString()]), value: Math.round(255 * v / 100.0)};
   });
 
   var stampModel = new function() {

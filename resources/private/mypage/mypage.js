@@ -189,7 +189,7 @@
     });
 
     self.availableAttachmentTypes = _.map(["cv", "examination", "proficiency"], function(type) {
-      return {id: type, name: loc("userinfo.architect.attachments.name." + type)};
+      return {id: type, name: loc("userinfo.architect.attachments.name", [type])};
     });
 
     self.init = function() {

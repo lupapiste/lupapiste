@@ -86,7 +86,7 @@
         <div data-bind="with: application" class="application_actions">
           <div class="muncipality-info">
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
-            <p data-bind="text: loc(municipality() ? 'municipality.' + municipality() : undefined)"></p>
+            <p data-bind="text: loc('municipality', [municipality()])"></p>
           </div>
           <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
             <span data-bind="ltext: 'application.submitApplication'"></span>
@@ -446,10 +446,10 @@
                                     click: $root.neighbor.showStatus,
                                     attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
                          href="#">
-                        <span data-bind="text: loc('neighbor.state.' + lastStatus.state())" class="status-state"></span>
+                        <span data-bind="text: loc('neighbor.state', [lastStatus.state()])" class="status-state"></span>
                       </a>
                       <span data-bind="visible: !$root.neighbor.statusCompleted($data),
-                                       text: loc('neighbor.state.' + lastStatus.state()),
+                                       text: loc('neighbor.state', [lastStatus.state()]),
                                        attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
                             class="status-state">
                       </span>
@@ -633,7 +633,7 @@
                           visible: $parent.status() < $parent.statusRunning,
                           enable: $parent.status() === $parent.statusReady" />
                       <span data-bind="
-                          text: loc('stamp.file.status.' + status()),
+                          text: loc('stamp.file.status', [status()]),
                           visible: $parent.status() >= $parent.statusRunning"></span>
                     </td>
                   </tr>
@@ -650,7 +650,7 @@
             </div>
 
             <div class="stamp-status">
-              <span data-bind="text: loc('stamp.status.' + status().toString())"></span>
+              <span data-bind="text: loc('stamp.status', [status().toString()])"></span>
             </div>
 
             <div class="stamp-buttons">
@@ -741,8 +741,8 @@
         </div>
         <div data-bind="with: neighborStatusModel" class="dialog-content">
 
-          <div data-bind="text: loc(state() ? 'neighbors.status-dialog.message.' + state() : undefined)"></div>
-          <div data-bind="text: loc(state() ? 'neighbors.status-dialog.description.' + state() : undefined)"></div>
+          <div data-bind="text: loc('neighbors.status-dialog.message', [state()])"></div>
+          <div data-bind="text: loc('neighbors.status-dialog.description', [state()])"></div>
 
           <table>
             <tbody>
@@ -762,7 +762,7 @@
           </table>
 
           <div data-bind="visible: message" class="neighbors-message">
-            <div data-bind="text: loc(state() ? 'neighbors.status-dialog.message-title.' + state() : undefined)"></div>
+            <div data-bind="text: loc('neighbors.status-dialog.message-title', [state()])"></div>
             <div data-bind="text: message"  data-test-id="neighbor-status-message"></div>
           </div>
 
