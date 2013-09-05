@@ -469,51 +469,60 @@
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
 
+
+(defn- approvable-top-level-groups [v]
+  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
+
 ;;
 ;; schemas
 ;;
 
 (defschemas
-  [{:info {:name "hankkeen-kuvaus"
+  [{:info {:name "hankkeen-kuvaus" :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
     {:info {:name "uusiRakennus" :approvable true}
-     :body (body rakennuksen-omistajat rakennuksen-tiedot)}
+     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
-    {:info {:name "rakennuksen-muuttaminen"}
-     :body rakennuksen-muuttaminen}
+    {:info {:name "rakennuksen-muuttaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen)}
 
-    {:info {:name "rakennuksen-laajentaminen"}
-     :body rakennuksen-laajentaminen}
+    {:info {:name "rakennuksen-laajentaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-    {:info {:name "purku"}
-     :body purku}
+    {:info {:name "purku" :approvable true}
+     :body (approvable-top-level-groups purku)}
 
-    {:info {:name "kaupunkikuvatoimenpide"}
-     :body rakennelma}
+    {:info {:name "kaupunkikuvatoimenpide" :approvable true}
+     :body (approvable-top-level-groups rakennelma)}
 
-    {:info {:name "maisematyo"}
-     :body maisematyo}
+    {:info {:name "maisematyo" :approvable true}
+     :body (approvable-top-level-groups maisematyo)}
 
     {:info {:name "hakija"
             :order 3
             :removable true
             :repeating true
-            :type :party}
+            :approvable true
+            :type :party
+            :subtype :hakija}
      :body party}
 
     {:info {:name "hakija-ya"
             :order 3
-            :removable true
-            :repeating true
-            :type :party}
+            :removable false
+            :repeating false
+            :approvable true
+            :type :party
+            :subtype :hakija}
      :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
 
     {:info {:name "paasuunnittelija"
             :order 4
             :removable false
+            :approvable true
             :type :party}
      :body paasuunnittelija}
 
@@ -521,6 +530,7 @@
             :repeating true
             :order 5
             :removable true
+            :approvable true
             :type :party}
      :body suunnittelija}
 
@@ -528,12 +538,13 @@
             :repeating true
             :order 6
             :removable true
+            :approvable true
             :type :party}
      :body (body
              party
              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
 
-    {:info {:name "rakennuspaikka"
+    {:info {:name "rakennuspaikka" :approvable true
             :order 2}
      :body [{:name "kiinteisto"
              :type :group
