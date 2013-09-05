@@ -3,73 +3,55 @@ var loc;
 ;(function() {
   "use strict";
 
-  function not(v) { return !v; }
+  function notValidLocParam(v) { return v === undefined || v === null || v === ""; }
 
   loc = function() {
-    var term, i, len, key = arguments[0];
-
-    if (_.some(arguments, not)) return null;
-
-    if (arguments.length > 1) {
-
-
-      // jari TODO: Testausta varten,    TODO:  poista tämä ->
-      debug("Korjaa taman lokalisaation kaytto koodissa: ", arguments );
-      return "$$Korjaa-taman-lokalisaation-kaytto-koodissa$$:" + arguments
-      // <- jari TODO
-
-      len = arguments.length;
-      for (i = 1; i < len; i++) {
-        key = key + "." + arguments[i];
-      }
-    }
-
-    term = loc.terms[key];
-
-    if (term === undefined) {
-      debug("Missing localization key", key);
-      return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
-    }
-
-    return term;
-  };
-
-  loc.getFormatted = function() {
     var args = Array.prototype.slice.call(arguments);
+    if (_.some(args, notValidLocParam)) {
+      //debug("Not valid loc params found, the arguments passed for loc: ", args);
+      return null;
+    }
     var key = args[0];
     var params = args.slice(1);
+    var formatParams = undefined;
+
+    // If we only got key, return the term corresponding it.
+    // If the argument after key, in index 1, is an array,
+    //   the keys in the array are concatenated with the key using '.' as a separator.
+    // Otherwise, extra parameters are used to format the key.
+
+    if (!_.isEmpty(params)) {
+
+      if (_.isArray(params[0])) {
+        var concatParams = params[0];
+        if (_.some(concatParams, notValidLocParam)) {
+          //debug("Not valid loc params found, key & params: ", key, concatParams);
+          return null;
+        }
+        for (var i in concatParams) {
+          key = key + "." + concatParams[i];
+        }
+      } else {
+        formatParams = params;
+      }
+    }
+
     var term = loc.terms[key];
 
-    if (_.some(arguments, not)) return null;
-
     if (term !== undefined) {
-
-      if (_.isEmpty(params)) {
-        return term;
-      } else {
-        var paramsStr = _.map(params, String);
-        var formatted = term;
-        for(var argIndex in paramsStr) {
-          formatted = formatted.replace('{' + argIndex + '}', paramsStr[argIndex]);
+      // If we have some format params, lets format the key with the params.
+      if (formatParams !== undefined) {
+        var formatParamsStr = _.map(formatParams, String);
+        for(var argIndex in formatParamsStr) {
+          term = term.replace('{' + argIndex + '}', formatParamsStr[argIndex]);
         }
-        return formatted;
       }
-
+      return term;
     } else {
       debug("Missing localization key", key);
       return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
   };
-
-
-
-  hub.subscribe("change-lang", function(e) {
-    var lang = e.lang;
-    if (_.contains(loc.supported, lang)) {
-      var url = location.href.replace("/app/" + loc.currentLanguage + "/", "/app/" + lang + "/");
-      window.location = url;
-    }
-  });
 
   loc.supported = [];
   loc.currentLanguage = null;
@@ -119,5 +101,14 @@ var loc;
     }
     return "$$noname$$";
   };
+
+
+  hub.subscribe("change-lang", function(e) {
+    var lang = e.lang;
+    if (_.contains(loc.supported, lang)) {
+      var url = location.href.replace("/app/" + loc.currentLanguage + "/", "/app/" + lang + "/");
+      window.location = url;
+    }
+  });
 
 })();
