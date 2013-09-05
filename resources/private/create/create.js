@@ -31,9 +31,16 @@
     };
 
     self.goPhase3 = function() {
-      $("#create-part-2").hide();
-      $("#create-part-3").show();
-      window.scrollTo(0, 0);
+      if (!self.inforequestsDisabled()) {
+        $("#create-part-2").hide();
+        $("#create-part-3").show();
+        window.scrollTo(0, 0);
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicOk(
+            loc("new-applications-or-inforequests-disabled.dialog.title"),
+            loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
+            {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+      }
     };
 
      self.returnPhase2 = function() {
@@ -63,10 +70,12 @@
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable();
+    self.inforequestsDisabled = ko.observable(false);
+    self.newApplicationsDisabled = ko.observable(false);
     self.pending = ko.observable();
 
     self.municipalityCode.subscribe(function(code) {
-      if(code) { self.findOperations(code); }
+      if (code) { self.findOperations(code); }
       if (self.useManualEntry()) { municipalities.findById(code, self.municipality); }
     });
 
@@ -296,6 +305,24 @@
     };
 
     self.create = function(infoRequest) {
+      if (infoRequest) {
+        if(model.inforequestsDisabled()) {
+          LUPAPISTE.ModalDialog.showDynamicOk(
+              loc("new-applications-or-inforequests-disabled.dialog.title"),
+              loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
+              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+          return;
+        }
+      } else {
+        if(model.newApplicationsDisabled()) {
+          LUPAPISTE.ModalDialog.showDynamicOk(
+              loc("new-applications-or-inforequests-disabled.dialog.title"),
+              loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
+              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+          return;
+        }
+      }
+
       ajax.command("create-application", {
         infoRequest: infoRequest,
         operation: self.operation(),
@@ -341,9 +368,21 @@
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          ajax.query("organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          ajax.query("organization-details",
+              {municipality: model.municipality().id,
+               operation: v.op,
+               lang: loc.getCurrentLanguage()})
+          .success(function(d) {
+            model.inforequestsDisabled(d["inforequests-disabled"]);
+            model.newApplicationsDisabled(d["new-applications-disabled"]);
             model.organization(d);
-          }).call();
+          })
+          .error(function(d) {
+            model.inforequestsDisabled(true);
+            model.newApplicationsDisabled(true);
+            notify.error(loc("error.dialog.title"), loc(d.text));
+          })
+          .call();
         } else {
           model.operation(null);
           model.organization(null);
