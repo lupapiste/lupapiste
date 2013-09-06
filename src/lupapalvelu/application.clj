@@ -449,7 +449,8 @@
    :states     [:draft :open :submitted :complement-needed]
    :validators [validate-owner-or-writer]}
   [{:keys [application]}]
-  (autofill-rakennuspaikka application (now)))
+  (try (autofill-rakennuspaikka application (now))
+    (catch Exception e (error e "KTJ data was not updated"))))
 
 (defcommand save-application-shape
   {:parameters [:id shape]
@@ -573,7 +574,7 @@
 
       (mongo/insert :applications application)
       (try (autofill-rakennuspaikka application created)
-        (catch Exception e (error e "KTJ data was not updatet.")))
+        (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
 
 (defcommand add-operation
@@ -608,7 +609,9 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
+      (if (and (= "R" (:permitType application)) (not (:infoRequest application)))
+        (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+          (catch Exception e (error e "KTJ data was not updated.")))))
     (fail :error.property-in-other-muinicipality)))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

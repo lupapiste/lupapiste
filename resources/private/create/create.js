@@ -306,7 +306,7 @@
 
     self.create = function(infoRequest) {
       if (infoRequest) {
-        if(model.newApplicationsDisabled()) {
+        if(model.inforequestsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
