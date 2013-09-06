@@ -67,7 +67,7 @@
         updated-document (when (not-empty to-update)
                            (assoc document :data (reduce
                                                    (fn [d [old-key v]]
-                                                     (let [new-key (conj (subvec old-key 0 (.size old-key)) :kuntaRoolikoodi)
+                                                     (let [new-key (conj (subvec old-key 0 (count old-key)) :kuntaRoolikoodi)
                                                            cleaned-up (sade.util/dissoc-in d (conj old-key :patevyys :kuntaRoolikoodi))]
                                                        (assoc-in cleaned-up new-key v)))
                                                    data to-update)))]
