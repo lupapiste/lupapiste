@@ -1,10 +1,5 @@
 var loc;
 
-//loc(foo, bar, baz)
-//loc([foo, bar, baz])
-//loc(pattern, 1, 2, 3)
-//loc([patternPart1, part2, part3], 1, 2, 3) === loc(patternPart1 +"."+ part2 +"."+ part3, 1, 2, 3)
-
 ;(function() {
   "use strict";
 
@@ -20,8 +15,7 @@ var loc;
     var key = args[0];
     if (_.isArray(key)) {
       if (_.some(key, notValidLocParam)) {
-        //debug("Not valid loc params found, the arguments passed for loc: ", args);
-        debug("Not valid loc params found in key: ", key);
+        //debug("Not valid loc params found in key: ", key);
         return null;
       }
       key = key.join(".");
