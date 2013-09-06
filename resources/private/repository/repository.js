@@ -31,11 +31,10 @@ var repository = (function() {
     $.when(loadingSchemas, loadingApp).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
-          application = loading.application,
-          schemaVersion = application["schema-version"];
+          application = loading.application;
       _.each(application.documents, function(doc) {
         var schemaInfo = doc["schema-info"],
-            schema = findSchema(schemas, schemaInfo.name, schemaVersion);
+            schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
         schema.info = schemaInfo;
         doc.schema = schema;
       });

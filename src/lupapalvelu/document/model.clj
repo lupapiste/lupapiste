@@ -226,7 +226,7 @@
           str-path    (map #(if (keyword? %) (name %) %) path)
           element     (keywordize-keys (find-by-name schema-body str-path))]
       (true? (:approvable element)))
-    (true? (get-in document [:schema :info :approvable])))))
+    (true? (get-in document [:schema-info :approvable])))))
 
 (defn modifications-since-approvals
   ([{:keys [schema data meta]}]
