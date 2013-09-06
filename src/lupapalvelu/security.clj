@@ -107,7 +107,17 @@
                             #".+email.+"     "error.duplicate-email"
                             #".+username.+"  "error.duplicate-email"
                             #".*"            "error.create-user")]
-          (throw (IllegalArgumentException. error-code)))))
+
+          (let [old-orgs (:organizations old-user)
+                new-orgs (:organizations new-user)]
+            (if (= error-code "error.duplicate-email")
+              (do
+                (assert (= 1 (count new-orgs)) "Just created new user has more than one organisation")
+                (if (some #(not (= % new-orgs)) old-orgs)
+                  (mongo/update-by-id :users (:id old-user) {$set {:organizations (merge old-orgs (first new-orgs))}})
+                  (throw (IllegalArgumentException. error-code))))
+              (throw (IllegalArgumentException. error-code)))))))
+
     (get-user-by-email email)))
 
 (defn create-user [user]
