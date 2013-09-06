@@ -10,13 +10,11 @@ var loc;
 
     var key = args[0];
     if (!key) {
-      //debug("Not valid loc params found, the arguments passed for loc: ", args);
       return null;
     }
     
     if (_.isArray(key)) {
       if (_.some(key, notValidLocParam)) {
-        //debug("Not valid loc params found in key: ", key);
         return null;
       }
       key = key.join(".");
