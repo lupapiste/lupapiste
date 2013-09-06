@@ -7,12 +7,13 @@ var loc;
 
   loc = function() {
     var args = Array.prototype.slice.call(arguments);
-    if (_.some(args, notValidLocParam)) {
+
+    var key = args[0];
+    if (!key) {
       //debug("Not valid loc params found, the arguments passed for loc: ", args);
       return null;
     }
-
-    var key = args[0];
+    
     if (_.isArray(key)) {
       if (_.some(key, notValidLocParam)) {
         //debug("Not valid loc params found in key: ", key);
@@ -27,7 +28,7 @@ var loc;
     if (term !== undefined) {
       if (!_.isEmpty(formatParams)) {
         formatParams = _.map(formatParams, String);
-        for(var argIndex in formatParams) {
+        for (var argIndex in formatParams) {
           term = term.replace('{' + argIndex + '}', formatParams[argIndex]);
         }
       }
