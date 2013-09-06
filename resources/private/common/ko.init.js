@@ -186,7 +186,7 @@
     this.find("input").each(function(i, element) {
       var e = $(element),
           id = e.attr("id"),
-          p = loc(id, "placeholder");
+          p = loc([id, "placeholder"]);
       if (p) { e.attr("placeholder", p); }
     });
     return this;
