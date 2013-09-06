@@ -85,6 +85,6 @@
     ; This updates application on mongo too
   (update-rakennuslupa-documents-schemas updated-application)))
 
-(defmigration move-turvakielto-to-correct-place2
+(defmigration move-turvakielto-to-correct-place
    (let [applications (mongo/select :applications)]
      (map update-application-for-turvakielto applications)))
