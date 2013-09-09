@@ -93,9 +93,6 @@
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
-(defn create-YA-app [apikey & args] (apply create-app apikey (concat args [:operation "mainostus-ja-viitoituslupa"])))
-(defn create-R-app [apikey & args]  (apply create-app apikey (concat args [:operation "asuinrakennus"])))
-
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
@@ -221,7 +218,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.0.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.1.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (when statement-id
@@ -245,7 +242,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       ;(facts "Statement upload should fail"
        ; (fact "Status code" (:status resp) => 302)
-      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.0.html") => 0))
+      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.1.html") => 0))
       ))))
 
 
