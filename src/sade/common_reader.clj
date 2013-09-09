@@ -19,7 +19,7 @@
     (timeformat/parse (timeformat/formatters format) s)))
 
 (defn parse-datetime [^String s]
-  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss'Z'") s))
+  (timeformat/parse (timeformat/formatters :date-time-parser) s))
 
 (defn unparse-datetime [format dt]
   (timeformat/unparse (timeformat/formatters format) dt))
@@ -65,7 +65,10 @@
 
 (defn to-timestamp
   "Parses yyyy-mm-dd date and converts to timestamp"
-  [v] (if (re-matches #"^\d{4}-\d{2}-\d{2}" v) (coerce/to-long (parse-date v)) v))
+  [v] (cond
+        (re-matches #"^\d{4}-\d{2}-\d{2}$" v) (coerce/to-long (parse-date v))
+        (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$" v) (coerce/to-long (parse-datetime v))
+        :else v))
 
 (defn convert-values
   "Runs a recursive conversion"
