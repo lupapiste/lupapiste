@@ -61,6 +61,34 @@
   (doseq [application (mongo/select :applications muutostapa-not-exits-query)]
     (update-rakennuslupa-documents-schemas application)))
 
+(defn- update-document-turvakieltoKytkin [{data :data :as document}]
+  (let [updated-document (if (contains? data :turvakieltoKytkin)
+                           (let [value (:turvakieltoKytkin data)
+                                 cleaned-up (dissoc data :turvakieltoKytkin)]
+                             (assoc document :data (assoc-in cleaned-up [:henkilotiedot :turvakieltoKytkin] value)))
+                           (let [to-update (tools/deep-find data [:henkilo :turvakieltoKytkin])
+                           updated-document (when (not-empty to-update)
+                                              (assoc document :data (reduce
+                                                                      (fn [d [old-key v]]
+                                                                        (let [new-key (conj (subvec old-key 0 (.size old-key)) :henkilo :henkilotiedot :turvakieltoKytkin)
+                                                                              cleaned-up (sade.util/dissoc-in d (conj old-key :henkilo :turvakieltoKytkin))]
+                                                                          (assoc-in cleaned-up new-key v)))
+                                                                      data to-update)))]
+                             updated-document))]
+    (if updated-document
+      updated-document
+      document)))
+
+(defn- update-application-for-turvakielto [application]
+  (let [documents (:documents application)
+        updated-application (assoc application :documents (map update-document-turvakieltoKytkin documents))]
+    ; This updates application on mongo too
+  (update-rakennuslupa-documents-schemas updated-application)))
+
+(defmigration move-turvakielto-to-correct-place
+   (let [applications (mongo/select :applications)]
+     (map update-application-for-turvakielto applications)))
+
 (defn- update-document-kuntaroolikoodi [{data :data :as document}]
   (let [to-update (tools/deep-find data [:patevyys :kuntaRoolikoodi])
 
