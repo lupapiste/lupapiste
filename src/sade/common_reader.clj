@@ -91,7 +91,7 @@
 
 (defn ensure-sequental
   "Makes sure that the value of key k in map m is sequental"
-  [m k] (let [v (k m)] (if-not (sequential? v) (assoc m k [v]) m)))
+  [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
 
 (defn strip-xml-namespaces
   "strips namespace-part of xml-element-keys"

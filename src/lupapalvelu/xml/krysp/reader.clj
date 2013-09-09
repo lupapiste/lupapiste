@@ -84,10 +84,12 @@
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
 
+(def cleanup (comp cr/strip-empty-maps cr/strip-nils))
+
 (defn ->rakennuksen-tiedot [xml buildingId]
   (let [stripped  (cr/strip-xml-namespaces xml)
         rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
-        polished  (comp cr/index-maps cr/strip-empty-maps cr/strip-nils cr/convert-booleans)]
+        polished  (comp cr/index-maps cleanup cr/convert-booleans)]
     (when rakennus
       (polished
         {:muutostyolaji                 ...notimplemented...
@@ -137,10 +139,11 @@
 
 (defn ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+    (cleanup)
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
     (cr/ensure-sequental :maarays)
-    (#(assoc % :maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :toteutusHetki])))
+    (#(when-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki]))))
     (dissoc :maarays)
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
@@ -172,13 +175,20 @@
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
    :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                   [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-   :poytakirjat    (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))})
+   :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
+                     (map ->paatospoytakirja poytakirjat))})
 
 (defn ->permits [xml]
   (map
     (fn [asia]
-      {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
-       :paatokset       (map ->permit (select asia [:paatostieto :Paatos]))})
+      (let [permit-model {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])}
+            permits      (->> (select asia [:paatostieto :Paatos])
+                           (map ->permit)
+                           (cleanup)
+                           (filter seq))]
+        (if (seq permits)
+          (assoc permit-model :paatokset permits)
+          permit-model)))
     (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
 
 
