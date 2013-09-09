@@ -534,6 +534,8 @@
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
