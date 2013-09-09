@@ -20,7 +20,7 @@
   function OwnInfo() {
 
     var self = this;
-    
+
     self.error = ko.observable();
     self.saved = ko.observable();
     self.firstName = ko.observable();
@@ -46,9 +46,9 @@
       return a && a.length > 0;
     });
     self.loadingAttachments = ko.observable();
-    
+
     self.availableQualifications = ["AA", "A", "B", "C"];
-    
+
     self.init = function(u) {
       return self
         .error(null)
@@ -79,12 +79,12 @@
         .query("user-attachments", {})
         .pending(self.loadingAttachments)
         .success(function(data) {
-          self.attachments(_.map(data.attachments, function(info, id) { info.id = id; return info; })); 
+          self.attachments(_.map(data.attachments, function(info, id) { info.id = id; return info; }));
         })
         .call();
       return self;
     };
-    
+
     self.clear = function() {
       return self.saved(false).error(null);
     };
@@ -103,14 +103,14 @@
         .attr("data-test-role", self.role());
       return self;
     };
- 
+
     self.add = function() {
       uploadModel.init().open();
       return false;
     };
-    
+
     self.fileToRemove = null;
-    
+
     self.remove = function(data) {
       self.fileToRemove = data['attachment-id'];
       LUPAPISTE.ModalDialog.open("#dialog-confirm-mypage-attachment-remove");
@@ -135,7 +135,7 @@
         self.doRemove,
         loc("no"));
     });
-    
+
   }
 
   function Password() {
@@ -171,12 +171,12 @@
     self.stateError    = 4;
 
     self.state = ko.observable(-1); // -1 makes sure that init() fires state change.
-    
+
     self.ready = _.partial(self.state, self.stateReady);
     self.sending = _.partial(self.state, self.stateSending);
     self.done = _.partial(self.state, self.stateDone);
     self.error = _.partial(self.state, self.stateError);
-    
+
     self.start = ko.observable();
     self.filename = ko.observable();
     self.filesize = ko.observable();
@@ -187,11 +187,11 @@
     self.canStart = ko.computed(function() {
       return !_.isBlank(self.filename()) && self.attachmentType();
     });
-    
+
     self.availableAttachmentTypes = _.map(["cv", "examination", "proficiency"], function(type) {
-      return {id: type, name: loc("userinfo.architect.attachments.name", type)};
+      return {id: type, name: loc(["userinfo.architect.attachments.name", type])};
     });
-    
+
     self.init = function() {
       return self
         .state(self.stateInit)
@@ -201,7 +201,7 @@
         .attachmentType(null)
         .csrf($.cookie("anti-csrf-token"));
     };
-    
+
     self.open = function() {
       LUPAPISTE.ModalDialog.open("#dialog-userinfo-architect-upload");
       return self;
@@ -237,7 +237,7 @@
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
 
   $(function() {
-    
+
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
@@ -261,7 +261,7 @@
             done: function(e, data) { uploadModel.done(); },
             fail: uploadModel.error
           });
-    
+
   });
 
 })();
