@@ -274,7 +274,7 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority] :feature [:targetted-comments]})
+(defquery can-target-comment-to-authority {:roles [:authority]})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
