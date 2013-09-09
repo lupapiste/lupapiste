@@ -306,7 +306,7 @@
 
     self.create = function(infoRequest) {
       if (infoRequest) {
-        if(model.inforequestsDisabled()) {
+        if (model.inforequestsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
@@ -314,7 +314,7 @@
           return;
         }
       } else {
-        if(model.newApplicationsDisabled()) {
+        if (model.newApplicationsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
