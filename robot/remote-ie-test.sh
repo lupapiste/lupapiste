@@ -11,4 +11,10 @@ if [ -z $server ] ; then
 	server="lupadev.solita.fi"
 fi
 
-pybot -d target --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://192.168.7.223:4444/wd/hub --variable SERVER:http://$server $target
+hubert='192.168.7.223'
+bianca='192.168.7.253'
+
+#remote=$bianca
+remote=$hubert
+
+pybot -d target --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:http://$server $target

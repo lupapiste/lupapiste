@@ -481,9 +481,9 @@
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/get-schema schema-name)
                                                  :created created
-                                                 :data (if (= schema-name (:schema op-info))
+                                                 :data (tools/timestamped (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
-                                                         {})})
+                                                         {}) created)})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -496,8 +496,8 @@
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
-            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
+            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
+            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
