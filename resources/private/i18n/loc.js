@@ -3,37 +3,40 @@ var loc;
 ;(function() {
   "use strict";
 
-  function not(v) { return !v; }
+  function notValidLocParam(v) { return v === undefined || v === null || v === ""; }
 
   loc = function() {
-    var term, i, len, key = arguments[0];
+    var args = Array.prototype.slice.call(arguments);
 
-    if (_.some(arguments, not)) return null;
-
-    if (arguments.length > 1) {
-      len = arguments.length;
-      for (i = 1; i < len; i++) {
-        key = key + "." + arguments[i];
+    var key = args[0];
+    if (!key) {
+      return null;
+    }
+    
+    if (_.isArray(key)) {
+      if (_.some(key, notValidLocParam)) {
+        return null;
       }
+      key = key.join(".");
     }
 
-    term = loc.terms[key];
+    var formatParams = args.slice(1);
+    var term = loc.terms[key];
 
-    if (term === undefined) {
+    if (term !== undefined) {
+      if (!_.isEmpty(formatParams)) {
+        formatParams = _.map(formatParams, String);
+        for (var argIndex in formatParams) {
+          term = term.replace('{' + argIndex + '}', formatParams[argIndex]);
+        }
+      }
+    } else {
       debug("Missing localization key", key);
-      return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
+      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
 
     return term;
   };
-
-  hub.subscribe("change-lang", function(e) {
-    var lang = e.lang;
-    if (_.contains(loc.supported, lang)) {
-      var url = location.href.replace("/app/" + loc.currentLanguage + "/", "/app/" + lang + "/");
-      window.location = url;
-    }
-  });
 
   loc.supported = [];
   loc.currentLanguage = null;
@@ -84,4 +87,14 @@ var loc;
     return "$$noname$$";
   };
 
+
+  hub.subscribe("change-lang", function(e) {
+    var lang = e.lang;
+    if (_.contains(loc.supported, lang)) {
+      var url = location.href.replace("/app/" + loc.currentLanguage + "/", "/app/" + lang + "/");
+      window.location = url;
+    }
+  });
+
 })();
+

@@ -24,7 +24,7 @@
 
     <div class="tree-last">
 
-      <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
+      <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations',op])"></div>
 
       <button data-bind="click: addOperation, disable: processing" class="btn btn-primary" data-test-id="add-operation-to-application">
         <span data-bind="ltext: 'operations.add'"></span>

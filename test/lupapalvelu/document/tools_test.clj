@@ -84,7 +84,6 @@
   (schema-without-element-by-name schema "INVALID") => schema
   (schema-without-element-by-name schema "band") => {:info {:name "band"} :body []})
 
-
 (def deep-find-test-data {:a {:1 {:b {:c 1}}
                               :2 {:b {:c 2}}
                               :3 {:c {:b {:c 3}}}}})
@@ -97,3 +96,4 @@
       (some #(= % [[:a :3 :c] 3]) deep-find-result) => truthy
       (deep-find deep-find-test-data [:b :e]) => '()
       )
+
