@@ -163,7 +163,8 @@
                                  (fn [{meta :metatieto}]
                                    [(keyword (:metatietoNimi meta)) (:metatietoArvo meta)])
                                  (if (sequential? metatietotieto) metatietotieto [metatietotieto]))))
-    (dissoc :metatietotieto)))
+    (dissoc :metatietotieto)
+    (cr/convert-keys-to-timestamps [:muokkausHetki])))
 
 (defn ->paatospoytakirja [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)

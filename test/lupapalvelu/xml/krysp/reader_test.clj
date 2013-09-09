@@ -81,7 +81,7 @@
         (:pykala pk1) => 1
         (:kuvaus liite) => "kuvaus 1"
         (:linkkiliitteeseen liite) => "file:///file.ext"
-        (:muokkausHetki liite) => "2013-09-01T12:00:00"
+        (:muokkausHetki liite) => (to-timestamp "2013-09-01T12:00:00")
         (:versionumero liite) => "1"
         (get-in liite [:tekija :henkilo :nimi :sukunimi]) => "Tarkkanen"
         (:tyyppi liite) => "tyyppi 1"
