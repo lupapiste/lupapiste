@@ -135,7 +135,7 @@
                                :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
 
 
-(defn- ->lupamaaraukset [paatos-xml-without-ns]
+(defn ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
@@ -154,14 +154,21 @@
                        s      (get-text paatos xml-kw)]
                    [% (when s (clj-time.coerce/to-long (cr/parse-date s)))]) v)))
 
-(defn- ->paatospoytakirja [paatos-xml-without-ns]
-  ; WIP, not tested
+(defn ->liite [{:keys [metatietotieto] :as liite}]
+  (-> liite
+    (assoc  :metadata (into {} (map
+                                 (fn [{meta :metatieto}]
+                                   [(keyword (:metatietoNimi meta)) (:metatietoArvo meta)])
+                                 (if (sequential? metatietotieto) metatietotieto [metatietotieto]))))
+    (dissoc :metatietotieto)))
+
+(defn ->paatospoytakirja [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
-    (cr/convert-keys-to-timestamps [:paatospvm]))
-  )
+    (cr/convert-keys-to-timestamps [:paatospvm])
+    (#(assoc % :liite (->liite (:liite %))))))
 
-(defn- ->permit [paatos-xml-without-ns]
+(defn ->permit [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
    :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                   [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])

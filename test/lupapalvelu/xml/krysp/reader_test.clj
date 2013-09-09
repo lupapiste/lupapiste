@@ -72,11 +72,25 @@
       poytakirjat    => truthy
       (count poytakirjat) => 2
 
+      (let [pk1   (first poytakirjat)
+            liite (:liite pk1)]
+        (:paatos pk1) => "Päätös 1"
+        (:paatoskoodi pk1) => "myönnetty"
+        (:paatoksentekija pk1) => "viranomainen"
+        (:paatospvm pk1) => (to-timestamp "2013-08-01")
+        (:pykala pk1) => 1
+        (:kuvaus liite) => "kuvaus 1"
+        (:linkkiliitteeseen liite) => "file:///file.ext"
+        (:muokkausHetki liite) => "2013-09-01T12:00:00"
+        (:versionumero liite) => "1"
+        (get-in liite [:tekija :henkilo :nimi :sukunimi]) => "Tarkkanen"
+        (:tyyppi liite) => "tyyppi 1"
+        (:metadata liite) => {:nimi "arvo"})
+
       (facts "second permit"
         (let [poytakirjat2 (-> cases last :paatokset last :poytakirjat)]
           (count poytakirjat2) => 1
           poytakirjat2 => sequential?)))
-
 
     )
   )
