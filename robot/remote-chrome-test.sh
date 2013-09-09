@@ -6,4 +6,8 @@ if [ -z $target ] ; then
 	target="tests"
 fi
 
-pybot -d target --exclude integration --exclude fail --RunEmptySuite --variable BROWSER:chrome --variable SELENIUM:http://192.168.7.223:4444/wd/hub --variable SERVER:http://lupatest.solita.fi $target
+hubert='192.168.7.223'
+
+remote=$hubert
+
+pybot -d target --exclude integration --exclude fail --RunEmptySuite --variable BROWSER:chrome --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:http://lupatest.solita.fi $target

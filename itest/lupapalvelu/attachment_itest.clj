@@ -91,10 +91,11 @@
         (approve-attachment application-id (first attachment-ids)))
 
       (fact "Veikko can still reject attachment"
-        (reject-attachment application-id (first attachment-ids)))
+        (reject-attachment application-id (first attachment-ids))))))
 
-      (fact "pdf does not work with YA-lupa"
-        (let [{application-id :id :as response} (create-YA-app pena :municipality veikko-muni)]
-          response => ok?
-          pena =not=> (allowed? :pdf-export :id application-id)
-          (raw pena "pdf-export" :id application-id) => http404?)))))
+(fact "pdf does not work with YA-lupa"
+  (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "yleiset-alueet-kaivuulupa")
+        application (:application (query pena :application :id application-id))]
+    (:organization application) => "753-YA"
+    pena =not=> (allowed? :pdf-export :id application-id)
+    (raw pena "pdf-export" :id application-id) => http404?))

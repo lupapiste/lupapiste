@@ -144,13 +144,12 @@
   [{app :application}]
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
-(defn filter-repeating-party-docs [schema-version schema-names]
-  (let [schemas (schemas/get-schemas schema-version)]
-    (filter
-      (fn [schema-name]
-        (let [schema-info (get-in schemas [schema-name :info])]
-          (and (:repeating schema-info) (= (:type schema-info) :party))))
-      schema-names)))
+(defn filter-repeating-party-docs [names]
+  (filter
+    (fn [name]
+      (and (= :party (get-in (schemas/get-schemas) [name :info :type]))
+        (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
+    names))
 
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
@@ -181,7 +180,7 @@
       (let [documents (:documents application)
             initialOp (:name (first (:operations application)))
             original-schema-names (:required ((keyword initialOp) operations/operations))
-            original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
+            original-party-documents (filter-repeating-party-docs original-schema-names)]
         (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
 ;;
@@ -335,8 +334,8 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
-        schema-name  (get-in document [:schema-info :name])
-        schema       (schemas/get-schema (:schema-version application) schema-name)
+        schema-name  (get-in document [:schema :info :name])
+        schema       (schemas/get-schema schema-name)
         subject      (security/get-non-private-userinfo userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
@@ -346,10 +345,11 @@
                        (assoc-in {} (map keyword (split path #"\.")) person)
                        person)
         updates      (tools/path-vals model)]
-    (when-not document (fail! :error.document-not-found))
-    (when-not schema (fail! :error.schema-not-found))
-    (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
-    (commands/persist-model-updates id document updates created)))
+    (if-not document
+      (fail :error.document-not-found)
+      (do
+        (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
+        (commands/persist-model-updates id document updates created)))))
 
 ;;
 ;; Assign
@@ -470,7 +470,6 @@
     (fn [body [data-path data-value]]
       (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
             val (if (fn? data-value) (data-value application) data-value)]
-        ; FIXME: why not assoc-in?
         (update-in body path (constantly val))))
     {} schema-data))
 
@@ -479,27 +478,28 @@
   (let [op-info               (operations/operations (keyword (:name op)))
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
-        schema-version        (:schema-version application)
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
+                                                 :schema (schemas/get-schema schema-name)
                                                  :created created
-                                                 :data (if (= schema-name (:schema op-info))
-                                                         (schema-data-to-body (:schema-data op-info) application)
-                                                         {})})
+                                                 :data (tools/timestamped
+                                                         (if (= schema-name (:schema op-info))
+                                                           (schema-data-to-body (:schema-data op-info) application)
+                                                           {})
+                                                         created)})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
+        op-doc                (update-in (make op-schema-name) [:schema :info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
-            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
+            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
+            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
@@ -523,7 +523,7 @@
    (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
-(defcommand create-application
+(defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
@@ -536,6 +536,8 @@
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
@@ -547,23 +549,22 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
-          application   {:id              id
-                         :created         created
-                         :opened          (when (#{:open :info} state) created)
-                         :modified        created
-                         :permitType      permit-type
-                         :infoRequest     info-request?
-                         :operations      [op]
-                         :state           state
-                         :municipality    municipality
-                         :location        (->location x y)
-                         :organization    organization-id
-                         :address         address
-                         :propertyId      propertyId
-                         :title           address
-                         :auth            [owner]
-                         :comments        (map make-comment messages)
-                         :schema-version  (schemas/get-latest-schema-version)}
+          application   {:id            id
+                         :created       created
+                         :opened        (when (#{:open :info} state) created)
+                         :modified      created
+                         :permitType    permit-type
+                         :infoRequest   info-request?
+                         :operations    [op]
+                         :state         state
+                         :municipality  municipality
+                         :location      (->location x y)
+                         :organization  organization-id
+                         :address       address
+                         :propertyId    propertyId
+                         :title         address
+                         :auth          [owner]
+                         :comments      (map make-comment messages)}
           application   (merge application
                           (if info-request?
                             {:attachments            []

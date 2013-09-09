@@ -59,8 +59,7 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def henkilo-valitsin [{:name "userId" :type :personSelector}
-                       {:name "turvakieltoKytkin" :type :checkbox}])
+(def henkilo-valitsin [{:name "userId" :type :personSelector}])
 
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
 
@@ -93,13 +92,15 @@
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
                              :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}]}])
+                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                    {:name "turvakieltoKytkin" :type :checkbox}]}])
 
 (def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
                                :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                       {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true}]})
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true}
+                                      {:name "turvakieltoKytkin" :type :checkbox}]})
 
 (def henkilo (body
                henkilo-valitsin
