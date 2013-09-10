@@ -272,10 +272,11 @@
               ) canonical statement-attachments)))
 
 (defn statements-ids-with-status [application]
-  (let [lausunto (get-in application [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+  (let [lausunnot (get-in application [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
         ]
+
     (println "!!!!!!!!!!!!!!!!!!!")
-    (clojure.pprint/pprint lausunto)
+    (clojure.pprint/pprint lausunnot)
     (println "!!!!!!!!!!!!!!!!!!!"))
   lausunto
   )
