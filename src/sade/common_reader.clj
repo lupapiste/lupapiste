@@ -12,11 +12,12 @@
 ;;
 
 (defn parse-date
-  ([^String s]
-    (parse-date :year-month-day s))
+  "Parses date using given format. Defaults to the one used by CGI's KRYSP implementation"
   ([format ^String s]
     (assert (keyword? format))
-    (timeformat/parse (timeformat/formatters format) s)))
+    (timeformat/parse (timeformat/formatters format) s))
+  ([^String s]
+    (timeformat/parse (timeformat/formatter "YYYY-MM-dd'Z'") s)))
 
 (defn parse-datetime [^String s]
   (timeformat/parse (timeformat/formatters :date-time-parser) s))
@@ -66,7 +67,9 @@
 (defn to-timestamp
   "Parses yyyy-mm-dd date and converts to timestamp"
   [v] (cond
-        (re-matches #"^\d{4}-\d{2}-\d{2}$" v) (coerce/to-long (parse-date v))
+        (nil? v) nil
+        (re-matches #"^\d{4}-\d{2}-\d{2}Z$" v) (coerce/to-long (parse-date v))
+        (re-matches #"^\d{4}-\d{2}-\d{2}$" v)  (coerce/to-long (parse-date :year-month-day v))
         (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$" v) (coerce/to-long (parse-datetime v))
         :else v))
 

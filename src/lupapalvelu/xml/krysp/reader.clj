@@ -154,9 +154,8 @@
                               :autopaikkojaUlkopuolella])))
 
 (defn- get-pvm-dates [paatos v]
-  (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))
-                       s      (get-text paatos xml-kw)]
-                   [% (when s (clj-time.coerce/to-long (cr/parse-date s)))]) v)))
+  (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
+                   [% (cr/to-timestamp (get-text paatos xml-kw))]) v)))
 
 (defn ->liite [{:keys [metatietotieto] :as liite}]
   (-> liite
