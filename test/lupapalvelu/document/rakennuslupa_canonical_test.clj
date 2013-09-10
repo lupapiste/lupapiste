@@ -174,6 +174,7 @@
    :schema {:info {:name "rakennuksen-laajentaminen"
                    :op {:name "laajentaminen"}}}
    :data (conj {:rakennusnro {:value "001"}
+                :manuaalinen_rakennusnro {:value "002"}
                 :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                       :mitat {:tilavuus {:value "1500"}
                                               :kerrosala {:value "180"}
