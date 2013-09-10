@@ -675,19 +675,16 @@
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy (organization/get-legacy organization)]
         (let [doc-name     "rakennuksen-muuttaminen"
-              document     (domain/get-document-by-id (:documents application) documentId)
+              document     (domain/get-document-by-id application documentId)
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)]
-          ;; TODO: update via model
-          (mongo/update
-            :applications
-            {:_id (:id application)
-             :documents {$elemMatch {:id documentId}}}
-            {$set {:documents.$.data with-value-metadata
-                   :modified created}})
-          (ok))
+              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)
+              updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
+          (do
+            (infof "merging data into %s %s" doc-name documentId)
+            (commands/persist-model-updates id document updates created)
+            (ok)))
         (fail :no-legacy-available)))))
 
 (defcommand get-building-info-from-legacy
