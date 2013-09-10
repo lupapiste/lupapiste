@@ -365,11 +365,13 @@
                     ;;
                     ;; Testeissa kaytettävia organisaatioita
                     ;;
-                    {:id "753-R-TESTI-1"
+
+                    ;; New applications disabled
+                    {:id "997-R-TESTI-1"
                      :inforequest-enabled true
                      :new-application-enabled false
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"}]
+                     :scope [{:municipality "997" :permitType "R"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -380,11 +382,13 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
-                    {:id "753-R-TESTI-2"
+
+                    ;; Inforequests disabled
+                    {:id "998-R-TESTI-2"
                      :inforequest-enabled false
                      :new-application-enabled true
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"}]
+                     :scope [{:municipality "998" :permitType "R"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -395,11 +399,13 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
-                    {:id "753-R-TESTI-3"
+
+                    ;; Both new applications and inforequests disabled
+                    {:id "999-R-TESTI-3"
                      :inforequest-enabled false
                      :new-application-enabled false
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"}]
+                     :scope [{:municipality "999" :permitType "R"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
