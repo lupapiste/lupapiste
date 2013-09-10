@@ -530,13 +530,16 @@
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type     (operations/permit-type-of-operation operation)
-        organization-id (:id (organization/resolve-organization municipality permit-type))]
+        organization (organization/resolve-organization municipality permit-type)
+        organization-id (:id organization)]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (when-not (:new-application-enabled organization)
+      (fail! :error.new-applications-disabled))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
