@@ -1,12 +1,4 @@
-(ns lupapalvelu.document.rakennuslupa_canonical
-  (:use [lupapalvelu.core :only [now]]
-        [sade.strings]
-        [lupapalvelu.i18n :only [with-lang loc]]
-        [lupapalvelu.document.canonical-common])
-  (:require [clojure.java.io :as io]
-            [clojure.xml :as xml]
-            [clojure.zip :as zip]
-            [clojure.string :as s]))
+
 
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
@@ -319,7 +311,11 @@
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
 
+(defn- get-toimenpide-with-count [f application toimenpiteet]
+  (f ))
+
 (defn- get-operations [documents application]
+  ;funkito
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
