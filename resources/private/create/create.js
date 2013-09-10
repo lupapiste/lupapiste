@@ -38,7 +38,7 @@
       } else {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
-            loc("error.organization.inforequests-disabled"),
+            loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
             {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
       }
     };
@@ -107,7 +107,7 @@
         var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
         self
           .municipalityCode(code)
-          .municipalityName(code ? loc("municipality", code) : null)
+          .municipalityName(code ? loc(["municipality", code]) : null)
           .findMunicipality(code, self.municipality);
       }
     });
@@ -194,11 +194,11 @@
     function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
-      self.search(", " + loc("municipality", item.municipality));
+      self.search(", " + loc(["municipality", item.municipality]));
       $("#create-search").caretToStart();
     }
     function fillAddress(item) {
-      self.search(item.street + " " + item.number + ", " + loc("municipality", item.municipality));
+      self.search(item.street + " " + item.number + ", " + loc(["municipality", item.municipality]));
       $("#create-search").caretTo(item.street.length + item.number.toString().length + 1);
     }
 
@@ -222,8 +222,8 @@
           .addClass("create-find")
           .addClass("poi")
           .append($("<span>").addClass("name").text(item.text))
-          .append($("<span>").addClass("municipality").text(loc("municipality", item.municipality)))
-          .append($("<span>").addClass("type").text(loc("poi.type", item.type)));
+          .append($("<span>").addClass("municipality").text(loc(["municipality", item.municipality])))
+          .append($("<span>").addClass("type").text(loc(["poi.type", item.type])));
       }],
       [{kind: "address"}, function(item) {
         var a = $("<a>")
@@ -231,7 +231,7 @@
           .addClass("address")
           .append($("<span>").addClass("street").text(item.street));
         if ((item.type !== "street-city") && (item.type !== "street")) { a.append($("<span>").addClass("number").text(item.number)); }
-        if (item.type !== "street-number") { a.append($("<span>").addClass("municipality").text(loc("municipality", item.municipality))); }
+        if (item.type !== "street-number") { a.append($("<span>").addClass("municipality").text(loc(["municipality", item.municipality]))); }
         return a;
       }],
       [{kind: "property-id"}, function(item) {
@@ -306,18 +306,18 @@
 
     self.create = function(infoRequest) {
       if (infoRequest) {
-        if(model.newApplicationsDisabled()) {
+        if (model.inforequestsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("error.organization.inforequests-disabled"),
+              loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
               {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
           return;
         }
       } else {
-        if(model.newApplicationsDisabled()) {
+        if (model.newApplicationsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("error.organization.new-applications-disabled"),
+              loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
               {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
           return;
         }

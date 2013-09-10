@@ -102,7 +102,7 @@
   (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :neighbors :fn neighbors/normalize-negighbors}
+                  {:field :neighbors :fn neighbors/normalize-neighbors}
                   {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}
                   {:field :unseenComments :fn count-unseen-comment}
@@ -274,7 +274,7 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority] :feature [:targetted-comments]})
+(defquery can-target-comment-to-authority {:roles [:authority]})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
@@ -448,7 +448,8 @@
    :states     [:draft :open :submitted :complement-needed]
    :validators [validate-owner-or-writer]}
   [{:keys [application]}]
-  (autofill-rakennuspaikka application (now)))
+  (try (autofill-rakennuspaikka application (now))
+    (catch Exception e (error e "KTJ data was not updated"))))
 
 (defcommand save-application-shape
   {:parameters [:id shape]
@@ -480,22 +481,23 @@
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/get-schema schema-name)
                                                  :created created
-                                                 :data (if (= schema-name (:schema op-info))
+                                                 :data (tools/timestamped (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
-                                                         {})})
+                                                         {}) created)})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
-        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
+        op-doc                (update-in (make op-schema-name) [:schema :info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
-            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
+            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
+            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
@@ -527,11 +529,16 @@
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type     (operations/permit-type-of-operation operation)
-        organization-id (:id (organization/resolve-organization municipality permit-type))]
+        organization (organization/resolve-organization municipality permit-type)
+        organization-id (:id organization)]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (when-not (:new-application-enabled organization)
+      (fail! :error.new-applications-disabled))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
@@ -571,7 +578,7 @@
 
       (mongo/insert :applications application)
       (try (autofill-rakennuspaikka application created)
-        (catch Exception e (error e "KTJ data was not updatet.")))
+        (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
 
 (defcommand add-operation
@@ -606,7 +613,9 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
+      (if (and (= "R" (:permitType application)) (not (:infoRequest application)))
+        (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+          (catch Exception e (error e "KTJ data was not updated.")))))
     (fail :error.property-in-other-muinicipality)))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

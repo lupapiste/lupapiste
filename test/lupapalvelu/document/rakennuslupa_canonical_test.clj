@@ -22,7 +22,7 @@
 
 (def nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
 
-(def henkilotiedot (assoc nimi :hetu {:value "210281-9988"}))
+(def henkilotiedot (assoc nimi :hetu {:value "210281-9988"} :turvakieltoKytkin {:value true}))
 
 (def osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
@@ -30,8 +30,7 @@
   {:henkilotiedot henkilotiedot
    :yhteystiedot {:puhelin {:value "+358401234567"}
                   :email {:value "pena@example.com"}}
-   :osoite osoite
-   :turvakieltoKytkin {:value true}})
+   :osoite osoite})
 
 (def suunnittelija-henkilo
   (assoc henkilo :henkilotiedot nimi))
