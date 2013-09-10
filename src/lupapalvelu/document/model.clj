@@ -132,17 +132,20 @@
       (map check schema-body))))
 
 (defn validate
-  "Validates document against it's local schema and document level rules
-   retuning list of validation errors."
-  [{schema-info :schema-info data :data :as document}]
-  (let [schema (schemas/get-schema (:version schema-info) (:name schema-info))
-        schema-body (:body schema)]
-    (and data
-      (flatten
-        (concat
-          (validate-fields schema-body nil data [])
-          (validate-required-fields schema-body [] data [])
-          (validator/validate document))))))
+  "Validates document against it's schema and document level rules
+   returning list of validation errors."
+  ([document]
+    (let [schema-info (:schema-info document)]
+      (validate document (schemas/get-schema (:version schema-info) (:name schema-info)))))
+  ([document schema]
+    (let [schema-body (:body schema)
+          data (:data document)]
+      (when data
+        (flatten
+          (concat
+            (validate-fields schema-body nil data [])
+            (validate-required-fields schema-body [] data [])
+            (validator/validate document)))))))
 
 (defn valid-document?
   "Checks weather document is valid."
