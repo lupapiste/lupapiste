@@ -76,7 +76,6 @@
     };
 
     self.openDeleteDialog = function() {
-//      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement");
       LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc("statement.delete.header"),
           loc("statement.delete.message"),
@@ -137,7 +136,6 @@
 
     self.deleteAttachment = function(attachmentId) {
       deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
-//      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement-attachment");
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("attachment.delete.version.header"),
         loc("attachment.delete.version.message"),
