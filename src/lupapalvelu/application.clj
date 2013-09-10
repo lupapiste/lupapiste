@@ -674,15 +674,11 @@
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy (organization/get-legacy organization)]
-        (let [doc-name     "rakennuksen-muuttaminen"
-              document     (domain/get-document-by-id application documentId)
-              old-body     (:data document)
+        (let [document     (domain/get-document-by-id application documentId)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)
               updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
           (do
-            (infof "merging data into %s %s" doc-name documentId)
+            (infof "merging data into %s %s" (get-in document [:schema :info :name]) (:id document))
             (commands/persist-model-updates id document updates created)
             (ok)))
         (fail :no-legacy-available)))))
