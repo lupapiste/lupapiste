@@ -1,4 +1,12 @@
-
+(ns lupapalvelu.document.rakennuslupa_canonical
+  (:use [lupapalvelu.core :only [now]]
+        [sade.strings]
+        [lupapalvelu.i18n :only [with-lang loc]]
+        [lupapalvelu.document.canonical-common])
+  (:require [clojure.java.io :as io]
+            [clojure.xml :as xml]
+            [clojure.zip :as zip]
+            [clojure.string :as s]))
 
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
