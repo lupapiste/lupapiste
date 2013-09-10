@@ -74,8 +74,8 @@
 
       (let [pk1   (first poytakirjat)
             liite (:liite pk1)]
-        (:paatos pk1) => "Päätös 1"
-        (:paatoskoodi pk1) => "myönnetty"
+        (:paatos pk1) => "P\u00e4\u00e4t\u00f6s 1"
+        (:paatoskoodi pk1) => "my\u00f6nnetty"
         (:paatoksentekija pk1) => "viranomainen"
         (:paatospvm pk1) => (to-timestamp "2013-08-01")
         (:pykala pk1) => 1
