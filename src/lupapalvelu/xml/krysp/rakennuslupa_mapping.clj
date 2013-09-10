@@ -210,15 +210,15 @@
         link (str begin-of-link attachment-file-name)]
     {:Liite (get-Liite title link attachment type file-id)}))
 
-(defn- get-statement-attachments-as-canonical [application begin-of-link ]
+(defn- get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
                                       (fn-> :target :id keyword)
                                       (filter
                                         (fn-> :target :type (= "statement"))
                                         (:attachments application)))
-        canonical-attachments (for [[id attacments] statement-attachments-by-id]
-                                {id (for [attachment attacments]
-                                      (get-liite-for-lausunto attachment application begin-of-link))})]
+        canonical-attachments (for [id allowed-statement-ids]
+                                {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
+                                                (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
@@ -271,15 +271,13 @@
                 (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
               ) canonical statement-attachments)))
 
-(defn statements-ids-with-status [application]
-  (let [lausunnot (get-in application [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
-        ]
-
-    (println "!!!!!!!!!!!!!!!!!!!")
-    (clojure.pprint/pprint lausunnot)
-    (println "!!!!!!!!!!!!!!!!!!!"))
-  lausunto
-  )
+(defn statements-ids-with-status [canonical]
+  (let [lt (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])]
+    (reduce (fn [r l]
+              (if (get-in l [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto])
+                (conj r (get-in l [:Lausunto :id]))
+                r))
+            #{} lt)))
 
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
@@ -289,10 +287,9 @@
         canonical-without-attachments  (application-to-canonical application lang)
 
         ;list stament ideistä joillaon lausunto annettu
-        statements-ids-with-status (statements-ids-with-status application)
-        _ (println statements-ids-with-status)
+        statement-given-ids (statements-ids-with-status canonical-without-attachments)
 
-        statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
+        statement-attachments (get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                           {:Liite
