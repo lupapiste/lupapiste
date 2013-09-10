@@ -9,12 +9,21 @@ LUPAPISTE.VerdictsModel = function() {
   self.response = ko.observable();
 
   self.refresh = function(application) {
-    var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {return _.isEqual(attachment.target, {type: "verdict"});});
+    var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {
+      return _.isEqual(attachment.target, {type: "verdict"});});
+
     var verdicts = _.cloneDeep(application.verdicts)
                     .map(function(verdict) {
 
                       var poytakirjat = _.map(verdict.poytakirjat, function(pk) {
-                        var myAttachments = filter(application.attachments, function(attachment) {return false;}) || []; // TODO
+                        var attachmentUrlHashes = _.map(ok.liitteet, function(liite) {
+                          return liite.urlHash; // TODO implement in backend
+                        });
+
+                        var myAttachments = filter(application.attachments, function(attachment) {
+                          return attachment.target && attachment.target.type === "verdict" &&
+                            _.contains(attachmentUrlHashes, attachment.target.id);}) || []; // TODO
+
                         pk.attachments = myAttachments;
                         if (manuallyUploadedAttachments) {
                           pk.attachments = pk.attachments.concat(manuallyUploadedAttachments);
