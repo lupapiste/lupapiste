@@ -21,5 +21,5 @@
 (defn dummy-doc [schema-name]
   (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
         data   (create-document-data schema dummy-values)]
-    {:schema-info schema
+    {:schema-info (:info schema)
      :data        data}))
