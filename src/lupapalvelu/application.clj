@@ -76,7 +76,7 @@
 (defn count-unseen-verdicts [user app]
   (if (and (= (:role user) "applicant") (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdict app))))
+      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
 
 (defn count-attachments-requiring-action [user app]
