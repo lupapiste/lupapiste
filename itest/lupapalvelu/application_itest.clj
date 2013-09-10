@@ -190,6 +190,11 @@
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
 
+(fact "Pena cannot create app for organization that has new applications disabled"
+  (let [resp  (create-app pena :municipality "997")]
+    resp =not=> ok?
+    (:text resp) => "error.new-applications-disabled"))
+
 (defn- set-and-check-person [api-key application-id initial-document path]
   (fact "initially there is no person data"
        initial-document => truthy
