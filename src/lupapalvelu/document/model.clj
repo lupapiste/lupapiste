@@ -132,8 +132,8 @@
       (map check schema-body))))
 
 (defn validate
-  "Validates document against it's schema and document level rules
-   returning list of validation errors."
+  "Validates document against schema and document level rules. Returns list of validation errors.
+   If schema is not given, uses schema defined in document."
   ([document]
     (let [schema-info (:schema-info document)]
       (validate document (schemas/get-schema (:version schema-info) (:name schema-info)))))
