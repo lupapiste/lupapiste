@@ -118,5 +118,6 @@
     (dissoc :verdict)))
 
 (defmigration verdicts-migraation
+  {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
   (let [applications (mongo/select :applications {:verdict {$exists true}})]
     (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications)))
