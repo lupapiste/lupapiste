@@ -1,5 +1,5 @@
 unknown-document: Tuntematon dokumentti
-update-authority-user-organisations.dialog.title: Lisää käyttäjä organisaatioon
+update-authority-user-organisations.dialog.title: Käyttäjän lisäys organisaatioon
 update-authority-user-organisations.dialog.content.single: Käyttäjä kuuluu jo organisaatioon {0}. Haluatko lisätä hänet organisaatioon {1}?
 update-authority-user-organisations.dialog.content.multi: Käyttäjä kuuluu jo organisaatioihin {0}. Haluatko lisätä hänet organisaatioon {1}?
 update-authority-user-organisations.dialog.confirm.title: Käyttäjän tietojen päivitys
