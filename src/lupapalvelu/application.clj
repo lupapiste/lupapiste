@@ -656,12 +656,14 @@
   (update-application command
     {$set {:modified created
            :state    :verdictGiven}
-     $push {:verdict  {:id verdictId
-                       :timestamp created
-                       :name name
-                       :given given
-                       :status status
-                       :official official}}}))
+     $push {:verdicts (domain/->paatos
+                        {:id verdictId      ; Kuntalupatunnus
+                         :timestamp created ; tekninen Lupapisteen aikaleima
+                         :name name         ; poytakirja[] / paatoksentekija
+                         :given given       ; paivamaarat / antoPvm
+                         :status status     ; poytakirja[] / paatoskoodi
+                         :official official ; paivamaarat / lainvoimainenPvm
+                         })}}))
 
 (defcommand "check-for-verdict"
   {:parameters [:id]
