@@ -337,11 +337,11 @@
                 </thead>
                 <tbody data-bind="foreach: $root.verdictModel.verdicts">
                   <tr class="statement-row">
-                    <td data-bind="text: id, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
+                    <td data-bind="text: $data.id, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
                     <td data-bind="ltext: 'verdict.status.'+status"></td>
                     <td data-bind="text: name"></td>
-                    <td data-bind="dateString: given"></td>
-                    <td data-bind="dateString: official"></td>
+                    <td data-bind="dateString: $data.given"></td>
+                    <td data-bind="dateString: $data.official"></td>
                     <td data-bind="foreach: $root.verdictModel.attachments()">
                       <span data-bind="with: $data.latestVersion">
                         <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
