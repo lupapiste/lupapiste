@@ -363,7 +363,7 @@
                              {:municipality "626" :permitType "R"}
                              {:municipality "691" :permitType "R"}]}
                     ;;
-                    ;; Testeissa kaytettävia organisaatioita
+                    ;; Testeissa kaytettavia organisaatioita
                     ;;
 
                     ;; New applications disabled
