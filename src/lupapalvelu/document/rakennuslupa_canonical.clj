@@ -249,12 +249,11 @@
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (when (-> toimenpide :rakennusnro :value)
                                    {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
-                                                     :jarjestysnumero (-> toimenpide :rakennusnro :value) ;jnumero juokse toimenpide numero
+                                                     :jarjestysnumero nil
                                                      :kiinttun (:propertyId application)}})
                                (when (-> toimenpide :manuaalinen_rakennusnro :value)
                                    {:rakennustunnus {:manuaalinen_rakennusnro (-> toimenpide :rakennusnro :value)
-                                                     :jarjestysnumero (-> toimenpide :rakennusnro :value) ;jnumero juokse toimenpide numero
-                                                     ;manuaaliunen rakkennustunnus
+                                                     :jarjestysnumero nil
                                                     :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
@@ -265,9 +264,6 @@
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
-
-(defn- get-rakenelma-data [application action]
-  nil)
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values
@@ -316,24 +312,27 @@
                                                  :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                                                  :kokonaisala (-> toimenpide :kokonaisala :value)
-                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}}}}
+                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}
+                                                 :tunnus {:jarjestysnumero nil}
+                                                 :kiinttun (:propertyId application)}}}
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
 
 (defn- get-toimenpide-with-count [toimenpide n]
-  (assoc-in toimenpide (first (tools/deep-find toimenpide [:rakennustunnus :jarjestysnumero])) n))
+  (clojure.walk/postwalk #(if (contains? % :jarjestysnumero)
+                            (assoc % :jarjestysnumero n)
+                            %) toimenpide))
+
+
 
 (defn- get-operations [documents application]
   ;funkito
-  (let [toimenpiteet (filter not-empty (concat (map
-                                                 (fn [[op k]] (map #(op % application) (k documents)))
-                                                 (partition 2 [get-uusi-toimenpide                      :uusiRakennus
-                                                               get-rakennuksen-muuttaminen-toimenpide   :rakennuksen-muuttaminen
-                                                               get-rakennuksen-laajentaminen-toimenpide :rakennuksen-laajentaminen
-                                                               get-purku-toimenpide                     :purku
-                                                               get-kaupunkikuvatoimenpide               :kaupunkikuvatoimenpide]))))
+  (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
+                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
+                                               (map #(get-purku-toimenpide % application) (:purku documents))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range))]
-    
     (not-empty (sort-by :created toimenpiteet))))
 
 
