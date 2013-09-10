@@ -23,19 +23,15 @@
 
       (facts "Embedded validator facts"
         (println "Checking:" doc)
-        #_(doseq [values ok]
+        (doseq [values ok]
           (validate-fn (update values)) => nil?)
         (doseq [values fail]
-          (println (update values))
-          ;(validate-fn (update values)) => (has some (contains {:result [level (name code)]}))
-          )))))
+          (validate-fn (update values)) => (has some (contains {:result [level (name code)]})))))))
 
-(keys (:schema-info (dummy-doc "uusiRakennus")))
 (defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
     (println "Checking" (str (count validators) "/" (count @v/validators)) "awesome validators!")
-    (check-validator (first validators))
-    #_(doseq [validator validators]
+    (doseq [validator validators]
       (check-validator validator))))
 
 (facts "Embedded validator facts"
