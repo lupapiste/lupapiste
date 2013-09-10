@@ -285,10 +285,7 @@
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
-
-        ;list stament ideistä joillaon lausunto annettu
         statement-given-ids (statements-ids-with-status canonical-without-attachments)
-
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
