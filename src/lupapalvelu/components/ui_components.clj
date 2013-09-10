@@ -45,7 +45,7 @@
                   :css  ["selectm.css"]}
 
    :licenses     {:html ["licenses.html"]}
-   
+
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
@@ -71,7 +71,7 @@
                   :css ["accordion.css"]}
 
    :application  {:depends [:common :repository :tree]
-                  :js ["change-location.js" "invite.js" "application.js" "add-operation.js"]
+                  :js ["change-location.js" "invite.js" "verdicts-model.js" "application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
