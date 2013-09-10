@@ -4,6 +4,7 @@
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.xml.krysp.verdict :as verdict]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
             [clj-http.client :as http]
@@ -170,7 +171,8 @@
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
-    (#(assoc % :liite (->liite (:liite %))))))
+    (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
+    (#(assoc % :liite  (->liite (:liite %))))))
 
 (defn ->permit [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
