@@ -102,7 +102,7 @@
   (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :neighbors :fn neighbors/normalize-negighbors}
+                  {:field :neighbors :fn neighbors/normalize-neighbors}
                   {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}
                   {:field :unseenComments :fn count-unseen-comment}
@@ -274,7 +274,7 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority] :feature [:targetted-comments]})
+(defquery can-target-comment-to-authority {:roles [:authority]})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
@@ -529,15 +529,23 @@
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type     (operations/permit-type-of-operation operation)
-        organization-id (:id (organization/resolve-organization municipality permit-type))]
+        organization (organization/resolve-organization municipality permit-type)
+        organization-id (:id organization)
+        info-request? (boolean infoRequest)]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (if info-request?
+      (when-not (:inforequest-enabled organization)
+        (fail! :error.inforequests-disabled))
+    (when-not (:new-application-enabled organization)
+        (fail! :error.new-applications-disabled)))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
-          info-request? (boolean infoRequest)
           state         (cond
                           info-request?              :info
                           (security/authority? user) :open

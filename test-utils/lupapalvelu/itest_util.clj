@@ -93,9 +93,6 @@
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
-(defn create-YA-app [apikey & args] (apply create-app apikey (concat args [:operation "mainostus-ja-viitoituslupa"])))
-(defn create-R-app [apikey & args]  (apply create-app apikey (concat args [:operation "asuinrakennus"])))
-
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
