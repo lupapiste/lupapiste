@@ -6,7 +6,8 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [lupapalvelu.document.tools :as tools]))
 
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
@@ -319,17 +320,26 @@
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
 
-(defn- get-toimenpide-with-count [f application toimenpiteet]
-  (f ))
+(defn- get-toimenpide-with-count [toimenpide n]
+  (assoc-in toimenpide (first (tools/deep-find toimenpide [:rakennustunnus :jarjestysnumero])) n))
 
 (defn- get-operations [documents application]
   ;funkito
-  (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
-                                               (map #(get-purku-toimenpide % application) (:purku documents))
-                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))]
+  (let [toimenpiteet (filter not-empty (concat (map
+                                                 (fn [[op k]] (map #(op % application) (k documents)))
+                                                 (partition 2 [get-uusi-toimenpide                      :uusiRakennus
+                                                               get-rakennuksen-muuttaminen-toimenpide   :rakennuksen-muuttaminen
+                                                               get-rakennuksen-laajentaminen-toimenpide :rakennuksen-laajentaminen
+                                                               get-purku-toimenpide                     :purku
+                                                               get-kaupunkikuvatoimenpide               :kaupunkikuvatoimenpide]))))
+        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range))]
+    
     (not-empty (sort-by :created toimenpiteet))))
+
+
+
+
+
 
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
