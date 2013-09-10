@@ -174,6 +174,7 @@
    :schema {:info {:name "rakennuksen-laajentaminen"
                    :op {:name "laajentaminen"}}}
    :data (conj {:rakennusnro {:value "001"}
+                :manuaalinen_rakennusnro {:value "002"}
                 :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                       :mitat {:tilavuus {:value "1500"}
                                               :kerrosala {:value "180"}
@@ -490,6 +491,7 @@
 
 (facts "Canonical model is correct"
   (let [canonical (application-to-canonical application "se")
+
         rakennusvalvonta (:Rakennusvalvonta canonical)
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto)
@@ -579,8 +581,8 @@
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
-    (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
-    (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
+    (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 1)
+    (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 2)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
