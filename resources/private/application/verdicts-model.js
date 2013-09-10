@@ -12,10 +12,12 @@ LUPAPISTE.VerdictsModel = function() {
     }));
   };
 
-  self.openVerdict = function() {
-    window.location.hash = "#!/verdict/" + currentId; // FIXME
+  self.openVerdict = function(bindings) {
+    var currentId = bindings.application.id();
+    window.location.hash = "#!/verdict/" + currentId;
     return false;
   };
+
   self.checkVerdict = function(){
     ajax.command("check-for-verdict", {id: application.id()}) // FIXME
     .success(function(resp) {
