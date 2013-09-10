@@ -337,8 +337,8 @@
                 </thead>
                 <tbody data-bind="foreach: $root.verdictModel.verdicts">
                   <tr class="statement-row">
-                    <td data-bind="text: $data.id, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
-                    <td data-bind="ltext: 'verdict.status.'+status"></td>
+                    <td data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
+                    <td data-bind="ltext: 'verdict.status.'+$data.status"></td>
                     <td data-bind="text: name"></td>
                     <td data-bind="dateString: $data.given"></td>
                     <td data-bind="dateString: $data.official"></td>
