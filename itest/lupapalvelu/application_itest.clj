@@ -6,7 +6,8 @@
         [clojure.string :only [join]])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]))
 
 (apply-remote-minimal)
 
@@ -42,7 +43,7 @@
     (:opened application) => nil
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
-    (lupapalvelu.document.tools/unwrapped (-> hakija :data :henkilo :henkilotiedot)) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
+    (tools/unwrapped (-> hakija :data :henkilo :henkilotiedot)) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "753")
@@ -150,11 +151,22 @@
       (success resp) => true
       (:state application) => "submitted"
 
-      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official sonja-id)
-            application (:application (query sonja :application :id application-id))]
+      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124)
+            application (:application (query sonja :application :id application-id))
+            verdict     (first (:verdicts application))
+            paatos      (first (:paatokset verdict))
+            poytakirja  (first (:poytakirjat paatos))]
         (success resp) => true
         (:state application) => "verdictGiven"
         (count (:verdicts application)) => 1
+        (count (:paatokset verdict)) => 1
+        (count (:poytakirjat paatos)) => 1
+
+        (:kuntalupatunnus verdict) => "aaa"
+        (:status poytakirja) => 42
+        (:paatoksentekija poytakirja) => "Paatoksen antaja"
+        (get-in paatos [:paivamaarat :anto]) => 123
+        (get-in paatos [:paivamaarat :lainvoimainen]) => 124
 
         (let [attachment-id (first (get-attachment-ids application))]
           (upload-attachment sonja (:id application) attachment-id true "R")
