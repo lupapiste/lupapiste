@@ -274,9 +274,10 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
+                    ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
                     {:id "753-YA"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Sipoon yleisten alueiden rakentaminen"}
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
