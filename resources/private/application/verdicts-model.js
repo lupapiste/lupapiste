@@ -6,14 +6,27 @@ LUPAPISTE.VerdictsModel = function() {
   }
 
   self.verdicts = ko.observable();
-  self.attachments = ko.observable();
   self.response = ko.observable();
 
   self.refresh = function(application) {
-    self.verdicts(application.verdicts);
-    self.attachments(_.filter(application.attachments,function(attachment) {
-      return _.isEqual(attachment.target, {type: "verdict"});
-    }));
+    var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {return _.isEqual(attachment.target, {type: "verdict"});});
+    var verdicts = _.cloneDeep(application.verdicts)
+                    .map(function(verdict) {
+
+                      var poytakirjat = _.map(verdict.poytakirjat, function(pk) {
+                        var myAttachments = filter(application.attachments, function(attachment) {return false;}) || []; // TODO
+                        pk.attachments = myAttachments;
+                        if (manuallyUploadedAttachments) {
+                          pk.attachments = pk.attachments.concat(manuallyUploadedAttachments);
+                          manuallyUploadedAttachments = null;
+                        }
+                      });
+
+                      verdict.poytakirjat = poytakirjat;
+                      return verdict;
+                    });
+
+    self.verdicts(verdicts);
   };
 
   self.openVerdict = function(bindings) {
