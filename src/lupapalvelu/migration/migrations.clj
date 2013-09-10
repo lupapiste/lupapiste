@@ -50,7 +50,7 @@
 
 (defn update-rakennuslupa-documents-schemas [application]
   (let [updated (map (fn [document] (let [name (get-in document [:schema :info :name])
-                                          new-schema (schemas/get-schema name)]
+                                          new-schema (schemas/get-schema 1 name)]
                                       (assoc document :schema new-schema)))
                      (:documents application))
         updated-application (assoc application :documents updated)]

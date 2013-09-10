@@ -21,7 +21,7 @@
   (fact "is valid with wrong data and wrong schema"
     (->
       document
-      (assoc-in [:schema :info :name] "test")
+      (assoc-in [:schema-info :name] "test")
       (assoc-in [:data :player :health] 11)
       validate) => [{:path [:player :health]
                      :result [:warn "too-much-health"]}
