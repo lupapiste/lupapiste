@@ -154,6 +154,7 @@
             application (:application (query sonja :application :id application-id))]
         (success resp) => true
         (:state application) => "verdictGiven"
+        (count (:verdicts application)) => 1
 
         (let [attachment-id (first (get-attachment-ids application))]
           (upload-attachment sonja (:id application) attachment-id true "R")
