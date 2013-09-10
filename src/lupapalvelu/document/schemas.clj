@@ -52,7 +52,8 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector}])
 
-(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
+(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}
+                           {:name "manuaalinen_rakennusnro" :type :string}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
