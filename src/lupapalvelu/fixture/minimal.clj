@@ -361,7 +361,61 @@
                      :scope [{:municipality "069" :permitType "R"}
                              {:municipality "317" :permitType "R"}
                              {:municipality "626" :permitType "R"}
-                             {:municipality "691" :permitType "R"}]}])
+                             {:municipality "691" :permitType "R"}]}
+                    ;;
+                    ;; Testeissa kaytettavia organisaatioita
+                    ;;
+
+                    ;; New applications disabled
+                    {:id "997-R-TESTI-1"
+                     :inforequest-enabled true
+                     :new-application-enabled false
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :scope [{:municipality "997" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}
+
+                    ;; Inforequests disabled
+                    {:id "998-R-TESTI-2"
+                     :inforequest-enabled false
+                     :new-application-enabled true
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :scope [{:municipality "998" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}
+
+                    ;; Both new applications and inforequests disabled
+                    {:id "999-R-TESTI-3"
+                     :inforequest-enabled false
+                     :new-application-enabled false
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :scope [{:municipality "999" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

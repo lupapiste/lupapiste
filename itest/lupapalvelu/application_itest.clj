@@ -203,6 +203,11 @@
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
 
+(fact "Pena cannot create app for organization that has new applications disabled"
+  (let [resp  (create-app pena :municipality "997")]
+    resp =not=> ok?
+    (:text resp) => "error.new-applications-disabled"))
+
 (defn- set-and-check-person [api-key application-id initial-document path]
   (fact "initially there is no person data"
        initial-document => truthy
@@ -253,6 +258,22 @@
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
+
+(fact "Merging building information from KRYSP does not overwrite the rest of the document"
+  (let [application-id  (create-app-id pena :municipality "753")
+        resp            (command pena :add-operation :id application-id :operation "kayttotark-muutos")
+        app             (:application (query pena :application :id application-id))
+        rakmuu-doc      (domain/get-document-by-name app "rakennuksen-muuttaminen")
+        resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
+        updated-app     (:application (query pena :application :id application-id))
+        building-info   (command pena :get-building-info-from-legacy :id application-id)
+        doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
+        building-id     (:buildingId (first (:data building-info)))
+        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :buildingId building-id)
+        merged-app      (:application (query pena :application :id application-id))
+        doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+        (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"        
+        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"))
 
 (comment
   (apply-remote-minimal)
