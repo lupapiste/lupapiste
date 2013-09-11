@@ -131,7 +131,7 @@
       [(check (sub-schema-by-name schema-body selected))]
       (map check schema-body))))
 
-(defn- get-document-schema [document]
+(defn get-document-schema [document]
   (let [schema-info (:schema-info document)]
     (schemas/get-schema (:version schema-info) (:name schema-info))))
 
