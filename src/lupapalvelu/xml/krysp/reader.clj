@@ -144,7 +144,7 @@
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
     (cr/ensure-sequental :maarays)
-    (#(when-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki]))))
+    (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
     (dissoc :maarays)
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
