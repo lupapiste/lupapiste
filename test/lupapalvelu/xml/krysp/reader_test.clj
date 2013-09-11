@@ -142,3 +142,17 @@
           (:linkkiliitteeseen liite) => "http://212.213.116.162:80/186/arkisto/2013/PAATOSOTE_13-0185-R_20130903152736270.rtf"
           (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
           (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))
+
+(facts "case not found"
+  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
+        cases (->verdicts xml)]
+    (fact "xml is parsed" cases => truthy)
+    (fact "xml has no cases" (count cases) => 0)))
+
+(facts "no verdicts"
+  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
+        cases (->verdicts xml)]
+    (fact "xml is parsed" cases => truthy)
+    (fact "xml has 1 case" (count cases) => 1)
+    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
+    (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
