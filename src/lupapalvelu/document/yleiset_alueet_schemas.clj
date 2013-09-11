@@ -12,11 +12,6 @@
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
     {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
 
-(def hankkeen-kuvaus-sijoituslupa
-  (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
-
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
     (schema-body-without-element-by-name party "turvakieltoKytkin")
@@ -100,6 +95,20 @@
      {:name "viitoitus-tapahtuma-valinta" :type :group
       :body viitoitus-tapahtuma}]))
 
+(defschemas
+  [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
+           :type :group
+           :removable false
+           :repeating false
+           :order 64}
+    :body mainostus-tai-viitoitus-tapahtuma-valinta}])
+
+
+(def hankkeen-kuvaus-sijoituslupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
+
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
     [{:name "sijoituksen-tarkoitus" :type :select
@@ -118,15 +127,6 @@
      ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
      {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
      {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
-
-
-(defschemas
-  [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
-           :type :group
-           :removable false
-           :repeating false
-           :order 64}
-    :body mainostus-tai-viitoitus-tapahtuma-valinta}])
 
 (defschemas
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
