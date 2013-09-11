@@ -113,7 +113,12 @@
 
     self.remove = function(data) {
       self.fileToRemove = data['attachment-id'];
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-mypage-attachment-remove");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("userinfo.architect.remove.title"),
+        loc("userinfo.architect.remove.message"),
+        {title: loc("yes"), fn: self.doRemove},
+        {title: loc("no")}
+      );
       return false;
     };
 
@@ -125,17 +130,6 @@
     };
 
     self.saved.subscribe(self.updateUserName);
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog(
-        "dialog-confirm-mypage-attachment-remove",
-        loc("userinfo.architect.remove.title"),
-        loc("userinfo.architect.remove.message"),
-        loc("yes"),
-        self.doRemove,
-        loc("no"));
-    });
-
   }
 
   function Password() {
