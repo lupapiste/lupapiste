@@ -112,8 +112,33 @@
       (fact "lupamaaraykset is parsed" lupamaaraykset => truthy)
 
       (facts "katselmukset"
-          (count katselmukset) => 1
-          (:katselmuksenLaji (first katselmukset)) => "loppukatselmus")
+        (count katselmukset) => 1
+        (:katselmuksenLaji (first katselmukset)) => "loppukatselmus")
 
-      )
-    ))
+      (facts "paivamaarat data is correct"
+        paivamaarat    => truthy
+        (:aloitettava paivamaarat) => pos?
+        (:aloitettava paivamaarat) => (to-timestamp "2016-10-08")
+        (:lainvoimainen paivamaarat) => (to-timestamp "2013-10-08")
+        (:voimassaHetki paivamaarat) => (to-timestamp "2018-10-08")
+        (:raukeamis paivamaarat) => nil
+        (:anto paivamaarat) => (to-timestamp "2013-09-06")
+        (:viimeinenValitus paivamaarat) => (to-timestamp "2013-10-07")
+        (:julkipano paivamaarat) => (to-timestamp "2013-09-04"))
+
+
+      (facts "p\u00f6yt\u00e4kirjat data is correct"
+        poytakirjat    => truthy
+        (count poytakirjat) => 1
+
+        (let [pk1   (first poytakirjat)
+              liite (:liite pk1)]
+          (:paatos pk1) => nil
+          (:paatoskoodi pk1) => "my\u00f6nnetty"
+          (:paatoksentekija pk1) => "Rakennuslautakunta"
+          (:paatospvm pk1) => (to-timestamp "2013-09-03")
+          (:pykala pk1) => 12
+          (:kuvaus liite) => "Päätösote"
+          (:linkkiliitteeseen liite) => "http://212.213.116.162:80/186/arkisto/2013/PAATOSOTE_13-0185-R_20130903152736270.rtf"
+          (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
+          (:tyyppi liite) => "Päätösote")))))
