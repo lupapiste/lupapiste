@@ -29,6 +29,7 @@ var repository = (function() {
     window.location.hash = "!/applications";
   }
 
+  // Cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo, because the id is registered with hub.subscribe.
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-application-load-error",
       loc("error.application-not-found"), loc("error.application-not-accessible"),
       loc("navigation"), showApplicationList, loc("logout"), function() {hub.send("logout");});

@@ -158,6 +158,22 @@
     :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
               :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
+
+   {:id "837-YA"  ;; Tampere YA paakayttaja
+    :enabled true
+    :lastName "Tampere"
+    :firstName "Paakayttaja-YA"
+    :city "Tampere"
+    :username "tampere-ya"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "tampere-ya"
+    :role "authorityAdmin"
+    :zip "010203"
+    :organizations ["837-YA"]
+    :private {:salt "$2a$10$hkJ5ZQhqL66iM2.3m4712e"
+              :password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe"}}
+
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
@@ -250,6 +266,7 @@
                               :url "http://www.jarvenpaa.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+
                     {:id "753-R"
                      :inforequest-enabled true
                      :new-application-enabled true
@@ -274,9 +291,11 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
+
+                    ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
                     {:id "753-YA"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Sipoon yleisten alueiden rakentaminen"}
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
@@ -289,8 +308,8 @@
                      :operations-attachments {:yleiset-alueet-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "753-P"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Sipoon poikkari"}
                      :scope [{:municipality "753" :permitType "P"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
@@ -306,8 +325,8 @@
                                          :name "Sonja Sibbo"}]}
 
                     {:id "837-R"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Tampereen rakennusvalvonta"}
                      :scope [{:municipality "837" :permitType "R"}]
                      :links [{:name {:fi "Tampere" :sv "Tammerfors"}
@@ -323,39 +342,110 @@
                                               :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
-                                                                         [:muut :valaistussuunnitelma]]}
-                     }
+                                                                         [:muut :valaistussuunnitelma]]}}
+
+                    {:id "837-YA",
+                      :inforequest-enabled true
+                      :name {:fi "Tampere yleiset alueet"
+                             :sv "Tammerfors yleiset alueet"}
+                      :new-application-enabled true
+                      :scope [{:municipality "837" :permitType "YA"}]
+;                      :statementPersons [{:id "521f1e82e4b0d14f5a87f179"
+;                                          :text "Paloviranomainen"
+;                                          :email "jari.asp@solita.fi"
+;                                          :name "Jari Asp"}]
+                      :yleiset-alueet-ftp-user "tampere"
+                      :operations-attachments {:yleiset-alueet-kaivuulupa
+                                               [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
+
                     {:id "638-R"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Porvoon rakennusvalvonta"}
                      :scope [{:municipality "638" :permitType "R"}]
                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
                               :url "http://www.porvoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+
                     {:id "564-R"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Oulun rakennusvalvonta"}
                      :scope [{:municipality "564" :permitType "R"}]
                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
                               :url "http://www.ouka.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+
                     {:id "529-R"
                      :inforequest-enabled true
                      :new-application-enabled true
                      :name {:fi "Naantalin rakennusvalvonta"}
                      :scope [{:municipality "529" :permitType "R"}]}
+
                     {:id "069-R"
-                     :inforequest-enabled false
-                     :new-application-enabled false
+                     :inforequest-enabled true
+                     :new-application-enabled true
                      :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"}
                      :scope [{:municipality "069" :permitType "R"}
                              {:municipality "317" :permitType "R"}
                              {:municipality "626" :permitType "R"}
-                             {:municipality "691" :permitType "R"}]}])
+                             {:municipality "691" :permitType "R"}]}
+                    ;;
+                    ;; Testeissa kaytettavia organisaatioita
+                    ;;
+
+                    ;; New applications disabled
+                    {:id "997-R-TESTI-1"
+                     :inforequest-enabled true
+                     :new-application-enabled false
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :scope [{:municipality "997" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}
+
+                    ;; Inforequests disabled
+                    {:id "998-R-TESTI-2"
+                     :inforequest-enabled false
+                     :new-application-enabled true
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :scope [{:municipality "998" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}
+
+                    ;; Both new applications and inforequests disabled
+                    {:id "999-R-TESTI-3"
+                     :inforequest-enabled false
+                     :new-application-enabled false
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :scope [{:municipality "999" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

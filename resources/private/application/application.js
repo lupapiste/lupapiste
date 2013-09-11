@@ -146,7 +146,12 @@
 
     self.init = function(applicationId) {
       self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.message"),
+        {title: loc("yes"), fn: self.ok},
+        {title: loc("no")}
+      );
       return self;
     };
     self.ok = function() {
@@ -158,10 +163,6 @@
         .call();
       return false;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
   }();
 
   var removeAuthModel = new function() {
@@ -173,7 +174,12 @@
     self.init = function(applicationId, username) {
       self.applicationId = applicationId;
       self.username = username;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-remove-auth");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.message"),
+        {title: loc("yes"), fn: self.ok},
+        {title: loc("no")}
+      );
       return self;
     };
 
@@ -186,10 +192,6 @@
         .call();
       return false;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-remove-auth", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
   }();
 
   var requestForStatementModel = new function() {
@@ -260,7 +262,12 @@
 
     self.init = function(applicationId) {
       self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-submit");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.submit.areyousure.title"),
+        loc("application.submit.areyousure.message"),
+        {title: loc("yes"), fn: self.ok},
+        {title: loc("no")}
+      );
       return self;
     };
 
@@ -270,10 +277,6 @@
         .call();
       return false;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
   }();
 
   var addPartyModel = new function() {
