@@ -687,7 +687,7 @@
               updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
           (do
             (infof "merging data into %s %s" (get-in document [:schema :info :name]) (:id document))
-            (commands/persist-model-updates id document updates created)
+            (commands/persist-model-updates id document updates created {:source "krysp"})
             (ok)))
         (fail :no-legacy-available)))))
 
