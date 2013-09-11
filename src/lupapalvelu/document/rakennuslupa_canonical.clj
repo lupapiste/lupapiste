@@ -247,20 +247,22 @@
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
-                               (when (-> toimenpide :rakennusnro :value)
-                                   {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                               (cond (-> toimenpide :manuaalinen_rakennusnro :value)
+                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
                                                      :jarjestysnumero nil
-                                                     :kiinttun (:propertyId application)}})
-                               (when (-> toimenpide :manuaalinen_rakennusnro :value)
-                                   {:rakennustunnus {:manuaalinen_rakennusnro (-> toimenpide :rakennusnro :value)
+                                                    :kiinttun (:propertyId application)}}
+                                     (-> toimenpide :rakennusnro :value)
+                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
                                                      :jarjestysnumero nil
-                                                    :kiinttun (:propertyId application)}})
+                                                     :kiinttun (:propertyId application)}}
+                                     :default
+                                       {:rakennustunnus {:jarjestysnumero nil
+                                                         :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
                                (when huoneistot (if (not-empty (:huoneisto huoneistot))
-                                                  {:asuinhuoneistot huoneistot})
-                                 ))}))
+                                                  {:asuinhuoneistot huoneistot})))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
@@ -332,7 +334,7 @@
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
                                                (map #(get-purku-toimenpide % application) (:purku documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
-        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range))]
+        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
 
 
