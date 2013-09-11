@@ -27,7 +27,7 @@
                     :css ["jquery-ui.css"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
    :knockout       {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
-   :lo-dash        {:js ["lodash-1.2.1.min.js"]}
+   :lo-dash        {:js ["lodash-1.3.1.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
