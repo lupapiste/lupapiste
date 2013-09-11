@@ -671,20 +671,43 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn load-verdict-attachments! [application]
-  )
+(defn- get-verdicts-with-attachments [application]
+  (let [legacy   (organization/get-legacy (:organization application))
+        xml      (krysp/application-xml legacy (:id application))
+        verdicts (krysp/->verdicts xml)]
+    (map
+      (fn [verdict]
+        (assoc verdict :paatokset
+          (map
+            (fn [paatos]
+              (assoc paatos :poytakirjat
+                (map
+                  (fn [pk]
+                    (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                      (let [pk-with-urlhash (assoc pk :urlHash (digest/sha-256 url))]
+
+                        ; TODO download & save; perhaps async, perhaps not?
+
+                        ; TODO (dissoc :liite)?
+                        pk-with-urlhash)
+                      pk))
+                  (:poytakirjat paatos))))
+            (:paatokset verdict))))
+      verdicts)))
 
 (defcommand check-for-verdict
-  {:parameters [id]
-   ;TODO; remove draft and open when this feature ready
-   :states     [:draft :open :submitted :complement-needed :sent]
+  {:parameters [:id]
+   ;TODO; remove all but sent when ready
+   :states     [:draft :open :submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]
    :feature [:paatoksenHaku]}
-  [{application :application}]
-  (let [legacy (organization/get-legacy (:organization application))]
-    (when-let [verdicts (seq (krysp/->verdicts (krysp/application-xml legacy id)))]
-      (ok :response verdicts))))
-
+  [{:keys [created application] :as command}]
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application))]
+    (update-application command
+      {$set {:verdicts verdicts-with-attachments
+             :modified created
+             :state    :verdictGiven}}) ; or $pushAll?
+    (ok :response verdicts-with-attachments)))
 
 ;;
 ;; krysp enrichment

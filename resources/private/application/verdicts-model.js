@@ -1,4 +1,5 @@
 LUPAPISTE.VerdictsModel = function() {
+  "use strict";
   var self = this;
 
   function getApplicationId(bindings) {
@@ -13,25 +14,22 @@ LUPAPISTE.VerdictsModel = function() {
       return _.isEqual(attachment.target, {type: "verdict"});});
 
     var verdicts = _.cloneDeep(application.verdicts || []).map(function(verdict) {
-                      var poytakirjat = _.map(verdict.poytakirjat, function(pk) {
-                        var attachmentUrlHashes = _.map(pk.liitteet, function(liite) {
-                          return liite.urlHash; // TODO implement in backend
-                        });
-
-                        var myAttachments = filter(application.attachments, function(attachment) {
-                          return attachment.target && attachment.target.type === "verdict" &&
-                            _.contains(attachmentUrlHashes, attachment.target.id);}) || []; // TODO
-
-                        pk.attachments = myAttachments;
-                        if (manuallyUploadedAttachments) {
-                          pk.attachments = pk.attachments.concat(manuallyUploadedAttachments);
-                          manuallyUploadedAttachments = null;
-                        }
-                      });
-
-                      verdict.poytakirjat = poytakirjat;
-                      return verdict;
-                    });
+      var paatokset = _.map(verdict.paatokset || [], function(paatos) {
+        var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
+          var myId = {type: "verdict", id: pk.urlHash};
+          var myAttachments = _.filter(application.attachments || [], function(attachment) {return _.isEqual(attachment.target, myId);}) || [];
+          pk.attachments = myAttachments;
+          if (manuallyUploadedAttachments) {
+            pk.attachments = pk.attachments.concat(manuallyUploadedAttachments);
+            manuallyUploadedAttachments = null;
+          }
+          return pk;
+        });
+        paatos.poytakirjat = poytakirjat;
+        return paatos;});
+      verdict.paatokset = paatokset;
+      return verdict;
+    });
 
     self.verdicts(verdicts);
   };
