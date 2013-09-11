@@ -324,10 +324,38 @@
           <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
           <div class="tab-wrapper" >
             <div class="row" data-bind="if: $root.verdictModel.verdicts()">
+              <dl data-bind="foreach: $root.verdictModel.verdicts">
+                <dt data-bind="ltext: 'verdict.id'"></dt>
+                <dd data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></dd>
+
+                <dt>__Paatokset__</dt>
+                <!--  ko if:  $data.paatokset -->
+                <dd data-bind="foreach: paatokset">
+                  <dl>
+                    <dt>_Poytakirjat_</dt>
+                    <!--  ko if:  $data.poytakirjat -->
+                    <dd data-bind="text: JSON.stringify(poytakirjat, null, 4)" style="white-space: pre-wrap;"></dd>
+                    <!-- /ko -->
+                    <dt>_Paivamaarat_</dt>
+                    <!--  ko if:  $data.paivamaarat -->
+                    <dd data-bind="text: JSON.stringify(paivamaarat, null, 4)" style="white-space: pre-wrap;"></dd>
+                    <!-- /ko -->
+                    <dt>_Lupamaaraykset_</dt>
+                    <!--  ko if:  $data.lupamaaraykset -->
+                    <dd data-bind="text: JSON.stringify(lupamaaraykset, null, 4)" style="white-space: pre-wrap;"></dd>
+                    <!-- /ko -->
+                  </dl>
+                </dd>
+
+
+                <!-- /ko -->
+
+              </dl>
+            <!--
               <table class="table table-striped tablesorter" id="application-verdict-details">
                 <thead>
                   <tr>
-                    <th data-bind="ltext: 'verdict.id'"></th>
+                    <th></th>
                     <th data-bind="ltext: 'verdict.status'"></th>
                     <th data-bind="ltext: 'verdict.name'"></th>
                     <th data-bind="ltext: 'verdict.given'"></th>
@@ -335,14 +363,14 @@
                     <th data-bind="ltext: 'verdict.attachments'"></th>
                   </tr>
                 </thead>
-                <tbody data-bind="foreach: $root.verdictModel.verdicts">
+                <tbody>
                   <tr class="statement-row">
-                    <td data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
+                    <td></td>
                     <td data-bind="ltext: 'verdict.status.'+$data.status"></td>
                     <td data-bind="text: name"></td>
-                    <td data-bind="dateString: $data.given"></td>
-                    <td data-bind="dateString: $data.official"></td>
-                    <td data-bind="foreach: $root.verdictModel.attachments()">
+                    <td data-bind="dateString: $data.paatokset.paivamaarat.anto"></td>
+                    <td data-bind="dateString: $data.paatokset.paivamaarat.lainvoimainen"></td>
+                    <td data-bind="foreach: $data.paatokset">
                       <span data-bind="with: $data.latestVersion">
                         <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
                           <i data-bind="ltext: contentType"></i>
@@ -352,6 +380,7 @@
                   </tr>
                 </tbody>
               </table>
+             -->
             </div>
             <button
               data-bind="click: $root.verdictModel.openVerdict, ltext: 'application.verdict.add', visible: $root.authorization.ok('give-verdict')"
