@@ -131,15 +131,19 @@
       [(check (sub-schema-by-name schema-body selected))]
       (map check schema-body))))
 
+(defn- get-document-schema [document]
+  (let [schema-info (:schema-info document)]
+    (schemas/get-schema (:version schema-info) (:name schema-info))))
+
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
    If schema is not given, uses schema defined in document."
   ([document]
-    (let [schema-info (:schema-info document)]
-      (validate document (schemas/get-schema (:version schema-info) (:name schema-info)))))
+    (validate document nil))
   ([document schema]
-    (let [schema-body (:body schema)
-          data (:data document)]
+    (let [data (:data document)
+          schema (or schema (get-document-schema document))
+          schema-body (:body schema)]
       (when data
         (flatten
           (concat
@@ -222,18 +226,21 @@
     (with-timestamp timestamp (apply-approval document path status user))))
 
 (defn approvable?
-  ([document] (approvable? document nil))
-  ([document path]
-  (if (seq path)
-    (let [schema-body (get-in document [:schema :body])
-          str-path    (map #(if (keyword? %) (name %) %) path)
-          element     (keywordize-keys (find-by-name schema-body str-path))]
-      (true? (:approvable element)))
-    (true? (get-in document [:schema-info :approvable])))))
+  ([document] (approvable? document nil nil))
+  ([document path] (approvable? document nil path))
+  ([document schema path]
+    (if (seq path)
+      (let [schema      (or schema (get-document-schema document))
+            schema-body (:body schema)
+            str-path    (map #(if (keyword? %) (name %) %) path)
+            element     (keywordize-keys (find-by-name schema-body str-path))]
+        (true? (:approvable element)))
+      (true? (get-in document [:schema-info :approvable])))))
 
 (defn modifications-since-approvals
-  ([{:keys [schema data meta]}]
-    (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0)))
+  ([{:keys [schema-info data meta]}]
+    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))]
+      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0))))
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
