@@ -158,6 +158,22 @@
     :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
               :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
+
+   {:id "837-YA"  ;; Tampere YA paakayttaja
+    :enabled true
+    :lastName "Tampere"
+    :firstName "Pääkäyttäjä-YA"
+    :city "Tampere"
+    :username "tampere-ya"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "tampere-ya"
+    :role "authorityAdmin"
+    :zip "010203"
+    :organizations ["837-YA"]
+    :private {:salt "$2a$10$hkJ5ZQhqL66iM2.3m4712e"
+              :password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe"}}
+
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
@@ -284,7 +300,7 @@
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :yleiset-alueet-ftp-user "sipoo"
+                     :yleiset-alueet-ftp-user "ya_sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -327,6 +343,20 @@
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]}}
+
+                    {:id "837-YA",
+                      :inforequest-enabled true
+                      :name {:fi "Tampere yleiset alueet"
+                             :sv "Tammerfors yleiset alueet"}
+                      :new-application-enabled true
+                      :scope [{:municipality "837" :permitType "YA"}]
+;                      :statementPersons [{:id "521f1e82e4b0d14f5a87f179"
+;                                          :text "Paloviranomainen"
+;                                          :email "jari.asp@solita.fi"
+;                                          :name "Jari Asp"}]
+                      :yleiset-alueet-ftp-user "ya_tampere"
+                      :operations-attachments {:yleiset-alueet-kaivuulupa
+                                               [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "638-R"
                      :inforequest-enabled true
