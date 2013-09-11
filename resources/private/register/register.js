@@ -41,16 +41,17 @@
   }
 
   function cancel() {
-    LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel-register");
-  }
-
-  $(function() {
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel-register", loc("areyousure"), loc("register.confirm-cancel"),
-      loc("yes"), function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("areyousure"),
+      loc("register.confirm-cancel"),
+      {title: loc("yes"),
+       fn: function() {
         reset(model());
         window.location.hash = "";
-      }, loc("no"));
-  });
+      }},
+      {title: loc("no")}
+    );
+  }
 
   var plainModel = {
     personId: ko.observable(),

@@ -273,7 +273,8 @@
         merged-app      (:application (query pena :application :id application-id))
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"        
-        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"))
+        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+        (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
 (comment
   (apply-remote-minimal)

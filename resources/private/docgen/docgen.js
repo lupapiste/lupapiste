@@ -500,7 +500,7 @@ var docgen = (function () {
       select.id = pathStrToID(myPath);
 
       select.name = myPath;
-      select.className = "form-input combobox really-long";
+      select.className = "form-input combobox long";
 
       if (subSchema.readonly) {
         select.readOnly = true;
