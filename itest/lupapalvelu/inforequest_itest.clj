@@ -30,4 +30,10 @@
       (query-application pena id)    => (in-state? :answered))
 
     (fact "Pena can convert-to-application"
-      (command pena :convert-to-application :id id) => ok?)))
+      (command pena :convert-to-application :id id) => ok?))
+
+
+  (fact "Pena cannot create app for organization that has inforequests disabled"
+  (let [resp  (create-app pena :infoRequest true :municipality "998")]
+    resp =not=> ok?
+    (:text resp) => "error.inforequests-disabled")))

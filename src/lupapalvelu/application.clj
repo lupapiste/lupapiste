@@ -533,17 +533,23 @@
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type     (operations/permit-type-of-operation operation)
-        organization-id (:id (organization/resolve-organization municipality permit-type))]
+        organization (organization/resolve-organization municipality permit-type)
+        organization-id (:id organization)
+        info-request? (boolean infoRequest)]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (if info-request?
+      (when-not (:inforequest-enabled organization)
+        (fail! :error.inforequests-disabled))
+    (when-not (:new-application-enabled organization)
+        (fail! :error.new-applications-disabled)))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
-          info-request? (boolean infoRequest)
           state         (cond
                           info-request?              :info
                           (security/authority? user) :open
@@ -681,20 +687,13 @@
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy (organization/get-legacy organization)]
-        (let [doc-name     "rakennuksen-muuttaminen"
-              document     (domain/get-document-by-id (:documents application) documentId)
-              old-body     (:data document)
+        (let [document     (domain/get-document-by-id application documentId)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)]
-          ;; TODO: update via model
-          (mongo/update
-            :applications
-            {:_id (:id application)
-             :documents {$elemMatch {:id documentId}}}
-            {$set {:documents.$.data with-value-metadata
-                   :modified created}})
-          (ok))
+              updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
+          (do
+            (infof "merging data into %s %s" (get-in document [:schema :info :name]) (:id document))
+            (commands/persist-model-updates id document updates created {:source "krysp"})
+            (ok)))
         (fail :no-legacy-available)))))
 
 (defcommand get-building-info-from-legacy
