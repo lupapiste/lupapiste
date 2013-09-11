@@ -24,7 +24,7 @@
     (defschema version schema)))
 
 (defn get-schema [schema-version schema-name]
-  {:pre [(not= nil schema-version) (not= nil schema-name)]}
+  {:pre [schema-version schema-name]}
   (get-in @registered-schemas [schema-version (name schema-name)]))
 
 (defn get-latest-schema-version []
