@@ -162,7 +162,7 @@
    {:id "837-YA"  ;; Tampere YA paakayttaja
     :enabled true
     :lastName "Tampere"
-    :firstName "Pääkäyttäjä-YA"
+    :firstName "Paakayttaja-YA"
     :city "Tampere"
     :username "tampere-ya"
     :street "Paapankuja 12"
