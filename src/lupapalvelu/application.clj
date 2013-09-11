@@ -671,19 +671,19 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defcommand "check-for-verdict"
-  {:parameters [:id]
+(defn load-verdict-attachments! [application]
+  )
+
+(defcommand check-for-verdict
+  {:parameters [id]
    ;TODO; remove draft and open when this feature ready
    :states     [:draft :open :submitted :complement-needed :sent]
    :roles      [:authority]
    :feature [:paatoksenHaku]}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [organization (:organization application)
-            legacy (organization/get-legacy organization)
-            id (:id application)]
-        (ok :response (xml/xml->edn (krysp/application-xml legacy id)))))))
+  [{application :application}]
+  (let [legacy (organization/get-legacy (:organization application))]
+    (when-let [verdicts (seq (krysp/->verdicts (krysp/application-xml legacy id)))]
+      (ok :response verdicts))))
 
 
 ;;

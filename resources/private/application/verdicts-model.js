@@ -44,7 +44,7 @@ LUPAPISTE.VerdictsModel = function() {
   self.checkVerdict = function(bindings){
     ajax.command("check-for-verdict", {id: getApplicationId(bindings)})
     .success(function(resp) {
-      self.response(JSON.stringify(resp.response));
+      self.response(JSON.stringify(resp.response, null, 4));
     })
     .call();
   };
