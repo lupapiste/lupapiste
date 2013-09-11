@@ -280,7 +280,7 @@
 (defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
   (let [toimenpide (:data rakennuksen-muuttaminen-doc)]
     {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
-                                      {:perusparannusKytkin (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value)}
+                                      {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value))}
                                       {:muutostyonLaji (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value)})
                   :rakennustieto (get-rakennus-data toimenpide application rakennuksen-muuttaminen-doc)}
      :created (:created rakennuksen-muuttaminen-doc)}))
@@ -289,7 +289,7 @@
   (let [toimenpide (:data laajentaminen-doc)
         mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
-                                   {:perusparannusKytkin (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value)}
+                                   {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value))}
                                    {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus :value)
                                                          :kerrosala (-> mitat :tilavuus :value)
                                                          :kokonaisala (-> mitat :tilavuus :value)
