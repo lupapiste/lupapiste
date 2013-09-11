@@ -204,7 +204,7 @@
       (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
       (let [updated-app (:application (query mikko :application :id application-id))
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
-            schema-name  (get-in update-doc [:schema :info :name])
+            schema-name  (get-in update-doc [:schema-info :name])
             person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
 
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"

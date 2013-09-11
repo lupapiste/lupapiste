@@ -10,7 +10,7 @@
             max-health [:game :max-health]]}
   (and health max-health (> health max-health)))
 
-(def document {:schema {:info {:name "invalid"}}
+(def document {:schema-info {:name "invalid"}
                :data {:player {:health     10}
                       :game   {:max-health 10}}})
 
