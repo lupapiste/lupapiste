@@ -173,24 +173,24 @@
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
     (#(assoc % :liite  (->liite (:liite %))))))
 
-(defn ->permit [paatos-xml-without-ns]
+(defn ->verdict [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
    :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                   [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
-(defn ->permits [xml]
+(defn ->verdicts [xml]
   (map
     (fn [asia]
-      (let [permit-model {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])}
-            permits      (->> (select asia [:paatostieto :Paatos])
-                           (map ->permit)
+      (let [verdict-model {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])}
+            verdicts      (->> (select asia [:paatostieto :Paatos])
+                           (map ->verdict)
                            (cleanup)
                            (filter seq))]
-        (if (seq permits)
-          (assoc permit-model :paatokset permits)
-          permit-model)))
+        (if (seq verdicts)
+          (assoc verdict-model :paatokset verdicts)
+          verdict-model)))
     (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
 
 

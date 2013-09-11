@@ -13,19 +13,19 @@
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
 (facts "KRYSP verdict"
-  (let [xml (sade.xml/parse (slurp "resources/public/krysp/permit.xml"))
-      cases (->permits xml)]
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
+      cases (->verdicts xml)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
-    (fact "second case has 2 permits" (-> cases last :paatokset count) => 2)
+    (fact "second case has 2 verdicts" (-> cases last :paatokset count) => 2)
 
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
 
-    (let [permit (first (:paatokset (last cases)))
-          lupamaaraykset (:lupamaaraykset permit)
-          paivamaarat    (:paivamaarat permit)
-          poytakirjat    (:poytakirjat permit)]
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)]
 
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
@@ -50,7 +50,7 @@
             (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
             (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))
 
-        (facts "second permit"
+        (facts "second verdict"
           (let [katselmukset2 (-> cases last :paatokset last :lupamaaraykset :vaaditutKatselmukset)]
             (count katselmukset2) => 1
             katselmukset2 => sequential?)
@@ -88,27 +88,27 @@
           (:tyyppi liite) => "tyyppi 1"
           (:metadata liite) => {:nimi "arvo"})
 
-        (facts "second permit"
+        (facts "second verdict"
           (let [poytakirjat2 (-> cases last :paatokset last :poytakirjat)]
             (count poytakirjat2) => 1
             poytakirjat2 => sequential?))))))
 
 (facts "CGI sample verdict"
-  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-permit.xml"))
-        cases (->permits xml)]
+  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
+        cases (->verdicts xml)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
-    (fact "case has 1 permit" (-> cases last :paatokset count) => 1)
+    (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
 
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
 
-    (let [permit         (-> cases first :paatokset first)
-          lupamaaraykset (:lupamaaraykset permit)
-          paivamaarat    (:paivamaarat permit)
-          poytakirjat    (:poytakirjat permit)
+    (let [verdict         (-> cases first :paatokset first)
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)
           katselmukset   (:vaaditutKatselmukset lupamaaraykset)]
 
-      (fact "paatos" permit => truthy)
+      (fact "paatos" verdict => truthy)
       (fact "lupamaaraykset is parsed" lupamaaraykset => truthy)
 
       (facts "katselmukset"
@@ -138,7 +138,7 @@
           (:paatoksentekija pk1) => "Rakennuslautakunta"
           (:paatospvm pk1) => (to-timestamp "2013-09-03")
           (:pykala pk1) => 12
-          (:kuvaus liite) => "Päätösote"
+          (:kuvaus liite) => "P\u00e4\u00e4t\u00f6sote"
           (:linkkiliitteeseen liite) => "http://212.213.116.162:80/186/arkisto/2013/PAATOSOTE_13-0185-R_20130903152736270.rtf"
           (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
-          (:tyyppi liite) => "Päätösote")))))
+          (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))

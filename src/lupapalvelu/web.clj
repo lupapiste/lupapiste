@@ -434,6 +434,11 @@
   (defjson "/dev/user" []
     (current-user))
 
+  (defpage "/dev/krysp" {:keys [typeName]}
+    (let [xmls {"rakval:ValmisRakennus"       "resources/krysp/sample/building.xml"
+                "rakval:RakennusvalvontaAsia" "resources/krysp/sample/verdict.xml"}]
+      (resp/content-type "application/xml; charset=utf-8" (slurp (get xmls typeName)))))
+
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
       (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))

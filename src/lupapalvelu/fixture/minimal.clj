@@ -2,6 +2,8 @@
   (:use lupapalvelu.fixture)
   (:require [lupapalvelu.mongo :as mongo]))
 
+(def ^:private local-legacy "http://localhost:8000/dev/krysp")
+
 (def users
   [{:id "777777777777777777000099" ;; admin
     :email "admin@solita.fi"
@@ -269,7 +271,7 @@
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]}
                      ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :legacy local-legacy
                      :rakennus-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -301,7 +303,7 @@
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                      ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :legacy local-legacy
                      :poikkeus-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -376,7 +378,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :legacy local-legacy
                      :rakennus-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -393,7 +395,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :legacy local-legacy
                      :rakennus-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -410,7 +412,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :legacy local-legacy
                      :rakennus-ftp-user "sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
