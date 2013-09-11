@@ -12,11 +12,9 @@ LUPAPISTE.VerdictsModel = function() {
     var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {
       return _.isEqual(attachment.target, {type: "verdict"});});
 
-    var verdicts = _.cloneDeep(application.verdicts)
-                    .map(function(verdict) {
-
+    var verdicts = _.cloneDeep(application.verdicts || []).map(function(verdict) {
                       var poytakirjat = _.map(verdict.poytakirjat, function(pk) {
-                        var attachmentUrlHashes = _.map(ok.liitteet, function(liite) {
+                        var attachmentUrlHashes = _.map(pk.liitteet, function(liite) {
                           return liite.urlHash; // TODO implement in backend
                         });
 
