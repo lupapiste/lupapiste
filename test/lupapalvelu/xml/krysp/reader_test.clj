@@ -149,6 +149,11 @@
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
+(facts "nil xml"
+  (let [cases (->verdicts nil)]
+    (seq cases) => nil
+    (count cases) => 0))
+
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
         cases (->verdicts xml)]

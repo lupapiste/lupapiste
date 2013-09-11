@@ -193,4 +193,3 @@
           verdict-model)))
     (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
 
-
