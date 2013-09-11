@@ -334,7 +334,7 @@
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
                                                (map #(get-purku-toimenpide % application) (:purku documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
-        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range))]
+        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
 
 
