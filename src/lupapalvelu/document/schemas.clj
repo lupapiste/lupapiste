@@ -151,7 +151,9 @@
 
 (def designer-basic (body
                       henkilotiedot-minimal
-                      {:name "yritys" :type :group :body yritys-minimal}
+                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (contains? c :required)
+                                                                                          (assoc c :required false)
+                                                                                          c)) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
