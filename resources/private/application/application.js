@@ -538,21 +538,25 @@
     });
     authorities(authorityInfos);
   }
-  
-  // Oskari map
+
+  // When Oskari map has initialized itself, draw shapes and marker
   hub.subscribe("map-initialized", function() {
-    var shapes = application.shapes();
-    if(shapes.length) {
+    if(application.shapes().length) {
       // only one shape per application is currently supported
       hub.send("map-viewvectors", {
-        drawing: shapes[0],
+        drawing: application.shapes()[0],
         style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
-        clear: false
+        clear: true
       });
     }
-    oskariSetMarker(self.location().x(), self.location().y());
+
+    hub.send("documents-map", {
+      data:  [{location: {x: x, y: y}}],
+      clear: true
+    });
   });
 
+  // When a shape is draw in Oskari map, save it to application
   hub.subscribe("map-draw-done", function(e) {
     var drawing = "" + e.data.drawing;
     ajax.command("save-application-shape", {id: currentId, shape: drawing})
@@ -561,13 +565,6 @@
     })
     .call();
   });
-
-  function oskariSetMarker(x, y) {
-    hub.send("documents-map", {
-      data:  [{location: {x: x, y: y}}],
-      clear: true
-    });
-  }
 
   function showApplication(applicationDetails) {
     isInitializing = true;
@@ -578,6 +575,11 @@
 
       // Performance improvement: documents should not be mapped with ko.mapping
       delete app.documents;
+
+      // Delete shapes
+      if(application.shapes) {
+        delete application.shapes;
+      }
 
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
@@ -630,9 +632,8 @@
 
       var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
-      
+
       if (application.shapes && application.shapes().length > 0) {
-        debugger;
         map.drawShape(application.shapes()[0]);
       }
 
