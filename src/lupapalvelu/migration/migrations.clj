@@ -49,7 +49,7 @@
                                                             "body.name" "muutostapa"}}}}}})
 
 (defn update-rakennuslupa-documents-schemas [application]
-  (let [updated (map (fn [document] (let [name (get-in document [:schema-info :name])
+  (let [updated (map (fn [document] (let [name (get-in document [:schema :info :name])
                                           new-schema (schemas/get-schema 1 name)]
                                       (assoc document :schema new-schema)))
                      (:documents application))
