@@ -426,6 +426,11 @@
    :notify     "state-change"
    :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :keys [created] :as command}]
+
+  (println "\n submit-application, command: ")
+  (clojure.pprint/pprint command)
+  (println "\n")
+
   (with-application command
     (fn [{:keys [id opened] :as application}]
       (mongo/update
