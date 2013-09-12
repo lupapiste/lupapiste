@@ -683,31 +683,32 @@
         verdicts (krysp/->verdicts xml)]
     (map
       (fn [verdict]
-        (assoc verdict :paatokset
-          (map
-            (fn [paatos]
-              (assoc paatos :poytakirjat
-                (map
-                  (fn [pk]
-                    (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                      (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                            urlhash         (digest/md5 file-name)
-                            resp            (http/get url {:as :stream})
-                            content-length  (Integer/parseInt (get-in resp [:headers "content-length"] "0"))
-                            attachment-type {:type-group "muut" :type-id "muu"}
-                            target          {:type "verdict" :id urlhash}
-                            locked          true]
-                        ; TODO this would create duplicate attachments if we're replacing existing verdicts
-                        (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user timestamp)
-                        (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
-                      pk))
-                  (:poytakirjat paatos))))
-            (:paatokset verdict))))
+        (assoc verdict
+          :timestamp timestamp
+          :paatokset (map
+                       (fn [paatos]
+                         (assoc paatos :poytakirjat
+                           (map
+                             (fn [pk]
+                               (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                 (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                       urlhash         (digest/md5 file-name)
+                                       resp            (http/get url {:as :stream})
+                                       content-length  (Integer/parseInt (get-in resp [:headers "content-length"] "0"))
+                                       attachment-type {:type-group "muut" :type-id "muu"}
+                                      target          {:type "verdict" :id urlhash}
+                                      locked          true]
+                                   ; TODO this would create duplicate attachments if we're replacing existing verdicts
+                                   (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user timestamp)
+                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                 pk))
+                             (:poytakirjat paatos))))
+                       (:paatokset verdict))))
       verdicts)))
 
 (defcommand check-for-verdict
   {:parameters [:id]
-   ;TODO; remove all but sent when ready
+   ;TODO remove all but sent when ready
    :states     [:draft :open :submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]
    :feature [:paatoksenHaku]}
@@ -716,7 +717,7 @@
     (update-application command
       {$set {:verdicts verdicts-with-attachments
              :modified created
-             :state    :verdictGiven}}) ; or $pushAll?
+             :state    :verdictGiven}}) ; TODO or $pushAll?
     (ok :response verdicts-with-attachments)))
 
 ;;
