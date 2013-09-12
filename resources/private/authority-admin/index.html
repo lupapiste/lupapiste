@@ -12,7 +12,7 @@
       <div class="informations">
       
         <div class="contact-information">
-          <h3>Ota yhteyttä</h3>
+          <h3 data-bind="ltext: 'footer.contact'"></h3>
           <a href="mailto:lupapiste@lupapiste.fi">lupapiste@lupapiste.fi</a><br>
           Ilkka Mattila<br>
           044 558 2494<br><br>
@@ -22,18 +22,18 @@
         </div>
           
         <div class="user-information">
-          <a href="https://www.lupapiste.fi/?page_id=331">Rekisteriseloste</a><br>
-          <a href="https://www.lupapiste.fi/?page_id=337">Käyttöehdot</a><br>
-                <a href="#!/licenses">Lisenssit</a>
+          <a href="https://www.lupapiste.fi/?page_id=331" data-bind="ltext: 'footer.register'"></a><br>
+          <a href="https://www.lupapiste.fi/?page_id=337" data-bind="ltext: 'footer.terms'"></a><br>
+                <a href="#!/licenses" data-bind="ltext: 'footer.license'"></a>
         </div>
         
         <div class="user-information">
-          <p>
-          Palvelu on osa valtiovarainministeriön koordinoimaa ja ympäristöministeriön toteuttamaa Sähköisen asioinnin ja demokratian vauhdittamisohjelmaa (SADe-ohjelma: <a href="http://www.vm.fi/sade">www.vm.fi/sade</a>)
+          <p data-bind="ltext: 'footer.sade'">
+           <a href="http://www.vm.fi/sade">www.vm.fi/sade</a>)
           </p>
         </div>
     
-    </div>
+      </div>
     </footer>
   </body>
 </html>
