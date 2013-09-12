@@ -24,6 +24,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
+            [lupapalvelu.document.schema-repository]
             [sade.security-headers :as headers]
             [sade.dummy-email-server]
             [lupapalvelu.migration.migration :as migration]))

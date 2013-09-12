@@ -226,5 +226,6 @@
               :body [{:name "rakentamisen_vaikutusten_merkittavyys" :type :text :max-len 4000 :layout :full-width}]}]})
 
 (defschemas
+  1
   [rakennushanke
    suunnittelutarveratkaisun-lisaosa])

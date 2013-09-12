@@ -269,7 +269,7 @@
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values
-  {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema :info :op :name))))})
+  {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema-info :op :name))))})
 
 (defn get-uusi-toimenpide [doc application]
   (let [toimenpide (:data doc)]
