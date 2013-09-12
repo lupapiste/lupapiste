@@ -204,8 +204,7 @@
       (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
       (let [updated-app (:application (query mikko :application :id application-id))
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
-            schema-name  (get-in update-doc [:schema :info :name])
-            schema       (schemas/get-schema schema-name)
+            schema-name  (get-in update-doc [:schema-info :name])
             person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
 
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
@@ -260,7 +259,8 @@
         merged-app      (:application (query pena :application :id application-id))
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"        
-        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"))
+        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+        (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
 (comment
   (apply-remote-minimal)

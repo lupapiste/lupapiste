@@ -60,49 +60,40 @@
 ;;
 
 (facts "validate"
-  {:schema {:info {:name "schema"}
-            :body [{:name "a" :type :group
-                    :body [{:name "aa" :type :string}
-                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
-   :data {:a {:aa {:value "kukka"}
-              :ab {:value "123"}}}} => valid?
-
-  {:schema {:info {:name "schema"}
-            :body [{:name "a" :type :group
-                    :body [{:name "aa" :type :string}
-                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
-   :data {:c {:aa {:value "kukka"}
-              :ab {:value "123"}}}} => invalid?)
+  (validate
+    {:data {:a {:aa {:value "kukka"}
+                :ab {:value "123"}}}}
+    {:body [{:name "a" :type :group
+             :body [{:name "aa" :type :string}
+                    {:name "ab" :type :string :min-len 2 :max-len 3}]}]}) => empty?
+  (validate
+    {:data {:a {:aa {:value "kukka"}
+                :ab {:value "1234"}}}}
+    {:body [{:name "a" :type :group
+             :body [{:name "aa" :type :string}
+                    {:name "ab" :type :string :min-len 2 :max-len 3}]}]}) =not=> empty?)
 
 ;; Validation tests:
 
 (facts "Simple validations"
   (with-timestamp some-time
     (let [document (new-document schema ..now..)]
-      (-> document
-        (apply-update [:a :ab] "foo"))   => valid?
-      (-> document
-        (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
-      (-> document
-        (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])
-      (-> document
-        (apply-update [:a :ab] "\u00d6\u00e9\u00c8")) => valid?
-      (-> document
-        (apply-update [:a :ab] "\u047e\u0471")) => (invalid-with? [:warn "illegal-value:not-latin1-string"]))))
+      (apply-update document [:a :ab] "foo")   => (valid-against? schema)
+      (apply-update document [:a :ab] "f")     => (invalid-with? schema [:warn "illegal-value:too-short"])
+      (apply-update document [:a :ab] "foooo") => (invalid-with? schema [:err "illegal-value:too-long"])
+      (apply-update document [:a :ab] "\u00d6\u00e9\u00c8") => (valid-against? schema)
+      (apply-update document [:a :ab] "\u047e\u0471") => (invalid-with? schema [:warn "illegal-value:not-latin1-string"]))))
 
 (facts "Select"
   (with-timestamp some-time
     (let [document (new-document schema ..now..)]
-      (-> document
-        (apply-update [:a :d] "A")) => valid?
-      (-> document
-        (apply-update [:a :d] "")) => valid?
-      (-> document
-        (apply-update [:a :d] "D")) => (invalid-with? [:warn "illegal-value:select"]))))
+      (apply-update document [:a :d] "A") => (valid-against? schema)
+      (apply-update document [:a :d] "")  => (valid-against? schema)
+      (apply-update document [:a :d] "D") => (invalid-with? schema [:warn "illegal-value:select"]))))
 
 (facts "with real schemas - important field for paasuunnittelija"
   (with-timestamp some-time
-    (let [document (new-document (schemas/get-schema "paasuunnittelija") ..now..)]
+    (let [document (new-document (schemas/get-schema (schemas/get-latest-schema-version) "paasuunnittelija") ..now..)]
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
@@ -115,37 +106,29 @@
         (apply-update [:patevyys :patevyysluokka] "AA")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
-      (-> document
-        (apply-update [:henkilotiedot :etunimiz] "Tauno")) => (invalid-with? [:err "illegal-key"])
-      (-> document
-        (apply-update [:henkilotiedot :sukunimiz] "Palo")) => (invalid-with? [:err "illegal-key"]))))
+      (apply-update document [:henkilotiedot :etunimiz] "Tauno") => (invalid-with? [:err "illegal-key"])
+      (apply-update document [:henkilotiedot :sukunimiz] "Palo") => (invalid-with? [:err "illegal-key"]))))
 
 (facts "Repeating section"
   (with-timestamp some-time
     (let [document (new-document schema-with-repetition ..now..)]
       (fact "Single value contains no nested sections"
-        (-> document
-          (apply-update [:single :1 :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+        (apply-update document [:single :1 :single2] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
 
       (fact "Repeating section happy case"
-        (-> document
-          (apply-update [:repeats :1 :single2] "foo")) => valid?)
+        (apply-update document [:repeats :1 :single2] "foo") => (valid-against? schema-with-repetition))
 
       (fact "Invalid key under nested section"
-        (-> document
-          (apply-update [:repeats :1 :single3] "foo")) => (invalid-with? [:err "illegal-key"]))
+        (apply-update document [:repeats :1 :single3] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
 
       (fact "Unindexed repeating section"
-        (-> document
-          (apply-update [:repeats :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+        (apply-update document [:repeats :single2] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
 
       (fact "Repeating string, 0"
-        (-> document
-          (apply-update [:repeats :1 :repeats2 :0] "1")) => valid?)
+        (apply-update document [:repeats :1 :repeats2 :0] "1") => (valid-against? schema-with-repetition))
 
       (fact "Repeating string, 1"
-        (-> document
-          (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"])))))
+        (apply-update document [:repeats :1 :repeats2 :1] "foo") => (invalid-with? schema-with-repetition [:warn "illegal-number"])))))
 
 (def schema-with-required {:info {:name "with-required" :version 1}
                            :body [{:name "a" :type :group
@@ -161,7 +144,7 @@
                                                           {:name "rd" :type :string :required true}
                                                           {:name "od2" :type :string}]}]}]}]})
 
-(def missing-required-fields? (invalid-with? [:tip "illegal-value:required"]))
+(def missing-required-fields? (invalid-with? schema-with-required [:tip "illegal-value:required"]))
 
 (facts "Required fields"
   (with-timestamp some-time
@@ -175,7 +158,7 @@
 
       (-> document
         (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")) => valid?
+        (apply-update [:a :b :ab] "value")) => (valid-against? schema-with-required)
 
       (-> document
         (apply-update [:a :b :aa] "value")
@@ -186,7 +169,7 @@
         (apply-update [:a :b :aa] "value")
         (apply-update [:a :b :ab] "value")
         (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :c :6 :rab] "value")) => valid?
+        (apply-update [:a :c :6 :rab] "value")) => (valid-against? schema-with-required)
 
       (-> document
         (apply-update [:a :b :aa] "value")
@@ -207,7 +190,7 @@
         (apply-update [:a :c :0 :rab] "value")
         (apply-update [:a :d :0 :d2 :0 :od1] "value")
         (apply-update [:a :d :0 :d2 :0 :rd] "value")
-        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?
+        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (valid-against? schema-with-required)
 
       (-> document
         (apply-update [:a :b :aa] "value")
@@ -215,11 +198,11 @@
         (apply-update [:a :c :0 :rab] "value")
         (apply-update [:a :d :0 :d2 :0 :od1] "value")
         (apply-update [:a :d :0 :d2 :0 :rd] "value")
-        (apply-update [:a :d :1 :d2 :6 :rd] "value")) => valid?)))
+        (apply-update [:a :d :1 :d2 :6 :rd] "value")) => (valid-against? schema-with-required))))
 
 (facts "with real schemas - required fields for henkilo hakija"
   (with-timestamp some-time
-    (let [document (-> (new-document (schemas/get-schema "hakija") ..now..)
+    (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
                    (apply-update [:_selected] "henkilo")
                    (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                    (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
@@ -242,7 +225,7 @@
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time
-    (let [document (-> (new-document (schemas/get-schema "hakija") ..now..)
+    (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
                      (apply-update [:_selected] "yritys")
                      (apply-update [:yritys :yritysnimi] "Solita")
                      (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
@@ -295,48 +278,60 @@
   (approvable? {}) => false
   (approvable? (new-document schema ..now..)) => false)
 
-(def schema-with-approvals {:info {:name "approval-model" :version 1}
+(def schema-without-approvals {:info {:name "approval-model-without-approvals"
+                                      :version 1
+                                      :approvable false}
+                               :body [{:name "single" :type :string :approvable true}
+                                      {:name "single2" :type :string}
+                                      {:name "repeats" :type :group :repeating true :approvable true
+                                       :body [{:name "single3" :type :string}]}]})
+
+(def schema-with-approvals {:info {:name "approval-model-with-approvals"
+                                   :version 1
+                                   :approvable true}
                             :body [{:name "single" :type :string :approvable true}
                                    {:name "single2" :type :string}
                                    {:name "repeats" :type :group :repeating true :approvable true
                                     :body [{:name "single3" :type :string}]}]})
 
+(schemas/defschema 1 schema-without-approvals)
+(schemas/defschema 1 schema-with-approvals)
+
 (facts "approve document part"
   (let [document (new-document schema-with-approvals ..now..)]
-    (approvable? document [:single]) => true
-    (approvable? document [:single2]) => false
-    (approvable? document [:repeats :1]) => true
-    (approvable? document [:repeats :0 :single3]) => false))
+    (approvable? document schema-with-approvals [:single]) => true
+    (approvable? document schema-with-approvals [:single2]) => false
+    (approvable? document schema-with-approvals [:repeats :1]) => true
+    (approvable? document schema-with-approvals [:repeats :0 :single3]) => false))
 
 (facts "modifications-since-approvals"
   (with-timestamp 10
     (modifications-since-approvals nil) => 0
     (modifications-since-approvals {}) => 0
-    (let [base-doc (-> (new-document schema-with-approvals 0)
-                   (apply-update [:single] "''"))]
+    (let [base-doc (-> (new-document schema-with-approvals 0) (apply-update [:single] "''"))]
       (modifications-since-approvals base-doc) => 1
-      (modifications-since-approvals
-        (apply-approval base-doc [:single] "approved" {} 9)) => 1
-      (modifications-since-approvals
-        (apply-approval base-doc [:single] "approved" {} 10)) => 0
-      (modifications-since-approvals
-        (apply-approval base-doc [] "approved" {} 9)) => 1
-      (modifications-since-approvals
-        (apply-approval base-doc [] "approved" {} 10)) => 0
+      (modifications-since-approvals (apply-approval base-doc [:single] "approved" {} 9)) => 1
+      (modifications-since-approvals (apply-approval base-doc [:single] "approved" {} 10)) => 0
+      (modifications-since-approvals (apply-approval base-doc [] "approved" {} 9)) => 1
+      (modifications-since-approvals (apply-approval base-doc [] "approved" {} 10)) => 0
       (modifications-since-approvals
         (-> base-doc
-          (assoc-in [:schema :info :approvable] true)
           (apply-approval [] "approved" {} 9)
           (apply-update [:single2] "")
           (apply-update [:repeats :0 :single3] "")
           (apply-update [:repeats :1 :single3] ""))) => 4
       (modifications-since-approvals
         (-> base-doc
-          (assoc-in [:schema :info :approvable] true)
           (apply-approval [] "approved" {} 11)
           (apply-update [:single2] "")
           (apply-update [:repeats :0 :single3] "")
-          (apply-update [:repeats :1 :single3] ""))) => 0
+          (apply-update [:repeats :1 :single3] ""))) => 0)
+    (let [base-doc (-> (new-document schema-without-approvals 0) (apply-update [:single] "''"))]
+      (modifications-since-approvals base-doc) => 1
+      (modifications-since-approvals (apply-approval base-doc [:single] "approved" {} 9)) => 1
+      (modifications-since-approvals (apply-approval base-doc [:single] "approved" {} 10)) => 0
+      (modifications-since-approvals (apply-approval base-doc [] "approved" {} 9)) => 1
+      (modifications-since-approvals (apply-approval base-doc [] "approved" {} 10)) => 0
       (modifications-since-approvals
         (-> base-doc
           (dissoc :data)
@@ -365,7 +360,7 @@
                   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
                                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
                                                                 :timestamp 1370856511356}}}}
-                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas/get-schema "uusiRakennus"))}}]
+                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas/get-schema (schemas/get-latest-schema-version) "uusiRakennus"))}}]
     (modifications-since-approvals real-doc) => 0))
 
 ;;

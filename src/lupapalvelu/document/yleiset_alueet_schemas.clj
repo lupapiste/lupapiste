@@ -29,6 +29,7 @@
 
 
 (defschemas
+  1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
            :type :group
            :removable false
@@ -96,6 +97,7 @@
       :body viitoitus-tapahtuma}]))
 
 (defschemas
+  1
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
            :removable false
@@ -129,6 +131,7 @@
      {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
 
 (defschemas
+  1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :removable false
            :repeating false
