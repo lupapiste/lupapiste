@@ -59,7 +59,7 @@
 
 (fact (numeric? ["0"]) => false)
 
-(facts
+(facts "decimal-number?"
   (fact (decimal-number? "1") => true)
   (fact (decimal-number? "1.1") => true)
   (fact (decimal-number? "a") => false)
@@ -69,3 +69,17 @@
   (fact (decimal-number? ".0") => false)
   (fact (decimal-number? "..0") => false)
   (fact (decimal-number? "123123132.456465465465464") => true))
+
+(fact "lower-case"
+  (lower-case nil)   => nil
+  (lower-case "")    => ""
+  (lower-case "a")   => "a"
+  (lower-case "A")   => "a")
+
+(fact "trim"
+  (trim nil)    => nil
+  (trim "")     => ""
+  (trim "a")    => "a"
+  (trim " a")   => "a"
+  (trim "a ")   => "a"
+  (trim " a ")  => "a")

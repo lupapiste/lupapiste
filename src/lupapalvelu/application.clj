@@ -2,12 +2,12 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim split]]
-        [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
   (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
             [clj-time.format :as tf]
+            [clj-http.client :as http]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -28,7 +28,9 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [sade.xml :as xml]))
+            [sade.strings :as ss]
+            [sade.xml :as xml])
+  (:import [java.net URL]))
 
 ;; Validators
 
@@ -68,7 +70,7 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
+                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
                      (:statements app))))
     0))
 
@@ -207,7 +209,7 @@
     {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
-      (let [email (lower-case email)]
+      (let [email (ss/lower-case email)]
         (if (domain/invited? application email)
           (fail :invite.already-invited)
           (let [invited (security/get-or-create-user-by-email email)
@@ -255,7 +257,7 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (let [email (lower-case email)]
+      (let [email (ss/lower-case email)]
         (with-user email
           (fn [_]
             (mongo/update-by-id :applications application-id
@@ -267,7 +269,7 @@
    :roles      [:applicant :authority]}
   [command]
   (update-application command
-    {$pull {:auth {$and [{:username (lower-case email)}
+    {$pull {:auth {$and [{:username (ss/lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
@@ -683,7 +685,14 @@
                 (map
                   (fn [pk]
                     (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                      (let [pk-with-urlhash (assoc pk :urlHash (digest/sha-256 url))]
+                      (let [file-id    (mongo/create-id)
+                            file-name  (-> url (URL.) (.getPath) (ss/suffix "/"))
+
+                            pk-with-urlhash (assoc pk :urlHash (digest/md5 file-name))
+                            ;file-stream     (http/get url {:as :stream})
+                            ]
+
+                       ;(mongo/upload )
 
                         ; TODO download & save; perhaps async, perhaps not?
 

@@ -1,6 +1,6 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
-        [sade.util :only [lower-case]])
+        [sade.strings :only [lower-case]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn warnf error fatal)]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.model :as model]

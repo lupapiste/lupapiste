@@ -29,7 +29,6 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [clojure.string :as s]
-            [sade.util :refer [lower-case] :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
@@ -244,7 +243,7 @@
                              (str (.substring line 0 limit) "... (truncated)")
                              line)))
         sanitized-page (sanitize (or page "(unknown)"))
-        user           (or (lower-case email) "(anonymous)")
+        user           (or (ss/lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
         sanitized-msg  (sanitize (str message))]
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"

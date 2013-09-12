@@ -1,4 +1,5 @@
 (ns sade.strings
+  (:require [clojure.string :as s])
   (:import [java.text Normalizer Normalizer$Form]
            [org.apache.commons.lang3 StringUtils]))
 
@@ -39,4 +40,6 @@
 (defn decimal-number? [s]
   (or (numeric? s) (if (and (string? s) (re-matches #"^\d+\.\d+$" s)) true false)))
 
+(defn ^String lower-case [^CharSequence x] (when x (s/lower-case x)))
 
+(defn ^String trim [^CharSequence x] (when x (s/trim x)))

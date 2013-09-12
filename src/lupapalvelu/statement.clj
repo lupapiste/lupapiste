@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [sade.env]
-        [sade.util :only [lower-case]])
+        [sade.strings :only [lower-case]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [sade.security :as sadesecurity]
             [lupapalvelu.mongo :as mongo]
