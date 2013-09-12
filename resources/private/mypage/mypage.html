@@ -34,15 +34,17 @@
             <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
             <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
           </div>
-          <div class="form-entry architect-toggle">
+
+          <div data-bind="if: features.enabled('architect-info')"><div class="form-entry architect-toggle feature">
             <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
             <label data-bind="ltext: 'userinfo.architect'" for="architect" class="form-label"></label>
-          </div>
+          </div></div>
         </div>
-        
-        <div data-bind="if: features.enabled('architect-info')" class="architect-info form-group"><div class="feature"><span class="legend">architect-info</span>
-        <div >
-          
+
+        <div data-bind="if: features.enabled('architect-info')">
+        <div class="architect-info form-group feature"><span class="legend">architect-info</span>
+        <div>
+
           <div data-bind="visible: architect">
             <h2 data-bind="ltext: 'architect.title'"></h2>
             <div class="form-entry">
@@ -65,17 +67,17 @@
               <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
               <input data-bind="value: companyCity" id="architect.company.city" type="text" class="form-input"></input>
             </div>
-            
+
             <div class="form-entry">
               <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
               <input data-bind="value: degree" id="architect.degree" type="text" class="form-input"></input>
             </div>
-    
+
             <div class="form-entry">
               <label data-bind="ltext: 'userinfo.architect.experience'" for="architect.experience" class="form-label"></label>
               <input data-bind="value: experience" id="architect.experience" type="text" class="form-input"></input>
             </div>
-    
+
             <div class="form-entry">
               <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
               <input data-bind="value: fise" id="architect.fise" type="text" class="form-input"></input>
@@ -103,7 +105,7 @@
                 <tbody data-bind="foreach: attachments">
                   <tr>
                     <td data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                      <div data-bind="text: loc('userinfo.architect.attachments.name', $data['attachment-type'])" data-test-id="attachment-type"></div>
+                      <div data-bind="text: loc(['userinfo.architect.attachments.name', $data['attachment-type']])" data-test-id="attachment-type"></div>
                       <div data-bind="text: filename" data-test-id="filename"></div>
                     </td>
                     <td>
@@ -127,19 +129,19 @@
           </div>
         </div>
         </div></div> <!-- feature flagging -->
-        
+
         <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
         <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
         <span data-bind="visible: !error() && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
         <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
       </form>
     </div>
-   
+
     <div >
       <form id="pw-form" >
         <div class="form-group">
           <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
-          
+
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
             <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
@@ -147,7 +149,7 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
             <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
-            <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+            <span data-bind="text: loc(['mypage.quality', quality()]), attr: {'class': quality}, visible: newPassword().length > 0"></span>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
@@ -162,7 +164,7 @@
         </div>
         </form>
     </div>
-   
+
     <div id="dialog-userinfo-architect-upload" class="window autosized">
       <div class="dialog-header">
         <p data-bind="ltext: 'userinfo.architect.upload.title'"></p>
@@ -218,7 +220,7 @@
 
       </div>
     </div>
-   
+
   </section>
 </body>
 </html>

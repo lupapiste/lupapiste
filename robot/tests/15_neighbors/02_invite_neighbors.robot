@@ -34,8 +34,8 @@ Sonja adds some neighbors
 Sonja removes mistakenly added neighbor d
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
   Click element  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
-  Wait until  Element should be visible  xpath=//div[@id='dialog-confirm-neighbor-remove']
-  Click element  xpath=//div[@id='dialog-confirm-neighbor-remove']//*[@data-test-id='confirm-yes']
+  Wait until  Element should be visible  xpath=//div[@id='dynamic-yes-no-confirm-dialog']
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
 
 Sonja corrects the email address of neighbor c
@@ -59,10 +59,12 @@ Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-c@example.com']//span[@data-test-id='neighbors-row-status-open']
 
 Sonja meets user 'a' IRL and marks her as 'done'
-  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
-  Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
+  ${a_xpath} =  Set Variable  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
+  Wait until  Element should be visible  ${a_xpath}
+  Focus  ${a_xpath}
+  Click element  ${a_xpath}
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
-  Wait until  Element should not be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
+  Wait until  Element should not be visible  ${a_xpath}
 
 Sonja opens status details dialog
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']

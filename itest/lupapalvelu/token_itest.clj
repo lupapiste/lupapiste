@@ -1,6 +1,5 @@
 (ns lupapalvelu.token-itest
   (:use [midje.sweet]
-        [midje.util :only [testable-privates]]
         [lupapalvelu.security :as security]
         [lupapalvelu.token]))
 
