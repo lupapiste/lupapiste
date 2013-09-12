@@ -7,7 +7,7 @@
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
   (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
-            [clj-time.format :as timeformat]
+            [clj-time.format :as tf]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -28,7 +28,6 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [clj-time.format :as tf]
             [sade.xml :as xml]))
 
 ;; Validators
