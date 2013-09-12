@@ -247,27 +247,29 @@
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
-                               (when (-> toimenpide :rakennusnro :value)
-                                   {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                               (cond (-> toimenpide :manuaalinen_rakennusnro :value)
+                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
                                                      :jarjestysnumero nil
-                                                     :kiinttun (:propertyId application)}})
-                               (when (-> toimenpide :manuaalinen_rakennusnro :value)
-                                   {:rakennustunnus {:manuaalinen_rakennusnro (-> toimenpide :rakennusnro :value)
+                                                    :kiinttun (:propertyId application)}}
+                                     (-> toimenpide :rakennusnro :value)
+                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
                                                      :jarjestysnumero nil
-                                                    :kiinttun (:propertyId application)}})
+                                                     :kiinttun (:propertyId application)}}
+                                     :default
+                                       {:rakennustunnus {:jarjestysnumero nil
+                                                         :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
                                (when huoneistot (if (not-empty (:huoneisto huoneistot))
-                                                  {:asuinhuoneistot huoneistot})
-                                 ))}))
+                                                  {:asuinhuoneistot huoneistot})))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values
-  {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema :info :op :name))))})
+  {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema-info :op :name))))})
 
 (defn get-uusi-toimenpide [doc application]
   (let [toimenpide (:data doc)]
@@ -278,7 +280,7 @@
 (defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
   (let [toimenpide (:data rakennuksen-muuttaminen-doc)]
     {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
-                                      {:perusparannusKytkin (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value)}
+                                      {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value))}
                                       {:muutostyonLaji (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value)})
                   :rakennustieto (get-rakennus-data toimenpide application rakennuksen-muuttaminen-doc)}
      :created (:created rakennuksen-muuttaminen-doc)}))
@@ -287,7 +289,7 @@
   (let [toimenpide (:data laajentaminen-doc)
         mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
-                                   {:perusparannusKytkin (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value)}
+                                   {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value))}
                                    {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus :value)
                                                          :kerrosala (-> mitat :tilavuus :value)
                                                          :kokonaisala (-> mitat :tilavuus :value)
@@ -332,7 +334,7 @@
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
                                                (map #(get-purku-toimenpide % application) (:purku documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
-        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range))]
+        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
 
 

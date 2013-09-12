@@ -46,7 +46,12 @@
     self.done = function() { window.location.hash = "!/application/" + applicationId + "/statement"; };
     self.remove = function(neighbor) {
       self.neighborId(neighbor.neighborId);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-neighbor-remove");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("neighbors.remove-dialog.title"),
+        loc("neighbors.remove-dialog.message"),
+        {title: loc("yes"), fn: self.removeNeighbor},
+        {title: loc("no")}
+      );
       return self;
     };
 
@@ -57,16 +62,6 @@
         .call();
       return self;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog(
-          "dialog-confirm-neighbor-remove",
-          loc("neighbors.remove-dialog.title"),
-          loc("neighbors.remove-dialog.message"),
-          loc("yes"),
-          self.removeNeighbor,
-          loc("no"));
-    });
   }
 
   function EditModel() {

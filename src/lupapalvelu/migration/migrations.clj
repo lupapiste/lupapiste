@@ -50,7 +50,7 @@
 
 (defn update-rakennuslupa-documents-schemas [application]
   (let [updated (map (fn [document] (let [name (get-in document [:schema :info :name])
-                                          new-schema (schemas/get-schema name)]
+                                          new-schema (schemas/get-schema 1 name)]
                                       (assoc document :schema new-schema)))
                      (:documents application))
         updated-application (assoc application :documents updated)]
@@ -110,3 +110,17 @@
 (defmigration kuntaroolikoodi-migraation
   (let [applications (mongo/select :applications)]
     (map #(mongo/update :applications {:_id (:id %)} (kuntaroolikoodiUpdate %)) applications)))
+
+(defn drop-schema-data [document]
+  (let [schema-info (-> document :schema :info (assoc :version 1))]
+    (-> document
+      (assoc :schema-info schema-info)
+      (dissoc :schema))))
+
+(defmigration schemas-be-gonez
+  {:apply-when (pos? (mongo/count :applications {:schema-version {$exists false}}))}
+  (doseq [application (mongo/select :applications {:schema-version {$exists false}} {:documents true})]
+    (mongo/update-by-id :applications (:id application) {$set {:schema-version 1
+                                                               :documents (map drop-schema-data (:documents application))}})))
+
+

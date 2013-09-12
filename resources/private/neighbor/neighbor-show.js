@@ -39,16 +39,20 @@
         .pending(self.pending)
         .call();
     };
-
+    
+    function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
+    function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
+    
     self.success = function(data) {
       var a = data.application,
           l = a.location,
           x = l.x,
           y = l.y;
+      
       self.application(a).map.updateSize().clear().center(x, y, 12).add(x, y);
 
-      var nonpartyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type !== "party"; });
-      var partyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type === "party"; });
+      var partyDocs = _.filter(a.documents, isPartyDoc);
+      var nonpartyDocs = _.filter(a.documents, isNotPartyDoc);
       var options = {disabled: true, validate: false};
       
       docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel, options);

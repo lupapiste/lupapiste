@@ -64,6 +64,7 @@
                                    {:name "Pankkitakaus"}]}))
 
 (defschemas
+  1
   [{:info {:name "meluilmoitus"
            :order 50}
     :body meluilmoitus}
