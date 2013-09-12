@@ -59,6 +59,9 @@ var gis = (function() {
         marker.destroy();
       });
       self.markers = [];
+      
+      self.vectorLayer.removeAllFeatures();
+      
       return self;
     };
 
@@ -98,7 +101,6 @@ var gis = (function() {
     };
 
     self.drawShape = function(shape) {
-      self.vectorLayer.removeAllFeatures();
       var vector = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(shape), {}, {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"});
       self.vectorLayer.addFeatures([vector]);
     };
