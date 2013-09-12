@@ -1,1 +1,28 @@
 unknown-document: Tuntematon dokumentti
+
+verdict.lupamaaraukset: Lupamääräykset
+
+verdict.aloitettava:   Aloitettava
+verdict.lainvoimainen: Lainvoimainen
+verdict.voimassaHetki: Voimassa
+verdict.raukeamis:     Raukeaa
+verdict.anto:          Annettu
+verdict.viimeinenValitus: Viimeinen valituspäivä
+verdict.julkipano:     Julkipano
+
+verdict.autopaikkojaEnintaan:   Autopaikkoja enintään
+verdict.autopaikkojaVahintaan:  Autopaikkoja vähintään
+verdict.autopaikkojaRakennettava:  Autopaikkoja rakennettava
+verdict.autopaikkojaRakennettu: Autopaikkoja rakennettu
+verdict.autopaikkojaKiinteistolla: Autopaikkoja kiinteistöllä
+verdict.autopaikkojaUlkopuolella:  Autopaikkoja ulkopuolella
+verdict.kerrosala:              Kerrosala
+verdict.kokonaisala:            Kokonaisala
+verdict.vaaditutKatselmukset:   Vaaditut katselmukset
+verdict.katselmuksenLaji:       Katselmuksen laji
+verdict.tarkastuksenTaiKatselmuksenNimi: Nimi
+verdict.maaraykset:             Määräykset
+verdict.maaraykset.maaraysaika: Määräysaika
+verdict.maaraykset.toteutusHetki: Toteutushetki
+verdict.maaraykset.sisalto:       Sisältö
+verdict.vaaditutTyonjohtajat:   Vaaditut työnjohtajat
