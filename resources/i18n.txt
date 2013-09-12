@@ -1,1 +1,3 @@
 unknown-document: Tuntematon dokumentti
+license.link: Tietoja Lupapisteestä
+stamp.verdict: Hyväksytty
