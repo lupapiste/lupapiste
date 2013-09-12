@@ -550,7 +550,7 @@
     (fact "Kiinteisto" Kiinteisto => truthy)
     (fact "tilanNimi" (:tilannimi Kiinteisto) => "Hiekkametsa")
     (fact "kiinteistotunnus" (:kiinteistotunnus Kiinteisto) => "21111111111111")
-    (fact "maaraalaTunnus" (:maaraAlaTunnus Kiinteisto) => "")
+    (fact "maaraalaTunnus" (:maaraAlaTunnus Kiinteisto) => nil)
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
 

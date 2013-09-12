@@ -372,9 +372,9 @@
       :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
-                                       :kiinteistotieto {:Kiinteisto {:tilannimi (-> kiinteisto :tilanNimi :value)
-                                                                                    :kiinteistotunnus (:propertyId application)
-                                                                                    :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
+                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
+                                                                             :kiinteistotunnus (:propertyId application)}
+                                                         (when (-> kiinteisto :maaraalaTunnus :value) {:maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)})) }}}}}))
 
 (defn- get-kayttotapaus [documents toimenpiteet]
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
