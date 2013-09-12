@@ -382,6 +382,14 @@
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
+(defn attach-file!
+  "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
+   Content can be a file or input-stream."
+  [application-id file-id file-name file-size content-type content attachment-id attachment-type attachment-target locked user timestamp]
+
+  (mongo/upload file-id file-name content-type content :application application-id)
+  )
+
 (defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
@@ -393,25 +401,26 @@
   (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
   (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail :error.illegal-attachment-type))
 
-  (let [file-id (mongo/create-id)
+  (let [file-id (mongo/create-id) ; TODO move into attach-file!
         sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)]
 
-    (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-    (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
-    (.delete (io/file tempfile))
-    (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
-      (executed "add-comment"
-        (-> command
-          (assoc :data {:id id
-                        :text text,
-                        :type :system
-                        :target {:type :attachment
-                                 :id (:id attachment-version)
+    (try
+      (attach-file! id file-id sanitazed-filename size content-type tempfile attachmentId attachmentType target locked user created)
+      (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
+        (executed "add-comment"
+          (-> command
+            (assoc :data {:id id
+                          :text text,
+                          :type :system
+                          :target {:type :attachment
+                                   :id (:id attachment-version)
                                    :version (:version attachment-version)
                                    :filename (:filename attachment-version)
                                    :fileId (:fileId attachment-version)}})))
-      (fail :error.unknown))))
+        (fail :error.unknown))
+      (finally (.delete (io/file tempfile))))
+    ))
 
 ;;
 ;; Download
