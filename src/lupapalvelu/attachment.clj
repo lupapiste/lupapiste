@@ -223,9 +223,9 @@
            :attachments.$.latestVersion.size size
            :attachments.$.latestVersion.created now}}))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
+(defn update-or-create-attachment [id attachment-id attachment-type file-id filename content-type size created user target locked]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created target locked)
+                        (create-attachment id attachment-type created target locked)
                         attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
@@ -384,11 +384,14 @@
 
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
-   Content can be a file or input-stream."
-  [application-id file-id file-name file-size content-type content attachment-id attachment-type attachment-target locked user timestamp]
-
-  (mongo/upload file-id file-name content-type content :application application-id)
-  )
+   Content can be a file or input-stream.
+   Returns attachment version."
+  [application-id file-name file-size content attachment-id attachment-type attachment-target locked user timestamp]
+  (let [file-id (mongo/create-id)
+        sanitazed-filename (mime/sanitize-filename file-name)
+        content-type (mime/mime-type sanitazed-filename)]
+    (mongo/upload file-id sanitazed-filename content-type content :application application-id)
+    (update-or-create-attachment application-id attachment-id attachment-type file-id sanitazed-filename content-type file-size timestamp user attachment-target locked)))
 
 (defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
@@ -398,29 +401,23 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (when-not (pos? size) (fail! :error.select-file))
-  (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
-  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail :error.illegal-attachment-type))
+  (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
+  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
 
-  (let [file-id (mongo/create-id) ; TODO move into attach-file!
-        sanitazed-filename (mime/sanitize-filename filename)
-        content-type (mime/mime-type sanitazed-filename)]
-
-    (try
-      (attach-file! id file-id sanitazed-filename size content-type tempfile attachmentId attachmentType target locked user created)
-      (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
-        (executed "add-comment"
-          (-> command
-            (assoc :data {:id id
-                          :text text,
-                          :type :system
-                          :target {:type :attachment
-                                   :id (:id attachment-version)
-                                   :version (:version attachment-version)
-                                   :filename (:filename attachment-version)
-                                   :fileId (:fileId attachment-version)}})))
-        (fail :error.unknown))
-      (finally (.delete (io/file tempfile))))
-    ))
+  (try
+    (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+      (executed "add-comment"
+        (-> command
+          (assoc :data {:id id
+                        :text text,
+                        :type :system
+                        :target {:type :attachment
+                                 :id (:id attachment-version)
+                                 :version (:version attachment-version)
+                                 :filename (:filename attachment-version)
+                                 :fileId (:fileId attachment-version)}})))
+      (fail :error.unknown))
+    (finally (.delete (io/file tempfile)))))
 
 ;;
 ;; Download
