@@ -454,7 +454,7 @@
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
