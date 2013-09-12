@@ -85,6 +85,7 @@
 
 
 (defschemas
+  1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
            :type :group
            :removable false
@@ -111,6 +112,7 @@
     :body tyo-aika}])
 
 (defschemas
+  1
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
            :removable false
@@ -119,6 +121,7 @@
     :body mainostus-tai-viitoitus-tapahtuma-valinta}])
 
 (defschemas
+  1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :removable false
            :repeating false

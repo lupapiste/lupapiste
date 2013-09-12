@@ -15,7 +15,9 @@
     :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
               :salt "$2a$10$WHPur/hjvaOTlm41VFjtju"
               :apikey "5087ba34c2e667024fbd5992"}}
-   {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
+   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
+   ;; veikko / veikko
+   {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role :authority
@@ -27,6 +29,23 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG" ;; veikko
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5051ba0caa2480f374dcfeff"}}
+   ;; Jussi Viranomainen - tamperelainen YA-lupa-arkkitehti
+   ;; jussi / jussi
+   {:id "777777777777777777000017"
+    :email "jussi.viranomainen@tampere.fi"
+    :enabled true
+    :role "authority"
+    :username "jussi"
+    :organizations ["837-YA"]
+    :firstName "Jussi"
+    :lastName "Viranomainen"
+    :street "Katuosoite 1 a 1"
+    :phone "1231234567"
+    :zip "33456"
+    :city "Tampere"
+    :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
+              :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
+              :apikey "5051ba0caa2480f374dcfefg"}}
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti
    ;; sonja / sonja
    {:id "777777777777777777000023"
@@ -158,6 +177,22 @@
     :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
               :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
+   ;; Tampere YA paakayttaja
+   ;; tampere-ya / tampere
+   {:id "837-YA"
+    :enabled true
+    :lastName "Tampere"
+    :firstName "Paakayttaja-YA"
+    :city "Tampere"
+    :username "tampere-ya"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "tampere-ya"
+    :role "authorityAdmin"
+    :zip "010203"
+    :organizations ["837-YA"]
+    :private {:salt "$2a$10$hkJ5ZQhqL66iM2.3m4712e"
+              :password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe"}} ;; tampere
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
@@ -327,6 +362,20 @@
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]}}
+
+                    {:id "837-YA",
+                     :inforequest-enabled true
+                      :name {:fi "Tampere yleiset alueet"
+                             :sv "Tammerfors yleiset alueet"}
+                      :new-application-enabled true
+                      :scope [{:municipality "837" :permitType "YA"}]
+                      :statementPersons [{:id "521f1e82e4b0d14f5a87f179"
+                                          :text "Paloviranomainen"
+                                          :email "jussi.viranomainen@tampere.fi"
+                                          :name "Jussi Viranomainen"}]
+                      :yleiset-alueet-ftp-user "tampere"
+                      :operations-attachments {:yleiset-alueet-kaivuulupa
+                                               [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "638-R"
                      :inforequest-enabled true
