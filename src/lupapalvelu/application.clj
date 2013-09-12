@@ -677,9 +677,9 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn- get-verdicts-with-attachments [application]
-  (let [legacy   (organization/get-legacy (:organization application))
-        xml      (krysp/application-xml legacy (:id application))
+(defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
+  (let [legacy   (organization/get-legacy organization)
+        xml      (krysp/application-xml legacy id)
         verdicts (krysp/->verdicts xml)]
     (map
       (fn [verdict]
@@ -690,19 +690,16 @@
                 (map
                   (fn [pk]
                     (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                      (let [file-id    (mongo/create-id)
-                            file-name  (-> url (URL.) (.getPath) (ss/suffix "/"))
-
-                            pk-with-urlhash (assoc pk :urlHash (digest/md5 file-name))
-                            ;file-stream     (http/get url {:as :stream})
-                            ]
-
-                       ;(mongo/upload )
-
-                        ; TODO download & save; perhaps async, perhaps not?
-
-                        ; TODO (dissoc :liite)?
-                        pk-with-urlhash)
+                      (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                            urlhash         (digest/md5 file-name)
+                            resp            (http/get url {:as :stream})
+                            content-length  (Integer/parseInt (get-in resp [:headers "content-length"] "0"))
+                            attachment-type {:type-group "muut" :type-id "muu"}
+                            target          {:type "verdict" :id urlhash}
+                            locked          true]
+                        ; TODO this would create duplicate attachments if we're replacing existing verdicts
+                        (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user timestamp)
+                        (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
                       pk))
                   (:poytakirjat paatos))))
             (:paatokset verdict))))
@@ -714,8 +711,8 @@
    :states     [:draft :open :submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]
    :feature [:paatoksenHaku]}
-  [{:keys [created application] :as command}]
-  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application))]
+  [{:keys [user created application] :as command}]
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (update-application command
       {$set {:verdicts verdicts-with-attachments
              :modified created
