@@ -116,3 +116,15 @@
   (make-query {} {:filter-kind  "both"
                   :filter-state "all"
                   :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+
+(facts filter-repeating-party-docs
+  (filter-repeating-party-docs 1 ["a" "b" "c"]) => (just "a")
+  (provided (schemas/get-schemas 1) => {"a" {:info {:type :party
+                                                    :repeating true}}
+                                        "b" {:info {:type :party
+                                                    :repeating false}}
+                                        "c" {:info {:type :foo
+                                                    :repeating true}}
+                                        "d" {:info {:type :party
+                                                    :repeating true}}}))
+

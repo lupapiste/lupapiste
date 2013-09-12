@@ -41,7 +41,7 @@
     (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
 
 (defn by-type [documents]
-  (group-by #(keyword (get-in % [:schema :info :name])) documents))
+  (group-by (comp keyword :name :schema-info) documents))
 
 
 (def ^:private puolto-mapping {:condition "ehdoilla"
