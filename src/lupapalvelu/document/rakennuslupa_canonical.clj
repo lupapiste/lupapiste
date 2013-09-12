@@ -384,7 +384,9 @@
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  (let [documents (by-type (:documents application))
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
         toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot
