@@ -389,30 +389,29 @@
    :states     [:draft :info :open :submitted :complement-needed :answered :verdictGiven]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
-  (if (> size 0)
-    (let [file-id (mongo/create-id)
-          sanitazed-filename (mime/sanitize-filename filename)]
-      (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-      (if (mime/allowed-file? sanitazed-filename)
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
-          (let [content-type (mime/mime-type sanitazed-filename)]
-            (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
-            (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
-              (executed "add-comment"
-                (-> command
-                  (assoc :data {:id id
-                                :text text,
-                                :type :system
-                                :target {:type :attachment
-                                         :id (:id attachment-version)
-                                         :version (:version attachment-version)
-                                         :filename (:filename attachment-version)
-                                         :fileId (:fileId attachment-version)}})))
-              (fail :error.unknown)))
-          (fail :error.illegal-attachment-type))
-        (fail :error.illegal-file-type)))
-    (fail :error.select-file)))
+  (when-not (pos? size) (fail! :error.select-file))
+  (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
+  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail :error.illegal-attachment-type))
+
+  (let [file-id (mongo/create-id)
+        sanitazed-filename (mime/sanitize-filename filename)
+        content-type (mime/mime-type sanitazed-filename)]
+
+    (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
+    (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
+    (.delete (io/file tempfile))
+    (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
+      (executed "add-comment"
+        (-> command
+          (assoc :data {:id id
+                        :text text,
+                        :type :system
+                        :target {:type :attachment
+                                 :id (:id attachment-version)
+                                   :version (:version attachment-version)
+                                   :filename (:filename attachment-version)
+                                   :fileId (:fileId attachment-version)}})))
+      (fail :error.unknown))))
 
 ;;
 ;; Download
