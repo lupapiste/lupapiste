@@ -158,7 +158,8 @@
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
+   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
+     (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
          kiinteistotunnus (:propertyId application)
          ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
      (when ktj-tiedot
@@ -172,7 +173,7 @@
            (:id application)
            rakennuspaikka
            updates
-           time)))))
+           time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -456,7 +457,7 @@
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -623,9 +624,8 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (if (and (= "R" (:permitType application)) (not (:infoRequest application)))
-        (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-          (catch Exception e (error e "KTJ data was not updated.")))))
+      (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+        (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

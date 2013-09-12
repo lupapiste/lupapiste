@@ -54,7 +54,7 @@
                   :html ["404.html" "nav.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers.2.12_25072013.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers.2.13_20130911.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
