@@ -50,11 +50,11 @@
     (fail :error.unauthorized)))
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (->double x) 800000)))
+  (when (and x (not (< 10000 (util/->double x) 800000)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (->double y) 7779999)))
+  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
 (defn count-unseen-comment [user app]
@@ -508,7 +508,7 @@
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
-   {:x (->double x) :y (->double y)})
+   {:x (util/->double x) :y (util/->double y)})
 
  (defn- make-application-id [municipality]
    (let [year           (str (year (local-now)))

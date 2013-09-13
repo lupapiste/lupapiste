@@ -1,4 +1,5 @@
-(ns sade.util)
+(ns sade.util
+  (:use [sade.strings :only [numeric? decimal-number?]]))
 
 ; from clojure.contrib/core
 
@@ -56,12 +57,16 @@
   ([x] (->int x 0))
   ([x default]
     (try
-      (java.lang.Integer/parseInt (cond
+      (Integer/parseInt (cond
                                     (keyword? x) (name x)
                                     (number? x) (str (int x))
                                     :else (str x)))
       (catch Exception e
         default))))
+
+(defn ->double [v]
+  (let [s (str v)]
+    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
 
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
