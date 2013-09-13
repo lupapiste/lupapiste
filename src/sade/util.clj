@@ -1,5 +1,4 @@
-(ns sade.util
-  (:require [clojure.string :as s]))
+(ns sade.util)
 
 ; from clojure.contrib/core
 
