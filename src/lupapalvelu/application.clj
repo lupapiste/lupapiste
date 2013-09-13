@@ -694,7 +694,7 @@
                                  (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
                                        urlhash         (digest/md5 file-name)
                                        resp            (http/get url {:as :stream})
-                                       content-length  (Integer/parseInt (get-in resp [:headers "content-length"] "0"))
+                                       content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                        attachment-type {:type-group "muut" :type-id "muu"}
                                       target          {:type "verdict" :id urlhash}
                                       locked          true]
@@ -822,7 +822,7 @@
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row (partial with-meta-fields user)) apps)
-        echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
+        echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
