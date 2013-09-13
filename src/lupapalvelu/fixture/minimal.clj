@@ -319,7 +319,7 @@
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :yleiset-alueet-ftp-user "sipoo"
+                     :yleiset-alueet-ftp-user "ya_sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -373,7 +373,7 @@
                                           :text "Paloviranomainen"
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
-                      :yleiset-alueet-ftp-user "tampere"
+                      :yleiset-alueet-ftp-user "ya_tampere"
                       :operations-attachments {:yleiset-alueet-kaivuulupa
                                                [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
