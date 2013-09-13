@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.subtype
-  (:use [clojure.string :only [blank?]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.util :refer [->int fn->]]
+            [clojure.string :refer [blank?]]
             [clj-time.format :as tf]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))

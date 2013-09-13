@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.vrk
-  (:use [lupapalvelu.clojure15]
-        [lupapalvelu.document.validator])
   (:require [sade.util :refer [->int fn->]]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [lupapalvelu.clojure15 :refer :all]
+            [lupapalvelu.document.validator :refer :all]))
 
 ;;
 ;; da lib

@@ -1,6 +1,6 @@
 (ns lupapalvelu.fixture.minimal
-  (:use lupapalvelu.fixture)
-  (:require [lupapalvelu.mongo :as mongo]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture :refer :all]))
 
 (def users
   [{:id "777777777777777777000099" ;; admin

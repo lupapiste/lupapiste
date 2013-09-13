@@ -1,7 +1,6 @@
 (ns lupapalvelu.document.yleiset-alueet-schemas
-  (:require [lupapalvelu.document.tools :refer :all])
-  (:use [lupapalvelu.document.schemas]))
-
+  (:require [lupapalvelu.document.tools :refer :all]
+            [lupapalvelu.document.schemas :refer :all]))
 
 (def hankkeen-kuvaus-kaivulupa
   (body

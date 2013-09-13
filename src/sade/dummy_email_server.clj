@@ -1,5 +1,5 @@
 (ns sade.dummy-email-server
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.email]
             [sade.env :as env]
             [clojure.pprint]

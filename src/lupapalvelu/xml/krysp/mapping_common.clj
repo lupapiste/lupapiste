@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.mapping-common
-  (:use [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
-        [lupapalvelu.attachment :only [encode-filename]]))
+  (:require [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+            [lupapalvelu.attachment :refer [encode-filename]]))
 
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}

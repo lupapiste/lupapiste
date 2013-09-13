@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.emit
-  (:use [clojure.data.xml]))
+  (:require [clojure.data.xml :refer :all]))
 
 (declare element-to-xml)
 

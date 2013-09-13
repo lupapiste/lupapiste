@@ -1,5 +1,5 @@
 (ns lupapalvelu.i18n
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [ontodev.excel :as xls]

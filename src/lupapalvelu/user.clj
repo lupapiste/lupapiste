@@ -1,8 +1,8 @@
 (ns lupapalvelu.user
-  (:use [monger.operators]
-        [lupapalvelu.core])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [slingshot.slingshot :refer [throw+]]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
