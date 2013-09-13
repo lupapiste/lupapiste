@@ -1,1 +1,2 @@
 unknown-document: Tuntematon dokumentti
+attachmentType.yleiset-alueet.suunnitelmakartta: Suunnitelmakartta
