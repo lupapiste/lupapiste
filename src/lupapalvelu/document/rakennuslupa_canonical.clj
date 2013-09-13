@@ -291,8 +291,8 @@
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
                                    {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value))}
                                    {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus :value)
-                                                         :kerrosala (-> mitat :tilavuus :value)
-                                                         :kokonaisala (-> mitat :tilavuus :value)
+                                                         :kerrosala (-> mitat :kerrosala :value)
+                                                         :kokonaisala (-> mitat :kokonaisala :value)
                                                          :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
                                                                          {:pintaAla (-> huoneistoala :pintaAla :value)
                                                                           :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi :value)})}})
