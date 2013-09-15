@@ -995,6 +995,7 @@ var docgen = (function () {
 
       if (schema.info.repeating && !isDisabled(options) && authorizationModel.ok('create-doc')) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
+        btn.className = "block btn";
 
         $(btn).click(function () {
           var self = this;
