@@ -13,6 +13,7 @@ var accordion = (function() {
     var state = content.attr("data-accordion-state");
 
     if (toState === state) { return; }
+
     if (toState === "toggle") { toState = (state !== "closed") ? "closed" : "open"; }
 
     var height = content.attr("data-accordion-height");
@@ -21,7 +22,7 @@ var accordion = (function() {
       height = h + "px";
       content
         .attr("data-accordion-height", height)
-        .css("height", height);
+        .css({"height": height, "overflow": "visible"});
     }
 
     if (toState === "closed") {
@@ -40,11 +41,11 @@ var accordion = (function() {
       .attr("data-accordion-state", state)
       .animate({ height: height }, animationTime, animationEasing, function() {
         if (state === "closed") {
-          content.removeClass("content_expanded");
+          content.removeClass("expanded");
         } else {
-          content.addClass("content_expanded");
+          content.addClass("expanded");
         }
-        target.trigger("accordion-" + state);
+        target.trigger("accordion" + state);
         if (done) { done(target); }
       });
 

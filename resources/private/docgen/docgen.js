@@ -930,7 +930,7 @@ var docgen = (function () {
       var title = document.createElement("h2");
 
       var sectionContainer = document.createElement("div");
-      var elements = document.createElement("article");
+      var elements = document.createElement("div");
 
       section.className = "accordion";
       icon.className = "icon toggle-icon drill-down-white";
@@ -957,10 +957,10 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
+      sectionContainer.setAttribute("data-accordion-state", "open");
       sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
-
       sectionContainer.appendChild(elements);
       section.appendChild(title);
       section.appendChild(sectionContainer);
