@@ -933,6 +933,8 @@ var docgen = (function () {
       var elements = document.createElement("div");
 
       section.className = "accordion";
+      elements.className = "accordion-fields";
+
       icon.className = "icon toggle-icon drill-down-white";
       title.appendChild(icon);
 
@@ -961,6 +963,7 @@ var docgen = (function () {
       sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
+
       sectionContainer.appendChild(elements);
       section.appendChild(title);
       section.appendChild(sectionContainer);
