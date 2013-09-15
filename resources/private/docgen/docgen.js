@@ -965,6 +965,9 @@ var docgen = (function () {
       appendElements(elements, self.schema, self.model, []);
 
       sectionContainer.appendChild(elements);
+      var clearDiv = document.createElement("div");
+      clearDiv.className = "clear";
+      sectionContainer.appendChild(clearDiv);
       section.appendChild(title);
       section.appendChild(sectionContainer);
       return section;
