@@ -65,7 +65,7 @@
                          :created 1372331179008,
                          :schema-info {:op {:id "51cc1cab23e74941fee4f495",
                                             :created 1372331179008,
-                                            :name "yleiset-alueet-kaivuulupa"},
+                                            :name "ya-kaivuulupa"},
                                        :name "tyomaastaVastaava"
                                        :version 1
                                        :removable true,
