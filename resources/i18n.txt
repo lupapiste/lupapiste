@@ -26,6 +26,11 @@ verdict.maaraykset.maaraysaika: Määräysaika
 verdict.maaraykset.toteutusHetki: Toteutushetki
 verdict.maaraykset.sisalto:       Sisältö
 verdict.vaaditutTyonjohtajat:   Vaaditut työnjohtajat
+
+verdict.poytakirjat: Pöytäkirjat
+verdict.pykala: Pykälä
+verdict.paatospvm: Päivämäärä
+
 attachmentType.yleiset-alueet.suunnitelmakartta: Suunnitelmakartta
 license.link: Tietoja Lupapisteestä
 stamp.verdict: Hyväksytty

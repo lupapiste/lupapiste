@@ -404,46 +404,47 @@
 
                 <!-- /ko -->
 
-                  <div data-bind="if:  $data.poytakirjat">
-                    <h3>_Poytakirjat_</h3>
-                    <pre data-bind="text: JSON.stringify(poytakirjat, null, 2)" ></pre>
+                  <div data-bind="if: $data.poytakirjat">
+                    <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
+                    <table class="table table-striped tablesorter" id="application-verdict-details">
+                      <thead>
+                        <tr>
+                          <th data-bind="ltext: 'verdict.status'"></th>
+                          <th data-bind="ltext: 'verdict.pykala'"></th>
+                          <th data-bind="ltext: 'verdict.name'"></th>
+                          <th data-bind="ltext: 'verdict.paatospvm'"></th>
+                          <th data-bind="ltext: 'verdict.attachments'"></th>
+                        </tr>
+                      </thead>
+                      <tbody data-bind="foreach: $data.poytakirjat">
+                        <tr class="statement-row" >
+                          <td>
+                          <!-- ko if: $data.status -->
+                          <span data-bind="ltext: 'verdict.status.'+$data.status"></span>
+                          <!-- /ko -->
+                          <span data-bind="text: $data.paatos"></span>
+                          </td>
+                          <td data-bind="text: $data.pykala"></td>
+                          <td data-bind="text: $data.paatoksentekija"></td>
+                          <td data-bind="dateString: $data.paatospvm"></td>
+                          <td data-bind="foreach: $data.attachments">
+                            <span data-bind="with: $data.latestVersion">
+                              <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+                                <i data-bind="ltext: contentType"></i>
+                                <i data-bind="size: size"></i><br/>
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </section>
             </div>
 
+            <pre data-bind="text: JSON.stringify($data.paatokset, null, 2)" ></pre>
 
-                <!-- /ko -->
-
-            <!--
-              <table class="table table-striped tablesorter" id="application-verdict-details">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th data-bind="ltext: 'verdict.status'"></th>
-                    <th data-bind="ltext: 'verdict.name'"></th>
-                    <th data-bind="ltext: 'verdict.given'"></th>
-                    <th data-bind="ltext: 'verdict.official'"></th>
-                    <th data-bind="ltext: 'verdict.attachments'"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="statement-row">
-                    <td></td>
-                    <td data-bind="ltext: 'verdict.status.'+$data.status"></td>
-                    <td data-bind="text: name"></td>
-                    <td data-bind="dateString: $data.paatokset.paivamaarat.anto"></td>
-                    <td data-bind="dateString: $data.paatokset.paivamaarat.lainvoimainen"></td>
-                    <td data-bind="foreach: $data.paatokset">
-                      <span data-bind="with: $data.latestVersion">
-                        <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
-                          <i data-bind="ltext: contentType"></i>
-                          <i data-bind="size: size"></i><br/>
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-             -->
+            <!-- /ko -->
 
             </div>
             </div>
