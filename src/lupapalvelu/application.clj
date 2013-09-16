@@ -692,7 +692,6 @@
                              (fn [pk]
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
                                  (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                       urlhash         (digest/md5 file-name)
                                        resp            (http/get url {:as :stream})
                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                        attachment-type {:type-group "muut" :type-id "muu"}
@@ -700,7 +699,7 @@
                                       locked          true]
                                    ; TODO this would create duplicate attachments if we're replacing existing verdicts
                                    (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user timestamp)
-                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                   (-> pk (assoc :urlHash (digest/md5 url)) (dissoc :liite)))
                                  pk))
                              (:poytakirjat paatos))))
                        (:paatokset verdict))))
