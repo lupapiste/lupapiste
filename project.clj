@@ -38,7 +38,6 @@
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.4.0"]
-                             [lein-requiretimes "0.1.0-SNAPSHOT"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]]
                    :source-paths ["test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
