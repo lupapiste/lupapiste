@@ -695,10 +695,11 @@
                                        resp            (http/get url {:as :stream})
                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                        attachment-type {:type-group "muut" :type-id "muu"}
-                                      target          {:type "verdict" :id urlhash}
-                                      locked          true]
+                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
+                                       target          {:type "verdict" :id urlhash}
+                                       locked          true]
                                    ; TODO this would create duplicate attachments if we're replacing existing verdicts
-                                   (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user timestamp)
+                                   (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user attachment-time)
                                    (-> pk (assoc :urlHash (digest/md5 url)) (dissoc :liite)))
                                  pk))
                              (:poytakirjat paatos))))
@@ -710,6 +711,7 @@
    ;TODO remove all but sent when ready
    :states     [:draft :open :submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]
+   ; TODO notify?
    :feature [:paatoksenHaku]}
   [{:keys [user created application] :as command}]
   (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
