@@ -5,11 +5,9 @@
         [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical]
         [sade.util :only [contains-value?]]))
 
-;; NOTE: Rakennuslupa-canonical-testista poiketen otin "auth"-kohdan pois.
+;; NOTE: Rakennuslupa-canonical-testista poiketen applicationin "auth"-kohta ei ole kaytossa.
 
-;; TODO: Pitaisiko "location"-kohta poistaa? Silla ei kuulemma tehda mitaan.
-
-;; TODO: Kopioi lausuntokohta, "statements", rakennusluvan puolelta.
+;; TODO: Pitaisiko "location"-kohta poistaa? Tekeeko silla mitaan?
 
 ;; TODO: Jossain itesteissa pitaisi testata seuraavat applicationin kohdat:
 ;;        - operations

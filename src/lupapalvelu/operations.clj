@@ -287,9 +287,9 @@
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
                      ;; TODO: Mita attachmentteihin?
-                     :attachments []
-;                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
-                                 }
+                     ;; Krysp_itesti (YA) olettaa tämän olevan määritelty
+                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}
+
    :ya-kayttolupa   {:schema "tyoaika"
                      :permit-type "YA"
                      :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
