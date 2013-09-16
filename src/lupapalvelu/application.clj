@@ -102,7 +102,7 @@
   (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :neighbors :fn neighbors/normalize-negighbors}
+                  {:field :neighbors :fn neighbors/normalize-neighbors}
                   {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}
                   {:field :unseenComments :fn count-unseen-comment}
@@ -448,7 +448,8 @@
    :states     [:draft :open :submitted :complement-needed]
    :validators [validate-owner-or-writer]}
   [{:keys [application]}]
-  (autofill-rakennuspaikka application (now)))
+  (try (autofill-rakennuspaikka application (now))
+    (catch Exception e (error e "KTJ data was not updated"))))
 
 (defcommand save-application-shape
   {:parameters [:id shape]
@@ -480,9 +481,9 @@
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/get-schema schema-name)
                                                  :created created
-                                                 :data (if (= schema-name (:schema op-info))
+                                                 :data (tools/timestamped (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
-                                                         {})})
+                                                         {}) created)})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -495,8 +496,8 @@
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
-            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
+            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
+            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
@@ -528,15 +529,23 @@
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type     (operations/permit-type-of-operation operation)
-        organization-id (:id (organization/resolve-organization municipality permit-type))]
+        organization (organization/resolve-organization municipality permit-type)
+        organization-id (:id organization)
+        info-request? (boolean infoRequest)]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (if info-request?
+      (when-not (:inforequest-enabled organization)
+        (fail! :error.inforequests-disabled))
+    (when-not (:new-application-enabled organization)
+        (fail! :error.new-applications-disabled)))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
-          info-request? (boolean infoRequest)
           state         (cond
                           info-request?              :info
                           (security/authority? user) :open
@@ -572,7 +581,7 @@
 
       (mongo/insert :applications application)
       (try (autofill-rakennuspaikka application created)
-        (catch Exception e (error e "KTJ data was not updatet.")))
+        (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
 
 (defcommand add-operation
@@ -607,7 +616,9 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
+      (if (and (= "R" (:permitType application)) (not (:infoRequest application)))
+        (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+          (catch Exception e (error e "KTJ data was not updated.")))))
     (fail :error.property-in-other-muinicipality)))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
@@ -671,20 +682,13 @@
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy (organization/get-legacy organization)]
-        (let [doc-name     "rakennuksen-muuttaminen"
-              document     (domain/get-document-by-id (:documents application) documentId)
-              old-body     (:data document)
+        (let [document     (domain/get-document-by-id application documentId)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)]
-          ;; TODO: update via model
-          (mongo/update
-            :applications
-            {:_id (:id application)
-             :documents {$elemMatch {:id documentId}}}
-            {$set {:documents.$.data with-value-metadata
-                   :modified created}})
-          (ok))
+              updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
+          (do
+            (infof "merging data into %s %s" (get-in document [:schema :info :name]) (:id document))
+            (commands/persist-model-updates id document updates created)
+            (ok)))
         (fail :no-legacy-available)))))
 
 (defcommand get-building-info-from-legacy

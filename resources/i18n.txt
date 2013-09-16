@@ -1,1 +1,0 @@
-XXX-laita-tama-email-templateen-add-statement-person: Teidät on lisätty lausunnon antajaksi organisaatioon <organisaatio> nimikkeellä <nimike>

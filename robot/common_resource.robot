@@ -304,7 +304,7 @@ Prepare new request
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Confirm  dialog-confirm-cancel
+  Confirm  dynamic-yes-no-confirm-dialog
 
 Confirm
   [Arguments]  ${modalId}
@@ -318,7 +318,7 @@ It is possible to add operation
 
 Submit application
   Click enabled by test id  application-submit-btn
-  Confirm  dialog-confirm-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
 
 #

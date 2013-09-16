@@ -86,7 +86,7 @@
         <div data-bind="with: application" class="application_actions">
           <div class="muncipality-info">
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
-            <p data-bind="text: loc('municipality', municipality())"></p>
+            <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
           <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
             <span data-bind="ltext: 'application.submitApplication'"></span>
@@ -245,7 +245,7 @@
               <table class="table">
                 <tbody data-bind="foreach: attachmentsByGroup">
                   <tr class="attachment-group-header">
-                    <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
+                    <td data-bind="text: loc(['attachmentType', group, '_group_label'])" colspan="6"></td>
                   </tr>
                   <tr>
                     <th data-bind="ltext: 'application.attachmentState'">Tila</th>
@@ -262,7 +262,7 @@
                     <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                       <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                         <span data-bind="if: type">
-                          <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                          <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
                         </span>
                         <span data-bind="if: !type">
                           <i data-bind="ltext: 'attachment.noName'"></i>
@@ -396,7 +396,7 @@
                     <td data-bind="text: person.name"></td>
                     <td data-bind="dateString: requested"></td>
                     <td data-bind="dateString: given"></td>
-                    <td data-bind="text: status() && loc('statement.'+status()), attr: {'data-test-name' : person.name}"></td>
+                    <td data-bind="text: status() && loc(['statement', status()]), attr: {'data-test-name' : person.name}"></td>
                   </tr>
                 </tbody>
               </table>
@@ -443,10 +443,10 @@
                                     click: $root.neighbor.showStatus,
                                     attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
                          href="#">
-                        <span data-bind="text: loc('neighbor.state', lastStatus.state())" class="status-state"></span>
+                        <span data-bind="text: loc(['neighbor.state', lastStatus.state()])" class="status-state"></span>
                       </a>
                       <span data-bind="visible: !$root.neighbor.statusCompleted($data),
-                                       text: loc('neighbor.state', lastStatus.state()),
+                                       text: loc(['neighbor.state', lastStatus.state()]),
                                        attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
                             class="status-state">
                       </span>
@@ -626,7 +626,7 @@
                           visible: $parent.status() < $parent.statusRunning,
                           enable: $parent.status() === $parent.statusReady" />
                       <span data-bind="
-                          text: loc('stamp.file.status', status()),
+                          text: loc(['stamp.file.status', status()]),
                           visible: $parent.status() >= $parent.statusRunning"></span>
                     </td>
                   </tr>
@@ -643,7 +643,7 @@
             </div>
 
             <div class="stamp-status">
-              <span data-bind="text: loc('stamp.status', status().toString())"></span>
+              <span data-bind="text: loc(['stamp.status', status().toString()])"></span>
             </div>
 
             <div class="stamp-buttons">
@@ -715,7 +715,7 @@
             <div>
               <select
                 data-bind="options: partyDocumentNames(),
-                           optionsText: function(item) { return loc('schemas.'  + item); },
+                           optionsText: function(item) { return loc(['schemas', item]); },
                            optionsValue: function(item) { return item; },
                            value: documentName,
                            optionsCaption: loc('choose')"
@@ -734,8 +734,8 @@
         </div>
         <div data-bind="with: neighborStatusModel" class="dialog-content">
 
-          <div data-bind="text: loc('neighbors.status-dialog.message', state())"></div>
-          <div data-bind="text: loc('neighbors.status-dialog.description', state())"></div>
+          <div data-bind="text: loc(['neighbors.status-dialog.message', state()])"></div>
+          <div data-bind="text: loc(['neighbors.status-dialog.description', state()])"></div>
 
           <table>
             <tbody>
@@ -755,7 +755,7 @@
           </table>
 
           <div data-bind="visible: message" class="neighbors-message">
-            <div data-bind="text: loc('neighbors.status-dialog.message-title', state())"></div>
+            <div data-bind="text: loc(['neighbors.status-dialog.message-title', state()])"></div>
             <div data-bind="text: message"  data-test-id="neighbor-status-message"></div>
           </div>
 
