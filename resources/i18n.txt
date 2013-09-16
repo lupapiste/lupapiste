@@ -1,4 +1,5 @@
 unknown-document: Tuntematon dokumentti
+attachmentType.yleiset-alueet.suunnitelmakartta: Suunnitelmakartta
 license.link: Tietoja Lupapisteestä
 stamp.verdict: Hyväksytty
 footer.sade: Palvelu on osa valtiovarainministeriön koordinoimaa ja ympäristöministeriön toteuttamaa Sähköisen asioinnin ja demokratian vauhdittamisohjelmaa (SADe-ohjelma
