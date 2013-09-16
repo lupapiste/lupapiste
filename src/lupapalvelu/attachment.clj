@@ -96,7 +96,9 @@
                     :tyyppiratkaisu
                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
                     :liitoslausunto
-                    :asemapiirros]
+                    :asemapiirros
+                    :rakennuspiirros
+                    :suunnitelmakartta]
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 

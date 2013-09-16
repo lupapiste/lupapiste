@@ -2,15 +2,14 @@
   (:require [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schemas :refer :all]))
 
+;;
+;; Kaivulupa
+;;
+
 (def hankkeen-kuvaus-kaivulupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
     {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
-
-(def hankkeen-kuvaus-sijoituslupa
-  (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -26,6 +25,39 @@
   (body
     {:name "tyoaika-alkaa-pvm" :type :date}                                     ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date}))
+
+
+(defschemas
+  1
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+           :type :group
+           :removable false
+           :repeating false
+           :order 60}
+    :body hankkeen-kuvaus-kaivulupa}
+   {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
+           :type :party
+           :removable false
+           :repeating false
+           :order 61}
+    :body tyomaasta-vastaava}
+   {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
+           :type :party
+           :removable false
+           :repeating false
+           :order 62}
+    :body yleiset-alueet-maksaja}
+   {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
+           :type :group
+           :removable false
+           :repeating false
+           :order 63}
+    :body tyo-aika}])
+
+
+;;
+;; Sijoituslupa
+;;
 
 (def tapahtuman-tiedot
   (body
@@ -63,6 +95,21 @@
      {:name "viitoitus-tapahtuma-valinta" :type :group
       :body viitoitus-tapahtuma}]))
 
+(defschemas
+  1
+  [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
+           :type :group
+           :removable false
+           :repeating false
+           :order 64}
+    :body mainostus-tai-viitoitus-tapahtuma-valinta}])
+
+
+(def hankkeen-kuvaus-sijoituslupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
+
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
     [{:name "sijoituksen-tarkoitus" :type :select
@@ -82,43 +129,6 @@
      {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
      {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
 
-
-(defschemas
-  1
-  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-           :type :group
-           :removable false
-           :repeating false
-           :order 60}
-    :body hankkeen-kuvaus-kaivulupa}
-   {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
-           :type :party
-           :removable false
-           :repeating false
-           :order 61}
-    :body tyomaasta-vastaava}
-   {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
-           :type :party
-           :removable false
-           :repeating false
-           :order 62}
-    :body yleiset-alueet-maksaja}
-   {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
-           :type :group
-           :removable false
-           :repeating false
-           :order 63}
-    :body tyo-aika}])
-
-(defschemas
-  1
-  [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
-           :type :group
-           :removable false
-           :repeating false
-           :order 64}
-    :body mainostus-tai-viitoitus-tapahtuma-valinta}])
-
 (defschemas
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
@@ -132,9 +142,12 @@
            :order 66}
     :body sijoituslupa-sijoituksen-tarkoitus}])
 
+
+
 ;;
-;; TODO: Liikennetta haittavan tyon lupa
+;; Liikennetta haittavan tyon lupa
 ;;
+
 #_(def liikennetta-haittaavan-tyon-lupa
   {:info {:name "yleisetAlueetLiikennettaHaittaava" :order 65}
    :body [{:name "ilmoituksenAihe"
