@@ -7,3 +7,24 @@ footer.terms: Käyttöehdot
 footer.register: Rekisteriseloste
 footer.license: Lisenssit
 footer.contact: Ota yhteyttä
+operations.ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
+operations.ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat.desc: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
+operations.ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot: Muut yleiselle alueelle kohdistuvat tilan käytöt
+operations.ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot: Erilaiset messujen ja tapahtumien aikaiset alueiden käytöt
+operations.ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.ya-kayttolupa-kadulta-tapahtuvat-nostot: Kadulta tapahtuvat nostot
+operations.ya-kayttolupa-kadulta-tapahtuvat-nostot.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi: Kiinteistön rakentamis- ja korjaamistyöt, joiden suorittamiseksi rajataan osa kadusta tai yleisestä alueesta työmaaksi (ei kaivutöitä)
+operations.ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.ya-kayttolupa-rakennustelineet-kadulla: Kadulle pystytettävät rakennustelineet
+operations.ya-kayttolupa-rakennustelineet-kadulla.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.ya-kayttolupa-muu-kayttolupa: Muu käyttölupa
+operations.ya-kayttolupa-muu-kayttolupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat._group_label: Työ-/vuokra-aika
+ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot._group_label: Työ-/vuokra-aika
+ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot._group_label: Työ-/vuokra-aika
+ya-kayttolupa-kadulta-tapahtuvat-nostot._group_label: Työ-/vuokra-aika
+ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi._group_label: Työ-/vuokra-aika
+ya-kayttolupa-rakennustelineet-kadulla._group_label: Työ-/vuokra-aika
+ya-kayttolupa-muu-kayttolupa._group_label: Työ-/vuokra-aika
