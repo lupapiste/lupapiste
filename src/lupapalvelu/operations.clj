@@ -287,8 +287,8 @@
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
                      ;; TODO: Mita attachmentteihin?
-                     :attachments []
-;                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
+;                     :attachments []
+                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
                                  }
    :ya-kayttolupa   {:schema "tyoaika"
                      :permit-type "YA"
