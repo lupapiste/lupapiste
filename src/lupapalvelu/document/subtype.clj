@@ -106,6 +106,12 @@
     (re-matches #"^([\p{L}\(\)\-/ &\.,:\*\d]+)$" v) nil
     :else [:warn "illegal-address"]))
 
+(defmethod subtype-validation :maaraala-tunnus [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^[0-9]{4}$" v) nil
+    :else [:warn "illegal-address"]))
+
 (defmethod subtype-validation nil [_ _]
   nil)
 
