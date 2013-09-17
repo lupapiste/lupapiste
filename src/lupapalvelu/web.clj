@@ -433,10 +433,13 @@
   (defjson "/dev/user" []
     (current-user))
 
-  (defpage "/dev/krysp" {:keys [typeName]}
+  (defpage "/dev/krysp" {typeName :typeName r :request}
+    (if-not (blank? typeName)
     (let [xmls {"rakval:ValmisRakennus"       "resources/krysp/sample/building.xml"
                 "rakval:RakennusvalvontaAsia" "resources/krysp/sample/verdict.xml"}]
-      (resp/content-type "application/xml; charset=utf-8" (slurp (get xmls typeName)))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (get xmls typeName))))
+      (when (= r "GetCapabilities")
+        (resp/status 200 "OK"))))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
