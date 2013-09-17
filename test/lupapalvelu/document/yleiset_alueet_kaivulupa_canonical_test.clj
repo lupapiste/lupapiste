@@ -157,12 +157,12 @@
 (def statements [{:id "518b3ee60364ff9a63c6d6a1"
                   :given 1368080324142
                   :requested 1368080102631
-                  :status "condition"
+                  :status "yes"
                   :person {:id "516560d6c2e6f603beb85147"
                            :text "Paloviranomainen"
                            :name "Sonja Sibbo"
                            :email "sonja.sibbo@sipoo.fi"}
-                  :text "Savupiippu pit\u00e4\u00e4 olla."}])
+                  :text "Annanpa luvan."}])
 
 (def application
   {:id "LP-753-2013-00001",
