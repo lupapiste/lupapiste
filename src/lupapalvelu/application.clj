@@ -3,7 +3,6 @@
             [monger.operators :refer :all]
             [lupapalvelu.core :refer :all]
             [clojure.string :refer [blank? join trim split]]
-            [sade.util :refer [lower-case]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [lupapalvelu.i18n :refer [with-lang loc]]

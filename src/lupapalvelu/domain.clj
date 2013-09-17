@@ -2,9 +2,9 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [sade.util :refer [lower-case]]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.xml.krysp.verdict :as verdict]
+            [sade.strings :refer [lower-case]]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
