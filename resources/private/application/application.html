@@ -340,69 +340,72 @@
                 </h2>
                 <div class="accordion_content expanded">
                 <!--  ko if:  $data.paivamaarat -->
-                <div data-bind="if: paivamaarat.aloitettava">
-                <label class="form-label" data-bind="ltext: 'verdict.aloitettava'"></label>
-                <span class="" data-bind="dateString: paivamaarat.aloitettava"></span>
+                <div data-bind="if: paivamaarat.aloitettava" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.aloitettava'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.aloitettava"></span>
                 </div>
-                <div data-bind="if: paivamaarat.lainvoimainen">
-                <label class="form-label" data-bind="ltext: 'verdict.lainvoimainen'"></label>
-                <span class="" data-bind="dateString: paivamaarat.lainvoimainen"></span>
+                <div data-bind="if: paivamaarat.lainvoimainen" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.lainvoimainen'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.lainvoimainen"></span>
                 </div>
-                <div data-bind="if: paivamaarat.voimassaHetki">
-                <label class="form-label" data-bind="ltext: 'verdict.voimassaHetki'"></label>
-                <span class="" data-bind="dateString: paivamaarat.voimassaHetki"></span>
+                <div data-bind="if: paivamaarat.voimassaHetki" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.voimassaHetki'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.voimassaHetki"></span>
                 </div>
-                <div data-bind="if: paivamaarat.raukeamis">
-                <label class="form-label" data-bind="ltext: 'verdict.raukeamis'"></label>
-                <span class="" data-bind="dateString: paivamaarat.raukeamis"></span>
+                <div data-bind="if: paivamaarat.raukeamis" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.raukeamis'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.raukeamis"></span>
                 </div>
-                <div data-bind="if: paivamaarat.anto">
-                <label class="form-label" data-bind="ltext: 'verdict.anto'"></label>
-                <span class="" data-bind="dateString: paivamaarat.anto"></span>
+                <div data-bind="if: paivamaarat.anto" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.anto'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.anto"></span>
                 </div>
-                <div data-bind="if: paivamaarat.viimeinenValitus">
-                <label class="form-label" data-bind="ltext: 'verdict.viimeinenValitus'"></label>
-                <span class="" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
+                <div data-bind="if: paivamaarat.viimeinenValitus" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.viimeinenValitus'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
                 </div>
-                <div data-bind="if: paivamaarat.julkipano">
-                <label class="form-label" data-bind="ltext: 'verdict.julkipano'"></label>
-                <span class="" data-bind="dateString: paivamaarat.julkipano"></span>
+                <div data-bind="if: paivamaarat.julkipano" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.julkipano'"></label>
+                  <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
                 </div>
                 <!-- /ko --> <!-- /paivamaarat -->
 
                 <!--  ko if:  $data.lupamaaraykset -->
                 <h3 data-bind="ltext: 'verdict.lupamaaraukset'"></h3>
 
-<div data-bind='if: lupamaaraykset.autopaikkojaEnintaan'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaEnintaan'></span></div>
-<div data-bind='if: lupamaaraykset.autopaikkojaVahintaan'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaVahintaan'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaVahintaan'></span></div>
-<div data-bind='if: lupamaaraykset.autopaikkojaRakennettava'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaRakennettava'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaRakennettava'></span></div>
-<div data-bind='if: lupamaaraykset.autopaikkojaRakennettu'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaRakennettu'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaRakennettu'></span></div>
-<div data-bind='if: lupamaaraykset.autopaikkojaKiinteistolla'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaKiinteistolla'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaKiinteistolla'></span></div>
-<div data-bind='if: lupamaaraykset.autopaikkojaUlkopuolella'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaUlkopuolella'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaUlkopuolella'></span></div>
-<div data-bind='if: lupamaaraykset.kerrosala'><label class="form-label" data-bind="ltext: 'verdict.kerrosala'"></label><span  data-bind='text: lupamaaraykset.kerrosala'></span></div>
-<div data-bind='if: lupamaaraykset.kokonaisala'><label class="form-label" data-bind="ltext: 'verdict.kokonaisala'"></label><span  data-bind='text: lupamaaraykset.kokonaisala'></span></div>
+                <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
+                <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.autopaikkojaVahintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaVahintaan"></span></div>
+                <div data-bind="if: lupamaaraykset.autopaikkojaRakennettava" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.autopaikkojaRakennettava'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaRakennettava"></span></div>
+                <div data-bind="if: lupamaaraykset.autopaikkojaRakennettu" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.autopaikkojaRakennettu'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaRakennettu"></span></div>
+                <div data-bind="if: lupamaaraykset.autopaikkojaKiinteistolla" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.autopaikkojaKiinteistolla'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaKiinteistolla"></span></div>
+                <div data-bind="if: lupamaaraykset.autopaikkojaUlkopuolella" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.autopaikkojaUlkopuolella'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaUlkopuolella"></span></div>
+                <div data-bind="if: lupamaaraykset.kerrosala" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.kerrosala'"></label><span class="value" data-bind="text: lupamaaraykset.kerrosala"></span></div>
+                <div data-bind="if: lupamaaraykset.kokonaisala" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.kokonaisala'"></label><span class="value" data-bind="text: lupamaaraykset.kokonaisala"></span></div>
 
-                <div data-bind='if: lupamaaraykset.vaaditutTyonjohtajat'>
-                  <label class="form-label" data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
-                  <span  data-bind='text: lupamaaraykset.vaaditutTyonjohtajat'></span>
+                <div data-bind="if: lupamaaraykset.vaaditutTyonjohtajat" class="key-value-pair">
+                  <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
+                  <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                 </div>
 
                 <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                   <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
-                  <table class="table table-striped tablesorter" id="application-verdict-details">
-                    <thead>
-                      <tr>
-                        <th data-bind="ltext: 'verdict.katselmuksenLaji'" width="25%"></th>
-                        <th data-bind="ltext: 'verdict.tarkastuksenTaiKatselmuksenNimi'"></th>
-                      </tr>
-                    </thead>
-                    <tbody data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
-                      <tr>
-                        <td data-bind='if: $data.katselmuksenLaji'><span data-bind="text: loc(['verdict.katselmus', $data.katselmuksenLaji])"></span></td>
-                        <td data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></td>
-                      </tr>
-                    </tbody>
-                  </table>
+
+                  <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
+                    <li data-bind='if: $data.katselmuksenLaji'>
+                      <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
+                      <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
+                        (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
+                      </span>
+                    </li>
+                  </ul>
                 </div>
 
                 <div data-bind='if: lupamaaraykset.maaraykset'>
