@@ -711,16 +711,16 @@
   {:parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
-   ; TODO notify?
+   :notify     "verdict"
    :feature [:paatoksenHaku]}
   [{:keys [user created application] :as command}]
-  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
-    (update-application command
+  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
+    (do (update-application command
       {$set {:verdicts verdicts-with-attachments
              :modified created
              :state    :verdictGiven}}) ; TODO or $pushAll?
-    (notifications/send-notifications-on-verdict! application (get-in command [:web :host]))
-    (ok :response verdicts-with-attachments)))
+      (ok :response verdicts-with-attachments))
+    (fail :info.no-verdicts-found-from-backend)))
 
 ;;
 ;; krysp enrichment

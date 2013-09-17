@@ -29,6 +29,8 @@ verdict.poytakirjat: Pöytäkirjat
 verdict.pykala: Pykälä
 verdict.paatospvm: Päivämäärä
 
+info.no-verdicts-found-from-backend: Taustajärjestelmästä ei löytynyt päätöstietoja.
+
 verdict.fetch: Hae päätöstiedot taustajärjestelmästä
 update-authority-user-organisations.dialog.title: Käyttäjän lisäys organisaatioon
 update-authority-user-organisations.dialog.content.single: Käyttäjä kuuluu jo organisaatioon {0}. Haluatko lisätä hänet organisaatioon {1}?
