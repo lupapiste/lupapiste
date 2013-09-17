@@ -38,9 +38,10 @@ var attachment = (function() {
     return false;
   }
 
+  // These cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo,
+  // because the ids are registered with hub.subscribe.
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
     loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
-
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
     loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
 
@@ -194,7 +195,7 @@ var attachment = (function() {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
       return;
     }
-    
+
     $('#file-preview-iframe').attr('src','');
 
     model.latestVersion(attachment.latestVersion);

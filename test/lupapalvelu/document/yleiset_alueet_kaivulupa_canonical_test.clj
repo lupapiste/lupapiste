@@ -53,26 +53,26 @@
 
 (def hakija {:id "51cc1cab23e74941fee4f498",
              :created 1372331179008,
-             :schema {:info
-                      {:name "hakija-ya",
-                       :removable true,
-                       :repeating true,
-                       :type "party",
-                       :order 3}},
+             :schema-info {:name "hakija-ya"
+                           :version 1
+                           :removable true,
+                           :repeating true,
+                           :type "party",
+                           :order 3},
              :data {:_selected {:modified 1372342070624, :value "yritys"},
                     :henkilo henkilo,
                     :yritys yritys}})
 
 (def tyomaasta-vastaava {:id "51cc1cab23e74941fee4f496",
                          :created 1372331179008,
-                         :schema {:info
-                                  {:op {:id "51cc1cab23e74941fee4f495",
-                                        :created 1372331179008,
-                                        :name "yleiset-alueet-kaivuulupa"},
-                                   :name "tyomaastaVastaava",
-                                   :removable true,
-                                   :type "party",
-                                   :order 61}},
+                         :schema-info {:op {:id "51cc1cab23e74941fee4f495",
+                                            :created 1372331179008,
+                                            :name "ya-kaivuulupa"},
+                                       :name "tyomaastaVastaava"
+                                       :version 1
+                                       :removable true,
+                                       :type "party",
+                                       :order 61},
                          :data {:_selected {:modified 1372342063565, :value "yritys"},
                                 :henkilo henkilo-without-hetu,
                                 :yritys yritys}})
@@ -81,9 +81,10 @@
 
 (def maksaja {:id "51cc1cab23e74941fee4f499",
               :created 1372331179008,
-              :schema {:info {:name "yleiset-alueet-maksaja",
-                              :type "party",
-                              :order 62}},
+              :schema-info {:name "yleiset-alueet-maksaja",
+                            :version 1
+                            :type "party",
+                            :order 62},
               :data {:_selected {:modified 1372341924880, :value "yritys"},
                      :henkilo henkilo,
                      :yritys yritys,
@@ -93,11 +94,13 @@
                       :created 1372331179008,
                       :data {:kayttotarkoitus {:modified 1372331214906, :value "Ojankaivuu."},
                              :sijoitusLuvanTunniste {:modified 1372331243461, :value "LP-753-2013-00001"}},
-                      :schema {:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa", :order 60}}})
+                      :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                    :version 1
+                                    :order 60}})
 
 (def tyoaika {:id "51cc1cab23e74941fee4f49b",
               :created 1372331179008,
-              :schema {:info {:name "tyoaika", :type "group", :order 63}},
+              :schema-info {:name "tyoaika" :version 1 :type "group" :order 63},
               :data {:tyoaika-alkaa-pvm
                      {:modified 1372331246482, :value "17.06.2013"},
                      :tyoaika-paattyy-pvm

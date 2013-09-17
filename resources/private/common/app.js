@@ -169,5 +169,6 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     $("nav").applyBindings(model).css("visibility", "visible");
+    $("footer").applyBindings(model).css("visibility", "visible");
   };
 };

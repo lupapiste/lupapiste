@@ -54,21 +54,21 @@
 (def ^:private operation-tree-for-YA
   {:permit-type permit/YA
    :tree ["yleisten-alueiden-luvat"
-          [["kaivuulupa" :yleiset-alueet-kaivuulupa]
+          [["kaivuulupa" :ya-kaivuulupa]
            ["kayttolupa"
-            [["tyomaasuojat-ja-muut-rakennelmat" :yleiset-alueet-kayttolupa] ;; TODO
-             ["mainoslaitteet-ja-opasteviitat" :mainostus-ja-viitoituslupa]
-             ["muut-yleisten-alueiden-tilojen-kaytot" :yleiset-alueet-kayttolupa] ;; TODO
-             ["messujen-ja-tapahtumien-alueiden-kaytot" :yleiset-alueet-kayttolupa] ;; TODO
-             ["kadulta-tapahtuvat-nostot" :yleiset-alueet-kayttolupa] ;; TODO
-             ["kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi" :yleiset-alueet-kayttolupa] ;; TODO
-             ["rakennustelineet-kadulla" :yleiset-alueet-kayttolupa] ;; TODO
-             ["muu-kayttolupa" :yleiset-alueet-kayttolupa]]] ;; TODO
+            [["tyomaasuojat-ja-muut-rakennelmat" :ya-kayttolupa] ;; TODO
+             ["mainoslaitteet-ja-opasteviitat" :ya-kayttolupa-mainostus-ja-viitoitus]
+             ["muut-yleisten-alueiden-tilojen-kaytot" :ya-kayttolupa] ;; TODO
+             ["messujen-ja-tapahtumien-alueiden-kaytot" :ya-kayttolupa] ;; TODO
+             ["kadulta-tapahtuvat-nostot" :ya-kayttolupa] ;; TODO
+             ["kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi" :ya-kayttolupa] ;; TODO
+             ["rakennustelineet-kadulla" :ya-kayttolupa] ;; TODO
+             ["muu-kayttolupa" :ya-kayttolupa]]] ;; TODO
            ["sijoituslupa"
-            [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-sijoituslupa] ;; TODO
-             ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :yleiset-alueet-sijoituslupa] ;; TODO
-             ["muu-sijoituslupa" :yleiset-alueet-sijoituslupa]] ;; TODO
-            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa] ;; TODO
+            [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :ya-sijoituslupa] ;; TODO
+             ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :ya-sijoituslupa] ;; TODO
+             ["muu-sijoituslupa" :ya-sijoituslupa]] ;; TODO
+            #_["liikennetta-haittaavan-tyon-lupa" :ya-liikennetta-haittaavan-tyon-lupa] ;; TODO
             ]]]})
 
 (def ^:private operation-tree-for-P
@@ -279,30 +279,35 @@
                                  :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                             "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                  :attachments []}
-   :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
-                                 :permit-type "YA"
-                                 :schema-data [[["_selected" :value] "yritys"]]
-                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa" "tyoaika")
-                                 ;; TODO: Mita attachmentteihin?
-                                 :attachments []
-;                                 :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
-                                 }
-   :yleiset-alueet-kayttolupa   {:schema "tyoaika"
-                                 :permit-type "YA"
-                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
-                                 :attachments []} ;; TODO: Mita attachmentteihin?
-   :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
-                                 :permit-type "YA"
-                                 :required yleiset-alueet-common-schemas
-                                 :attachments []} ;; TODO: Mita attachmentteihin?
-   :yleiset-alueet-sijoituslupa {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
-                                 :permit-type "YA"
-                                 :schema-data [[["_selected" :value] "yritys"]]
-                                 :required ["sijoituslupa-sijoituksen-tarkoitus"]
-                                 :attachments []} ;; TODO: Mita attachmentteihin?
 
-;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika" ;; Mika nimi tassa kuuluu olla?
-;                                                       :required (conj yleiset-alueet-common-schemas [])}
+   :ya-kaivuulupa   {:schema "tyomaastaVastaava"
+                     :permit-type "YA"
+                     :schema-data [[["_selected" :value] "yritys"]]
+                     :required (conj yleiset-alueet-common-schemas
+                                 "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                 "tyoaika")
+                     ;; TODO: Mita attachmentteihin?
+;                     :attachments []
+                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
+                                 }
+   :ya-kayttolupa   {:schema "tyoaika"
+                     :permit-type "YA"
+                     :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+                     :attachments []} ;; TODO: Mita attachmentteihin?
+
+   :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
+                                           :permit-type "YA"
+                                           :required yleiset-alueet-common-schemas
+                                           :attachments []} ;; TODO: Mita attachmentteihin?
+
+   :ya-sijoituslupa {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+                     :permit-type "YA"
+                     :schema-data [[["_selected" :value] "yritys"]]
+                     :required ["sijoituslupa-sijoituksen-tarkoitus"]
+                     :attachments []} ;; TODO: Mita attachmentteihin?
+
+;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika" ;; Mika nimi tassa kuuluu olla?
+;                                           :required (conj yleiset-alueet-common-schemas [])}
    })
 
 (defn permit-type-of-operation [operation]
@@ -311,15 +316,6 @@
 (doseq [[op {:keys [permit-type]}] operations]
   (when-not permit-type
     (throw (Exception. (format "Operation %s does not have permit-type set." op)))))
-
-;;
-;; Sanity scheck
-;;
-
-(doseq [[op {:keys [schema required]}] operations
-        schema (cons schema required)]
-  (if-not (schemas/get-schema schema)
-    (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
 
 ;;
 ;; Actions

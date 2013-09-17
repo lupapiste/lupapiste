@@ -146,7 +146,12 @@
 
     self.init = function(applicationId) {
       self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.message"),
+        {title: loc("yes"), fn: self.ok},
+        {title: loc("no")}
+      );
       return self;
     };
     self.ok = function() {
@@ -158,10 +163,6 @@
         .call();
       return false;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
   }();
 
   var removeAuthModel = new function() {
@@ -173,7 +174,12 @@
     self.init = function(applicationId, username) {
       self.applicationId = applicationId;
       self.username = username;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-remove-auth");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.message"),
+        {title: loc("yes"), fn: self.ok},
+        {title: loc("no")}
+      );
       return self;
     };
 
@@ -186,10 +192,6 @@
         .call();
       return false;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-remove-auth", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
   }();
 
   var requestForStatementModel = new function() {
@@ -260,7 +262,12 @@
 
     self.init = function(applicationId) {
       self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-submit");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.submit.areyousure.title"),
+        loc("application.submit.areyousure.message"),
+        {title: loc("yes"), fn: self.ok},
+        {title: loc("no")}
+      );
       return self;
     };
 
@@ -270,10 +277,6 @@
         .call();
       return false;
     };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
   }();
 
   var addPartyModel = new function() {
@@ -359,25 +362,6 @@
       var url = '/oskari/fullmap.html?coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
       window.open(url);
       var applicationId = self.id();
-
-      // FIXME: Can't just subscribe repeatedly.
-      hub.subscribe("map-initialized", function() {
-        if(self.shapes && self.shapes().length > 0) {
-          oskariDrawShape(self.shapes()[0]);
-        }
-
-        oskariSetMarker(self.location().x(), self.location().y());
-      });
-
-      // FIXME: Can't just subscribe repeatedly.
-      hub.subscribe("map-draw-done", function(e) {
-        var drawing = "" + e.data.drawing;
-        ajax.command("save-application-shape", {id: applicationId, shape: drawing})
-        .success(function() {
-          repository.load(applicationId);
-        })
-        .call();
-      });
     };
 
     self.submitApplication = function() {
@@ -539,24 +523,9 @@
         authorizationModel.refresh(currentId);
         })
       .error(function(data) {
-        LUPAPISTE.ModalDialog.showDynamicError(loc(data.text) + ": " + data.id);
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
       })
       .call();
-  }
-
-  function oskariDrawShape(shape) {
-    hub.send("map-viewvectors", {
-      drawing: shape,
-      style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
-      clear: false
-    });
-  }
-
-  function oskariSetMarker(x, y) {
-    hub.send("documents-map", {
-      data:  [{location: {x: x, y: y}}],
-      clear: true
-    });
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
@@ -573,6 +542,33 @@
     authorities(authorityInfos);
   }
 
+  // When Oskari map has initialized itself, draw shapes and marker
+  hub.subscribe("map-initialized", function() {
+    if(application.shapes().length) {
+      // only one shape per application is currently supported
+      hub.send("map-viewvectors", {
+        drawing: application.shapes()[0],
+        style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
+        clear: true
+      });
+    }
+
+    hub.send("documents-map", {
+      data:  [{location: {x: x, y: y}}],
+      clear: true
+    });
+  });
+
+  // When a shape is draw in Oskari map, save it to application
+  hub.subscribe("map-draw-done", function(e) {
+    var drawing = "" + e.data.drawing;
+    ajax.command("save-application-shape", {id: currentId, shape: drawing})
+    .success(function() {
+      repository.load(currentId);
+    })
+    .call();
+  });
+
   function showApplication(applicationDetails) {
     isInitializing = true;
 
@@ -582,6 +578,11 @@
 
       // Performance improvement: documents should not be mapped with ko.mapping
       delete app.documents;
+
+      // Delete shapes
+      if(application.shapes) {
+        delete application.shapes;
+      }
 
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
@@ -634,7 +635,10 @@
 
       var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
-      if (application.shapes && application.shapes().length > 0) map.drawShape(application.shapes()[0]);
+
+      if (application.shapes && application.shapes().length > 0) {
+        map.drawShape(application.shapes()[0]);
+      }
 
       if (application.infoRequest()) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();

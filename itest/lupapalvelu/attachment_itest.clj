@@ -94,7 +94,7 @@
         (reject-attachment application-id (first attachment-ids))))))
 
 (fact "pdf does not work with YA-lupa"
-  (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "yleiset-alueet-kaivuulupa")
+  (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-kaivuulupa")
         application (:application (query pena :application :id application-id))]
     (:organization application) => "753-YA"
     pena =not=> (allowed? :pdf-export :id application-id)
