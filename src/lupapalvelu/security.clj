@@ -122,11 +122,16 @@
 (defn update-user [email data]
   (mongo/update :users {:email (util/lower-case email)} {$set data}))
 
+(defn update-organizations-of-authority-user [email new-organization]
+  (let [old-orgs (:organizations (get-user-by-email email))]
+    (when (every? #(not (= % new-organization)) old-orgs)
+      (update-user email {:organizations (merge old-orgs new-organization)}))))
+
 (defn change-password [email password]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
     (mongo/update :users {:email (util/lower-case email)} {$set {:private.salt  salt
-                                                            :private.password hashed-password}})))
+                                                                 :private.password hashed-password}})))
 
 (defn get-or-create-user-by-email [email]
   (let [email (util/lower-case email)]
