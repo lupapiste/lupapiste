@@ -1,13 +1,13 @@
 (ns lupapalvelu.attachment
-  (:use [monger.operators]
-        [lupapalvelu.core]
-        [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
-        [lupapalvelu.i18n :only [loc *lang* with-lang]]
-        [clojure.string :only [split join trim]]
-        [swiss-arrows.core :only [-<> -<>>]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
+            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
+            [lupapalvelu.i18n :refer [loc *lang* with-lang]]
+            [clojure.string :refer [split join trim]]
+            [swiss-arrows.core :refer [-<> -<>>]]
             [sade.util :refer [fn-> fn->> future*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -96,7 +96,9 @@
                     :tyyppiratkaisu
                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
                     :liitoslausunto
-                    :asemapiirros]
+                    :asemapiirros
+                    :rakennuspiirros
+                    :suunnitelmakartta]
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 

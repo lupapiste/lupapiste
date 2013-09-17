@@ -1,11 +1,11 @@
 (ns lupapalvelu.web
-  (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery now]]
-        [lupapalvelu.i18n :only [*lang*]]
-        [clojure.walk :only [keywordize-keys]]
-        [clojure.string :only [blank?]]
-        [lupapalvelu.security :only [current-user]])
-  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal spy)]
+  (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
+            [noir.core :refer [defpage]]
+            [lupapalvelu.core :refer [ok fail defcommand defquery now]]
+            [lupapalvelu.i18n :refer [*lang*]]
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.string :refer [blank?]]
+            [lupapalvelu.security :refer [current-user]]
             [lupapalvelu.logging :refer [with-logging-context]]
             [noir.request :as request]
             [noir.response :as resp]

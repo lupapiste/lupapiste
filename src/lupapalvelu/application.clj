@@ -1,12 +1,12 @@
 (ns lupapalvelu.application
-  (:use [monger.operators]
-        [lupapalvelu.core]
-        [clojure.string :only [blank? join trim split]]
-        [sade.util :only [lower-case]]
-        [clj-time.core :only [year]]
-        [clj-time.local :only [local-now]]
-        [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
+            [clojure.string :refer [blank? join trim split]]
+            [sade.util :refer [lower-case]]
+            [clj-time.core :refer [year]]
+            [clj-time.local :refer [local-now]]
+            [lupapalvelu.i18n :refer [with-lang loc]]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -156,7 +156,8 @@
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
+   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
+     (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
          kiinteistotunnus (:propertyId application)
          ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
      (when ktj-tiedot
@@ -170,7 +171,7 @@
            (:id application)
            rakennuspaikka
            updates
-           time)))))
+           time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -454,7 +455,7 @@
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -621,9 +622,8 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (if (and (= "R" (:permitType application)) (not (:infoRequest application)))
-        (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-          (catch Exception e (error e "KTJ data was not updated.")))))
+      (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+        (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
