@@ -170,16 +170,16 @@
    :created 1372331179008,
    :opened 1372331643985,
    :modified 1372342070624,
+   :submitted 1379405092649,
    :authority authority,
-   :state "open",
+   :state "submitted",
    :title "Latokuja 1",
    :address "Latokuja 1",
    :location {:x 404335.789, :y 6693783.426},
    :attachments [],
    :propertyId "75341600550007",
    :documents documents,
-   :municipality municipality
-   ;; Statements kopioitu Rakennuslupa_canonical_test.clj:sta, joka on identtinen yleisten alueiden puolen kanssa.
+   :municipality municipality,
    :statements statements})
 
 
