@@ -291,7 +291,7 @@
                     <td>
                     </td>
                   </tr>
-                <!-- /ko -->
+                  <!-- /ko -->
 
                 </tbody>
               </table>
@@ -368,7 +368,7 @@
                 <label class="form-label" data-bind="ltext: 'verdict.julkipano'"></label>
                 <span class="" data-bind="dateString: paivamaarat.julkipano"></span>
                 </div>
-                <!-- /ko -->
+                <!-- /ko --> <!-- /paivamaarat -->
 
                 <!--  ko if:  $data.lupamaaraykset -->
                 <h3 data-bind="ltext: 'verdict.lupamaaraukset'"></h3>
@@ -387,22 +387,33 @@
 <span  data-bind='text: katselmuksenLaji'></span></div>
 <div data-bind='if: $data.tarkastuksenTaiKatselmuksenNimi'><label class="form-label" data-bind="ltext: 'verdict.tarkastuksenTaiKatselmuksenNimi'"></label>
 <span  data-bind='text: tarkastuksenTaiKatselmuksenNimi'></span></div>
-<!-- /ko -->
+<!-- /ko --> <!-- lupamaaraykset.maaraykset -->
 </div>
-<div data-bind='if: lupamaaraykset.maaraykset'><label class="form-label" data-bind="ltext: 'verdict.maaraykset'"></label>
-<!-- ko foreach:  lupamaaraykset.maaraykset-->
-<div data-bind='if: $data.maaraysaika'><label class="form-label" data-bind="ltext: 'verdict.maaraykset.maaraysaika'"></label>
-<span  data-bind='dateString: maaraysaika'></span></div>
-<div data-bind='if: $data.toteutusHetki'><label class="form-label" data-bind="ltext: 'verdict.maaraykset.toteutusHetki'"></label>
-<span  data-bind='dateString: toteutusHetki'></span></div>
-<div data-bind='if: $data.sisalto'><label class="form-label" data-bind="ltext: 'verdict.maaraykset.sisalto'"></label>
-<span  data-bind='text: sisalto'></span></div>
-<!-- /ko -->
-</div>
+
+                <div data-bind='if: lupamaaraykset.maaraykset'>
+                  <h3 data-bind="ltext: 'verdict.maaraykset'"></h3>
+                  <table class="table table-striped tablesorter" id="application-verdict-details">
+                    <thead>
+                      <tr>
+                        <th data-bind="ltext: 'verdict.maaraykset.maaraysaika'" width="25%"></th>
+                        <!-- <th data-bind="ltext: 'verdict.maaraykset.toteutusHetki'"></th> -->
+                        <th data-bind="ltext: 'verdict.maaraykset.sisalto'"></th>
+                      </tr>
+                    </thead>
+                    <tbody data-bind="foreach: lupamaaraykset.maaraykset">
+                      <tr>
+                        <td data-bind='dateString: $data.maaraysaika'></td>
+                        <!-- <td data-bind='dateString: toteutusHetki'></td> -->
+                        <td data-bind='text: $data.sisalto'></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
 <div data-bind='if: lupamaaraykset.vaaditutTyonjohtajat'><label class="form-label" data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label><span  data-bind='text: lupamaaraykset.vaaditutTyonjohtajat'></span></div>
 
 
-                <!-- /ko -->
+                <!-- /ko --> <!-- lupamaaraykset -->
 
                   <div data-bind="if: $data.poytakirjat">
                     <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
@@ -444,7 +455,7 @@
 
             <button data-bind="click: function() {debug($data.paatokset);}">Debug</button>
 
-            <!-- /ko -->
+            <!-- /ko --> <!-- /paatokset -->
 
             </div>
             </div>
