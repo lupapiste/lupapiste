@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clj-time.format :as timeformat]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [clojure.string :as s]))
 
 
 ; Empty String will be rendered as empty XML element
