@@ -68,5 +68,5 @@
   ;Returing vector because this element to be Associative
   (vec (map get-statement statements)))
 
-(defn- empty-strings-to-nil [v]
+(defn empty-strings-to-nil [v]
   (if (and (string? v) (s/blank? v)) nil v))
