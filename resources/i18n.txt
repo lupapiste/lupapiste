@@ -1,0 +1,1 @@
+error.illegal-maaraala-tunnus: Virheellinen määräalatunnus. Määräalatunnuksessa tulee olla neljä numeroa.
