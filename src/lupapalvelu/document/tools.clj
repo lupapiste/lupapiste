@@ -19,6 +19,7 @@
     :personSelector   "123"
     :buildingSelector "001"
     :string           (condp = (keyword subtype)
+                        :maaraala-tunnus   "0003"
                         :email            "example@example.com"
                         :tel              "012 123 4567"
                         :number           "4"

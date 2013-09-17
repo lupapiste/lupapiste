@@ -303,7 +303,7 @@ var docgen = (function () {
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
 
       if (subSchema.subtype === "maaraala-tunnus" ) {
-    	  var kiitunAndInput = document.createElement("span");
+          var kiitunAndInput = document.createElement("span");
           var kiintun = document.createElement("span");
 
           kiitunAndInput.className = "kiintun-and-maaraalatunnus";
@@ -318,7 +318,7 @@ var docgen = (function () {
           kiitunAndInput.appendChild(input);
           span.appendChild(kiitunAndInput);
 
-      	}
+      }
       else if (subSchema.unit) {
         var inputAndUnit = document.createElement("span");
         var unit = document.createElement("span");
