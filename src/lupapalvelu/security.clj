@@ -123,11 +123,8 @@
   (mongo/update :users {:email (util/lower-case email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
-  ;;
-  ;; TODO: Pitaako taalta heittaa poikkeuksia jossain tilanteessa?
-  ;;
   (let [old-orgs (:organizations (get-user-by-email email))]
-    (when (some #(not (= % new-organization)) old-orgs)
+    (when (every? #(not (= % new-organization)) old-orgs)
       (update-user email {:organizations (merge old-orgs new-organization)}))))
 
 (defn change-password [email password]
