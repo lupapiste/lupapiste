@@ -1,5 +1,5 @@
 (ns lupapalvelu.components.core
-  (:use [clojure.string :only [join]]))
+  (:require [clojure.string :refer [join]]))
 
 (defn get-component
   "Return component c from components. Throws exception if component c is missing"

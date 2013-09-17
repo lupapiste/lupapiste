@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.model
-  (:use [sade.strings]
-        [clojure.walk :only [keywordize-keys]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [sade.strings :refer :all]
+            [clojure.walk :refer [keywordize-keys]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]

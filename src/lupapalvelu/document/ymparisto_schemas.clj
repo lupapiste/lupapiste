@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.ymparisto-schemas
-  (:use [lupapalvelu.document.schemas]))
+  (:require [lupapalvelu.document.schemas :refer :all]))
 
 (def sijainti (body simple-osoite
                 {:name "karttapiirto" :type :text :max-len 4000}))

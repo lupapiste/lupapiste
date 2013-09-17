@@ -1,5 +1,5 @@
 (ns lupapalvelu.operations
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
