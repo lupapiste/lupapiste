@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clj-time.format :as timeformat]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [clojure.string :as s]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -45,8 +46,8 @@
 
 
 (def ^:private puolto-mapping {:condition "ehdoilla"
-                     :no "ei puolla"
-                     :yes "puoltaa"})
+                               :no "ei puolla"
+                               :yes "puoltaa"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto
@@ -66,3 +67,6 @@
 (defn get-statements [statements]
   ;Returing vector because this element to be Associative
   (vec (map get-statement statements)))
+
+(defn- empty-strings-to-nil [v]
+  (if (and (string? v) (s/blank? v)) nil v))
