@@ -1,12 +1,12 @@
 (ns lupapalvelu.document.rakennuslupa_canonical
-  (:use [lupapalvelu.core :only [now]]
-        [sade.strings]
-        [lupapalvelu.i18n :only [with-lang loc]]
-        [lupapalvelu.document.canonical-common])
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.string :as s]
+            [lupapalvelu.core :refer [now]]
+            [sade.strings :refer :all]
+            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]))
 
 ;; Macro to get values from

@@ -1,10 +1,10 @@
 (ns lupapalvelu.token
-  (:use [monger.operators]
-        [sade.security :only [random-password]])
-  (:require [taoensso.timbre :as timbre :refer (errorf)]
+  (:require [taoensso.timbre :as timbre :refer [errorf]]
             [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
+            [monger.operators :refer :all]
+            [sade.security :refer [random-password]]
             [noir.request :as request]))
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))

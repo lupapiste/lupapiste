@@ -1,6 +1,6 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]

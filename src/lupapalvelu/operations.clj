@@ -1,5 +1,5 @@
 (ns lupapalvelu.operations
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
@@ -287,8 +287,8 @@
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
                      ;; TODO: Mita attachmentteihin?
-                     :attachments []
-;                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
+;                     :attachments []
+                     :attachments [:yleiset-alueet [:tieto-kaivupaikkaan-liittyvista-johtotiedoista]]
                                  }
    :ya-kayttolupa   {:schema "tyoaika"
                      :permit-type "YA"

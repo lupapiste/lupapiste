@@ -1,5 +1,5 @@
 (ns lupapalvelu.security
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.strings :as s]

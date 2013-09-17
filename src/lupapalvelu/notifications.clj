@@ -1,10 +1,10 @@
 (ns lupapalvelu.notifications
-  (:use [monger.operators]
-        [sade.strings :only [suffix]]
-        [clojure.set :only [difference]]
-        [lupapalvelu.i18n :only [loc]]
-        [sade.util :only [future*]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [monger.operators]
+            [sade.strings :refer [suffix]]
+            [clojure.set :refer [difference]]
+            [lupapalvelu.i18n :refer [loc]]
+            [sade.util :refer [future*]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.env :as env]

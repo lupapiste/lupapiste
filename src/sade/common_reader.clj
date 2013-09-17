@@ -1,8 +1,8 @@
 (ns sade.common-reader
-  (:use sade.xml)
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.coerce :as coerce]
+            [sade.xml :refer :all]
             [clj-time.format :as timeformat]
             [clj-http.client :as http]
             [sade.strings :as ss]))

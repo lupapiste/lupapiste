@@ -1,8 +1,8 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:use sade.xml)
   (:require [taoensso.timbre :as timbre :refer [debug]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
+            [sade.xml :refer :all]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [net.cgrand.enlive-html :as enlive]

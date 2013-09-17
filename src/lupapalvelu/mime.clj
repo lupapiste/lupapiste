@@ -1,7 +1,7 @@
 (ns lupapalvelu.mime
-  (:use [clojure.string :only [split join]]
-        [clojure.java.io :only [reader file]])
-  (:require [sade.strings :as ss]))
+  (:require [clojure.string :refer [split join trim]]
+            [clojure.java.io :refer [reader file]]
+            [sade.strings :as ss]))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
