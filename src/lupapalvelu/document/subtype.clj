@@ -110,7 +110,7 @@
   (cond
     (blank? v) nil
     (re-matches #"^[0-9]{4}$" v) nil
-    :else [:warn "illegal-address"]))
+    :else [:warn "illegal-maaraala-tunnus"]))
 
 (defmethod subtype-validation nil [_ _]
   nil)

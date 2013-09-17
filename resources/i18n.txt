@@ -1,3 +1,5 @@
+error.illegal-maaraala-tunnus: Virheellinen määräalatunnus. Määräalatunnuksessa tulee olla neljä numeroa.
+
 unknown-document: Tuntematon dokumentti
 license.link: Tietoja Lupapisteestä
 stamp.verdict: Hyväksytty
