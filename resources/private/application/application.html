@@ -381,14 +381,29 @@
 <div data-bind='if: lupamaaraykset.autopaikkojaUlkopuolella'><label class="form-label" data-bind="ltext: 'verdict.autopaikkojaUlkopuolella'"></label><span  data-bind='text: lupamaaraykset.autopaikkojaUlkopuolella'></span></div>
 <div data-bind='if: lupamaaraykset.kerrosala'><label class="form-label" data-bind="ltext: 'verdict.kerrosala'"></label><span  data-bind='text: lupamaaraykset.kerrosala'></span></div>
 <div data-bind='if: lupamaaraykset.kokonaisala'><label class="form-label" data-bind="ltext: 'verdict.kokonaisala'"></label><span  data-bind='text: lupamaaraykset.kokonaisala'></span></div>
-<div data-bind='if: lupamaaraykset.vaaditutKatselmukset'><label class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></label>
-<!-- ko foreach:  lupamaaraykset.maaraykset-->
-<div data-bind='if: $data.katselmuksenLaji'><label class="form-label" data-bind="ltext: 'verdict.katselmuksenLaji'"></label>
-<span  data-bind='text: katselmuksenLaji'></span></div>
-<div data-bind='if: $data.tarkastuksenTaiKatselmuksenNimi'><label class="form-label" data-bind="ltext: 'verdict.tarkastuksenTaiKatselmuksenNimi'"></label>
-<span  data-bind='text: tarkastuksenTaiKatselmuksenNimi'></span></div>
-<!-- /ko --> <!-- lupamaaraykset.maaraykset -->
-</div>
+
+                <div data-bind='if: lupamaaraykset.vaaditutTyonjohtajat'>
+                  <label class="form-label" data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
+                  <span  data-bind='text: lupamaaraykset.vaaditutTyonjohtajat'></span>
+                </div>
+
+                <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
+                  <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
+                  <table class="table table-striped tablesorter" id="application-verdict-details">
+                    <thead>
+                      <tr>
+                        <th data-bind="ltext: 'verdict.katselmuksenLaji'" width="25%"></th>
+                        <th data-bind="ltext: 'verdict.tarkastuksenTaiKatselmuksenNimi'"></th>
+                      </tr>
+                    </thead>
+                    <tbody data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
+                      <tr>
+                        <td data-bind='if: $data.katselmuksenLaji'><span data-bind="text: loc(['verdict.katselmus', $data.katselmuksenLaji])"></span></td>
+                        <td data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
                 <div data-bind='if: lupamaaraykset.maaraykset'>
                   <h3 data-bind="ltext: 'verdict.maaraykset'"></h3>
@@ -409,9 +424,6 @@
                     </tbody>
                   </table>
                 </div>
-
-<div data-bind='if: lupamaaraykset.vaaditutTyonjohtajat'><label class="form-label" data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label><span  data-bind='text: lupamaaraykset.vaaditutTyonjohtajat'></span></div>
-
 
                 <!-- /ko --> <!-- lupamaaraykset -->
 
