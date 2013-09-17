@@ -1,9 +1,10 @@
 (ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test
-  (:use [lupapalvelu.factlet]
-        [midje.sweet]
-        [lupapalvelu.document.canonical-common]
-        [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical]
-        [sade.util :only [contains-value?]]))
+  (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
+            [lupapalvelu.factlet :refer :all]
+            [midje.sweet :refer :all]
+            [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :refer :all]
+            [sade.util :refer [contains-value?]]))
 
 ;; NOTE: Rakennuslupa-canonical-testista poiketen applicationin "auth"-kohta ei ole kaytossa.
 
@@ -18,13 +19,13 @@
 (def nimi {:etunimi {:modified 1372341939920, :value "Pena"},
            :sukunimi {:modified 1372341939920, :value "Panaani"}})
 
-(def henkilotiedot (assoc nimi :hetu {:modified 1372341952297, :value "260886-027R"}))
+(def henkilotiedot (merge
+                     nimi
+                     {:hetu {:modified 1372341952297, :value "260886-027R"}}))
 
 (def osoite {:katu {:modified 1372341939920, :value "Paapankuja 12"},
              :postinumero {:modified 1372341955504, :value "33800"},
              :postitoimipaikannimi {:modified 1372341939920, :value "Piippola"}})
-
-(def user-id {:modified 1372341939964, :value "777777777777777777000020"})
 
 (def yhteystiedot {:email {:modified 1372341939920, :value "pena@example.com"},
                    :puhelin {:modified 1372341939920, :value "0102030405"}})
@@ -32,22 +33,21 @@
 (def yritys-nimi-ja-tunnus {:yritysnimi {:modified 1372331257700, :value "Yritys Oy Ab"},
                             :liikeJaYhteisoTunnus {:modified 1372331320811, :value "2492773-2"}})
 
-
 (def henkilo-without-hetu {:henkilotiedot nimi,
                            :osoite osoite,
-                           :userId user-id,
+                           :userId {:modified 1372341939964, :value "777777777777777777000020"},
                            :yhteystiedot yhteystiedot})
 
-(def henkilo {:henkilotiedot henkilotiedot,
+(def henkilo {:userId {:modified 1372341939964, :value "777777777777777777000020"},
+              :henkilotiedot henkilotiedot,
               :osoite osoite,
-              :userId user-id,
               :yhteystiedot yhteystiedot})
 
 (def yritys (merge
+              yritys-nimi-ja-tunnus
               {:osoite osoite,
                :yhteyshenkilo {:henkilotiedot nimi,
-                               :yhteystiedot yhteystiedot}}
-              yritys-nimi-ja-tunnus))
+                               :yhteystiedot yhteystiedot}}))
 
 (def hakija {:id "51cc1cab23e74941fee4f498",
              :created 1372331179008,
@@ -90,11 +90,11 @@
 
 (def hankkeen-kuvaus {:id "51cc1cab23e74941fee4f49a",
                       :created 1372331179008,
-                      :data {:kayttotarkoitus {:modified 1372331214906, :value "Ojankaivuu."},
-                             :sijoitusLuvanTunniste {:modified 1372331243461, :value "LP-753-2013-00001"}},
                       :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                     :version 1
-                                    :order 60}})
+                                    :order 60},
+                      :data {:kayttotarkoitus {:modified 1372331214906, :value "Ojankaivuu."},
+                             :sijoitusLuvanTunniste {:modified 1372331243461, :value "LP-753-2013-00001"}}})
 
 (def tyoaika {:id "51cc1cab23e74941fee4f49b",
               :created 1372331179008,
@@ -109,15 +109,6 @@
                 maksaja
                 hankkeen-kuvaus
                 tyoaika])
-
-
-(def authority {:id "777777777777777777000023",
-                :username "sonja",
-                :firstName "Sonja",
-                :lastName "Sibbo",
-                :role "authority"})
-
-(def municipality 753)
 
 (def attachments [{:id "51cc1e7c23e74941fee4f519",
                    :modified 1372331643985,
@@ -135,11 +126,7 @@
                                    :contentType "image/jpeg",
                                    :stamped false,
                                    :accepted nil,
-                                   :user {:id "777777777777777777000020",
-                                          :role "applicant",
-                                          :lastName "Panaani",
-                                          :firstName "Pena",
-                                          :username "pena"}},
+                                   :user pena},
                    :versions [{:fileId "51cc1e7b23e74941fee4f516",
                                :version {:major 1, :minor 0},
                                :size 115496,
@@ -148,21 +135,7 @@
                                :contentType "image/jpeg",
                                :stamped false,
                                :accepted nil,
-                               :user {:id "777777777777777777000020",
-                                      :role "applicant",
-                                      :lastName "Panaani",
-                                      :firstName "Pena",
-                                      :username "pena"}}]}])
-
-(def statements [{:id "518b3ee60364ff9a63c6d6a1"
-                  :given 1368080324142
-                  :requested 1368080102631
-                  :status "yes"
-                  :person {:id "516560d6c2e6f603beb85147"
-                           :text "Paloviranomainen"
-                           :name "Sonja Sibbo"
-                           :email "sonja.sibbo@sipoo.fi"}
-                  :text "Annanpa luvan."}])
+                               :user pena}]}])
 
 (def application
   {:id "LP-753-2013-00001",
@@ -171,11 +144,11 @@
    :opened 1372331643985,
    :modified 1372342070624,
    :submitted 1379405092649,
-   :authority authority,
+   :authority sonja,
    :state "submitted",
    :title "Latokuja 1",
    :address "Latokuja 1",
-   :location {:x 404335.789, :y 6693783.426},
+   :location location,
    :attachments [],
    :propertyId "75341600550007",
    :documents documents,
