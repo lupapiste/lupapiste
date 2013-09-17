@@ -1,6 +1,6 @@
 (ns lupapalvelu.fixture.minimal
-  (:use lupapalvelu.fixture)
-  (:require [lupapalvelu.mongo :as mongo]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture :refer :all]))
 
 (def users
   [{:id "777777777777777777000099" ;; admin
@@ -324,7 +324,7 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments {:yleiset-alueet-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
+                     :operations-attachments {:ya-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "753-P"
                      :inforequest-enabled true
@@ -374,8 +374,7 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments {:yleiset-alueet-kaivuulupa
-                                               [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
+                      :operations-attachments {:ya-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
 
                     {:id "638-R"
                      :inforequest-enabled true

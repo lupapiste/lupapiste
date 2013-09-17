@@ -1,10 +1,1 @@
 error.illegal-maaraala-tunnus: Virheellinen määräalatunnus. Määräalatunnuksessa tulee olla neljä numeroa.
-
-unknown-document: Tuntematon dokumentti
-license.link: Tietoja Lupapisteestä
-stamp.verdict: Hyväksytty
-footer.sade: Palvelu on osa valtiovarainministeriön koordinoimaa ja ympäristöministeriön toteuttamaa Sähköisen asioinnin ja demokratian vauhdittamisohjelmaa (SADe-ohjelma
-footer.terms: Käyttöehdot
-footer.register: Rekisteriseloste
-footer.license: Lisenssit
-footer.contact: Ota yhteyttä

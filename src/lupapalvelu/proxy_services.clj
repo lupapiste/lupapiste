@@ -1,14 +1,14 @@
 (ns lupapalvelu.proxy-services
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clj-http.client :as client]
             [noir.response :as resp]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.string :as s]
             [lupapalvelu.wfs :as wfs]
-            [lupapalvelu.find-address :as find-address])
-  (:use [clojure.data.zip.xml]
-        [sade.util :only [dissoc-in select]]))
+            [lupapalvelu.find-address :as find-address]
+            [clojure.data.zip.xml :refer :all]
+            [sade.util :refer [dissoc-in select]]))
 
 ;;
 ;; NLS:

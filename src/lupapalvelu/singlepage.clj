@@ -1,7 +1,7 @@
 (ns lupapalvelu.singlepage
-  (:use [lupapalvelu.components.ui-components :only [ui-components]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
+            [lupapalvelu.components.ui-components :refer [ui-components]]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
