@@ -523,7 +523,7 @@
         authorizationModel.refresh(currentId);
         })
       .error(function(data) {
-        LUPAPISTE.ModalDialog.showDynamicError(loc(data.text) + ": " + data.id);
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
       })
       .call();
   }
