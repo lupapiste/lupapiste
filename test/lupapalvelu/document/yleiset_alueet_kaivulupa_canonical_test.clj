@@ -16,10 +16,11 @@
 ;;        - organization ?
 
 
-(def tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op]
-                                    {:id "51cc1cab23e74941fee4f495",
-                                     :created 1372331179008,
-                                     :name "ya-kaivuulupa"}))
+(def operation {:id "51cc1cab23e74941fee4f495",
+                :created 1372331179008,
+                :name "ya-kaivuulupa"})
+
+(def tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
 (def documents [hakija
                 tyomaasta-vastaava-kaivulupa
@@ -40,6 +41,7 @@
    :address "Latokuja 1",
    :location location,
    :attachments [],
+   :operations [operation],
    :propertyId "75341600550007",
    :documents documents,
    :municipality municipality,
