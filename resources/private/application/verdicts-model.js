@@ -46,6 +46,7 @@ LUPAPISTE.VerdictsModel = function() {
     .processing(self.processing)
     .pending(self.pending)
     .success(function(resp) {
+      pageutil.showAjaxWait();
       repository.load(applicationId);
     })
     .call();
