@@ -1,12 +1,12 @@
 (ns lupapalvelu.document.rakennuslupa_canonical
-  (:use [lupapalvelu.core :only [now]]
-        [sade.strings]
-        [lupapalvelu.i18n :only [with-lang loc]]
-        [lupapalvelu.document.canonical-common])
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.string :as s]
+            [lupapalvelu.core :refer [now]]
+            [sade.strings :refer :all]
+            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]))
 
 ;; Macro to get values from
@@ -291,8 +291,8 @@
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
                                    {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value))}
                                    {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus :value)
-                                                         :kerrosala (-> mitat :tilavuus :value)
-                                                         :kokonaisala (-> mitat :tilavuus :value)
+                                                         :kerrosala (-> mitat :kerrosala :value)
+                                                         :kokonaisala (-> mitat :kokonaisala :value)
                                                          :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
                                                                          {:pintaAla (-> huoneistoala :pintaAla :value)
                                                                           :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi :value)})}})
@@ -372,9 +372,10 @@
       :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
-                                       :kiinteistotieto {:Kiinteisto {:tilannimi (-> kiinteisto :tilanNimi :value)
-                                                                                    :kiinteistotunnus (:propertyId application)
-                                                                                    :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
+                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
+                                                                             :kiinteistotunnus (:propertyId application)}
+                                                         (when (-> kiinteisto :maaraalaTunnus :value)
+                                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
 
 (defn- get-kayttotapaus [documents toimenpiteet]
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
@@ -384,7 +385,9 @@
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  (let [documents (by-type (:documents application))
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
         toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot

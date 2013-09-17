@@ -151,7 +151,9 @@
 
 (def designer-basic (body
                       henkilotiedot-minimal
-                      {:name "yritys" :type :group :body yritys-minimal}
+                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (contains? c :required)
+                                                                                          (assoc c :required false)
+                                                                                          c)) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
@@ -561,7 +563,7 @@
             :order 2}
      :body [{:name "kiinteisto"
              :type :group
-             :body [{:name "maaraalaTunnus" :type :string}
+             :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
                     {:name "tilanNimi" :type :string :readonly true}
                     {:name "rekisterointipvm" :type :string :readonly true}
                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}

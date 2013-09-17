@@ -26,6 +26,7 @@ var docgen = (function () {
     self.application = application;
     self.authorizationModel = authorizationModel;
     self.eventData = { doc: docId, app: self.appId };
+    self.propertyId = application.propertyId;
 
     self.getMeta = function (path, m) {
       var meta = m ? m : self.meta;
@@ -301,7 +302,24 @@ var docgen = (function () {
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
 
-      if (subSchema.unit) {
+      if (subSchema.subtype === "maaraala-tunnus" ) {
+          var kiitunAndInput = document.createElement("span");
+          var kiintun = document.createElement("span");
+
+          kiitunAndInput.className = "kiintun-and-maaraalatunnus";
+
+          kiintun.className = "form-maaraala";
+          kiintun.appendChild(document.createTextNode(util.prop.toHumanFormat(self.propertyId) + "-M"));
+
+          input.onfocus = self.showHelp;
+          input.onblur = self.hideHelp;
+
+          kiitunAndInput.appendChild(kiintun);
+          kiitunAndInput.appendChild(input);
+          span.appendChild(kiitunAndInput);
+
+      }
+      else if (subSchema.unit) {
         var inputAndUnit = document.createElement("span");
         var unit = document.createElement("span");
 

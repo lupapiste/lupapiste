@@ -1,16 +1,15 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
-  (:use  [clojure.data.xml]
-         [clojure.java.io]
-         [clojure.walk :only [prewalk]]
-         [sade.util]
-         [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
-         [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :only [application-to-canonical]]
-         [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]])
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [me.raynes.fs :as fs]
-            [lupapalvelu.mongo :as mongo]))   ;; used in "write-attachments"
-
+            [lupapalvelu.mongo :as mongo]  ;; used in "write-attachments"
+            [clojure.data.xml :refer :all]
+            [clojure.java.io :refer :all]
+            [clojure.walk :refer [prewalk]]
+            [sade.util :refer :all]
+            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :refer [application-to-canonical]]
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.krysp.validator :refer [validate]]))   
 
 ;; tags changed:
 ;; :kayntiosoite -> :kayntiosoitetieto
