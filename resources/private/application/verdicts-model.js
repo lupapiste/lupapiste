@@ -7,7 +7,8 @@ LUPAPISTE.VerdictsModel = function() {
   }
 
   self.verdicts = ko.observable();
-  self.response = ko.observable();
+  self.processing = ko.observable(false);
+  self.pending = ko.observable(false);
 
   self.refresh = function(application) {
     var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {
@@ -40,9 +41,12 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.checkVerdict = function(bindings){
-    ajax.command("check-for-verdict", {id: getApplicationId(bindings)})
+    var applicationId = getApplicationId(bindings);
+    ajax.command("check-for-verdict", {id: applicationId})
+    .processing(self.processing)
+    .pending(self.pending)
     .success(function(resp) {
-      self.response(JSON.stringify(resp.response, null, 4));
+      repository.load(applicationId);
     })
     .call();
   };
