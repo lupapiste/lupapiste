@@ -442,7 +442,7 @@
               </section>
             </div>
 
-            <pre data-bind="text: JSON.stringify($data.paatokset, null, 2)" ></pre>
+            <button data-bind="click: function() {console.log(JSON.stringify($data.paatokset, null, 2));}">JSON to console</button>
 
             <!-- /ko -->
 
@@ -456,7 +456,7 @@
 
             <div data-bind="if: features.enabled('paatoksenHaku')"><div class="feature"><span class="legend">paatoksenHaku</span>
             <button
-              data-bind="click: $root.verdictModel.checkVerdict, ltext: 'application.verdict.check', visible: $root.authorization.ok('check-for-verdict')"
+              data-bind="click: $root.verdictModel.checkVerdict, ltext: 'verdict.fetch', visible: $root.authorization.ok('check-for-verdict')"
               class="btn btn-primary modal"
               data-test-id="give-verdict">
             </button>

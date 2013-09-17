@@ -31,6 +31,8 @@ verdict.poytakirjat: Pöytäkirjat
 verdict.pykala: Pykälä
 verdict.paatospvm: Päivämäärä
 
+verdict.fetch: Hae päätöstiedot taustajärjestelmästä
+
 attachmentType.yleiset-alueet.suunnitelmakartta: Suunnitelmakartta
 license.link: Tietoja Lupapisteestä
 stamp.verdict: Hyväksytty
