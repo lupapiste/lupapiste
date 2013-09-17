@@ -3,7 +3,7 @@
             [lupapalvelu.factlet :refer :all]
             [midje.sweet :refer :all]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :refer :all]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :refer [application-to-canonical]]
             [sade.util :refer [contains-value?]]))
 
 ;; NOTE: Rakennuslupa-canonical-testista poiketen applicationin "auth"-kohta ei ole kaytossa.
@@ -51,15 +51,14 @@
 (def get-maksaja #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-maksaja)
 (def get-tyomaasta-vastaava #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-tyomaasta-vastaava)
 
-(facts* "Canonical model is correct"
+(facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical application "fi")
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
-        Kasittelytieto-kasittelija (:kasittelija Kasittelytieto) => truthy
-        Kasittelytieto-kasittelija-nimi (-> Kasittelytieto-kasittelija :henkilotieto :Henkilo :nimi) => truthy
+        Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
@@ -127,11 +126,11 @@
       (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
       (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id application))
       (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened application)))
-      (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName authority))
-      (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName authority))
+      (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
+      (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => "kaivu- tai katuty\u00f6lupa")
-      (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false) ;; TODO: Onko tama checkki ok?
+      (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false)
 
       ;; Sijainti
       (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id application))
@@ -229,7 +228,7 @@
 
       ;; Hankkeen kuvaus
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
-      (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)  ;; TODO: Onko tama checkki ok?
+      (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
 
 

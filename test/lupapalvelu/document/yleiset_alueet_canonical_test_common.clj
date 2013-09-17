@@ -18,6 +18,11 @@
             :lastName "Sibbo",
             :username "sonja"})
 
+(def statement-person {:id "516560d6c2e6f603beb85147"
+                       :text "Paloviranomainen"
+                       :name "Sonja Sibbo"
+                       :email "sonja.sibbo@sipoo.fi"})
+
 
 (def hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                      :created 1379404904514,
@@ -160,10 +165,16 @@
 
 ;; Statements
 
+(def sonja {:id "777777777777777777000023",
+            :role "authority",
+            :firstName "Sonja",
+            :lastName "Sibbo",
+            :username "sonja"})
+
 (def statements [{:id "52382cea94a74fc25bb4be5d"
                   :given 1379415837074
                   :requested 1379413226349
                   :status "yes"
-                  :person sonja
+                  :person statement-person
                   :text "Annanpa luvan."}])
 
