@@ -696,11 +696,12 @@
                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                        attachment-type {:type-group "muut" :type-id "muu"}
                                        attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
+                                       urlhash         (digest/md5 url)
                                        target          {:type "verdict" :id urlhash}
                                        locked          true]
                                    ; TODO this would create duplicate attachments if we're replacing existing verdicts
                                    (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user attachment-time)
-                                   (-> pk (assoc :urlHash (digest/md5 url)) (dissoc :liite)))
+                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
                                  pk))
                              (:poytakirjat paatos))))
                        (:paatokset verdict))))
@@ -708,8 +709,7 @@
 
 (defcommand check-for-verdict
   {:parameters [:id]
-   ;TODO remove all but sent when ready
-   :states     [:draft :open :submitted :complement-needed :sent :verdictGiven]
+   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    ; TODO notify?
    :feature [:paatoksenHaku]}
@@ -719,6 +719,7 @@
       {$set {:verdicts verdicts-with-attachments
              :modified created
              :state    :verdictGiven}}) ; TODO or $pushAll?
+    (notifications/send-notifications-on-verdict! application (get-in command [:web :host]))
     (ok :response verdicts-with-attachments)))
 
 ;;
