@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.poikkeamis-schemas
-  (:use [lupapalvelu.document.schemas]))
+  (:require [lupapalvelu.document.schemas :refer :all]))
 ;TODO: refactor kayttotarkoitus to use same as in schemas file has if this stays
 
 
