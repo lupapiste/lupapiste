@@ -391,9 +391,8 @@ var docgen = (function () {
       var myPath = path.join(".");
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
-      var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
-
+      
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
 
@@ -407,14 +406,20 @@ var docgen = (function () {
       } else {
         select.onchange = save;
       }
+      
+      var otherKey = subSchema["other-key"];
+      if (otherKey) {
+        var pathToOther = path.slice(0, -1);
+        pathToOther.push(otherKey);
+        select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
+      }
 
+      var option = document.createElement("option");
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
-      if (selectedOption === "") {
-        option.selected = "selected";
-      }
+      if (selectedOption === "") option.selected = "selected";
       select.appendChild(option);
-
+      
       $.each(subSchema.body, function (i, o) {
         var name = o.name;
         var option = document.createElement("option");
@@ -428,11 +433,28 @@ var docgen = (function () {
         select.appendChild(option);
       });
 
+      if (otherKey) {
+        option = document.createElement("option");
+        option.value = "other";
+        option.appendChild(document.createTextNode(loc("select-other")));
+        if (selectedOption === "other") option.selected = "selected";
+        select.appendChild(option);
+      }
+
       span.appendChild(makeLabel("select", myPath, true));
       span.appendChild(select);
       return span;
     }
 
+    function updateOther(select) {
+      var otherId = select.attr("data-select-other-id"),
+          other = $("#" + otherId, select.parent().parent());
+      other.prop("disabled", select.val() != "other");
+    }
+    
+    function initSelectWithOther(i, e) { updateOther($(e)); }
+    function selectWithOtherChanged() { updateOther($(this)); }
+    
     function buildGroup(subSchema, model, path, partOfChoice) {
       var myPath = path.join(".");
       var name = subSchema.name;
@@ -443,7 +465,7 @@ var docgen = (function () {
       var label = makeLabel("group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
-
+      
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
       clearDiv.className = "clear";
@@ -453,6 +475,8 @@ var docgen = (function () {
       if (subSchema.approvable) {
         label.appendChild(self.makeApprovalButtons(path, myModel));
       }
+      
+      $("select[data-select-other-id]", partsDiv).each(initSelectWithOther).change(selectWithOtherChanged);
 
       div.appendChild(partsDiv);
       div.appendChild(clearDiv);
@@ -744,7 +768,7 @@ var docgen = (function () {
       }
 
       var selectOneOf = getSelectOneOfDefinition(schema);
-
+      
       _.each(schema.body, function (subSchema) {
         var children = build(subSchema, model, path, save, partOfChoice);
         if (!_.isArray(children)) {

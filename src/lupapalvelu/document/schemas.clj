@@ -313,7 +313,7 @@
                                   :body [{:name "elementti"}
                                          {:name "paikalla"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select :required true
+                                 {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "ter\u00e4s"}
