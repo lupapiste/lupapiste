@@ -435,8 +435,8 @@
 
   (defpage "/dev/krysp" {typeName :typeName r :request}
     (if-not (blank? typeName)
-    (let [xmls {"rakval:ValmisRakennus"       "resources/krysp/sample/building.xml"
-                "rakval:RakennusvalvontaAsia" "resources/krysp/sample/verdict.xml"}]
+      (let [xmls {"rakval:ValmisRakennus"       "resources/krysp/sample/building.xml"
+                  "rakval:RakennusvalvontaAsia" "resources/krysp/sample/verdict.xml"}]
         (resp/content-type "application/xml; charset=utf-8" (slurp (get xmls typeName))))
       (when (= r "GetCapabilities")
         (resp/status 200 "OK"))))
@@ -444,7 +444,7 @@
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
       (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
-        {:status 200 :body (str response)}
+        (resp/status 200 (str response))
         (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId]}
@@ -454,7 +454,7 @@
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
-        {:status 400 :body (str response)})))
+        (resp/status 400 (str response)))))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
