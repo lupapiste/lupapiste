@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:use sade.xml)
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
+            [sade.xml :refer :all]
             [lupapalvelu.document.schemas :as schema]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]

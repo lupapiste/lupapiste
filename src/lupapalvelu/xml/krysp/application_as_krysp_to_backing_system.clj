@@ -1,10 +1,9 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
-  (:require
-    [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
-    [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
-    [lupapalvelu.permit :as permit]
-    [sade.env :as env]
-    [me.raynes.fs :as fs]))
+  (:require [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
+            [lupapalvelu.permit :as permit]
+            [sade.env :as env]
+            [me.raynes.fs :as fs]))
 
 (defn save-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
