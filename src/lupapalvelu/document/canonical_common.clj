@@ -70,6 +70,7 @@
 
 (defn empty-strings-to-nil [v]
   (if (and (string? v) (s/blank? v)) nil v))
+
 (defn muu-select-map
   "Jos muu-value on annettu, palauttaa mapin, jossa muu-key ja muu value.
    Jos ei, palauttaa mapin, jossa sel-key ja sel value annettu.
@@ -88,6 +89,5 @@
    :ya-kayttolupa-kadulta-tapahtuvat-nostot "kadulta tapahtuvat nostot"
    :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
    :ya-kayttolupa-rakennustelineet-kadulla "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
-   :ya-kayttolupa-muu-kayttolupa "muu kaytt\u00f6lupa"
-   })
+   :ya-kayttolupa-muu-kayttolupa "muu kaytt\u00f6lupa"})
 
