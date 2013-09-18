@@ -435,9 +435,9 @@
 
   (defpage "/dev/krysp" {typeName :typeName r :request}
     (if-not (blank? typeName)
-      (let [xmls {"rakval:ValmisRakennus"       "resources/krysp/sample/building.xml"
-                  "rakval:RakennusvalvontaAsia" "resources/krysp/sample/verdict.xml"}]
-        (resp/content-type "application/xml; charset=utf-8" (slurp (get xmls typeName))))
+      (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
+                  "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"}]
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
       (when (= r "GetCapabilities")
         (resp/status 200 "OK"))))
 
