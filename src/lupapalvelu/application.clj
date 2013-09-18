@@ -716,8 +716,7 @@
    :parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
-   :notify     "verdict"
-   :feature [:paatoksenHaku]}
+   :notify     "verdict"}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (do (update-application command
