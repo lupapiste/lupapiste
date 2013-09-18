@@ -144,7 +144,8 @@ var docgen = (function () {
       var input = document.createElement("input");
       input.id = pathStrToID(pathStr);
       input.name = docId + "." + pathStr;
-
+      input.setAttribute("data-docgen-path", pathStr);
+      
       try {
         input.type = type;
       } catch (e) {
@@ -413,7 +414,8 @@ var docgen = (function () {
       
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
-
+      select.setAttribute("data-docgen-path", myPath);
+      
       select.name = myPath;
       select.className = "form-input combobox";
 
