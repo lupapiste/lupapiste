@@ -43,7 +43,7 @@
                              :title "Latokuja 1",
                              :address "Latokuja 1",
                              :location location,
-                             :attachments attachments,  ;; saa olla tyhja?
+                             :attachments [],
                              :operations [operation],
                              :propertyId 75341600550007,
                              :documents documents,
