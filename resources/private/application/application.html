@@ -331,7 +331,7 @@
             </h2>
 
             <!--  ko if:  $data.paatokset -->
-            <div data-bind="foreach: paatokset">
+            <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
               <section class="accordion">
                 <h2 onclick="accordion.click(this)">
                   <span class="icon toggle-icon drill-down-white"></span>
