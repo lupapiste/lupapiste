@@ -1,3 +1,39 @@
+verdict.lupamaaraukset: Lupamääräykset
+
+verdict.aloitettava:   Aloitettava
+verdict.lainvoimainen: Lainvoimainen
+verdict.voimassaHetki: Voimassa
+verdict.raukeamis:     Raukeaa
+verdict.anto:          Annettu
+verdict.viimeinenValitus: Viimeinen valituspäivä
+verdict.julkipano:     Julkipano
+
+verdict.autopaikkojaEnintaan:   Autopaikkoja enintään
+verdict.autopaikkojaVahintaan:  Autopaikkoja vähintään
+verdict.autopaikkojaRakennettava:  Autopaikkoja rakennettava
+verdict.autopaikkojaRakennettu: Autopaikkoja rakennettu
+verdict.autopaikkojaKiinteistolla: Autopaikkoja kiinteistöllä
+verdict.autopaikkojaUlkopuolella:  Autopaikkoja ulkopuolella
+verdict.kerrosala:              Kerrosala
+verdict.kokonaisala:            Kokonaisala
+verdict.vaaditutKatselmukset:   Vaaditut katselmukset
+verdict.katselmuksenLaji:       Katselmuksen laji
+verdict.tarkastuksenTaiKatselmuksenNimi: Nimi
+verdict.maaraykset:             Määräykset
+verdict.maaraykset.maaraysaika: Määräysaika
+verdict.maaraykset.toteutusHetki: Toteutushetki
+verdict.maaraykset.sisalto:       Sisältö
+verdict.vaaditutTyonjohtajat:   Vaaditut työnjohtajat
+
+verdict.poytakirjat: Pöytäkirjat
+verdict.pykala: Pykälä
+verdict.paatospvm: Päivämäärä
+
+info.no-verdicts-found-from-backend: Taustajärjestelmästä ei löytynyt päätöstietoja.
+verdict.verdicts-found-from-backend: Taustajärjestelmästä haettiin {0} kuntalupatunnukseen liittyvät tiedot.
+verdict.fetch.button: Hae päätöstiedot taustajärjestelmästä
+verdict.fetch.title: Hae päätöstiedot
+
 update-authority-user-organisations.dialog.title: Käyttäjän lisäys organisaatioon
 update-authority-user-organisations.dialog.content.single: Käyttäjä kuuluu jo organisaatioon {0}. Haluatko lisätä hänet organisaatioon {1}?
 update-authority-user-organisations.dialog.content.multi: Käyttäjä kuuluu jo organisaatioihin {0}. Haluatko lisätä hänet organisaatioon {1}?

@@ -9,6 +9,7 @@
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var inviteModel = new LUPAPISTE.InviteModel();
+  var verdictModel = new LUPAPISTE.VerdictsModel();
 
   function isNum(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
@@ -230,26 +231,6 @@
 
     self.openStatement = function(model) {
       window.location.hash = "#!/statement/" + currentId + "/" + model.id();
-      return false;
-    };
-
-  }();
-
-  var verdictModel = new function() {
-    var self = this;
-
-    self.verdicts = ko.observable();
-    self.attachments = ko.observable();
-
-    self.refresh = function(application) {
-      self.verdicts(application.verdict);
-      self.attachments(_.filter(application.attachments,function(attachment) {
-        return _.isEqual(attachment.target, {type: "verdict"});
-      }));
-    };
-
-    self.openVerdict = function() {
-      window.location.hash = "#!/verdict/" + currentId;
       return false;
     };
 

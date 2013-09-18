@@ -5,10 +5,10 @@
 
 (def id "75300301050006")
 
-(def local-test-legacy  (str (server-address) "/krysp/building.xml"))
+(def local-legacy  (str (server-address) "/dev/krysp"))
 
 (fact "two buildings can be extracted"
-  (let [xml (building-xml local-test-legacy id)]
+  (let [xml (building-xml local-legacy id)]
     xml => truthy
 
     (let [buildings (->buildings xml)]
@@ -29,8 +29,8 @@
                                :usage      "021 rivitalot"
                                :created    "1998"}))))
 
-(fact "converting krysp to lupapiste domain model"
-  (let [xml (building-xml local-test-legacy id)]
+(fact "converting building krysp to lupapiste domain model"
+  (let [xml (building-xml local-legacy id)]
     xml => truthy
 
     (fact "invalid buildingid returns nil"
@@ -111,5 +111,9 @@
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}
-                              :yritysnimi "Testiyritys 11477"}})
-        ))))
+                              :yritysnimi "Testiyritys 11477"}})))))
+
+(fact "converting verdict krysp to lupapiste domain model"
+  (let [xml (application-xml local-legacy id)]
+    xml => truthy
+    (->verdicts xml)))
