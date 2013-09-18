@@ -65,9 +65,9 @@
              ["rakennustelineet-kadulla" :ya-kayttolupa-rakennustelineet-kadulla]
              ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
            ["sijoituslupa"
-            [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :ya-sijoituslupa]      ;; TODO
-             ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :ya-sijoituslupa]    ;; TODO
-             ["muu-sijoituslupa" :ya-sijoituslupa]]]                                   ;; TODO
+            [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen]
+             ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen]
+             ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
            #_["liikennetta-haittaavan-tyon-lupa" :ya-liikennetta-haittaavan-tyon-lupa] ;; TODO
            ]]})
 
@@ -137,6 +137,12 @@
                                       :required (conj yleiset-alueet-common-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
                                       :attachments []})
+
+(def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+                                       :permit-type "YA"
+                                       :schema-data [[["_selected" :value] "yritys"]]
+                                       :required ["sijoituslupa-sijoituksen-tarkoitus"]
+                                       :attachments []})
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
@@ -311,11 +317,9 @@
                                            :required yleiset-alueet-common-schemas
                                            :attachments []}  ;; TODO: Mita attachmentteihin?
 
-   :ya-sijoituslupa {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
-                     :permit-type "YA"
-                     :schema-data [[["_selected" :value] "yritys"]]
-                     :required ["sijoituslupa-sijoituksen-tarkoitus"]
-                     :attachments []}  ;; TODO: Mita attachmentteihin?
+   :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen   ya-sijoituslupa-general
+   :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-sijoituslupa-general
+   :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
 
 ;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika" ;; Mika nimi tassa kuuluu olla?
 ;                                           :required yleiset-alueet-common-schemas}

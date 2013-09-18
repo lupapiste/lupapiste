@@ -3,7 +3,7 @@
             [lupapalvelu.factlet :refer :all]
             [midje.sweet :refer :all]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [sade.util :refer [contains-value?]]))
 
 ;; NOTE: Rakennuslupa-canonical-testista poiketen applicationin "auth"-kohta ei ole kaytossa.
@@ -28,31 +28,30 @@
                 hankkeen-kuvaus
                 tyoaika])
 
-(def application
-  {:id "LP-753-2013-00001",
-   :permitType "YA",
-   :created 1372331179008,
-   :opened 1372331643985,
-   :modified 1372342070624,
-   :submitted 1379405092649,
-   :authority sonja,
-   :state "submitted",
-   :title "Latokuja 1",
-   :address "Latokuja 1",
-   :location location,
-   :attachments [],
-   :operations [operation],
-   :propertyId "75341600550007",
-   :documents documents,
-   :municipality municipality,
-   :statements statements})
+(def kaivulupa-application {:id "LP-753-2013-00001",
+                            :permitType "YA",
+                            :created 1372331179008,
+                            :opened 1372331643985,
+                            :modified 1372342070624,
+                            :submitted 1379405092649,
+                            :authority sonja,
+                            :state "submitted",
+                            :title "Latokuja 1",
+                            :address "Latokuja 1",
+                            :location location,
+                            :attachments [],
+                            :operations [operation],
+                            :propertyId "75341600550007",
+                            :documents documents,
+                            :municipality municipality,
+                            :statements statements})
 
 
-(def get-maksaja #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-maksaja)
-(def get-tyomaasta-vastaava #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-tyomaasta-vastaava)
+(def get-maksaja #'lupapalvelu.document.yleiset-alueet-canonical/get-maksaja)
+(def get-tyomaasta-vastaava #'lupapalvelu.document.yleiset-alueet-canonical/get-tyomaasta-vastaava)
 
 (facts* "Kaivulupa canonical model is correct"
-  (let [canonical (application-to-canonical application "fi")
+  (let [canonical (application-to-canonical kaivulupa-application "fi")
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
@@ -122,10 +121,10 @@
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
-      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified application)))
+      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified kaivulupa-application)))
       (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
-      (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id application))
-      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened application)))
+      (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id kaivulupa-application))
+      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened kaivulupa-application)))
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
@@ -133,10 +132,10 @@
       (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false)
 
       ;; Sijainti
-      (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id application))
+      (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kaivulupa-application))
 ;      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
-      (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address application))
-      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
+      (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kaivulupa-application))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kaivulupa-application :location :x) " " (-> kaivulupa-application :location :y)))
 
       ;; Maksajan tiedot
       (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))

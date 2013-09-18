@@ -6,12 +6,12 @@
             [clojure.java.io :refer :all]
             [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.canonical-common :refer [to-xml-datetime ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]))   
+            [lupapalvelu.xml.krysp.validator :refer [validate]]))
 
-;; tags changed:
+;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
 ;; :postiosoite -> :postiosoitetieto
 ;; Added tag :Kayntiosoite after :kayntiosoitetieto
@@ -86,7 +86,7 @@
                                            :child [{:tag :Puolto
                                                     :child [{:tag :puolto}]}]}]}]}]}])
 
-(def kaivulupa_to_krysp
+(defn get-yleiset-alueet-krysp-mapping [lupa-name-key]
   {:tag :YleisetAlueet
    :ns "yak"
    :attr {:xsi:schemaLocation
@@ -98,13 +98,11 @@
           :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
           :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
           :xmlns:gml "http://www.opengis.net/gml"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"
-;         :xmlns:xlink "http://www.w3.org/1999/xlink"           ;; TODO: Tarvitaanko tata?
-         }
+          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
 
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :yleinenAlueAsiatieto
-            :child [{:tag :Tyolupa
+            :child [{:tag lupa-name-key
                      :child [{:tag :kasittelytietotieto
                               :child [{:tag :Kasittelytieto
                                        :child [{:tag :muutosHetki :ns "yht"}
@@ -173,20 +171,17 @@
         link (str begin-of-link attachment-file-name)]
     {:Liite (get-Liite title link attachment type file-id)}))
 
-(defn- get-statement-attachments-as-canonical [application begin-of-link]
-;  (println "\n  get-statement-attachments-as-canonical, application: ")
-;  (clojure.pprint/pprint application)
-;  (println "\n  get-statement-attachments-as-canonical, begin-of-link: " begin-of-link "\n")
-
+(defn- get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
                                       (fn-> :target :id keyword)
                                       (filter
                                         (fn-> :target :type (= "statement"))
                                         (:attachments application)))
-        canonical-attachments (for [[id attachments] statement-attachments-by-id]
-                                {id (for [attachment attachments]
-                                      (get-liite-for-lausunto attachment application begin-of-link))})]
+        canonical-attachments (for [id allowed-statement-ids]
+                                {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
+                                                (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
+
 
 (defn- get-attachments-as-canonical [application begin-of-link]
 ;  (println "\n get-attachments-as-canonical, attachments: ")
@@ -221,7 +216,7 @@
         files (reduce concat (reduce concat f))]
     (write-attachments files output-dir)))
 
-(defn- add-statement-attachments [canonical statement-attachments]
+(defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
 ;  (println "\n  add-statement-attachments, canonical: ")
 ;  (clojure.pprint/pprint canonical)
 ;  (println "\n  add-statement-attachments, statement-attachments: ")
@@ -233,7 +228,7 @@
     canonical
     (reduce
       (fn [c a]
-        (let [lausuntotieto (get-in c [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :lausuntotieto])
+        (let [lausuntotieto (get-in c [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto])
               lausunto-id (name (first (keys a)))
               paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
@@ -245,38 +240,48 @@
                            lausuntotieto
                            index-of-paivitettava
                            paivitetty-lausunto)]
-          (assoc-in c [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :lausuntotieto] paivitetty)))
+          (assoc-in c [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto] paivitetty)))
       canonical
       statement-attachments)))
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-  (let [file-name  (str output-dir "/" (:id application))
+  (let [lupa-name-key ((-> application :operations first :name keyword) ya-operation-type-to-schema-name-key)
+        file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
         attachments (get-attachments-as-canonical application begin-of-link)
-        statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
+        statement-given-ids (mapping-common/statements-ids-with-status
+                              (get-in canonical-without-attachments
+                                [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
+        statement-attachments (get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         canonical-with-statement-attachments (add-statement-attachments
+                                               lupa-name-key
                                                canonical-without-attachments
                                                statement-attachments)
         canonical (assoc-in
                     canonical-with-statement-attachments
-                    [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :liitetieto]
+                    [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
-        xml (element-to-xml canonical kaivulupa_to_krysp)
+        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))
         xml-s (indent-str xml)]
 
-    ;(clojure.pprint/pprint (:attachments application))
-    ;(clojure.pprint/pprint canonical-with-statement-attachments)
-    ;(println xml-s)
 
-;    (println "\n attachments: ")
-;    (clojure.pprint/pprint attachments)
+;    (println "\n lupa-name-key: ")
+;    (clojure.pprint/pprint lupa-name-key)
 ;    (println "\n")
 
-;    (println "\n statement-attachments: ")
-;    (clojure.pprint/pprint statement-attachments)
-;    (println "\n")
+;    (clojure.pprint/pprint (:attachments application))
+;    (clojure.pprint/pprint canonical-with-statement-attachments)
+;    (println xml-s)
+
+    (println "\n attachments: ")
+    (clojure.pprint/pprint attachments)
+    (println "\n")
+
+    (println "\n statement-attachments: ")
+    (clojure.pprint/pprint statement-attachments)
+    (println "\n")
 
 ;    (println "\n canonical-with-statement-attachments: ")
 ;    (clojure.pprint/pprint canonical-with-statement-attachments)
@@ -290,7 +295,7 @@
 ;    (println "\n")
 
     (validate xml-s)
-    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
+    (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
 
