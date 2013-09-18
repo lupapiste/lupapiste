@@ -694,13 +694,15 @@
                                  (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
                                        resp            (http/get url {:as :stream})
                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                       urlhash         (digest/sha1 url)
+                                       attachment-id   urlhash
                                        attachment-type {:type-group "muut" :type-id "muu"}
-                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
-                                       urlhash         (digest/md5 url)
                                        target          {:type "verdict" :id urlhash}
-                                       locked          true]
-                                   ; TODO this would create duplicate attachments if we're replacing existing verdicts
-                                   (attachment/attach-file! id file-name content-length (:body resp) nil attachment-type target locked user attachment-time)
+                                       locked          true
+                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                   ; If the attachment-id, i.e., hash of the URL matches
+                                   ; any old attachment, a new version will be added
+                                   (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
                                    (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
                                  pk))
                              (:poytakirjat paatos))))
@@ -708,7 +710,10 @@
       verdicts)))
 
 (defcommand check-for-verdict
-  {:parameters [:id]
+  {:description "Fetches verdicts from municipality backend system.
+                 If the command is run more than once, existing verdicts are
+                 replaced by the new ones."
+   :parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    :notify     "verdict"
@@ -718,8 +723,8 @@
     (do (update-application command
       {$set {:verdicts verdicts-with-attachments
              :modified created
-             :state    :verdictGiven}}) ; TODO or $pushAll?
-      (ok :response verdicts-with-attachments))
+             :state    :verdictGiven}})
+      (ok :verdictCount (count verdicts-with-attachments)))
     (fail :info.no-verdicts-found-from-backend)))
 
 ;;

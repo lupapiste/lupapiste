@@ -120,8 +120,8 @@
 (defn organization-attachments [organization]
   attachment-types-R)
 
-(defn make-attachment [now target locked op attachement-type]
-  {:id (mongo/create-id)
+(defn make-attachment [now target locked op attachement-type & [attachment-id]]
+  {:id (or attachment-id (mongo/create-id))
    :type attachement-type
    :modified now
    :locked locked
@@ -135,8 +135,8 @@
   [now attachement-types]
   (map (partial make-attachment now nil false nil) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target locked]
-  (let [attachment (make-attachment now target locked nil attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked & [attachment-id]]
+  (let [attachment (make-attachment now target locked nil attachement-type attachment-id)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -225,11 +225,15 @@
            :attachments.$.latestVersion.size size
            :attachments.$.latestVersion.created now}}))
 
-(defn update-or-create-attachment [id attachment-id attachment-type file-id filename content-type size created user target locked]
-  (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachment-type created target locked)
-                        attachment-id)]
-    (set-attachment-version id attachment-id file-id filename content-type size created user false)))
+(defn update-or-create-attachment
+  "If the attachment-id matches any old attachment, a new version will be added.
+   Otherwise a new attachment is created."
+  [application-id attachment-id attachment-type file-id filename content-type size created user target locked]
+  (let [attachment-id (cond
+                        (s/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
+                        (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
+                        :else (create-attachment application-id attachment-type created target locked attachment-id))]
+    (set-attachment-version application-id attachment-id file-id filename content-type size created user false)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
