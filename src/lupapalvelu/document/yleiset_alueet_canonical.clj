@@ -170,9 +170,10 @@
                                :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)}}]
 
       (if (= lupa-name-key :Tyolupa)
-        (assoc body :johtoselvitysviitetieto {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
-                                                                   ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
-                                                                   }})
+        (assoc-in body [lupa-name-key :johtoselvitysviitetieto]
+          {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
+                                ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
+                                }})
         body))))
 
 (defn application-to-canonical

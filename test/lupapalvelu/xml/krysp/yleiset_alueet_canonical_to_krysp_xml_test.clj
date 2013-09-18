@@ -16,7 +16,7 @@
 (defn- do-test [application]
   (let [operation-name-key (-> application :operations first :name keyword)
         lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
-        canonical (application-to-canonical kaivulupa-application "fi")
+        canonical (application-to-canonical application "fi")
         mapping (get-yleiset-alueet-krysp-mapping lupa-name-key)
         xml (element-to-xml canonical mapping)
         xml-s (indent-str xml)]
@@ -52,7 +52,7 @@
 
   (let [operation-name-key (-> kayttolupa-application :operations first :name keyword)]
 
-    #_(fact "Kaivulupa application -> canonical -> xml"
+    (fact "Kaivulupa application -> canonical -> xml"
       (do-test kaivulupa-application))
 
     (fact "Kayttolupa application -> canonical -> xml"
