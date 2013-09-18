@@ -95,23 +95,12 @@
   {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
-(defn- muu-select-map
-  "Palauttaa mapin jossa muu-key ja muu value jos muu valuen annettu.
-   Jos ei paluttaa mapin jossa sel-key ja sel value annettu.
-   Jos ei niin palauttaa nil"
-  [muu-key muu-val sel-key sel-val]
-  (if (s/blank? muu-val)
-    (when sel-val
-      {sel-key sel-val})
-    {muu-key muu-val}))
-
 (defn- get-osapuoli-data [osapuoli party-type]
   (let [henkilo        (:henkilo osapuoli)
         kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
-        omistajalaji   (muu-select-map :muu
-                         (-> osapuoli :muu-omistajalaji :value)
-                         :omistajalaji
-                         (-> osapuoli :omistajalaji :value))
+        omistajalaji   (muu-select-map
+                         :muu (-> osapuoli :muu-omistajalaji :value)
+                         :omistajalaji (-> osapuoli :omistajalaji :value))
         role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
                         :kuntaRooliKoodi kuntaRoolicode
                         :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin :value))}
