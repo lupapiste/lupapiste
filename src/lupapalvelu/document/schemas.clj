@@ -313,14 +313,14 @@
                                   :body [{:name "elementti"}
                                          {:name "paikalla"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select :required true
+                                 {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "ter\u00e4s"}
                                          {:name "puu"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muuRakennusaine" :type :string}
-                                 {:name "julkisivu" :type :select
+                                 {:name "julkisivu" :type :select :other-key "muuMateriaali"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "metallilevy"}
@@ -338,7 +338,7 @@
                                          {:name "uuni"}
                                          {:name "eiLammitysta"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select :required true
+                                 {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde" 
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
                                          {:name "raskas poltto\u00f6ljy"}
@@ -348,7 +348,6 @@
                                          {:name "turve"}
                                          {:name "maal\u00e4mp\u00f6"}
                                          {:name "puu"}
-                                         {:name "muu" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muu-lammonlahde" :type :string}]}
                          {:name "verkostoliittymat" :type :group :layout :vertical
@@ -411,22 +410,22 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                         [{:name "omistajalaji" :type :select
-                                           :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
-                                                  {:name "muu yksityinen henkil\u00f6 tai perikunta"}
-                                                  {:name "asunto-oy tai asunto-osuuskunta"}
-                                                  {:name "kiinteist\u00f6 oy"}
-                                                  {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
-                                                  {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
-                                                  {:name "kunnan liikelaitos"}
-                                                  {:name "valtion liikelaitos"}
-                                                  {:name "pankki tai vakuutuslaitos"}
-                                                  {:name "kunta tai kuntainliitto"}
-                                                  {:name "valtio"}
-                                                  {:name "sosiaaliturvarahasto"}
-                                                  {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
-                                                  {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :string}])}])
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" 
+                                       :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
+                                              {:name "muu yksityinen henkil\u00f6 tai perikunta"}
+                                              {:name "asunto-oy tai asunto-osuuskunta"}
+                                              {:name "kiinteist\u00f6 oy"}
+                                              {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
+                                              {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
+                                              {:name "kunnan liikelaitos"}
+                                              {:name "valtion liikelaitos"}
+                                              {:name "pankki tai vakuutuslaitos"}
+                                              {:name "kunta tai kuntainliitto"}
+                                              {:name "valtio"}
+                                              {:name "sosiaaliturvarahasto"}
+                                              {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
+                                              {:name "ei tiedossa"}]}
+                                      {:name "muu-omistajalaji" :type :string}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")

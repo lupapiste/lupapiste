@@ -27,7 +27,7 @@
                     :css ["jquery-ui.css"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
    :knockout       {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
-   :lo-dash        {:js ["lodash-1.2.1.min.js"]}
+   :lo-dash        {:js ["lodash-1.3.1.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
@@ -45,7 +45,7 @@
                   :css  ["selectm.css"]}
 
    :licenses     {:html ["licenses.html"]}
-   
+
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
@@ -71,7 +71,7 @@
                   :css ["accordion.css"]}
 
    :application  {:depends [:common :repository :tree]
-                  :js ["change-location.js" "invite.js" "application.js" "add-operation.js"]
+                  :js ["change-location.js" "invite.js" "verdicts-model.js" "application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
