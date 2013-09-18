@@ -14,7 +14,7 @@ LUPAPISTE.VerdictsModel = function() {
     var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {
       return _.isEqual(attachment.target, {type: "verdict"});});
 
-    var verdicts = _.cloneDeep(application.verdicts || []).map(function(verdict) {
+    var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
           var myId = {type: "verdict", id: pk.urlHash};
