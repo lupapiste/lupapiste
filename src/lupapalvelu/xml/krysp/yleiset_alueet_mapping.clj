@@ -184,9 +184,6 @@
 
 
 (defn- get-attachments-as-canonical [application begin-of-link]
-;  (println "\n get-attachments-as-canonical, attachments: ")
-;  (clojure.pprint/pprint (:attachments application))
-;  (println "\n")
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
                                     :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
@@ -217,12 +214,6 @@
     (write-attachments files output-dir)))
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
-;  (println "\n  add-statement-attachments, canonical: ")
-;  (clojure.pprint/pprint canonical)
-;  (println "\n  add-statement-attachments, statement-attachments: ")
-;  (clojure.pprint/pprint statement-attachments)
-;  (println "\n")
-
   ;; if we have no statement-attachments to add return the canonical map itself
   (if (empty? statement-attachments)
     canonical
@@ -271,17 +262,19 @@
 ;    (clojure.pprint/pprint lupa-name-key)
 ;    (println "\n")
 
+;    (println "output-dir: " output-dir)
+
 ;    (clojure.pprint/pprint (:attachments application))
 ;    (clojure.pprint/pprint canonical-with-statement-attachments)
 ;    (println xml-s)
 
-    (println "\n attachments: ")
-    (clojure.pprint/pprint attachments)
-    (println "\n")
+;    (println "\n attachments: ")
+;    (clojure.pprint/pprint attachments)
+;    (println "\n")
 
-    (println "\n statement-attachments: ")
-    (clojure.pprint/pprint statement-attachments)
-    (println "\n")
+;    (println "\n statement-attachments: ")
+;    (clojure.pprint/pprint statement-attachments)
+;    (println "\n")
 
 ;    (println "\n canonical-with-statement-attachments: ")
 ;    (clojure.pprint/pprint canonical-with-statement-attachments)
