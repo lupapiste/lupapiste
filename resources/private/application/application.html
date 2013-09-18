@@ -481,7 +481,7 @@
               <button
                 data-bind="click: $root.verdictModel.checkVerdict, disable: $root.verdictModel.processing, visible: $root.authorization.ok('check-for-verdict')"
                 class="btn btn-primary modal"
-                data-test-id="give-verdict">
+                data-test-id="fetch-verdict">
                 <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
                 <span data-bind="ltext: 'verdict.fetch'"></span>
               </button>
