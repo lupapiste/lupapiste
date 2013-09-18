@@ -104,7 +104,7 @@
         Vastuuhenkilo-henkilo (:Vastuuhenkilo (first (filter #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-tyomaastavastaava) vastuuhenkilot-vec)))
         Vastuuhenkilo-henkilo-osoite (-> Vastuuhenkilo-henkilo :osoitetieto :osoite) => truthy
 
-        ;; Testataan muunnosfunktiota henkilo-tyyppisella tyomaasta-vastaavalla
+        ;; Testataan muunnosfunktiota myos henkilo-tyyppisella tyomaasta-vastaavalla
         tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
                                      (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo")) => truthy
         tyomaasta-vastaava-Vastuuhenkilo (-> tyomaasta-vastaava-henkilo :vastuuhenkilotieto :Vastuuhenkilo) => truthy
