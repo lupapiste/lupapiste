@@ -15,6 +15,11 @@
 (defpermit Y  "Ymparistoluvat")
 (defpermit P  "Poikkeusluvat")
 
+(defn permit-subtypes [permit-type]
+  (cond
+    (= permit-type P) [:poikkeamislupa :suunnittelutarveratkaisu]
+    :default []))
+
 ;;
 ;; Helpers
 ;;
@@ -40,3 +45,13 @@
     (let [application-permit-type (permit-type application)]
       (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
         (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
+
+(defn is-valid-subtype [validator-permit-subtype]
+  (fn [_ application]
+    (when-not (some #(= validator-permit-subtype %) (permit-subtypes (:permitType application)))
+      (fail :error.permit-has-no-such-subtype))))
+
+(defn validate-permit-has-subtypes []
+  (fn [_ application]
+    (when (empty? (permit-subtypes (:permitType application)))
+      (fail :error.permit-has-no-subtypes))))
