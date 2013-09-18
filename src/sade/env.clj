@@ -119,6 +119,9 @@
 (defn dev-mode? []
   (= :dev mode))
 
+(defn test-build? []
+  (= target-env "TEST"))
+
 (def ^:dynamic *in-dev-macro* false)
 
 (defmacro in-dev [& body]
