@@ -1,9 +1,10 @@
 (ns lupapalvelu.migration.migrations
-  (:require [lupapalvelu.migration.core :refer [defmigration]]
+  (:require [monger.operators :refer :all]
+            [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -18,3 +19,13 @@
                                                                :documents (map drop-schema-data (:documents application))}})))
 
 
+
+(defn verdict-to-verdics [{verdict :verdict :as app}]
+  (-> app
+    (assoc :verdicts (map domain/->paatos verdict))
+    (dissoc :verdict)))
+
+(defmigration verdicts-migraation
+  {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
+  (let [applications (mongo/select :applications {:verdict {$exists true}})]
+    (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications)))

@@ -176,7 +176,7 @@
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
                      (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
-                     (when (not-empty jakokirjain) {:jakokirjain (clojure.string/lower-case jakokirjain)}))}))))
+                     (when (not-empty jakokirjain) {:jakokirjain (lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   {:Omistaja (merge (get-osapuoli-data omistaja :rakennuksenomistaja))})
