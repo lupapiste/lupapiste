@@ -426,20 +426,21 @@
 ;; dev utils:
 ;;
 
-(env/in-dev
-  (defjson [:any "/dev/spy"] []
-    (dissoc (request/ring-request) :body))
-
-  (defjson "/dev/user" []
-    (current-user))
-
+(when (or (env/dev-mode?) (env/test-build?))
   (defpage "/dev/krysp" {typeName :typeName r :request}
     (if-not (blank? typeName)
       (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"}]
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
       (when (= r "GetCapabilities")
-        (resp/status 200 "OK"))))
+        (resp/status 200 "OK")))))
+
+(env/in-dev
+  (defjson [:any "/dev/spy"] []
+    (dissoc (request/ring-request) :body))
+
+  (defjson "/dev/user" []
+    (current-user))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
