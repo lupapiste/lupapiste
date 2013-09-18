@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.poikkeamis-canonical-test)
 
 
-(def statements [{:given 1379423133068
+(def ^:private statements [{:given 1379423133068
                                      :id "52385377da063788effc1e93"
                                      :person {:text "Paloviranomainen"
                                               :name "Sonja Sibbo"
@@ -11,7 +11,7 @@
                                      :status "yes"
                                      :text "Lausunto liitteenä."}])
 
-(def hakija {:id "523844e1da063788effc1c58"
+(def ^:private hakija {:id "523844e1da063788effc1c58"
              :schema-info {:approvable true
                            :subtype "hakija"
                            :name "hakija"
@@ -55,7 +55,7 @@
                                                                   :value "Piippola"}}}
                     :_selected {:value "henkilo"}}})
 
-(def uusi {:created 1379419361123
+(def ^:private uusi {:created 1379419361123
            :data {:toimenpiteet {:0 {:Toimenpide {:modified 1379419797183
                                                   :value "uusi"}
                                      :huoneistoja {:modified 1379419800278
@@ -87,7 +87,7 @@
                               :created 1379419361123}
                          :removable true}})
 
-(def hanke {:created 1379419361123
+(def ^:private hanke {:created 1379419361123
             :data {:kuvaus {:modified 1379419749140
                             :value "Omakotitalon ja tallin rakentaminen."}
                    :poikkeamat {:modified 1379419775530
@@ -98,7 +98,7 @@
                           :version 1
                           :order 1}})
 
-(def maksaja {:created 1379419361123
+(def ^:private maksaja {:created 1379419361123
               :data {:_selected {:modified 1379484845705
                                  :value "yritys"}
                      :laskuviite {:modified 1379484949604
@@ -131,7 +131,7 @@
                             :order 6}}
   )
 
-(def rakennuspaikka {:created 1379419361123
+(def ^:private rakennuspaikka {:created 1379419361123
                      :data {:hallintaperuste {:modified 1379419781683
                                               :value "oma"}
                             :kaavanaste {:modified 1379419785786
@@ -144,14 +144,14 @@
                                            :version 1
                                            :order 2}})
 
-(def lisatieto {:id "523844e1da063788effc1c5c"
+(def ^:private lisatieto {:id "523844e1da063788effc1c5c"
                 :schema-info {:name "lisatiedot"
                               :version 1
                               :order 100}
                 :created 1379419361123
                 :data {}})
 
-(def paasuunnittelija {:created 1379419361123
+(def ^:private paasuunnittelija {:created 1379419361123
           :data {:henkilotiedot {:etunimi {:modified 1379421445541
                                            :value "Pena"}
                                  :sukunimi {:modified 1379421445541
@@ -180,7 +180,7 @@
                                :type "party"
                                :order 4}})
 
-(def suunnittelija {:id "523844e1da063788effc1c5e"
+(def ^:private suunnittelija {:id "523844e1da063788effc1c5e"
                                            :schema-info {:approvable true
                                                          :name "suunnittelija"
                                                          :removable true
@@ -191,7 +191,7 @@
                                            :created 1379419361123
                                            :data {}})
 
-(def lisaosa {:created 1379419361123
+(def ^:private lisaosa {:created 1379419361123
               :data {:kaavoituksen_ja_alueiden_tilanne {:rajoittuuko_tiehen {:modified 1379419814128
                                                                              :value true}
                                                         :tienkayttooikeus {:modified 1379419818358
@@ -225,7 +225,7 @@
                             :version 1
                             :order 52}})
 
-(def documents [hakija
+(def ^:private documents [hakija
                 uusi
                 hanke
                 maksaja
@@ -235,7 +235,7 @@
                 suunnittelija
                 lisaosa])
 
-(def poikkari-hakemus {:schema-version 1
+(def ^:private poikkari-hakemus {:schema-version 1
                        :auth [{:lastName "Panaani"
                                :firstName "Pena"
                                :username "pena"
@@ -377,3 +377,5 @@
                        :permitType "P"
                        :id "LP-753-2013-00001"
                        :municipality "753"})
+
+
