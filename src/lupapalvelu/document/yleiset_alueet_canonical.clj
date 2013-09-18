@@ -169,12 +169,12 @@
                                                                             :tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste :value)}}
                                :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)}}]
 
-      (if (= lupa-name-key :Tyolupa)
+      (if-not (= lupa-name-key :Tyolupa)
+        body
         (assoc-in body [lupa-name-key :johtoselvitysviitetieto]
           {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
                                 ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
-                                }})
-        body))))
+                                }})))))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
