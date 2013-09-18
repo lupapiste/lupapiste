@@ -69,14 +69,15 @@
   (vec (map get-statement statements)))
 
 (defn muu-select-map
-  "Jos muu-value on annettu, palauttaa mapin, jossa muu-key ja muu value.
-   Jos ei, palauttaa mapin, jossa sel-key ja sel value annettu.
-   Jos ei, palauttaa nil."
+  "If 'sel-val' is \"other\" considers 'muu-key' and 'muu-val', else considers 'sel-key' and 'sel-val'.
+   If value (either 'muu-val' or 'sel-val' is blank, return nil, else return map with
+   considered key mapped to considered value."
   [muu-key muu-val sel-key sel-val]
-  (if (s/blank? muu-val)
-    (when sel-val
-      {sel-key sel-val})
-    {muu-key muu-val}))
+  (let [muu (= "other" sel-val)
+        k   (if muu muu-key sel-key)
+        v   (if muu muu-val sel-val)]
+    (when-not (s/blank? v)
+      {k v})))
 
 (def ya-application-operation-type-to-usage-description
   {:ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat "ty\u00f6maasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"

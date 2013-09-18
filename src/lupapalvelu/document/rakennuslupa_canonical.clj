@@ -191,10 +191,9 @@
          huoneistot :huoneistot} toimenpide
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (-> rakenne :muuRakennusaine :value)
                                                   :rakennusaine (-> rakenne :kantavaRakennusaine :value))
-        lammonlahde-map (muu-select-map :muu
-                                        (-> lammitys :muu-lammonlahde :value)
-                                        :polttoaine
-                                        (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde :value))
+        lammonlahde-map (muu-select-map
+                          :muu (-> lammitys :muu-lammonlahde :value)
+                          :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde :value))
                                           (str (-> lammitys :lammonlahde :value) ".")
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)

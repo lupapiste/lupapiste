@@ -126,7 +126,7 @@
                                 :muuRakennusaine {:value ""}
                                 :julkisivu {:value "puu"}}
                       :lammitys {:lammitystapa {:value "vesikeskus"}
-                                 :lammonlahde {:value "muu"}
+                                 :lammonlahde {:value "other"}
                                  :muu-lammonlahde {:value "polttopuillahan tuo"}}
                       :varusteet {:hissiKytkin {:value true},
                                   :kaasuKytkin {:value true},
@@ -503,7 +503,7 @@
 
 (facts "When muu-lammonlahde is specified, it is used"
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
-                                           :lammonlahde  {:value "muu"}
+                                           :lammonlahde  {:value "other"}
                                            :muu-lammonlahde {:value "fuusioenergialla"}} }
                                {:id "123" :created nil} application)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))

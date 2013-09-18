@@ -58,9 +58,11 @@
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
-(defmethod validate-field :select [{:keys [body]} v]
-  (when-not (or (s/blank? v) (some #{v} (map :name body)))
-    [:warn "illegal-value:select"]))
+(defmethod validate-field :select [{:keys [body other-key]} v]
+  (let [accepted-values (set (map :name body))
+        accepted-values (if other-key (conj accepted-values "other") accepted-values)]
+    (when-not (or (s/blank? v) (contains? accepted-values v))
+      [:warn "illegal-value:select"])))
 
 (defmethod validate-field :radioGroup [elem v] nil)
 (defmethod validate-field :buildingSelector [elem v] nil)
