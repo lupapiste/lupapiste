@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clj-time.format :as timeformat]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [clojure.string :as s]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -66,3 +67,25 @@
 (defn get-statements [statements]
   ;Returing vector because this element to be Associative
   (vec (map get-statement statements)))
+
+(defn muu-select-map
+  "Jos muu-value on annettu, palauttaa mapin, jossa muu-key ja muu value.
+   Jos ei, palauttaa mapin, jossa sel-key ja sel value annettu.
+   Jos ei, palauttaa nil."
+  [muu-key muu-val sel-key sel-val]
+  (if (s/blank? muu-val)
+    (when sel-val
+      {sel-key sel-val})
+    {muu-key muu-val}))
+
+(def ya-application-operation-type-to-usage-description
+  {:ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat "ty\u00f6maasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"
+   :ya-kayttolupa-mainostus-ja-viitoitus "mainoslaitteiden ja opasteviittojen sijoittaminen"
+   :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot "erilaiset messujen ja tapahtumien aikaiset alueiden k\u00e4yt\u00f6t"
+   :ya-kayttolupa-kadulta-tapahtuvat-nostot "kadulta tapahtuvat nostot"
+   :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
+   :ya-kayttolupa-rakennustelineet-kadulla "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
+   :ya-kayttolupa-muu-kayttolupa "muu kaytt\u00f6lupa"
+   })
+
