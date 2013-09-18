@@ -95,17 +95,6 @@
   {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
-(defn- muu-select-map
-  "If 'sel-val' is \"other\" considers 'muu-key' and 'muu-val', else considers 'sel-key' and 'sel-val'.
-   If value (either 'muu-val' or 'sel-val' is blank, return nil, else return map with
-   considered key mapped to considered value."
-  [muu-key muu-val sel-key sel-val]
-  (let [muu (= "other" sel-val)
-        k   (if muu muu-key sel-key)
-        v   (if muu muu-val sel-val)]
-    (when-not (s/blank? v)
-      {k v})))
-
 (defn- get-osapuoli-data [osapuoli party-type]
   (let [henkilo        (:henkilo osapuoli)
         kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
@@ -205,8 +194,8 @@
         lammonlahde-map (muu-select-map
                           :muu (-> lammitys :muu-lammonlahde :value)
                           :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde :value))
-                                        (str (-> lammitys :lammonlahde :value) ".")
-                                        (-> lammitys :lammonlahde :value)))
+                                          (str (-> lammitys :lammonlahde :value) ".")
+                                          (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
                                       :julkisivumateriaali (-> rakenne :julkisivu :value))
         lammitystapa (-> lammitys :lammitystapa :value)
