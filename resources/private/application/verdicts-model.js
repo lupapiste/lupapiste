@@ -45,7 +45,9 @@ LUPAPISTE.VerdictsModel = function() {
     ajax.command("check-for-verdict", {id: applicationId})
     .processing(self.processing)
     .pending(self.pending)
-    .success(function(resp) {
+    .success(function(d) {
+      var content = loc("verdict.verdicts-found-from-backend", d.verdictCount);
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
       pageutil.showAjaxWait();
       repository.load(applicationId);
     })
