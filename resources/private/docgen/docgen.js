@@ -4,7 +4,7 @@ var docgen = (function () {
   function makeButton(id, label) {
     var button = document.createElement("button");
     button.id = id;
-    button.className = "btn";
+    button.className = "btn block";
     button.innerHTML = label;
     return button;
   }
@@ -963,9 +963,11 @@ var docgen = (function () {
       var title = document.createElement("h2");
 
       var sectionContainer = document.createElement("div");
-      var elements = document.createElement("article");
+      var elements = document.createElement("div");
 
       section.className = "accordion";
+      elements.className = "accordion-fields";
+
       icon.className = "icon toggle-icon drill-down-white";
       title.appendChild(icon);
 
@@ -990,11 +992,15 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
+      sectionContainer.setAttribute("data-accordion-state", "open");
       sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
 
       sectionContainer.appendChild(elements);
+      var clearDiv = document.createElement("div");
+      clearDiv.className = "clear";
+      sectionContainer.appendChild(clearDiv);
       section.appendChild(title);
       section.appendChild(sectionContainer);
       return section;
