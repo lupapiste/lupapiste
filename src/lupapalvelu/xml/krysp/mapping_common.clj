@@ -171,10 +171,9 @@
   (str application-id "_current_application.pdf"))
 
 (defn statements-ids-with-status [lausuntotieto]
-  (let [lt lausuntotieto]
-    (reduce
-      (fn [r l]
-        (if (get-in l [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto])
-          (conj r (get-in l [:Lausunto :id]))
-          r))
-      #{} lausuntotieto)))
+  (reduce
+    (fn [r l]
+      (if (get-in l [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto])
+        (conj r (get-in l [:Lausunto :id]))
+        r))
+    #{} lausuntotieto))
