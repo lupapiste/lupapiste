@@ -548,7 +548,7 @@
     (if info-request?
       (when-not (:inforequest-enabled organization)
         (fail! :error.inforequests-disabled))
-    (when-not (:new-application-enabled organization)
+      (when-not (:new-application-enabled organization)
         (fail! :error.new-applications-disabled)))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
