@@ -28,6 +28,7 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.open-inforequest :as open-inforequest]
             [sade.strings :as ss]
             [sade.xml :as xml])
   (:import [java.net URL]))
@@ -586,7 +587,9 @@
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
-      (try (autofill-rakennuspaikka application created)
+      (open-inforequest/new-open-inforequest! application)
+      (try
+        (autofill-rakennuspaikka application created)
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
 
