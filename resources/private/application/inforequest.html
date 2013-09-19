@@ -9,10 +9,14 @@
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: 'infoRequest'"></span> <span data-bind="text: address" class="address"></span>
-          <a class="icon"
-             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
-             data-test-id="change-location-link"></a>
+          <h1>
+            <span data-bind="ltext: 'infoRequest'"></span> <span data-bind="text: address" class="address"></span>
+            <a class="icon"
+               data-bind="ltext: 'edit',
+                          click: $root.changeLocationModel.changeLocation,
+                          visible: $root.authorization.ok('change-location')"
+               data-test-id="change-location-link">
+             </a>
           </h1>
 
           <!-- Property ID: -->
