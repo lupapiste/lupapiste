@@ -323,6 +323,7 @@
     self.hasAttachment = ko.observable(false);
     self.address = ko.observable();
     self.operations = ko.observable();
+    self.permitSubtype = ko.observable();
     self.operationsCount = ko.observable();
     self.applicant = ko.observable();
     self.assignee = ko.observable();
@@ -334,8 +335,7 @@
     self.unseenStatements = ko.observable();
     self.unseenVerdicts = ko.observable();
     self.unseenComments = ko.observable();
-
-    // new stuff
+        // new stuff
     self.invites = ko.observableArray();
 
     // all data in here
@@ -493,6 +493,7 @@
   var application = new ApplicationModel();
 
   var authorities = ko.observableArray([]);
+  var permitSubtypes = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
@@ -528,7 +529,22 @@
       .call();
   }
 
+  function updatePermitSubtype(value){
+      if (isInitializing) { return; }
+
+      ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        })
+      .error(function(data) {
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+      })
+      .call();
+
+  }
+
   application.assignee.subscribe(function(v) { updateAssignee(v); });
+  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);})
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
@@ -540,6 +556,11 @@
       authorityInfos.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
     authorities(authorityInfos);
+  }
+
+  function initPermitSubtypesSelectList(data){
+      console.log(data);
+      permitSubtypes(data);
   }
 
   // When Oskari map has initialized itself, draw shapes and marker
@@ -621,6 +642,9 @@
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
+
+      // permit subtypes
+      initPermitSubtypesSelectList(applicationDetails.permitSubtypes);
 
       // Update map:
       var location = application.location();
@@ -871,6 +895,7 @@
     var bindings = {
       application: application,
       authorities: authorities,
+      permitSubtypes: permitSubtypes,
       attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
       comment: commentModel,

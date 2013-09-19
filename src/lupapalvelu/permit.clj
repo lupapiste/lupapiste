@@ -46,12 +46,11 @@
       (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
         (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
 
-(defn is-valid-subtype [validator-permit-subtype]
-  (fn [_ application]
-    (when-not (some #(= validator-permit-subtype %) (permit-subtypes (:permitType application)))
-      (fail :error.permit-has-no-such-subtype))))
+(defn is-valid-subtype [permitSubtype {permitType :permitType}]
+  (when-not (some #(= permitSubtype %) (permit-subtypes permitType))
+    (fail :error.permit-has-no-such-subtype)))
 
-(defn validate-permit-has-subtypes []
-  (fn [_ application]
-    (when (empty? (permit-subtypes (:permitType application)))
-      (fail :error.permit-has-no-subtypes))))
+
+(defn validate-permit-has-subtypes [_ {permitType :permitType}]
+    (when (empty? (permit-subtypes permitType))
+      (fail :error.permit-has-no-subtypes)))

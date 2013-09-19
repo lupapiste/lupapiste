@@ -67,7 +67,7 @@
           <!-- /ko -->
 
           <!-- Operations: -->
-          <div>
+          <div data-bind="visible: !$root.authorization.ok('change-permit-sub-type')">
             <p data-bind="ltext: 'application.operations'"></p>
             <ul data-bind="foreach: operationsCount">
               <li>
@@ -80,6 +80,25 @@
             </ul>
           </div>
         </div>
+
+        <!-- Subtypes: -->
+          <div data-bind="visible: $root.authorization.ok('change-permit-sub-type')">
+            <p data-bind="ltext: 'application.permitSubtypes'"></p>
+            <span>
+            <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                               optionsText: function(item) {return loc('permitSubtype.' + item); }">
+            </select>
+            </span>
+          </div>
+        </div>
+
+        <!-- <select
+                data-bind="options: $root.authorities,
+                           optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                           optionsValue: 'id',
+                           value: $root.application.assignee,
+                           optionsCaption: loc('choose')"
+                data-test-id="application-assigneed-authority">-->
 
 
         <!-- Actions: -->

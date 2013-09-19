@@ -133,7 +133,8 @@
   [{app :application user :user}]
   (if app
     (ok :application ((app-post-processor user) app)
-        :authorities (find-authorities-in-applications-organization app))
+        :authorities (find-authorities-in-applications-organization app)
+        :permitSubtypes (permit/permit-subtypes (:permitType app)))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -563,6 +564,7 @@
                          :opened        (when (#{:open :info} state) created)
                          :modified      created
                          :permitType    permit-type
+                         :permitSubtype (first (permit/permit-subtypes permit-type))
                          :infoRequest   info-request?
                          :operations    [op]
                          :state         state
@@ -583,6 +585,7 @@
                             {:attachments            (make-attachments created op organization-id)
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
+
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
@@ -606,6 +609,17 @@
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})))))
+
+(defcommand change-permit-sub-type
+  {:parameters [id permitSubtype]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :validators [permit/validate-permit-has-subtypes]}
+  [{:keys [application created]}]
+  (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
+    validation-errors
+    (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype
+                                                :modified      created}})))
 
 (defcommand change-location
   {:parameters [id x y address propertyId]
