@@ -1008,7 +1008,6 @@ var docgen = (function () {
   function updateOther(select) {
     var otherId = select.attr("data-select-other-id"),
         other = $("#" + otherId, select.parent().parent());
-    console.log("*** select val", select.val(), ", other: ", other);
     other.parent().css("visibility", select.val() === "other" ? "visible" : "hidden");
   }
 
