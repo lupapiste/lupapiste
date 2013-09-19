@@ -124,8 +124,8 @@
              {:name "jate--tai-sadevesi"}
              {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
              {:name "vesijohto"}]}
-     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
-     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
+     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}          ;; lupakohtainenLisatietotieto
+     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}])) ;; lupakohtainenLisatietotieto
 
 (defschemas
   1
