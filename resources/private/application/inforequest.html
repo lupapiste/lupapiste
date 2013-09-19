@@ -19,6 +19,10 @@
              </a>
           </h1>
 
+          <span data-bind="visible: currentUser.get().oir">
+            USER: [<span data-bind="text: currentUser.get().username"></span>]
+          </span>
+          
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
