@@ -1,3 +1,4 @@
+select-other: Muu
 operations.ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
 operations.ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat.desc: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
 operations.ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot: Muut yleiselle alueelle kohdistuvat tilan käytöt

@@ -12,20 +12,17 @@
       (assoc :schema-info schema-info)
       (dissoc :schema))))
 
-(defmigration schemas-be-gonez
+(defmigration schemas-be-gone
   {:apply-when (pos? (mongo/count :applications {:schema-version {$exists false}}))}
   (doseq [application (mongo/select :applications {:schema-version {$exists false}} {:documents true})]
     (mongo/update-by-id :applications (:id application) {$set {:schema-version 1
                                                                :documents (map drop-schema-data (:documents application))}})))
 
-
-
-(defn verdict-to-verdics [{verdict :verdict :as app}]
-  (-> app
-    (assoc :verdicts (map domain/->paatos verdict))
-    (dissoc :verdict)))
+(defn verdict-to-verdics [{verdict :verdict}]
+  {$set {:verdicts (map domain/->paatos verdict)}
+   $unset {:verdict 1}})
 
 (defmigration verdicts-migraation
   {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
   (let [applications (mongo/select :applications {:verdict {$exists true}})]
-    (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications)))
+    (doall (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications))))

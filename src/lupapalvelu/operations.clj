@@ -39,17 +39,20 @@
              ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
              ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
              ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-           ["Rakennuksen purkaminen" :purkaminen]]
-          ["Elinympariston muuttaminen"
-           [["Maisemaa muutava toimenpide"
-             [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-              ["Puun kaataminen" :puun-kaataminen]
-              ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-            ["Tontti tai korttelialueen jarjestelymuutos"
-             [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
-              ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
-              ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-              ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]})
+           ["Rakennuksen purkaminen" :purkaminen]]]})
+
+(def ^:private operation-tree-for-environment-R
+  {:permit-type permit/R
+   :tree ["Elinympariston muuttaminen"
+          [["Maisemaa muutava toimenpide"
+            [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
+             ["Puun kaataminen" :puun-kaataminen]
+             ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
+           ["Tontti tai korttelialueen jarjestelymuutos"
+            [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
+             ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
+             ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
+             ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]})
 
 (def ^:private operation-tree-for-YA
   {:permit-type permit/YA
@@ -83,7 +86,9 @@
            ["maa-ainesten_ottaminen" :maa-aineslupa]]]})
 
 (def ^:private operation-tree
-  (vector operation-tree-for-R
+  (vector
+    operation-tree-for-R
+    operation-tree-for-environment-R
     (when (env/feature? :poikkari) operation-tree-for-P)
     (when (env/feature? :ymparisto) operation-tree-for-Y)
     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
