@@ -95,23 +95,12 @@
   {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
-(defn- muu-select-map
-  "Palauttaa mapin jossa muu-key ja muu value jos muu valuen annettu.
-   Jos ei paluttaa mapin jossa sel-key ja sel value annettu.
-   Jos ei niin palauttaa nil"
-  [muu-key muu-val sel-key sel-val]
-  (if (s/blank? muu-val)
-    (when sel-val
-      {sel-key sel-val})
-    {muu-key muu-val}))
-
 (defn- get-osapuoli-data [osapuoli party-type]
   (let [henkilo        (:henkilo osapuoli)
         kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
-        omistajalaji   (muu-select-map :muu
-                         (-> osapuoli :muu-omistajalaji :value)
-                         :omistajalaji
-                         (-> osapuoli :omistajalaji :value))
+        omistajalaji   (muu-select-map
+                         :muu (-> osapuoli :muu-omistajalaji :value)
+                         :omistajalaji (-> osapuoli :omistajalaji :value))
         role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
                         :kuntaRooliKoodi kuntaRoolicode
                         :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin :value))}
@@ -187,7 +176,7 @@
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
                      (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
-                     (when (not-empty jakokirjain) {:jakokirjain (clojure.string/lower-case jakokirjain)}))}))))
+                     (when (not-empty jakokirjain) {:jakokirjain (lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   {:Omistaja (merge (get-osapuoli-data omistaja :rakennuksenomistaja))})
@@ -202,10 +191,9 @@
          huoneistot :huoneistot} toimenpide
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (-> rakenne :muuRakennusaine :value)
                                                   :rakennusaine (-> rakenne :kantavaRakennusaine :value))
-        lammonlahde-map (muu-select-map :muu
-                                        (-> lammitys :muu-lammonlahde :value)
-                                        :polttoaine
-                                        (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde :value))
+        lammonlahde-map (muu-select-map
+                          :muu (-> lammitys :muu-lammonlahde :value)
+                          :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde :value))
                                           (str (-> lammitys :lammonlahde :value) ".")
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)

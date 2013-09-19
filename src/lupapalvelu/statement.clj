@@ -4,7 +4,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.core :refer :all]
             [sade.env :refer :all]
-            [sade.util :refer [lower-case]]
+            [sade.strings :refer [lower-case]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]

@@ -2,8 +2,9 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [sade.util :refer [lower-case]]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.xml.krysp.verdict :as verdict]
+            [sade.strings :refer [lower-case]]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
@@ -126,6 +127,17 @@
               :postitoimipaikannimi {:value city}}}
     strip-nils
     strip-empty-maps))
+
+(defn ->paatos
+  "Returns a verdict data structure, compatible with KRYSP schema"
+  [{:keys [id timestamp name given status official]}]
+  {:kuntalupatunnus id
+   :timestamp timestamp
+   :paatokset [{:paivamaarat {:anto          given
+                              :lainvoimainen official}
+                :poytakirjat [{:paatoksentekija name
+                               :status          status
+                               :paatoskoodi     (verdict/verdict-name status)}]}]})
 
 ;;
 ;; Software version metadata

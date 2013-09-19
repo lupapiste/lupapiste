@@ -112,7 +112,7 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    [{:name "sijoituksen-tarkoitus" :type :select
+    [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
       :body [{:name "sahko"}
              {:name "tele"}
              {:name "kaivo-(tele/sahko)"}
@@ -123,9 +123,7 @@
              {:name "katuvalo"}
              {:name "jate--tai-sadevesi"}
              {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
-             {:name "vesijohto"}
-             {:name "muu"}]}
-     ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+             {:name "vesijohto"}]}
      {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
      {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
 

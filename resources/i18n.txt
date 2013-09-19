@@ -1,8 +1,1 @@
-update-authority-user-organisations.dialog.title: Käyttäjän lisäys organisaatioon
-update-authority-user-organisations.dialog.content.single: Käyttäjä kuuluu jo organisaatioon {0}. Haluatko lisätä hänet organisaatioon {1}?
-update-authority-user-organisations.dialog.content.multi: Käyttäjä kuuluu jo organisaatioihin {0}. Haluatko lisätä hänet organisaatioon {1}?
-update-authority-user-organisations.dialog.confirm.title: Käyttäjän tietojen päivitys
-update-authority-user-organisations.dialog.confirm.success: Käyttäjän tietojen päivitys onnistui.
-update-authority-user-organisations.dialog.confirm.error: Käyttäjän tietojen päivitys epäonnistui. Ota yhteyttä kuntasi viranomaiseen.
-authority.already.in.organization.dialog.content: Käyttäjä on jo aiemmin lisätty organisaatioon.
-error.illegal-maaraala-tunnus: Virheellinen määräalatunnus. Määräalatunnuksessa tulee olla neljä numeroa.
+select-other: Muu
