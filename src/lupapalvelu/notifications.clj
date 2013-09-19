@@ -137,7 +137,7 @@
                                                            :link-sv (link-fn :sv)})))
 
 (defn send-open-inforequest-invite! [email token application-id host]
-  (let [link-fn (fn [lang] (str host "/app/" (name lang) "/openinforequest/" token))]
+  (let [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token))] ; FIXME: & gets escaped with "&lang=" (name lang)
     (email/send-email-message
       email
       "Uusi neuvontapyynt\u00F6"
