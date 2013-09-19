@@ -539,9 +539,7 @@
         organization     (organization/resolve-organization municipality permit-type)
         organization-id  (:id organization)
         info-request?    (boolean infoRequest)]
-    (when-not
-      (or (security/applicant? user)
-          (user-is-authority-in-organization? (:id user) organization-id))
+    (when-not (or (security/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
