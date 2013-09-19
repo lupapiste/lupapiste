@@ -136,6 +136,11 @@
                                                            :link-fi (link-fn :fi)
                                                            :link-sv (link-fn :sv)})))
 
+(defn send-open-inforequest-invite! [email token application-id host]
+  (let [link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" application-id "/" "foo" "/" token))]
+    (email/send-email-message email "subject" "open-inforequest-invite.md" {:link-fi (link-fn :fi)
+                                                                            :link-sv (link-fn :sv)})))
+
 (defn get-message-for-application-state-change [application host]
   (message
     (template "application-state-change.html")

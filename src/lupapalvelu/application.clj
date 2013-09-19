@@ -535,7 +535,7 @@
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] {:keys [host]} :web :as command}]
   (let [permit-type      (operations/permit-type-of-operation operation)
         organization     (organization/resolve-organization municipality permit-type)
         organization-id  (:id organization)
@@ -587,7 +587,7 @@
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
-      (open-inforequest/new-open-inforequest! application)
+      (open-inforequest/new-open-inforequest! application host)
       (try
         (autofill-rakennuspaikka application created)
         (catch Exception e (error e "KTJ data was not updated")))
