@@ -34,9 +34,10 @@
      :email email
      :enabled true
      :role :authority
+     :oir true
      :organizations [organization-id]
      :firstName ""
-     :lastName ""
+     :lastName email
      :phone ""
      :username email}))
 
