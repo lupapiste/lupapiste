@@ -45,7 +45,7 @@ var accordion = (function() {
         } else {
           content.addClass("expanded");
         }
-        target.trigger("accordion" + state);
+        target.trigger("accordion-" + state);
         if (done) { done(target); }
       });
 
