@@ -134,7 +134,6 @@
   {:authenticated true
    :parameters [:id]}
   [{app :application user :user}]
-  (println "\n\n=== app" app user)
   (if app
     (ok :application ((app-post-processor user) app)
         :authorities (find-authorities-in-applications-organization app))
