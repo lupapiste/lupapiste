@@ -4,7 +4,7 @@ var docgen = (function () {
   function makeButton(id, label) {
     var button = document.createElement("button");
     button.id = id;
-    button.className = "btn";
+    button.className = "btn block";
     button.innerHTML = label;
     return button;
   }
@@ -144,6 +144,7 @@ var docgen = (function () {
       var input = document.createElement("input");
       input.id = pathStrToID(pathStr);
       input.name = docId + "." + pathStr;
+      input.setAttribute("data-docgen-path", pathStr);
 
       try {
         input.type = type;
@@ -409,11 +410,11 @@ var docgen = (function () {
       var myPath = path.join(".");
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
-      var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
 
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
+      select.setAttribute("data-docgen-path", myPath);
 
       select.name = myPath;
       select.className = "form-input combobox";
@@ -426,11 +427,17 @@ var docgen = (function () {
         select.onchange = save;
       }
 
+      var otherKey = subSchema["other-key"];
+      if (otherKey) {
+        var pathToOther = path.slice(0, -1);
+        pathToOther.push(otherKey);
+        select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
+      }
+
+      var option = document.createElement("option");
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
-      if (selectedOption === "") {
-        option.selected = "selected";
-      }
+      if (selectedOption === "") option.selected = "selected";
       select.appendChild(option);
 
       $.each(subSchema.body, function (i, o) {
@@ -445,6 +452,14 @@ var docgen = (function () {
         }
         select.appendChild(option);
       });
+
+      if (otherKey) {
+        option = document.createElement("option");
+        option.value = "other";
+        option.appendChild(document.createTextNode(loc("select-other")));
+        if (selectedOption === "other") option.selected = "selected";
+        select.appendChild(option);
+      }
 
       span.appendChild(makeLabel("select", myPath, true));
       span.appendChild(select);
@@ -948,9 +963,11 @@ var docgen = (function () {
       var title = document.createElement("h2");
 
       var sectionContainer = document.createElement("div");
-      var elements = document.createElement("article");
+      var elements = document.createElement("div");
 
       section.className = "accordion";
+      elements.className = "accordion-fields";
+
       icon.className = "icon toggle-icon drill-down-white";
       title.appendChild(icon);
 
@@ -975,11 +992,15 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
+      sectionContainer.setAttribute("data-accordion-state", "open");
       sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
 
       sectionContainer.appendChild(elements);
+      var clearDiv = document.createElement("div");
+      clearDiv.className = "clear";
+      sectionContainer.appendChild(clearDiv);
       section.appendChild(title);
       section.appendChild(sectionContainer);
       return section;
@@ -989,6 +1010,15 @@ var docgen = (function () {
     validate();
     disableBasedOnOptions();
   };
+
+  function updateOther(select) {
+    var otherId = select.attr("data-select-other-id"),
+        other = $("#" + otherId, select.parent().parent());
+    other.parent().css("visibility", select.val() === "other" ? "visible" : "hidden");
+  }
+
+  function initSelectWithOther(i, e) { updateOther($(e)); }
+  function selectWithOtherChanged() { updateOther($(this)); }
 
   function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
 
@@ -1022,6 +1052,8 @@ var docgen = (function () {
         docgenDiv.append(btn);
       }
     });
+
+    $("select[data-select-other-id]", docgenDiv).each(initSelectWithOther).change(selectWithOtherChanged);
   }
 
   function isDisabled(options) { return options && options.disabled; }

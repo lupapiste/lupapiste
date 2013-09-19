@@ -3,11 +3,11 @@
             [monger.operators :refer :all]
             [lupapalvelu.core :refer :all]
             [clojure.string :refer [blank? join trim split]]
-            [sade.util :refer [lower-case]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [lupapalvelu.i18n :refer [with-lang loc]]
-            [clj-time.format :as timeformat]
+            [clj-time.format :as tf]
+            [clj-http.client :as http]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -28,7 +28,9 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [clj-time.format :as tf]))
+            [sade.strings :as ss]
+            [sade.xml :as xml])
+  (:import [java.net URL]))
 
 ;; Validators
 
@@ -48,11 +50,11 @@
     (fail :error.unauthorized)))
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (->double x) 800000)))
+  (when (and x (not (< 10000 (util/->double x) 800000)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (->double y) 7779999)))
+  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
 (defn count-unseen-comment [user app]
@@ -68,14 +70,14 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
+                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
                      (:statements app))))
     0))
 
 (defn count-unseen-verdicts [user app]
   (if (and (= (:role user) "applicant") (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdict app))))
+      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
 
 (defn count-attachments-requiring-action [user app]
@@ -210,7 +212,7 @@
     {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
-      (let [email (lower-case email)]
+      (let [email (ss/lower-case email)]
         (if (domain/invited? application email)
           (fail :invite.already-invited)
           (let [invited (security/get-or-create-user-by-email email)
@@ -258,7 +260,7 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (let [email (lower-case email)]
+      (let [email (ss/lower-case email)]
         (with-user email
           (fn [_]
             (mongo/update-by-id :applications application-id
@@ -270,7 +272,7 @@
    :roles      [:applicant :authority]}
   [command]
   (update-application command
-    {$pull {:auth {$and [{:username (lower-case email)}
+    {$pull {:auth {$and [{:username (ss/lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
@@ -507,7 +509,7 @@
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
-   {:x (->double x) :y (->double y)})
+   {:x (util/->double x) :y (util/->double y)})
 
  (defn- make-application-id [municipality]
    (let [year           (str (year (local-now)))
@@ -680,12 +682,63 @@
   (update-application command
     {$set {:modified created
            :state    :verdictGiven}
-     $push {:verdict  {:id verdictId
-                       :timestamp created
-                       :name name
-                       :given given
-                       :status status
-                       :official official}}}))
+     $push {:verdicts (domain/->paatos
+                        {:id verdictId      ; Kuntalupatunnus
+                         :timestamp created ; tekninen Lupapisteen aikaleima
+                         :name name         ; poytakirja[] / paatoksentekija
+                         :given given       ; paivamaarat / antoPvm
+                         :status status     ; poytakirja[] / paatoskoodi
+                         :official official ; paivamaarat / lainvoimainenPvm
+                         })}}))
+
+(defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
+  (let [legacy   (organization/get-legacy organization)
+        xml      (krysp/application-xml legacy id)
+        verdicts (krysp/->verdicts xml)]
+    (map
+      (fn [verdict]
+        (assoc verdict
+          :timestamp timestamp
+          :paatokset (map
+                       (fn [paatos]
+                         (assoc paatos :poytakirjat
+                           (map
+                             (fn [pk]
+                               (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                 (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                       resp            (http/get url {:as :stream})
+                                       content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                       urlhash         (digest/sha1 url)
+                                       attachment-id   urlhash
+                                       attachment-type {:type-group "muut" :type-id "muu"}
+                                       target          {:type "verdict" :id urlhash}
+                                       locked          true
+                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                   ; If the attachment-id, i.e., hash of the URL matches
+                                   ; any old attachment, a new version will be added
+                                   (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                 pk))
+                             (:poytakirjat paatos))))
+                       (:paatokset verdict))))
+      verdicts)))
+
+(defcommand check-for-verdict
+  {:description "Fetches verdicts from municipality backend system.
+                 If the command is run more than once, existing verdicts are
+                 replaced by the new ones."
+   :parameters [:id]
+   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles      [:authority]
+   :notify     "verdict"}
+  [{:keys [user created application] :as command}]
+  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
+    (do (update-application command
+      {$set {:verdicts verdicts-with-attachments
+             :modified created
+             :state    :verdictGiven}})
+      (ok :verdictCount (count verdicts-with-attachments)))
+    (fail :info.no-verdicts-found-from-backend)))
 
 ;;
 ;; krysp enrichment
@@ -789,7 +842,7 @@
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row (partial with-meta-fields user)) apps)
-        echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
+        echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total

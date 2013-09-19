@@ -69,10 +69,10 @@
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
-    self.processing = ko.observable();
+    self.processing = ko.observable(false);
     self.inforequestsDisabled = ko.observable(false);
     self.newApplicationsDisabled = ko.observable(false);
-    self.pending = ko.observable();
+    self.pending = ko.observable(false);
 
     self.municipalityCode.subscribe(function(code) {
       if (code) { self.findOperations(code); }
@@ -353,15 +353,25 @@
 
     $("#create").applyBindings(model);
 
-    $("#create-search")
-      .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
-      .autocomplete({
-        source:     "/proxy/find-address",
-        delay:      500,
-        minLength:  3,
-        select:     model.autocompleteSelect
-      })
-      .data("ui-autocomplete")._renderItem = model.autocompleteRender;
+    // Hack: data("ui-autocomplete") sometimes returns null in IE,
+    // retry in 100ms
+    function initSearchAutoComplete() {
+      try {
+        $("#create-search")
+          .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
+          .autocomplete({
+            source:     "/proxy/find-address",
+            delay:      500,
+            minLength:  3,
+            select:     model.autocompleteSelect
+          })
+          .data("ui-autocomplete")._renderItem = model.autocompleteRender;
+      } catch (e){
+        error("Unable to init create-search, retrying...", e);
+        setTimeout(initSearchAutoComplete, 100);
+      }
+    }
+    initSearchAutoComplete();
 
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
