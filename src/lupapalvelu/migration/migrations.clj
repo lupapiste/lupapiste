@@ -12,7 +12,7 @@
       (assoc :schema-info schema-info)
       (dissoc :schema))))
 
-(defmigration schemas-be-gonez
+(defmigration schemas-be-gone
   {:apply-when (pos? (mongo/count :applications {:schema-version {$exists false}}))}
   (doseq [application (mongo/select :applications {:schema-version {$exists false}} {:documents true})]
     (mongo/update-by-id :applications (:id application) {$set {:schema-version 1
