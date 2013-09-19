@@ -26,9 +26,4 @@
 
   window.setLogLimit = function(l) { limit = l; };
 
-  window.onerror = function(msg, url, line) {
-    window.error(url + ":" + line + " " + msg);
-    return true;
-  };
-  
 })();
