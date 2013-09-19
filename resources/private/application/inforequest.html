@@ -19,10 +19,6 @@
              </a>
           </h1>
 
-          <span data-bind="visible: currentUser.get().oir">
-            USER: [<span data-bind="text: currentUser.get().username"></span>]
-          </span>
-          
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
@@ -65,20 +61,20 @@
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
-              <p data-bind="ltext: 'application.assignee'"></p>
-              <span id="test-inforequest-assignee" class="application_summary_text">
-
-                <select id="inforequest-assignee-select"
-                        class="form-input combobox"
-                        data-bind="options: $root.authorities,
-                                   optionsText: function(item) {
-                                    return item.firstName + ' ' + item.lastName;
-                                   },
-                                   optionsValue: 'id',
-                                   value: $root.application.assignee,
-                                   optionsCaption: loc('choose')"></select>
-               </span>
-            </div>
+            <p data-bind="ltext: 'application.assignee'"></p>
+            <span id="test-inforequest-assignee" class="application_summary_text">
+              <select id="inforequest-assignee-select"
+                      class="form-input combobox"
+                      data-bind="options: $root.authorities,
+                                 optionsText: function(item) {
+                                   return item.firstName + ' ' + item.lastName;
+                                 },
+                                 optionsValue: 'id',
+                                 value: $root.application.assignee,
+                                 optionsCaption: loc('choose')">
+              </select>
+            </span>
+          </div>
           
         <!-- /ko -->
         </div>
