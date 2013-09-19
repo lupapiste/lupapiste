@@ -559,7 +559,6 @@
   }
 
   function initPermitSubtypesSelectList(data){
-      console.log(data);
       permitSubtypes(data);
   }
 
