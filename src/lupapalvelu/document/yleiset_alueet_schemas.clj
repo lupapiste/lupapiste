@@ -147,7 +147,7 @@
 ;;
 
 #_(def liikennetta-haittaavan-tyon-lupa
-  {:info {:name "yleisetAlueetLiikennettaHaittaava" :order 65}
+  {:info {:name "yleisetAlueetLiikennettaHaittaava" :order 67}
    :body [{:name "ilmoituksenAihe"
            :type :group
            :body [{:name "ensimmainenIlmoitusTyosta" :type :checkbox}
