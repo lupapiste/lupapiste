@@ -61,7 +61,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var path = hash.split("/");
 
-    if (!self.allowAnonymous && self.session === undefined) {
+    if (self.session === undefined) {
       trace("session === undefined", hash, path);
       ajax.query("user")
         .success(function (e) {
@@ -72,7 +72,7 @@ var LUPAPISTE = LUPAPISTE || {};
         })
         .error(function (e) {
           self.session = false;
-          hub.send("logout", e);
+          if (!self.allowAnonymous) hub.send("logout", e);
         })
         .call();
       return;
