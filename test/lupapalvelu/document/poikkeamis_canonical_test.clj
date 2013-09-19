@@ -1,4 +1,6 @@
-(ns lupapalvelu.document.poikkeamis-canonical-test)
+(ns lupapalvelu.document.poikkeamis-canonical-test
+  (:require [lupapalvelu.factlet :as fl]
+            [midje.sweet]))
 
 
 (def ^:private statements [{:given 1379423133068
@@ -377,5 +379,14 @@
                        :permitType "P"
                        :id "LP-753-2013-00001"
                        :municipality "753"})
+
+(fl/fact*
+  (let [canonical (application-to-canonical application ) => truthy
+
+        ]
+ ))
+
+
+
 
 
