@@ -1,13 +1,13 @@
 (ns lupapalvelu.attachment
-  (:use [monger.operators]
-        [lupapalvelu.core]
-        [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
-        [lupapalvelu.i18n :only [loc *lang* with-lang]]
-        [clojure.string :only [split join trim]]
-        [swiss-arrows.core :only [-<> -<>>]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
+            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
+            [lupapalvelu.i18n :refer [loc *lang* with-lang]]
+            [clojure.string :refer [split join trim]]
+            [swiss-arrows.core :refer [-<> -<>>]]
             [sade.util :refer [fn-> fn->> future*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -96,7 +96,9 @@
                     :tyyppiratkaisu
                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
                     :liitoslausunto
-                    :asemapiirros]
+                    :asemapiirros
+                    :rakennuspiirros
+                    :suunnitelmakartta]
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 
@@ -118,8 +120,8 @@
 (defn organization-attachments [organization]
   attachment-types-R)
 
-(defn make-attachment [now target locked op attachement-type]
-  {:id (mongo/create-id)
+(defn make-attachment [now target locked op attachement-type & [attachment-id]]
+  {:id (or attachment-id (mongo/create-id))
    :type attachement-type
    :modified now
    :locked locked
@@ -133,8 +135,8 @@
   [now attachement-types]
   (map (partial make-attachment now nil false nil) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target locked]
-  (let [attachment (make-attachment now target locked nil attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked & [attachment-id]]
+  (let [attachment (make-attachment now target locked nil attachement-type attachment-id)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -223,11 +225,15 @@
            :attachments.$.latestVersion.size size
            :attachments.$.latestVersion.created now}}))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
-  (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created target locked)
-                        attachment-id)]
-    (set-attachment-version id attachment-id file-id filename content-type size created user false)))
+(defn update-or-create-attachment
+  "If the attachment-id matches any old attachment, a new version will be added.
+   Otherwise a new attachment is created."
+  [application-id attachment-id attachment-type file-id filename content-type size created user target locked]
+  (let [attachment-id (cond
+                        (s/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
+                        (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
+                        :else (create-attachment application-id attachment-type created target locked attachment-id))]
+    (set-attachment-version application-id attachment-id file-id filename content-type size created user false)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
@@ -382,6 +388,17 @@
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
+(defn attach-file!
+  "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
+   Content can be a file or input-stream.
+   Returns attachment version."
+  [application-id file-name file-size content attachment-id attachment-type attachment-target locked user timestamp]
+  (let [file-id (mongo/create-id)
+        sanitazed-filename (mime/sanitize-filename file-name)
+        content-type (mime/mime-type sanitazed-filename)]
+    (mongo/upload file-id sanitazed-filename content-type content :application application-id)
+    (update-or-create-attachment application-id attachment-id attachment-type file-id sanitazed-filename content-type file-size timestamp user attachment-target locked)))
+
 (defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
@@ -389,30 +406,24 @@
    :states     [:draft :info :open :submitted :complement-needed :answered :verdictGiven]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
-  (if (> size 0)
-    (let [file-id (mongo/create-id)
-          sanitazed-filename (mime/sanitize-filename filename)]
-      (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-      (if (mime/allowed-file? sanitazed-filename)
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
-          (let [content-type (mime/mime-type sanitazed-filename)]
-            (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
-            (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
-              (executed "add-comment"
-                (-> command
-                  (assoc :data {:id id
-                                :text text,
-                                :type :system
-                                :target {:type :attachment
-                                         :id (:id attachment-version)
-                                         :version (:version attachment-version)
-                                         :filename (:filename attachment-version)
-                                         :fileId (:fileId attachment-version)}})))
-              (fail :error.unknown)))
-          (fail :error.illegal-attachment-type))
-        (fail :error.illegal-file-type)))
-    (fail :error.select-file)))
+  (when-not (pos? size) (fail! :error.select-file))
+  (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
+  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
+
+  (try
+    (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+      (executed "add-comment"
+        (-> command
+          (assoc :data {:id id
+                        :text text,
+                        :type :system
+                        :target {:type :attachment
+                                 :id (:id attachment-version)
+                                 :version (:version attachment-version)
+                                 :filename (:filename attachment-version)
+                                 :fileId (:fileId attachment-version)}})))
+      (fail :error.unknown))
+    (finally (.delete (io/file tempfile)))))
 
 ;;
 ;; Download

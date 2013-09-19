@@ -1,7 +1,6 @@
 (ns lupapalvelu.server
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.server :as server]
-            [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
@@ -24,6 +23,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
+            [lupapalvelu.document.schema-repository]
             [sade.security-headers :as headers]
             [sade.dummy-email-server]
             [lupapalvelu.migration.migration :as migration]))
@@ -55,7 +55,8 @@
     ((resolve 'lupapalvelu.perf-mon/init)))
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9090))
+    (require 'clojure.tools.nrepl.server)
+    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090))
   (let [jetty-opts (into
                      {:max-threads 250}
                      (when (env/dev-mode?)

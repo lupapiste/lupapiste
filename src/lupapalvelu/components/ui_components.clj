@@ -1,5 +1,5 @@
 (ns lupapalvelu.components.ui-components
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -27,7 +27,7 @@
                     :css ["jquery-ui.css"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
    :knockout       {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
-   :lo-dash        {:js ["lodash-1.2.1.min.js"]}
+   :lo-dash        {:js ["lodash-1.3.1.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
@@ -45,7 +45,7 @@
                   :css  ["selectm.css"]}
 
    :licenses     {:html ["licenses.html"]}
-   
+
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
@@ -54,7 +54,7 @@
                   :html ["404.html" "nav.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers.2.12_25072013.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers.2.13_20130911.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
@@ -71,7 +71,7 @@
                   :css ["accordion.css"]}
 
    :application  {:depends [:common :repository :tree]
-                  :js ["change-location.js" "invite.js" "application.js" "add-operation.js"]
+                  :js ["change-location.js" "invite.js" "verdicts-model.js" "application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
@@ -164,7 +164,7 @@
 
    :neighbor {:depends [:common :map :debug :docgen :debug]
               :html ["neighbor-show.html" "index.html"]
-              :js ["neighbor-app.js" "begin.js" "neighbor-show.js"]}})
+              :js ["neighbor-app.js" "neighbor-show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

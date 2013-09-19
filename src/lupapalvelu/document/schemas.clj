@@ -7,19 +7,28 @@
 
 (defonce ^:private registered-schemas (atom {}))
 
-(defn get-schemas [] @registered-schemas)
+(defn get-all-schemas [] @registered-schemas)
+(defn get-schemas [version] (get @registered-schemas version))
 
-(defn defschema [data]
+(defn defschema [version data]
   (let [schema-name (name (get-in data [:info :name]))]
-    (swap! registered-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
+    (swap! registered-schemas
+      assoc-in
+      [version schema-name]
+      (-> data
+        (assoc-in [:info :name] schema-name)
+        (assoc-in [:info :version] version)))))
 
-(defn defschemas [schemas]
+(defn defschemas [version schemas]
   (doseq [schema schemas]
-    (defschema schema)))
+    (defschema version schema)))
 
-(defn get-schema [schema-name]
-  {:pre [(not= nil schema-name)]}
-  (@registered-schemas (name schema-name)))
+(defn get-schema [schema-version schema-name]
+  {:pre [schema-version schema-name]}
+  (get-in @registered-schemas [schema-version (name schema-name)]))
+
+(defn get-latest-schema-version []
+  (->> @registered-schemas keys (sort >) first))
 
 ;;
 ;; helpers
@@ -142,7 +151,9 @@
 
 (def designer-basic (body
                       henkilotiedot-minimal
-                      {:name "yritys" :type :group :body yritys-minimal}
+                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (contains? c :required)
+                                                                                          (assoc c :required false)
+                                                                                          c)) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
@@ -302,14 +313,14 @@
                                   :body [{:name "elementti"}
                                          {:name "paikalla"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select :required true
+                                 {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "ter\u00e4s"}
                                          {:name "puu"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muuRakennusaine" :type :string}
-                                 {:name "julkisivu" :type :select
+                                 {:name "julkisivu" :type :select :other-key "muuMateriaali"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "metallilevy"}
@@ -327,7 +338,7 @@
                                          {:name "uuni"}
                                          {:name "eiLammitysta"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select :required true
+                                 {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde" 
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
                                          {:name "raskas poltto\u00f6ljy"}
@@ -337,7 +348,6 @@
                                          {:name "turve"}
                                          {:name "maal\u00e4mp\u00f6"}
                                          {:name "puu"}
-                                         {:name "muu" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muu-lammonlahde" :type :string}]}
                          {:name "verkostoliittymat" :type :group :layout :vertical
@@ -400,22 +410,22 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                         [{:name "omistajalaji" :type :select
-                                           :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
-                                                  {:name "muu yksityinen henkil\u00f6 tai perikunta"}
-                                                  {:name "asunto-oy tai asunto-osuuskunta"}
-                                                  {:name "kiinteist\u00f6 oy"}
-                                                  {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
-                                                  {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
-                                                  {:name "kunnan liikelaitos"}
-                                                  {:name "valtion liikelaitos"}
-                                                  {:name "pankki tai vakuutuslaitos"}
-                                                  {:name "kunta tai kuntainliitto"}
-                                                  {:name "valtio"}
-                                                  {:name "sosiaaliturvarahasto"}
-                                                  {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
-                                                  {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :string}])}])
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" 
+                                       :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
+                                              {:name "muu yksityinen henkil\u00f6 tai perikunta"}
+                                              {:name "asunto-oy tai asunto-osuuskunta"}
+                                              {:name "kiinteist\u00f6 oy"}
+                                              {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
+                                              {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
+                                              {:name "kunnan liikelaitos"}
+                                              {:name "valtion liikelaitos"}
+                                              {:name "pankki tai vakuutuslaitos"}
+                                              {:name "kunta tai kuntainliitto"}
+                                              {:name "valtio"}
+                                              {:name "sosiaaliturvarahasto"}
+                                              {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
+                                              {:name "ei tiedossa"}]}
+                                      {:name "muu-omistajalaji" :type :string}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
@@ -480,7 +490,9 @@
 ;;
 
 (defschemas
-  [{:info {:name "hankkeen-kuvaus" :approvable true
+  1
+  [{:info {:name "hankkeen-kuvaus"
+           :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
@@ -550,7 +562,7 @@
             :order 2}
      :body [{:name "kiinteisto"
              :type :group
-             :body [{:name "maaraalaTunnus" :type :string}
+             :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
                     {:name "tilanNimi" :type :string :readonly true}
                     {:name "rekisterointipvm" :type :string :readonly true}
                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}

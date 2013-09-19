@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.model
-  (:use [sade.strings]
-        [clojure.walk :only [keywordize-keys]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [sade.strings :refer :all]
+            [clojure.walk :refer [keywordize-keys]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
@@ -58,9 +58,11 @@
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
-(defmethod validate-field :select [{:keys [body]} v]
-  (when-not (or (s/blank? v) (some #{v} (map :name body)))
-    [:warn "illegal-value:select"]))
+(defmethod validate-field :select [{:keys [body other-key]} v]
+  (let [accepted-values (set (map :name body))
+        accepted-values (if other-key (conj accepted-values "other") accepted-values)]
+    (when-not (or (s/blank? v) (contains? accepted-values v))
+      [:warn "illegal-value:select"])))
 
 (defmethod validate-field :radioGroup [elem v] nil)
 (defmethod validate-field :buildingSelector [elem v] nil)
@@ -131,27 +133,29 @@
       [(check (sub-schema-by-name schema-body selected))]
       (map check schema-body))))
 
+(defn get-document-schema [document]
+  (let [schema-info (:schema-info document)]
+    (schemas/get-schema (:version schema-info) (:name schema-info))))
+
 (defn validate
-  "Validates document against it's local schema and document level rules
-   retuning list of validation errors."
-  [{{schema-body :body} :schema data :data :as document}]
-  (and data
-    (flatten
-      (concat
-        (validate-fields schema-body nil data [])
-        (validate-required-fields schema-body [] data [])
-        (validator/validate document)))))
+  "Validates document against schema and document level rules. Returns list of validation errors.
+   If schema is not given, uses schema defined in document."
+  ([document]
+    (validate document nil))
+  ([document schema]
+    (let [data (:data document)
+          schema (or schema (get-document-schema document))
+          schema-body (:body schema)]
+      (when data
+        (flatten
+          (concat
+            (validate-fields schema-body nil data [])
+            (validate-required-fields schema-body [] data [])
+            (validator/validate document)))))))
 
 (defn valid-document?
   "Checks weather document is valid."
   [document] (empty? (validate document)))
-
-(defn validate-against-current-schema
-  "Validates document against the latest schema and returns list of errors."
-  [{{{schema-name :name} :info} :schema document-data :data :as document}]
-  (let [latest-schema (schemas/get-schema schema-name)
-        pimped-doc    (assoc document :schema latest-schema)]
-    (validate pimped-doc)))
 
 (defn has-errors?
   [results]
@@ -224,18 +228,21 @@
     (with-timestamp timestamp (apply-approval document path status user))))
 
 (defn approvable?
-  ([document] (approvable? document nil))
-  ([document path]
-  (if (seq path)
-    (let [schema-body (get-in document [:schema :body])
-          str-path    (map #(if (keyword? %) (name %) %) path)
-          element     (keywordize-keys (find-by-name schema-body str-path))]
-      (true? (:approvable element)))
-    (true? (get-in document [:schema :info :approvable])))))
+  ([document] (approvable? document nil nil))
+  ([document path] (approvable? document nil path))
+  ([document schema path]
+    (if (seq path)
+      (let [schema      (or schema (get-document-schema document))
+            schema-body (:body schema)
+            str-path    (map #(if (keyword? %) (name %) %) path)
+            element     (keywordize-keys (find-by-name schema-body str-path))]
+        (true? (:approvable element)))
+      (true? (get-in document [:schema-info :approvable])))))
 
 (defn modifications-since-approvals
-  ([{:keys [schema data meta]}]
-    (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0)))
+  ([{:keys [schema-info data meta]}]
+    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))]
+      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0))))
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
@@ -256,7 +263,7 @@
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]
-  {:id      (mongo/create-id)
-   :created created
-   :schema  schema
-   :data    {}})
+  {:id           (mongo/create-id)
+   :created      created
+   :schema-info  (:info schema)
+   :data         {}})

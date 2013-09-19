@@ -18,7 +18,8 @@
                    (reduce
                      (fn [d i]
                        (apply-update d (get paths i) (get values i)))
-                     dummy (range 0 (count paths))))]
+                     dummy
+                     (range 0 (count paths))))]
 
       (facts "Embedded validator facts"
         (println "Checking:" doc)

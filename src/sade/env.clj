@@ -110,7 +110,7 @@
     default))
 
 (def mode (keyword (get-prop "lupapiste.mode" "dev")))
-(def port (Integer/parseInt (get-prop "lupapiste.port" "8000")))
+(def port (->int (get-prop "lupapiste.port" "8000")))
 (def log-level (keyword (get-prop "lupapiste.loglevel" (if (= mode :dev) "debug" "info"))))
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" "")))
 (def perf-mon-on (Boolean/parseBoolean (str (get-prop "lupapiste.perfmon" "false"))))
@@ -118,6 +118,9 @@
 
 (defn dev-mode? []
   (= :dev mode))
+
+(defn test-build? []
+  (= target-env "TEST"))
 
 (def ^:dynamic *in-dev-macro* false)
 

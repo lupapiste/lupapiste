@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.vrk
-  (:use [lupapalvelu.clojure15]
-        [lupapalvelu.document.validator])
   (:require [sade.util :refer [->int fn->]]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [lupapalvelu.clojure15 :refer :all]
+            [lupapalvelu.document.validator :refer :all]))
 
 ;;
 ;; da lib
@@ -122,7 +122,7 @@
 
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when (= schema-name "uusiRakennus")
     (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value ->kayttotarkoitus)
           tilavuus        (some->> data :mitat :tilavuus :value ->int)
@@ -135,7 +135,7 @@
 
 (defvalidator-old "vrk:BR106"
   "Puutalossa saa olla korkeintaan 4 kerrosta"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
@@ -148,7 +148,7 @@
 
 (defvalidator-old "vrk:CR343"
   "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
@@ -161,7 +161,7 @@
 
 (defvalidator-old "vrk:CR342"
   "Sahko polttoaineena vaatii sahkoliittyman"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
@@ -174,7 +174,7 @@
 
 (defvalidator-old "vrk:CR341"
   "Sahkolammitus vaatii sahkoliittyman"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
@@ -187,7 +187,7 @@
 
 (defvalidator-old "vrk:CR336"
   "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
@@ -200,7 +200,7 @@
 
 (defvalidator-old "vrk:CR335"
   "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
-  [{{{schema-name :name} :info} :schema data :data}]
+  [{{schema-name :name} :schema-info data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")

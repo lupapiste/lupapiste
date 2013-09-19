@@ -1,10 +1,10 @@
 (ns lupapalvelu.statement
-  (:use [monger.operators]
-        [lupapalvelu.core]
-        [sade.env]
-        [sade.util :only [lower-case]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.security :as sadesecurity]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
+            [sade.env :refer :all]
+            [sade.strings :refer [lower-case]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]

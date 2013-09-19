@@ -44,58 +44,68 @@
                                   :puhelin {:value "03-389 1380"}}}})
 
 (def hakija1
-  {:id "hakija1" :schema {:info {:name "hakija"}}
+  {:id "hakija1" :schema-info {:name "hakija"
+                               :version 1}
    :data {:henkilo henkilo}})
 
 (def hakija2
-  {:id "hakija2" :schema {:info {:name "hakija"}}
+  {:id "hakija2" :schema-info {:name "hakija"
+                               :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
 (def paasuunnittelija {:id "50bc85e4ea3e790c9ff7cdb2",
-   :schema {:info {:name "paasuunnittelija"}}
+   :schema-info {:name "paasuunnittelija"
+                 :version 1}
    :data (merge
            suunnittelija-henkilo
            {:patevyys {:koulutus {:value "Arkkitehti"} :patevyysluokka {:value "ei tiedossa"}}}
            {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def suunnittelija1
-  {:id "suunnittelija1" :schema {:info {:name "suunnittelija"}}
+  {:id "suunnittelija1" :schema-info {:name "suunnittelija"
+                                      :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
                 {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def suunnittelija2
-  {:id "suunnittelija2"  :schema {:info {:name "suunnittelija"}}
+  {:id "suunnittelija2"  :schema-info {:name "suunnittelija"
+                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
                 {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def suunnittelija-old-schema-LUPA-771
-  {:id "suunnittelija-old-schema-LUPA771" :schema {:info {:name "suunnittelija"}}
+  {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
+                                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:patevyys {:koulutus {:value "Koulutus"}
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :patevyysluokka {:value "B"}}})})
 
 (def suunnittelija-blank-role
-  {:id "suunnittelija-blank-role" :schema {:info {:name "suunnittelija"}}
+  {:id "suunnittelija-blank-role" :schema-info {:name "suunnittelija"
+                                                :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
                 {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def maksaja1
-  {:id "maksaja1" :schema {:info {:name "maksaja"}}
+  {:id "maksaja1" :schema-info {:name "maksaja"
+                                :version 1}
    :data {:henkilo henkilo}})
 
 (def maksaja2
-  {:id "maksaja2" :schema {:info {:name "maksaja"}}
+  {:id "maksaja2" :schema-info {:name "maksaja"
+                                :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
 (def rakennuspaikka
-  {:id "rakennuspaikka" :schema {:info {:name "rakennuspaikka"}}
+  {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
+                                      :version 1}
    :data {:kiinteisto {:tilanNimi {:value "Hiekkametsa"}
                        :maaraalaTunnus {:value ""}}
           :hallintaperuste {:value "oma"}
@@ -116,7 +126,7 @@
                                 :muuRakennusaine {:value ""}
                                 :julkisivu {:value "puu"}}
                       :lammitys {:lammitystapa {:value "vesikeskus"}
-                                 :lammonlahde {:value "muu"}
+                                 :lammonlahde {:value "other"}
                                  :muu-lammonlahde {:value "polttopuillahan tuo"}}
                       :varusteet {:hissiKytkin {:value true},
                                   :kaasuKytkin {:value true},
@@ -155,15 +165,17 @@
 (def uusi-rakennus
   {:id "uusi-rakennus"
    :created 2
-   :schema {:info {:name "uusiRakennus"
-                   :op {:name "asuinrakennus"}}}
+   :schema-info {:name "uusiRakennus"
+                 :version 1
+                 :op {:name "asuinrakennus"}}
    :data common-rakennus})
 
 (def rakennuksen-muuttaminen
   {:id "muuttaminen"
    :created 1
-   :schema {:info {:name "rakennuksen-muuttaminen"
-                   :op {:name "muu-laajentaminen"}}}
+   :schema-info {:name "rakennuksen-muuttaminen"
+                 :version 1
+                 :op {:name "muu-laajentaminen"}}
    :data (conj {:rakennusnro {:value "001"}
                 :perusparannuskytkin {:value true}
                 :muutostyolaji {:value "muut muutosty\u00f6t"}} common-rakennus)})
@@ -171,8 +183,9 @@
 (def laajentaminen
   {:id "laajennus"
    :created 3
-   :schema {:info {:name "rakennuksen-laajentaminen"
-                   :op {:name "laajentaminen"}}}
+   :schema-info {:name "rakennuksen-laajentaminen"
+                 :version 1
+                 :op {:name "laajentaminen"}}
    :data (conj {:rakennusnro {:value "001"}
                 :manuaalinen_rakennusnro {:value "002"}
                 :laajennuksen-tiedot {:perusparannuskytkin {:value true}
@@ -187,8 +200,9 @@
 
 (def purku {:id "purku"
             :created 4
-            :schema {:info {:name "purku"
-                            :op {:name "purkaminen"}}}
+            :schema-info {:name "purku"
+                          :version 1
+                          :op {:name "purkaminen"}}
             :data (conj {:rakennusnro {:value "001"}
                          :poistumanAjankohta {:value "17.04.2013"},
                          :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
@@ -197,25 +211,30 @@
                                 :kuvaus { :value "Aidan rakentaminen rajalle"}}
                          :id "aidan-rakentaminen"
                          :created 5
-                         :schema {:info {:removable true
-                                         :op {:id  "5177ac76da060e8cd8348e07"
-                                              :name "aita"}
-                                         :name "kaupunkikuvatoimenpide"}}})
+                         :schema-info {:removable true
+                                       :op {:id  "5177ac76da060e8cd8348e07"
+                                            :name "aita"}
+                                       :name "kaupunkikuvatoimenpide"
+                                       :version 1}})
 
 (def puun-kaataminen {:created 6
                       :data { :kuvaus {:value "Puun kaataminen"}}
                       :id "puun kaataminen"
-                      :schema { :info {:removable true
-                                       :op {:id "5177ad63da060e8cd8348e32"
-                                            :name "puun-kaataminen"
-                                            :created  1366797667137}
-                                       :name "maisematyo"}}})
+                      :schema-info {:removable true
+                                    :op {:id "5177ad63da060e8cd8348e32"
+                                         :name "puun-kaataminen"
+                                         :created  1366797667137}
+                                    :name "maisematyo"
+                                    :version 1}})
 
-(def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema {:info {:name "hankkeen-kuvaus" :order 1}}
+(def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema-info {:name "hankkeen-kuvaus"
+                                                         :version 1
+                                                         :order 1}
                       :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
                              :poikkeamat {:value "Ei poikkeamisia"}}})
 
-(def lisatieto {:id "lisatiedot" :schema {:info {:name "lisatiedot"}}
+(def lisatieto {:id "lisatiedot" :schema-info {:name "lisatiedot"
+                                               :version 1}
                 :data {:suoramarkkinointikielto {:value true}}})
 
 ;TODO LIITETIETO
@@ -484,7 +503,7 @@
 
 (facts "When muu-lammonlahde is specified, it is used"
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
-                                           :lammonlahde  {:value "muu"}
+                                           :lammonlahde  {:value "other"}
                                            :muu-lammonlahde {:value "fuusioenergialla"}} }
                                {:id "123" :created nil} application)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
@@ -550,7 +569,7 @@
     (fact "Kiinteisto" Kiinteisto => truthy)
     (fact "tilanNimi" (:tilannimi Kiinteisto) => "Hiekkametsa")
     (fact "kiinteistotunnus" (:kiinteistotunnus Kiinteisto) => "21111111111111")
-    (fact "maaraalaTunnus" (:maaraAlaTunnus Kiinteisto) => "")
+    (fact "maaraalaTunnus" (:maaraAlaTunnus Kiinteisto) => nil)
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
 

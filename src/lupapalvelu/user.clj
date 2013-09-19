@@ -1,15 +1,15 @@
 (ns lupapalvelu.user
-  (:use [monger.operators]
-        [lupapalvelu.core])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [slingshot.slingshot :refer [throw+]]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
             [sade.security :as sadesecurity]
-            [sade.util :refer [lower-case trim future*] :as util]
+            [sade.util :refer [future*] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [noir.session :as session]
@@ -26,7 +26,7 @@
 (defcommand "login"
   {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
-  (if-let [user (security/login (-> username lower-case trim) password)]
+  (if-let [user (security/login (-> username ss/lower-case ss/trim) password)]
     (do
       (info "login successful, username:" username)
       (session/put! :user user)
@@ -51,7 +51,7 @@
    :verified   true}
   [{{:keys [stamp] :as data} :data}]
   (if-let [vetuma-data (vetuma/get-user stamp)]
-    (let [email (-> data :email lower-case trim)]
+    (let [email (-> data :email ss/lower-case ss/trim)]
       (if (.contains email "@")
         (try
           (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
@@ -86,7 +86,7 @@
    :notified      true
    :authenticated false}
   [{data :data}]
-  (let [email (lower-case (:email data))]
+  (let [email (ss/lower-case (:email data))]
     (infof "Password resert request: email=%s" email)
     (if (mongo/select-one :users {:email email :enabled true})
       (let [token (token/make-token :password-reset {:email email})]
@@ -98,7 +98,7 @@
         (fail :email-not-found)))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
-  (let [email (lower-case (:email data))]
+  (let [email (ss/lower-case (:email data))]
     (security/change-password email password)
     (infof "password reset performed: email=%s" email)
     (resp/status 200 (resp/json {:ok true}))))
@@ -138,19 +138,19 @@
                            :content-type     content-type
                            :size             size
                            :created          (now)}]
-    
+
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
 
     (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
     (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
-    
+
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$set {(str "attachments." attachment-id) file-info}})
     (refresh-user!)
 
-    (->> (assoc file-info :ok true) 
+    (->> (assoc file-info :ok true)
       (resp/json)
-      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.  
+      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.
       (resp/status 200))))
 
 (defraw download-user-attachment

@@ -6,7 +6,8 @@
         [clojure.string :only [join]])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]))
 
 (apply-remote-minimal)
 
@@ -42,7 +43,7 @@
     (:opened application) => nil
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
-    (lupapalvelu.document.tools/unwrapped (-> hakija :data :henkilo :henkilotiedot)) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
+    (tools/unwrapped (-> hakija :data :henkilo :henkilotiedot)) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "753")
@@ -150,10 +151,22 @@
       (success resp) => true
       (:state application) => "submitted"
 
-      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official sonja-id)
-            application (:application (query sonja :application :id application-id))]
+      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124)
+            application (:application (query sonja :application :id application-id))
+            verdict     (first (:verdicts application))
+            paatos      (first (:paatokset verdict))
+            poytakirja  (first (:poytakirjat paatos))]
         (success resp) => true
         (:state application) => "verdictGiven"
+        (count (:verdicts application)) => 1
+        (count (:paatokset verdict)) => 1
+        (count (:poytakirjat paatos)) => 1
+
+        (:kuntalupatunnus verdict) => "aaa"
+        (:status poytakirja) => 42
+        (:paatoksentekija poytakirja) => "Paatoksen antaja"
+        (get-in paatos [:paivamaarat :anto]) => 123
+        (get-in paatos [:paivamaarat :lainvoimainen]) => 124
 
         (let [attachment-id (first (get-attachment-ids application))]
           (upload-attachment sonja (:id application) attachment-id true "R")
@@ -204,8 +217,7 @@
       (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
       (let [updated-app (:application (query mikko :application :id application-id))
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
-            schema-name  (get-in update-doc [:schema :info :name])
-            schema       (schemas/get-schema schema-name)
+            schema-name  (get-in update-doc [:schema-info :name])
             person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
 
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
@@ -260,7 +272,8 @@
         merged-app      (:application (query pena :application :id application-id))
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"        
-        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"))
+        (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+        (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
 (comment
   (apply-remote-minimal)

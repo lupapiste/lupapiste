@@ -1,13 +1,13 @@
 (ns lupapalvelu.application
-  (:use [monger.operators]
-        [lupapalvelu.core]
-        [clojure.string :only [blank? join trim split]]
-        [sade.util :only [lower-case]]
-        [clj-time.core :only [year]]
-        [clj-time.local :only [local-now]]
-        [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn error fatal)]
-            [clj-time.format :as timeformat]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer :all]
+            [clojure.string :refer [blank? join trim split]]
+            [clj-time.core :refer [year]]
+            [clj-time.local :refer [local-now]]
+            [lupapalvelu.i18n :refer [with-lang loc]]
+            [clj-time.format :as tf]
+            [clj-http.client :as http]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -28,7 +28,9 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [clj-time.format :as tf]))
+            [sade.strings :as ss]
+            [sade.xml :as xml])
+  (:import [java.net URL]))
 
 ;; Validators
 
@@ -48,11 +50,11 @@
     (fail :error.unauthorized)))
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (->double x) 800000)))
+  (when (and x (not (< 10000 (util/->double x) 800000)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (->double y) 7779999)))
+  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
 (defn count-unseen-comment [user app]
@@ -68,14 +70,14 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
+                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
                      (:statements app))))
     0))
 
 (defn count-unseen-verdicts [user app]
   (if (and (= (:role user) "applicant") (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdict app))))
+      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
 
 (defn count-attachments-requiring-action [user app]
@@ -144,18 +146,20 @@
   [{app :application}]
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
-(defn filter-repeating-party-docs [names]
+(defn filter-repeating-party-docs [schema-version schema-names]
+  (let [schemas (schemas/get-schemas schema-version)]
   (filter
-    (fn [name]
-      (and (= :party (get-in (schemas/get-schemas) [name :info :type]))
-        (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
-    names))
+      (fn [schema-name]
+        (let [schema-info (get-in schemas [schema-name :info])]
+          (and (:repeating schema-info) (= (:type schema-info) :party))))
+      schema-names)))
 
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
+   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
+     (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
          kiinteistotunnus (:propertyId application)
          ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
      (when ktj-tiedot
@@ -169,7 +173,7 @@
            (:id application)
            rakennuspaikka
            updates
-           time)))))
+           time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -180,7 +184,7 @@
       (let [documents (:documents application)
             initialOp (:name (first (:operations application)))
             original-schema-names (:required ((keyword initialOp) operations/operations))
-            original-party-documents (filter-repeating-party-docs original-schema-names)]
+            original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
         (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
 ;;
@@ -207,7 +211,7 @@
     {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
-      (let [email (lower-case email)]
+      (let [email (ss/lower-case email)]
         (if (domain/invited? application email)
           (fail :invite.already-invited)
           (let [invited (security/get-or-create-user-by-email email)
@@ -255,7 +259,7 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (let [email (lower-case email)]
+      (let [email (ss/lower-case email)]
         (with-user email
           (fn [_]
             (mongo/update-by-id :applications application-id
@@ -267,7 +271,7 @@
    :roles      [:applicant :authority]}
   [command]
   (update-application command
-    {$pull {:auth {$and [{:username (lower-case email)}
+    {$pull {:auth {$and [{:username (ss/lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
@@ -334,8 +338,8 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
-        schema-name  (get-in document [:schema :info :name])
-        schema       (schemas/get-schema schema-name)
+        schema-name  (get-in document [:schema-info :name])
+        schema       (schemas/get-schema (:schema-version application) schema-name)
         subject      (security/get-non-private-userinfo userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
@@ -345,11 +349,10 @@
                        (assoc-in {} (map keyword (split path #"\.")) person)
                        person)
         updates      (tools/path-vals model)]
-    (if-not document
-      (fail :error.document-not-found)
-      (do
+    (when-not document (fail! :error.document-not-found))
+    (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
-        (commands/persist-model-updates id document updates created)))))
+    (commands/persist-model-updates id document updates created)))
 
 ;;
 ;; Assign
@@ -454,7 +457,7 @@
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -470,6 +473,7 @@
     (fn [body [data-path data-value]]
       (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
             val (if (fn? data-value) (data-value application) data-value)]
+        ; FIXME: why not assoc-in?
         (update-in body path (constantly val))))
     {} schema-data))
 
@@ -478,18 +482,21 @@
   (let [op-info               (operations/operations (keyword (:name op)))
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
+        schema-version        (:schema-version application)
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema (schemas/get-schema schema-name)
+                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
                                                  :created created
-                                                 :data (tools/timestamped (if (= schema-name (:schema op-info))
-                                                         (schema-data-to-body (:schema-data op-info) application)
-                                                         {}) created)})
-        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+                                                 :data (tools/timestamped
+                                                         (if (= schema-name (:schema op-info))
+                                                           (schema-data-to-body (:schema-data op-info) application)
+                                                           {})
+                                                         created)})
+        existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc                (update-in (make op-schema-name) [:schema :info] #(merge {:op op :removable true} %))
+        op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
@@ -501,7 +508,7 @@
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
-   {:x (->double x) :y (->double y)})
+   {:x (util/->double x) :y (util/->double y)})
 
  (defn- make-application-id [municipality]
    (let [year           (str (year (local-now)))
@@ -521,7 +528,7 @@
    (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
-(defcommand "create-application"
+(defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
@@ -568,7 +575,8 @@
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :comments      (map make-comment messages)}
+                         :comments        (map make-comment messages)
+                         :schema-version  (schemas/get-latest-schema-version)}
           application   (merge application
                           (if info-request?
                             {:attachments            []
@@ -616,9 +624,8 @@
                                                   :propertyId    propertyId
                                                   :title         (trim address)
                                                   :modified      created}})
-      (if (and (= "R" (:permitType application)) (not (:infoRequest application)))
-        (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-          (catch Exception e (error e "KTJ data was not updated.")))))
+      (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+        (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
@@ -661,12 +668,63 @@
   (update-application command
     {$set {:modified created
            :state    :verdictGiven}
-     $push {:verdict  {:id verdictId
-                       :timestamp created
-                       :name name
-                       :given given
-                       :status status
-                       :official official}}}))
+     $push {:verdicts (domain/->paatos
+                        {:id verdictId      ; Kuntalupatunnus
+                         :timestamp created ; tekninen Lupapisteen aikaleima
+                         :name name         ; poytakirja[] / paatoksentekija
+                         :given given       ; paivamaarat / antoPvm
+                         :status status     ; poytakirja[] / paatoskoodi
+                         :official official ; paivamaarat / lainvoimainenPvm
+                         })}}))
+
+(defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
+  (let [legacy   (organization/get-legacy organization)
+        xml      (krysp/application-xml legacy id)
+        verdicts (krysp/->verdicts xml)]
+    (map
+      (fn [verdict]
+        (assoc verdict
+          :timestamp timestamp
+          :paatokset (map
+                       (fn [paatos]
+                         (assoc paatos :poytakirjat
+                           (map
+                             (fn [pk]
+                               (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                 (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                       resp            (http/get url {:as :stream})
+                                       content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                       urlhash         (digest/sha1 url)
+                                       attachment-id   urlhash
+                                       attachment-type {:type-group "muut" :type-id "muu"}
+                                       target          {:type "verdict" :id urlhash}
+                                       locked          true
+                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                   ; If the attachment-id, i.e., hash of the URL matches
+                                   ; any old attachment, a new version will be added
+                                   (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                 pk))
+                             (:poytakirjat paatos))))
+                       (:paatokset verdict))))
+      verdicts)))
+
+(defcommand check-for-verdict
+  {:description "Fetches verdicts from municipality backend system.
+                 If the command is run more than once, existing verdicts are
+                 replaced by the new ones."
+   :parameters [:id]
+   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles      [:authority]
+   :notify     "verdict"}
+  [{:keys [user created application] :as command}]
+  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
+    (do (update-application command
+      {$set {:verdicts verdicts-with-attachments
+             :modified created
+             :state    :verdictGiven}})
+      (ok :verdictCount (count verdicts-with-attachments)))
+    (fail :info.no-verdicts-found-from-backend)))
 
 ;;
 ;; krysp enrichment
@@ -685,10 +743,9 @@
         (let [document     (domain/get-document-by-id application documentId)
               kryspxml     (krysp/building-xml legacy propertyId)
               updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
-          (do
-            (infof "merging data into %s %s" (get-in document [:schema :info :name]) (:id document))
-            (commands/persist-model-updates id document updates created)
-            (ok)))
+          (infof "merging data into %s %s" (get-in document [:schema :info :name]) (:id document))
+          (commands/persist-model-updates id document updates created :source "krysp")
+          (ok))
         (fail :no-legacy-available)))))
 
 (defcommand get-building-info-from-legacy
@@ -771,7 +828,7 @@
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row (partial with-meta-fields user)) apps)
-        echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
+        echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total

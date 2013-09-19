@@ -1,16 +1,16 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:use  [clojure.data.xml]
-         [clojure.java.io]
-         [sade.util]
-         [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
-         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical]]
-         [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]])
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-         [me.raynes.fs :as fs]
-         [lupapalvelu.ke6666 :as ke6666]
-         [lupapalvelu.core :as core]
-         [lupapalvelu.mongo :as mongo]))
+            [me.raynes.fs :as fs]
+            [clojure.data.xml :refer :all]
+            [clojure.java.io :refer :all]
+            [sade.util :refer :all]
+            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.krysp.validator :refer [validate]]
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.core :as core]
+            [lupapalvelu.mongo :as mongo]))
 
 ;RakVal
 

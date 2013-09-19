@@ -1,8 +1,8 @@
 (ns lupapalvelu.find-address
-  (:use [monger.operators]
-        [clojure.data.zip.xml :only [xml-> text]]
-        [lupapalvelu.i18n :only [*lang* with-lang]])
   (:require [clojure.string :as s]
+            [monger.operators :refer :all]
+            [clojure.data.zip.xml :refer [xml-> text]]
+            [lupapalvelu.i18n :refer [*lang* with-lang]]
             [monger.query :as q]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs]))

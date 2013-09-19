@@ -70,20 +70,22 @@ $(function() {
         .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
         .append($("<label>").text("Toggle hidden"))
         .append($("<br>"))
-        .append($("<input type='checkbox' data-id='proxy'>").click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
-        .append($("<label>").text("Proxy enabled"))
+        .append($("<input type='checkbox' data-id='proxy' id='debugProxy'>").click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
+        .append($("<label for='debugProxy'>").text("Proxy enabled"))
+        .append($("<br>"))
+        .append($("<input type='checkbox' data-id='maps' id='debugMaps'>")
+            .click(function(e) { ajax.query("set-feature", {feature: "maps-disabled", value: $(e.target).prop("checked")}).call(); })
+            .prop("checked", features.enabled("maps-disabled")))
+        .append($("<label for='debugMaps'>").text("Disable maps"))
         .append($("<br>"))
         .append($("<input type='checkbox' data-id='anim' checked='checked'>").click(function() { tree.animation($(this).prop("checked")); }))
         .append($("<label>").text("Animations"))
         .append($("<h3><a href='/api/last-email'>Last Email</a></h3>"))
         .append($("<p>").text("Apply:")
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
-          .append($("<br>"))
           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("minimal").click(function() { applyFixture("minimal"); }))
-          .append($("<br>"))
           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("municipality-test-users").click(function() { applyFixture("municipality-test-users"); })))
         .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
-        .append($("<br>"))
         .append($("<span>").text("Throttle web: "))
         .append($("<b>").addClass("dev-throttle-web").text("0"))
         .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "web"), 500)))
@@ -109,7 +111,11 @@ $(function() {
 
   ajax
     .get("/api/proxy-ctrl")
-    .success(function(data) { $("footer input[data-id='proxy']").prop("checked", data.data ? "checked" : ""); })
+    .success(function(data) {
+      $("footer input[data-id='proxy']").prop("checked", data.data);
+      // Refresh maps checkbox too, features might not have been loaded when the box was initialized
+      $("footer input[data-id='maps']").prop("checked", features.enabled("maps-disabled"));
+     })
     .call();
 
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.

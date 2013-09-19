@@ -3,7 +3,6 @@
         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical]]
         [lupapalvelu.document.rakennuslupa_canonical-test :only [application]]
         [lupapalvelu.xml.emit]
-;        [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system]
         [lupapalvelu.xml.krysp.rakennuslupa-mapping :only [rakennuslupa_to_krysp]]
         [lupapalvelu.xml.krysp.validator :only [validate]]
         [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :only [has-tag]]
@@ -21,7 +20,6 @@
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
-;    (save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
 
     ;(clojure.pprint/pprint application)
 

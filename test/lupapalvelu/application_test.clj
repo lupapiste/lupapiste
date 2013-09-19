@@ -31,13 +31,13 @@
   (count-unseen-verdicts nil nil) => 0
   (count-unseen-verdicts {} {}) => 0
   (count-unseen-verdicts {} {:verdict [{}]}) => 0
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{}]}) => 0
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 1}]}) => 1
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 1} {:timestamp 2}]}) => 2
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 0}]}) => 0
-  (count-unseen-verdicts {:role "authority"} {:verdict [{:timestamp 0}]}) => 0
-  (count-unseen-verdicts {:role "authority"} {:verdict [{:timestamp 1}]}) => 0
-  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdict [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0)
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{}]}) => 0
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1}]}) => 1
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1} {:timestamp 2}]}) => 2
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 0}]}) => 0
+  (count-unseen-verdicts {:role "authority"} {:verdicts [{:timestamp 0}]}) => 0
+  (count-unseen-verdicts {:role "authority"} {:verdicts [{:timestamp 1}]}) => 0
+  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdicts [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0)
 
 (facts "count-attachments-requiring-action"
   (count-attachments-requiring-action nil nil) => 0
@@ -116,3 +116,15 @@
   (make-query {} {:filter-kind  "both"
                   :filter-state "all"
                   :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+
+(facts filter-repeating-party-docs
+  (filter-repeating-party-docs 1 ["a" "b" "c"]) => (just "a")
+  (provided (schemas/get-schemas 1) => {"a" {:info {:type :party
+                                                    :repeating true}}
+                                        "b" {:info {:type :party
+                                                    :repeating false}}
+                                        "c" {:info {:type :foo
+                                                    :repeating true}}
+                                        "d" {:info {:type :party
+                                                    :repeating true}}}))
+

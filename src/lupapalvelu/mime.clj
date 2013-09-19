@@ -1,8 +1,7 @@
 (ns lupapalvelu.mime
-  (:use [clojure.string :only [split join trim]]
-        [clojure.java.io :only [reader file]]
-        [sade.strings :as ss])
-  (:require [sade.strings :as strings]))
+  (:require [clojure.string :refer [split join trim]]
+            [clojure.java.io :refer [reader file]]
+            [sade.strings :as ss]))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
@@ -10,7 +9,7 @@
 (def mime-types
   (with-open [resource (clojure.lang.RT/resourceAsStream nil "private/mime.types")]
     (into {} (for [line (line-seq (reader resource))
-                   :let [l (trim line)
+                   :let [l (ss/trim line)
                          type-and-exts (split l #"\s+")
                          mime-type (first type-and-exts)]
                    :when (and (not (.isEmpty l)) (not (.startsWith l "#")))]
@@ -36,7 +35,7 @@
 
 (defn mime-type [filename]
   (when filename
-    (get mime-types (.toLowerCase (strings/suffix filename ".")))))
+    (get mime-types (.toLowerCase (ss/suffix filename ".")))))
 
 (defn allowed-file? [filename]
   (when-let [t (mime-type filename)]
