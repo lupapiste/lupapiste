@@ -164,6 +164,7 @@
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
+                   :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
                    :neighbor anyone})
