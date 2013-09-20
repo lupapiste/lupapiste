@@ -72,7 +72,6 @@ var LUPAPISTE = LUPAPISTE || {};
           if (!self.allowAnonymous) hub.send("logout", e);
         })
         .call();
-      return;
     }
 
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
