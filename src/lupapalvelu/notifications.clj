@@ -184,9 +184,9 @@
 
 (defn send-notifications-on-verdict! [application host]
   (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
-        msg         (message
-                      (template "application-verdict.html")
-                      (replace-application-links "#verdict-link" application "/verdict" host))
+        path-suffix  "/verdict"
+        msg         (email/apply-template "application-verdict.md" {:verdict-link-fi (get-application-link application path-suffix host "fi")
+                                                                    :verdict-link-sv (get-application-link application path-suffix host "sv")})
         title       (get-email-title application "verdict")]
     (send-mail-to-recipients! recipients title msg)))
 
