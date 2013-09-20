@@ -112,10 +112,8 @@
 (defn send-password-reset-email! [to token]
   (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
-        msg (message
-              (template "password-reset.html")
-              (enlive/transform [:#link-fi] (fn [a] (assoc-in a [:attrs :href] link-fi)))
-              (enlive/transform [:#link-sv] (fn [a] (assoc-in a [:attrs :href] link-sv))))]
+        msg (email/apply-template "password-reset.md" {:link-fi link-fi
+                                                       :link-sv link-sv})]
     (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
 
 ;;
