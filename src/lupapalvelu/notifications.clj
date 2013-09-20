@@ -70,15 +70,15 @@
 
 ; emails are sent to everyone in auth array except statement persons
 (defn get-email-recipients-for-application [{:keys [auth statements]} included-roles excluded-roles]
-  (let [included-users   (if (seq included-roles) 
+  (let [included-users   (if (seq included-roles)
                            (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
                            auth)
         auth-user-emails (->> included-users
                            (filter (fn [user] (not (some #(= (:role user) %) excluded-roles))))
                            (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
     (if (some #(= "statementGiver" %) excluded-roles)
-      (difference 
-        (set auth-user-emails) 
+      (difference
+        (set auth-user-emails)
         (map #(-> % :person :email) statements))
       auth-user-emails)))
 
@@ -156,14 +156,18 @@
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
     (let [recipients (get-email-recipients-for-application application nil ["statementGiver"])
-          msg        (get-message-for-new-comment application host)
-          title      (get-email-title application "new-comment")]
-      (send-mail-to-recipients! recipients title msg))))
+          title      (get-email-title application "new-comment")
+          path-suffix  "/conversation"]
+      (email/send-email-message (first recipients) title "new-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
+                                                                           :link-sv (get-application-link application path-suffix host "sv")}))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
-  (let [msg        (get-message-for-targeted-comment application host)
-        title      (get-email-title application "new-comment")]
-    (send-mail-to-recipients! [to-email] title msg)))
+  (let [title        (get-email-title application "new-comment")
+        path-suffix  "/conversation"]
+    (email/send-email-message to-email title "new-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
+                                                               :link-sv (get-application-link application path-suffix host "sv")})))
+
+;(send-mail-to-recipients! [to-email] title msg)))
 
 (defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
