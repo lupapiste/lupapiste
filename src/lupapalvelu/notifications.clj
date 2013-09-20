@@ -169,8 +169,6 @@
     (email/send-email-message to-email title "new-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
                                                                :link-sv (get-application-link application path-suffix host "sv")})))
 
-;(send-mail-to-recipients! [to-email] title msg)))
-
 (defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
         msg   (message
