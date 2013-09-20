@@ -412,6 +412,7 @@
                              {:municipality "317" :permitType "R"}
                              {:municipality "626" :permitType "R"}
                              {:municipality "691" :permitType "R"}]}
+                 
                     ;;
                     ;; Testeissa kaytettavia organisaatioita
                     ;;
@@ -465,7 +466,20 @@
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}])
+                                         :name "Sonja Sibbo"}]}
+                    
+                    ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynon-avaus" system.
+                    ;; Nice address for testing "Ojatie 1, Loppi" 
+                    
+                    {:id "433-R"
+                     :open-inforequest true
+                     :open-inforequest-email "erajorma@takahikia.fi"
+                     :inforequest-enabled true
+                     :new-application-enabled false
+                     :name {:fi "Takahiki\u00e4n rakennusvalvonta"}
+                     :scope [{:municipality "433" :permitType "R"}]
+                     :links [{:name {:fi "Takahiki\u00e4", :sv "Tillbakasvettas"}
+                              :url "http://urbaanisanakirja.com/word/takahikia/"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
