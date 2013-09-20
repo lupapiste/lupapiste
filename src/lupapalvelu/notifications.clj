@@ -57,7 +57,7 @@
 (defn send-mail-to-recipients! [recipients title msg]
   (future*
     (doseq [recipient recipients]
-      (if (email/send-mail recipient title :html msg)
+      (if (email/send-email-message recipient title msg)
         (error "email could not be delivered." recipient title msg)
         (info "email was sent successfully." recipient title))))
   nil)
@@ -105,9 +105,9 @@
 (defn send-on-request-for-statement! [persons application user host]
   (doseq [{:keys [email text]} persons]
     (let [title (get-email-title application "statement-request")
-          msg   (message
-                  (template "add-statement-request.html")
-                  (replace-application-links "#link" application "" host))]
+          msg   (email/apply-template "add-statement-request.md"
+                          {:link-fi (get-application-link application nil host "fi")
+                           :link-sv (get-application-link application nil host "sv")})]
       (send-mail-to-recipients! [email] title msg))))
 
 (defn send-password-reset-email! [to token]
