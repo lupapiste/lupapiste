@@ -111,14 +111,14 @@
               :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}})
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
-  {:Attribuutti {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta"
-                 :arvo (-> data :lisatietoja-sijoituskohteesta :value)}})
+  {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta"
+   :arvo (-> data :lisatietoja-sijoituskohteesta :value)})
 
 (defn- get-sijoituksen-tarkoitus [data]
-  {:Attribuutti {:selitysteksti "Sijoituksen tarkoitus"
-                 :arvo (if (= "other" (:sijoituksen-tarkoitus data))
-                         (-> data :muu-sijoituksen-tarkoitus :value)
-                         (-> data :sijoituksen-tarkoitus :value))}})
+  {:selitysteksti "Sijoituksen tarkoitus"
+   :arvo (if (= "other" (:sijoituksen-tarkoitus data))
+           (-> data :muu-sijoituksen-tarkoitus :value)
+           (-> data :sijoituksen-tarkoitus :value))})
 
 ;;
 ;; TODO: Mihin kielitieto (lang) lisataan? Rakval-puolella on lisatiedoissa asioimiskieli.

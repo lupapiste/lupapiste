@@ -127,9 +127,9 @@
 
         lisatieto-vec (-> Sijoituslupa :lupakohtainenLisatietotieto) => truthy
 
-        match-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :Attribuutti :selitysteksti))
+        match-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
         sijoituksen-tarkoitus-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        sijoituksen-tark (-> sijoituksen-tarkoitus-Lisatieto :Attribuutti :arvo) => truthy
+        sijoituksen-tark (:arvo sijoituksen-tarkoitus-Lisatieto) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
         sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
@@ -137,9 +137,9 @@
                                           [:sijoituksen-tarkoitus :value]
                                           "liikennevalo")) => truthy
 
-        match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :Attribuutti :selitysteksti))
+        match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :selitysteksti))
         lisatietoja-sijoituskohteesta-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        lisatietoja-sijoituskohteesta(-> lisatietoja-sijoituskohteesta-Lisatieto :Attribuutti :arvo) => truthy
+        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy
         ]
 
 ;    (println "\n canonical:")
@@ -185,7 +185,7 @@
     (fact "hakija-yksityinen-henkilotunnus" (:henkilotunnus hakija-yksityinen-Henkilo) => (-> henkilotiedot :hetu :value))
 
     (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> sijoituksen-tarkoitus :data :sijoituksen-tarkoitus :value))
-    (fact "lisatietoja-sijoituskohteesta-liikennevalo" (-> sijoituksen-tark-liikennevalo :Attribuutti :arvo) => "liikennevalo")
+    (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
     (fact "lisatietoja-sijoituskohteesta" lisatietoja-sijoituskohteesta => (-> sijoituksen-tarkoitus :data :lisatietoja-sijoituskohteesta :value))
 
     ;; Hankkeen kuvaus
