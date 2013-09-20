@@ -1,15 +1,14 @@
 (ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test
-  (:use [lupapalvelu.factlet]
-        [midje.sweet]
-        [lupapalvelu.document.canonical-common]
-        [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical]
-        [sade.util :only [contains-value?]]))
+  (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
+            [lupapalvelu.factlet :refer :all]
+            [midje.sweet :refer :all]
+            [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [sade.util :refer [contains-value?]]))
 
-;; NOTE: Rakennuslupa-canonical-testista poiketen otin "auth"-kohdan pois.
+;; NOTE: Rakennuslupa-canonical-testista poiketen applicationin "auth"-kohta ei ole kaytossa.
 
-;; TODO: Pitaisiko "location"-kohta poistaa? Silla ei kuulemma tehda mitaan.
-
-;; TODO: Kopioi lausuntokohta, "statements", rakennusluvan puolelta.
+;; TODO: Pitaisiko "location"-kohta poistaa? Tekeeko silla mitaan?
 
 ;; TODO: Jossain itesteissa pitaisi testata seuraavat applicationin kohdat:
 ;;        - operations
@@ -17,186 +16,48 @@
 ;;        - organization ?
 
 
-(def nimi {:etunimi {:modified 1372341939920, :value "Pena"},
-           :sukunimi {:modified 1372341939920, :value "Panaani"}})
+(def operation {:id "51cc1cab23e74941fee4f495",
+                :created 1372331179008,
+                :name "ya-kaivuulupa"})
 
-(def henkilotiedot (assoc nimi :hetu {:modified 1372341952297, :value "260886-027R"}))
-
-(def osoite {:katu {:modified 1372341939920, :value "Paapankuja 12"},
-             :postinumero {:modified 1372341955504, :value "33800"},
-             :postitoimipaikannimi {:modified 1372341939920, :value "Piippola"}})
-
-(def user-id {:modified 1372341939964, :value "777777777777777777000020"})
-
-(def yhteystiedot {:email {:modified 1372341939920, :value "pena@example.com"},
-                   :puhelin {:modified 1372341939920, :value "0102030405"}})
-
-(def yritys-nimi-ja-tunnus {:yritysnimi {:modified 1372331257700, :value "Yritys Oy Ab"},
-                            :liikeJaYhteisoTunnus {:modified 1372331320811, :value "2492773-2"}})
-
-
-(def henkilo-without-hetu {:henkilotiedot nimi,
-                           :osoite osoite,
-                           :userId user-id,
-                           :yhteystiedot yhteystiedot})
-
-(def henkilo {:henkilotiedot henkilotiedot,
-              :osoite osoite,
-              :userId user-id,
-              :yhteystiedot yhteystiedot})
-
-(def yritys (merge
-              {:osoite osoite,
-               :yhteyshenkilo {:henkilotiedot nimi,
-                               :yhteystiedot yhteystiedot}}
-              yritys-nimi-ja-tunnus))
-
-(def hakija {:id "51cc1cab23e74941fee4f498",
-             :created 1372331179008,
-             :schema-info {:name "hakija-ya"
-                           :version 1
-                           :removable true,
-                           :repeating true,
-                           :type "party",
-                           :order 3},
-             :data {:_selected {:modified 1372342070624, :value "yritys"},
-                    :henkilo henkilo,
-                    :yritys yritys}})
-
-(def tyomaasta-vastaava {:id "51cc1cab23e74941fee4f496",
-                         :created 1372331179008,
-                         :schema-info {:op {:id "51cc1cab23e74941fee4f495",
-                                            :created 1372331179008,
-                                            :name "yleiset-alueet-kaivuulupa"},
-                                       :name "tyomaastaVastaava"
-                                       :version 1
-                                       :removable true,
-                                       :type "party",
-                                       :order 61},
-                         :data {:_selected {:modified 1372342063565, :value "yritys"},
-                                :henkilo henkilo-without-hetu,
-                                :yritys yritys}})
-
-(def _laskuviite {:modified 1372331605911, :value "1234567890"})
-
-(def maksaja {:id "51cc1cab23e74941fee4f499",
-              :created 1372331179008,
-              :schema-info {:name "yleiset-alueet-maksaja",
-                            :version 1
-                            :type "party",
-                            :order 62},
-              :data {:_selected {:modified 1372341924880, :value "yritys"},
-                     :henkilo henkilo,
-                     :yritys yritys,
-                     :laskuviite _laskuviite}})
-
-(def hankkeen-kuvaus {:id "51cc1cab23e74941fee4f49a",
-                      :created 1372331179008,
-                      :data {:kayttotarkoitus {:modified 1372331214906, :value "Ojankaivuu."},
-                             :sijoitusLuvanTunniste {:modified 1372331243461, :value "LP-753-2013-00001"}},
-                      :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-                                    :version 1
-                                    :order 60}})
-
-(def tyoaika {:id "51cc1cab23e74941fee4f49b",
-              :created 1372331179008,
-              :schema-info {:name "tyoaika" :version 1 :type "group" :order 63},
-              :data {:tyoaika-alkaa-pvm
-                     {:modified 1372331246482, :value "17.06.2013"},
-                     :tyoaika-paattyy-pvm
-                     {:modified 1372331248524, :value "20.06.2013"}}})
+(def tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
 (def documents [hakija
-                tyomaasta-vastaava
+                tyomaasta-vastaava-kaivulupa
                 maksaja
                 hankkeen-kuvaus
                 tyoaika])
 
-
-(def authority {:id "777777777777777777000023",
-                :username "sonja",
-                :firstName "Sonja",
-                :lastName "Sibbo",
-                :role "authority"})
-
-(def municipality 753)
-
-(def attachments [{:id "51cc1e7c23e74941fee4f519",
-                   :modified 1372331643985,
-                   :type {:type-group "yleiset-alueet",
-                          :type-id "aiemmin-hankittu-sijoituspaatos"},
-                   :state "requires_authority_action",
-                   :target nil,
-                   :op nil,
-                   :locked false,
-                   :latestVersion {:fileId "51cc1e7b23e74941fee4f516",
-                                   :version {:major 1, :minor 0},
-                                   :size 115496,
-                                   :created 1372331643985,
-                                   :filename "Screenshot_Lisaa_lausunnon_antaja.jpg",
-                                   :contentType "image/jpeg",
-                                   :stamped false,
-                                   :accepted nil,
-                                   :user {:id "777777777777777777000020",
-                                          :role "applicant",
-                                          :lastName "Panaani",
-                                          :firstName "Pena",
-                                          :username "pena"}},
-                   :versions [{:fileId "51cc1e7b23e74941fee4f516",
-                               :version {:major 1, :minor 0},
-                               :size 115496,
-                               :created 1372331643985,
-                               :filename "Screenshot_Lisaa_lausunnon_antaja.jpg",
-                               :contentType "image/jpeg",
-                               :stamped false,
-                               :accepted nil,
-                               :user {:id "777777777777777777000020",
-                                      :role "applicant",
-                                      :lastName "Panaani",
-                                      :firstName "Pena",
-                                      :username "pena"}}]}])
-
-(def statements [{:id "518b3ee60364ff9a63c6d6a1"
-                  :given 1368080324142
-                  :requested 1368080102631
-                  :status "condition"
-                  :person {:id "516560d6c2e6f603beb85147"
-                           :text "Paloviranomainen"
-                           :name "Sonja Sibbo"
-                           :email "sonja.sibbo@sipoo.fi"}
-                  :text "Savupiippu pit\u00e4\u00e4 olla."}])
-
-(def application
-  {:id "LP-753-2013-00001",
-   :permitType "YA",
-   :created 1372331179008,
-   :opened 1372331643985,
-   :modified 1372342070624,
-   :authority authority,
-   :state "open",
-   :title "Latokuja 1",
-   :address "Latokuja 1",
-   :location {:x 404335.789, :y 6693783.426},
-   :attachments [],
-   :propertyId "75341600550007",
-   :documents documents,
-   :municipality municipality
-   ;; Statements kopioitu Rakennuslupa_canonical_test.clj:sta, joka on identtinen yleisten alueiden puolen kanssa.
-   :statements statements})
+(def kaivulupa-application {:id "LP-753-2013-00001",
+                            :permitType "YA",
+                            :created 1372331179008,
+                            :opened 1372331643985,
+                            :modified 1372342070624,
+                            :submitted 1379405092649,
+                            :authority sonja,
+                            :state "submitted",
+                            :title "Latokuja 1",
+                            :address "Latokuja 1",
+                            :location location,
+                            :attachments [],
+                            :operations [operation],
+                            :propertyId "75341600550007",
+                            :documents documents,
+                            :municipality municipality,
+                            :statements statements})
 
 
-(def get-maksaja #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-maksaja)
-(def get-tyomaasta-vastaava #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-tyomaasta-vastaava)
+(def get-maksaja #'lupapalvelu.document.yleiset-alueet-canonical/get-maksaja)
+(def get-tyomaasta-vastaava #'lupapalvelu.document.yleiset-alueet-canonical/get-tyomaasta-vastaava)
 
-(facts* "Canonical model is correct"
-  (let [canonical (application-to-canonical application "fi")
+(facts* "Kaivulupa canonical model is correct"
+  (let [canonical (application-to-canonical kaivulupa-application "fi")
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
-        Kasittelytieto-kasittelija (:kasittelija Kasittelytieto) => truthy
-        Kasittelytieto-kasittelija-nimi (-> Kasittelytieto-kasittelija :henkilotieto :Henkilo :nimi) => truthy
+        Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
@@ -242,7 +103,7 @@
         Vastuuhenkilo-henkilo (:Vastuuhenkilo (first (filter #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-tyomaastavastaava) vastuuhenkilot-vec)))
         Vastuuhenkilo-henkilo-osoite (-> Vastuuhenkilo-henkilo :osoitetieto :osoite) => truthy
 
-        ;; Testataan muunnosfunktiota henkilo-tyyppisella tyomaasta-vastaavalla
+        ;; Testataan muunnosfunktiota myos henkilo-tyyppisella tyomaasta-vastaavalla
         tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
                                      (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo")) => truthy
         tyomaasta-vastaava-Vastuuhenkilo (-> tyomaasta-vastaava-henkilo :vastuuhenkilotieto :Vastuuhenkilo) => truthy
@@ -260,21 +121,21 @@
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
-      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified application)))
+      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified kaivulupa-application)))
       (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
-      (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id application))
-      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened application)))
-      (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName authority))
-      (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName authority))
+      (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id kaivulupa-application))
+      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened kaivulupa-application)))
+      (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
+      (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => "kaivu- tai katuty\u00f6lupa")
-      (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false) ;; TODO: Onko tama checkki ok?
+      (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false)
 
       ;; Sijainti
-      (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id application))
+      (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kaivulupa-application))
 ;      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
-      (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address application))
-      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
+      (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kaivulupa-application))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kaivulupa-application :location :x) " " (-> kaivulupa-application :location :y)))
 
       ;; Maksajan tiedot
       (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))
@@ -366,7 +227,7 @@
 
       ;; Hankkeen kuvaus
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
-      (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)  ;; TODO: Onko tama checkki ok?
+      (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
 
 

@@ -1,19 +1,21 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:use sade.xml)
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug]]
+            [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
+            [sade.xml :refer :all]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.xml.krysp.verdict :as verdict]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
             [clj-http.client :as http]
+            [ring.util.codec :as codec]
             [sade.common-reader :as cr]))
-
 
 ;;
 ;; Test urls
 ;;
 
-(def logica-test-legacy "http://212.213.116.162/geoserver/wfs")
+(def logica-test-legacy "http://212.213.116.162/geos_facta/wfs")
 
 ;;
 ;; Read the Krysp from Legacy
@@ -23,12 +25,35 @@
   "checks if the legacy system is Web Feature Service -enabled. kindof."
   [url]
   (try
-    (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
+    (-> url (http/get {:query-params {:request "GetCapabilities"} :throw-exceptions false}) :status (= 200))
     (catch Exception e false)))
 
+;; Object types (URL encoded)
+(def building-type "typeName=rakval%3AValmisRakennus")
+(def case-type     "typeName=rakval%3ARakennusvalvontaAsia")
+
+;; For building filters
+(def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
+(def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+
+(defn property-equals
+  "Returns URL-encoded search parameter suitable for 'filter'"
+  [property value]
+  (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
+
+(defn wfs-krysp-url [server object-type filter]
+  (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
+
 (defn building-xml [server id]
-  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
+  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
+    (debug "Get building: " url)
     (cr/get-xml url)))
+
+(defn application-xml [server id]
+  (let [url (wfs-krysp-url server case-type (property-equals asian-lp-lupatunnus id))]
+    (debug "Get application: " url)
+    (cr/get-xml url)))
+
 
 (defn- ->buildingIds [m]
   {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])
@@ -60,10 +85,12 @@
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
 
+(def cleanup (comp cr/strip-empty-maps cr/strip-nils))
+
 (defn ->rakennuksen-tiedot [xml buildingId]
   (let [stripped  (cr/strip-xml-namespaces xml)
         rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
-        polished  (comp cr/index-maps cr/strip-empty-maps cr/strip-nils cr/convert-booleans)]
+        polished  (comp cr/index-maps cleanup cr/convert-booleans)]
     (when rakennus
       (polished
         {:muutostyolaji                 ...notimplemented...
@@ -109,3 +136,60 @@
                                                   :huoneluku       (get-text huoneisto :huoneluku)}
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
                                :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
+
+
+(defn ->lupamaaraukset [paatos-xml-without-ns]
+  (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
+    (cleanup)
+    (cr/ensure-sequental :vaaditutKatselmukset)
+    (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+    (cr/ensure-sequental :maarays)
+    (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
+    (dissoc :maarays)
+    (cr/convert-keys-to-ints [:autopaikkojaEnintaan
+                              :autopaikkojaVahintaan
+                              :autopaikkojaRakennettava
+                              :autopaikkojaRakennettu
+                              :autopaikkojaKiinteistolla
+                              :autopaikkojaUlkopuolella])))
+
+(defn- get-pvm-dates [paatos v]
+  (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
+                   [% (cr/to-timestamp (get-text paatos xml-kw))]) v)))
+
+(defn ->liite [{:keys [metatietotieto] :as liite}]
+  (-> liite
+    (assoc  :metadata (into {} (map
+                                 (fn [{meta :metatieto}]
+                                   [(keyword (:metatietoNimi meta)) (:metatietoArvo meta)])
+                                 (if (sequential? metatietotieto) metatietotieto [metatietotieto]))))
+    (dissoc :metatietotieto)
+    (cr/convert-keys-to-timestamps [:muokkausHetki])))
+
+(defn ->paatospoytakirja [paatos-xml-without-ns]
+  (-> (cr/all-of paatos-xml-without-ns :poytakirja)
+    (cr/convert-keys-to-ints [:pykala])
+    (cr/convert-keys-to-timestamps [:paatospvm])
+    (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
+    (#(assoc % :liite  (->liite (:liite %))))))
+
+(defn ->verdict [paatos-xml-without-ns]
+  {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
+   :paivamaarat    (get-pvm-dates paatos-xml-without-ns
+                                  [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+   :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
+                     (map ->paatospoytakirja poytakirjat))})
+
+(defn ->verdicts [xml]
+  (map
+    (fn [asia]
+      (let [verdict-model {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])}
+            verdicts      (->> (select asia [:paatostieto :Paatos])
+                           (map ->verdict)
+                           (cleanup)
+                           (filter seq))]
+        (if (seq verdicts)
+          (assoc verdict-model :paatokset verdicts)
+          verdict-model)))
+    (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
+

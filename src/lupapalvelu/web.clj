@@ -1,11 +1,11 @@
 (ns lupapalvelu.web
-  (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery now]]
-        [lupapalvelu.i18n :only [*lang*]]
-        [clojure.walk :only [keywordize-keys]]
-        [clojure.string :only [blank?]]
-        [lupapalvelu.security :only [current-user]])
-  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal spy)]
+  (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
+            [noir.core :refer [defpage]]
+            [lupapalvelu.core :refer [ok fail defcommand defquery now]]
+            [lupapalvelu.i18n :refer [*lang*]]
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.string :refer [blank?]]
+            [lupapalvelu.security :refer [current-user]]
             [lupapalvelu.logging :refer [with-logging-context]]
             [noir.request :as request]
             [noir.response :as resp]
@@ -29,7 +29,6 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [clojure.string :as s]
-            [sade.util :refer [lower-case] :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
@@ -244,7 +243,7 @@
                              (str (.substring line 0 limit) "... (truncated)")
                              line)))
         sanitized-page (sanitize (or page "(unknown)"))
-        user           (or (lower-case email) "(anonymous)")
+        user           (or (ss/lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
         sanitized-msg  (sanitize (str message))]
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
@@ -427,6 +426,15 @@
 ;; dev utils:
 ;;
 
+(when (or (env/dev-mode?) (env/test-build?))
+  (defpage "/dev/krysp" {typeName :typeName r :request}
+    (if-not (blank? typeName)
+      (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
+                  "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"}]
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
+      (when (= r "GetCapabilities")
+        (resp/status 200 "OK")))))
+
 (env/in-dev
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
@@ -437,7 +445,7 @@
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
       (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
-        {:status 200 :body (str response)}
+        (resp/status 200 (str response))
         (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId]}
@@ -447,7 +455,7 @@
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
-        {:status 400 :body (str response)})))
+        (resp/status 400 (str response)))))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt

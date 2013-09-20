@@ -1,7 +1,7 @@
 (ns lupapalvelu.singlepage
-  (:use [lupapalvelu.components.ui-components :only [ui-components]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
+            [lupapalvelu.components.ui-components :refer [ui-components]]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
@@ -73,11 +73,12 @@
   (str (kind (env/value :cdn)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
 
 (def ^:private buildinfo-summary
-  (format "%s-%s %3$tF %3$tT [%4$s]"
+  (format "%s %s [%s] %4$tF %4$tT (%5$s)"
           env/target-env
-          (:build-number env/buildinfo)
+          (:branch env/buildinfo)
+          (name env/mode)
           (tc/to-date (tc/from-long (:time env/buildinfo)))
-          (name env/mode)))
+          (:build-number env/buildinfo)))
 
 (defn inject-content [t {:keys [header nav page footer]} component]
   (enlive/emit* (-> t

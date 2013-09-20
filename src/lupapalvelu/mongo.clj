@@ -1,6 +1,6 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -106,15 +106,15 @@
   (.setId input id)
   input)
 
-(defn upload [file-id filename content-type tempfile & metadata]
+(defn upload [file-id filename content-type content & metadata]
   (assert (and (string? file-id)
                (string? filename)
                (string? content-type)
-               (instance? java.io.File tempfile)
+               (or (instance? java.io.File content) (instance? java.io.InputStream content))
                (sequential? metadata)
                (even? (clojure.core/count metadata))))
   (gfs/store-file
-    (gfs/make-input-file tempfile)
+    (gfs/make-input-file content)
     (set-file-id file-id)
     (gfs/filename filename)
     (gfs/content-type content-type)

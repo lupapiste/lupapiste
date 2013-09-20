@@ -1,16 +1,16 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:use  [clojure.data.xml]
-         [clojure.java.io]
-         [sade.util]
-         [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
-         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical]]
-         [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]])
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-         [me.raynes.fs :as fs]
-         [lupapalvelu.ke6666 :as ke6666]
-         [lupapalvelu.core :as core]
-         [lupapalvelu.mongo :as mongo]))
+            [me.raynes.fs :as fs]
+            [clojure.data.xml :refer :all]
+            [clojure.java.io :refer :all]
+            [sade.util :refer :all]
+            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.krysp.validator :refer [validate]]
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.core :as core]
+            [lupapalvelu.mongo :as mongo]))
 
 ;RakVal
 
@@ -271,21 +271,14 @@
                 (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
               ) canonical statement-attachments)))
 
-(defn statements-ids-with-status [canonical]
-  (let [lt (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])]
-    (reduce (fn [r l]
-              (if (get-in l [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto])
-                (conj r (get-in l [:Lausunto :id]))
-                r))
-            #{} lt)))
-
-
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
-        statement-given-ids (statements-ids-with-status canonical-without-attachments)
+        statement-given-ids (mapping-common/statements-ids-with-status
+                              (get-in canonical-without-attachments
+                                [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments

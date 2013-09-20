@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.model
-  (:use [sade.strings]
-        [clojure.walk :only [keywordize-keys]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [sade.strings :refer :all]
+            [clojure.walk :refer [keywordize-keys]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
@@ -58,9 +58,11 @@
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
-(defmethod validate-field :select [{:keys [body]} v]
-  (when-not (or (s/blank? v) (some #{v} (map :name body)))
-    [:warn "illegal-value:select"]))
+(defmethod validate-field :select [{:keys [body other-key]} v]
+  (let [accepted-values (set (map :name body))
+        accepted-values (if other-key (conj accepted-values "other") accepted-values)]
+    (when-not (or (s/blank? v) (contains? accepted-values v))
+      [:warn "illegal-value:select"])))
 
 (defmethod validate-field :radioGroup [elem v] nil)
 (defmethod validate-field :buildingSelector [elem v] nil)
