@@ -50,8 +50,6 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.hashChanged = function () {
-    trace("hash changed");
-
     var hash = (location.hash || "").substr(3);
 
     if (hash === "") {
@@ -62,7 +60,6 @@ var LUPAPISTE = LUPAPISTE || {};
     var path = hash.split("/");
 
     if (self.session === undefined) {
-      trace("session === undefined", hash, path);
       ajax.query("user")
         .success(function (e) {
           self.session = true;
