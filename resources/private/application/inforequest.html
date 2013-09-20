@@ -104,6 +104,15 @@
       </div>
 
       <div class="content">
+      
+        <div data-bind="visible: currentUser.get().oir">
+          <h2>
+            <span data-bind="ltext: 'oir.wanna-join.message'"></span>
+            <a data-bind="ltext: 'oir.wanna-join.link'" href="#!/contact"></a>
+          </h2>
+        </div>
+      
+      
         <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'"></h3>
         <div data-bind="if: attachments().length">
           <table class="table" data-test-id="inforequest-attachments-table">
