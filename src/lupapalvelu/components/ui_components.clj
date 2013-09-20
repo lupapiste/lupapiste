@@ -117,6 +117,11 @@
                   :js ["authority.js"]
                   :html ["index.html"]}
 
+   :oir          {:depends [:common :authenticated :map :application :attachment
+                            :docgen :debug]
+                  :js ["oir.js"]
+                  :html ["index.html" "contact.html"]}
+   
    :admins   {:js ["user.js" "users.js"]
               :html ["admin-user-list.html" "user-modification-dialogs.html"]}
 
