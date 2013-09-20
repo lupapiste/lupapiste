@@ -56,9 +56,9 @@
 
 (defn send-email-message
   "Sends email message using a template."
-  [to subject template context]
-  (assert (and to subject template context) "missing argument")
-  (let [[plain html] (apply-template template context)]
+  [to subject msg]
+  (assert (and to subject msg) "missing argument")
+  (let [[plain html] msg]
     (send-mail to subject :plain plain :html html)))
 
 ;;

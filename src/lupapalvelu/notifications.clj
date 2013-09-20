@@ -9,6 +9,7 @@
             [clojure.string :as s]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.email :as email]
             [net.cgrand.enlive-html :as enlive]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
@@ -122,19 +123,20 @@
 ;; New stuff
 ;;
 
-(defn send-neighbor-invite! [email token neighbor-id application host]
+(defn send-neighbor-invite! [to-address token neighbor-id application host]
   (let [neighbor-name  (get-in application [:neighbors neighbor-id :neighbor :owner :name])
         address        (get application :address)
         municipality   (get application :municipality)
         subject        (get-email-title application "neighbor")
         page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
-        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" (name neighbor-id) "/" token))]
-    (email/send-email-message email subject "neighbor.md" {:name neighbor-name
-                                                           :address address
-                                                           :city-fi (i18n/localize :fi "municipality" municipality)
-                                                           :city-sv (i18n/localize :sv "municipality" municipality)
-                                                           :link-fi (link-fn :fi)
-                                                           :link-sv (link-fn :sv)})))
+        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" (name neighbor-id) "/" token))
+        msg            (email/apply-template "neighbor.md" {:name neighbor-name
+                                                      :address address
+                                                      :city-fi (i18n/localize :fi "municipality" municipality)
+                                                      :city-sv (i18n/localize :sv "municipality" municipality)
+                                                      :link-fi (link-fn :fi)
+                                                      :link-sv (link-fn :sv)})]
+    (email/send-email-message to-address subject msg)))
 
 (defn get-message-for-application-state-change [application host]
   (message
@@ -144,30 +146,28 @@
     (enlive/transform [:#state-sv] (enlive/content (i18n/localize :sv (str (:state application)))))))
 
 (defn get-message-for-new-comment [application host]
-  (message
-    (template "application-new-comment.html")
-    (replace-application-links "#conversation-link" application "/conversation" host)))
+  (let [path-suffix  "/conversation"]
+    (email/apply-template "new-comment.md"
+                          {:link-fi (get-application-link application path-suffix host "fi")
+                           :link-sv (get-application-link application path-suffix host "sv")})))
 
 (defn get-message-for-targeted-comment [application host]
-  (message
-    (template "application-targeted-comment.html")
-    (replace-application-links "#conversation-link" application "/conversation" host)))
+  (let [path-suffix  "/conversation"]
+    (email/apply-template "new-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
+                                            :link-sv (get-application-link application path-suffix host "sv")})))
 
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
-    (let [recipients (get-email-recipients-for-application application nil ["statementGiver"])
-          title      (get-email-title application "new-comment")
-          path-suffix  "/conversation"]
-      (doall (map (fn [to-address] (email/send-email-message to-address title "new-comment.md"
-                                                      {:link-fi (get-application-link application path-suffix host "fi")
-                                                       :link-sv (get-application-link application path-suffix host "sv")}))
-           recipients)))))
+    (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
+          title        (get-email-title application "new-comment")
+          msg          (get-message-for-new-comment application host)]
+      (doall (map (fn [to-address] (email/send-email-message to-address title msg)) recipients)))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
   (let [title        (get-email-title application "new-comment")
-        path-suffix  "/conversation"]
-    (email/send-email-message to-email title "new-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
-                                                               :link-sv (get-application-link application path-suffix host "sv")})))
+        path-suffix  "/conversation"
+        msg          (get-message-for-targeted-comment application host)]
+    (email/send-email-message to-email title msg)))
 
 (defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
