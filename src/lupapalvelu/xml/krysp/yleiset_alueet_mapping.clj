@@ -258,10 +258,6 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
-        _  (do
-             (println "\n canonical: ")
-             (clojure.pprint/pprint canonical)
-             (println "\n"))
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))
         xml-s (indent-str xml)]
 
