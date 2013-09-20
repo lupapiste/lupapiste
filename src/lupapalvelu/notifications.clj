@@ -158,10 +158,10 @@
     (let [recipients (get-email-recipients-for-application application nil ["statementGiver"])
           title      (get-email-title application "new-comment")
           path-suffix  "/conversation"]
-      (map (fn [to-address] (email/send-email-message to-address title "new-comment.md"
+      (doall (map (fn [to-address] (email/send-email-message to-address title "new-comment.md"
                                                       {:link-fi (get-application-link application path-suffix host "fi")
                                                        :link-sv (get-application-link application path-suffix host "sv")}))
-           recipients))))
+           recipients)))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
   (let [title        (get-email-title application "new-comment")
