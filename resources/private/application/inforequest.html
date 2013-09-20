@@ -6,6 +6,11 @@
       <div class="container">
         <div class="application-map-container">
           <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+          <div class="application-map-actions" data-bind="with: application">
+            <!-- ko if: location() -->
+              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
+            <!-- /ko -->
+          </div>
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
@@ -24,27 +29,28 @@
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="inforequest-property-id"></span>
           </div>
+          <!-- Applicant: -->
           <div>
             <p data-bind="ltext: 'application.applicant'"></p>
             <span data-bind="text: applicant" data-test-id="inforequest-application-applicant" class="application_summary_text"></span>
           </div>
+          <!-- State: -->
           <div data-bind="if: state">
             <p data-bind="ltext: 'application.state'"></p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
-
+          <!-- Created: -->
           <div data-bind="with: $root.application.data">
             <p data-bind="ltext: 'inforequest.created'"></p>
             <span data-bind="if: $data.created">
               <span class="application_summary_text" data-bind="dateString: created"></span>
             </span>
           </div>
-
+          <!-- Application ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
           </div>
-
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>

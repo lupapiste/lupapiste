@@ -292,6 +292,7 @@
     var self = this;
     self.id = ko.observable();
     self.infoRequest = ko.observable();
+    self.openInfoRequest = ko.observable();
     self.state = ko.observable();
     self.location = ko.observable();
     self.municipality = ko.observable();
