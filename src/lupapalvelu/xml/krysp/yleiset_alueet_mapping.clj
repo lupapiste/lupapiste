@@ -142,6 +142,10 @@
                              {:tag :lausuntotieto
                               :child lausunto}
                              {:tag :lupaAsianKuvaus}
+                             {:tag :lupakohtainenLisatietotieto
+                              :child [{:tag :LupakohtainenLisatieto
+                                       :child [{:tag :selitysteksti :ns "yht"}
+                                               {:tag :arvo :ns "yht"}]}]}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
@@ -254,6 +258,10 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
+        _  (do
+             (println "\n canonical: ")
+             (clojure.pprint/pprint canonical)
+             (println "\n"))
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))
         xml-s (indent-str xml)]
 
