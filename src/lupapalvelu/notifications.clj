@@ -138,11 +138,11 @@
     (email/send-email-message to-address subject msg)))
 
 (defn get-message-for-application-state-change [application host]
-  (message
-    (template "application-state-change.html")
-    (replace-application-links "#application-link" application "" host)
-    (enlive/transform [:#state-fi] (enlive/content (i18n/localize :fi (str (:state application)))))
-    (enlive/transform [:#state-sv] (enlive/content (i18n/localize :sv (str (:state application)))))))
+  (email/apply-template "application-state-change.md"
+                          {:application-link-fi (get-application-link application nil host "fi")
+                           :application-link-sv (get-application-link application nil host "sv")
+                           :state-fi (i18n/localize :fi (str (:state application)))
+                           :state-sv (i18n/localize :sv (str (:state application)))}))
 
 (defn get-message-for-new-comment [application host]
   (let [path-suffix  "/conversation"]
