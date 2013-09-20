@@ -131,25 +131,30 @@
 ;    (clojure.pprint/pprint application)
 ;    (println "\n")
 
+    ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
+    ;;               -> maksaja gets hakija's henkilotieto, alkuPvm/loppuPvm both get application's "modified" date.
+
     (let [operation-name-key (-> application :operations first :name keyword)
           lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
+          hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
           tyoaika-doc (if-not (= lupa-name-key :Sijoituslupa)
                         (-> documents-by-type :tyoaika first :data)
                         {})
           alku-pvm (if-not (= lupa-name-key :Sijoituslupa)
                     (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))
-                    {})
+                    (to-xml-date (:modified application)))
           loppu-pvm (if-not (= lupa-name-key :Sijoituslupa)
                     (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
-                    {})
+                    (to-xml-date (:modified application)))
+
           maksaja (if-not (= lupa-name-key :Sijoituslupa)
                     (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
-                    {})
+                    {:henkilotieto (:henkilotieto hakija)
+                     :laskuviite "0000000000"})
           hankkeen-kuvaus-key (if (= lupa-name-key :Sijoituslupa)
                                 :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
                                 :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
           hankkeen-kuvaus (-> documents-by-type hankkeen-kuvaus-key first :data)
-          hakija (get-hakija (:data (first (:hakija-ya documents-by-type))))
           tyomaasta-vastaava (if (= lupa-name-key :Tyolupa)
                                (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data))
                                {})
@@ -181,19 +186,11 @@
                                          }})
         :Kayttolupa body
         :Sijoituslupa (util/dissoc-in
-                        (util/dissoc-in
-                          (util/dissoc-in
-                            (util/dissoc-in
-
-                              (assoc-in body [lupa-name-key :lupakohtainenLisatietotieto]
-                                (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                  [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                   {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
-
-                              [lupa-name-key :vastuuhenkilotieto])
-                            [lupa-name-key :maksajatieto])
-                          [lupa-name-key :alkuPvm])
-                        [lupa-name-key :loppuPvm])))))
+                        (assoc-in body [lupa-name-key :lupakohtainenLisatietotieto]
+                          (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
+                            [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
+                             {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
+                        [lupa-name-key :vastuuhenkilotieto])))))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."

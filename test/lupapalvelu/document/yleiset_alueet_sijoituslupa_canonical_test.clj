@@ -107,6 +107,11 @@
 
         osapuolet-vec (-> Sijoituslupa :osapuolitieto) => truthy
 
+        ;; These (maksaja, alkuPvm and loppuPvm) are not filled in the application, but are requested by schema
+        Maksaja (-> Sijoituslupa :maksajatieto :Maksaja) => truthy
+        alkuPvm (-> Sijoituslupa :alkuPvm) => truthy
+        loppuPvm (-> Sijoituslupa :loppuPvm) => truthy
+
         lupaAsianKuvaus (:lupaAsianKuvaus Sijoituslupa) => truthy
 
         Sijoituslupaviite (-> Sijoituslupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
@@ -162,6 +167,10 @@
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address sijoituslupa-application))
     (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> sijoituslupa-application :location :x) " " (-> sijoituslupa-application :location :y)))
 
+    ;; Maksajan tiedot (just something in Sijoituslupa, because schema requests it)
+    (fact "maksaja-henkilotieto" (:henkilotieto Maksaja) => truthy)
+    (fact "maksaja-laskuviite" (:laskuviite Maksaja) => truthy)
+
     ;; Osapuoli: Hakija
     (fact "hakija-etunimi" (:etunimi hakija-henkilo-nimi) => (-> nimi :etunimi :value))
     (fact "hakija-sukunimi" (:sukunimi hakija-henkilo-nimi) => (-> nimi :sukunimi :value))
@@ -187,6 +196,10 @@
     (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> sijoituksen-tarkoitus :data :sijoituksen-tarkoitus :value))
     (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
     (fact "lisatietoja-sijoituskohteesta" lisatietoja-sijoituskohteesta => (-> sijoituksen-tarkoitus :data :lisatietoja-sijoituskohteesta :value))
+
+    ;; Kayton alku/loppu pvm  (just something in Sijoituslupa, because schema requests it)
+    (fact "alkuPvm" alkuPvm => truthy)
+    (fact "loppuPvm" loppuPvm => truthy)
 
     ;; Hankkeen kuvaus
     (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
