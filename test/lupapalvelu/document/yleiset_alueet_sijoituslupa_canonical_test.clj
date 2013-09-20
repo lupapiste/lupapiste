@@ -63,7 +63,7 @@
 ;                             ["muut" ["muu"]]])
 
 (def sijoituslupa-application {:schema-version 1,
-                               :id "LP-753-2013-00001",
+                               :id "LP-753-2013-00003",
                                :created 1379592634015,
                                :opened 1379592902883,
                                :modified 1379592969636,

@@ -30,7 +30,7 @@
 ;                             ["muut" ["muu"]]])
 
 (def kayttolupa-application {:schema-version 1,
-                             :id "LP-753-2013-00001",
+                             :id "LP-753-2013-00002",
                              :created 1379404904514,
                              :opened 1379404981309,
                              :modified 1379405054747,
