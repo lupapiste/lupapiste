@@ -63,10 +63,10 @@
 
 (fact "Email for application open is like"
   (let [msg (get-message-for-application-state-change { :id 123 :state "open"} "http://localhost:8000")]
-    msg => (contains "http://localhost:8000/app/sv/applicant?hashbang=!/application/123#!/application/123")
-    msg => (contains "Valmisteilla")))
+    (first msg) => (contains "http://localhost:8000/app/sv/applicant?hashbang=!/application/123#!/application/123")
+    (first msg) => (contains "Valmisteilla")))
 
 (fact "Email for application submitted contains the state string."
-  (get-message-for-application-state-change { :state "submitted"} ..host..) => (contains "Vireill\u00E4"))
+  (first (get-message-for-application-state-change { :state "submitted"} ..host..)) => (contains "Vireill\u00E4"))
 
 (fact "")
