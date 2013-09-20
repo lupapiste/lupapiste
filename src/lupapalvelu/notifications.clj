@@ -152,8 +152,8 @@
 
 (defn get-message-for-targeted-comment [application host]
   (let [path-suffix  "/conversation"]
-    (email/apply-template "new-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
-                                            :link-sv (get-application-link application path-suffix host "sv")})))
+    (email/apply-template "application-targeted-comment.md" {:conversation-link-fi (get-application-link application path-suffix host "fi")
+                                                             :conversation-link-sv (get-application-link application path-suffix host "sv")})))
 
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
