@@ -95,11 +95,10 @@
 
 (defn send-create-statement-person! [email text organization]
   (let [title (get-email-title {:title "Lausunnot"})
-        msg   (message
-                (template "add-statement-person.html")
-                (enlive/transform [:.text] (enlive/content text))
-                (enlive/transform [:#organization-fi] (enlive/content (:fi (:name organization))))
-                (enlive/transform [:#organization-sv] (enlive/content (:sv (:name organization)))))]
+        msg   (email/apply-template "add-statement-person.md"
+                                    {:text text
+                                     :organization-fi (:fi (:name organization))
+                                     :organization-sv (:sv (:name organization))})]
     (send-mail-to-recipients! [email] title msg)))
 
 (defn send-on-request-for-statement! [persons application user host]
