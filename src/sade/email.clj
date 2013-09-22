@@ -4,6 +4,7 @@
             [clojure.string :as s]
             [postal.core :as postal]
             [sade.env :as env]
+            [sade.strings :as ss]
             [net.cgrand.enlive-html :as enlive]
             [endophile.core :as endophile]
             [clostache.parser :as clostache]))
@@ -109,7 +110,7 @@
 ;; Apply template:
 ;; ---------------
 
-(defn apply-template [template context]
+(defn apply-md-template [template context]
   (let [master    (fetch-template "master.md")
         header    (fetch-template "header.md")
         body      (fetch-template template)
@@ -117,3 +118,9 @@
         rendered  (clostache/render master context {:header header :body body :footer footer})
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
+
+(defn apply-template [template context]
+  (cond
+    (ss/ends-with template ".md") (apply-md-template template context)
+    :else (throw (Exception. (str "unsupported template: " template)))))
+
