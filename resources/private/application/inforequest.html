@@ -65,7 +65,7 @@
             </ul>
           </div>
 
-          <!-- ko if: !currentUser.get().oir() && $root.authorization.ok('assign-application') -->
+          <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
             <p data-bind="ltext: 'application.assignee'"></p>
             <span id="test-inforequest-assignee" class="application_summary_text">
@@ -79,8 +79,7 @@
               </select>
             </span>
           </div>
-          
-        <!-- /ko -->
+          <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
           <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
