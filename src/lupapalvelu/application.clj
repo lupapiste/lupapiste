@@ -35,6 +35,10 @@
 
 ;; Validators
 
+(defn not-open-inforequest-user-validator [{user :user} _]
+  (when (:oir user)
+    (fail :error.not-allowed-for-oir)))
+
 (defn- property-id? [^String s]
   (and s (re-matches #"^[0-9]{14}$" s)))
 
@@ -279,7 +283,8 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority]})
+(defquery can-target-comment-to-authority {:roles [:authority]
+                                           :validators  [not-open-inforequest-user-validator]})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
@@ -368,6 +373,7 @@
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
+   :validators  [not-open-inforequest-user-validator]
    :roles       [:authority]}
   [{user :user :as command}]
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
