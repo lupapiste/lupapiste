@@ -27,9 +27,17 @@
   (when (and s prefix)
     (.startsWith s prefix)))
 
+(defn ends-with [^String s ^String prefix]
+  (when (and s prefix)
+    (.endsWith s prefix)))
+
 (defn starts-with-i [^String s ^String prefix]
   (when (and s prefix)
     (.startsWith (.toLowerCase s) (.toLowerCase prefix))))
+
+(defn ends-with-i [^String s ^String prefix]
+  (when (and s prefix)
+    (.endsWith (.toLowerCase s) (.toLowerCase prefix))))
 
 ;; Commons-lang3 wrapper
 (defn numeric?
