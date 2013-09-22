@@ -145,7 +145,6 @@
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
-                                       :schema-data [[["_selected" :value] "yritys"]]
                                        :required ["sijoituslupa-sijoituksen-tarkoitus"]
                                        :attachments []})
 
