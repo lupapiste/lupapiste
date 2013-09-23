@@ -60,4 +60,7 @@
       (do-test kayttolupa-application))
 
     (fact "Sijoituslupa application -> canonical -> xml"
-      (do-test sijoituslupa-application))))
+      (do-test sijoituslupa-application))
+
+    ;; TODO: kayttolupa-mainostus-viitoitus
+    ))

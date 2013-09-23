@@ -134,6 +134,10 @@
     ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
     ;;               -> maksaja gets hakija's henkilotieto, alkuPvm/loppuPvm both get application's "modified" date.
 
+
+    ;; TODO: kayttolupa-mainostus-viitoitus
+
+
     (let [operation-name-key (-> application :operations first :name keyword)
           lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
           hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
