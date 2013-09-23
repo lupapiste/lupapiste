@@ -27,13 +27,13 @@
                                                           :tapahtuma-aika-paattyy-pvm {:modified 1379920589017, :value "29.09.2013"},
                                                           :tapahtuman-nimi {:modified 1379920525351,
                                                                             :value "Mainostettavan tapahtuman nimi"},
-                                                          :tapahtumapaikka {:modified 1379920556532, :value "Sipoon urheilukenttä"}
+                                                          :tapahtumapaikka {:modified 1379920556532, :value "Sipoon urheilukentt\u00e4"}
                                                           :haetaan-kausilupaa {:modified 1379933391241, :value true}},
                             :viitoitus-tapahtuma-valinta {:tapahtuma-aika-alkaa-pvm {:modified 1379920629190, :value "27.09.2013"},
                                                           :tapahtuma-aika-paattyy-pvm {:modified 1379920630934, :value "29.09.2013"},
                                                           :tapahtuman-nimi {:modified 1379920534147,
                                                                             :value "Viitoitettavan tapahtuman nimi"},
-                                                          :tapahtumapaikka {:modified 1379920624162, :value "Sipoon urheilukenttä"}}}})
+                                                          :tapahtumapaikka {:modified 1379920624162, :value "Sipoon urheilukentt\u00e4"}}}})
 
 (def mainostus-application
   {:schema-version 1,
@@ -137,7 +137,7 @@
         haetaan-kausilupaa-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
         haetaan-kausilupaa (:arvo haetaan-kausilupaa-Lisatieto) => truthy
 
-        ;; Testataan muunnosfunktiota myös "viitoitus tapahtuma" valittuna
+        ;; Testataan muunnosfunktiota myos "viitoitus tapahtuma" valittuna
         canonical-2 (application-to-canonical viitoitus-application "fi")
         lupaAsianKuvaus-2 (:lupaAsianKuvaus canonical-2) => falsey
         Sijoituslupaviite-2 (:sijoituslupaviitetieto canonical-2) => falsey
