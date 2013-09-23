@@ -169,10 +169,9 @@ Admin logs in
   Admin front page should be open
 
 User role should be
-  [Arguments]  ${role}
-  Wait Until   Page should contain element  user-name
-  ${found_role} =  Get Element Attribute  user-name@data-test-role
-  Should be equal  ${role}  ${found_role}
+  [Arguments]  ${expected-role}
+  ${user-role}=  Execute JavaScript  return window.currentUser.get().role();
+  Should Be Equal  ${expected-role}  ${user-role}
 
 As Mikko
   Open browser to login page
@@ -216,7 +215,7 @@ Sipoo logs in
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
-
+  
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
