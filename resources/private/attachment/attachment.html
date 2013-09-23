@@ -37,12 +37,9 @@
             <img data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
           </a>
         </div>
-        <div class="file-preview-pdf" data-bind="if: isPdf()">
+        <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
         <a data-bind="text: loc('attachment.pdf.preview.link'), attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" target="file-preview-iframe-name"></a>
           <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
-        </div>
-        <div class="file-preview-plain-text" data-bind="if: isPlainText()">
-          <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}"></iframe>
         </div>
       </div>
 
