@@ -35,7 +35,7 @@
                                                                             :value "Viitoitettavan tapahtuman nimi"},
                                                           :tapahtumapaikka {:modified 1379920624162, :value "Sipoon urheilukenttä"}}}})
 
-(def mainostus-viitoitus-application
+(def mainostus-application
   {:schema-version 1,
    :id "LP-753-2013-00004",
    :created 1379920470831,
@@ -58,11 +58,17 @@
    :municipality municipality,
    :statements statements})
 
+(def viitoitus-application (assoc
+                             (assoc mainostus-application :documents
+                               [hakija
+                                maksaja
+                                (assoc-in tapahtuma-info [:data :_selected :value] "viitoitus-tapahtuma-valinta")])
+                             :id "LP-753-2013-00005"))
 
 (def get-maksaja #'lupapalvelu.document.yleiset-alueet-canonical/get-maksaja)
 
 (facts* "Mainostus-viitoituslupa canonical model is correct"
-  (let [canonical (application-to-canonical mainostus-viitoitus-application "fi")
+  (let [canonical (application-to-canonical mainostus-application "fi")
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Mainostus-viitoituslupa (:Kayttolupa yleinenAlueAsiatieto) => truthy
@@ -132,12 +138,7 @@
         haetaan-kausilupaa (:arvo haetaan-kausilupaa-Lisatieto) => truthy
 
         ;; Testataan muunnosfunktiota myös "viitoitus tapahtuma" valittuna
-        canonical-2 (application-to-canonical
-                    (assoc-in mainostus-viitoitus-application [:documents]
-                      [hakija
-                       maksaja
-                       (assoc-in tapahtuma-info [:data :_selected :value] "viitoitus-tapahtuma-valinta")])
-                    "fi")
+        canonical-2 (application-to-canonical viitoitus-application "fi")
         lupaAsianKuvaus-2 (:lupaAsianKuvaus canonical-2) => falsey
         Sijoituslupaviite-2 (:sijoituslupaviitetieto canonical-2) => falsey
         toimintajaksotieto-2 (:toimintajaksotieto canonical-2) => falsey
@@ -154,19 +155,19 @@
 
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
-    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified mainostus-viitoitus-application)))
+    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified mainostus-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
-    (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id mainostus-viitoitus-application))
-    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened mainostus-viitoitus-application)))
+    (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id mainostus-application))
+    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened mainostus-application)))
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
     (fact "Mainostus-viitoituslupa-kayttotarkoitus" Mainostus-viitoituslupa-kayttotarkoitus => ((keyword (:name operation)) ya-operation-type-to-usage-description))
 
     ;; Sijainti
-    (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id mainostus-viitoitus-application))
-    (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address mainostus-viitoitus-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> mainostus-viitoitus-application :location :x) " " (-> mainostus-viitoitus-application :location :y)))
+    (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id mainostus-application))
+    (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address mainostus-application))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> mainostus-application :location :x) " " (-> mainostus-application :location :y)))
 
     ;; Maksajan tiedot
     (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))
