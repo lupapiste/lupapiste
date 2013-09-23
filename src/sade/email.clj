@@ -7,7 +7,8 @@
             [sade.strings :as ss]
             [net.cgrand.enlive-html :as enlive]
             [endophile.core :as endophile]
-            [clostache.parser :as clostache]))
+            [clostache.parser :as clostache]
+            [net.cgrand.enlive-html :as html]))
 
 ;;
 ;; Default headers:
@@ -74,8 +75,12 @@
   (with-open [in (io/input-stream (find-resource template-name))]
     (slurp in)))
 
+(defn fetch-html-template [template-name]
+  (enlive/html-resource (find-resource template-name)))
+
 (when-not (env/dev-mode?)
-  (def fetch-template (memoize fetch-template)))
+  (alter-var-root #'fetch-template memoize)
+  (alter-var-root #'fetch-html-template memoize))
 
 ;;
 ;; Plain text support:
@@ -103,7 +108,7 @@
 ;; -------------
 
 (defn- wrap-html [html-body]
-  (let [html-wrap (enlive/html-resource (find-resource "html-wrap.html"))]
+  (let [html-wrap (fetch-html-template "html-wrap.html")]
     (enlive/transform html-wrap [:body] (enlive/content html-body))))
 
 ;;
@@ -111,16 +116,26 @@
 ;; ---------------
 
 (defn apply-md-template [template context]
-  (let [master    (fetch-template "master.md")
-        header    (fetch-template "header.md")
+  (let [master      (fetch-template "master.md")
+        header      (fetch-template "header.md")
+        body        (fetch-template template)
+        footer      (fetch-template "footer.md")
+        html-wrap   (fetch-html-template "html-wrap.html")
+        rendered    (clostache/render master context {:header header :body body :footer footer})
+        content     (endophile/to-clj (endophile/mp rendered))]
+    [(->str* content)
+     (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string)]))
+
+(defn apply-html-template [template context]
+  #_(let [master    (html/html-resource (fetch-template "master.html"))
         body      (fetch-template template)
-        footer    (fetch-template "footer.md")
         rendered  (clostache/render master context {:header header :body body :footer footer})
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
 
 (defn apply-template [template context]
   (cond
-    (ss/ends-with template ".md") (apply-md-template template context)
-    :else (throw (Exception. (str "unsupported template: " template)))))
+    (ss/ends-with template ".md")    (apply-md-template template context)
+    (ss/ends-with template ".html")  (apply-html-template template context)
+    :else                            (throw (Exception. (str "unsupported template: " template)))))
 
