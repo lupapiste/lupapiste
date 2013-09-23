@@ -11,10 +11,7 @@
           {:ok false :error "invalid test: must return a map with :ok key or nil"})
         {:ok true})
       {:ok false :error "unknown test"})
-    (catch Exception e
-      (.printStackTrace e)
-      {:ok false :error (.getMessage e)})
-    (catch AssertionError e
+    (catch Throwable e
       (.printStackTrace e)
       {:ok false :error (.getMessage e)})))
 
