@@ -1,7 +1,8 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.mongo :as mongo])
-  (:use lupapalvelu.notifications
-        midje.sweet))
+  (:require [lupapalvelu.notifications :refer :all]
+            [midje.sweet :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [sade.dummy-email-server :as dummy]))
 
 (facts "email titles"
   (get-email-subject {:subject "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
@@ -69,4 +70,13 @@
 (fact "Email for application submitted contains the state string."
   (first (get-message-for-application-state-change { :state "submitted"} ..host..)) => (contains "Vireill\u00E4"))
 
-(fact "")
+(fact send-open-inforequest-invite!
+  (dummy/reset-sent-messages)
+  (send-open-inforequest-invite! "foo@example.com" "123" "abc" "http://lupapiste.fi") => nil
+  (let [{:keys [html plain]} (-> dummy/sent-messages deref first :body)]
+    html => #"^\<html\>"
+    html => #"Uusi neuvontapyynt\u00F6:"
+    html => #"\<a.*href=\"http://lupapiste.fi/api/raw/openinforequest\?token-id=123&lang=fi"
+    plain => #"Uusi neuvontapyynt\u00F6:"
+    plain => #"http://lupapiste.fi/api/raw/openinforequest\?token-id=123"))
+
