@@ -54,17 +54,17 @@
 (defn replace-application-links [e selector application suffix host]
   (replace-links-in-fi-sv e selector (partial get-application-link application suffix host)))
 
-(defn send-mail-to-recipients! [recipients title msg]
+(defn send-mail-to-recipients! [recipients subject msg]
   (future*
     (doseq [recipient recipients]
-      (if (email/send-email-message recipient title msg)
-        (error "email could not be delivered." recipient title msg)
-        (info "email was sent successfully." recipient title))))
+      (if (email/send-email-message recipient subject msg)
+        (error "email could not be delivered." recipient subject msg)
+        (info "email was sent successfully." recipient subject))))
   nil)
 
-(defn get-email-title [{title :title} & [title-key]]
+(defn get-email-subject [{subject :subject} & [title-key]]
   (let [title-postfix (when title-key (str " - " (i18n/localize "fi" "email.title" title-key)))]
-    (str "Lupapiste.fi: " title title-postfix)))
+    (str "Lupapiste.fi: " subject title-postfix)))
 
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
@@ -94,20 +94,20 @@
 ;;
 
 (defn send-create-statement-person! [email text organization]
-  (let [title (get-email-title {:title "Lausunnot"})
+  (let [subject (get-email-subject {:subject "Lausunnot"})
         msg   (email/apply-template "add-statement-person.md"
                                     {:text text
                                      :organization-fi (:fi (:name organization))
                                      :organization-sv (:sv (:name organization))})]
-    (send-mail-to-recipients! [email] title msg)))
+    (send-mail-to-recipients! [email] subject msg)))
 
 (defn send-on-request-for-statement! [persons application user host]
   (doseq [{:keys [email text]} persons]
-    (let [title (get-email-title application "statement-request")
+    (let [subject (get-email-subject application "statement-request")
           msg   (email/apply-template "add-statement-request.md"
                           {:link-fi (get-application-link application nil host "fi")
                            :link-sv (get-application-link application nil host "sv")})]
-      (send-mail-to-recipients! [email] title msg))))
+      (send-mail-to-recipients! [email] subject msg))))
 
 (defn send-password-reset-email! [to token]
   (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
@@ -124,7 +124,7 @@
   (let [neighbor-name  (get-in application [:neighbors neighbor-id :neighbor :owner :name])
         address        (get application :address)
         municipality   (get application :municipality)
-        subject        (get-email-title application "neighbor")
+        subject        (get-email-subject application "neighbor")
         page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
         link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" (name neighbor-id) "/" token))
         msg            (email/apply-template "neighbor.md" {:name neighbor-name
@@ -165,37 +165,37 @@
 (defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
     (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
-          title        (get-email-title application "new-comment")
+          subject      (get-email-subject application "new-comment")
           msg          (get-message-for-new-comment application host)]
-      (send-mail-to-recipients! recipients title msg))))
+      (send-mail-to-recipients! recipients subject msg))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
-  (let [title        (get-email-title application "new-comment")
+  (let [subject      (get-email-subject application "new-comment")
         path-suffix  "/conversation"
         msg          (get-message-for-targeted-comment application host)]
-    (send-mail-to-recipients! [to-email]  title msg)))
+    (send-mail-to-recipients! [to-email]  subject msg)))
 
 (defn send-invite! [email text application host]
-  (let [title (get-email-title application "invite")
-        msg   (message
+  (let [subject (get-email-subject application "invite")
+        msg     (message
                 (template "invite.html")
                 (replace-application-links "#link" application "" host))]
-    (send-mail-to-recipients! [email] title msg)))
+    (send-mail-to-recipients! [email] subject msg)))
 
 (defn send-notifications-on-application-state-change! [{:keys [id]} host]
   (let [application (mongo/by-id :applications id)
         recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         msg         (get-message-for-application-state-change application host)
-        title       (get-email-title application "state-change")]
-    (send-mail-to-recipients! recipients title msg)))
+        subject     (get-email-subject application "state-change")]
+    (send-mail-to-recipients! recipients subject msg)))
 
 (defn send-notifications-on-verdict! [application host]
   (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         path-suffix  "/verdict"
         msg         (email/apply-template "application-verdict.md" {:verdict-link-fi (get-application-link application path-suffix host "fi")
                                                                     :verdict-link-sv (get-application-link application path-suffix host "sv")})
-        title       (get-email-title application "verdict")]
-    (send-mail-to-recipients! recipients title msg)))
+        subject     (get-email-subject application "verdict")]
+    (send-mail-to-recipients! recipients subject msg)))
 
 ;;
 ;; Da notify
