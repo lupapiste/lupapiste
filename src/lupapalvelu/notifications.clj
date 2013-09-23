@@ -135,14 +135,14 @@
                                                       :link-sv (link-fn :sv)})]
     (send-mail-to-recipients! [to-address]  subject msg)))
 
+(defn get-message-for-open-inforequest-invite [host token]
+  (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))]
+    (email/apply-template "open-inforequest-invite.html" {:link-fi (link-fn :fi) :link-sv (link-fn :sv)})))
+
 (defn send-open-inforequest-invite! [email token application-id host]
-  (let [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))]
-    (email/send-email-message
-      email
-      "Uusi neuvontapyynt\u00F6"
-      "open-inforequest-invite.html"
-      {:link-fi (link-fn :fi)
-       :link-sv (link-fn :sv)})))
+  (let [subject "Uusi neuvontapyynt\u00F6"
+        msg     (get-message-for-open-inforequest-invite host token)]
+    (send-mail-to-recipients! [email] subject msg)))
 
 (defn get-message-for-application-state-change [application host]
   (email/apply-template "application-state-change.md"

@@ -70,13 +70,7 @@
 (fact "Email for application submitted contains the state string."
   (first (get-message-for-application-state-change { :state "submitted"} ..host..)) => (contains "Vireill\u00E4"))
 
-(fact send-open-inforequest-invite!
-  (dummy/reset-sent-messages)
-  (send-open-inforequest-invite! "foo@example.com" "123" "abc" "http://lupapiste.fi") => nil
-  (let [{:keys [html plain]} (-> dummy/sent-messages deref first :body)]
-    html => #"^\<html\>"
-    html => #"Uusi neuvontapyynt\u00F6:"
-    html => #"\<a.*href=\"http://lupapiste.fi/api/raw/openinforequest\?token-id=123&lang=fi"
-    plain => #"Uusi neuvontapyynt\u00F6:"
-    plain => #"http://lupapiste.fi/api/raw/openinforequest\?token-id=123"))
+(fact "Email for sending an open inforequest is like"
+  (let  [html (first (get-message-for-open-inforequest-invite "http://lupapiste.fi" "123"))]
+    html => (contains "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi")))
 
