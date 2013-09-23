@@ -171,6 +171,13 @@
   };
 
   $.fn.applyBindings = function(model) {
+    if (!this.length) {
+      warn(this.selector + " didn't match any elements");
+      return this;
+    }
+    if (this.length > 1) {
+      warn("Apply bindings to " + this.length + " nodes");
+    }
     _.each(this, _.partial(ko.applyBindings, model));
     return this;
   };
