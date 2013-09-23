@@ -75,7 +75,7 @@
   (send-open-inforequest-invite! "foo@example.com" "123" "abc" "http://lupapiste.fi") => nil
   (let [{:keys [html plain]} (-> dummy/sent-messages deref first :body)]
     html => #"^\<html\>"
-    html => #"\<p\>Uusi neuvontapyynt\u00F6:"
+    html => #"Uusi neuvontapyynt\u00F6:"
     html => #"\<a.*href=\"http://lupapiste.fi/api/raw/openinforequest\?token-id=123\""
     plain => #"Uusi neuvontapyynt\u00F6:"
     plain => #"http://lupapiste.fi/api/raw/openinforequest\?token-id=123"))

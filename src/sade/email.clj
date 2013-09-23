@@ -111,6 +111,14 @@
   (let [html-wrap (fetch-html-template "html-wrap.html")]
     (enlive/transform html-wrap [:body] (enlive/content html-body))))
 
+(defn- html->plain [html]
+  (-> html
+    (.getBytes "UTF-8")
+    (io/reader :encoding "UTF-8")
+    (enlive/html-resource)
+    (enlive/select [:body])
+    (->str*)))
+
 ;;
 ;; Apply template:
 ;; ---------------
@@ -128,11 +136,14 @@
 
 (defn apply-html-template [template-name context]
   (let [master    (fetch-html-template "master.html")
-        template  (fetch-html-template template-name)]
-    (-> master
-      (enlive/transform [:style] (enlive/append (->> (enlive/select template [:style]) (map :content) flatten s/join)))
-      (enlive/transform [:body] (enlive/content (->> (enlive/select template [:body]) (map :content))))
-      endophile/html-string)))
+        template  (fetch-html-template template-name)
+        html      (-> master
+                    (enlive/transform [:style] (enlive/append (->> (enlive/select template [:style]) (map :content) flatten s/join)))
+                    (enlive/transform [:.body] (enlive/append (map :content (enlive/select template [:body]))))
+                    (endophile/html-string)
+                    (clostache/render context))
+        plain     (html->plain html)]
+    [plain html]))
 
 (defn apply-template [template context]
   (cond
