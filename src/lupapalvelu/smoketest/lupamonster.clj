@@ -1,14 +1,20 @@
 (ns lupapalvelu.smoketest.lupamonster
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.smoketest.core :refer :all]))
+            [lupapalvelu.smoketest.core :refer :all]
+            [lupapalvelu.smoketest.application-tests]))
 
 (defn -main [& args]
-  (if-not @mongo/connected
-    (do
-      (mongo/connect! "lupaci.solita.fi" 27018)
-      (let [report (execute-all-tests)]
-        (doseq [[test-name v] report]
-          (printf "%-40s %s\n" (str test-name ":") (if (= :ok v) "OK" (str "FAIL:" v))))
-        )
-      (mongo/disconnect!))
-    (println "ERROR: Already connected to a MongoDB!")))
+  (when @mongo/connected
+    (println "Warning: disconnecting current MongoDB connection!")
+    (mongo/disconnect!))
+
+  (mongo/connect! "lupaci.solita.fi" 27018)
+
+  (let [started-from-cli (find-ns 'lupapalvelu.main)
+        results (execute-all-tests)
+        all-ok  (reduce
+                  (fn [ok [test-name v]]
+                    (printf "%-40s %s\n" (str test-name ":") (if (= :ok v) "OK" (str "FAIL:" v))) (flush)
+                    (and ok (= :ok v)))
+                  true results)]
+    (when (and started-from-cli (not all-ok)) (System/exit 1))))
