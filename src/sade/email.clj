@@ -126,12 +126,13 @@
     [(->str* content)
      (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string)]))
 
-(defn apply-html-template [template context]
-  #_(let [master    (html/html-resource (fetch-template "master.html"))
-        body      (fetch-template template)
-        rendered  (clostache/render master context {:header header :body body :footer footer})
-        content   (endophile/to-clj (endophile/mp rendered))]
-    [(->str* content) (endophile/html-string (wrap-html content))]))
+(defn apply-html-template [template-name context]
+  (let [master    (fetch-html-template "master.html")
+        template  (fetch-html-template template-name)]
+    (-> master
+      (enlive/transform [:style] (enlive/append (->> (enlive/select template [:style]) (map :content) flatten s/join)))
+      (enlive/transform [:body] (enlive/content (->> (enlive/select template [:body]) (map :content))))
+      endophile/html-string)))
 
 (defn apply-template [template context]
   (cond
