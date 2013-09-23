@@ -1,9 +1,9 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.core :refer [now]]
-            [lupapalvelu.document.canonical-common :refer :all]))
+            [lupapalvelu.document.canonical-common :refer :all]
+            [sade.util :as util]))
 
 (defn- get-henkilo [henkilo]
-;  (println "\n get-henkilo(), henkilo: " henkilo)
   {:nimi {:etunimi (-> henkilo :henkilotiedot :etunimi :value)
           :sukunimi (-> henkilo :henkilotiedot :sukunimi :value)}
    :osoite {:osoitenimi {:teksti (-> henkilo :osoite :katu :value)}
@@ -14,11 +14,9 @@
    :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)})
 
 (defn- get-henkilo-reduced [henkilo]
-;  (println "\n get-henkilo-reduced(), henkilo: " henkilo)
   (dissoc (get-henkilo henkilo) :osoite :henkilotunnus))
 
 (defn- get-yritys [yritys]
-;  (println "\n get-yritys(), yritys: " yritys)
   (merge
     {:nimi (-> yritys :yritysnimi :value)
      :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
@@ -27,7 +25,6 @@
                                       :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)}}}))
 
 (defn- get-yritys-maksaja [yritys]
-;  (println "\n get-yritys-maksaja(), yritys: " yritys)
   (merge
     {:nimi (-> yritys :yritysnimi :value)
      :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
@@ -36,9 +33,6 @@
                    :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)}}))
 
 (defn- get-hakija [hakija-doc]
-;  (println "\n get-hakija(), hakija-doc: ")
-;  (clojure.pprint/pprint hakija-doc)
-;  (println "\n")
   (merge
     (if (= (-> hakija-doc :_selected :value) "yritys")
       {:yritystieto  {:Yritys (get-yritys (:yritys hakija-doc))}
@@ -53,9 +47,6 @@
             :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)}})
 
 (defn- get-vastuuhenkilo [vastuuhenkilo type roolikoodi]
-;  (println "\n get-vastuuhenkilo(), vastuuhenkilo (type: \"" type "\", roolikoodi: \"" roolikoodi "\"): ")
-;  (clojure.pprint/pprint vastuuhenkilo)
-;  (println "\n")
   (merge
     (if (= type :yritys)
       ;; yritys-tyyppinen vastuuhenkilo
@@ -73,9 +64,6 @@
     {:rooliKoodi roolikoodi}))
 
 (defn- get-tyomaasta-vastaava [tyomaasta-vastaava]
-;  (println "\n get-tyomaasta-vastaava(), tyomaasta-vastaava: ")
-;  (clojure.pprint/pprint tyomaasta-vastaava)
-;  (println "\n")
   (if (= (-> tyomaasta-vastaava :_selected :value) "yritys")
     ;; yritys-tyyppinen tyomaasta-vastaava, siirretaan yritysosa omaksi osapuolekseen
     {:osapuolitieto {:Osapuoli {:yritystieto {:Yritys (get-yritys (:yritys tyomaasta-vastaava))}
@@ -91,9 +79,6 @@
                                            "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")}}))
 
 (defn- get-maksaja [maksaja-doc]
-;  (println "\n maksaja-doc: ")
-;  (clojure.pprint/pprint maksaja-doc)
-;  (println "\n")
   (merge
     (if (= (-> maksaja-doc :_selected :value) "yritys")
       ;; yritys-tyyppinen maksaja, siirretaan yritysosa omaksi osapuolekseen
@@ -113,11 +98,6 @@
     empty-tag))
 
 (defn- get-kasittelytieto [application]
-;  (println "\n get-kasittelytieto , :modified:" (:modified application))
-;  (println "\n get-kasittelytieto , :state:" (keyword (:state application)))
-;  (println "\n get-kasittelytieto , :state to krysp state:" ((keyword (:state application)) application-state-to-krysp-state))
-;  (println "\n get-kasittelytieto , :id:" (:id application))
-
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
                     :hakemuksenTila ((keyword (:state application)) application-state-to-krysp-state)
                     :asiatunnus (:id application)
@@ -125,11 +105,20 @@
                     :kasittelija (get-handler application)}})
 
 (defn- get-sijaintitieto [application]
-;  (println "\n get-sijaintitieto , sijainti:" sijainti)
   {:Sijainti {:osoite {:yksilointitieto (:id application)
                        :alkuHetki (to-xml-datetime (now))
                        :osoitenimi {:teksti (:address application)}}
               :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}})
+
+(defn- get-lisatietoja-sijoituskohteesta [data]
+  {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta"
+   :arvo (-> data :lisatietoja-sijoituskohteesta :value)})
+
+(defn- get-sijoituksen-tarkoitus [data]
+  {:selitysteksti "Sijoituksen tarkoitus"
+   :arvo (if (= "other" (:sijoituksen-tarkoitus data))
+           (-> data :muu-sijoituksen-tarkoitus :value)
+           (-> data :sijoituksen-tarkoitus :value))})
 
 ;;
 ;; TODO: Mihin kielitieto (lang) lisataan? Rakval-puolella on lisatiedoissa asioimiskieli.
@@ -140,21 +129,41 @@
 ;    (clojure.pprint/pprint documents-by-type)
 ;    (println "\n application: ")
 ;    (clojure.pprint/pprint application)
-;    (clojure.pprint/pprint (:yleiset-alueet-maksaja documents-by-type))
-;    (println "(:data (:yleiset-alueet-maksaja documents-by-type)): " (:data (:yleiset-alueet-maksaja documents-by-type)))
+;    (println "\n")
+
+    ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
+    ;;               -> maksaja gets hakija's henkilotieto, alkuPvm/loppuPvm both get application's "modified" date.
 
     (let [operation-name-key (-> application :operations first :name keyword)
           lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
-          maksaja (get-maksaja (:data (first (:yleiset-alueet-maksaja documents-by-type))))
-          hankkeen-kuvaus (:data (first (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type)))
-          hakija (get-hakija (:data (first (:hakija-ya documents-by-type))))
+          hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
+          tyoaika-doc (if-not (= lupa-name-key :Sijoituslupa)
+                        (-> documents-by-type :tyoaika first :data)
+                        {})
+          alku-pvm (if-not (= lupa-name-key :Sijoituslupa)
+                    (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))
+                    (to-xml-date (:modified application)))
+          loppu-pvm (if-not (= lupa-name-key :Sijoituslupa)
+                    (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
+                    (to-xml-date (:modified application)))
+
+          maksaja (if-not (= lupa-name-key :Sijoituslupa)
+                    (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
+                    {:henkilotieto (:henkilotieto hakija)
+                     :laskuviite "0000000000"})
+          hankkeen-kuvaus-key (if (= lupa-name-key :Sijoituslupa)
+                                :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+                                :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
+          hankkeen-kuvaus (-> documents-by-type hankkeen-kuvaus-key first :data)
           tyomaasta-vastaava (if (= lupa-name-key :Tyolupa)
-                               (get-tyomaasta-vastaava (:data (first (:tyomaastaVastaava documents-by-type))))
+                               (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data))
                                {})
-          tyoaika-doc (:data (first (:tyoaika documents-by-type)))
+          sijoituslupaviitetieto-key (if (= lupa-name-key :Sijoituslupa)
+                                       :kaivuLuvanTunniste
+                                       :sijoitusLuvanTunniste)
           body {lupa-name-key {:kasittelytietotieto (get-kasittelytieto application)
-                               :alkuPvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))
-                               :loppuPvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
+                               :alkuPvm alku-pvm
+                               :loppuPvm loppu-pvm
                                :sijaintitieto (get-sijaintitieto application)
                                ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
                                :osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}
@@ -165,16 +174,23 @@
                                :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
                                :lausuntotieto (get-statements (:statements application))
                                :lupaAsianKuvaus (-> hankkeen-kuvaus :kayttotarkoitus :value)
+                               ;;   TODO: Onko tama oikea paikka sijoitusluvassa olevalle kaivuLuvanTunnisteelle?
                                :sijoituslupaviitetieto {:Sijoituslupaviite {:vaadittuKytkin false  ;; TODO: Muuta trueksi?
-                                                                            :tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste :value)}}
+                                                                            :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}}
                                :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)}}]
 
-      (if-not (= lupa-name-key :Tyolupa)
-        body
-        (assoc-in body [lupa-name-key :johtoselvitysviitetieto]
-          {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
-                                ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
-                                }})))))
+      (condp = lupa-name-key
+        :Tyolupa (assoc-in body [lupa-name-key :johtoselvitysviitetieto]
+                   {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
+                                         ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
+                                         }})
+        :Kayttolupa body
+        :Sijoituslupa (util/dissoc-in
+                        (assoc-in body [lupa-name-key :lupakohtainenLisatietotieto]
+                          (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
+                            [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
+                             {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
+                        [lupa-name-key :vastuuhenkilotieto])))))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."

@@ -382,17 +382,17 @@
               {municipality: model.municipality().id,
                operation: v.op,
                lang: loc.getCurrentLanguage()})
-          .success(function(d) {
-            model.inforequestsDisabled(d["inforequests-disabled"]);
-            model.newApplicationsDisabled(d["new-applications-disabled"]);
-            model.organization(d);
-          })
-          .error(function(d) {
-            model.inforequestsDisabled(true);
-            model.newApplicationsDisabled(true);
-            notify.error(loc("error.dialog.title"), loc(d.text));
-          })
-          .call();
+            .success(function(d) {
+              model.inforequestsDisabled(d["inforequests-disabled"]);
+              model.newApplicationsDisabled(d["new-applications-disabled"]);
+              model.organization(d);
+            })
+            .error(function(d) {
+              model.inforequestsDisabled(true);
+              model.newApplicationsDisabled(true);
+              notify.error(loc("error.dialog.title"), loc(d.text));
+            })
+            .call();
         } else {
           model.operation(null);
           model.organization(null);

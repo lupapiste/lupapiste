@@ -28,11 +28,16 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.open-inforequest :as open-inforequest]
             [sade.strings :as ss]
             [sade.xml :as xml])
   (:import [java.net URL]))
 
 ;; Validators
+
+(defn not-open-inforequest-user-validator [{user :user} _]
+  (when (:oir user)
+    (fail :error.not-allowed-for-oir)))
 
 (defn- property-id? [^String s]
   (and s (re-matches #"^[0-9]{14}$" s)))
@@ -278,7 +283,8 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority]})
+(defquery can-target-comment-to-authority {:roles [:authority]
+                                           :validators  [not-open-inforequest-user-validator]})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
@@ -367,6 +373,7 @@
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
+   :validators  [not-open-inforequest-user-validator]
    :roles       [:authority]}
   [{user :user :as command}]
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
@@ -457,7 +464,7 @@
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed :info]}
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -534,21 +541,20 @@
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [permit-type     (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        organization-id (:id organization)
-        info-request? (boolean infoRequest)]
-    (when-not
-      (or (security/applicant? user)
-          (user-is-authority-in-organization? (:id user) organization-id))
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] {:keys [host]} :web :as command}]
+  (let [permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+        organization-id   (:id organization)
+        info-request?     (boolean infoRequest)
+        open-inforequest? (and info-request? (:open-inforequest organization))]
+    (when-not (or (security/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
       (when-not (:inforequest-enabled organization)
         (fail! :error.inforequests-disabled))
-    (when-not (:new-application-enabled organization)
+      (when-not (:new-application-enabled organization)
         (fail! :error.new-applications-disabled)))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
@@ -560,23 +566,24 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
-          application   {:id            id
-                         :created       created
-                         :opened        (when (#{:open :info} state) created)
-                         :modified      created
-                         :permitType    permit-type
-                         :infoRequest   info-request?
-                         :operations    [op]
-                         :state         state
-                         :municipality  municipality
-                         :location      (->location x y)
-                         :organization  organization-id
-                         :address       address
-                         :propertyId    propertyId
-                         :title         address
-                         :auth          [owner]
-                         :comments        (map make-comment messages)
-                         :schema-version  (schemas/get-latest-schema-version)}
+          application   {:id               id
+                         :created          created
+                         :opened           (when (#{:open :info} state) created)
+                         :modified         created
+                         :permitType       permit-type
+                         :infoRequest      info-request?
+                         :openInfoRequest  open-inforequest?
+                         :operations       [op]
+                         :state            state
+                         :municipality     municipality
+                         :location         (->location x y)
+                         :organization     organization-id
+                         :address          address
+                         :propertyId       propertyId
+                         :title            address
+                         :auth             [owner]
+                         :comments         (map make-comment messages)
+                         :schema-version   (schemas/get-latest-schema-version)}
           application   (merge application
                           (if info-request?
                             {:attachments            []
@@ -588,7 +595,10 @@
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
-      (try (autofill-rakennuspaikka application created)
+      (when open-inforequest?
+        (open-inforequest/new-open-inforequest! application host))
+      (try
+        (autofill-rakennuspaikka application created)
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
 

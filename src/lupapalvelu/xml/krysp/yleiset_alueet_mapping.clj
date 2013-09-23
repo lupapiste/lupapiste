@@ -142,6 +142,10 @@
                              {:tag :lausuntotieto
                               :child lausunto}
                              {:tag :lupaAsianKuvaus}
+                             {:tag :lupakohtainenLisatietotieto
+                              :child [{:tag :LupakohtainenLisatieto
+                                       :child [{:tag :selitysteksti :ns "yht"}
+                                               {:tag :arvo :ns "yht"}]}]}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
