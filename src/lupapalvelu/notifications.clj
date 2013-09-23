@@ -133,7 +133,7 @@
                                                       :city-sv (i18n/localize :sv "municipality" municipality)
                                                       :link-fi (link-fn :fi)
                                                       :link-sv (link-fn :sv)})]
-    (email/send-email-message to-address subject msg)))
+    (send-mail-to-recipients! [to-address]  subject msg)))
 
 (defn send-open-inforequest-invite! [email token application-id host]
   (let [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token))] ; FIXME: & gets escaped with "&lang=" (name lang)
@@ -167,13 +167,13 @@
     (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
           title        (get-email-title application "new-comment")
           msg          (get-message-for-new-comment application host)]
-      (doall (map (fn [to-address] (email/send-email-message to-address title msg)) recipients)))))
+      (send-mail-to-recipients! recipients title msg))))
 
 (defn send-notifications-on-new-targetted-comment! [application to-email host]
   (let [title        (get-email-title application "new-comment")
         path-suffix  "/conversation"
         msg          (get-message-for-targeted-comment application host)]
-    (email/send-email-message to-email title msg)))
+    (send-mail-to-recipients! [to-email]  title msg)))
 
 (defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
