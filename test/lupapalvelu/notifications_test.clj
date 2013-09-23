@@ -76,7 +76,7 @@
   (let [{:keys [html plain]} (-> dummy/sent-messages deref first :body)]
     html => #"^\<html\>"
     html => #"Uusi neuvontapyynt\u00F6:"
-    html => #"\<a.*href=\"http://lupapiste.fi/api/raw/openinforequest\?token-id=123\""
+    html => #"\<a.*href=\"http://lupapiste.fi/api/raw/openinforequest\?token-id=123&lang=fi"
     plain => #"Uusi neuvontapyynt\u00F6:"
     plain => #"http://lupapiste.fi/api/raw/openinforequest\?token-id=123"))
 
