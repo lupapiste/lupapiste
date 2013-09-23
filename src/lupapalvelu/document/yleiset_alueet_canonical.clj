@@ -120,6 +120,21 @@
            (-> data :muu-sijoituksen-tarkoitus :value)
            (-> data :sijoituksen-tarkoitus :value))})
 
+(defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
+  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm :value))
+                   :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-paattyy-pvm :value))}})
+
+(defn- get-mainostus-viitoitus-lisatiedot [mainostus-viitoitus-tapahtuma]
+  (let [lisatiedot [{:LupakohtainenLisatieto {:selitysteksti "Tapahtuman nimi"
+                                             :arvo (-> mainostus-viitoitus-tapahtuma :tapahtuman-nimi :value)}}
+                   {:LupakohtainenLisatieto {:selitysteksti "Tapahtumapaikka"
+                                             :arvo (-> mainostus-viitoitus-tapahtuma :tapahtumapaikka :value)}}]]
+    (if (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa)
+      (conj lisatiedot
+        {:LupakohtainenLisatieto {:selitysteksti "Haetaan kausilupaa"
+                                  :arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)}})
+      lisatiedot)))
+
 ;;
 ;; TODO: Mihin kielitieto (lang) lisataan? Rakval-puolella on lisatiedoissa asioimiskieli.
 ;;
@@ -134,23 +149,28 @@
     ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
     ;;               -> maksaja gets hakija's henkilotieto, alkuPvm/loppuPvm both get application's "modified" date.
 
-
-    ;; TODO: kayttolupa-mainostus-viitoitus
-
-
     (let [operation-name-key (-> application :operations first :name keyword)
           lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
           hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
-          tyoaika-doc (if-not (= lupa-name-key :Sijoituslupa)
+          tyoaika-doc (if-not (or
+                                (= lupa-name-key :Sijoituslupa)
+                                (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus))
                         (-> documents-by-type :tyoaika first :data)
                         {})
-          alku-pvm (if-not (= lupa-name-key :Sijoituslupa)
-                    (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))
-                    (to-xml-date (:modified application)))
-          loppu-pvm (if-not (= lupa-name-key :Sijoituslupa)
-                    (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
-                    (to-xml-date (:modified application)))
-
+          mainostus-viitoitus-tapahtuma-doc (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
+                                              (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
+                                              {})
+          mainostus-viitoitus-tapahtuma (mainostus-viitoitus-tapahtuma-doc (keyword (-> mainostus-viitoitus-tapahtuma-doc :_selected :value)))
+          alku-pvm (if (= lupa-name-key :Sijoituslupa)
+                    (to-xml-date (:modified application))
+                    (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
+                      (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-alkaa-pvm :value))
+                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))))
+          loppu-pvm (if (= lupa-name-key :Sijoituslupa)
+                    (to-xml-date (:modified application))
+                    (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
+                      (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
+                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))))
           maksaja (if-not (= lupa-name-key :Sijoituslupa)
                     (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
                     {:henkilotieto (:henkilotieto hakija)
@@ -158,7 +178,9 @@
           hankkeen-kuvaus-key (if (= lupa-name-key :Sijoituslupa)
                                 :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
                                 :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
-          hankkeen-kuvaus (-> documents-by-type hankkeen-kuvaus-key first :data)
+          hankkeen-kuvaus (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
+                            {}
+                            (-> documents-by-type hankkeen-kuvaus-key first :data))
           tyomaasta-vastaava (if (= lupa-name-key :Tyolupa)
                                (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data))
                                {})
@@ -188,7 +210,25 @@
                    {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
                                          ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
                                          }})
-        :Kayttolupa body
+        :Kayttolupa (util/dissoc-in
+                      (util/dissoc-in
+
+                        (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
+                          ;; Mainostus/viitoituslupa
+                          (assoc-in
+                            ;; Mainostuksen alku-/loppuHetki
+                            (if (= "mainostus-tapahtuma-valinta" (-> mainostus-viitoitus-tapahtuma-doc :_selected :value))
+                              (assoc-in body [lupa-name-key :toimintajaksotieto]
+                                (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
+                              body)
+
+                            [lupa-name-key :lupakohtainenLisatietotieto]
+                            (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma))
+                          ;; Muu kayttolupa
+                          body)
+
+                        [lupa-name-key :lupaAsianKuvaus])
+                      [lupa-name-key :sijoituslupaviitetieto])
         :Sijoituslupa (util/dissoc-in
                         (assoc-in body [lupa-name-key :lupakohtainenLisatietotieto]
                           (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
