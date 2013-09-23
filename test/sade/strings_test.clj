@@ -57,6 +57,31 @@
   (fact (starts-with "foo" nil)    => falsey)
   (fact (starts-with nil "ba")     => falsey))
 
+(facts
+  (fact (starts-with-i "Foo" "f")    => truthy)
+  (fact (starts-with-i "foo" "Fo")   => truthy)
+  (fact (starts-with-i "foO" "fOo")  => truthy)
+  (fact (starts-with-i "foo" "fooo") => falsey)
+  (fact (starts-with-i "foo" "ba")   => falsey)
+  (fact (starts-with-i "foo" nil)    => falsey)
+  (fact (starts-with-i nil "ba")     => falsey))
+
+(facts
+  (fact (ends-with "foo" "o")    => truthy)
+  (fact (ends-with "foo" "oo")   => truthy)
+  (fact (ends-with "foo" "foo")  => truthy)
+  (fact (ends-with "foo" "fooo") => falsey)
+  (fact (ends-with "foo" "ba")   => falsey)
+  (fact (ends-with "foo" nil)    => falsey)
+  (fact (ends-with nil "ba")     => falsey))
+
+(facts
+  (fact (ends-with-i "foo" "O")    => truthy)
+  (fact (ends-with-i "foO" "Oo")   => truthy)
+  (fact (ends-with-i "fOO" "foo")  => truthy)
+  (fact (ends-with-i "foo" nil)    => falsey)
+  (fact (ends-with-i nil "ba")     => falsey))
+
 (fact (numeric? ["0"]) => false)
 
 (facts "decimal-number?"
