@@ -377,6 +377,7 @@
                                                                                                                             :id "777777777777777777000023"}}]
                        :address "Söderkullantie 146"
                        :permitType "P"
+                       :permitSubtype "poikkeamislupa"
                        :id "LP-753-2013-00001"
                        :municipality "753"})
 
