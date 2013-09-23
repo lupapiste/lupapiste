@@ -5,8 +5,8 @@
             [sade.dummy-email-server :as dummy]))
 
 (facts "email titles"
-  (get-email-subject {:subject "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
-  (get-email-subject {:subject "Haavikontie 9, Tampere"}) => "Lupapiste.fi: Haavikontie 9, Tampere")
+  (get-email-subject {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
+  (get-email-subject {:title "Haavikontie 9, Tampere"}) => "Lupapiste.fi: Haavikontie 9, Tampere")
 
 (fact "create application link"
   (fact "..for application"
