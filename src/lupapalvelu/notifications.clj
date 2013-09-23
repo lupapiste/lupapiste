@@ -62,9 +62,9 @@
         (info "email was sent successfully." recipient subject))))
   nil)
 
-(defn get-email-subject [{subject :subject} & [title-key]]
+(defn get-email-subject [{title :title} & [title-key]]
   (let [title-postfix (when title-key (str " - " (i18n/localize "fi" "email.title" title-key)))]
-    (str "Lupapiste.fi: " subject title-postfix)))
+    (str "Lupapiste.fi: " title title-postfix)))
 
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
