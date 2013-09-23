@@ -15,15 +15,18 @@
       (.printStackTrace e)
       {:ok false :error (.getMessage e)})))
 
-(defn execute-all-tests
-  "Lets all the monsters loose. Returns a map where with test names as keys.
+(defn execute-tests
+  "Lets the monsters loose. Returns a map with test names as keys.
    Value is either :ok (if the test passes) or the failure report."
-  []
+  [& test-names]
   (into {} (map (fn [name]
                 [name (let [result (execute-test name)]
                         (if (true? (:ok result))
                           :ok
-                          (or (:results result) (:error result))))]) (keys @tests))))
+                          (or (:results result) (:error result))))])
+             (if (seq test-names)
+               (filter #((set test-names) %) (keys @tests))
+               (keys @tests)))))
 
 (defmacro defmonster
   "Defines a smoke test. First argument is the name, followed by the body of actual test.
