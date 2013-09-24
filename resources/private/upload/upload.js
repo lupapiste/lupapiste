@@ -41,7 +41,7 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
           return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })};
         }));
         var uploadForm$ = $("#attachmentUploadForm");
-        ko.applyBindings(LUPAPISTE.Upload, uploadForm$[0]);
+        uploadForm$.applyBindings(LUPAPISTE.Upload);
         $("#initLoader").hide();
         uploadForm$.show();
       })
