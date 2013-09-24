@@ -140,8 +140,7 @@
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi :child [{:tag :kuvaus}]}
-                                               {:tag :laajennus :child [{:tag :kuvaus}
-                                                                        {:tag :laajennuksentiedot
+                                               {:tag :laajennus :child [{:tag :laajennuksentiedot
                                                                          :child [{:tag :tilavuus}
                                                                                  {:tag :kerrosala}
                                                                                  {:tag :kokonaisala}
@@ -150,8 +149,6 @@
                                                                                          {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
                                                                         {:tag :kuvaus}
                                                                         {:tag :perusparannusKytkin}]}
-                                               {:tag :perusparannus :child [{:tag :kuvaus}]}
-                                               {:tag :uudelleenrakentaminen :child [{:tag :kuvaus}]}
                                                {:tag :purkaminen :child [{:tag :kuvaus}
                                                                         {:tag :purkamisenSyy}
                                                                         {:tag :poistumaPvm }]}
