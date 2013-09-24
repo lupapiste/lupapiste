@@ -3,42 +3,41 @@
 <body>
   <section class="page" id="admin">
     <div class="container">
+      
       <div class="breadcrumb">
         <a href="#!/admin" data-bind="ltext: 'admin.adminpage-title'"></a>
+        <a href="#!/fixtures">fixtures</a>
+        <a href="#!/features">features</a>
       </div>
+      
       <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
 
       <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.users.type, users: $root.users.data(), usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateModal, openCommandEditModal: $root.users.openModifyModal, openCommandResetPwModal: $root.users.openPasswordModal}}"></div>
+
       <br/>
+
       <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.applicantUsers.type, users: $root.applicantUsers.data(), usersListTitle: 'admin.applicant-users', addUserButtonLabel: 'admin.addApplicantUser', openCommandEditModal: $root.applicantUsers.openModifyModal}}"></div>
 
-      <h2>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h2>
-      <ul data-bind="foreach: fixtures.data()">
-        <li>
-          <a href="#" data-bind="text: $data, click: $root.fixtures.apply, attr: {id:$data}"></a>
-        </li>
-      </ul><br/>
       <h2>Aktivoi tili</h2>
       <ul data-bind="foreach: activations.data()">
         <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
       </ul><br/>
-      <h2>Featuret</h2>
-      <ul data-bind="foreach: features.data()">
-        <li><span data-bind="text: $data[0].join('.'), attr: {'style': 'color: ' + ($data[1] ? 'green' : 'red')}"></span></li>
-      </ul><br/>
+
       <h2>Toiminnot</h2>
       <table>
         <thead>
-          <th>status</th>
-          <th>toiminto</th>
-          <th>tyyppi</th>
-          <th>roolit</th>
-          <th>tilat</th>
-          <th>parametrit</th>
-          <th>email</th>
-          <th>feature</th>
-          <th>l&auml;hdekoodi</th>
-          <th>kuvaus</th>
+          <tr>
+            <th>status</th>
+            <th>toiminto</th>
+            <th>tyyppi</th>
+            <th>roolit</th>
+            <th>tilat</th>
+            <th>parametrit</th>
+            <th>email</th>
+            <th>feature</th>
+            <th>l&auml;hdekoodi</th>
+            <th>kuvaus</th>
+          </tr>
         </thead>
         <tbody data-bind="foreach: actions.data">
           <tr>

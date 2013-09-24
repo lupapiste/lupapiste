@@ -130,8 +130,10 @@
                      :html ["index.html" "admin.html"]}
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :debug]
-             :js ["admin.js"]
-             :html ["index.html" "admin.html"]}
+             :js ["admin.js"
+                  "fixtures.js" "features.js"]
+             :html ["index.html" "admin.html"
+                    "fixtures.html" "features.html"]}
 
    :tree    {:depends [:jquery]
              :js ["tree.js"]
