@@ -308,7 +308,9 @@
   {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
           :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
           :rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
-                                                               :sukunimi {:modified 1370856477455, :value "Panaani"}}
+                                                               :sukunimi {:modified 1370856477455, :value "Panaani"}
+                                                               :hetu     {:modified 1370856477455, :value "010101-1234"}
+                                                               :turvakieltoKytkin {:modified 1370856477455, :value true}}
                                                :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
                                                         :postinumero {:value "10203", :modified 1370856487304}
                                                         :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
@@ -392,5 +394,29 @@
   (map2updates [:a :b] {:c 1 :d {:e 2}}) => (just [[[:a :b :c] 1]
                                                    [[:a :b :d :e] 2]] :in-any-order))
 
+;;
+;; Blacklist
+;;
+
+(def hakija {:schema-info {:name "hakija" :version 1}
+             :data (assoc (get-in uusiRakennus [:data :rakennuksenOmistajat :0]) :_selected {:value "henkilo"})})
 
 
+(facts "meta tests"
+  (has-errors? (validate uusiRakennus)) => false
+  (has-errors? (validate hakija)) => false)
+
+(facts "blacklists"
+  (fact "no blacklist, no changes"
+    (strip-blacklisted-data nil nil) => nil
+    (strip-blacklisted-data hakija nil) => hakija
+    (strip-blacklisted-data hakija :x) => hakija
+    (strip-blacklisted-data uusiRakennus :x) => uusiRakennus)
+
+  (fact "no hetu for neighbor, case hakija"
+    (get-in hakija [:data :henkilo :henkilotiedot :hetu]) => truthy
+    (get-in (strip-blacklisted-data hakija :neighbor) [:data :henkilo :henkilotiedot :hetu]) => nil)
+
+  (fact "no hetu for neighbor, case asuintalo"
+    (get-in uusiRakennus [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => truthy
+    (get-in (strip-blacklisted-data uusiRakennus :neighbor) [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => nil))
