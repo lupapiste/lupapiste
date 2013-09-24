@@ -9,6 +9,7 @@
         <a href="#!/fixtures">fixtures</a>
         <a href="#!/features">features</a>
         <a href="#!/actions">actions</a>
+        <a href="#!/activations">activations</a>
       </div>
       
       <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
@@ -19,14 +20,10 @@
 
       <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.applicantUsers.type, users: $root.applicantUsers.data(), usersListTitle: 'admin.applicant-users', addUserButtonLabel: 'admin.addApplicantUser', openCommandEditModal: $root.applicantUsers.openModifyModal}}"></div>
 
-      <h2>Aktivoi tili</h2>
-      <ul data-bind="foreach: activations.data()">
-        <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
-      </ul><br/>
 
-
-    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserTitle: 'admin.addAdminUser', modifyUserTitle: 'admin.editAdminUser'}}"></div>
-
+      <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserTitle: 'admin.addAdminUser', modifyUserTitle: 'admin.editAdminUser'}}"></div>
+      
+    </div>
   </section>
 </body>
 </html>
