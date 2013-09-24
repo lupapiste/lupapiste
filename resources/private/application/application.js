@@ -292,6 +292,7 @@
     var self = this;
     self.id = ko.observable();
     self.infoRequest = ko.observable();
+    self.openInfoRequest = ko.observable();
     self.state = ko.observable();
     self.location = ko.observable();
     self.municipality = ko.observable();
@@ -525,7 +526,7 @@
 
   // When Oskari map has initialized itself, draw shapes and marker
   hub.subscribe("map-initialized", function() {
-    if(application.shapes().length) {
+    if (application.shapes && application.shapes().length) {
       // only one shape per application is currently supported
       hub.send("map-viewvectors", {
         drawing: application.shapes()[0],
@@ -534,6 +535,8 @@
       });
     }
 
+    var x = (application.location && application.location().x) ? application.location().x() : 0;
+    var y = (application.location && application.location().y) ? application.location().y() : 0;
     hub.send("documents-map", {
       data:  [{location: {x: x, y: y}}],
       clear: true

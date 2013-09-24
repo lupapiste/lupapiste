@@ -350,28 +350,17 @@
   hub.onPageChange("create", model.clear);
 
   $(function() {
-
     $("#create").applyBindings(model);
 
-    // Hack: data("ui-autocomplete") sometimes returns null in IE,
-    // retry in 100ms
-    function initSearchAutoComplete() {
-      try {
-        $("#create-search")
-          .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
-          .autocomplete({
-            source:     "/proxy/find-address",
-            delay:      500,
-            minLength:  3,
-            select:     model.autocompleteSelect
-          })
-          .data("ui-autocomplete")._renderItem = model.autocompleteRender;
-      } catch (e){
-        error("Unable to init create-search, retrying...", e);
-        setTimeout(initSearchAutoComplete, 100);
-      }
-    }
-    initSearchAutoComplete();
+    $("#create-search")
+        .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
+        .autocomplete({
+          source:     "/proxy/find-address",
+          delay:      500,
+          minLength:  3,
+          select:     model.autocompleteSelect
+        })
+        .data("ui-autocomplete")._renderItem = model.autocompleteRender;
 
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
@@ -382,17 +371,17 @@
               {municipality: model.municipality().id,
                operation: v.op,
                lang: loc.getCurrentLanguage()})
-          .success(function(d) {
-            model.inforequestsDisabled(d["inforequests-disabled"]);
-            model.newApplicationsDisabled(d["new-applications-disabled"]);
-            model.organization(d);
-          })
-          .error(function(d) {
-            model.inforequestsDisabled(true);
-            model.newApplicationsDisabled(true);
-            notify.error(loc("error.dialog.title"), loc(d.text));
-          })
-          .call();
+            .success(function(d) {
+              model.inforequestsDisabled(d["inforequests-disabled"]);
+              model.newApplicationsDisabled(d["new-applications-disabled"]);
+              model.organization(d);
+            })
+            .error(function(d) {
+              model.inforequestsDisabled(true);
+              model.newApplicationsDisabled(true);
+              notify.error(loc("error.dialog.title"), loc(d.text));
+            })
+            .call();
         } else {
           model.operation(null);
           model.organization(null);

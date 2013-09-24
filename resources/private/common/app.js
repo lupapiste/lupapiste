@@ -50,8 +50,6 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.hashChanged = function () {
-    trace("hash changed");
-
     var hash = (location.hash || "").substr(3);
 
     if (hash === "") {
@@ -61,8 +59,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var path = hash.split("/");
 
-    if (!self.allowAnonymous && self.session === undefined) {
-      trace("session === undefined", hash, path);
+    if (self.session === undefined) {
       ajax.query("user")
         .success(function (e) {
           self.session = true;
@@ -72,10 +69,9 @@ var LUPAPISTE = LUPAPISTE || {};
         })
         .error(function (e) {
           self.session = false;
-          hub.send("logout", e);
+          if (!self.allowAnonymous) hub.send("logout", e);
         })
         .call();
-      return;
     }
 
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
