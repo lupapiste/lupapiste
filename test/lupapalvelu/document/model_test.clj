@@ -360,7 +360,7 @@
                   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
                                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
                                                                 :timestamp 1370856511356}}}}
-                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas/get-schema (schemas/get-latest-schema-version) "uusiRakennus"))}}]
+                  :schema-info {:version 1 :approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}}]
     (modifications-since-approvals real-doc) => 0))
 
 ;;
