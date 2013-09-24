@@ -4,6 +4,8 @@
         [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :only [kaivulupa-application]]
         [lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test :only [kayttolupa-application]]
         [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :only [sijoituslupa-application]]
+        [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
+         :only [mainostus-application viitoitus-application]]
         [lupapalvelu.xml.emit]
         [lupapalvelu.xml.krysp.yleiset-alueet-mapping :only [get-yleiset-alueet-krysp-mapping]]
         [clojure.data.xml]
@@ -60,4 +62,10 @@
       (do-test kayttolupa-application))
 
     (fact "Sijoituslupa application -> canonical -> xml"
-      (do-test sijoituslupa-application))))
+      (do-test sijoituslupa-application))
+
+    (fact "Mainostuslupa application -> canonical -> xml"
+      (do-test mainostus-application))
+
+    (fact "Viitoituslupa application -> canonical -> xml"
+      (do-test viitoitus-application))))
