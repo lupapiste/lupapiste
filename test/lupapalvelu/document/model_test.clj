@@ -304,6 +304,22 @@
     (approvable? document schema-with-approvals [:repeats :1]) => true
     (approvable? document schema-with-approvals [:repeats :0 :single3]) => false))
 
+(def uusiRakennus
+  {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
+          :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
+          :rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
+                                                               :sukunimi {:modified 1370856477455, :value "Panaani"}}
+                                               :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
+                                                        :postinumero {:value "10203", :modified 1370856487304}
+                                                        :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
+                                               :userId {:value "777777777777777777000020", :modified 1370856477473}
+                                               :yhteystiedot {:email {:modified 1370856477455, :value "pena@example.com"}
+                                                              :puhelin {:modified 1370856477455, :value "0102030405"}}}}}},
+   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
+                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
+                                                 :timestamp 1370856511356}}}}
+   :schema-info {:version 1 :approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}})
+
 (facts "modifications-since-approvals"
   (with-timestamp 10
     (modifications-since-approvals nil) => 0
@@ -347,21 +363,8 @@
           (apply-update [:repeats :0 :single3] "")
           (apply-update [:repeats :1 :single3] ""))) => 1))
 
-  (let [real-doc {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
-                         :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
-                         :rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
-                                                                              :sukunimi {:modified 1370856477455, :value "Panaani"}}
-                                                              :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
-                                                                       :postinumero {:value "10203", :modified 1370856487304}
-                                                                       :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
-                                                              :userId {:value "777777777777777777000020", :modified 1370856477473}
-                                                              :yhteystiedot {:email {:modified 1370856477455, :value "pena@example.com"}
-                                                                             :puhelin {:modified 1370856477455, :value "0102030405"}}}}}},
-                  :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
-                                                                :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
-                                                                :timestamp 1370856511356}}}}
-                  :schema-info {:version 1 :approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}}]
-    (modifications-since-approvals real-doc) => 0))
+  (fact "real world uusiRakennus document has no modifications since approvals"
+    (modifications-since-approvals uusiRakennus) => 0))
 
 ;;
 ;; Updates
@@ -388,3 +391,6 @@
 (fact "map2updates"
   (map2updates [:a :b] {:c 1 :d {:e 2}}) => (just [[[:a :b :c] 1]
                                                    [[:a :b :d :e] 2]] :in-any-order))
+
+
+
