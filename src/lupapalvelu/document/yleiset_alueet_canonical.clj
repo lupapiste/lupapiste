@@ -210,25 +210,24 @@
                    {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
                                          ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
                                          }})
-        :Kayttolupa (util/dissoc-in
+        :Kayttolupa (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
+                      ;; Mainostus/viitoituslupa
                       (util/dissoc-in
+                        (util/dissoc-in
 
-                        (if (= operation-name-key :ya-kayttolupa-mainostus-ja-viitoitus)
-                          ;; Mainostus/viitoituslupa
                           (assoc-in
                             ;; Mainostuksen alku-/loppuHetki
                             (if (= "mainostus-tapahtuma-valinta" (-> mainostus-viitoitus-tapahtuma-doc :_selected :value))
                               (assoc-in body [lupa-name-key :toimintajaksotieto]
                                 (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
                               body)
-
                             [lupa-name-key :lupakohtainenLisatietotieto]
                             (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma))
-                          ;; Muu kayttolupa
-                          body)
 
-                        [lupa-name-key :lupaAsianKuvaus])
-                      [lupa-name-key :sijoituslupaviitetieto])
+                          [lupa-name-key :lupaAsianKuvaus])
+                        [lupa-name-key :sijoituslupaviitetieto])
+                      ;; Muu kayttolupa
+                      body)
         :Sijoituslupa (util/dissoc-in
                         (assoc-in body [lupa-name-key :lupakohtainenLisatietotieto]
                           (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
