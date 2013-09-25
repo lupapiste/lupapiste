@@ -1,3 +1,0 @@
-select-other: Muu
-oir.wanna-join.message: Haluatko liittyä Lupapiste.fi palveluun?
-oir.wanna-join.link: Lue lisää
