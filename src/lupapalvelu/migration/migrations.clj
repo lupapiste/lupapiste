@@ -50,5 +50,8 @@
                    (if-let [r (some (fn [nd] (when (= id (:id nd)) nd)) updated-documents)]
                      r
                      d)) documents)]
-    (assoc application :documents (into [] result))
-     ))
+    (assoc application :documents (into [] result))))
+
+(defmigration invalid-schema-infos-validation
+  (let [applications (mongo/select :applications)]
+    (doall (map #(mongo/update-by-id :applications (:id %) (fix-invalid-schema-infos %)) applications))))
