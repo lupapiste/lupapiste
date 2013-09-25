@@ -146,6 +146,10 @@
                               :child [{:tag :LupakohtainenLisatieto
                                        :child [{:tag :selitysteksti :ns "yht"}
                                                {:tag :arvo :ns "yht"}]}]}
+                             {:tag :toimintajaksotieto
+                              :child [{:tag :Toimintajakso
+                                       :child [{:tag :alkuHetki :ns "yht"}
+                                               {:tag :loppuHetki :ns "yht"}]}]}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
