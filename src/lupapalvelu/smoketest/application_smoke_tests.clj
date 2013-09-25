@@ -37,10 +37,11 @@
 ;; Documents have operation information
 
 (defn- application-schemas-have-ops [{documents :documents operations :operations :as application}]
-  (let [docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
-        ops          (count operations)]
-    (when-not (= docs-with-op ops)
-      (:id application))))
+  (when-not (:infoRequest application)
+    (let [docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
+          ops          (count operations)]
+      (when-not (= docs-with-op ops)
+        (:id application)))))
 
 (defn- schemas-have-ops [apps]
   (let [app-ids-with-invalid-docs (filter identity (map application-schemas-have-ops apps))]
