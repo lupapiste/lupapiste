@@ -45,7 +45,7 @@
                              :location location,
                              :attachments [],
                              :operations [operation],
-                             :propertyId 75341600550007,
+                             :propertyId "75341600550007",
                              :documents documents,
 ;                             :allowedAttachmentTypes allowedAttachmentTypes,   ;; TODO: tama pois?
                              :municipality municipality,
