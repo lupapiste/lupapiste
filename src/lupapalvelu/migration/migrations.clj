@@ -30,10 +30,8 @@
     (doall (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications))))
 
 
-(defn fix-invalid-schema-infos [application]
-  (let [documents (:documents application)
-        operations (:operations application)
-        updated-documents (doall (for [o operations]
+(defn fix-invalid-schema-infos [{documents :documents operations :operations :as application}]
+  (let [updated-documents (doall (for [o operations]
                             (let [operation-name (keyword (:name o))
                                   target-document-name (:schema (operation-name op/operations))
                                   created (:created o)
@@ -43,7 +41,7 @@
                                                                        (= target-document-name (get-in d [:schema-info :name])))
                                                                      d)) documents)
                                   updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                     :removable true})))]
+                                                                                                                                                     :removable (= "R" (:permitType application))})))]
                               updated)))
         result (map
                  (fn [{id :id :as d}]
