@@ -17,6 +17,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
             [lupapalvelu.user]
+            [lupapalvelu.users]
             [lupapalvelu.operations]
             [lupapalvelu.statement]
             [lupapalvelu.proxy-services]
