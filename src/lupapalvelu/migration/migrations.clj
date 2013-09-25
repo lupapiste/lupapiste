@@ -50,7 +50,7 @@
                                  (nil? (some
                                          (fn [d]
                                            (when
-                                             (= id (get-in d [:schema-info :id]))
+                                             (= id (get-in d [:schema-info :op :id]))
                                              d))
                                          updated-documents)))
                                operations)
@@ -65,7 +65,7 @@
                                                                                          (= target-document-name (get-in d [:schema-info :name])))
                                                                                        d)) documents)
                                                           updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                     :removable (= "R" (:permitType application))})))]
+                                                                                                                                                                             :removable (= "R" (:permitType application))})))]
                                                       updated)))
         result (map
                  (fn [{id :id :as d}]
