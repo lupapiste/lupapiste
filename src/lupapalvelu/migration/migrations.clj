@@ -32,19 +32,19 @@
 
 (defn fix-invalid-schema-infos [{documents :documents operations :operations :as application}]
   (let [updated-documents (doall (for [o operations]
-                            (let [operation-name (keyword (:name o))
-                                  target-document-name (:schema (operation-name op/operations))
-                                  created (:created o)
-                                  document-to-update (some (fn [d] (if
-                                                                     (and
-                                                                       (= created (:created d))
-                                                                       (= target-document-name (get-in d [:schema-info :name])))
-                                                                     d)) documents)
-                                  updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                     :removable (= "R" (:permitType application))})))
-                                  ]
+                                   (let [operation-name (keyword (:name o))
+                                         target-document-name (:schema (operation-name op/operations))
+                                         created (:created o)
+                                         document-to-update (some (fn [d] (if
+                                                                            (and
+                                                                              (= created (:created d))
+                                                                              (= target-document-name (get-in d [:schema-info :name])))
+                                                                            d)) documents)
+                                         updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
+                                                                                                                                                            :removable (= "R" (:permitType application))})))
+                                         ]
 
-                              updated)))
+                                     updated)))
         unmatched-operations (filter
                                (fn [{id :id :as op}]
                                  (nil? (some
@@ -71,9 +71,19 @@
                  (fn [{id :id :as d}]
                    (if-let [r (some (fn [nd] (when (= id (:id nd)) nd)) updated-documents)]
                      r
-                     d)) documents)]
-    (assoc application :documents (into [] result))))
+                     d)) documents)
+        new-operations (filter
+                         (fn [{id :id :as op}]
+                           (some
+                             (fn [d]
+                               (when
+                                 (= id (get-in d [:schema-info :op :id]))
+                                 d))
+                             result))
+                         operations)]
+
+    (assoc (assoc application :documents (into [] result)) :operations new-operations)))
 
 (defmigration invalid-schema-infos-validation
-  (let [applications (mongo/select :applications)]
+  (let [applications (mongo/select :applications {:infoRequest false})]
     (doall (map #(mongo/update-by-id :applications (:id %) (fix-invalid-schema-infos %)) applications))))
