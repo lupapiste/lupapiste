@@ -177,13 +177,13 @@
 
 (env/in-dev
   (defcommand "create-apikey"
-  {:parameters [:username :password]}
-  [command]
-  (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
-    (let [apikey (security/create-apikey)]
-      (mongo/update
-        :users
-        {:username (:username user)}
-        {$set {"private.apikey" apikey}})
-      (ok :apikey apikey))
+    {:parameters [:username :password]}
+    [command]
+    (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
+      (let [apikey (security/create-apikey)]
+        (mongo/update
+          :users
+          {:username (:username user)}
+          {$set {"private.apikey" apikey}})
+        (ok :apikey apikey))
       (fail :error.unauthorized))))
