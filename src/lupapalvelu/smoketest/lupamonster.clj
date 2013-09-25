@@ -15,7 +15,9 @@
         results (apply execute-tests args)
         all-ok  (reduce
                   (fn [ok [test-name v]]
-                    (printf "%-40s %s\n" (str test-name ":") (if (= :ok v) "OK" (str "FAIL:" v))) (flush)
+                    (printf "%-40s %s\n" (str test-name ":") (if (= :ok v) "OK" (str "FAIL: " v))) (flush)
                     (and ok (= :ok v)))
                   true results)]
+    (println "Tests done, disconnecting")
+    (mongo/disconnect!)
     (when (and started-from-cli (not all-ok)) (System/exit 1))))
