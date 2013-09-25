@@ -41,8 +41,32 @@
                                                                        (= target-document-name (get-in d [:schema-info :name])))
                                                                      d)) documents)
                                   updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                     :removable (= "R" (:permitType application))})))]
+                                                                                                                                                     :removable (= "R" (:permitType application))})))
+                                  ]
+
                               updated)))
+        unmatched-operations (filter
+                               (fn [{id :id :as op}]
+                                 (nil? (some
+                                         (fn [d]
+                                           (when
+                                             (= id (get-in d [:schema-info :id]))
+                                             d))
+                                         updated-documents)))
+                               operations)
+        updated-documents (into updated-documents (for [o unmatched-operations]
+                                                    (let [operation-name (keyword (:name o))
+                                                          target-document-name (:schema (operation-name op/operations))
+                                                          created (:created o)
+                                                          document-to-update (some (fn [d]
+                                                                                     (if
+                                                                                       (and
+                                                                                         (< created (:created d))
+                                                                                         (= target-document-name (get-in d [:schema-info :name])))
+                                                                                       d)) documents)
+                                                          updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
+                                                                                                                                                     :removable (= "R" (:permitType application))})))]
+                                                      updated)))
         result (map
                  (fn [{id :id :as d}]
                    (if-let [r (some (fn [nd] (when (= id (:id nd)) nd)) updated-documents)]
