@@ -18,13 +18,39 @@
        :state state
        :results results})))
 
-(defmonster documents-are-valid
-  (if-let [validation-results (seq (filter seq (map validate-documents @applications)))]
+(defn- documents-are-valid [applications]
+  (if-let [validation-results (seq (filter seq (map validate-documents applications)))]
     {:ok false :results validation-results}
     {:ok true}))
 
-(defmonster submitted-documents-are-valid
-  {:ok true}
-  #_(if-let [validation-results (seq (filter seq (map validate-documents @submitted-applications)))]
-    {:ok false :results validation-results}
-    {:ok true}))
+;; Every document is valid.
+
+(comment
+; Disabled: fail atm.
+(defmonster applications-documents-are-valid
+  (documents-are-valid @applications))
+
+(defmonster submitted-applications-documents-are-valid
+  (documents-are-valid @submitted-applications))
+  )
+
+;; Documents have operation information
+
+(defn- application-schemas-have-ops [{documents :documents operations :operations :as application}]
+  (let [docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
+        ops          (count operations)]
+    (when-not (= docs-with-op ops)
+      (:id application))))
+
+(defn- schemas-have-ops [apps]
+  (let [app-ids-with-invalid-docs (filter identity (map application-schemas-have-ops apps))]
+    (when (seq app-ids-with-invalid-docs)
+      {:ok false :results (into [] app-ids-with-invalid-docs)})))
+
+(defmonster applications-schemas-have-ops
+  (schemas-have-ops @applications))
+
+(comment
+  ; Enable after schemas be gone -migration has been applied to submitted-applications
+  (defmonster submitted-applications-schemas-have-ops
+  (schemas-have-ops @submitted-applications)))
