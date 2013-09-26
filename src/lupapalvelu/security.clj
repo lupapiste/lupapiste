@@ -9,18 +9,49 @@
   (:import [org.mindrot.jbcrypt BCrypt]
            [com.mongodb MongoException MongoException$DuplicateKey]))
 
-(defn non-private [map] (dissoc map :private))
+;;
+;; Password generation and checking:
+;;
 
-(defn get-hash [password salt] (BCrypt/hashpw password salt))
-(defn dispense-salt ([] (dispense-salt 10)) ([n] (BCrypt/gensalt n)))
-(defn check-password [candidate hashed] (BCrypt/checkpw candidate hashed))
-(defn create-apikey [] (apply str (take 40 (repeatedly #(rand-int 10)))))
+(def ^:private token-chars (concat (range (int \0) (inc (int \9)))
+                                   (range (int \A) (inc (int \Z)))
+                                   (range (int \a) (inc (int \z)))))
+
+(defn random-password
+  ([]
+    (random-password 40))
+  ([len]
+    (apply str (repeatedly len (comp char (partial rand-nth token-chars))))))
+
+(defn valid-password? [password]
+    (>= (count password) (env/value :password :minlength)))  ; length should match the length in util.js
+
+(defn get-hash [password salt]
+  (BCrypt/hashpw password salt))
+
+(defn dispense-salt []
+  (BCrypt/gensalt (or (env/value :salt-strength) 10)))
+
+(defn check-password [candidate hashed]
+  (BCrypt/checkpw candidate hashed))
+
+;;
+;; Data privatization:
+;;
+
+(defn non-private
+  "Returns user without private details."
+  [user] (dissoc user :private))
 
 (defn summary
-  "returns common information about the user or nil"
+  "Returns common information about the user or nil"
   [user]
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
+
+;;
+;; User management:
+;;
 
 (defn current-user
   "fetches the current user from session"
@@ -28,7 +59,8 @@
   ([request] (request :user)))
 
 (defn- load-user [username]
-  (mongo/select-one :users {:username username}))
+  (when username
+    (mongo/select-one :users {:username (s/lower-case username)})))
 
 (defn load-current-user
   "fetch the current user from db"
@@ -53,36 +85,54 @@
       (when (:enabled user) user))))
 
 (defn get-non-private-userinfo [user-id]
-  (non-private (mongo/select-one :users {:_id user-id})))
+  (when user-id
+    (non-private (mongo/select-one :users {:_id user-id}))))
 
 (defn get-user-by-email [email]
-  (and email (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
+  (when email
+    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
 
-(defn- random-password []
-  (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
-    (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
+(defn create-apikey [email]
+  (let [apikey (random-password)
+        result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
+    (when result
+      apikey)))
 
-; length should match the length in util.js
-(defn valid-password? [password]
-  (>= (count password) (env/value :password :minlength)))
+(defn change-password [email password]
+  (let [salt              (dispense-salt)
+        hashed-password   (get-hash password salt)]
+    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
+                                                              :private.password hashed-password}})))
 
-(defn create-user-entity [email password userid role firstname lastname phone city street zip enabled organizations]
+(defn create-user-entity [email password person-id role firstname lastname phone city street zip enabled organizations]
   (let [email             (s/lower-case email)
         salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
-    (-> {:username     email
-         :email        email
-         :role         role
-         :firstName    firstname
-         :lastName     lastname
-         :phone        phone
-         :city         city
-         :street       street
-         :zip          zip
-         :enabled      enabled
-         :private      {:salt salt :password hashed-password}}
-      (#(if userid (assoc % :personId userid) %))
-      (#(if (#{:authority :authorityAdmin} (keyword role)) (assoc % :organizations organizations) %)))))
+    (-> {:username      email
+         :email         email
+         :role          role
+         :firstName     firstname
+         :lastName      lastname
+         :personId      person-id
+         :phone         phone
+         :city          city
+         :street        street
+         :zip           zip
+         :enabled       enabled
+         :organizations organizations
+         :private       {:salt salt :password hashed-password}})))
+
+(def user-defaults {:firstName     ""
+                    :lastName      ""
+                    :personId      ""
+                    :phone         ""
+                    :city          ""
+                    :street        ""
+                    :zip           ""
+                    :enabled       false
+                    :organizations []})
+
+(def required-fields #{:username :email})
 
 (defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled organizations]
                          :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
@@ -110,8 +160,9 @@
           (throw (IllegalArgumentException. error-code)))))
     (get-user-by-email email)))
 
-(defn create-user [user]
-  (create-any-user (merge user {:role :applicant :enabled false})))
+(defn create-user [caller params]
+  (let [params (merge user-defaults params)])
+  (create-any-user (merge params {:role :applicant :enabled false})))
 
 (defn create-authority [user]
   (create-any-user (merge user {:role :authority :enabled true})))

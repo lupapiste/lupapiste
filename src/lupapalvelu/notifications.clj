@@ -11,7 +11,6 @@
             [sade.strings :as ss]
             [sade.email :as email]
             [net.cgrand.enlive-html :as enlive]
-            [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
             [sade.email :as email]
             [lupapalvelu.mongo :as mongo]

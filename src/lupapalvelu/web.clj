@@ -25,7 +25,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.etag :as etag]
-            [sade.security :as sadesecurity]
+            [lupapalvelu.activation :as activation]
             [sade.status :as status]
             [sade.strings :as ss]
             [clojure.string :as s]
@@ -288,7 +288,7 @@
 
 (def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
-  (if-let [user (sadesecurity/activate-account key)]
+  (if-let [user (activation/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)

@@ -4,7 +4,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [monger.operators :refer :all]
-            [sade.security :refer [random-password]]
             [noir.request :as request]))
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))
@@ -14,7 +13,7 @@
 
 (def ^:private default-ttl (* 24 60 60 1000))
 
-(def make-token-id (partial random-password 48))
+(def make-token-id (partial security/random-password 48))
 
 (defn make-token [token-type data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
   (let [token-id (make-token-id)

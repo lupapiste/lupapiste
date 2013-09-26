@@ -4,11 +4,11 @@
             [monger.operators :refer :all]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.activation :as activation]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
-            [sade.security :as sadesecurity]
             [sade.util :refer [future*] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -57,7 +57,7 @@
           (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
           (if-let [user (security/create-user (merge data vetuma-data {:email email}))]
             (do
-              (future* (sadesecurity/send-activation-mail-for user))
+              (future* (activation/send-activation-mail-for user))
               (vetuma/consume-user stamp)
               (ok :id (:_id user)))
             (fail :error.create-user))
