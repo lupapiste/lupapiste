@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Login & Logout
+Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Variables ***
@@ -10,6 +11,7 @@ ${PASSWORD}     mikko123
 ${USERNAME}     Mikko Intonen
 
 *** Test Cases ***
+
 
 Login fails with invalid username
   [Tags]  ie8

@@ -11,6 +11,17 @@ Authority admin goes to the authority admin page
   Sipoo logs in
   Wait until page contains element  test-authority-admin-users-table
 
+Password minimum length is 8
+  Click element  test-create-user
+  Wait until  Element should be visible  user-email
+  Input text  user-email  short.password@example.com
+  Input text  user-firstName  Short
+  Input text  user-lastName  Password
+  Input text  user-password  1234567
+  Element Should Be Disabled  test-create-user-save
+  Input text  user-password  12345678
+  Element Should Be Enabled  test-create-user-save
+
 Authority admin creates two users
   Wait Until  Element Should Be Visible  //tr[@class="user-row"]
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
@@ -18,17 +29,6 @@ Authority admin creates two users
   Create user  hessu.kesa@example.com  Hessu  Kesa  12345678
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
-
-Password minimum length is 8
-  Click element  test-create-user
-  Wait until  Element should be visible  user-email
-  Input text       user-email  short.password@example.com
-  Input text       user-firstname  Short
-  Input text       user-lastname  Password
-  Input text       user-password  1234567
-  Element Should Be Disabled  test-create-user-save
-  Input text       user-password  12345678
-  Element Should Be Enabled  test-create-user-save
   Logout
 
 Created user can login
@@ -55,10 +55,10 @@ Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}  ${password}
   Click element  test-create-user
   Wait until  Element should be visible  user-email
-  Input text       user-email  ${email}
-  Input text       user-firstname  ${firstName}
-  Input text       user-lastname  ${lastName}
-  Input text       user-password  ${password}
-  Click element    test-create-user-save
+  Input text  user-email  ${email}
+  Input text  user-firstName  ${firstName}
+  Input text  user-lastName  ${lastName}
+  Input text  user-password  ${password}
+  Click element  test-create-user-save
   Wait Until  Element Should Not Be Visible  dialog-add-user
   Wait Until  Page Should Contain  ${email}

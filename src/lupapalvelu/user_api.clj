@@ -234,7 +234,7 @@
 
 
 (defcommand "create-authority-admin-user"
-  {:parameters [:firstname :lastname :email :password :organizations]
+  {:parameters [:firstName :lastName :email :password :organizations]
    :roles      [:admin]
    :verified   true}
   [{{:keys [password] :as data} :data}]
@@ -247,7 +247,7 @@
     (ok :id (:_id new-user))))
 
 (defcommand "create-authority-user"
-  {:parameters [:firstname :lastname :email :password]
+  {:parameters [:firstName :lastName :email :password]
    :roles      [:authorityAdmin]
    :verified   true}
   [{{:keys [organizations]} :user data :data}]
@@ -262,13 +262,13 @@
 
 
 (defcommand "edit-authority-admin-user"
-  {:parameters [:email :firstname :lastname :enabled :organizations]
+  {:parameters [:email :firstName :lastName :enabled :organizations]
    :roles      [:admin]
    :verified   true}
-  [{{:keys [email firstname lastname enabled organizations]} :data}]
+  [{{:keys [email firstName lastName enabled organizations]} :data}]
   (with-user email
     (fn [user]
-      (user/update-user email {:firstName firstname :lastName lastname :enabled enabled :organizations organizations}))))
+      (user/update-user email {:firstName firstName :lastName lastName :enabled enabled :organizations organizations}))))
 
 (defcommand "reset-authority-admin-password"
   {:parameters [:email :password]
@@ -303,15 +303,15 @@
 ;;
 
 (defcommand "edit-authority-user"
-  {:parameters [:email :firstname :lastname :enabled]
+  {:parameters [:email :firstName :lastName :enabled]
    :roles      [:authorityAdmin]
    :verified   true}
-  [{{:keys [municipality]} :user {:keys [email firstname lastname enabled]} :data}]
+  [{{:keys [municipality]} :user {:keys [email firstName lastName enabled]} :data}]
   (with-user (ss/lower-case email)
     (fn [user]
       (if (not= municipality (:municipality user))
         (fail :error.invalid-authority)
-        (user/update-user email {:firstName firstname :lastName lastname :enabled enabled})))))
+        (user/update-user email {:firstName firstName :lastName lastName :enabled enabled})))))
 
 (defcommand "reset-authority-password"
   {:parameters [:email :password]

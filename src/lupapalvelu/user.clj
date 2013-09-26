@@ -95,10 +95,6 @@
     (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
 
-
-(mongo/select :users {:email "foo@bar.com"})
-
-
 (def required-user-keys [:email :id :role])
 (def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
 (def user-defaults      {:firstName "" :lastName "" :enabled false})
