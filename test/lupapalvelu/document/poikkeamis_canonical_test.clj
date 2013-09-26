@@ -193,7 +193,20 @@
                                                          :type "party"
                                                          :order 5}
                                            :created 1379419361123
-                                           :data {}})
+                                           :data {:henkilotiedot
+                                                  {:etunimi {:modified 1380191655585 :value "Pena"}
+                                                   :sukunimi {:modified 1380191655585 :value "Panaani"}}
+                                                  :kuntaRoolikoodi {:modified 1380191654305 :value "KVV-suunnittelija"}
+                                                  :osoite {:katu {:modified 1380191655585 :value "Paapankuja 12"}
+                                                           :postinumero {:modified 1380191660158 :value "10203"}
+                                                           :postitoimipaikannimi {:modified 1380191655585 :value "Piippola"}}
+                                                  :patevyys {:koulutus {:modified 1380191688364 :value "Elämän koulu"}
+                                                             :patevyysluokka {:modified 1380191690366 :value "C"}}
+                                                  :userId {:modified 1380191655618 :value "777777777777777777000020"}
+                                                  :yhteystiedot {:email {:modified 1380191655585 :value "pena@example.com"}
+                                                                 :puhelin {:modified 1380191655585 :value "0102030405"}}
+                                                  :yritys {:liikeJaYhteisoTunnus {:modified 1380191678631 :value "1743842-0"}
+                                                           :yritysnimi {:modified 1380191663668 :value "ewq"}}}})
 
 (def ^:private lisaosa {:created 1379419361123
                         :data {:kaavoituksen_ja_alueiden_tilanne {:rajoittuuko_tiehen {:modified 1379419814128

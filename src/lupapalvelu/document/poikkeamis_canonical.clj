@@ -1,5 +1,14 @@
 (ns lupapalvelu.document.poikkeamis-canonical)
 
-(defn poikkeus-application-to-canonical [application]
+(defmulti poikkeus-application-to-canonical :permitSubtype)
+
+(defmethod poikkeus-application-to-canonical "poikkeamislupa" [application]
+  (println "ASSDA")
   )
+
+(defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application]
+  (println "ASSDA!!!!!")
+  )
+
+
 
