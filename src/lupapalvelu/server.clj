@@ -5,6 +5,8 @@
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
             [sade.env :as env]
+            [sade.security-headers :as headers]
+            [sade.dummy-email-server]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
@@ -22,8 +24,7 @@
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
             [lupapalvelu.document.schema-repository]
-            [sade.security-headers :as headers]
-            [sade.dummy-email-server]
+            [lupapalvelu.common-actions]
             [lupapalvelu.migration.migration :as migration]))
 
 (defn -main [& _]

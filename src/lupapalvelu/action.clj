@@ -2,14 +2,16 @@
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [clojure.string :as s]
-            [slingshot.slingshot :refer [throw+ try+]]
-            [monger.operators :refer :all]
+            [slingshot.slingshot :refer [try+]]
             [sade.env :as env]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.logging :as log]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.domain :as domain]))
+
+;;
+;; construct command, query and raw
+;;
 
 (defn- action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
   {:action name
@@ -18,14 +20,16 @@
    :created (now)
    :data data})
 
-(defn query [name data] (action name :type :query :data data))
-(defn raw   [name data] (action name :type :raw :data data))
+(defn make-query [name data] (action name :type :query :data data))
+(defn make-raw   [name data] (action name :type :raw :data data))
 
-(defn command
-  ([name data]
-    (command name nil data))
-  ([name user data]
-    (action name :user user :data data :type :command)))
+(defn make-command
+  ([name data]      (make-command name nil data))
+  ([name user data] (action name :user user :data data :type :command)))
+
+;;
+;; some utils
+;;
 
 (defn with-application [command function]
   (if-let [id (-> command :data :id)]
@@ -41,6 +45,31 @@
                             params))]
     (info "blank parameters:" (s/join ", " missing))
     (fail :error.missing-parameters :parameters (vec missing))))
+
+(defn get-applicant-name [_ app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
+      (str first-name \space last-name))
+    (when-let [body (:data (domain/get-applicant-document app))]
+      (if (= (get-in body [:_selected :value]) "yritys")
+        (get-in body [:yritys :yritysnimi :value])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str (:value first-name) \space (:value last-name)))))))
+
+(defn get-application-operation [app]
+  (first (:operations app)))
+
+(defn update-application
+  "get current application from command (or fail) and run changes into it."
+  ([command changes]
+    (update-application command {} changes))
+  ([command mongo-query changes]
+    (with-application command
+      (fn [{:keys [id]}]
+        (mongo/update :applications (assoc mongo-query :_id id) changes)))))
+
+(defn without-system-keys [application]
+  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
 
 ;;
 ;; Actions
@@ -272,77 +301,4 @@
 (defmacro defcommand [& args] `(defaction :command ~@args))
 (defmacro defquery   [& args] `(defaction :query ~@args))
 (defmacro defraw     [& args] `(defaction :raw ~@args))
-
-;;
-;; Default actions
-;;
-
-(defn foreach-action [user data application]
-  (map
-    #(assoc (command % data) :user user :application application)
-    (keys (get-actions))))
-
-(defn validated [command]
-  {(:action command) (validate command)})
-
-(defquery "actions"
- {:roles       [:admin]
-  :description "List of all actions and their meta-data."
-  :verified    true} [_]
- (ok :actions (serializable-actions)))
-
-(defquery "allowed-actions"
- {:verified true} [{:keys [data user application]}]
- (let [results  (map validated (foreach-action user data application))
-       filtered (if (env/dev-mode?)
-                  results
-                  (filter (comp :ok first vals) results))
-       actions  (into {} filtered)]
- (ok :actions actions)))
-
-(defquery   "ping"     {:verified true :description "returns pong."} [_] (ok :text "pong"))
-(defraw     "ping-raw" {:verified true :description "returns pong."} [_] "pong")
-(defcommand "ping!"    {:verified true :description "returns pong."} [_] (ok :text "pong"))
-
-;; TODO: security issue here? return only thruthy features?
-(defquery "features"
-   {:description "returns list of features"}
-   [_] (ok :features (tools/path-vals (env/features))))
-
-(when (env/dev-mode?)
-  (defquery "set-feature"
-    {:description "returns list of features"
-     :parameters [:feature :value]}
-    [{{:keys [feature value]} :data}]
-    (env/set-feature! (env/read-value value) [feature])
-    (ok :feature feature :value value)))
-
-;;
-;; Common helpers:
-;;
-
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-applicant-document app))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
-
-(defn get-application-operation [app]
-  (first (:operations app)))
-
-(defn update-application
-  "get current application from command (or fail) and run changes into it."
-  ([command changes]
-    (update-application command {} changes))
-  ([command mongo-query changes]
-    (with-application command
-      (fn [{:keys [id]}]
-        (mongo/update :applications (assoc mongo-query :_id id) changes)))))
-
-(defn without-system-keys [application]
-  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
 
