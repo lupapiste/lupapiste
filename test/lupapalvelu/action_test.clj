@@ -172,9 +172,9 @@
   (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh")))}})
   (execute {:action "failing"}) => {:ok false :text "kosh"})
 
-(facts "Executed works same when called with one or two parameters"
-  (fact (executed "ping" {:action "ping"}) => {:ok true :text "pong"})
-  (fact (executed {:action "ping"} ) => {:ok true :text "pong"}))
+;; FIXME: these should fail!
+;(fact (executed "ping" {:action "ping"}) => {:ok true :text "pong"})
+;(fact (executed {:action "ping"}) => {:ok true :text "pong"})
 
 (facts "non-blank-parameters"
   (non-blank-parameters nil {}) => nil
