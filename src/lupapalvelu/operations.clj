@@ -325,8 +325,10 @@
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
 
-;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika" ;; Mika nimi tassa kuuluu olla?
-;                                           :required yleiset-alueet-common-schemas}
+;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
+;                                           :permit-type "YA"
+;                                           :required yleiset-alueet-common-schemas
+;                                           :attachments attachment/attachment-types-YA}
    })
 
 (defn permit-type-of-operation [operation]
