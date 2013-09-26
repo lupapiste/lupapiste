@@ -149,157 +149,8 @@
                                        :required ["sijoituslupa-sijoituksen-tarkoitus"]
                                        :attachments attachment/attachment-types-YA})
 
-(def operations
-  {:asuinrakennus               {:schema "uusiRakennus"
-                                 :permit-type "R"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
-                                 :required common-schemas
-                                 :attachments uuden_rakennuksen_liitteet}
-   :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
-                                 :permit-type "R"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
-                                 :required common-schemas
-                                 :attachments uuden_rakennuksen_liitteet}
-   :varasto-tms                 {:schema "uusiRakennus"
-                                 :permit-type "R"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
-                                 :required common-schemas
-                                 :attachments uuden_rakennuksen_liitteet}
-   :julkinen-rakennus           {:schema "uusiRakennus"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments uuden_rakennuksen_liitteet}
-   :muu-uusi-rakentaminen       {:schema "uusiRakennus"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments uuden_rakennuksen_liitteet}
-   :laajentaminen               {:schema "rakennuksen-laajentaminen"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/perustusten-korjaus]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_muutos_liitteet}
-   :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
-                                 :permit-type "R"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet}
-   :auto-katos                  {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :masto-tms                   {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :aita                        {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :maalampo                    {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :jatevesi                    {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet}
-   :purkaminen                  {:schema "purku"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-                                                      :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]}
-   :kaivuu                      {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :puun-kaataminen             {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :muu-maisema-toimenpide      {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required  common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :tontin-ajoliittyman-muutos  {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required  common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :paikoutysjarjestus-muutos   {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required  common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :kortteli-yht-alue-muutos    {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required  common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
-                                 :permit-type "R"
-                                 :required  common-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :poikkeamis                  {:schema "rakennushanke"
-                                 :permit-type "P"
-                                 :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
-                                 :attachments [:paapiirustus [:asemapiirros]]}
-   :meluilmoitus                {:schema "meluilmoitus"
-                                 :permit-type "R"
-                                 :required common-ymp-schemas
-                                 :attachments []}
-   :pima                        {:schema "pima"
-                                 :permit-type "R"
-                                 :required ["ymp-ilm-kesto-mini"]
-                                 :attachments []}
-   :maa-aineslupa               {:schema "ottamismaara"
-                                 :permit-type "R"
-                                 :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
-                                            "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
-                                 :attachments []}
-
-   ;; YA operations
-
-   :ya-kaivuulupa   {:schema "tyomaastaVastaava"
+(def ya-operations
+  {:ya-kaivuulupa   {:schema "tyomaastaVastaava"
                      :permit-type "YA"
                      :schema-data [[["_selected" :value] "yritys"]]
                      :required (conj yleiset-alueet-common-schemas
@@ -329,7 +180,157 @@
 ;                                           :permit-type "YA"
 ;                                           :required yleiset-alueet-common-schemas
 ;                                           :attachments attachment/attachment-types-YA}
-   })
+})
+
+(def operations
+  (merge
+    {:asuinrakennus               {:schema "uusiRakennus"
+                                   :permit-type "R"
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                                 [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet}
+     :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
+                                   :permit-type "R"
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet}
+     :varasto-tms                 {:schema "uusiRakennus"
+                                   :permit-type "R"
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet}
+     :julkinen-rakennus           {:schema "uusiRakennus"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet}
+     :muu-uusi-rakentaminen       {:schema "uusiRakennus"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet}
+     :laajentaminen               {:schema "rakennuksen-laajentaminen"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/perustusten-korjaus]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_muutos_liitteet}
+     :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
+                                   :permit-type "R"
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet}
+     :auto-katos                  {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :masto-tms                   {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :aita                        {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :maalampo                    {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :jatevesi                    {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments kaupunkikuva_toimenpide_liitteet}
+     :purkaminen                  {:schema "purku"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                                                        :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]}
+     :kaivuu                      {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :puun-kaataminen             {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :muu-maisema-toimenpide      {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required  common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :tontin-ajoliittyman-muutos  {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required  common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :paikoutysjarjestus-muutos   {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required  common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :kortteli-yht-alue-muutos    {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required  common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
+                                   :permit-type "R"
+                                   :required  common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :poikkeamis                  {:schema "rakennushanke"
+                                   :permit-type "P"
+                                   :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
+                                   :attachments [:paapiirustus [:asemapiirros]]}
+     :meluilmoitus                {:schema "meluilmoitus"
+                                   :permit-type "R"
+                                   :required common-ymp-schemas
+                                   :attachments []}
+     :pima                        {:schema "pima"
+                                   :permit-type "R"
+                                   :required ["ymp-ilm-kesto-mini"]
+                                   :attachments []}
+     :maa-aineslupa               {:schema "ottamismaara"
+                                   :permit-type "R"
+                                   :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
+                                              "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
+                                   :attachments []}}
+    ya-operations))
 
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
