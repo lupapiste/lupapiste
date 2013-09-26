@@ -17,7 +17,7 @@
   (get-attachment-by-id application-id attachment-id) => (in-state? "requires_user_action"))
 
 (facts "attachments"
-  (let [{application-id :id :as response} (create-app pena :municipality veikko-muni)]
+  (let [{application-id :id :as response} (create-app pena :municipality veikko-muni :operation "asuinrakennus")]
 
     response => ok?
 
@@ -38,11 +38,11 @@
 
       (fact "attachment has been saved to application"
         (get-attachment-by-id application-id (first attachment-ids)) => (contains
-                                                                          {:type {:type-group "tg" :type-id "tid-1"}
+                                                                          {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                            :state "requires_user_action"
                                                                            :versions []})
         (get-attachment-by-id application-id (second attachment-ids)) => (contains
-                                                                           {:type {:type-group "tg" :type-id "tid-2"}
+                                                                           {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                             :state "requires_user_action"
                                                                             :versions []}))
 
