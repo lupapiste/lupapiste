@@ -2,22 +2,20 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [swiss-arrows.core :refer [-<> -<>>]]
             [monger.operators :refer :all]
+            [sade.util :refer [fn-> fn->> future*]]
+            [sade.strings :as ss]
+            [sade.env :as env]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
-            [lupapalvelu.i18n :refer [loc *lang* with-lang]]
-            [clojure.string :refer [split join trim]]
-            [swiss-arrows.core :refer [-<> -<>>]]
-            [sade.util :refer [fn-> fn->> future*]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
-            [sade.strings :as ss]
+            [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
-            [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.i18n :as i18n]
-            [sade.env :as env])
+            [lupapalvelu.stamper :as stamper])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -185,7 +183,7 @@
                              :fileId   file-id
                              :created  now
                              :accepted nil
-                             :user    (security/summary user)
+                             :user    (user/summary user)
                              ; File name will be presented in ASCII when the file is downloaded.
                              ; Conversion could be done here as well, but we don't want to lose information.
                              :filename filename
@@ -502,16 +500,15 @@
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)
-            loc (i18n/localizer lang)]
+      (let [zip (ZipOutputStream. out)]
         ; Add all attachments:
         (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -546,7 +543,7 @@
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
 (defn- loc-organization-name [organization]
-  (get-in organization [:name (keyword *lang*)] (str "???ORG:" (:id organization) "???")))
+  (get-in organization [:name i18n/*lang*] (str "???ORG:" (:id organization) "???")))
 
 (defn- get-organization-name [application-id]
   (-<> application-id
@@ -573,7 +570,7 @@
   ; mea culpa, but what the fuck was I supposed to do
   (mongo/update-by-id :applications (:application-id context)
     {$set {:modified (:created context)}
-     $push {:comments {:text    (loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
+     $push {:comments {:text    (i18n/loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
                        :created (:created context)
                        :user    (:user context)
                        :target  {:type "attachment"

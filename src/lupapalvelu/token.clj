@@ -1,10 +1,11 @@
 (ns lupapalvelu.token
   (:require [taoensso.timbre :as timbre :refer [errorf]]
+            [monger.operators :refer :all]
+            [noir.request :as request]
             [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
-            [monger.operators :refer :all]
-            [noir.request :as request]))
+            [lupapalvelu.user :as user]
+            [lupapalvelu.security :as security]))
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))
 
@@ -27,7 +28,7 @@
                           :created now
                           :expires (+ now ttl)
                           :ip (:remote-addr request)
-                          :user-id (:id (security/current-user))})
+                          :user-id (:id (user/current-user))})
     token-id))
 
 (defn get-token [id & {:keys [consume] :or {consume false}}]

@@ -1,11 +1,12 @@
 (ns lupapalvelu.activation
   (:require [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
             [hiccup.core :refer :all]
             [sade.env :as env]
             [sade.email :as email]
-            [sade.strings :refer [lower-case]]))
+            [sade.strings :refer [lower-case]]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.security :as security]))
 
 ;;
 ;; FIXME:
@@ -66,7 +67,7 @@ p {
         success (mongo/update :users {:_id userid} {$set {:enabled true}})]
     (when success
       (mongo/remove :activation (:_id act))
-      (merge (security/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
+      (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
 
 (defn activate-account-by-email [email]
   (let [act     (mongo/select-one :activation {:email (lower-case email)})
@@ -74,7 +75,7 @@ p {
         success (mongo/update :users {:_id userid} {$set {:enabled true}})]
     (when success
       (mongo/remove :activation (:_id act))
-      (merge (security/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
+      (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
 
 (defn activations []
   (mongo/select :activation))

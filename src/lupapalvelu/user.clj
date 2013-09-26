@@ -1,189 +1,211 @@
 (ns lupapalvelu.user
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
-            [slingshot.slingshot :refer [throw+]]
+  (:require [taoensso.timbre :as timbre :refer [debug info warn]]
             [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.activation :as activation]
-            [camel-snake-kebab :as kebab]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.mime :as mime]
-            [sade.util :refer [future*] :as util]
-            [sade.env :as env]
-            [sade.strings :as ss]
+            [noir.request :as request]
             [noir.session :as session]
-            [noir.core :refer [defpage]]
-            [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.attachment :refer [encode-filename]]
-            [noir.response :as resp]))
+            [camel-snake-kebab :as kebab]
+            [sade.strings :as s]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.security :as security]))
+
+;;
+;; Securing data:
+;;
+
+(defn non-private
+  "Returns user without private details."
+  [user] (dissoc user :private))
+
+(defn summary
+  "Returns common information about the user or nil"
+  [user]
+  (when user
+    (select-keys user [:id :username :firstName :lastName :role])))
+
+;;
+;; User management:
+;;
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
 
-;; TODO: count error trys!
-(defcommand "login"
-  {:parameters [:username :password] :verified false}
-  [{{:keys [username password]} :data}]
-  (if-let [user (security/login (-> username ss/lower-case ss/trim) password)]
-    (do
-      (info "login successful, username:" username)
-      (session/put! :user user)
-      (if-let [application-page (applicationpage-for (:role user))]
-        (ok :user user :applicationpage application-page)
-        (do
-          (error "Unknown user role:" (:role user))
-          (fail :error.login))))
-    (do
-      (info "login failed, username:" username)
-      (fail :error.login))))
+
+(defn current-user
+  "fetches the current user from session"
+  ([] (current-user (request/ring-request)))
+  ([request] (request :user)))
+
+(defn- load-user [username]
+  (when username
+    (mongo/select-one :users {:username (s/lower-case username)})))
+
+(defn load-current-user
+  "fetch the current user from db"
+  []
+  (when-let [user (load-user (:username (current-user)))]
+    (non-private user)))
 
 (defn refresh-user!
   "Loads user information from db and saves it to session. Call this after you make changes to user information."
   []
-  (when-let [user (security/load-current-user)]
+  (when-let [user (load-current-user)]
     (debug "user session refresh successful, username:" (:username user))
     (session/put! :user user)))
 
-(defcommand "register-user"
-  {:parameters [:stamp :email :password :street :zip :city :phone]
-   :verified   true}
-  [{{:keys [stamp] :as data} :data}]
-  (if-let [vetuma-data (vetuma/get-user stamp)]
-    (let [email (-> data :email ss/lower-case ss/trim)]
-      (if (.contains email "@")
-        (try
-          (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-          (if-let [user (security/create-user (merge data vetuma-data {:email email}))]
-            (do
-              (future* (activation/send-activation-mail-for user))
-              (vetuma/consume-user stamp)
-              (ok :id (:_id user)))
-            (fail :error.create-user))
-          (catch IllegalArgumentException e
-            (fail (keyword (.getMessage e)))))
-        (fail :error.email)))
-    (fail :error.create-user)))
+(defn user-in-role [user role & params]
+  (merge (apply hash-map params) (assoc (summary user) :role role)))
 
-(defcommand "change-passwd"
-  {:parameters [:oldPassword :newPassword]
-   :authenticated true
-   :verified true}
-  [{{:keys [oldPassword newPassword]} :data {user-id :id :as user} :user}]
-  (let [user-data (mongo/by-id :users user-id)]
-    (if (security/check-password oldPassword (-> user-data :private :password))
-      (do
-        (debug "Password change: user-id:" user-id)
-        (security/change-password (:email user) newPassword)
-        (ok))
-      (do
-        (warn "Password change: failed: old password does not match, user-id:" user-id)
-        (fail :mypage.old-password-does-not-match)))))
 
-(defcommand "reset-password"
-  {:parameters    [:email]
-   :notified      true
-   :authenticated false}
-  [{data :data}]
-  (let [email (ss/lower-case (:email data))]
-    (infof "Password resert request: email=%s" email)
-    (if (mongo/select-one :users {:email email :enabled true})
-      (let [token (token/make-token :password-reset {:email email})]
-        (infof "password reset request: email=%s, token=%s" email token)
-        (notifications/send-password-reset-email! email token)
-        (ok))
-      (do
-        (warnf "password reset request: unknown email: email=%s" email)
-        (fail :email-not-found)))))
+(defn login
+  "returns non-private information of enabled user with the username and password"
+  [username password]
+  (when-let [user (load-user username)]
+    (and
+      (:enabled user)
+      (security/check-password password (-> user :private :password))
+      (non-private user))))
 
-(defmethod token/handle-token :password-reset [{data :data} {password :password}]
-  (let [email (ss/lower-case (:email data))]
-    (security/change-password email password)
-    (infof "password reset performed: email=%s" email)
-    (resp/status 200 (resp/json {:ok true}))))
+(defn login-with-apikey
+  "returns non-private information of enabled user with the apikey"
+  [apikey]
+  (when apikey
+    (when-let [user (non-private (mongo/select-one :users {:private.apikey apikey}))]
+      (when (:enabled user) user))))
 
-(defquery "user"
-  {:authenticated true :verified true}
-  [{user :user}]
-  (ok :user user))
+(defn get-non-private-userinfo [user-id]
+  (when user-id
+    (non-private (mongo/select-one :users {:_id user-id}))))
 
-(defcommand "save-user-info"
-  {:parameters [:firstName :lastName]
-   :authenticated true
-   :verified true}
-  [{data :data {user-id :id} :user}]
-  (mongo/update-by-id
-    :users
-    user-id
-    {$set (select-keys data [:firstName :lastName :street :city :zip :phone
-                             :architect :degree :experience :fise :qualification
-                             :companyName :companyId :companyStreet :companyZip :companyCity])})
-  (session/put! :user (security/get-non-private-userinfo user-id))
-  (ok))
+(defn get-user-by-email [email]
+  (when email
+    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
 
-(defquery user-attachments
-  {:authenticated true}
-  [{user :user}]
-  (ok :attachments (:attachments user)))
+(defn create-apikey [email]
+  (let [apikey (security/random-password)
+        result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
+    (when result
+      apikey)))
 
-(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
-  (let [user              (security/current-user)
-        filename          (mime/sanitize-filename filename)
-        attachment-type   (keyword attachment-type)
-        attachment-id     (mongo/create-id)
-        file-info         {:attachment-type  attachment-type
-                           :attachment-id    attachment-id
-                           :filename         filename
-                           :content-type     content-type
-                           :size             size
-                           :created          (now)}]
+(defn change-password [email password]
+  (let [salt              (security/dispense-salt)
+        hashed-password   (security/get-hash password salt)]
+    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
+                                                              :private.password hashed-password}})))
 
-    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
+(defn create-user-entity [email password person-id role firstname lastname phone city street zip enabled organizations]
+  (let [email             (s/lower-case email)
+        salt              (security/dispense-salt)
+        hashed-password   (security/get-hash password salt)]
+    (-> {:username      email
+         :email         email
+         :role          role
+         :firstName     firstname
+         :lastName      lastname
+         :personId      person-id
+         :phone         phone
+         :city          city
+         :street        street
+         :zip           zip
+         :enabled       enabled
+         :organizations organizations
+         :private       {:salt salt :password hashed-password}})))
 
-    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
-    (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
+(def user-defaults {:firstName     ""
+                    :lastName      ""
+                    :personId      ""
+                    :phone         ""
+                    :city          ""
+                    :street        ""
+                    :zip           ""
+                    :enabled       false
+                    :organizations []})
 
-    (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
-    (mongo/update-by-id :users (:id user) {$set {(str "attachments." attachment-id) file-info}})
-    (refresh-user!)
+(def required-fields #{:username :email})
 
-    (->> (assoc file-info :ok true)
-      (resp/json)
-      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.
-      (resp/status 200))))
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled organizations]
+                         :or {firstname "" lastname "" password (security/random-password) role :dummy enabled false} :as user}]
+  (let [email             (s/lower-case email)
+        id                (mongo/create-id)
+        old-user          (get-user-by-email email)
+        new-user-base     (create-user-entity email password userid role firstname lastname phone city street zip enabled organizations)
+        new-user          (assoc new-user-base :id id)]
+    (info "register user:" (dissoc user :password))
+    (try
+      (if (= "dummy" (:role old-user))
+        (do
+          (info "rewriting over dummy user:" (:id old-user))
+          (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
+        (do
+          (info "creating new user")
+          (mongo/insert :users new-user)))
+      (catch com.mongodb.MongoException$DuplicateKey e
+        (warn e)
+        (let [error-code  (condp re-matches (.getMessage e)
+                            #".+personId.+"  "error.duplicate-person-id"
+                            #".+email.+"     "error.duplicate-email"
+                            #".+username.+"  "error.duplicate-email"
+                            #".*"            "error.create-user")]
+          (throw (IllegalArgumentException. error-code)))))
+    (get-user-by-email email)))
 
-(defraw download-user-attachment
-  {:parameters [attachment-id]}
-  [{user :user}]
-  (when-not user (throw+ {:status 401 :body "forbidden"}))
-  (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
-    {:status 200
-     :body ((:content attachment))
-     :headers {"Content-Type" (:content-type attachment)
-               "Content-Length" (str (:content-length attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment)))}}
-    {:status 404
-     :body (str "can't file attachment: id=" attachment-id)}))
+(defn create-user [caller params]
+  (let [params (merge user-defaults params)])
+  (create-any-user (merge params {:role :applicant :enabled false})))
 
-(defcommand remove-user-attachment
-  {:parameters [attachment-id]}
-  [{user :user}]
-  (info "Removing user attachment: attachment-id:" attachment-id)
-  (mongo/update-by-id :users (:id user) {$unset {(str "attachments." attachment-id) nil}})
-  (refresh-user!)
-  (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
-  (ok))
+(defn create-authority [user]
+  (create-any-user (merge user {:role :authority :enabled true})))
 
-(env/in-dev
-  (defcommand "create-apikey"
-    {:parameters [:username :password]}
-    [command]
-    (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
-      (let [apikey (security/create-apikey)]
-        (mongo/update
-          :users
-          {:username (:username user)}
-          {$set {"private.apikey" apikey}})
-        (ok :apikey apikey))
-      (fail :error.unauthorized))))
+(defn create-authority-admin [user]
+  (create-any-user (merge user {:role :authorityAdmin :enabled true})))
+
+(defn update-user [email data]
+  (mongo/update :users {:email (s/lower-case email)} {$set data}))
+
+(defn update-organizations-of-authority-user [email new-organization]
+  (let [old-orgs (:organizations (get-user-by-email email))]
+    (when (every? #(not (= % new-organization)) old-orgs)
+      (update-user email {:organizations (merge old-orgs new-organization)}))))
+
+(defn change-password [email password]
+  (let [salt              (security/dispense-salt)
+        hashed-password   (security/get-hash password salt)]
+    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt  salt
+                                                            :private.password hashed-password}})))
+
+(defn get-or-create-user-by-email [email]
+  (let [email (s/lower-case email)]
+    (or
+      (get-user-by-email email)
+      (create-any-user {:email email}))))
+
+(defn authority? [{role :role}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{role :role}]
+  (= :applicant (keyword role)))
+
+(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
+  (= id1 id2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
