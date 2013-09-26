@@ -1,13 +1,6 @@
 (ns lupapalvelu.security
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
-            [sade.strings :as s]
-            [sade.env :as env]
-            [noir.request :as request]
-            [noir.session :as session])
-  (:import [org.mindrot.jbcrypt BCrypt]
-           [com.mongodb MongoException MongoException$DuplicateKey]))
+  (:require [sade.env :as env])
+  (:import [org.mindrot.jbcrypt BCrypt]))
 
 ;;
 ;; Password generation and checking:
