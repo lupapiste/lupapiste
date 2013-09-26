@@ -1,9 +1,8 @@
 (ns lupapalvelu.notifications
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [monger.operators]
-            [sade.strings :refer [suffix]]
-            [clojure.set :refer [difference]]
-            [lupapalvelu.i18n :refer [loc]]
+            [clojure.set :as set]
+            [lupapalvelu.i18n :refer [loc] :as i18n]
             [sade.util :refer [future*]]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -11,17 +10,8 @@
             [sade.strings :as ss]
             [sade.email :as email]
             [net.cgrand.enlive-html :as enlive]
-            [sade.security :as sadesecurity]
-            [sade.client :as sadeclient]
-            [sade.email :as email]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.client :as client]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.components.core :as c]
-            [noir.request :as request]))
+            [lupapalvelu.user :as user]))
 
 ;;
 ;; Helpers
@@ -78,7 +68,7 @@
                            (filter (fn [user] (not (some #(= (:role user) %) excluded-roles))))
                            (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
     (if (some #(= "statementGiver" %) excluded-roles)
-      (difference
+      (set/difference
         (set auth-user-emails)
         (map #(-> % :person :email) statements))
       auth-user-emails)))
@@ -163,7 +153,7 @@
                                                              :conversation-link-sv (get-application-link application path-suffix host "sv")})))
 
 (defn send-notifications-on-new-comment! [application user host]
-  (when (security/authority? user)
+  (when (user/authority? user)
     (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
           subject      (get-email-subject application "new-comment")
           msg          (get-message-for-new-comment application host)]

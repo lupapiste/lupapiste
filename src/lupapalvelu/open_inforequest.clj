@@ -4,7 +4,7 @@
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [lupapalvelu.organization :as organization]
-            [sade.security :refer [random-password]]
+            [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]
             [noir.session :as session]
             [noir.response :as resp]))

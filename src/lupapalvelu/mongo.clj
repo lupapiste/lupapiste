@@ -1,5 +1,5 @@
 (ns lupapalvelu.mongo
-  (:refer-clojure :exclude [count])
+  (:refer-clojure :exclude [count remove])
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
@@ -97,6 +97,10 @@
 
 (defn drop-collection [collection]
   (mc/drop collection))
+
+(defn remove
+  "Removes documents by id."
+  [collection id] (mc/remove collection {:_id id}))
 
 (defn remove-many
   "Removes all documents matching query."
