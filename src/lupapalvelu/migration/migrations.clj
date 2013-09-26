@@ -14,10 +14,10 @@
       (assoc :schema-info schema-info)
       (dissoc :schema))))
 
-(defmigration schemas-be-gone
-  {:apply-when (pos? (mongo/count :applications {:schema-version {$exists false}}))}
-  (doseq [application (mongo/select :applications {:schema-version {$exists false}} {:documents true})]
-    (mongo/update-by-id :applications (:id application) {$set {:schema-version 1
+(defmigration schemas-be-gone-from-submitted
+  {:apply-when (pos? (mongo/count :submitted-applications {:schema-version {$exists false}}))}
+  (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
+    (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
                                                                :documents (map drop-schema-data (:documents application))}})))
 
 (defn verdict-to-verdics [{verdict :verdict}]
