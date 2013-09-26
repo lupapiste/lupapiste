@@ -1,6 +1,8 @@
 (ns lupapalvelu.fixture.minimal
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture :refer :all]))
+            [lupapalvelu.fixture :refer :all]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.attachment :as attachment]))
 
 (def ^:private local-legacy "http://localhost:8000/dev/krysp")
 
@@ -278,15 +280,22 @@
     :role  "applicant"}
    ])
 
-(def ^:private ya-operations-attachments [[:yleiset-alueet :aiemmin-hankittu-sijoituspaatos]
-                                          [:yleiset-alueet :tilapainen-liikennejarjestelysuunnitelma]
-                                          [:yleiset-alueet :tyyppiratkaisu]
-                                          [:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]
-                                          [:yleiset-alueet :liitoslausunto]
-                                          [:yleiset-alueet :asemapiirros]
-                                          [:yleiset-alueet :rakennuspiirros]
-                                          [:yleiset-alueet :suunnitelmakartta]
-                                          [:muut :muu]])
+(def ^:private ya-attachments-reorganized
+  (into []
+    (map vec
+      (partition 2
+        (flatten
+          (reduce
+            (fn [r [k v]]
+              (println "\n (into [] (cons k (interpose k v))): " (into [] (cons k (interpose k v))))
+              (conj r (into [] (cons k (interpose k v)))))
+            []
+            (partition 2 attachment/attachment-types-YA)))))))
+
+(def ya-operations-attachments-all (reduce
+                                     (fn [r k] (assoc r k ya-attachments-reorganized))
+                                     {}
+                                     (keys operations/ya-operations)))
 
 (def organizations [{:id "186-R"
                      :inforequest-enabled true
@@ -336,19 +345,7 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments
-                     {:ya-kaivuulupa ya-operations-attachments
-                      :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat ya-operations-attachments
-                      :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot ya-operations-attachments
-                      :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot ya-operations-attachments
-                      :ya-kayttolupa-kadulta-tapahtuvat-nostot ya-operations-attachments
-                      :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi ya-operations-attachments
-                      :ya-kayttolupa-rakennustelineet-kadulla ya-operations-attachments
-                      :ya-kayttolupa-muu-kayttolupa ya-operations-attachments
-                      :ya-kayttolupa-mainostus-ja-viitoitus ya-operations-attachments
-                      :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen ya-operations-attachments
-                      :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-operations-attachments
-                      :ya-sijoituslupa-muu-sijoituslupa ya-operations-attachments}}
+                     :operations-attachments ya-operations-attachments-all}
 
                     {:id "753-P"
                      :inforequest-enabled true
@@ -398,7 +395,7 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments {:ya-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
+                      :operations-attachments ya-operations-attachments-all}
 
                     {:id "638-R"
                      :inforequest-enabled true
