@@ -410,7 +410,7 @@
 (validate-all-documents documents)
 
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus) => truthy
+  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)

@@ -1,14 +1,22 @@
-(ns lupapalvelu.document.poikkeamis-canonical)
+(ns lupapalvelu.document.poikkeamis-canonical
+  (require [lupapalvelu.document.canonical-common :refer :all]))
 
-(defmulti poikkeus-application-to-canonical :permitSubtype)
+(defn- root-element [application lang]
+  {:Popast
+   {:toimituksenTiedot (toimituksen-tiedot application lang)
+    }})
 
-(defmethod poikkeus-application-to-canonical "poikkeamislupa" [application]
-  (println "ASSDA")
-  )
 
-(defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application]
-  (println "ASSDA!!!!!")
-  )
+
+(defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
+
+(defmethod poikkeus-application-to-canonical "poikkeamislupa" [application lang]
+  (let [root (root-element application lang)]
+    root))
+
+(defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
+  (let [root (root-element application lang)]
+    root))
 
 
 
