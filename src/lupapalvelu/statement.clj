@@ -5,7 +5,7 @@
             [sade.env :refer :all]
             [sade.strings :refer [lower-case]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :refer [with-user] :as user]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]))
