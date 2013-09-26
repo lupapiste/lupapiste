@@ -14,7 +14,8 @@
             [sade.env :as env]
             [sade.status :as status]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail defcommand defquery now] :as core]
+            [lupapalvelu.core :refer [ok fail now] :as core]
+            [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.i18n :refer [*lang*]]
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
@@ -120,23 +121,23 @@
   (with-logging-context
     {:applicationId (get-in action [:data :id])
      :userId        (get-in action [:user :id])}
-    (core/execute action)))
+    (action/execute action)))
 
 (defn- execute-command
   ([name] (execute-command name (from-json (request/ring-request))))
-  ([name params] (execute (enriched (core/command name params)))))
+  ([name params] (execute (enriched (action/command name params)))))
 
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
 
 (defn- execute-query [name params]
-  (execute (enriched (core/query name params))))
+  (execute (enriched (action/query name params))))
 
 (defjson "/api/query/:name" {name :name}
   (execute-query name (from-query)))
 
 (defpage "/api/raw/:name" {name :name}
-  (let [response (execute (enriched (core/raw name (from-query))))]
+  (let [response (execute (enriched (action/raw name (from-query))))]
     (if-not (= (:ok response) false)
       response
       (resp/status 404 (resp/json response)))))
@@ -335,7 +336,7 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (execute (enriched (core/command "upload-attachment" upload-data)))]
+        result (execute (enriched (action/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.8.1.html"

@@ -9,6 +9,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.core :refer :all]
+            [lupapalvelu.action :refer [defquery defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
