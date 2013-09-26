@@ -130,7 +130,7 @@
     empty-tag))
 
 
-(defn- get-state [application]
+(defn get-state [application]
   (let [state (keyword (:state application))]
     {:Tilamuutos
      {:tila (application-state-to-krysp-state state)

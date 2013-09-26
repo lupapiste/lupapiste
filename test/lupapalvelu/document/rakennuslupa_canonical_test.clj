@@ -441,7 +441,7 @@
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
-(def get-handler #'lupapalvelu.document.rakennuslupa_canonical/get-handler)
+(def get-handler #'lupapalvelu.document.canonical-common/get-handler)
 
 (facts "Handler is sonja"
   (let [handler (get-handler application)
