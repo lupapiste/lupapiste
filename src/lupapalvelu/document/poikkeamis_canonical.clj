@@ -16,7 +16,7 @@
       root
       [:Popast :poikkeamisasiatieto]
       {:Poikkeamisasia {:kasittelynTilatieto (get-state application)
-                         }})))
+                        :kuntakoodi (:municipality application) }})))
 
 (defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
   (let [root (root-element application lang)]

@@ -425,6 +425,7 @@
         kasittelynTilatieto (:kasittelynTilatieto Poikkeamisasia) => truthy
         Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
         pvm (:pvm Tilamuutos) => "2013-09-17"
+        kuntakoodi (:kuntakoodi Poikkeamisasia) => (:municipality poikkari-hakemus)
 
         ;end of abstarctPoikkeamistype
         ;asianTiedot
