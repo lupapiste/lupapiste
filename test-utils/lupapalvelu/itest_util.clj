@@ -196,7 +196,7 @@
 ;; Stuffin' data in
 ;;
 
-(defn upload-attachment [apikey application-id attachment-id expect-to-succeed attachment-type]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
@@ -245,13 +245,9 @@
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
-(defn get-attachment-type [application attachment-id]
-  (->> application :attachments  (filter #(= attachment-id (:id %))) :type))
-
 (defn upload-attachment-to-all-placeholders [apikey application]
-  (doseq [attachment-id (get-attachment-ids application)]
-    (let [attachment-type (get-attachment-type application attachment-id)]
-      (upload-attachment pena (:id application) attachment-id true attachment-type))))
+  (let [attachments (:attachments application)]
+    (map (fn [attachment] (upload-attachment pena (:id application) attachment true)) attachments)))
 
 ;;
 ;; Vetuma

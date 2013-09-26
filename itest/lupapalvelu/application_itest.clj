@@ -169,8 +169,8 @@
         (get-in paatos [:paivamaarat :lainvoimainen]) => 124
 
         (let [first-attachment (get-in application [:attachments 0])]
-          (upload-attachment sonja (:id application) (:id first-attachment) true (:type first-attachment))
-          (upload-attachment pena (:id application) (:id first-attachment) false (:type first-attachment)))))))
+          (upload-attachment sonja (:id application) first-attachment true)
+          (upload-attachment pena (:id application) first-attachment false))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)
