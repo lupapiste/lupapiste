@@ -140,12 +140,7 @@
 ;; TODO: Mihin kielitieto (lang) lisataan? Rakval-puolella on lisatiedoissa asioimiskieli.
 ;;
 (defn- permits [application lang]
-;  (println "\n application: ")
-;  (clojure.pprint/pprint application)
-;  (println "\n documents-by-type: \n")
-;  (clojure.pprint/pprint (by-type (:documents application)))
-;  (println "\n")
-
+  ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
 
@@ -194,8 +189,6 @@
                                                             :johtoselvitysviitetieto false}}
 
         config (or (operation-name-key mega-config) (lupa-name-key mega-config))
-
-        _ (println "\n config: " config)
 
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         tyoaika-doc (when (:tyoaika config)
