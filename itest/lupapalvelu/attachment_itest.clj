@@ -26,8 +26,8 @@
     (let [resp (command veikko
                  :create-attachments
                  :id application-id
-                 :attachmentTypes [{:type-group "tg" :type-id "tid-1"}
-                                   {:type-group "tg" :type-id "tid-2"}])
+                 :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
+                                   {:type-group "paapiirustus" :type-id "pohjapiirros"}])
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -42,7 +42,7 @@
                                                                            :state "requires_user_action"
                                                                            :versions []})
         (get-attachment-by-id application-id (second attachment-ids)) => (contains
-                                                                           {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
+                                                                           {:type {:type-group "paapiirustus" :type-id "pohjapiirros"}
                                                                             :state "requires_user_action"
                                                                             :versions []}))
 
@@ -63,7 +63,7 @@
             (raw pena "pdf-export" :id application-id) => http200?)
 
           (doseq [attachment-id (get-attachment-ids application)
-                  :let [file-id  (attachment-latest-file-id application attachment-id)]]
+                  :let [file-id (attachment-latest-file-id application attachment-id)]]
 
             (fact "view-attachment anonymously should not be possible"
               (raw nil "view-attachment" :attachment-id file-id) => http401?)
