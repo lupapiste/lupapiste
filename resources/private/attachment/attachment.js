@@ -264,6 +264,7 @@ var attachment = (function() {
       authorization: authorizationModel,
       commentsModel: commentsModel
     });
+    $("#upload-page").applyBindings({});
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
