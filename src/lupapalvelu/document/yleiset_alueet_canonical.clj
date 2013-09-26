@@ -2,7 +2,8 @@
   (:require [lupapalvelu.core :refer [now]]
             [lupapalvelu.document.canonical-common :refer :all]
             [sade.util :as util]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk]
+            [sade.common-reader :as cr]))
 
 (defn- get-henkilo [henkilo]
   {:nimi {:etunimi (-> henkilo :henkilotiedot :etunimi :value)
@@ -148,6 +149,8 @@
         operation-name-key (-> application :operations first :name keyword)
         lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
 
+        ;; TODO: default config
+
         mega-config {:Tyolupa {:dummy-maksaja false
                                :tyomaasta-vastaava true
                                :tyoaika true
@@ -263,11 +266,7 @@
                  (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
                body)]
 
-    (walk/prewalk
-      (fn [x]
-        (when-not (and (vector? x) (keyword? (first x)) (nil? (second x)))
-          x))
-      body)))
+    (cr/strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
