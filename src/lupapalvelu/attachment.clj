@@ -90,7 +90,7 @@
           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
           :muu]])
 
-(def ^:private attachment-types-YA
+(def attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                     :tilapainen-liikennejarjestelysuunnitelma
                     :tyyppiratkaisu

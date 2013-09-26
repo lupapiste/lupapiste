@@ -6,6 +6,7 @@
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.core :refer :all]
             [sade.util :refer :all]
             [sade.env :as env]))
@@ -141,28 +142,12 @@
                                       :permit-type "YA"
                                       :required (conj yleiset-alueet-common-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
-                                      :attachments [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                                                                     :tilapainen-liikennejarjestelysuunnitelma
-                                                                     :tyyppiratkaisu
-                                                                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                                                                     :liitoslausunto
-                                                                     :asemapiirros
-                                                                     :rakennuspiirros
-                                                                     :suunnitelmakartta]
-                                                    :muut [:muu]]})
+                                      :attachments attachment/attachment-types-YA})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
                                        :required ["sijoituslupa-sijoituksen-tarkoitus"]
-                                       :attachments [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                                                                      :tilapainen-liikennejarjestelysuunnitelma
-                                                                      :tyyppiratkaisu
-                                                                      :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                                                                      :liitoslausunto
-                                                                      :asemapiirros
-                                                                      :rakennuspiirros
-                                                                      :suunnitelmakartta]
-                                                     :muut [:muu]]})
+                                       :attachments attachment/attachment-types-YA})
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
@@ -321,15 +306,7 @@
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
                      ;; HUOM: Krysp_itesti (YA) olettaa attachmentsiin on annettu jotain
-                     :attachments [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                                                    :tilapainen-liikennejarjestelysuunnitelma
-                                                    :tyyppiratkaisu
-                                                    :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                                                    :liitoslausunto
-                                                    :asemapiirros
-                                                    :rakennuspiirros
-                                                    :suunnitelmakartta]
-                                   :muut [:muu]]}
+                     :attachments attachment/attachment-types-YA}
 
    :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat                              ya-kayttolupa-general
    :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot                         ya-kayttolupa-general
@@ -342,15 +319,7 @@
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type "YA"
                                            :required yleiset-alueet-common-schemas
-                                           :attachments [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                                                                          :tilapainen-liikennejarjestelysuunnitelma
-                                                                          :tyyppiratkaisu
-                                                                          :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                                                                          :liitoslausunto
-                                                                          :asemapiirros
-                                                                          :rakennuspiirros
-                                                                          :suunnitelmakartta]
-                                                         :muut [:muu]]}
+                                           :attachments attachment/attachment-types-YA}
 
    :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen   ya-sijoituslupa-general
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-sijoituslupa-general
