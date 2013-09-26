@@ -369,10 +369,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot
-                      {:LupaTunnus
-                       {:muuTunnustieto {:MuuTunnus {:tunnus (:id application)
-                                                     :sovellus "Lupapiste"}}}}
+                      :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto
                       {:Osapuolet
                        {:osapuolitieto (get-parties documents)

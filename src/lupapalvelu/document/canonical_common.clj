@@ -138,3 +138,10 @@
       :kasittelija (get-handler application)}}))
 
 
+(defn lupatunnus [application]
+  {:LupaTunnus
+   {:muuTunnustieto {:MuuTunnus {:tunnus (:id application)
+                                 :sovellus "Lupapiste"}}}}
+  )
+
+
