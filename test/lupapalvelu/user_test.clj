@@ -75,3 +75,6 @@
 (facts "same-user?"
   (same-user? {:id "123"} {:id "123"}) => true
   (same-user? {:id "123"} {:id "234"}) => false)
+
+(facts "with-user"
+  (with-user nil nil) => (contains {:ok false})
