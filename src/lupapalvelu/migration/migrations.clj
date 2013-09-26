@@ -4,7 +4,11 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
+            [clojure.walk :as walk]
+            [sade.util :refer [dissoc-in]]
+            [sade.common-reader :refer [strip-nils postwalk-map]]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -12,10 +16,10 @@
       (assoc :schema-info schema-info)
       (dissoc :schema))))
 
-(defmigration schemas-be-gone
-  {:apply-when (pos? (mongo/count :applications {:schema-version {$exists false}}))}
-  (doseq [application (mongo/select :applications {:schema-version {$exists false}} {:documents true})]
-    (mongo/update-by-id :applications (:id application) {$set {:schema-version 1
+(defmigration schemas-be-gone-from-submitted
+  {:apply-when (pos? (mongo/count :submitted-applications {:schema-version {$exists false}}))}
+  (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
+    (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
                                                                :documents (map drop-schema-data (:documents application))}})))
 
 (defn verdict-to-verdics [{verdict :verdict}]
@@ -26,3 +30,127 @@
   {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
   (let [applications (mongo/select :applications {:verdict {$exists true}})]
     (doall (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications))))
+
+
+(defn fix-invalid-schema-infos [{documents :documents operations :operations :as application}]
+  (let [updated-documents (doall (for [o operations]
+                                   (let [operation-name (keyword (:name o))
+                                         target-document-name (:schema (operation-name op/operations))
+                                         created (:created o)
+                                         document-to-update (some (fn [d] (if
+                                                                            (and
+                                                                              (= created (:created d))
+                                                                              (= target-document-name (get-in d [:schema-info :name])))
+                                                                            d)) documents)
+                                         updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
+                                                                                                                                                            :removable (= "R" (:permitType application))})))
+                                         ]
+
+                                     updated)))
+        unmatched-operations (filter
+                               (fn [{id :id :as op}]
+                                 (nil? (some
+                                         (fn [d]
+                                           (when
+                                             (= id (get-in d [:schema-info :op :id]))
+                                             d))
+                                         updated-documents)))
+                               operations)
+        updated-documents (into updated-documents (for [o unmatched-operations]
+                                                    (let [operation-name (keyword (:name o))
+                                                          target-document-name (:schema (operation-name op/operations))
+                                                          created (:created o)
+                                                          document-to-update (some (fn [d]
+                                                                                     (if
+                                                                                       (and
+                                                                                         (< created (:created d))
+                                                                                         (= target-document-name (get-in d [:schema-info :name])))
+                                                                                       d)) documents)
+                                                          updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
+                                                                                                                                                                             :removable (= "R" (:permitType application))})))]
+                                                      updated)))
+        result (map
+                 (fn [{id :id :as d}]
+                   (if-let [r (some (fn [nd] (when (= id (:id nd)) nd)) updated-documents)]
+                     r
+                     d)) documents)
+        new-operations (filter
+                         (fn [{id :id :as op}]
+                           (some
+                             (fn [d]
+                               (when
+                                 (= id (get-in d [:schema-info :op :id]))
+                                 d))
+                             result))
+                         operations)]
+
+    (assoc (assoc application :documents (into [] result)) :operations new-operations)))
+
+(defmigration invalid-schema-infos-validation
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications (mongo/select collection {:infoRequest false})]
+      (doall (map #(mongo/update-by-id collection (:id %) (fix-invalid-schema-infos %)) applications)))))
+
+;; Old migration previoisly run to applications collection only
+
+(defn- update-document-kuntaroolikoodi [{data :data :as document}]
+  (let [to-update (tools/deep-find data [:patevyys :kuntaRoolikoodi])
+        updated-document (when (not-empty to-update)
+                           (assoc document :data (reduce
+                                                   (fn [d [old-key v]]
+                                                     (let [new-key (conj (subvec old-key 0 (count old-key)) :kuntaRoolikoodi)
+                                                           cleaned-up (dissoc-in d (conj old-key :patevyys :kuntaRoolikoodi))]
+                                                       (assoc-in cleaned-up new-key v)))
+                                                   data to-update)))]
+    (if updated-document
+      updated-document
+      document)))
+
+
+(defn kuntaroolikoodiUpdate [{d :documents :as a}]
+    (assoc a :documents (map update-document-kuntaroolikoodi d)))
+
+(defmigration submitted-applications-kuntaroolikoodi-migraation
+  (let [applications (mongo/select :submitted-applications)]
+    (dorun (map #(mongo/update :submitted-applications {:_id (:id %)} (kuntaroolikoodiUpdate %)) applications))))
+
+(defn- strip-fax [doc]
+  (postwalk-map (partial map (fn [[k v]] (when (not= :fax k) [k v]))) doc))
+
+(defn- cleanup-uusirakennus [doc]
+  (if (and (= "uusiRakennus" (get-in doc [:schema-info :name])) (get-in doc [:data :henkilotiedot]))
+    (-> doc
+      (dissoc-in [:data :userId])
+      (dissoc-in [:data :henkilotiedot])
+      (dissoc-in [:data :osoite])
+      (dissoc-in [:data :yhteystiedot]))
+    doc))
+
+(defn- fix-hakija [doc]
+  (if (and (= "hakija" (get-in doc [:schema-info :name])) (get-in doc [:data :henkilotiedot]))
+    (if (or (get-in doc [:data :henkilo]) (get-in doc [:data :yritys]))
+      ; Cleanup
+      (-> doc
+        (dissoc-in [:data :userId])
+        (dissoc-in [:data :henkilotiedot])
+        (dissoc-in [:data :osoite])
+        (dissoc-in [:data :yhteystiedot]))
+      ; Or move
+      (assoc doc :data {:henkilo (:data doc)}))
+    doc))
+
+(defmigration document-data-cleanup-rel-1.12
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications (mongo/select collection)]
+      (dorun
+        (map
+          (fn [app]
+            (mongo/update-by-id collection (:id app)
+              {$set {:documents (map
+                                  (fn [doc] (-> doc
+                                                 strip-fax
+                                                 cleanup-uusirakennus
+                                                 fix-hakija
+                                                 strip-nils))
+                                  (:documents app))}}))
+          applications)))))
