@@ -124,7 +124,8 @@
                    :rakentamistapa      (get-text rakennus :rakentamistapa)}
          :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
                     :lammonlahde        (get-text rakennus :polttoaine)}
-         :varusteet                     (cr/all-of   rakennus :varusteet)
+                                        ; key :uima-altaita has been removed from lupapiste
+         :varusteet                     (dissoc (cr/all-of rakennus :varusteet) :uima-altaita)
          :huoneistot (->>
                        (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
