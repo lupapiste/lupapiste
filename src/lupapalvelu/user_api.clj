@@ -14,7 +14,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :refer [with-user] :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :refer [encode-filename]]))
@@ -184,6 +184,13 @@
 
 
 
+(defquery "authority-users"
+  {:roles [:authorityAdmin]
+   :verified true}
+  [{{:keys [organizations]} :user}]
+  (let [organization (first organizations)
+        users (map user/non-private (mongo/select :users {:organizations {$in [organization]}}))]
+    (ok :users users)))
 
 
 
@@ -207,6 +214,18 @@
 
 
 
+
+(defquery "applicant-users"
+  {:roles [:admin]
+   :verified true}
+  [_]
+  (let [users (map user/non-private (mongo/select :users {:role "applicant"}))]
+    (ok :users users)))
+
+(defquery "authority-admin-users"
+  {:roles [:admin]
+   :verified true}
+  [_] (ok :users (map user/non-private (mongo/select :users {:role "authorityAdmin"}))))
 
 
 
