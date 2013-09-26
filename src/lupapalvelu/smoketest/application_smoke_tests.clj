@@ -50,7 +50,5 @@
 (defmonster applications-schemas-have-ops
   (schemas-have-ops @applications))
 
-(comment
-  ; Enable after schemas be gone -migration has been applied to submitted-applications
-  (defmonster submitted-applications-schemas-have-ops
-  (schemas-have-ops @submitted-applications)))
+(defmonster submitted-applications-schemas-have-ops
+  (schemas-have-ops @submitted-applications))
