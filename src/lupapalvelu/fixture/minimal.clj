@@ -286,9 +286,7 @@
       (partition 2
         (flatten
           (reduce
-            (fn [r [k v]]
-              (println "\n (into [] (cons k (interpose k v))): " (into [] (cons k (interpose k v))))
-              (conj r (into [] (cons k (interpose k v)))))
+            (fn [r [k v]]  (conj r (into [] (cons k (interpose k v)))))
             []
             (partition 2 attachment/attachment-types-YA)))))))
 
