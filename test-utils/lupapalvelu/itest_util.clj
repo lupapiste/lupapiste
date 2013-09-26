@@ -238,7 +238,7 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       ;(facts "Statement upload should fail"
-       ; (fact "Status code" (:status resp) => 302)
+      ;  (fact "Status code" (:status resp) => 302)
       ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.1.html") => 0))
       ))))
 
@@ -246,8 +246,8 @@
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
-  (let [attachments (:attachments application)]
-    (map (fn [attachment] (upload-attachment pena (:id application) attachment true)) attachments)))
+  (doseq [attachment (:attachments application)]
+    (upload-attachment pena (:id application) attachment true)))
 
 ;;
 ;; Vetuma
