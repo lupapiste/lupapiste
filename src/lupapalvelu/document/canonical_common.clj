@@ -123,3 +123,18 @@
    :kuntakoodi (:municipality application)
    :kielitieto lang})
 
+(defn- get-handler [application]
+  (if-let [handler (:authority application)]
+    {:henkilo {:nimi {:etunimi  (:firstName handler)
+                      :sukunimi (:lastName handler)}}}
+    empty-tag))
+
+
+(defn- get-state [application]
+  (let [state (keyword (:state application))]
+    {:Tilamuutos
+     {:tila (application-state-to-krysp-state state)
+      :pvm (to-xml-date ((state-timestamps state) application))
+      :kasittelija (get-handler application)}}))
+
+
