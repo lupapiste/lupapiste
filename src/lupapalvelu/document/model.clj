@@ -267,3 +267,31 @@
    :created      created
    :schema-info  (:info schema)
    :data         {}})
+
+;;
+;; Blacklists
+;;
+
+(defn strip-blacklisted-data
+  "Strips values from document data if blacklist in schema includes given blacklist-item."
+  [{:keys [schema-info data] :as document} blacklist-item]
+  (when data
+    (letfn [(strip [schema-body path]
+              (into {}
+                (map
+                  (fn [{:keys [name type body repeating blacklist] :as element}]
+                    (let [k (keyword name)
+                          current-path (conj path k)
+                          v (get-in data current-path)]
+                    (if ((set blacklist) blacklist-item)
+                      [k nil]
+                      (when v
+                        (if (not= (keyword type) :group)
+                          [k v]
+                          [k (if repeating
+                               (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
+                               (strip body current-path))])))))
+                  schema-body)))]
+      (assoc document :data
+        (strip (:body (schemas/get-schema schema-info)) [])))))
+

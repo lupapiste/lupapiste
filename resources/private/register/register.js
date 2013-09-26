@@ -111,7 +111,7 @@
                                 .attr('id', 'vetuma-init');
     });
     statusModel.subPage(subPage());
-    ko.applyBindings(statusModel, $('#register')[0]);
+    $('#register').applyBindings(statusModel);
   });
 
   hub.onPageChange('register2', function() {
@@ -126,7 +126,7 @@
           if(data.city) { model().city(data.city); }
           if(data.zip) { model().zip(data.zip); }
           if(data.street) { model().street(data.street); }
-          ko.applyBindings(model, $('#register2')[0]);
+          $('#register2').applyBindings(model);
         } else {
           window.location.hash = "!/register";
         }
@@ -136,7 +136,7 @@
   });
 
   hub.onPageChange('register3', function() {
-    ko.applyBindings(confirmModel, $('#register3')[0]);
+    $('#register3').applyBindings(confirmModel);
   });
 
 })();

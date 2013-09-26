@@ -172,12 +172,12 @@
   });
 
   $(function() {
-    ko.applyBindings({
+    $("#statement").applyBindings({
       statementModel: statementModel,
       authorization: authorizationModel,
       commentsModel: commentsModel,
       attachmentsModel: attachmentsModel
-    }, $("#statement")[0]);
+    });
   });
 
 })();
