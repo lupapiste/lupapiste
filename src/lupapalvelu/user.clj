@@ -96,7 +96,7 @@
                                                               :private.password hashed-password}})))
 
 
-
+(mongo/select :users {:email "foo@bar.com"})
 
 
 (def required-user-keys [:email :id :role])
@@ -106,16 +106,17 @@
 
 (defn create-user-entity [{:keys [email password] :as user-data}]
   (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
-  
-  (let [email             (s/lower-case email)
-        salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)]
+  (let [email    (s/lower-case email)
+        private  (when password
+                   (let [salt (security/dispense-salt)]
+                     {:salt     salt
+                      :password (security/get-hash password salt)}))]
     (merge
       user-defaults
       (select-keys user-data user-keys)
       {:username email
        :email    email
-       :private  {:salt salt :password hashed-password}})))
+       :private  private})))
 
 
 
