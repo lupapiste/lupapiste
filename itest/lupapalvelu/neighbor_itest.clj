@@ -123,7 +123,7 @@
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "abba"
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
 
-      (fact "neighbor applicaiton query does not return hetu"
+      (fact "neighbor application query does not return hetu"
         (let [resp        (query pena :neighbor-application
                                       :applicationId application-id
                                       :neighborId neighborId
