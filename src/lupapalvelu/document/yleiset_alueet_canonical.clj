@@ -194,15 +194,17 @@
                                                             :johtoselvitysviitetieto false}}
 
         config (or (operation-name-key mega-config) (lupa-name-key mega-config))
+
+        _ (println "\n config: " config)
+
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
-        tyoaika-doc (if (:tyoaika config)
-                      (-> documents-by-type :tyoaika first :data)
-                      {})
+        tyoaika-doc (when (:tyoaika config)
+                      (-> documents-by-type :tyoaika first :data))
         mainostus-viitoitus-tapahtuma-doc (or
                                             (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
                                             {})
-        mainostus-viitoitus-tapahtuma (mainostus-viitoitus-tapahtuma-doc
-                                        (keyword (-> mainostus-viitoitus-tapahtuma-doc :_selected :value)))
+        mainostus-viitoitus-tapahtuma-name (-> mainostus-viitoitus-tapahtuma-doc :_selected :value)
+        mainostus-viitoitus-tapahtuma (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name))
         alku-pvm (if (:dummy-alku-pvm config)
                    (to-xml-date (:modified application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
@@ -216,45 +218,38 @@
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
                   (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
-        tyomaasta-vastaava (if (:tyomaasta-vastaava config)
-                             (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data))
-                             {})
+        tyomaasta-vastaava (when (:tyomaasta-vastaava config)
+                             (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
         osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}
                                                   (:osapuolitieto tyomaasta-vastaava)]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
-        vastuuhenkilotieto (if (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
+        vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
-                                                              (:vastuuhenkilotieto maksaja)]))
-                             {})
+                                                              (:vastuuhenkilotieto maksaja)])))
         hankkeen-kuvaus-key (if (= lupa-name-key :Sijoituslupa)
                               :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
                               :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
-        hankkeen-kuvaus (if (:hankkeen-kuvaus config)
-                          (-> documents-by-type hankkeen-kuvaus-key first :data)
-                          {})
-        lupaAsianKuvaus (if (:hankkeen-kuvaus config)
-                          (-> hankkeen-kuvaus :kayttotarkoitus :value)
-                          {})
+        hankkeen-kuvaus (when (:hankkeen-kuvaus config)
+                          (-> documents-by-type hankkeen-kuvaus-key first :data))
+        lupaAsianKuvaus (when (:hankkeen-kuvaus config)
+                          (-> hankkeen-kuvaus :kayttotarkoitus :value))
         lupakohtainenLisatieto (if (:sijoitus-lisatiedot config)
                                  (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
                                    [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                     {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])
-                                 (if (:mainostus-viitoitus-lisatiedot config)
-                                   (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)
-                                   {}))
+                                 (when (:mainostus-viitoitus-lisatiedot config)
+                                   (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
         sijoituslupaviitetieto-key (if (= lupa-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
-        sijoituslupaviitetieto (if (:hankkeen-kuvaus config)
+        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
                                  {:Sijoituslupaviite {:vaadittuKytkin false  ;; TODO: Muuta trueksi?
-                                                      :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}}
-                                 {})
-        johtoselvitysviitetieto (if (:johtoselvitysviitetieto config)
+                                                      :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
+        johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
                                                         ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
-                                                        }}
-                                  {})
+                                                        }})
 
         body {lupa-name-key {:kasittelytietotieto (get-kasittelytieto application)
                              :alkuPvm alku-pvm
@@ -269,14 +264,15 @@
                              :sijoituslupaviitetieto sijoituslupaviitetieto
                              :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
                              :johtoselvitysviitetieto johtoselvitysviitetieto}}
-        body (if (= "mainostus-tapahtuma-valinta" (-> mainostus-viitoitus-tapahtuma-doc :_selected :value))
+
+        body (if (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
                (assoc-in body [lupa-name-key :toimintajaksotieto]
                  (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
                body)]
 
     (walk/prewalk
       (fn [x]
-        (when-not (and (vector? x) (map? (second x)) (empty? (second x)))
+        (when-not (and (vector? x) (keyword? (first x)) (nil? (second x)))
           x))
       body)))
 
