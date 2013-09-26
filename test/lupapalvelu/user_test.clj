@@ -34,47 +34,59 @@
     (applicant? {:role :applicant}) => true
     (applicant? {}) => false))
 
-;; Metaconstant cannot be cast to java.lang.String
-(def ^:private some-password "p4sswodr")
+(fact "is a map with all the data"
+  (create-user-entity {:id             ..id..
+                       :email          "Foo@Bar.Com"
+                       :password       "some-password"
+                       :personId       ..userid..
+                       :role           ..role..
+                       :firstName      ..firstname..
+                       :lastName       ..lastname..
+                       :phone          ..phone..
+                       :city           ..city..
+                       :street         ..street..
+                       :zip            ..zip..
+                       :enabled        ..enabled..
+                       :organizations  ..organizations..})
+    => (contains {:id           ..id..
+                  :email        "foo@bar.com"
+                  :personId     ..userid..
+                  :role         ..role..
+                  :firstName    ..firstname..
+                  :lastName     ..lastname..
+                  :phone        ..phone..
+                  :city         ..city..
+                  :street       ..street..
+                  :zip          ..zip..
+                  :enabled      ..enabled..}))
 
-(facts "user entity mongo model"
-  (fact "is a map with all the data"
-     (create-user-entity "Foo@Bar.Com" some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:email        "foo@bar.com"
-                   :personId     ..userid..
-                   :role         ..role..
-                   :firstName    ..firstname..
-                   :lastName     ..lastname..
-                   :phone        ..phone..
-                   :city         ..city..
-                   :street       ..street..
-                   :zip          ..zip..
-                   :enabled      ..enabled..}))
+(fact "does not contain plaintext password"
+  (let [entity   (create-user-entity {:password  "some-password"
+                                      :id        ..id..
+                                      :email     ..email..
+                                      :role      ..role..})
+        password (get-in entity [:private :password])]
+    password => truthy
+    (.contains password "some-password") => false
+    (.contains (str entity) "some-password") => false))
 
-  (fact "does not contain plaintext password"
-     (let [entity   (create-user-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-           password (get-in entity [:private :password])]
-       password => truthy
-       (.contains password some-password) => false
-       (.contains (str entity) some-password) => false))
+;; FIXME: fix after refactoring
+#_(fact "applicant does not have organizations"
+    (:organizations
+      (create-user-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
+    => nil)
 
-  ;; FIXME: fix after refactoring
-  #_(fact "applicant does not have organizations"
-     (:organizations
-       (create-user-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
-     => nil)
-
-  (fact "authority does have organizations"
-     (create-user-entity ..email.. some-password ..userid.. :authority ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:organizations ..organizations..}))
-
-  (fact "authorityAdmin does have organizations"
-     (create-user-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:organizations ..organizations..})))
+(fact "authority does have organizations"
+  (create-user-entity {:id             ..id..
+                       :email          ..email..
+                       :role           ..role..
+                       :organizations  ..organizations..})
+    => (contains {:organizations ..organizations..}))
 
 (facts "same-user?"
   (same-user? {:id "123"} {:id "123"}) => true
   (same-user? {:id "123"} {:id "234"}) => false)
 
 (facts "with-user"
-  (with-user nil nil) => (contains {:ok false})
+  (with-user nil nil) => (contains {:ok false}))
+
