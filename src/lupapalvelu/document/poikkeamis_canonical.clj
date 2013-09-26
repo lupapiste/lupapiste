@@ -12,7 +12,11 @@
 
 (defmethod poikkeus-application-to-canonical "poikkeamislupa" [application lang]
   (let [root (root-element application lang)]
-    root))
+    (assoc-in
+      root
+      [:Popast :poikkeamisasiatieto]
+      {:Poikkeamisasia {:kasittelynTilatieto (get-state application)
+                         }})))
 
 (defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
   (let [root (root-element application lang)]

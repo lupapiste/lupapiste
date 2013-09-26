@@ -418,7 +418,18 @@
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
 
+        suunnittelutarveasia (:suunnittelutarveasia Popast) => nil
+        poikkeamisasiatieto (:poikkeamisasiatieto Popast) => truthy
+        Poikkeamisasia (:Poikkeamisasia poikkeamisasiatieto)
+        ;abstarctPoikkeamistype
+        kasittelynTilatieto (:kasittelynTilatieto Poikkeamisasia) => truthy
+        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        pvm (:pvm Tilamuutos) => "2013-09-17"
 
+        ;end of abstarctPoikkeamistype
+        ;asianTiedot
+        ;kaytttotapaus
+        ;_ (clojure.pprint/pprint canonical)
         ]))
 
 
