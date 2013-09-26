@@ -87,9 +87,9 @@
     (assoc (assoc application :documents (into [] result)) :operations new-operations)))
 
 (defmigration invalid-schema-infos-validation
-  (let [applications (mongo/select :applications {:infoRequest false})]
-    (doall (map #(mongo/update-by-id :applications (:id %) (fix-invalid-schema-infos %)) applications))))
-
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications (mongo/select collection {:infoRequest false})]
+      (doall (map #(mongo/update-by-id collection (:id %) (fix-invalid-schema-infos %)) applications)))))
 
 ;; Old migration previoisly run to applications collection only
 
