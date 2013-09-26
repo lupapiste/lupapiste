@@ -378,13 +378,7 @@
                                                             v)) (:documents application)))
         toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot
-                    {:aineistonnimi (:title application)
-                     :aineistotoimittaja "lupapiste@solita.fi"
-                     :tila toimituksenTiedot-tila
-                     :toimitusPvm (to-xml-date (now))
-                     :kuntakoodi (:municipality application)
-                     :kielitieto ""}
+                   {:toimituksenTiedot toimituksen-tiedot
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)

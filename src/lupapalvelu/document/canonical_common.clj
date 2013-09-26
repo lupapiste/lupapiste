@@ -1,7 +1,8 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [lupapalvelu.core :refer [now]]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -113,4 +114,12 @@
    :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen :Sijoituslupa
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen :Sijoituslupa
    :ya-sijoituslupa-muu-sijoituslupa :Sijoituslupa})
+
+(defn toimituksen-tiedot [application lang]
+  {:aineistonnimi (:title application)
+   :aineistotoimittaja "lupapiste@solita.fi"
+   :tila toimituksenTiedot-tila
+   :toimitusPvm (to-xml-date (now))
+   :kuntakoodi (:municipality application)
+   :kielitieto lang})
 
