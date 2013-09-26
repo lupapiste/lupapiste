@@ -1,12 +1,13 @@
 (ns lupapalvelu.user
-  (:require [taoensso.timbre :as timbre :refer [debug info warn]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn]]
             [monger.operators :refer :all]
             [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as s]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.core :refer [fail fail!]]))
 
 ;;
 ;; Securing data:
@@ -56,6 +57,8 @@
   (merge (apply hash-map params) (assoc (summary user) :role role)))
 
 
+
+
 (defn login
   "returns non-private information of enabled user with the username and password"
   [username password]
@@ -92,65 +95,52 @@
     (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
 
-(defn create-user-entity [email password person-id role firstname lastname phone city street zip enabled organizations]
+
+
+
+
+(def required-user-keys [:email :id :role])
+(def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
+(def user-defaults      {:firstName "" :lastName "" :enabled false})
+(def known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
+
+(defn create-user-entity [{:keys [email password] :as user-data}]
+  (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
+  
   (let [email             (s/lower-case email)
         salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (-> {:username      email
-         :email         email
-         :role          role
-         :firstName     firstname
-         :lastName      lastname
-         :personId      person-id
-         :phone         phone
-         :city          city
-         :street        street
-         :zip           zip
-         :enabled       enabled
-         :organizations organizations
-         :private       {:salt salt :password hashed-password}})))
+    (merge
+      user-defaults
+      (select-keys user-data user-keys)
+      {:username email
+       :email    email
+       :private  {:salt salt :password hashed-password}})))
 
-(def user-defaults {:firstName     ""
-                    :lastName      ""
-                    :personId      ""
-                    :phone         ""
-                    :city          ""
-                    :street        ""
-                    :zip           ""
-                    :enabled       false
-                    :organizations []})
 
-(def required-fields #{:username :email})
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled organizations]
-                         :or {firstname "" lastname "" password (security/random-password) role :dummy enabled false} :as user}]
-  (let [email             (s/lower-case email)
-        id                (mongo/create-id)
-        old-user          (get-user-by-email email)
-        new-user-base     (create-user-entity email password userid role firstname lastname phone city street zip enabled organizations)
-        new-user          (assoc new-user-base :id id)]
-    (info "register user:" (dissoc user :password))
+(defn- create-any-user [user-data]
+  (let [id           (mongo/create-id)
+        new-user     (create-user-entity (assoc user-data :id id))
+        old-user     (get-user-by-email (:email user-data))]
+    (info "register user:" (dissoc new-user :private))
     (try
       (if (= "dummy" (:role old-user))
         (do
-          (info "rewriting over dummy user:" (:id old-user))
+          (info "rewriting over dummy user:" (:id old-user) (dissoc new-user :private :id))
           (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
         (do
-          (info "creating new user")
+          (info "creating new user" (dissoc new-user :private))
           (mongo/insert :users new-user)))
+      (get-user-by-email (:email new-user))
       (catch com.mongodb.MongoException$DuplicateKey e
         (warn e)
-        (let [error-code  (condp re-matches (.getMessage e)
-                            #".+personId.+"  "error.duplicate-person-id"
-                            #".+email.+"     "error.duplicate-email"
-                            #".+username.+"  "error.duplicate-email"
-                            #".*"            "error.create-user")]
-          (throw (IllegalArgumentException. error-code)))))
-    (get-user-by-email email)))
-
-(defn create-user [caller params]
-  (let [params (merge user-defaults params)])
-  (create-any-user (merge params {:role :applicant :enabled false})))
+        (throw (IllegalArgumentException.
+                 (condp re-find (.getMessage e)
+                   #"\.personId\."  "error.duplicate-person-id"
+                   #"\.email\."     "error.duplicate-email"
+                   #"\.username\."  "error.duplicate-email"
+                   "error.create-user")))))))
 
 (defn create-authority [user]
   (create-any-user (merge user {:role :authority :enabled true})))
@@ -193,10 +183,14 @@
 
 
 
-
-
-
-
+(defn with-user [email function]
+  (if (nil? email)
+    (fail :error.user-not-found)
+    (if-let [user (get-user-by-email email)]
+      (function user)
+      (do
+        (debugf "user '%s' not found with email" email)
+        (fail :error.user-not-found)))))
 
 
 

@@ -21,7 +21,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :refer [with-user] :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -30,6 +30,12 @@
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as open-inforequest])
   (:import [java.net URL]))
+
+;; Notificator
+
+(defn notify [notification]
+  (fn [command status]
+    (notifications/notify! notification command)))
 
 ;; Validators
 
@@ -207,7 +213,7 @@
 (defcommand invite
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
-   :notify     "invite"
+   :on-success (notify "invite")
    :verified   true}
   [{created :created
     user    :user
@@ -285,10 +291,10 @@
                                            :validators  [not-open-inforequest-user-validator]})
 
 (defcommand add-comment
-  {:parameters [:id :text :target]
-   :roles      [:applicant :authority]
-   :validators [applicant-cant-set-to]
-   :notify     "new-comment"}
+  {:parameters  [:id :text :target]
+   :roles       [:applicant :authority]
+   :validators  [applicant-cant-set-to]
+   :on-success  (notify "new-comment")}
   [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
@@ -389,7 +395,7 @@
 (defcommand cancel-application
   {:parameters [:id]
    :roles      [:applicant]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
@@ -399,7 +405,7 @@
 (defcommand request-for-complement
   {:parameters [:id]
    :roles      [:authority]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
@@ -409,7 +415,7 @@
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
@@ -431,7 +437,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :keys [created] :as command}]
   (with-application command
@@ -670,7 +676,7 @@
   {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
-   :notify     "verdict"
+   :on-success (notify "verdict")
    :roles      [:authority]}
   [{:keys [created] :as command}]
   (update-application command
@@ -718,13 +724,13 @@
       verdicts)))
 
 (defcommand check-for-verdict
-  {:description "Fetches verdicts from municipality backend system.
-                 If the command is run more than once, existing verdicts are
-                 replaced by the new ones."
-   :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
-   :roles      [:authority]
-   :notify     "verdict"}
+  {:description  "Fetches verdicts from municipality backend system.
+                  If the command is run more than once, existing verdicts are
+                  replaced by the new ones."
+   :parameters  [:id]
+   :states      [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles       [:authority]
+   :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (do (update-application command
