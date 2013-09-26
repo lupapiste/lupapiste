@@ -31,6 +31,8 @@
 (def sonja-muni  "753")
 (def sipoo       (apikey-for "sipoo"))
 (def dummy       (apikey-for "dummy"))
+(def admin       (apikey-for "admin"))
+(def admin-id    (id-for "admin"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
