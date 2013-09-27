@@ -435,6 +435,31 @@
         tunnus (:tunnus MuuTunnus) => "LP-753-2013-00001"
         sovellus (:sovellus MuuTunnus) => "Lupapiste"
 
+        osapuolettieto (:osapuolettieto Poikkeamisasia) => truthy
+        Osapuolet (:Osapuolet osapuolettieto) => truthy
+        ;Maksaja
+        Osapuoli (:Osapuoli Osapuolet) => truthy
+        maksaja (some #(when (= (:VRKrooliKoodi %) "maksaja") %) Osapuoli) => truthy
+        _ (:turvakieltoKytkin maksaja) => false
+        henkilo (:henkilo maksaja) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Toimi"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Toimimari"
+        _ (:puhelin henkilo) => "020202"
+        _ (:sahkopostiosoite henkilo) => "paajehu@yit.foo"
+        yritys (:yritys maksaja) => truthy
+        _ (:nimi yritys ) => "YIT"
+        _ (:liikeJaYhteisoTunnus yritys) => "1743842-0"
+        postiosoite (:postiosoite yritys) => truthy
+        _ (get-in postiosoite [:osoitenimi :teksti]) => "Koivukuja 2 "
+        _ (:postinumero postiosoite) => "23500"
+        _ (:postitoimipaikannimi postiosoite) => "Helsinki"
+
+
+
+        ;Hakija
+        ;Paassuunnitelija
+        ;Suunnitelija
+
 
 
 
