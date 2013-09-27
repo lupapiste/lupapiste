@@ -2,7 +2,8 @@
   (:use [lupapalvelu.document.model]
         [lupapalvelu.document.validators]
         [midje.sweet])
-  (:require [lupapalvelu.document.schemas :as schemas]))
+  (:require [lupapalvelu.document.schemas :as schemas]
+            [sade.util :as util]))
 
 ;; Define a "random" timestamp used in test.
 ;; Midje metaconstraints seems to mess with tools/unwrapped.
@@ -35,6 +36,9 @@
 
 (facts "Find-by-name"
   (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
+  (fact (find-by-name (:body schema) ["a" :b])       => {:name "b" :type :group
+                                                         :body [{:name "ba" :type :string :min-len 2}
+                                                                {:name "bb" :type :boolean}]})
   (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :boolean})
@@ -307,10 +311,11 @@
 (def uusiRakennus
   {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
           :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
-          :rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
+          :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
+                                     :henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
                                                                :sukunimi {:modified 1370856477455, :value "Panaani"}
                                                                :hetu     {:modified 1370856477455, :value "010101-1234"}
-                                                               :turvakieltoKytkin {:modified 1370856477455, :value true}}
+                                                               :turvakieltoKytkin {:modified 1370856477455, :value false}}
                                                :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
                                                         :postinumero {:value "10203", :modified 1370856487304}
                                                         :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
@@ -399,8 +404,7 @@
 ;;
 
 (def hakija {:schema-info {:name "hakija" :version 1}
-             :data (assoc (get-in uusiRakennus [:data :rakennuksenOmistajat :0]) :_selected {:value "henkilo"})})
-
+             :data (get-in uusiRakennus [:data :rakennuksenOmistajat :0])})
 
 (facts "meta tests"
   (has-errors? (validate uusiRakennus)) => false
@@ -421,34 +425,58 @@
     (get-in uusiRakennus [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => truthy
     (get-in (strip-blacklisted-data uusiRakennus :neighbor) [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => nil))
 
-(def hakija-with-turvakielto  (apply-update hakija [:henkilotiedot schemas/turvakielto] true))
+(def hakija-with-turvakielto  (apply-update hakija [:henkilo :henkilotiedot schemas/turvakielto] true))
+(def uusiRakennus-with-turvakielto
+  (assoc-in uusiRakennus [:data :rakennuksenOmistajat]
+    {:0 (:data hakija)
+     :1 (:data hakija-with-turvakielto)
+     :2 (:data hakija)
+     :3 (:data hakija-with-turvakielto)}))
+
+(fact "Meta test: fixture is valid"
+  (has-errors? (validate hakija-with-turvakielto)) => false
+  (has-errors? (validate uusiRakennus-with-turvakielto)) => false)
 
 (facts "turvakielto"
+
   (fact "no turvakielto, no changes"
     (strip-turvakielto-data nil) => nil
     (strip-turvakielto-data {}) => {}
     (strip-turvakielto-data hakija) => hakija
     (strip-turvakielto-data uusiRakennus) => uusiRakennus)
 
-  (fact "meta test: turvakielto is set, there is data to be filtered"
-    (get-in hakija-with-turvakielto [:data :henkilotiedot schemas/turvakielto :value]) => true
-    (get-in hakija-with-turvakielto [:data :henkilo :yhteystiedot]) => truthy
-    (get-in hakija-with-turvakielto [:data :henkilo :osoite]) => truthy
-    (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot :hetu]) => truthy)
+  (let [stripped-hakija (strip-turvakielto-data hakija-with-turvakielto)
+        stripped-uusirakennus (strip-turvakielto-data uusiRakennus-with-turvakielto)]
 
-  (fact "turvakielto data is stripped from hakija"
-    (let [stripped-hakija (strip-turvakielto-data hakija-with-turvakielto)]
-      (get-in stripped-hakija [:data :henkilotiedot schemas/turvakielto]) => nil
+    (facts "stripped documents are valid"
+      (has-errors? (validate stripped-hakija)) => false
+      (has-errors? (validate stripped-uusirakennus)) => false)
+
+    (fact "meta test: turvakielto is set, there is data to be filtered"
+      (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot schemas/turvakielto :value]) => true
+      (get-in hakija-with-turvakielto [:data :henkilo :yhteystiedot]) => truthy
+      (get-in hakija-with-turvakielto [:data :henkilo :osoite]) => truthy
+      (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot :hetu]) => truthy)
+
+    (fact "turvakielto data is stripped from hakija"
+      (get-in stripped-hakija [:data :henkilo :henkilotiedot schemas/turvakielto]) => nil
       (get-in stripped-hakija [:data :henkilo :yhteystiedot]) => nil
       (get-in stripped-hakija [:data :henkilo :osoite]) => nil
       (get-in stripped-hakija [:data :henkilo :henkilotiedot :hetu]) => nil
       (get-in stripped-hakija [:data :henkilotiedot :etunimi]) => (get-in hakija [:data :henkilotiedot :etunimi])
-      (get-in stripped-hakija [:data :henkilotiedot :sukunimi]) => (get-in hakija [:data :henkilotiedot :sukunimi])
-      )
+      (get-in stripped-hakija [:data :henkilotiedot :sukunimi]) => (get-in hakija [:data :henkilotiedot :sukunimi]))
 
+    (facts "turvakielto data is stripped from uusiRakennus"
+      (fact "without owners there are no changes"
+        (util/dissoc-in uusiRakennus [:data :rakennuksenOmistajat]) => (util/dissoc-in stripped-uusirakennus [:data :rakennuksenOmistajat]))
 
-    )
+      (fact "has 4 owners"
+        (keys (get-in stripped-uusirakennus [:data :rakennuksenOmistajat])) => (just [:0 :1 :2 :3]))
 
-  )
+      (fact "owners 0 & 2 are intact"
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :0]) => (:data hakija)
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :2]) => (:data hakija))
 
-
+      (fact "owners 1 & 3 match stripped-hakija"
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1]) => (:data stripped-hakija)
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
