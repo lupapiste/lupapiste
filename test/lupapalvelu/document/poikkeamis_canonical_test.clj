@@ -439,7 +439,8 @@
         Osapuolet (:Osapuolet osapuolettieto) => truthy
         ;Maksaja
         Osapuoli (:Osapuoli Osapuolet) => truthy
-        maksaja (some #(when (= (:VRKrooliKoodi %) "maksaja") %) Osapuoli) => truthy
+        osapuolitieto (:osapuolitieto Osapuoli)
+        maksaja (some #(when (= (:VRKrooliKoodi %) "maksaja") %) osapuolitieto) => truthy
         _ (:turvakieltoKytkin maksaja) => false
         henkilo (:henkilo maksaja) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Toimi"
@@ -454,7 +455,7 @@
         _ (:postinumero postiosoite) => "23500"
         _ (:postitoimipaikannimi postiosoite) => "Helsinki"
 
-
+        _ (clojure.pprint/pprint Poikkeamisasia)
 
         ;Hakija
         ;Paassuunnitelija
