@@ -84,7 +84,7 @@
     (if (nil? ks)
       elem
       (if (:repeating elem)
-        (when (numeric? (first ks))
+        (when (numeric? (name (first ks)))
           (if (seq (rest ks))
             (find-by-name (:body elem) (rest ks))
             elem))
