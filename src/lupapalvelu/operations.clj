@@ -1,14 +1,14 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.poikkeamis-schemas :as poischemas]
-            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
-            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.core :refer :all]
             [sade.util :refer :all]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [lupapalvelu.core :refer [ok]]
+            [lupapalvelu.action :refer [defquery]]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.poikkeamis-schemas]
+            [lupapalvelu.document.ymparisto-schemas]
+            [lupapalvelu.document.yleiset-alueet-schemas]
+            [lupapalvelu.permit :as permit]))
 
 (def default-description "operations.tree.default-description")
 
@@ -283,15 +283,15 @@
                                  :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :meluilmoitus                {:schema "meluilmoitus"
-                                 :permit-type "R"
+                                 :permit-type "Y"
                                  :required common-ymp-schemas
                                  :attachments []}
    :pima                        {:schema "pima"
-                                 :permit-type "R"
+                                 :permit-type "Y"
                                  :required ["ymp-ilm-kesto-mini"]
                                  :attachments []}
    :maa-aineslupa               {:schema "ottamismaara"
-                                 :permit-type "R"
+                                 :permit-type "Y"
                                  :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                             "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                  :attachments []}

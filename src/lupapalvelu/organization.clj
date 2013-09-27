@@ -1,11 +1,12 @@
 (ns lupapalvelu.organization
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
-            [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
             [clojure.string :as s]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
+            [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
@@ -47,7 +48,7 @@
 (defquery "users-in-same-organizations"
   {:roles [:authority]}
   [{user :user}]
-  (ok :users (map security/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
+  (ok :users (map user/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
 (defquery "organization-by-user"
   {:description "Lists all organization users by organization."
@@ -122,7 +123,7 @@
                        "operations-attachments" 1
                        "inforequest-enabled" 1
                        "new-application-enabled" 1})]
-      (when-not result (fail! :error.unknown-organization))
+      (when-not result (fail! :error.unknown-organization :municipality municipality :permitType permit-type))
       (let [inforequests-enabled (:inforequest-enabled result)
             new-applications-enabled (:new-application-enabled result)
             name-map (-> result :name)

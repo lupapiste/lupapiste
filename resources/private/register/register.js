@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var keys = ['stamp', 'personId', 'firstname', 'lastname', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
   var model;
 
   function json(model) {
@@ -55,8 +55,8 @@
 
   var plainModel = {
     personId: ko.observable(),
-    firstname: ko.observable(),
-    lastname: ko.observable(),
+    firstName: ko.observable(),
+    lastName: ko.observable(),
     stamp: ko.observable(),
     street: ko.observable().extend({required: true}),
     city: ko.observable().extend({required: true}),
@@ -120,8 +120,8 @@
       .success(function(data) {
         if (data) {
           model().personId(data.userid);
-          model().firstname(data.firstname);
-          model().lastname(data.lastname);
+          model().firstName(data.firstName);
+          model().lastName(data.lastName);
           model().stamp(data.stamp);
           if(data.city) { model().city(data.city); }
           if(data.zip) { model().zip(data.zip); }

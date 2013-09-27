@@ -1,13 +1,14 @@
 (ns lupapalvelu.open-inforequest
   (:require [taoensso.timbre :as timbre :refer [infof info]]
-            [lupapalvelu.core :refer [now fail! defraw]]
-            [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
-            [lupapalvelu.organization :as organization]
-            [sade.security :refer [random-password]]
-            [lupapalvelu.notifications :as notifications]
             [noir.session :as session]
-            [noir.response :as resp]))
+            [noir.response :as resp]
+            [lupapalvelu.core :refer [now fail!]]
+            [lupapalvelu.action :refer [defraw]]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.security :refer [random-password]]
+            [lupapalvelu.notifications :as notifications]))
 
 (defn new-open-inforequest! [{application-id :id organization-id :organization} host]
   (assert application-id)
