@@ -55,7 +55,10 @@ Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}  ${password}
   Wait until  Element should be visible  test-create-user
   Click element  test-create-user
-  Wait until  Element should be visible  user-email
+  ${lables} =  Get Matching Xpath Count  //label[@for='user-email']
+  log  "LABELS:"
+  log  ${lables}
+  Wait until  Element should be visible  //label[@for='user-email']
   Input text  user-email  ${email}
   Input text  user-firstName  ${firstName}
   Input text  user-lastName  ${lastName}
