@@ -53,6 +53,7 @@ User count is
 
 Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}  ${password}
+  Wait until  Element should be visible  test-create-user
   Click element  test-create-user
   Wait until  Element should be visible  user-email
   Input text  user-email  ${email}
