@@ -1,8 +1,9 @@
 (ns lupapalvelu.organization
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
-            [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
             [clojure.string :as s]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]

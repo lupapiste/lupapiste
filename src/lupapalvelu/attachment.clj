@@ -7,7 +7,8 @@
             [sade.util :refer [fn-> fn->> future*]]
             [sade.strings :as ss]
             [sade.env :as env]
-            [lupapalvelu.core :refer :all]
+            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -334,7 +335,7 @@
   (mongo/update
     :applications
     {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified (:created command)
+    {$set {:modified (:created created)
            :attachments.$.state :ok}}))
 
 (defcommand reject-attachment
@@ -346,7 +347,7 @@
   (mongo/update
     :applications
     {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified (:created command)
+    {$set {:modified (:created created)
            :attachments.$.state :requires_user_action}}))
 
 (defcommand create-attachments

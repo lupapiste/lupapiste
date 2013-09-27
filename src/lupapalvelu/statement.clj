@@ -1,9 +1,10 @@
 (ns lupapalvelu.statement
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
             [sade.env :refer :all]
             [sade.strings :refer [lower-case]]
+            [lupapalvelu.core :refer :all]
+            [lupapalvelu.action :refer [defquery defcommand with-application executed]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user] :as user]
             [lupapalvelu.domain :as domain]
