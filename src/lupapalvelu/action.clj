@@ -233,14 +233,19 @@
           (ok))))
     (catch [:lupapalvelu.core/type :lupapalvelu.core/fail] {:keys [text] :as all}
       (do
-        (error text "exception while processing action:" (:action command))
+        (errorf "fail! in action: \"%s\" [%s:%d]: %s (%s)"
+          (:action command)
+          (:lupapalvelu.core/file all)
+          (:lupapalvelu.core/line all)
+          text
+          (dissoc all :text :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))
         (when execute? (log/log-event :error command))
-        (fail text (dissoc all :lupapalvelu.core/type))))
+        (fail text (dissoc all :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))))
     (catch response? resp
       resp)
     (catch Object e
       (do
-        (error e "exception while processing action:" (:action command))
+        (error e "exception while processing action:" (:action command) (class e) (str e))
         (when execute? (log/log-event :error command))
         (fail (s/replace (.getMessage e) #"<|>" {"<" "&lt;" ">" "&gt;"}))))))
 

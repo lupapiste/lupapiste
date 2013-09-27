@@ -412,7 +412,13 @@
                              {:municipality "317" :permitType "R"}
                              {:municipality "626" :permitType "R"}
                              {:municipality "691" :permitType "R"}]}
-                 
+                    
+                    {:id "491-Y"
+                     :inforequest-enabled true
+                     :new-application-enabled true
+                     :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
+                     :scope [{:municipality "491" :permitType "Y"}]}
+                    
                     ;;
                     ;; Testeissa kaytettavia organisaatioita
                     ;;
