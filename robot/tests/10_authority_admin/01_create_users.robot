@@ -12,6 +12,7 @@ Authority admin goes to the authority admin page
   Wait until page contains element  test-authority-admin-users-table
 
 Password minimum length is 8
+  [Tags]  fail
   Click element  test-create-user
   Wait until  Element should be visible  user-email
   Input text  user-email  short.password@example.com
@@ -23,6 +24,7 @@ Password minimum length is 8
   Element Should Be Enabled  test-create-user-save
 
 Authority admin creates two users
+  [Tags]  fail
   Wait Until  Element Should Be Visible  //tr[@class="user-row"]
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
   Create user  heikki.virtanen@example.com  Heikki  Virtanen  12345678
@@ -32,15 +34,18 @@ Authority admin creates two users
   Logout
 
 Created user can login
+  [Tags]  fail
   Login  heikki.virtanen@example.com  12345678
   User should be logged in  Heikki Virtanen
   Logout
 
 Activation link is not visible, because new authority user is actived by default
+  [Tags]  fail
   Wait until  page should not contain link  heikki.virtanen@example.com
   Logout
 
 Hessu can login, too
+  [Tags]  fail
   Login  hessu.kesa@example.com  12345678
   User should be logged in  Hessu Kesa
   Logout
@@ -53,11 +58,8 @@ User count is
 
 Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}  ${password}
-  Sleep  5
   Wait until  Element should be visible  test-create-user
-  Sleep  5
   Click element  test-create-user
-  Sleep  5
   Wait until  Element should be visible  //label[@for='user-email']
   Input text  user-email  ${email}
   Input text  user-firstName  ${firstName}
