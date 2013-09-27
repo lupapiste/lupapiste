@@ -420,3 +420,35 @@
   (fact "no hetu for neighbor, case asuintalo"
     (get-in uusiRakennus [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => truthy
     (get-in (strip-blacklisted-data uusiRakennus :neighbor) [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => nil))
+
+(def hakija-with-turvakielto  (apply-update hakija [:henkilotiedot schemas/turvakielto] true))
+
+(facts "turvakielto"
+  (fact "no turvakielto, no changes"
+    (strip-turvakielto-data nil) => nil
+    (strip-turvakielto-data {}) => {}
+    (strip-turvakielto-data hakija) => hakija
+    (strip-turvakielto-data uusiRakennus) => uusiRakennus)
+
+  (fact "meta test: turvakielto is set, there is data to be filtered"
+    (get-in hakija-with-turvakielto [:data :henkilotiedot schemas/turvakielto :value]) => true
+    (get-in hakija-with-turvakielto [:data :henkilo :yhteystiedot]) => truthy
+    (get-in hakija-with-turvakielto [:data :henkilo :osoite]) => truthy
+    (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot :hetu]) => truthy)
+
+  (fact "turvakielto data is stripped from hakija"
+    (let [stripped-hakija (strip-turvakielto-data hakija-with-turvakielto)]
+      (get-in stripped-hakija [:data :henkilotiedot schemas/turvakielto]) => nil
+      (get-in stripped-hakija [:data :henkilo :yhteystiedot]) => nil
+      (get-in stripped-hakija [:data :henkilo :osoite]) => nil
+      (get-in stripped-hakija [:data :henkilo :henkilotiedot :hetu]) => nil
+      (get-in stripped-hakija [:data :henkilotiedot :etunimi]) => (get-in hakija [:data :henkilotiedot :etunimi])
+      (get-in stripped-hakija [:data :henkilotiedot :sukunimi]) => (get-in hakija [:data :henkilotiedot :sukunimi])
+      )
+
+
+    )
+
+  )
+
+

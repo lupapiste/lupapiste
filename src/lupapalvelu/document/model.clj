@@ -133,9 +133,8 @@
       [(check (sub-schema-by-name schema-body selected))]
       (map check schema-body))))
 
-(defn get-document-schema [document]
-  (let [schema-info (:schema-info document)]
-    (schemas/get-schema (:version schema-info) (:name schema-info))))
+(defn get-document-schema [{schema-info :schema-info}]
+  (schemas/get-schema schema-info))
 
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
