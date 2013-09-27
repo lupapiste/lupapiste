@@ -53,11 +53,11 @@ User count is
 
 Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}  ${password}
+  Sleep  5
   Wait until  Element should be visible  test-create-user
+  Sleep  5
   Click element  test-create-user
-  ${lables} =  Get Matching Xpath Count  //label[@for='user-email']
-  log  "LABELS:"
-  log  ${lables}
+  Sleep  5
   Wait until  Element should be visible  //label[@for='user-email']
   Input text  user-email  ${email}
   Input text  user-firstName  ${firstName}
