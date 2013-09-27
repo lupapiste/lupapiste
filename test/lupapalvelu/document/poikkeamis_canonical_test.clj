@@ -437,25 +437,26 @@
 
         osapuolettieto (:osapuolettieto Poikkeamisasia) => truthy
         Osapuolet (:Osapuolet osapuolettieto) => truthy
+        osapuolitieto (:osapuolitieto Osapuolet) => truthy
+
         ;Maksaja
-        Osapuoli (:Osapuoli Osapuolet) => truthy
-        osapuolitieto (:osapuolitieto Osapuoli)
-        maksaja (some #(when (= (:VRKrooliKoodi %) "maksaja") %) osapuolitieto) => truthy
-        _ (:turvakieltoKytkin maksaja) => false
-        henkilo (:henkilo maksaja) => truthy
+        maksaja (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "maksaja") %) osapuolitieto) => truthy
+        Osapuoli (:Osapuoli maksaja) => truthy
+        _ (:turvakieltoKytkin Osapuoli) => false
+        henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Toimi"
-        _ (get-in henkilo [:nimi :sukunimi]) => "Toimimari"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Toimari"
         _ (:puhelin henkilo) => "020202"
         _ (:sahkopostiosoite henkilo) => "paajehu@yit.foo"
-        yritys (:yritys maksaja) => truthy
+        yritys (:yritys Osapuoli) => truthy
         _ (:nimi yritys ) => "YIT"
-        _ (:liikeJaYhteisoTunnus yritys) => "1743842-0"
+        _ (:liikeJaYhteisotunnus yritys) => "1743842-0"
         postiosoite (:postiosoite yritys) => truthy
         _ (get-in postiosoite [:osoitenimi :teksti]) => "Koivukuja 2 "
         _ (:postinumero postiosoite) => "23500"
         _ (:postitoimipaikannimi postiosoite) => "Helsinki"
 
-        _ (clojure.pprint/pprint Poikkeamisasia)
+        ;_ (clojure.pprint/pprint Poikkeamisasia)
 
         ;Hakija
         ;Paassuunnitelija
