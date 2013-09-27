@@ -13,7 +13,7 @@
                                               :id "516560d6c2e6f603beb85147"}
                                      :requested 1379423095616
                                      :status "yes"
-                                     :text "Lausunto liitteenä."}])
+                                     :text "Lausunto liitteen\u00e4."}])
 
 (def ^:private hakija {:id "523844e1da063788effc1c58"
                        :schema-info {:approvable true
@@ -200,7 +200,7 @@
                                                   :osoite {:katu {:modified 1380191655585 :value "Paapankuja 12"}
                                                            :postinumero {:modified 1380191660158 :value "10203"}
                                                            :postitoimipaikannimi {:modified 1380191655585 :value "Piippola"}}
-                                                  :patevyys {:koulutus {:modified 1380191688364 :value "Elämän koulu"}
+                                                  :patevyys {:koulutus {:modified 1380191688364 :value "El\u00e4m\u00e4n koulu"}
                                                              :patevyysluokka {:modified 1380191690366 :value "C"}}
                                                   :userId {:modified 1380191655618 :value "777777777777777777000020"}
                                                   :yhteystiedot {:email {:modified 1380191655585 :value "pena@example.com"}
@@ -220,7 +220,7 @@
                                          :metsassa {:modified 1379419917695
                                                     :value false}}
                                :merkittavyys {:rakentamisen_vaikutusten_merkittavyys {:modified 1379419957431
-                                                                                      :value "Vain pientä maisemallista haittaa."}}
+                                                                                      :value "Vain pient\u00e4 maisemallista haittaa."}}
                                :muut_vaikutukset {:etaisyys_viemariverkosta {:modified 1379419943875
                                                                              :value "2000"}
                                                   :pohjavesialuetta {:modified 1379419946000
@@ -234,7 +234,7 @@
                                                                   :etaisyyys_kouluun {:modified 1379419824940
                                                                                       :value "10"}
                                                                   :muita_vaikutuksia {:modified 1379419877240
-                                                                                      :value "Maisemallisesti talo tulee sijoittumaan mäen harjalle."}}
+                                                                                      :value "Maisemallisesti talo tulee sijoittumaan m\u00e4en harjalle."}}
                                :virkistys_tarpeet {:ulkoilu_ja_virkistysaluetta_varattu {:modified 1379419934504
                                                                                          :value true}}}
               :id "523844e1da063788effc1c5f"
@@ -351,7 +351,7 @@
                                                                                 :accepted nil}]}]
                        :statements statements
                        :organization "753-P"
-                       :title "Söderkullantie 146"
+                       :title "S\u00f6derkullantie 146"
                        :operations [{:id "523844e1da063788effc1c56"
                                      :name "poikkeamis"
                                      :created 1379419361123}]
@@ -390,7 +390,7 @@
                                                                                    :lastName "Sibbo"
                                                                                    :firstName "Sonja"
                                                                                    :username "sonja"
-                                                                                   :id "777777777777777777000023"}} {:text "Hakemukselle lisätty lausunto."
+                                                                                   :id "777777777777777777000023"}} {:text "Hakemukselle lis\u00e4tty lausunto."
                                                                                                                      :target {:type "statement"
                                                                                                                               :id "52385377da063788effc1e93"}
                                                                                                                      :created 1379423133065
@@ -400,7 +400,7 @@
                                                                                                                             :firstName "Sonja"
                                                                                                                             :username "sonja"
                                                                                                                             :id "777777777777777777000023"}}]
-                       :address "Söderkullantie 146"
+                       :address "S\u00f6derkullantie 146"
                        :permitType "P"
                        :permitSubtype "poikkeamislupa"
                        :id "LP-753-2013-00001"
@@ -457,7 +457,7 @@
         _ (:postitoimipaikannimi postiosoite) => "Helsinki"
 
         ;Hakija
-         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
+        hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
         _ (:turvakieltoKytkin Osapuoli) => false
         henkilo (:henkilo Osapuoli) => truthy
@@ -472,9 +472,20 @@
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
         yritys (:yritys Osapuoli) => nil
 
-
-
         ;Paassuunnitelija
+        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
+        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
+        _ (clojure.pprint/pprint paasuunnittelija)
+        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
+        henkilo (:henkilo Suunnittelija) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        postiosoite (:postiosoite henkilo) => truthy
+        _ (get-in postiosoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero postiosoite) => "10203"
+        _ (:postitoimipaikannimi postiosoite) => "Piippola"
         ;Suunnitelija
 
 
@@ -483,7 +494,7 @@
         ;end of abstarctPoikkeamistype
         ;asianTiedot
         ;kaytttotapaus
-        ;_ (clojure.pprint/pprint canonical)
+        _ (clojure.pprint/pprint canonical)
         ]))
 
 
