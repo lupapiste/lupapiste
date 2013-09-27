@@ -110,7 +110,7 @@
                                :yritys {:liikeJaYhteisoTunnus {:modified 1379484890671
                                                                :value "1743842-0"}
                                         :osoite {:katu {:modified 1379484901862
-                                                        :value "Koivukuja 2 "}
+                                                        :value "Koivukuja 2"}
                                                  :postinumero {:modified 1379484904468
                                                                :value "23500"}
                                                  :postitoimipaikannimi {:modified 1379484907792
@@ -452,13 +452,28 @@
         _ (:nimi yritys ) => "YIT"
         _ (:liikeJaYhteisotunnus yritys) => "1743842-0"
         postiosoite (:postiosoite yritys) => truthy
-        _ (get-in postiosoite [:osoitenimi :teksti]) => "Koivukuja 2 "
+        _ (get-in postiosoite [:osoitenimi :teksti]) => "Koivukuja 2"
         _ (:postinumero postiosoite) => "23500"
         _ (:postitoimipaikannimi postiosoite) => "Helsinki"
 
-        ;_ (clojure.pprint/pprint Poikkeamisasia)
-
         ;Hakija
+         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
+        Osapuoli (:Osapuoli hakija) => truthy
+        _ (:turvakieltoKytkin Osapuoli) => false
+        henkilo (:henkilo Osapuoli) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        yritys (:yritys Osapuoli) => nil
+
+
+
         ;Paassuunnitelija
         ;Suunnitelija
 
