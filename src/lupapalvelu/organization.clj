@@ -123,7 +123,7 @@
                        "operations-attachments" 1
                        "inforequest-enabled" 1
                        "new-application-enabled" 1})]
-      (when-not result (fail! :error.unknown-organization))
+      (when-not result (fail! :error.unknown-organization :municipality municipality :permitType permit-type))
       (let [inforequests-enabled (:inforequest-enabled result)
             new-applications-enabled (:new-application-enabled result)
             name-map (-> result :name)
