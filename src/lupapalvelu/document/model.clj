@@ -293,7 +293,7 @@
                   schema-body)))]
       (let [path (into [] initial-path)
             schema (get-document-schema document)
-            schema-body (:body (if (seq path) (find-by-name (:body schema) initial-path) schema))]
+            schema-body (:body (if (seq path) (find-by-name (:body schema) path) schema))]
         (assoc-in document (concat [:data] path)
           (strip schema-body path))))))
 
@@ -313,7 +313,5 @@
           (strip-blacklisted-data doc schemas/turvakielto strip-from)
           doc)))
     document
-    (tools/deep-find data schemas/turvakielto)
-    )
-  )
+    (tools/deep-find data schemas/turvakielto)))
 
