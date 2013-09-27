@@ -273,7 +273,7 @@
 
 (defn strip-blacklisted-data
   "Strips values from document data if blacklist in schema includes given blacklist-item."
-  [{:keys [schema-info data] :as document} blacklist-item]
+  [{data :data :as document} blacklist-item & [initial-path]]
   (when data
     (letfn [(strip [schema-body path]
               (into {}
@@ -291,6 +291,29 @@
                                (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
                                (strip body current-path))])))))
                   schema-body)))]
+      (let [path (into [] initial-path)
+            schema (get-document-schema document)
+            schema-body (:body (if (seq path) (find-by-name (:body schema) initial-path) schema))]
       (assoc document :data
-        (strip (:body (schemas/get-schema schema-info)) [])))))
+          (strip schema-body path))))))
+
+
+;;
+;; Turvakielto
+;;
+
+(defn strip-turvakielto-data [{data :data :as document}]
+  (reduce
+    (fn [doc [path v]]
+      (let [turvakielto-value (:value v)
+            ; Strip data starting from one level up.
+            ; Fragile, but currently schemas are modeled this way!
+            strip-from (butlast path)]
+        (if turvakielto-value
+          (strip-blacklisted-data doc schemas/turvakielto strip-from)
+          doc)))
+    document
+    (tools/deep-find data schemas/turvakielto)
+    )
+  )
 
