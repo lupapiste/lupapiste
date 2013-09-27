@@ -46,9 +46,6 @@
     (fact "fails with uneven optional parameter pairs"
       (user/user-in-role user :reader :age) => (throws Exception))))
 
-(facts "test execute methods"
-  (fact (execute {:action "ping"}) => {:ok true :text "pong"}))
-
 (facts "Test missing-fields"
   (fact (missing-fields {:data {:foo "Foo" :bar "Bar"}} {:parameters [:foo :bar]}) => empty?)
   (fact (missing-fields {:data {:foo "Foo" :bozo "Bozo"}} {:parameters [:foo :bar]}) => (contains "bar"))
