@@ -294,7 +294,7 @@
       (let [path (into [] initial-path)
             schema (get-document-schema document)
             schema-body (:body (if (seq path) (find-by-name (:body schema) initial-path) schema))]
-      (assoc document :data
+        (assoc-in document (concat [:data] path)
           (strip schema-body path))))))
 
 
