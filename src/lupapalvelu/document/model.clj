@@ -282,7 +282,7 @@
                     (let [k (keyword name)
                           current-path (conj path k)
                           v (get-in data current-path)]
-                    (if ((set blacklist) blacklist-item)
+                    (if ((set (map keyword blacklist)) (keyword blacklist-item))
                       [k nil]
                       (when v
                         (if (not= (keyword type) :group)
@@ -313,5 +313,5 @@
           (strip-blacklisted-data doc schemas/turvakielto strip-from)
           doc)))
     document
-    (tools/deep-find data schemas/turvakielto)))
+    (tools/deep-find data (keyword schemas/turvakielto))))
 
