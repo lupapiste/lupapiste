@@ -417,15 +417,52 @@
     (strip-blacklisted-data hakija :x) => hakija
     (strip-blacklisted-data uusiRakennus :x) => uusiRakennus)
 
+  (fact "schema-info is preserved"
+    (:schema-info (strip-blacklisted-data hakija :neighbor)) => (:schema-info hakija))
+
   (fact "no hetu for neighbor, case hakija"
-    (get-in hakija [:data :henkilo :henkilotiedot :hetu]) => truthy
+    (get-in hakija [:data :henkilo :henkilotiedot :hetu :value]) => truthy
     (get-in (strip-blacklisted-data hakija :neighbor) [:data :henkilo :henkilotiedot :hetu]) => nil)
 
   (fact "no hetu for neighbor, case asuintalo"
     (get-in uusiRakennus [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => truthy
     (get-in (strip-blacklisted-data uusiRakennus :neighbor) [:data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]) => nil))
 
-(def hakija-with-turvakielto  (apply-update hakija [:henkilo :henkilotiedot schemas/turvakielto] true))
+(fact "strip blacklisted turvakielto data from hakija"
+  (strip-blacklisted-data
+    {:data (lupapalvelu.document.tools/wrapped
+             {:henkilo
+              {:henkilotiedot
+               {:etunimi "Gustav",
+                :sukunimi "Golem",
+                :hetu "000000-0000",
+                :turvakieltoKytkin true},
+               :osoite {:katu "Katuosoite"},
+               :yhteystiedot nil}})
+     :schema-info {:name "hakija" :version 1}}
+    :turvakieltoKytkin) =>
+  {:data {:henkilo {:henkilotiedot {:etunimi {:value "Gustav"}, :hetu nil, :sukunimi {:value "Golem"}, :turvakieltoKytkin nil}, :osoite nil, :yhteystiedot nil}},
+   :schema-info {:name "hakija" :version 1}})
+
+(fact "strip-turvakielto-data from minimal uusiRakennus"
+  (let [doc {:data (lupapalvelu.document.tools/wrapped
+             {:rakennuksenOmistajat
+              {:0
+               {:henkilo
+                {:henkilotiedot
+                 {:etunimi "Gustav",
+                  :sukunimi "Golem",
+                  :hetu "000000-0000",
+                  :turvakieltoKytkin true},
+                 :osoite {:katu "Katuosoite"},
+                 :yhteystiedot {}}}}})
+     :schema-info {:name "uusiRakennus" :version 1}}]
+    (has-errors? (validate doc)) => false
+    (strip-turvakielto-data doc) =>
+    {:data {:rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:value "Gustav"}, :hetu nil, :sukunimi {:value "Golem"}, :turvakieltoKytkin nil}, :osoite nil, :yhteystiedot nil}}}},
+     :schema-info {:name "uusiRakennus" :version 1}}))
+
+(def hakija-with-turvakielto  (apply-update hakija [:henkilo :henkilotiedot (keyword schemas/turvakielto)] true))
 (def uusiRakennus-with-turvakielto
   (assoc-in uusiRakennus [:data :rakennuksenOmistajat]
     {:0 (:data hakija)
@@ -448,12 +485,16 @@
   (let [stripped-hakija (strip-turvakielto-data hakija-with-turvakielto)
         stripped-uusirakennus (strip-turvakielto-data uusiRakennus-with-turvakielto)]
 
+    (fact "schema-info is preserved"
+      (:schema-info stripped-hakija) => (:schema-info hakija)
+      (:schema-info stripped-uusirakennus) => (:schema-info uusiRakennus))
+
     (facts "stripped documents are valid"
       (has-errors? (validate stripped-hakija)) => false
       (has-errors? (validate stripped-uusirakennus)) => false)
 
     (fact "meta test: turvakielto is set, there is data to be filtered"
-      (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot schemas/turvakielto :value]) => true
+      (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot :turvakieltoKytkin :value]) => true
       (get-in hakija-with-turvakielto [:data :henkilo :yhteystiedot]) => truthy
       (get-in hakija-with-turvakielto [:data :henkilo :osoite]) => truthy
       (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot :hetu]) => truthy)
@@ -476,6 +517,15 @@
       (fact "owners 0 & 2 are intact"
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :0]) => (:data hakija)
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :2]) => (:data hakija))
+
+      (fact "some henkilotiedot"
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1 :henkilo :henkilotiedot]) => truthy)
+
+      (fact "no hetu"
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1 :henkilo :henkilotiedot :hetu]) => nil)
+
+      (fact "no turvakieltoKytkin"
+        (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1 :henkilo :henkilotiedot :turvakieltoKytkin]) => nil)
 
       (fact "owners 1 & 3 match stripped-hakija"
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1]) => (:data stripped-hakija)
