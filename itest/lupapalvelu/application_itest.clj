@@ -168,9 +168,9 @@
         (get-in paatos [:paivamaarat :anto]) => 123
         (get-in paatos [:paivamaarat :lainvoimainen]) => 124
 
-        (let [attachment-id (first (get-attachment-ids application))]
-          (upload-attachment sonja (:id application) attachment-id true "R")
-          (upload-attachment pena (:id application) attachment-id false "R"))))))
+        (let [first-attachment (get-in application [:attachments 0])]
+          (upload-attachment sonja (:id application) first-attachment true)
+          (upload-attachment pena (:id application) first-attachment false))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)
@@ -271,7 +271,7 @@
         resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :buildingId building-id)
         merged-app      (:application (query pena :application :id application-id))
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
-        (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"        
+        (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
