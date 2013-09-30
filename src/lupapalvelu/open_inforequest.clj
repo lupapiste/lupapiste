@@ -50,4 +50,4 @@
     (when-not token (fail! :error.unknown-open-inforequest-token))
     (mongo/update-by-id :open-inforequest-token token-id {$set {:last-used (now)}})
     (session/put! :user (make-user token))
-    (resp/redirect url :permanent)))
+    (resp/redirect url)))
