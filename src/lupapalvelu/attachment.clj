@@ -89,7 +89,7 @@
           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
           :muu]])
 
-(def ^:private attachment-types-YA
+(def attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                     :tilapainen-liikennejarjestelysuunnitelma
                     :tyyppiratkaisu
@@ -262,7 +262,7 @@
   (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
 (defn attachment-latest-file-id
-  "Gets latest file-ids from attachment."
+  "Gets latest file-id from attachment."
   [application attachmentId]
   (->> (attachment-file-ids application attachmentId) last))
 

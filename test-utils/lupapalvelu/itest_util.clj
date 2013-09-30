@@ -91,7 +91,7 @@
                        :propertyId "75312312341234"
                        :x 444444 :y 6666666
                        :address "foo 42, bar"
-                       :municipality "753"})
+                       :municipality sonja-muni})
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
@@ -198,7 +198,7 @@
 ;; Stuffin' data in
 ;;
 
-(defn upload-attachment [apikey application-id attachment-id expect-to-succeed permit-type]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
@@ -206,12 +206,9 @@
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
                                    {:name "Content/type"   :content "text/plain"}
-                                   {:name "attachmentType" :content (condp = (keyword permit-type)
-                                                                      :R "paapiirustus.asemapiirros"
-                                                                      :YA "yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista"
-                                                                      :Y "paapiirustus.asemapiirros"  ;;TODO: Change this
-                                                                      :P "paapiirustus.asemapiirros"  ;;TODO: Change this
-                                                                      (fail! "unsupported permit-type"))}
+                                   {:name "attachmentType" :content (str
+                                                                      (:type-group attachment-type) "."
+                                                                      (:type-id attachment-type))}
                                    {:name "attachmentId"   :content attachment-id}
                                    {:name "upload"         :content uploadfile}]})]
     (if expect-to-succeed
@@ -243,7 +240,7 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       ;(facts "Statement upload should fail"
-       ; (fact "Status code" (:status resp) => 302)
+      ;  (fact "Status code" (:status resp) => 302)
       ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.8.1.html") => 0))
       ))))
 
@@ -251,8 +248,8 @@
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
-  (doseq [attachment-id (get-attachment-ids application)]
-    (upload-attachment pena (:id application) attachment-id true "R")))
+  (doseq [attachment (:attachments application)]
+    (upload-attachment pena (:id application) attachment true)))
 
 ;;
 ;; Vetuma

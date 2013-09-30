@@ -475,7 +475,6 @@
     {$set {:shapes [shape]}}))
 
 (defn make-attachments [created operation organization-id & {:keys [target]}]
-
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
