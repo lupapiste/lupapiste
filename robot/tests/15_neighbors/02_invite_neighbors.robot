@@ -12,6 +12,11 @@ Mikko wants to build a water slide
   Set Suite Variable  ${appname}  FOO_${secs}
   Create application  ${appname}  753  753-416-25-22
   Add comment  Lapsille vesiliuku
+
+Mikko sets turvakielto for himself
+  Open tab  parties
+  Wait and click  xpath=//div[@id="application-parties-tab"]//input[@data-docgen-path="henkilo.henkilotiedot.turvakieltoKytkin"]
+  Wait Until  Page Should Contain  Tallennettu
   Logout
 
 Sonja adds some neighbors
@@ -110,6 +115,15 @@ Neighbor clicks on email link and sees epplication
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinrakennuksen rakentaminen
 
+Hetu is not shown to neighbor
+  Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.henkilotiedot.hetu"]  ${EMPTY}
+
+Address is not shown to neighbor
+  Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.osoite.katu"]  ${EMPTY}
+
+Phone number is not shown to neighbor
+  Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.yhteystiedot.puhelin"]  ${EMPTY}
+
 Neighbor clicks vetuma button to identify herself
   [Tags]  integration
   Wait and click  xpath=//*[@data-test-id='vetuma-init']
@@ -124,8 +138,7 @@ Neighbor is back and leaves a comment
   Wait and click  xpath=//input[@data-test-id='neighbor-response-comments']
   Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-message']
   Input text  xpath=//*[@data-test-id='neighbor-response-message']  No fucking way
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-send']
-  Click element  xpath=//*[@data-test-id='neighbor-response-send']
+  Click enabled by test id  neighbor-response-send
   Wait until  Element should be visible  xpath=//*[@data-test-id='neighbor-response-done']
   Element text should be  xpath=//*[@data-test-id='neighbor-response-done']  KIITOS VASTAUKSESTASI!
 
