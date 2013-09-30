@@ -84,7 +84,7 @@
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:header] (constantly (first header)))
-                  (enlive/transform [:nav] (constantly (last nav)))
+                  (enlive/transform [:nav] (enlive/content (map :content nav)))
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (constantly (first footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))

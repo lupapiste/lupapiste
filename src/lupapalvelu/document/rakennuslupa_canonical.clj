@@ -167,7 +167,7 @@
 
 
 (defn- get-toimenpide-with-count [toimenpide n]
-  (clojure.walk/postwalk #(if (contains? % :jarjestysnumero)
+  (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
                             (assoc % :jarjestysnumero n)
                             %) toimenpide))
 

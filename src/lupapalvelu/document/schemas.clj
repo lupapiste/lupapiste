@@ -72,6 +72,7 @@
 
 (def simple-osoite [{:name "osoite"
                      :type :group
+                     :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
@@ -92,7 +93,7 @@
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
-                    :blacklist [:neighbor]
+                    :blacklist [:neighbor turvakielto]
                     :body [{:name "puhelin" :type :string :subtype :tel :required true}
                            {:name "email" :type :string :subtype :email :required true}
                            #_{:name "fax" :type :string :subtype :tel}]}])
@@ -101,14 +102,14 @@
                              :type :group
                              :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                     {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                    {:name turvakielto :type :checkbox}]}])
+                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]}])
 
 (def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
                                :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                       {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor]}
-                                      {:name turvakielto :type :checkbox}]})
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                      {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
                henkilo-valitsin
@@ -158,7 +159,7 @@
 
 (def designer-basic (body
                       henkilotiedot-minimal
-                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (contains? c :required)
+                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
                                                                                           (assoc c :required false)
                                                                                           c)) yritys-minimal)}
                       simple-osoite
