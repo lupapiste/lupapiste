@@ -240,7 +240,7 @@
              {:henkilo (get-yhteyshenkilo-data (get-in osapuoli [:yritys :yhteyshenkilo]))})
       (merge codes {:henkilo (get-henkilo-data henkilo)}))))
 
-(defn- get-parties-by-type [documents tag-name party-type doc-transformer]
+(defn get-parties-by-type [documents tag-name party-type doc-transformer]
   (for [doc (documents party-type)
         :let [osapuoli (:data doc)]
         :when (seq osapuoli)]
@@ -252,7 +252,7 @@
     (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
     (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))
 
-(defn- get-suunnittelija-data [suunnittelija party-type]
+(defn get-suunnittelija-data [suunnittelija party-type]
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
         codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
