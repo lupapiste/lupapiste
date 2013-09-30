@@ -1,7 +1,6 @@
 (ns lupapalvelu.document.vrk
   (:require [sade.util :refer [->int fn->]]
             [clojure.string :as s]
-            [lupapalvelu.clojure15 :refer :all]
             [lupapalvelu.document.validator :refer :all]))
 
 ;;
