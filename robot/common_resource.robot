@@ -215,7 +215,7 @@ Sipoo logs in
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
-  
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -292,12 +292,16 @@ Prepare new request
   Select From List by test id  create-municipality-select  ${municipality}
   Set animations off
   Click enabled by test id  create-continue
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
+  Click tree item  "Rakentaminen ja purkaminen"
+  Click tree item  "Uuden rakennuksen rakentaminen"
+  Click tree item  "Asuinrakennuksen rakentaminen"
   Wait until  Element should be visible  xpath=//*[@class="attachments-list"]/span[text()="Asemapiirros"]
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
+
+Click tree item
+  [Arguments]  ${itemName}
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()=${itemName}]
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
