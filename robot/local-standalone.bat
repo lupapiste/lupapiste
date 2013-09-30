@@ -4,4 +4,4 @@
 @set server=%2
 @if [%server%]==[] set server=localhost:8000
 
-pybot --exclude integration --exclude fail --RunEmptySuite --variable SERVER:http://%server% -d target common/setup %target% common/teardown
+pybot --exclude fail --RunEmptySuite --variable SERVER:http://%server% -d target common/setup %target% common/teardown
