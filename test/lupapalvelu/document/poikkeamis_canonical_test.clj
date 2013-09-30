@@ -475,17 +475,15 @@
 
         ;Paassuunnitelija
         suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
-        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
-        _ (clojure.pprint/pprint paasuunnittelija)
-        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
+        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthySuunnittelija (:Suunnittelija paasuunnittelija) => truthy
         henkilo (:henkilo Suunnittelija) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
         _ (:puhelin henkilo) => "0102030405"
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        postiosoite (:postiosoite henkilo) => truthy
-        _ (get-in postiosoite [:osoitenimi :teksti]) => "Paapankuja 12"
-        _ (:postinumero postiosoite) => "10203"
+        osoite (osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi postiosoite) => "Piippola"
         ;Suunnitelija
 
