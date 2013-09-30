@@ -7,9 +7,11 @@
 (def submitted-applications (delay (mongo/select :submitted-applications)))
 
 (defn- validate-doc [{id :id schema-info :schema-info :as doc}]
-  (let [results (filter (fn [{result :result}] (= :err (first result))) (model/validate doc))]
-    (when (seq results)
-      {:document-id id :schema-info schema-info :results results})))
+  (if (and (:name schema-info) (:version schema-info))
+    (let [results (filter (fn [{result :result}] (= :err (first result))) (model/validate doc))]
+      (when (seq results)
+        {:document-id id :schema-info schema-info :results results}))
+    {:document-id id :schema-info schema-info :results "Schema name or version missing"}))
 
 (defn- validate-documents [{id :id state :state documents :documents }]
   (let [results (filter seq (map validate-doc documents))]
@@ -25,14 +27,11 @@
 
 ;; Every document is valid.
 
-(comment
-; Disabled: fail atm.
 (defmonster applications-documents-are-valid
   (documents-are-valid @applications))
 
 (defmonster submitted-applications-documents-are-valid
   (documents-are-valid @submitted-applications))
-  )
 
 ;; Documents have operation information
 
@@ -51,7 +50,5 @@
 (defmonster applications-schemas-have-ops
   (schemas-have-ops @applications))
 
-(comment
-  ; Enable after schemas be gone -migration has been applied to submitted-applications
-  (defmonster submitted-applications-schemas-have-ops
-  (schemas-have-ops @submitted-applications)))
+(defmonster submitted-applications-schemas-have-ops
+  (schemas-have-ops @submitted-applications))

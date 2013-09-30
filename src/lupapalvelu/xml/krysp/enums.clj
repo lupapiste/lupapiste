@@ -2,7 +2,6 @@
   (:require [clojure.string :as s]
             [net.cgrand.enlive-html :as e]
             [sade.util :refer [fn->]]
-            [lupapalvelu.clojure15 :refer [some->>]]
             [sade.xml :as xml]))
 
 (defn extract [schema name mapper]

@@ -280,11 +280,13 @@ var docgen = (function () {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
       var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
-      input.onclick = self.addFocus;
-      input.onfocus = self.showHelp;
-      input.onblur = self.hideHelp;
+      var label = makeLabel("checkbox", myPath)
+      input.onmouseover = self.showHelp;
+      input.onmouseout = self.hideHelp;
+      label.onmouseover = self.showHelp;
+      label.onmouseout = self.hideHelp;
       span.appendChild(input);
-      span.appendChild(makeLabel("checkbox", myPath));
+      span.appendChild(label);
       return span;
     }
 
@@ -314,6 +316,8 @@ var docgen = (function () {
 
           input.onfocus = self.showHelp;
           input.onblur = self.hideHelp;
+          input.onmouseover = self.showHelp;
+          input.onmouseout = self.hideHelp;
 
           kiitunAndInput.appendChild(kiintun);
           kiitunAndInput.appendChild(input);
@@ -332,6 +336,8 @@ var docgen = (function () {
 
         input.onfocus = self.showHelp;
         input.onblur = self.hideHelp;
+        input.onmouseover = self.showHelp;
+        input.onmouseout = self.hideHelp;
 
         inputAndUnit.appendChild(unit);
         span.appendChild(inputAndUnit);
@@ -339,6 +345,8 @@ var docgen = (function () {
       } else {
         input.onfocus = self.showHelp;
         input.onblur = self.hideHelp;
+        input.onmouseover = self.showHelp;
+        input.onmouseout = self.hideHelp;
         span.appendChild(input);
       }
 
@@ -358,6 +366,8 @@ var docgen = (function () {
 
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
+      input.onmouseover = self.showHelp;
+      input.onmouseout = self.hideHelp;
 
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
@@ -414,6 +424,8 @@ var docgen = (function () {
 
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
+      select.onmouseover = self.showHelp;
+      select.onmouseout = self.hideHelp;
       select.setAttribute("data-docgen-path", myPath);
 
       select.name = myPath;
