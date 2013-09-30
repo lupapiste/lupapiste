@@ -147,54 +147,37 @@
 
   (let [documents-by-type (by-type (:documents application))
         operation-name-key (-> application :operations first :name keyword)
-        lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
+        permit-name-key (operation-name-key ya-operation-type-to-schema-name-key)
 
-        ;; TODO: default config
+        default-config {:tyomaasta-vastaava true
+                        :tyoaika true
+                        :hankkeen-kuvaus true}
 
-        mega-config {:Tyolupa {:dummy-maksaja false
-                               :tyomaasta-vastaava true
-                               :tyoaika true
-                               :hankkeen-kuvaus true
-                               :dummy-alku-pvm false
-                               :sijoitus-lisatiedot false
-                               :mainostus-viitoitus-tapahtuma-pvm false
-                               :mainostus-viitoitus-lisatiedot false
-                               :johtoselvitysviitetieto true}
+        configs-per-permit-name {:Tyolupa      (merge default-config {:johtoselvitysviitetieto true})
 
-                     :Kayttolupa {:dummy-maksaja false
-                                  :tyomaasta-vastaava false
-                                  :tyoaika true
-                                  :hankkeen-kuvaus true
-                                  :dummy-alku-pvm false
-                                  :sijoitus-lisatiedot false
-                                  :mainostus-viitoitus-tapahtuma-pvm false
-                                  :mainostus-viitoitus-lisatiedot false
-                                  :johtoselvitysviitetieto false}
+                                 :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
 
-                     :Sijoituslupa {:dummy-maksaja true
-                                    :tyomaasta-vastaava false
-                                    :tyoaika false
-                                    :hankkeen-kuvaus true
-                                    :dummy-alku-pvm true
-                                    :sijoitus-lisatiedot true
-                                    :mainostus-viitoitus-tapahtuma-pvm false
-                                    :mainostus-viitoitus-lisatiedot false
-                                    :johtoselvitysviitetieto false}
+                                 :Sijoituslupa (dissoc
+                                                 (dissoc
+                                                   (merge default-config {:dummy-maksaja true
+                                                                          :dummy-alku-pvm true
+                                                                          :sijoitus-lisatiedot true})
+                                                   :tyomaasta-vastaava)
+                                                 :tyoaika)
 
-                     :ya-kayttolupa-mainostus-ja-viitoitus {:dummy-maksaja false
-                                                            :tyomaasta-vastaava false
-                                                            :tyoaika false
-                                                            :hankkeen-kuvaus false
-                                                            :dummy-alku-pvm false
-                                                            :sijoitus-lisatiedot false
-                                                            :mainostus-viitoitus-tapahtuma-pvm true
-                                                            :mainostus-viitoitus-lisatiedot true
-                                                            :johtoselvitysviitetieto false}}
+                                 :ya-kayttolupa-mainostus-ja-viitoitus (dissoc
+                                                                         (dissoc
+                                                                           (dissoc
+                                                                             (merge default-config {:mainostus-viitoitus-tapahtuma-pvm true
+                                                                                                    :mainostus-viitoitus-lisatiedot true})
+                                                                             :tyomaasta-vastaava)
+                                                                           :tyoaika)
+                                                                         :hankkeen-kuvaus)}
 
-        config (or (operation-name-key mega-config) (lupa-name-key mega-config))
+        config (or (operation-name-key configs-per-permit-name) (permit-name-key configs-per-permit-name))
 
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
-        tyoaika-doc (when (:tyoaika config)
+        tyoaika-doc (when (get-in config [:tyoaika] false)
                       (-> documents-by-type :tyoaika first :data))
         mainostus-viitoitus-tapahtuma-doc (or
                                             (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
@@ -214,55 +197,55 @@
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
                   (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
-        tyomaasta-vastaava (when (:tyomaasta-vastaava config)
+        tyomaasta-vastaava (when (get-in config [:tyomaasta-vastaava] false)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
         osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}
                                                   (:osapuolitieto tyomaasta-vastaava)]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
-        vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
+        vastuuhenkilotieto (when (or (get-in config [:tyomaasta-vastaava] false) (not (get-in config [:dummy-maksaja] false)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
-        hankkeen-kuvaus-key (if (= lupa-name-key :Sijoituslupa)
+        hankkeen-kuvaus-key (if (= permit-name-key :Sijoituslupa)
                               :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
                               :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
-        hankkeen-kuvaus (when (:hankkeen-kuvaus config)
+        hankkeen-kuvaus (when (get-in config [:hankkeen-kuvaus] false)
                           (-> documents-by-type hankkeen-kuvaus-key first :data))
-        lupaAsianKuvaus (when (:hankkeen-kuvaus config)
+        lupaAsianKuvaus (when (get-in config [:hankkeen-kuvaus] false)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
         lupakohtainenLisatieto (if (:sijoitus-lisatiedot config)
                                  (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
                                    [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                     {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])
-                                 (when (:mainostus-viitoitus-lisatiedot config)
+                                 (when (get-in config [:mainostus-viitoitus-lisatiedot] false)
                                    (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
-        sijoituslupaviitetieto-key (if (= lupa-name-key :Sijoituslupa)
+        sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
-        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
+        sijoituslupaviitetieto (when (get-in config [:hankkeen-kuvaus] false)
                                  {:Sijoituslupaviite {:vaadittuKytkin false  ;; TODO: Muuta trueksi?
                                                       :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
-        johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
+        johtoselvitysviitetieto (when (get-in config [:johtoselvitysviitetieto] false)
                                   {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
                                                         ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
                                                         }})
 
-        body {lupa-name-key {:kasittelytietotieto (get-kasittelytieto application)
-                             :alkuPvm alku-pvm
-                             :loppuPvm loppu-pvm
-                             :sijaintitieto (get-sijaintitieto application)
-                             :osapuolitieto osapuolitieto
-                             :vastuuhenkilotieto vastuuhenkilotieto
-                             :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
-                             :lausuntotieto (get-statements (:statements application))
-                             :lupaAsianKuvaus lupaAsianKuvaus
-                             :lupakohtainenLisatietotieto lupakohtainenLisatieto
-                             :sijoituslupaviitetieto sijoituslupaviitetieto
-                             :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
-                             :johtoselvitysviitetieto johtoselvitysviitetieto}}
+        body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
+                               :alkuPvm alku-pvm
+                               :loppuPvm loppu-pvm
+                               :sijaintitieto (get-sijaintitieto application)
+                               :osapuolitieto osapuolitieto
+                               :vastuuhenkilotieto vastuuhenkilotieto
+                               :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
+                               :lausuntotieto (get-statements (:statements application))
+                               :lupaAsianKuvaus lupaAsianKuvaus
+                               :lupakohtainenLisatietotieto lupakohtainenLisatieto
+                               :sijoituslupaviitetieto sijoituslupaviitetieto
+                               :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
+                               :johtoselvitysviitetieto johtoselvitysviitetieto}}
 
         body (if (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
-               (assoc-in body [lupa-name-key :toimintajaksotieto]
+               (assoc-in body [permit-name-key :toimintajaksotieto]
                  (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
                body)]
 
