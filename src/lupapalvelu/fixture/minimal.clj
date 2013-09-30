@@ -281,14 +281,15 @@
    ])
 
 (def ^:private ya-attachments-reorganized
-  (into []
-    (map vec
-      (partition 2
-        (flatten
-          (reduce
-            (fn [r [k v]]  (conj r (into [] (cons k (interpose k v)))))
-            []
-            (partition 2 attachment/attachment-types-YA)))))))
+  (->>
+    (partition 2 attachment/attachment-types-YA)
+    (reduce
+      (fn [r [k v]] (conj r (into [] (interleave (repeat k) v))))
+      [])
+    (flatten)
+    (partition 2)
+    (map vec)
+    (into [])))
 
 (def ya-operations-attachments-all (reduce
                                      (fn [r k] (assoc r k ya-attachments-reorganized))
