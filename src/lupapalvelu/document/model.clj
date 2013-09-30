@@ -84,7 +84,7 @@
     (if (nil? ks)
       elem
       (if (:repeating elem)
-        (when (numeric? (first ks))
+        (when (numeric? (name (first ks)))
           (if (seq (rest ks))
             (find-by-name (:body elem) (rest ks))
             elem))
@@ -133,9 +133,8 @@
       [(check (sub-schema-by-name schema-body selected))]
       (map check schema-body))))
 
-(defn get-document-schema [document]
-  (let [schema-info (:schema-info document)]
-    (schemas/get-schema (:version schema-info) (:name schema-info))))
+(defn get-document-schema [{schema-info :schema-info}]
+  (schemas/get-schema schema-info))
 
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
@@ -274,7 +273,7 @@
 
 (defn strip-blacklisted-data
   "Strips values from document data if blacklist in schema includes given blacklist-item."
-  [{:keys [schema-info data] :as document} blacklist-item]
+  [{data :data :as document} blacklist-item & [initial-path]]
   (when data
     (letfn [(strip [schema-body path]
               (into {}
@@ -283,7 +282,7 @@
                     (let [k (keyword name)
                           current-path (conj path k)
                           v (get-in data current-path)]
-                    (if ((set blacklist) blacklist-item)
+                    (if ((set (map keyword blacklist)) (keyword blacklist-item))
                       [k nil]
                       (when v
                         (if (not= (keyword type) :group)
@@ -292,6 +291,27 @@
                                (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
                                (strip body current-path))])))))
                   schema-body)))]
-      (assoc document :data
-        (strip (:body (schemas/get-schema schema-info)) [])))))
+      (let [path (into [] initial-path)
+            schema (get-document-schema document)
+            schema-body (:body (if (seq path) (find-by-name (:body schema) path) schema))]
+        (assoc-in document (concat [:data] path)
+          (strip schema-body path))))))
+
+
+;;
+;; Turvakielto
+;;
+
+(defn strip-turvakielto-data [{data :data :as document}]
+  (reduce
+    (fn [doc [path v]]
+      (let [turvakielto-value (:value v)
+            ; Strip data starting from one level up.
+            ; Fragile, but currently schemas are modeled this way!
+            strip-from (butlast path)]
+        (if turvakielto-value
+          (strip-blacklisted-data doc schemas/turvakielto strip-from)
+          doc)))
+    document
+    (tools/deep-find data (keyword schemas/turvakielto))))
 

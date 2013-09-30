@@ -1,15 +1,15 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.poikkeamis-schemas :as poischemas]
-            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
-            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.core :refer :all]
             [sade.util :refer :all]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [lupapalvelu.core :refer [ok]]
+            [lupapalvelu.action :refer [defquery]]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.poikkeamis-schemas]
+            [lupapalvelu.document.ymparisto-schemas]
+            [lupapalvelu.document.yleiset-alueet-schemas]
+            [lupapalvelu.permit :as permit]))
 
 (def default-description "operations.tree.default-description")
 

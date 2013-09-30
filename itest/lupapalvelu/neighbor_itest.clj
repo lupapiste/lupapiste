@@ -98,6 +98,8 @@
                                       :updates [["rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"  "Gustav"]
                                                 ["rakennuksenOmistajat.0.henkilo.henkilotiedot.sukunimi" "Golem"]
                                                 ["rakennuksenOmistajat.0.henkilo.henkilotiedot.hetu"     "abba"]
+                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.turvakieltoKytkin" true]
+                                                ["rakennuksenOmistajat.0.henkilo.osoite.katu" "Katuosoite"]
                                                 ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"     "040-2345678"]])]
 
     application => truthy
@@ -121,6 +123,8 @@
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "abba"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => true
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
 
       (fact "neighbor application query does not return hetu"
@@ -139,11 +143,14 @@
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
           (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
           (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
+          (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => nil
           (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
           (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
 
           (facts "random testing about content"
             (:comments application) => nil

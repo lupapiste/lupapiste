@@ -50,10 +50,10 @@ Authority applications page should be open
   Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority-admin front page should be open
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 Admin front page should be open
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 Number of visible applications
   [Arguments]  ${amount}
@@ -214,7 +214,7 @@ Sipoo logs in
 
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
   
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
