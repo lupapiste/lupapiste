@@ -2,7 +2,8 @@
   (:require [lupapalvelu.factlet :as fl]
             [midje.sweet :refer :all]
             [lupapalvelu.document.canonical-test-common :refer :all]
-            [lupapalvelu.document.poikkeamis-canonical :as c]))
+            [lupapalvelu.document.poikkeamis-canonical :as c]
+            [lupapalvelu.document.poikkeamis-schemas]))
 
 
 (def ^:private statements [{:given 1379423133068
