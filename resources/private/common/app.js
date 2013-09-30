@@ -59,7 +59,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var path = hash.split("/");
 
-    if (self.session === undefined) {
+    if (!self.allowAnonymous && self.session === undefined) {
       ajax.query("user")
         .success(function (e) {
           self.session = true;
@@ -69,9 +69,10 @@ var LUPAPISTE = LUPAPISTE || {};
         })
         .error(function (e) {
           self.session = false;
-          if (!self.allowAnonymous) hub.send("logout", e);
+          hub.send("logout", e);
         })
         .call();
+      return;
     }
 
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
