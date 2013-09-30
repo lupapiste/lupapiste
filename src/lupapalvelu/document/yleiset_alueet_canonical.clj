@@ -153,31 +153,28 @@
                         :tyoaika true
                         :hankkeen-kuvaus true}
 
-        configs-per-permit-name {:Tyolupa      (merge default-config {:johtoselvitysviitetieto true})
+        configs-per-permit-name {:Tyolupa      (assoc default-config :johtoselvitysviitetieto true)
 
                                  :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
 
-                                 :Sijoituslupa (dissoc
-                                                 (dissoc
-                                                   (merge default-config {:dummy-maksaja true
-                                                                          :dummy-alku-pvm true
-                                                                          :sijoitus-lisatiedot true})
-                                                   :tyomaasta-vastaava)
-                                                 :tyoaika)
+                                 :Sijoituslupa (-> default-config
+                                                 (dissoc :tyomaasta-vastaava)
+                                                 (dissoc :tyoaika)
+                                                 (merge {:dummy-maksaja true
+                                                         :dummy-alku-pvm true
+                                                         :sijoitus-lisatiedot true}))
 
-                                 :ya-kayttolupa-mainostus-ja-viitoitus (dissoc
-                                                                         (dissoc
-                                                                           (dissoc
-                                                                             (merge default-config {:mainostus-viitoitus-tapahtuma-pvm true
-                                                                                                    :mainostus-viitoitus-lisatiedot true})
-                                                                             :tyomaasta-vastaava)
-                                                                           :tyoaika)
-                                                                         :hankkeen-kuvaus)}
+                                 :ya-kayttolupa-mainostus-ja-viitoitus (-> default-config
+                                                                         (dissoc :tyomaasta-vastaava)
+                                                                         (dissoc :tyoaika)
+                                                                         (dissoc :hankkeen-kuvaus)
+                                                                         (merge {:mainostus-viitoitus-tapahtuma-pvm true
+                                                                                 :mainostus-viitoitus-lisatiedot true}))}
 
         config (or (operation-name-key configs-per-permit-name) (permit-name-key configs-per-permit-name))
 
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
-        tyoaika-doc (when (get-in config [:tyoaika] false)
+        tyoaika-doc (when (:tyoaika config)
                       (-> documents-by-type :tyoaika first :data))
         mainostus-viitoitus-tapahtuma-doc (or
                                             (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
@@ -197,35 +194,35 @@
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
                   (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
-        tyomaasta-vastaava (when (get-in config [:tyomaasta-vastaava] false)
+        tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
         osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}
                                                   (:osapuolitieto tyomaasta-vastaava)]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
-        vastuuhenkilotieto (when (or (get-in config [:tyomaasta-vastaava] false) (not (get-in config [:dummy-maksaja] false)))
+        vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
         hankkeen-kuvaus-key (if (= permit-name-key :Sijoituslupa)
                               :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
                               :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
-        hankkeen-kuvaus (when (get-in config [:hankkeen-kuvaus] false)
+        hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (-> documents-by-type hankkeen-kuvaus-key first :data))
-        lupaAsianKuvaus (when (get-in config [:hankkeen-kuvaus] false)
+        lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
         lupakohtainenLisatieto (if (:sijoitus-lisatiedot config)
                                  (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
                                    [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                     {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])
-                                 (when (get-in config [:mainostus-viitoitus-lisatiedot] false)
+                                 (when (:mainostus-viitoitus-lisatiedot config)
                                    (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
         sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
-        sijoituslupaviitetieto (when (get-in config [:hankkeen-kuvaus] false)
+        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
                                  {:Sijoituslupaviite {:vaadittuKytkin false  ;; TODO: Muuta trueksi?
                                                       :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
-        johtoselvitysviitetieto (when (get-in config [:johtoselvitysviitetieto] false)
+        johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
                                                         ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
                                                         }})
