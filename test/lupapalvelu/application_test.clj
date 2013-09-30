@@ -1,8 +1,8 @@
 (ns lupapalvelu.application-test
-  (:use [lupapalvelu.application]
-        [lupapalvelu.core]
-        [midje.sweet])
-  (:require [lupapalvelu.operations :as operations]
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.action :refer [update-application]]
+            [lupapalvelu.application :refer :all]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]))

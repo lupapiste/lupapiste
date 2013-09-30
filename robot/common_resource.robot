@@ -50,10 +50,10 @@ Authority applications page should be open
   Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority-admin front page should be open
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 Admin front page should be open
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 Number of visible applications
   [Arguments]  ${amount}
@@ -149,29 +149,39 @@ Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  applicant
+  User nav menu is visible
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  authority
+  User nav menu is visible
   Authority applications page should be open
 
 Authority-admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
+  User nav menu is visible
   Authority-admin front page should be open
 
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  admin
+  User nav menu is visible
   Admin front page should be open
 
 User role should be
   [Arguments]  ${expected-role}
   ${user-role}=  Execute JavaScript  return window.currentUser.get().role();
   Should Be Equal  ${expected-role}  ${user-role}
+
+User nav menu is visible
+  Element should be visible  //*[@data-test-id='user-nav-menu']
+
+User nav menu is not visible
+  Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
   Open browser to login page
@@ -214,8 +224,8 @@ Sipoo logs in
 
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
-  Wait until page contains element  admin-header
-  
+  Wait until  Element should be visible  admin
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -423,3 +433,17 @@ Set animations on
 Set animations off
   Execute Javascript  tree.animation(false);
 
+#
+# Neighbor
+#
+
+Add neighbor
+  [Arguments]  ${propertyId}  ${name}  ${email}
+  Click enabled by test id  manager-neighbors-add
+  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Input text by test id  neighbors.edit.propertyId  ${propertyId}
+  Input text by test id  neighbors.edit.name  ${name}
+  Input text by test id  neighbors.edit.email  ${email}
+  Click by test id  neighbors.edit.ok
+  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Wait Until  Page Should Contain  ${email}

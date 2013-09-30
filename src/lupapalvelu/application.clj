@@ -1,18 +1,19 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
-            [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
             [clojure.string :refer [blank? join trim split]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [lupapalvelu.i18n :refer [with-lang loc]]
             [clj-time.format :as tf]
             [clj-http.client :as http]
-            [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
             [monger.query :as query]
             [sade.env :as env]
             [sade.util :as util]
-            [lupapalvelu.tepa :as tepa]
+            [sade.strings :as ss]
+            [sade.xml :as xml]
+            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys]]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -21,17 +22,21 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.security :as security]
+            [lupapalvelu.user :refer [with-user] :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [lupapalvelu.open-inforequest :as open-inforequest]
-            [sade.strings :as ss]
-            [sade.xml :as xml])
+            [lupapalvelu.open-inforequest :as open-inforequest])
   (:import [java.net URL]))
+
+;; Notificator
+
+(defn notify [notification]
+  (fn [command status]
+    (notifications/notify! notification command)))
 
 ;; Validators
 
@@ -164,21 +169,19 @@
 
 (defn- autofill-rakennuspaikka [application time]
    (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
-     (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
-         kiinteistotunnus (:propertyId application)
-         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
-     (when ktj-tiedot
-       (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                      [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                      [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                      [[:kiinteisto :rekisterointipvm] (or (try
-                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                         (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-         (commands/persist-model-updates
-           (:id application)
-           rakennuspaikka
-           updates
-           time))))))
+     (when-let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")]
+       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                        [[:kiinteisto :rekisterointipvm] (or (try
+                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+           (commands/persist-model-updates
+             (:id application)
+             rakennuspaikka
+             updates
+             time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -209,7 +212,7 @@
 (defcommand invite
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
-   :notify     "invite"
+   :on-success (notify "invite")
    :verified   true}
   [{created :created
     user    :user
@@ -219,7 +222,7 @@
       (let [email (ss/lower-case email)]
         (if (domain/invited? application email)
           (fail :invite.already-invited)
-          (let [invited (security/get-or-create-user-by-email email)
+          (let [invited (user/get-or-create-user-by-email email)
                 invite  {:title        title
                          :application  application-id
                          :text         text
@@ -228,9 +231,9 @@
                          :documentId   documentId
                          :created      created
                          :email        email
-                         :user         (security/summary invited)
-                         :inviter      (security/summary user)}
-                writer  (role invited :writer)
+                         :user         (user/summary invited)
+                         :inviter      (user/summary user)}
+                writer  (user/user-in-role invited :writer)
                 auth    (assoc writer :invite invite)]
             (if (domain/has-auth? application (:id invited))
               (fail :invite.already-has-auth)
@@ -255,7 +258,7 @@
             (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
           {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
-          {$set  {:auth.$ (role user :writer)}})))))
+          {$set  {:auth.$ (user/user-in-role user :writer)}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -280,29 +283,29 @@
                          {:type {$ne :owner}}]}}}))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
-  (when (and to (not (security/authority? user)))
+  (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
 (defquery can-target-comment-to-authority {:roles [:authority]
                                            :validators  [not-open-inforequest-user-validator]})
 
 (defcommand add-comment
-  {:parameters [:id :text :target]
-   :roles      [:applicant :authority]
-   :validators [applicant-cant-set-to]
-   :notify     "new-comment"}
+  {:parameters  [:id :text :target]
+   :roles       [:applicant :authority]
+   :validators  [applicant-cant-set-to]
+   :on-success  (notify "new-comment")}
   [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
-      (let [to-user   (and to (or (security/get-non-private-userinfo to)
+      (let [to-user   (and to (or (user/get-non-private-userinfo to)
                                   (fail! :to-is-not-id-of-any-user-in-system)))
-            from-user (security/summary user)]
+            from-user (user/summary user)]
         (update-application command
           {$set  {:modified created}
            $push {:comments {:text    text
                              :target  target
                              :created created
-                             :to      (security/summary to-user)
+                             :to      (user/summary to-user)
                              :user    from-user}}})
 
         (condp = (keyword state)
@@ -315,13 +318,13 @@
                              :opened   created}}))
 
           ;; LUPA-371, LUPA-745
-          :info (when (and mark-answered (security/authority? user))
+          :info (when (and mark-answered (user/authority? user))
                   (update-application command
                     {$set {:state    :answered
                            :modified created}}))
 
           ;; LUPA-371 (was: mark-inforequest-answered)
-          :answered (when (security/applicant? user)
+          :answered (when (user/applicant? user)
                       (update-application command
                         {$set {:state :info
                                :modified created}}))
@@ -346,10 +349,10 @@
   (let [document     (domain/get-document-by-id application documentId)
         schema-name  (get-in document [:schema-info :name])
         schema       (schemas/get-schema (:schema-version application) schema-name)
-        subject      (security/get-non-private-userinfo userId)
+        subject      (user/get-non-private-userinfo userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
-                       (security/same-user? user subject))
+                       (user/same-user? user subject))
         person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
         model        (if-not (blank? path)
                        (assoc-in {} (map keyword (split path #"\.")) person)
@@ -369,7 +372,7 @@
    :roles      [:authority]}
   [{user :user :as command}]
   (update-application command
-    {$set {:authority (security/summary user)}}))
+    {$set {:authority (user/summary user)}}))
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
@@ -380,7 +383,7 @@
     (if (or assignee (nil? assigneeId))
       (update-application command
                           (if assignee
-                            {$set   {:authority (security/summary assignee)}}
+                            {$set   {:authority (user/summary assignee)}}
                             {$unset {:authority ""}}))
       (fail "error.user.not.found" :id assigneeId))))
 
@@ -391,7 +394,7 @@
 (defcommand cancel-application
   {:parameters [:id]
    :roles      [:applicant]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
@@ -401,7 +404,7 @@
 (defcommand request-for-complement
   {:parameters [:id]
    :roles      [:authority]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
@@ -411,7 +414,7 @@
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
@@ -433,7 +436,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :notify     "state-change"
+   :on-success (notify "state-change")
    :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :keys [created] :as command}]
   (with-application command
@@ -470,7 +473,6 @@
     {$set {:shapes [shape]}}))
 
 (defn make-attachments [created operation organization-id & {:keys [target]}]
-
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
@@ -547,7 +549,7 @@
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest organization))]
-    (when-not (or (security/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
+    (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
@@ -557,15 +559,15 @@
       (when-not (:new-application-enabled organization)
         (fail! :error.new-applications-disabled)))
     (let [id            (make-application-id municipality)
-          owner         (role user :owner :type :owner)
+          owner         (user/user-in-role user :owner :type :owner)
           op            (make-op operation created)
           state         (cond
                           info-request?              :info
-                          (security/authority? user) :open
+                          (user/authority? user) :open
                           :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
-                                        :user (security/summary user)} :text)
+                                        :user (user/summary user)} :text)
           application   {:id               id
                          :created          created
                          :opened           (when (#{:open :info} state) created)
@@ -672,7 +674,7 @@
   {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
-   :notify     "verdict"
+   :on-success (notify "verdict")
    :roles      [:authority]}
   [{:keys [created] :as command}]
   (update-application command
@@ -720,13 +722,13 @@
       verdicts)))
 
 (defcommand check-for-verdict
-  {:description "Fetches verdicts from municipality backend system.
-                 If the command is run more than once, existing verdicts are
-                 replaced by the new ones."
-   :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
-   :roles      [:authority]
-   :notify     "verdict"}
+  {:description  "Fetches verdicts from municipality backend system.
+                  If the command is run more than once, existing verdicts are
+                  replaced by the new ones."
+   :parameters  [:id]
+   :states      [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles       [:authority]
+   :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (do (update-application command

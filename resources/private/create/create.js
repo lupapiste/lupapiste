@@ -379,7 +379,6 @@
             .error(function(d) {
               model.inforequestsDisabled(true);
               model.newApplicationsDisabled(true);
-              notify.error(loc("error.dialog.title"), loc(d.text));
             })
             .call();
         } else {

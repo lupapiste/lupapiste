@@ -1,12 +1,12 @@
 (ns lupapalvelu.statement
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.security :as sadesecurity]
             [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
             [sade.env :refer :all]
             [sade.strings :refer [lower-case]]
+            [lupapalvelu.core :refer :all]
+            [lupapalvelu.action :refer [defquery defcommand with-application executed]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
+            [lupapalvelu.user :refer [with-user] :as user]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]))
@@ -55,7 +55,7 @@
         email           (lower-case email)]
     (with-user email
       (fn [{:keys [firstName lastName] :as user}]
-        (if-not (security/authority? user)
+        (if-not (user/authority? user)
           (fail :error.not-authority)
           (do
             (mongo/update
@@ -98,8 +98,8 @@
           (let [now            (now)
                 personIdSet    (set personIds)
                 persons        (filter #(-> % :id personIdSet) statementPersons)
-                users          (map #(security/get-or-create-user-by-email (:email %)) persons)
-                writers        (map #(role % :writer) users)
+                users          (map #(user/get-or-create-user-by-email (:email %)) persons)
+                writers        (map #(user/user-in-role % :writer) users)
                 new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
                 new-userids    (set (map :id new-writers))
                 unique-writers (distinct new-writers)

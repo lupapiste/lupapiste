@@ -1,6 +1,8 @@
 (ns lupapalvelu.fixture.minimal
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture :refer :all]))
+            [lupapalvelu.fixture :refer :all]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.attachment :as attachment]))
 
 (def ^:private local-legacy "http://localhost:8000/dev/krysp")
 
@@ -278,6 +280,21 @@
     :role  "applicant"}
    ])
 
+(def ^:private ya-attachments-reorganized
+  (into []
+    (map vec
+      (partition 2
+        (flatten
+          (reduce
+            (fn [r [k v]]  (conj r (into [] (cons k (interpose k v)))))
+            []
+            (partition 2 attachment/attachment-types-YA)))))))
+
+(def ya-operations-attachments-all (reduce
+                                     (fn [r k] (assoc r k ya-attachments-reorganized))
+                                     {}
+                                     (keys operations/ya-operations)))
+
 (def organizations [{:id "186-R"
                      :inforequest-enabled true
                      :new-application-enabled true
@@ -326,7 +343,7 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments {:ya-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
+                     :operations-attachments ya-operations-attachments-all}
 
                     {:id "753-P"
                      :inforequest-enabled true
@@ -376,7 +393,7 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments {:ya-kaivuulupa [[:yleiset-alueet :tieto-kaivupaikkaan-liittyvista-johtotiedoista]]}}
+                      :operations-attachments ya-operations-attachments-all}
 
                     {:id "638-R"
                      :inforequest-enabled true
@@ -412,7 +429,13 @@
                              {:municipality "317" :permitType "R"}
                              {:municipality "626" :permitType "R"}
                              {:municipality "691" :permitType "R"}]}
-                 
+
+                    {:id "491-Y"
+                     :inforequest-enabled true
+                     :new-application-enabled true
+                     :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
+                     :scope [{:municipality "491" :permitType "Y"}]}
+
                     ;;
                     ;; Testeissa kaytettavia organisaatioita
                     ;;
@@ -467,10 +490,10 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}
-                    
+
                     ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynon-avaus" system.
-                    ;; Nice address for testing "Ojatie 1, Loppi" 
-                    
+                    ;; Nice address for testing "Ojatie 1, Loppi"
+
                     {:id "433-R"
                      :open-inforequest true
                      :open-inforequest-email "erajorma@takahikia.fi"

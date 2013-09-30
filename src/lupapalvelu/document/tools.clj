@@ -87,7 +87,7 @@
   ([m k]
     (assert (keyword? k))
     (walk/postwalk
-      (fn [x] (if (contains? x k) (k x) x))
+      (fn [x] (if (and (map? x) (contains? x k)) (k x) x))
       m)))
 
 (defn timestamped
@@ -95,7 +95,7 @@
   ([m timestamp] (timestamped m timestamp :value :modified))
   ([m timestamp value-key timestamp-key]
   (walk/postwalk
-    (fn [x] (if (contains? x value-key) (assoc x timestamp-key timestamp) x))
+    (fn [x] (if (and (map? x) (contains? x value-key)) (assoc x timestamp-key timestamp) x))
     m)))
 
 (defn create-document-data

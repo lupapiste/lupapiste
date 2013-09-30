@@ -10,3 +10,8 @@ Re-enable proxies
 
 Kill all browsers
   Close all browsers
+
+Teardown (integration)
+  [Tags]  integration
+  Set integration proxy on
+  Close all browsers
