@@ -149,29 +149,39 @@ Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  applicant
+  User nav menu is visible
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  authority
+  User nav menu is visible
   Authority applications page should be open
 
 Authority-admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
+  User nav menu is visible
   Authority-admin front page should be open
 
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  admin
+  User nav menu is visible
   Admin front page should be open
 
 User role should be
   [Arguments]  ${expected-role}
   ${user-role}=  Execute JavaScript  return window.currentUser.get().role();
   Should Be Equal  ${expected-role}  ${user-role}
+
+User nav menu is visible
+  Element should be visible  //*[@data-test-id='user-nav-menu']
+
+User nav menu is not visible
+  Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
   Open browser to login page
