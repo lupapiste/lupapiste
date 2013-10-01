@@ -17,7 +17,7 @@ Mikko sees application in list
   Request should be visible  create-app
 
 Mikko creates a new inforequest
-  Create inforequest  create-info  753  753-416-25-22  Hoblaa  "R"
+  Create inforequest  create-info  753  753-416-25-22  Hoblaa  R
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-operation-id='asuinrakennus']
   Element should not be visible  //h2[@data-test-id='wanna-join']
