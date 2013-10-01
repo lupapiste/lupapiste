@@ -88,7 +88,8 @@
 
         ;; maksajan henkilotieto-osa
         rooliKoodi-maksajan-vastuuhenkilo "maksajan vastuuhenkil\u00f6"
-        maksaja-Vastuuhenkilo (:Vastuuhenkilo (first (filter #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-maksajan-vastuuhenkilo) vastuuhenkilot-vec)))
+        maksaja-filter-fn #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-maksajan-vastuuhenkilo)
+        maksaja-Vastuuhenkilo (:Vastuuhenkilo (first (filter maksaja-filter-fn vastuuhenkilot-vec)))
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
         ;; maksajan yritystieto-osa
         Maksaja (-> Mainostus-viitoituslupa :maksajatieto :Maksaja) => truthy
@@ -117,7 +118,8 @@
         osapuolet-vec (-> Mainostus-viitoituslupa :osapuolitieto) => truthy
 
         rooliKoodi-Hakija "hakija"
-        hakija-Osapuoli (:Osapuoli (first (filter #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija) osapuolet-vec)))
+        hakija-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
+        hakija-Osapuoli (:Osapuoli (first (filter hakija-filter-fn osapuolet-vec)))
         hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
         hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy

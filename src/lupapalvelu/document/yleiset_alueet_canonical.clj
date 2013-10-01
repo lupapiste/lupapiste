@@ -160,8 +160,7 @@
                                  :Sijoituslupa (-> default-config
                                                  (dissoc :tyomaasta-vastaava)
                                                  (dissoc :tyoaika)
-                                                 (merge {:dummy-maksaja true
-                                                         :dummy-alku-pvm true
+                                                 (merge {:dummy-alku-pvm true
                                                          :sijoitus-lisatiedot true}))
 
                                  :ya-kayttolupa-mainostus-ja-viitoitus (-> default-config
