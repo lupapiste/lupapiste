@@ -5,16 +5,16 @@
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as s]
+            [sade.util :refer [fn->]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
 
 ;;
 ;; ==============================================================================
-;; Securing data:
+;; Utils:
 ;; ==============================================================================
 ;;
-
 
 (defn non-private
   "Returns user without private details."
@@ -25,6 +25,33 @@
   [user]
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
+
+(def authority? (fn-> :role keyword (= :authority)))
+(def applicant? (fn-> :role keyword (= :applicant)))
+
+(defn same-user? [{id1 :id} {id2 :id}]
+  (= id1 id2))
+
+;;
+;; ==============================================================================
+;; Getting user data:
+;; ==============================================================================
+;;
+
+(defn get-non-private-userinfo [user-id]
+  (when user-id
+    (non-private (mongo/select-one :users {:_id user-id}))))
+
+(defn get-user-by-email [email]
+  (when email
+    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
+
+(defmacro with-user-by-email [email & body]
+  `(let [~'user (get-user-by-email ~email)]
+     (when-not ~'user
+       (debugf "user '%s' not found with email" ~email)
+       (fail! :error.user-not-found :email ~email))
+     ~@body))
 
 ;;
 ;; ==============================================================================
@@ -102,19 +129,6 @@
 
 
 
-;;
-;; ==============================================================================
-;; Getting user data:
-;; ==============================================================================
-;;
-
-(defn get-non-private-userinfo [user-id]
-  (when user-id
-    (non-private (mongo/select-one :users {:_id user-id}))))
-
-(defn get-user-by-email [email]
-  (when email
-    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
 
 
 
@@ -242,13 +256,14 @@
     (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt  salt
                                                             :private.password hashed-password}})))
 
+;;
+;; ==============================================================================
+;; Other:
+;; ==============================================================================
+;;
 
-
-
-
-
-
-
+; TODO: replace dummy users with tokens
+; When (if?) dummy users are changed with tokens, this should be removed too:
 
 (defn get-or-create-user-by-email [email]
   (let [email (s/lower-case email)]
@@ -256,27 +271,3 @@
       (get-user-by-email email)
       (create-any-user {:email email}))))
 
-(defn authority? [{role :role}]
-  (= :authority (keyword role)))
-
-(defn applicant? [{role :role}]
-  (= :applicant (keyword role)))
-
-(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
-  (= id1 id2))
-
-
-
-
-;;
-;; ==============================================================================
-;; Util:
-;; ==============================================================================
-;;
-
-(defmacro with-user-by-email [email & body]
-  `(let [~'user (get-user-by-email ~email)]
-     (when-not ~'user
-       (debugf "user '%s' not found with email" ~email)
-       (fail! :error.user-not-found :email ~email))
-     ~@body))

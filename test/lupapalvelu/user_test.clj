@@ -25,15 +25,15 @@
     (fact (summary nil) => nil)
     (fact (summary user) => (just (dissoc user :private)))))
 
-(facts "roles"
-  (fact "authority"
-    (authority? {:role "authority"}) => true
-    (authority? {:role :authority}) => true
-    (authority? {}) => false)
-  (fact "applicant"
-    (applicant? {:role "applicant"}) => true
-    (applicant? {:role :applicant}) => true
-    (applicant? {}) => false))
+(fact "authority"
+  (authority? {:role "authority"}) => true
+  (authority? {:role :authority}) => true
+  (authority? {}) => false)
+
+(fact "applicant"
+  (applicant? {:role "applicant"}) => true
+  (applicant? {:role :applicant}) => true
+  (applicant? {}) => false)
 
 (fact "is a map with all the data"
   (create-user-entity {:id             ..id..
@@ -88,6 +88,13 @@
   (same-user? {:id "123"} {:id "123"}) => true
   (same-user? {:id "123"} {:id "234"}) => false)
 
-(facts with-user-by-email
-  (with-user-by-email "admin@solita.fi" user) => (contains {:id "777777777777777777000099" :email "admin@solita.fi"})
-  (with-user-by-email "nobody") => (throws clojure.lang.ExceptionInfo #"error\.user-not-found"))
+(fact
+  (with-user-by-email "email" user) => (contains {:id "123" :email "email"})
+  (provided (get-user-by-email "email") => {:id "123" :email "email"}))
+
+(fact
+  (with-user-by-email "email") => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
+  (provided (get-user-by-email "email") => nil))
+
+(fact
+  (with-user-by-email nil) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found"))
