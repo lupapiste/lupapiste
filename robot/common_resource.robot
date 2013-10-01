@@ -149,29 +149,39 @@ Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  applicant
+  User nav menu is visible
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  authority
+  User nav menu is visible
   Authority applications page should be open
 
 Authority-admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
+  User nav menu is visible
   Authority-admin front page should be open
 
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  admin
+  User nav menu is visible
   Admin front page should be open
 
 User role should be
   [Arguments]  ${expected-role}
   ${user-role}=  Execute JavaScript  return window.currentUser.get().role();
   Should Be Equal  ${expected-role}  ${user-role}
+
+User nav menu is visible
+  Element should be visible  //*[@data-test-id='user-nav-menu']
+
+User nav menu is not visible
+  Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
   Open browser to login page
@@ -215,7 +225,7 @@ Sipoo logs in
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
-  
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -261,15 +271,16 @@ Create inforequest the fast way
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Run Keyword If  "${permitType}" == "YA"  Wait Until  Element Should Not Be Visible  xpath=//span[@data-test-id='application-pdf-btn']
 
 Create inforequest
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
@@ -280,7 +291,7 @@ Create inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
   Click by test id  create-search-button
@@ -292,12 +303,49 @@ Prepare new request
   Select From List by test id  create-municipality-select  ${municipality}
   Set animations off
   Click enabled by test id  create-continue
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
+  Select operation path by permit type  ${permitType}
   Wait until  Element should be visible  xpath=//*[@class="attachments-list"]/span[text()="Asemapiirros"]
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
+
+
+Select operation path by permit type
+  [Arguments]  ${permitType}
+  Run Keyword If  '${permitType}' == 'R'  Select operations path R
+  ...  ELSE IF  '${permitType}' == 'YA-kaivulupa'  Select operations path YA kaivulupa
+  ...  ELSE IF  '${permitType}' == 'YA-kayttolupa'  Select operations path YA kayttolupa
+  ...  ELSE IF  '${permitType}' == 'YA-kayttolupa-mainostus-viitoitus'  Select operations path YA kayttolupa mainostus-viitoitus
+  ...  ELSE IF  '${permitType}' == 'YA-sijoituslupa'  Select operations path YA sijoituslupa
+  ...  ELSE  Select operations path R
+
+Select operations path R
+  Click tree item by text  "Rakentaminen ja purkaminen"
+  Click tree item by text  "Uuden rakennuksen rakentaminen"
+  Click tree item by text  "Asuinrakennuksen rakentaminen"
+
+Select operations path YA kaivulupa
+  Click tree item by text  "Yleisten alueiden käyttö"
+  Click tree item by text  "Kaivaminen yleisellä alueella (kadut ja puistot)"
+
+Select operations path YA kayttolupa
+  Click tree item by text  "Yleisten alueiden käyttö"
+  Click tree item by text  "Yleisten alueiden käyttäminen"
+  Click tree item by text  "Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"
+
+Select operations path YA kayttolupa mainostus-viitoitus
+  Click tree item by text  "Yleisten alueiden käyttö"
+  Click tree item by text  "Yleisten alueiden käyttäminen"
+  Click tree item by text  "Mainoslaitteiden ja opasteviittojen sijoittaminen"
+
+Select operations path YA sijoituslupa
+  Click tree item by text  "Yleisten alueiden käyttö"
+  Click tree item by text  "Rakenteiden sijoittaminen"
+  Click tree item by text  "Pysyvien maanalaisten rakenteiden sijoittaminen"
+
+Click tree item by text
+  [Arguments]  ${itemName}
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()=${itemName}]
+
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
@@ -423,3 +471,17 @@ Set animations on
 Set animations off
   Execute Javascript  tree.animation(false);
 
+#
+# Neighbor
+#
+
+Add neighbor
+  [Arguments]  ${propertyId}  ${name}  ${email}
+  Click enabled by test id  manager-neighbors-add
+  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Input text by test id  neighbors.edit.propertyId  ${propertyId}
+  Input text by test id  neighbors.edit.name  ${name}
+  Input text by test id  neighbors.edit.email  ${email}
+  Click by test id  neighbors.edit.ok
+  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Wait Until  Page Should Contain  ${email}

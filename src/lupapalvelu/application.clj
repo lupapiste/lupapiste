@@ -170,21 +170,19 @@
 
 (defn- autofill-rakennuspaikka [application time]
    (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
-     (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
-         kiinteistotunnus (:propertyId application)
-         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
-     (when ktj-tiedot
-       (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                      [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                      [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                      [[:kiinteisto :rekisterointipvm] (or (try
-                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                         (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-         (commands/persist-model-updates
-           (:id application)
-           rakennuspaikka
-           updates
-           time))))))
+     (when-let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")]
+       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                        [[:kiinteisto :rekisterointipvm] (or (try
+                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+           (commands/persist-model-updates
+             (:id application)
+             rakennuspaikka
+             updates
+             time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -476,7 +474,6 @@
     {$set {:shapes [shape]}}))
 
 (defn make-attachments [created operation organization-id & {:keys [target]}]
-
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))

@@ -60,10 +60,10 @@ Remove link
 
 User sees link
   [Arguments]  ${name}  ${url}
-  Prepare new request  Latokuja 103  753  75300000000001
+  Prepare new request  Latokuja 103  753  75300000000001  R
   Element Text Should Be  xpath=//a[@href='${url}']  ${name} fi
 
 User does not see link
   [Arguments]  ${name}
-  Prepare new request  Latokuja 103  753  75300000000001
+  Prepare new request  Latokuja 103  753  75300000000001  R
   Element should not be visible  //a[text()='${name} fi']
