@@ -508,7 +508,7 @@
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
-        Rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy
+        Rakennuspaikka (first rakennuspaikkatieto) => truthy
         rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistötieto Rakennuspaikka) => truthy
         RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto Rakennuspaikka) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy

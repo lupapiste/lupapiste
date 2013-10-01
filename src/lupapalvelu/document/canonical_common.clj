@@ -280,12 +280,12 @@
    {:osapuolitieto (get-parties documents-by-types)
     :suunnittelijatieto (get-designers documents-by-types)}})
 
-(defn- change-value-to-when [value to_compare new_val]
+(defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val
     value))
 
 
-(defn- get-bulding-places [documents application]
+(defn get-bulding-places [documents application]
   (for [doc (:rakennuspaikka documents)
         :let [rakennuspaikka (:data doc)
               kiinteisto (:kiinteisto rakennuspaikka)
