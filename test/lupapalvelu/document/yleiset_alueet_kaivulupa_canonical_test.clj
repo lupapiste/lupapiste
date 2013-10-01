@@ -73,7 +73,8 @@
 
         ;; maksajan henkilotieto-osa
         rooliKoodi-maksajan-vastuuhenkilo "maksajan vastuuhenkil\u00f6"
-        maksaja-Vastuuhenkilo (:Vastuuhenkilo (first (filter #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-maksajan-vastuuhenkilo) vastuuhenkilot-vec)))
+        maksaja-filter-fn #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-maksajan-vastuuhenkilo)
+        maksaja-Vastuuhenkilo (:Vastuuhenkilo (first (filter maksaja-filter-fn vastuuhenkilot-vec)))
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
         ;; maksajan yritystieto-osa
         Maksaja (-> Tyolupa :maksajatieto :Maksaja) => truthy
@@ -100,7 +101,8 @@
         Vastuuhenkilo-yritys-Yritys (-> Vastuuhenkilo-yritys :yritystieto :Yritys) => truthy
         Vastuuhenkilo-yritys-Postiosoite (-> Vastuuhenkilo-yritys-Yritys :postiosoitetieto :Postiosoite) => truthy
         ;; tyomaasta-vastaavan henkilotieto-osa
-        Vastuuhenkilo-henkilo (:Vastuuhenkilo (first (filter #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-tyomaastavastaava) vastuuhenkilot-vec)))
+        tyomaastavastaava-filter-fn #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-tyomaastavastaava)
+        Vastuuhenkilo-henkilo (:Vastuuhenkilo (first (filter tyomaastavastaava-filter-fn vastuuhenkilot-vec)))
         Vastuuhenkilo-henkilo-osoite (-> Vastuuhenkilo-henkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota myos henkilo-tyyppisella tyomaasta-vastaavalla
@@ -110,7 +112,8 @@
         tyomaasta-vastaava-Vastuuhenkilo-osoite (-> tyomaasta-vastaava-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         rooliKoodi-Hakija "hakija"
-        hakija-Osapuoli (:Osapuoli (first (filter #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija) osapuolet-vec)))
+        hakija-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
+        hakija-Osapuoli (:Osapuoli (first (filter hakija-filter-fn osapuolet-vec)))
         hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
         hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
@@ -229,6 +232,3 @@
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
-
-
-
