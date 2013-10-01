@@ -10,8 +10,11 @@
             [lupapalvelu.core :refer [fail fail!]]))
 
 ;;
+;; ==============================================================================
 ;; Securing data:
+;; ==============================================================================
 ;;
+
 
 (defn non-private
   "Returns user without private details."
@@ -24,17 +27,27 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 ;;
+;; ==============================================================================
 ;; User management:
+;; ==============================================================================
 ;;
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
 
-
 (defn current-user
   "fetches the current user from session"
   ([] (current-user (request/ring-request)))
   ([request] (request :user)))
+
+(defn user-in-role [user role & params]
+  (merge (apply hash-map params) (assoc (summary user) :role role)))
+
+;;
+;; ==============================================================================
+;; Loading user data:
+;; ==============================================================================
+;;
 
 (defn- load-user [username]
   (when username
@@ -53,11 +66,22 @@
     (debug "user session refresh successful, username:" (:username user))
     (session/put! :user user)))
 
-(defn user-in-role [user role & params]
-  (merge (apply hash-map params) (assoc (summary user) :role role)))
 
 
 
+
+
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Login:
+;; ==============================================================================
+;;
 
 (defn login
   "returns non-private information of enabled user with the username and password"
@@ -75,6 +99,15 @@
     (when-let [user (non-private (mongo/select-one :users {:private.apikey apikey}))]
       (when (:enabled user) user))))
 
+
+
+
+;;
+;; ==============================================================================
+;; Getting user data:
+;; ==============================================================================
+;;
+
 (defn get-non-private-userinfo [user-id]
   (when user-id
     (non-private (mongo/select-one :users {:_id user-id}))))
@@ -83,17 +116,52 @@
   (when email
     (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
 
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Creating API keys:
+;; ==============================================================================
+;;
+
 (defn create-apikey [email]
   (let [apikey (security/random-password)
         result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
     (when result
       apikey)))
 
+
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Change password:
+;; ==============================================================================
+;;
+
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
     (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Creating users:
+;; ==============================================================================
+;;
 
 (def required-user-keys [:email :id :role])
 (def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
@@ -149,6 +217,17 @@
   (create-any-user (merge user {:role :applicant :enabled true})))
 
 
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Updating user information:
+;; ==============================================================================
+;;
+
 (defn update-user [email data]
   (mongo/update :users {:email (s/lower-case email)} {$set data}))
 
@@ -162,6 +241,14 @@
         hashed-password   (security/get-hash password salt)]
     (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt  salt
                                                             :private.password hashed-password}})))
+
+
+
+
+
+
+
+
 
 (defn get-or-create-user-by-email [email]
   (let [email (s/lower-case email)]
@@ -181,8 +268,11 @@
 
 
 
-
-
+;;
+;; ==============================================================================
+;; Util:
+;; ==============================================================================
+;;
 
 (defn with-user [email function]
   (if (nil? email)
@@ -192,15 +282,5 @@
       (do
         (debugf "user '%s' not found with email" email)
         (fail :error.user-not-found)))))
-
-
-
-
-
-
-
-
-
-
 
 
