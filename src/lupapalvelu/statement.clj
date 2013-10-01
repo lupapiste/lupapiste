@@ -6,7 +6,7 @@
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand with-application executed]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :refer [with-user] :as user]
+            [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]))
@@ -53,19 +53,16 @@
   (let [organization-id (first organizations)
         organization    (mongo/select-one :organizations {:_id organization-id})
         email           (lower-case email)]
-    (with-user email
-      (fn [{:keys [firstName lastName] :as user}]
-        (if-not (user/authority? user)
-          (fail :error.not-authority)
-          (do
-            (mongo/update
-              :organizations
-              {:_id organization-id}
-              {$push {:statementPersons {:id (mongo/create-id)
-                                         :text text
-                                         :email email
-                                         :name (str firstName " " lastName)}}})
-            (notifications/send-create-statement-person! email text organization)))))))
+    (with-user-by-email email
+      (when-not (user/authority? user) (fail! :error.not-authority))
+      (mongo/update
+        :organizations
+        {:_id organization-id}
+        {$push {:statementPersons {:id (mongo/create-id)
+                                   :text text
+                                   :email email
+                                   :name (str (:firstName user) " " (:lastName user))}}})
+      (notifications/send-create-statement-person! email text organization))))
 
 (defcommand "delete-statement-person"
   {:parameters [:personId]

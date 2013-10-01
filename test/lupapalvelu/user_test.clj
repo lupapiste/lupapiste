@@ -1,6 +1,7 @@
 (ns lupapalvelu.user-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.user :refer :all]))
+            [lupapalvelu.user :refer :all]
+            [slingshot.slingshot :refer [try+]]))
 
 (facts
   (applicationpage-for "applicant")      => "applicant"
@@ -87,6 +88,6 @@
   (same-user? {:id "123"} {:id "123"}) => true
   (same-user? {:id "123"} {:id "234"}) => false)
 
-(facts "with-user"
-  (with-user nil nil) => (contains {:ok false}))
-
+(facts with-user-by-email
+  (with-user-by-email "admin@solita.fi" user) => (contains {:id "777777777777777777000099" :email "admin@solita.fi"})
+  (with-user-by-email "nobody") => (throws clojure.lang.ExceptionInfo #"error\.user-not-found"))

@@ -274,13 +274,9 @@
 ;; ==============================================================================
 ;;
 
-(defn with-user [email function]
-  (if (nil? email)
-    (fail :error.user-not-found)
-    (if-let [user (get-user-by-email email)]
-      (function user)
-      (do
-        (debugf "user '%s' not found with email" email)
-        (fail :error.user-not-found)))))
-
-
+(defmacro with-user-by-email [email & body]
+  `(let [~'user (get-user-by-email ~email)]
+     (when-not ~'user
+       (debugf "user '%s' not found with email" ~email)
+       (fail! :error.user-not-found :email ~email))
+     ~@body))
