@@ -280,3 +280,26 @@
    {:osapuolitieto (get-parties documents-by-types)
     :suunnittelijatieto (get-designers documents-by-types)}})
 
+(defn- change-value-to-when [value to_compare new_val]
+  (if (= value to_compare) new_val
+    value))
+
+
+(defn- get-bulding-places [documents application]
+  (for [doc (:rakennuspaikka documents)
+        :let [rakennuspaikka (:data doc)
+              kiinteisto (:kiinteisto rakennuspaikka)
+              id (:id doc)]]
+    {:Rakennuspaikka
+     {:yksilointitieto id
+      :alkuHetki (to-xml-datetime (now))
+      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste :value) "eiKaavaa" "ei kaavaa")
+      :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
+                                      {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
+                                       :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
+                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
+                                                                             :kiinteistotunnus (:propertyId application)}
+                                                         (when (-> kiinteisto :maaraalaTunnus :value)
+                                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
+
+
