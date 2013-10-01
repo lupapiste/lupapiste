@@ -508,16 +508,17 @@
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
-        Rakennuspaikka (first rakennuspaikkatieto) => truthy
-        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistötieto Rakennuspaikka) => truthy
-        RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto Rakennuspaikka) => truthy
+        Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
+        Rakennuspaikka (:Rakennuspaikka Rakennuspaikkaf) => truthy
+        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto Rakennuspaikka) => truthy
+        RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
-        tilannimi (:Kiinteisto Kiinteisto) => "Omatila"
-        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "753-427-2-63"
-        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "0008"
-        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => true
-        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "Oma"
+        tilannimi (:tilannimi Kiinteisto) => "Omatila"
+        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
+        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
+        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
+        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
 
 
 
@@ -532,7 +533,7 @@
         ;end of abstarctPoikkeamistype
         ;asianTiedot
         ;kaytttotapaus
-        _ (clojure.pprint/pprint canonical)
+        ;_ (clojure.pprint/pprint canonical)
         ]))
 
 
