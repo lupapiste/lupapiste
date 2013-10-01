@@ -475,19 +475,35 @@
 
         ;Paassuunnitelija
         suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
-        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthySuunnittelija (:Suunnittelija paasuunnittelija) => truthy
+        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
+        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
         henkilo (:henkilo Suunnittelija) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
         _ (:puhelin henkilo) => "0102030405"
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        osoite (osoite henkilo) => truthy
+        osoite (:osoite henkilo) => truthy
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
-        _ (:postitoimipaikannimi postiosoite) => "Piippola"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Suunnittelija) => "Arkkitehti"
+        _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
+
         ;Suunnitelija
-
-
+        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
+        suunnittelija (some #(when (= (get-in % [:Suunnittelija :suunnittelijaRoolikoodi] %) "KVV-suunnittelija") %) suunnittelijatieto) => truthy
+        Suunnittelija (:Suunnittelija suunnittelija) => truthy
+        henkilo (:henkilo Suunnittelija) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Suunnittelija) => "Elämän koulu"
+        _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
 
         ;end of abstarctPoikkeamistype
