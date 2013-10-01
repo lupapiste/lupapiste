@@ -142,7 +142,9 @@
                                       :kaavanaste {:modified 1379419785786
                                                    :value "eiKaavaa"}
                             :kiinteisto {:maaraalaTunnus {:modified 1379422953978
-                                                          :value "0008"}}}
+                                                          :value "0008"}
+                                         :tilanNimi {:modified 1379422953979
+                                                     :value "Omatila"}}}
                                :id "523844e1da063788effc1c5b"
                                :schema-info {:approvable true
                                            :name "rakennuspaikka"
@@ -504,6 +506,27 @@
         _ (:postitoimipaikannimi osoite) => "Piippola"
         _ (:koulutus Suunnittelija) => "Elämän koulu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
+
+        rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
+        Rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy
+        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistötieto Rakennuspaikka) => truthy
+        RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto Rakennuspaikka) => truthy
+        kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy
+        Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
+        tilannimi (:Kiinteisto Kiinteisto) => "Omatila"
+        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "753-427-2-63"
+        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "0008"
+        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => true
+        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "Oma"
+
+
+
+
+
+
+        ;paaKayttotarkoitus ???
+        ;rantaKytkin ???
+
 
 
         ;end of abstarctPoikkeamistype
