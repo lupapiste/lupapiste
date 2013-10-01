@@ -5,9 +5,9 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
-            [sade.util :refer [future*] :as util]
-            [sade.env :as env]
-            [sade.strings :as ss]
+            [sade.util :refer [future*]]
+            [sade.env :refer [in-dev]]
+            [sade.strings :as s]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
@@ -21,7 +21,7 @@
             [lupapalvelu.attachment :refer [encode-filename]]))
 
 ;; TODO: count error trys!
-(defcommand "login"
+(defcommand login
   {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
   (if-let [user (user/login username password)]
@@ -37,12 +37,12 @@
       (info "login failed, username:" username)
       (fail :error.login))))
 
-(defcommand "register-user"
+(defcommand register-user
   {:parameters [:stamp :email :password :street :zip :city :phone]
    :verified   true}
   [{{:keys [stamp] :as data} :data}]
   (if-let [vetuma-data (vetuma/get-user stamp)]
-    (let [email (-> data :email ss/lower-case ss/trim)]
+    (let [email (-> data :email s/lower-case s/trim)]
       (if (.contains email "@")
         (try
           (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
@@ -57,7 +57,7 @@
         (fail :error.email)))
     (fail :error.create-user)))
 
-(defcommand "change-passwd"
+(defcommand change-passwd
   {:parameters [:oldPassword :newPassword]
    :authenticated true
    :verified true}
@@ -72,12 +72,12 @@
         (warn "Password change: failed: old password does not match, user-id:" user-id)
         (fail :mypage.old-password-does-not-match)))))
 
-(defcommand "reset-password"
+(defcommand reset-password
   {:parameters    [:email]
    :notified      true
    :authenticated false}
   [{data :data}]
-  (let [email (ss/lower-case (:email data))]
+  (let [email (s/lower-case (:email data))]
     (infof "Password resert request: email=%s" email)
     (if (mongo/select-one :users {:email email :enabled true})
       (let [token (token/make-token :password-reset {:email email})]
@@ -89,17 +89,17 @@
         (fail :email-not-found)))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
-  (let [email (ss/lower-case (:email data))]
+  (let [email (s/lower-case (:email data))]
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
     (resp/status 200 (resp/json {:ok true}))))
 
-(defquery "user"
+(defquery user
   {:authenticated true :verified true}
   [{user :user}]
   (ok :user user))
 
-(defcommand "save-user-info"
+(defcommand save-user-info
   {:parameters [:firstName :lastName]
    :authenticated true
    :verified true}
@@ -166,8 +166,8 @@
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
-(env/in-dev
-  (defcommand "create-apikey"
+(in-dev
+  (defcommand create-apikey
     {:parameters [:username :password]}
     [command]
     (if-let [user (user/login (-> command :data :username) (-> command :data :password))]
@@ -185,7 +185,7 @@
 
 
 
-(defquery "authority-users"
+(defquery authority-users
   {:roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
@@ -216,14 +216,14 @@
 
 
 
-(defquery "applicant-users"
+(defquery applicant-users
   {:roles [:admin]
    :verified true}
   [_]
   (let [users (map user/non-private (mongo/select :users {:role "applicant"}))]
     (ok :users users)))
 
-(defquery "authority-admin-users"
+(defquery authority-admin-users
   {:roles [:admin]
    :verified true}
   [_] (ok :users (map user/non-private (mongo/select :users {:role "authorityAdmin"}))))
@@ -234,7 +234,7 @@
 
 
 
-(defcommand "create-authority-admin-user"
+(defcommand create-authority-admin-user
   {:parameters [:firstName :lastName :email :password :organizations]
    :roles      [:admin]
    :verified   true}
@@ -247,7 +247,7 @@
         (activation/send-activation-mail-for pimped-user)))
     (ok :id (:_id new-user))))
 
-(defcommand "create-authority-user"
+(defcommand create-authority-user
   {:parameters [:firstName :lastName :email :password]
    :roles      [:authorityAdmin]
    :verified   true}
@@ -262,7 +262,7 @@
 ;;
 
 
-(defcommand "edit-authority-admin-user"
+(defcommand edit-authority-admin-user
   {:parameters [:email :firstName :lastName :enabled :organizations]
    :roles      [:admin]
    :verified   true}
@@ -271,7 +271,7 @@
     (fn [user]
       (user/update-user email {:firstName firstName :lastName lastName :enabled enabled :organizations organizations}))))
 
-(defcommand "reset-authority-admin-password"
+(defcommand reset-authority-admin-password
   {:parameters [:email :password]
    :roles      [:admin]
    :verified true}
@@ -280,7 +280,7 @@
     (fn [user]
       (user/change-password email password))))
 
-(defcommand "update-authority-user-organisations"
+(defcommand update-authority-user-organisations
   {:parameters [:email :organization]
    :roles      [:authorityAdmin]
    :verified   true}
@@ -292,7 +292,7 @@
 ;;
 
 
-(defcommand "edit-applicant-user"
+(defcommand edit-applicant-user
   {:parameters [:email :enabled]
    :roles      [:admin]
    :verified   true}
@@ -303,18 +303,18 @@
 ;; authority
 ;;
 
-(defcommand "edit-authority-user"
+(defcommand edit-authority-user
   {:parameters [:email :firstName :lastName :enabled]
    :roles      [:authorityAdmin]
    :verified   true}
   [{{:keys [municipality]} :user {:keys [email firstName lastName enabled]} :data}]
-  (with-user (ss/lower-case email)
+  (with-user (s/lower-case email)
     (fn [user]
       (if (not= municipality (:municipality user))
         (fail :error.invalid-authority)
         (user/update-user email {:firstName firstName :lastName lastName :enabled enabled})))))
 
-(defcommand "reset-authority-password"
+(defcommand reset-authority-password
   {:parameters [:email :password]
    :roles      [:authorityAdmin]
    :verified true}
@@ -330,16 +330,16 @@
 ;;
 
 ; FIXME: generalize
-(env/in-dev
+(in-dev
 
-  (defquery "debug" {} [query] (ok :query query))
+  (defquery debug {} [query] (ok :query query))
 
   (require '[lupapalvelu.fixture])
   
-  (defquery "fixtures" {} [_]
+  (defquery fixtures {} [_]
     (ok :fixtures (keys @lupapalvelu.fixture/fixtures)))
 
-  (defquery "apply-fixture"
+  (defquery apply-fixture
     {:parameters [:name]}
     [{{:keys [name]} :data}]
     (if (lupapalvelu.fixture/exists? name)
@@ -350,13 +350,13 @@
         (warn "fixture '%s' not found" name)
         (fail :error.fixture-not-found))))
 
-  (defquery "activate-user-by-email"
+  (defquery activate-user-by-email
     {:parameters [:email]}
     [{{:keys [email]} :data}]
     (if-let [user (activation/activate-account-by-email email)]
       (ok)
       (fail :cant_activate_user_by_email)))
 
-  (defquery "activations" {} [query]
+  (defquery activations {} [query]
     (ok :activations (activation/activations))))
 
