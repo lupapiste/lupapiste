@@ -5,20 +5,20 @@ var repository = (function() {
     .query("schemas")
     .error(function(e) { error("can't load schemas"); })
     .call();
-  
+
   function findSchema(schemas, name, version) {
     var v = schemas[version] || schemaNotFound(schemas, name, version);
     var s = v[name] || schemaNotFound(schemas, name, version);
     return _.clone(s);
   }
-  
+
   function schemaNotFound(schemas, name, version) {
     // TODO, now what?
     var message = "unknown schema, name='" + name + "', version='" + version + "'";
     error(message);
     throw message;
   }
-  
+
   function load(id, pending) {
     var loadingApp = ajax
       .query("application", {id: id})
@@ -32,16 +32,16 @@ var repository = (function() {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
           application = loading.application;
-      _.each(application.documents, function(doc) {
+      _.each(application.documents || [], function(doc) {
         var schemaInfo = doc["schema-info"],
             schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
         schema.info = schemaInfo;
         doc.schema = schema;
       });
       hub.send("application-loaded", {applicationDetails: loading});
-    }); 
+    });
   }
-  
+
   function loaded(pages, f) {
     if (!_.isFunction(f)) throw "f is not a function: f=" + f;
     hub.subscribe("application-loaded", function(e) {

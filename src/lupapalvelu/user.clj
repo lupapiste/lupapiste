@@ -4,7 +4,7 @@
             [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
-            [sade.strings :as s]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
@@ -38,7 +38,7 @@
 
 (defn- load-user [username]
   (when username
-    (mongo/select-one :users {:username (s/lower-case username)})))
+    (mongo/select-one :users {:username (ss/lower-case username)})))
 
 (defn load-current-user
   "fetch the current user from db"
@@ -81,18 +81,18 @@
 
 (defn get-user-by-email [email]
   (when email
-    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
+    (non-private (mongo/select-one :users {:email (ss/lower-case email)}))))
 
 (defn create-apikey [email]
   (let [apikey (security/random-password)
-        result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
+        result (mongo/update :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
     (when result
       apikey)))
 
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
+    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
 
 (def required-user-keys [:email :id :role])
@@ -102,7 +102,7 @@
 
 (defn create-user-entity [{:keys [email password] :as user-data}]
   (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
-  (let [email    (s/lower-case email)
+  (let [email    (ss/lower-case email)
         private  (when password
                    (let [salt (security/dispense-salt)]
                      {:salt     salt
@@ -150,7 +150,7 @@
 
 
 (defn update-user [email data]
-  (mongo/update :users {:email (s/lower-case email)} {$set data}))
+  (mongo/update :users {:email (ss/lower-case email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]
@@ -160,11 +160,11 @@
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt  salt
+    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt  salt
                                                             :private.password hashed-password}})))
 
 (defn get-or-create-user-by-email [email]
-  (let [email (s/lower-case email)]
+  (let [email (ss/lower-case email)]
     (or
       (get-user-by-email email)
       (create-any-user {:email email}))))
