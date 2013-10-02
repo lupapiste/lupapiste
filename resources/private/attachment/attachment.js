@@ -258,12 +258,13 @@ var attachment = (function() {
   });
 
   $(function() {
-    ko.applyBindings({
+    $("#attachment").applyBindings({
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
       commentsModel: commentsModel
-    }, $("#attachment")[0]);
+    });
+    $("#upload-page").applyBindings({});
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using

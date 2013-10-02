@@ -1,21 +1,24 @@
 (ns lupapalvelu.web
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
-            [noir.core :refer [defpage]]
-            [lupapalvelu.core :refer [ok fail defcommand defquery now]]
-            [lupapalvelu.i18n :refer [*lang*]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :refer [blank?]]
-            [lupapalvelu.security :refer [current-user]]
-            [lupapalvelu.logging :refer [with-logging-context]]
+            [clojure.string :as s]
+            [clojure.java.io :as io]
+            [cheshire.core :as json]
+            [clj-http.client :as client]
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
-            [noir.server :as server]
             [noir.cookies :as cookies]
             [sade.env :as env]
-            [lupapalvelu.core :as core]
+            [sade.status :as status]
+            [sade.strings :as ss]
+            [lupapalvelu.core :refer [ok fail now] :as core]
+            [lupapalvelu.action :refer [defcommand defquery] :as action]
+            [lupapalvelu.i18n :refer [*lang*]]
+            [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.security :as security]
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
@@ -25,17 +28,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.etag :as etag]
-            [sade.security :as sadesecurity]
-            [sade.status :as status]
-            [sade.strings :as ss]
-            [clojure.string :as s]
-            [cheshire.core :as json]
-            [clojure.java.io :as io]
-            [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery]
-            [lupapalvelu.neighbors])
-  (:import [java.io ByteArrayInputStream]
-           [java.util.concurrent TimeUnit]))
+            [lupapalvelu.activation :as activation]
+            [lupapalvelu.logging :refer [with-logging-context]]
+            [lupapalvelu.neighbors]))
 
 ;;
 ;; Helpers
@@ -94,10 +89,10 @@
 
 (defn logged-in?
   ([] (logged-in? (request/ring-request)))
-  ([request] (not (nil? (current-user request)))))
+  ([request] (not (nil? (user/current-user request)))))
 
 (defn in-role? [role]
-  (= role (keyword (:role (current-user)))))
+  (= role (keyword (:role (user/current-user)))))
 
 (defn authority? [] (in-role? :authority))
 (defn authority-admin? [] (in-role? :authorityAdmin))
@@ -118,7 +113,7 @@
 ;;
 
 (defn enriched [m]
-  (merge m {:user (current-user)
+  (merge m {:user (user/current-user)
             :lang *lang*
             :web  (web-stuff)}))
 
@@ -126,23 +121,23 @@
   (with-logging-context
     {:applicationId (get-in action [:data :id])
      :userId        (get-in action [:user :id])}
-    (core/execute action)))
+    (action/execute action)))
 
 (defn- execute-command
   ([name] (execute-command name (from-json (request/ring-request))))
-  ([name params] (execute (enriched (core/command name params)))))
+  ([name params] (execute (enriched (action/make-command name params)))))
 
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
 
 (defn- execute-query [name params]
-  (execute (enriched (core/query name params))))
+  (execute (enriched (action/make-query name params))))
 
 (defjson "/api/query/:name" {name :name}
   (execute-query name (from-query)))
 
 (defpage "/api/raw/:name" {name :name}
-  (let [response (execute (enriched (core/raw name (from-query))))]
+  (let [response (execute (enriched (action/make-raw name (from-query))))]
     (if-not (= (:ok response) false)
       response
       (resp/status 404 (resp/json response)))))
@@ -164,6 +159,7 @@
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
+                   :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
                    :neighbor anyone})
@@ -188,7 +184,7 @@
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
-      (ByteArrayInputStream. (compose resource-type app))
+      (java.io.ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
       (resp/set-headers (cache-headers resource-type)))
     failure))
@@ -211,7 +207,7 @@
   ([]
     (landing-page default-lang))
   ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (user/current-user))))]
       (redirect lang application-page)
       (redirect-to-frontpage lang))))
 
@@ -287,7 +283,7 @@
 
 (def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
-  (if-let [user (sadesecurity/activate-account key)]
+  (if-let [user (activation/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
@@ -315,7 +311,7 @@
   [handler]
   (fn [request]
     (handler (assoc request :user
-                    (or (security/login-with-apikey (get-apikey request))
+                    (or (user/login-with-apikey (get-apikey request))
                         (session/get :user))))))
 
 (defn- logged-in-with-apikey? [request]
@@ -340,7 +336,7 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (execute (enriched (core/command "upload-attachment" upload-data)))]
+        result (execute (enriched (action/make-command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.8.1.html"
@@ -352,7 +348,7 @@
 ;; Server is alive
 ;;
 
-(defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
+(defjson "/api/alive" [] {:ok (if (user/current-user) true false)})
 
 ;;
 ;; Proxy
@@ -384,7 +380,7 @@
 (defn- csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
-     :userId        (:id (current-user request) "???")}
+     :userId        (:id (user/current-user request) "???")}
     (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (client-ip request) (get-in request [:headers "referer"]))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
@@ -407,7 +403,7 @@
 ;;
 
 (defn get-session-timeout [request]
-  (get-in request [:session :noir :user :session-timeout] (.toMillis TimeUnit/HOURS 1)))
+  (get-in request [:session :noir :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 1)))
 
 (defn session-timeout-handler [handler request]
   (let [now (now)
@@ -428,7 +424,7 @@
 
 (when (or (env/dev-mode?) (env/test-build?))
   (defpage "/dev/krysp" {typeName :typeName r :request}
-    (if-not (blank? typeName)
+    (if-not (s/blank? typeName)
       (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"}]
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
@@ -440,7 +436,7 @@
     (dissoc (request/ring-request) :body))
 
   (defjson "/dev/user" []
-    (current-user))
+    (user/current-user))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
@@ -453,7 +449,7 @@
           property (format "%03d%03d%04d%04d" (get parts 0) (get parts 1) (get parts 2) (get parts 3))
           response (execute-command "create-application" (assoc (from-query) :propertyId property))]
       (if (core/ok? response)
-        (redirect "fi" (str (user/applicationpage-for (:role (current-user)))
+        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
         (resp/status 400 (str response)))))
 

@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var keys = ['stamp', 'personId', 'firstname', 'lastname', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
   var model;
 
   function json(model) {
@@ -55,8 +55,8 @@
 
   var plainModel = {
     personId: ko.observable(),
-    firstname: ko.observable(),
-    lastname: ko.observable(),
+    firstName: ko.observable(),
+    lastName: ko.observable(),
     stamp: ko.observable(),
     street: ko.observable().extend({required: true}),
     city: ko.observable().extend({required: true}),
@@ -111,7 +111,7 @@
                                 .attr('id', 'vetuma-init');
     });
     statusModel.subPage(subPage());
-    ko.applyBindings(statusModel, $('#register')[0]);
+    $('#register').applyBindings(statusModel);
   });
 
   hub.onPageChange('register2', function() {
@@ -120,13 +120,13 @@
       .success(function(data) {
         if (data) {
           model().personId(data.userid);
-          model().firstname(data.firstname);
-          model().lastname(data.lastname);
+          model().firstName(data.firstName);
+          model().lastName(data.lastName);
           model().stamp(data.stamp);
           if(data.city) { model().city(data.city); }
           if(data.zip) { model().zip(data.zip); }
           if(data.street) { model().street(data.street); }
-          ko.applyBindings(model, $('#register2')[0]);
+          $('#register2').applyBindings(model);
         } else {
           window.location.hash = "!/register";
         }
@@ -136,7 +136,7 @@
   });
 
   hub.onPageChange('register3', function() {
-    ko.applyBindings(confirmModel, $('#register3')[0]);
+    $('#register3').applyBindings(confirmModel);
   });
 
 })();

@@ -6,7 +6,7 @@ var LUPAPISTE = LUPAPISTE || {};
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
- LUPAPISTE.App = function (startPage, allowAnonymous) {
+ LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
   "use strict";
 
   var self = this;
@@ -15,7 +15,8 @@ var LUPAPISTE = LUPAPISTE || {};
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-
+  self.showUserMenu = (showUserMenu != undefined) ? showUserMenu : !allowAnonymous;
+  
   /**
   * Window unload event handler
   */
@@ -50,8 +51,6 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.hashChanged = function () {
-    trace("hash changed");
-
     var hash = (location.hash || "").substr(3);
 
     if (hash === "") {
@@ -62,7 +61,6 @@ var LUPAPISTE = LUPAPISTE || {};
     var path = hash.split("/");
 
     if (!self.allowAnonymous && self.session === undefined) {
-      trace("session === undefined", hash, path);
       ajax.query("user")
         .success(function (e) {
           self.session = true;
@@ -165,7 +163,7 @@ var LUPAPISTE = LUPAPISTE || {};
       currentLanguage: loc.getCurrentLanguage(),
       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
       startPage: self.startPage,
-      allowAnonymous: self.allowAnonymous
+      showUserMenu: self.showUserMenu
     };
 
     $("nav").applyBindings(model).css("visibility", "visible");

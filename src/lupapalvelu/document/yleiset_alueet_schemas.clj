@@ -61,10 +61,10 @@
 
 (def tapahtuman-tiedot
   (body
-    {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
-    {:name "tapahtumapaikka" :type :string :size "l"}
-    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                              ;; kayttojaksotietoType
-    {:name "tapahtuma-aika-paattyy-pvm" :type :date}))
+    {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}     ;; lupakohtainenLisatietoType
+    {:name "tapahtumapaikka" :type :string :size "l"}                           ;; lupaAsianKuvaus
+    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                              ;; alkuPvm
+    {:name "tapahtuma-aika-paattyy-pvm" :type :date}))                          ;; loppuPvm
 
 #_(def tapahtumien-syotto                                                       ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
@@ -78,7 +78,7 @@
     tapahtuman-tiedot
     [{:name "mainostus-alkaa-pvm" :type :date}                                  ;; toimintajaksotietoType
      {:name "mainostus-paattyy-pvm" :type :date}]
-    {:name "haetaan-kausilupaa" :type :checkbox}                                ;; lupakohtainenLisatietoType ?
+    {:name "haetaan-kausilupaa" :type :checkbox}                                ;; lupakohtainenLisatietoType
     #_tapahtumien-syotto))
 
 (def viitoitus-tapahtuma
@@ -124,8 +124,8 @@
              {:name "jate--tai-sadevesi"}
              {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
              {:name "vesijohto"}]}
-     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
-     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
+     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}          ;; lupakohtainenLisatietotieto
+     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}])) ;; lupakohtainenLisatietotieto
 
 (defschemas
   1
@@ -147,7 +147,7 @@
 ;;
 
 #_(def liikennetta-haittaavan-tyon-lupa
-  {:info {:name "yleisetAlueetLiikennettaHaittaava" :order 65}
+  {:info {:name "yleisetAlueetLiikennettaHaittaava" :order 67}
    :body [{:name "ilmoituksenAihe"
            :type :group
            :body [{:name "ensimmainenIlmoitusTyosta" :type :checkbox}

@@ -22,7 +22,7 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (def ui-components
-  {:cdn-fallback   {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
+  {:cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]
                     :css ["jquery-ui.css"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
@@ -117,6 +117,11 @@
                   :js ["authority.js"]
                   :html ["index.html"]}
 
+   :oir          {:depends [:common :authenticated :map :application :attachment
+                            :docgen :debug]
+                  :js ["oir.js"]
+                  :html ["index.html" "contact.html"]}
+
    :admins   {:js ["user.js" "users.js"]
               :html ["admin-user-list.html" "user-modification-dialogs.html"]}
 
@@ -125,8 +130,10 @@
                      :html ["index.html" "admin.html"]}
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :debug]
-             :js ["admin.js"]
-             :html ["index.html" "admin.html"]}
+             :js ["admin.js"
+                  "fixtures.js" "features.js" "actions.js" "activations.js"]
+             :html ["index.html" "admin.html"
+                    "fixtures.html" "features.html" "actions.html" "activations.html"]}
 
    :tree    {:depends [:jquery]
              :js ["tree.js"]

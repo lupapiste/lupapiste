@@ -1,5 +1,5 @@
 (ns lupapalvelu.mongo
-  (:refer-clojure :exclude [count])
+  (:refer-clojure :exclude [count remove])
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
@@ -97,6 +97,10 @@
 
 (defn drop-collection [collection]
   (mc/drop collection))
+
+(defn remove
+  "Removes documents by id."
+  [collection id] (mc/remove collection {:_id id}))
 
 (defn remove-many
   "Removes all documents matching query."
@@ -256,7 +260,8 @@
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
   (mc/ensure-index :vetuma {:user.stamp 1})
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
-  (mc/ensure-index :fs.chunks {:files_id 1 :n 1 }))
+  (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
+  (mc/ensure-index :open-inforequest-token {:application-id 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

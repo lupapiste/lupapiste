@@ -87,7 +87,7 @@
   ([m k]
     (assert (keyword? k))
     (walk/postwalk
-      (fn [x] (if (contains? x k) (k x) x))
+      (fn [x] (if (and (map? x) (contains? x k)) (k x) x))
       m)))
 
 (defn timestamped
@@ -95,7 +95,7 @@
   ([m timestamp] (timestamped m timestamp :value :modified))
   ([m timestamp value-key timestamp-key]
   (walk/postwalk
-    (fn [x] (if (contains? x value-key) (assoc x timestamp-key timestamp) x))
+    (fn [x] (if (and (map? x) (contains? x value-key)) (assoc x timestamp-key timestamp) x))
     m)))
 
 (defn create-document-data
@@ -143,15 +143,17 @@
   (assoc schema :body (schema-body-without-element-by-name (:body schema) element-name)))
 
 (defn deep-find
-  "Finds 0..n locations in the m structured where target is found. Target can be any deep vector of key values.
+  "Finds 0..n locations in the m structured where target is found.
+   Target can be a single key or any deep vector of keys.
    Returns list of vectors that first value contains key to location and second val is value found in."
   ([m target]
     (deep-find m target [] []))
   ([m target current-location result]
-    (if (get-in m target)
-      (conj result [current-location (get-in m target)])
-      (reduce concat (for [[k v] m]
-                       (when (map? v) (if-not (contains? v :value)
-                                        (concat result (deep-find v target (conj current-location k) result))
-                                        result)))))))
+    (let [target (if (sequential? target) target [target])]
+      (if (get-in m target)
+        (conj result [current-location (get-in m target)])
+        (reduce concat (for [[k v] m]
+                         (when (map? v) (if-not (contains? v :value)
+                                          (concat result (deep-find v target (conj current-location k) result))
+                                          result))))))))
 

@@ -2,22 +2,21 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [monger.operators :refer :all]
-            [lupapalvelu.core :refer :all]
-            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
-            [lupapalvelu.i18n :refer [loc *lang* with-lang]]
-            [clojure.string :refer [split join trim]]
             [swiss-arrows.core :refer [-<> -<>>]]
+            [monger.operators :refer :all]
             [sade.util :refer [fn-> fn->> future*]]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
             [sade.strings :as ss]
+            [sade.env :as env]
+            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
+            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
-            [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.i18n :as i18n]
-            [sade.env :as env])
+            [lupapalvelu.stamper :as stamper])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -90,7 +89,7 @@
           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
           :muu]])
 
-(def ^:private attachment-types-YA
+(def attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                     :tilapainen-liikennejarjestelysuunnitelma
                     :tyyppiratkaisu
@@ -185,7 +184,7 @@
                              :fileId   file-id
                              :created  now
                              :accepted nil
-                             :user    (security/summary user)
+                             :user    (user/summary user)
                              ; File name will be presented in ASCII when the file is downloaded.
                              ; Conversion could be done here as well, but we don't want to lose information.
                              :filename filename
@@ -263,7 +262,7 @@
   (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
 (defn attachment-latest-file-id
-  "Gets latest file-ids from attachment."
+  "Gets latest file-id from attachment."
   [application attachmentId]
   (->> (attachment-file-ids application attachmentId) last))
 
@@ -336,7 +335,7 @@
   (mongo/update
     :applications
     {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified (:created command)
+    {$set {:modified (:created created)
            :attachments.$.state :ok}}))
 
 (defcommand reject-attachment
@@ -348,7 +347,7 @@
   (mongo/update
     :applications
     {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified (:created command)
+    {$set {:modified (:created created)
            :attachments.$.state :requires_user_action}}))
 
 (defcommand create-attachments
@@ -382,12 +381,6 @@
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
-(defn authority-viewing-verdictGiven-application [{{:keys [attachmentId]} :data :as command} application]
-  (when (and
-          (-> application :state (= "verdictGiven"))
-          (not (-> command :user :role (= "authority"))))
-    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
-
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
@@ -402,8 +395,10 @@
 (defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked authority-viewing-verdictGiven-application]
-   :states     [:draft :info :open :submitted :complement-needed :answered :verdictGiven]
+   :validators [attachment-is-not-locked (fn [{user :user} {state :state}]
+                                           (when (and (not= (:role user) "authority") (#{:sent :verdictGiven} (keyword state)))
+                                             (fail :error.non-authority-viewing-application-in-verdictgiven-state)))]
+   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (when-not (pos? size) (fail! :error.select-file))
@@ -506,16 +501,15 @@
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)
-            loc (i18n/localizer lang)]
+      (let [zip (ZipOutputStream. out)]
         ; Add all attachments:
         (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -550,7 +544,7 @@
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
 (defn- loc-organization-name [organization]
-  (get-in organization [:name (keyword *lang*)] (str "???ORG:" (:id organization) "???")))
+  (get-in organization [:name i18n/*lang*] (str "???ORG:" (:id organization) "???")))
 
 (defn- get-organization-name [application-id]
   (-<> application-id
@@ -577,7 +571,7 @@
   ; mea culpa, but what the fuck was I supposed to do
   (mongo/update-by-id :applications (:application-id context)
     {$set {:modified (:created context)}
-     $push {:comments {:text    (loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
+     $push {:comments {:text    (i18n/loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
                        :created (:created context)
                        :user    (:user context)
                        :target  {:type "attachment"

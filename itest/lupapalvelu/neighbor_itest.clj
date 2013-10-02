@@ -11,6 +11,14 @@
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-response"}))
 (defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-vetuma-user"}))
 
+(facts "add neigbor with missing optional data"
+  (let [application-id (create-app-id pena :municipality sonja-muni)]
+    (command pena :add-comment :id application-id :text "foo" :target "application") => ok?
+    (fact "no name" (command sonja "neighbor-add" :id application-id :propertyId "p" :street "s" :city "c" :zip "z" :email "e") => ok?)
+    (fact "no streen" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
+    (fact "no city" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"  :zip "z" :email "e") => ok?)
+    (fact "no zip" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :email "e") => ok?)
+    (fact "no email" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
 
 (defn- create-app-with-neighbor []
   (let [resp (create-app pena)
@@ -84,12 +92,23 @@
                                       :email "abba@example.com")
         application     (-> (query pena :application :id application-id) :application)
         hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
+        uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))
         _               (command pena :update-doc
                                       :id application-id
                                       :doc hakija-doc-id
                                       :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
                                                 ["henkilo.henkilotiedot.sukunimi" "Zorro"]
-                                                ["henkilo.henkilotiedot.hetu"     "123456789"]])]
+                                                ["henkilo.henkilotiedot.hetu"     "123456789"]
+                                                ["henkilo.yhteystiedot.puhelin"     "040-1234567"]])
+        _               (command pena :update-doc
+                                      :id application-id
+                                      :doc uusirak-doc-id
+                                      :updates [["rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"  "Gustav"]
+                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.sukunimi" "Golem"]
+                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.hetu"     "abba"]
+                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.turvakieltoKytkin" true]
+                                                ["rakennuksenOmistajat.0.henkilo.osoite.katu" "Katuosoite"]
+                                                ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"     "040-2345678"]])]
 
     application => truthy
 
@@ -102,21 +121,28 @@
 
       (fact "application query returns set document info"
         (let [application (-> (query pena :application :id application-id) :application)
-              hakija-doc  (domain/get-document-by-id application hakija-doc-id)
-              hakija-doc  (tools/unwrapped hakija-doc)]
+              hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
+              uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
 
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
           (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"))
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"
+          (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => "040-1234567"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "abba"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => true
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
 
-      (fact "neighbor applicaiton query does not return hetu"
+      (fact "neighbor application query does not return hetu"
         (let [resp        (query pena :neighbor-application
                                       :applicationId application-id
                                       :neighborId neighborId
                                       :token token)
               application (:application resp)
-              hakija-doc  (domain/get-document-by-id application hakija-doc-id)
-              hakija-doc  (tools/unwrapped hakija-doc)]
+              hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
+              uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
 
           resp => truthy
           resp => (contains {:ok true})
@@ -125,6 +151,14 @@
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
           (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
           (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
+          (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+          (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
+          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
 
           (facts "random testing about content"
             (:comments application) => nil

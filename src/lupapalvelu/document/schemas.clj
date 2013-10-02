@@ -23,9 +23,13 @@
   (doseq [schema schemas]
     (defschema version schema)))
 
-(defn get-schema [schema-version schema-name]
+(defn get-schema
+  ([{:keys [version name]}] (get-schema version name))
+  ([schema-version schema-name]
   {:pre [schema-version schema-name]}
-  (get-in @registered-schemas [schema-version (name schema-name)]))
+  (get-in @registered-schemas [schema-version (name schema-name)])))
+
+
 
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
@@ -57,15 +61,18 @@
 
 (def select-one-of-key "_selected")
 
+(def turvakielto "turvakieltoKytkin")
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def henkilo-valitsin [{:name "userId" :type :personSelector}])
+(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}
                            {:name "manuaalinen_rakennusnro" :type :string}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
+                     :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
@@ -86,6 +93,7 @@
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
+                    :blacklist [:neighbor turvakielto]
                     :body [{:name "puhelin" :type :string :subtype :tel :required true}
                            {:name "email" :type :string :subtype :email :required true}
                            #_{:name "fax" :type :string :subtype :tel}]}])
@@ -94,14 +102,14 @@
                              :type :group
                              :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                     {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                    {:name "turvakieltoKytkin" :type :checkbox}]}])
+                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]}])
 
 (def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
                                :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                       {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true}
-                                      {:name "turvakieltoKytkin" :type :checkbox}]})
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                      {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
                henkilo-valitsin
@@ -151,7 +159,7 @@
 
 (def designer-basic (body
                       henkilotiedot-minimal
-                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (contains? c :required)
+                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
                                                                                           (assoc c :required false)
                                                                                           c)) yritys-minimal)}
                       simple-osoite
@@ -338,7 +346,7 @@
                                          {:name "uuni"}
                                          {:name "eiLammitysta"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde" 
+                                 {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
                                          {:name "raskas poltto\u00f6ljy"}
@@ -410,7 +418,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" 
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -531,7 +539,7 @@
             :approvable true
             :type :party
             :subtype :hakija}
-     :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
+     :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
             :order 4

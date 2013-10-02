@@ -10,8 +10,13 @@ Mikko wants to build a water slide
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}
-  Create application  ${appname}  753  753-416-25-22
+  Create application the fast way  ${appname}  753  753-416-25-22
   Add comment  Lapsille vesiliuku
+
+Mikko sets turvakielto for himself
+  Open tab  parties
+  Wait and click  xpath=//div[@id="application-parties-tab"]//input[@data-docgen-path="henkilo.henkilotiedot.turvakieltoKytkin"]
+  Wait Until  Page Should Contain  Tallennettu
   Logout
 
 Sonja adds some neighbors
@@ -110,78 +115,11 @@ Neighbor clicks on email link and sees epplication
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinrakennuksen rakentaminen
 
-Neighbor clicks vetuma button to identify herself
-  [Tags]  fail  integration
-  Click element  xpath=//*[@data-test-id='vetuma-init']
-  Click element  xpath=//img[@alt='Pankkitunnistus']
-  Click element  xpath=//a[@class='nordea']
-  Wait Until  Element Should Be Visible  xpath=//input[@name='Ok']
-  Click element  xpath=//input[@name='Ok']
-  Click element  xpath=//input[@type='submit']
-  Click element  xpath=//button[@type='submit']
+Hetu is not shown to neighbor
+  Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.henkilotiedot.hetu"]  ${EMPTY}
 
-Neighbor is back and leaves a comment
-  [Tags]  fail  integration
-  Wait until  Element should be visible  xpath=//input[@data-test-id='neighbor-response-comments']
-  Click element  xpath=//input[@data-test-id='neighbor-response-comments']
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-message']
-  Input text  xpath=//*[@data-test-id='neighbor-response-message']  No fucking way
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-send']
-  Click element  xpath=//*[@data-test-id='neighbor-response-send']
-  Wait until  Element should be visible  xpath=//*[@data-test-id='neighbor-response-done']
-  Element text should be  xpath=//*[@data-test-id='neighbor-response-done']  KIITOS VASTAUKSESTASI!
+Address is not shown to neighbor
+  Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.osoite.katu"]  ${EMPTY}
 
-Mikko sees that the neighbor has given a comment
-  [Tags]  fail  integration
-  Go to login page
-  Mikko logs in
-  Open application  ${appname}  753-416-25-22
-  Open tab  statement
-  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']
-
-Mikko opens dialog to see neighbors response
-  [Tags]  fail  integration
-  Click element  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
-  Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
-
-Mikko can not see neighbor sotu
-  [Tags]  fail  integration
-  Element should not be visible  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']
-
-Mikko goes to pursuit happines in life
-  [Tags]  fail  integration
-  Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
-  Logout
-
-Sonja sees that the neighbour has given a comment
-  [Tags]  fail  integration
-  Sonja logs in
-  Open application  ${appname}  753-416-25-22
-  Open tab  statement
-  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']
-  Click element  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
-  Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
-
-Sonja can see neighbor sotu
-  [Tags]  fail  integration
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']  210281-9988
-  Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
-
-
-*** Keywords ***
-Add neighbor
-  [Arguments]  ${propertyId}  ${name}  ${email}
-  Click enabled by test id  manager-neighbors-add
-  Wait Until   Element Should Be Visible  dialog-edit-neighbor
-  Input text by test id  neighbors.edit.propertyId  ${propertyId}
-  Input text by test id  neighbors.edit.name  ${name}
-  Input text by test id  neighbors.edit.email  ${email}
-  Click by test id  neighbors.edit.ok
-  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
-  Wait Until  Page Should Contain  ${email}
+Phone number is not shown to neighbor
+  Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.yhteystiedot.puhelin"]  ${EMPTY}

@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.validator
   (:require [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.clojure15 :refer [some->>]]
             [sade.util :refer [fn->]]))
 
 (defonce validators (atom {}))
