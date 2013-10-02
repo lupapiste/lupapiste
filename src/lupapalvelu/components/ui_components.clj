@@ -154,7 +154,8 @@
 
    :login-frame {:depends [:login]
                  :html    ["login-frame.html"]
-                 :js      ["login-frame.js"]}
+                 :js      ["login-frame.js"]
+                 :css     ["login-frame.css"]}
 
    :welcome {:depends [:login :register :debug :user-menu]
              :js ["welcome.js"]
