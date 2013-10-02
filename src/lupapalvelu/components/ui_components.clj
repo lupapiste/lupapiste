@@ -51,12 +51,14 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
-                  :html ["404.html" "nav.html"]}
+                  :html ["404.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.13_20130911.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
+   :user-menu     {:html ["nav.html"]}
+
+   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :user-menu ]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -118,7 +120,7 @@
                   :html ["index.html"]}
 
    :oir          {:depends [:common :authenticated :map :application :attachment
-                            :docgen :debug]
+                            :docgen :debug :user-menu]
                   :js ["oir.js"]
                   :html ["index.html" "contact.html"]}
 
@@ -154,7 +156,7 @@
                  :html    ["login-frame.html"]
                  :js      ["login-frame.js"]}
 
-   :welcome {:depends [:login :register :debug]
+   :welcome {:depends [:login :register :debug :user-menu]
              :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 
@@ -165,7 +167,7 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :neighbor {:depends [:common :map :debug :docgen :debug]
+   :neighbor {:depends [:common :map :debug :docgen :debug :user-menu]
               :html ["neighbor-show.html" "index.html"]
               :js ["neighbor-app.js" "neighbor-show.js"]}})
 
