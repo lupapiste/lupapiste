@@ -155,7 +155,6 @@
                    :welcome anyone
                    :login-frame anyone
                    :oskari anyone
-                   :about anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
