@@ -60,6 +60,7 @@ Mikko logs out
 Mikko logs in via iframe
   Go to  ${SERVER}/html/pages/login-iframe.html
   Select Frame  loginframe
+  Element Should Not Be Visible  xpath=//nav
   Login  ${LOGIN}  ${PASSWORD}
   User should be logged in  ${USERNAME}
   Applications page should be open
@@ -75,4 +76,4 @@ Mikko logs in with username that has capital letters
 Solita Admin can log in
   [Tags]  ie8
   SolitaAdmin logs in
-  Logout  
+  Logout
