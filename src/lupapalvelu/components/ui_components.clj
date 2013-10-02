@@ -165,10 +165,6 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :about {:depends [:common :debug]
-           :js ["about.js"]
-           :html ["terms.html" "index.html"]}
-
    :neighbor {:depends [:common :map :debug :docgen :debug]
               :html ["neighbor-show.html" "index.html"]
               :js ["neighbor-app.js" "neighbor-show.js"]}})
