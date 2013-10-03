@@ -215,7 +215,7 @@
                                                             v)) (:documents application)))
         toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot toimituksen-tiedot
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)

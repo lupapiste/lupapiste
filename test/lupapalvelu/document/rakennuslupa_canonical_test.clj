@@ -605,7 +605,9 @@
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
 
     (fl/fact*
-      (let [lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))  => truthy
+      (let [toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
+            aineistonnimi (:aineistonnimi toimituksenTiedot ) => "s"
+            lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))  => truthy
             Lausunto (:Lausunto lausuntotieto) => truthy
             viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
             pyyntoPvm (:pyyntoPvm Lausunto) => "2013-05-09"

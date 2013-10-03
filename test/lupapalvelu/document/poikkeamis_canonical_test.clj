@@ -522,7 +522,7 @@
 
 ;        toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
 ;        toimenpide-count (count toimenpidetieto) => 2
-;ﬁ        uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
+;        uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
 
 
 
