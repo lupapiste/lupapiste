@@ -22,7 +22,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.user :refer [with-user] :as user]
+            [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -269,11 +269,10 @@
   (with-application command
     (fn [{application-id :id}]
       (let [email (ss/lower-case email)]
-        (with-user email
-          (fn [_]
-            (mongo/update-by-id :applications application-id
-              {$pull {:auth {$and [{:username email}
-                                   {:type {$ne :owner}}]}}})))))))
+        (with-user-by-email email
+          (mongo/update-by-id :applications application-id
+            {$pull {:auth {$and [{:username email}
+                                 {:type {$ne :owner}}]}}}))))))
 
 (defcommand remove-auth
   {:parameters [:id email]
@@ -842,6 +841,8 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
+  (println user)
+  (println params)
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
