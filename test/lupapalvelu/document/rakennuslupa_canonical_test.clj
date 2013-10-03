@@ -308,8 +308,6 @@
                  :status "condition"
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]})
 
-(def get-osapuoli-data #'lupapalvelu.document.rakennuslupa_canonical/get-osapuoli-data)
-
 (defn- validate-minimal-person [person]
   (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
 
@@ -366,9 +364,6 @@
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
     (validate-minimal-person henkilo)
     (validate-company yritys)))
-
-(def get-suunnittelija-data #'lupapalvelu.document.rakennuslupa_canonical/get-suunnittelija-data)
-(def get-parties-by-type #'lupapalvelu.document.rakennuslupa_canonical/get-parties-by-type)
 
 (fact "Empty body"
   (empty? (get-parties-by-type
@@ -441,7 +436,7 @@
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
-(def get-handler #'lupapalvelu.document.rakennuslupa_canonical/get-handler)
+(def get-handler #'lupapalvelu.document.canonical-common/get-handler)
 
 (facts "Handler is sonja"
   (let [handler (get-handler application)
