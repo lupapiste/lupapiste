@@ -12,148 +12,6 @@
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
 
-(defn- get-simple-osoite [osoite]
-  {:osoitenimi {:teksti (-> osoite :katu :value)}
-   :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)
-   :postinumero (-> osoite :postinumero :value)})
-
-(defn- get-yhteystiedot-data [yhteystiedot]
-  {:sahkopostiosoite (-> yhteystiedot :email :value)
-  :puhelin (-> yhteystiedot :puhelin :value)})
-
-(defn- get-simple-yritys [yritys]
-  {:nimi (-> yritys :yritysnimi :value)
-   :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)})
-
-(defn- get-yritys-data [yritys]
-  (let [yhteystiedot (get-in yritys [:yhteyshenkilo :yhteystiedot])]
-    (merge (get-simple-yritys yritys)
-           {:postiosoite (get-simple-osoite (:osoite yritys))
-            :puhelin (-> yhteystiedot :puhelin :value)
-            :sahkopostiosoite (-> yhteystiedot :email :value)})))
-
-(defn- get-name [henkilotiedot]
-  {:nimi {:etunimi (-> henkilotiedot :etunimi :value)
-          :sukunimi (-> henkilotiedot :sukunimi :value)}})
-
-(defn- get-henkilo-data [henkilo]
-  (let [henkilotiedot (:henkilotiedot henkilo)
-        yhteystiedot (:yhteystiedot henkilo)]
-    (merge (get-name henkilotiedot)
-      {:henkilotunnus (-> henkilotiedot :hetu :value)
-       :osoite (get-simple-osoite (:osoite henkilo))}
-     (get-yhteystiedot-data yhteystiedot))))
-
-(defn- get-yhteyshenkilo-data [henkilo]
-  (let [henkilotiedot (:henkilotiedot henkilo)
-        yhteystiedot (:yhteystiedot henkilo)]
-    (merge (get-name henkilotiedot)
-     (get-yhteystiedot-data yhteystiedot))))
-
-(defn- get-handler [application]
-  (if-let [handler (:authority application)]
-    {:henkilo {:nimi {:etunimi  (:firstName handler)
-                      :sukunimi (:lastName handler)}}}
-    empty-tag))
-
-(def kuntaRoolikoodit
-  {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
-   :hakija                 "Rakennusvalvonta-asian hakija"
-   :maksaja                "Rakennusvalvonta-asian laskun maksaja"
-   :rakennuksenomistaja    "Rakennuksen omistaja"})
-
-(def ^:private default-role "ei tiedossa")
-(defn- get-kuntaRooliKoodi [party party-type]
-  (if (contains? kuntaRoolikoodit party-type)
-    (kuntaRoolikoodit party-type)
-    (let [code (or (get-in party [:kuntaRoolikoodi :value])
-                   ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
-                   (get-in party [:patevyys :kuntaRoolikoodi :value])
-                   default-role)]
-      (if (s/blank? code) default-role code))))
-
-(def kuntaRoolikoodi-to-vrkRooliKoodi
-  {"Rakennusvalvonta-asian hakija"  "hakija"
-   "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
-   "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
-   "GEO-suunnittelija"              "erityissuunnittelija"
-   "LVI-suunnittelija" `            "erityissuunnittelija"
-   "RAK-rakennesuunnittelija"       "erityissuunnittelija"
-   "ARK-rakennussuunnittelija"      "rakennussuunnittelija"
-   "ei tiedossa"                    "ei tiedossa"
-   "Rakennuksen omistaja"           "rakennuksen omistaja"
-
-   ; TODO mappings for the rest
-   :rakennuspaikanomistaja          "rakennuspaikan omistaja"
-   :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
-   :naapuri                         "naapuri"
-   :lisatietojenantaja              "lis\u00e4tietojen antaja"
-   :tyonjohtaja                     "ty\u00f6njohtaja"
-   :muu                             "muu osapuoli"})
-
-(defn- get-roolikoodit [kuntaRoolikoodi]
-  {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
-   :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
-
-(defn- get-osapuoli-data [osapuoli party-type]
-  (let [henkilo        (:henkilo osapuoli)
-        kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
-        omistajalaji   (muu-select-map
-                         :muu (-> osapuoli :muu-omistajalaji :value)
-                         :omistajalaji (-> osapuoli :omistajalaji :value))
-        role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
-                        :kuntaRooliKoodi kuntaRoolicode
-                        :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin :value))}
-        codes          (if omistajalaji
-                         (merge role-codes {:omistajalaji omistajalaji})
-                         role-codes)]
-    (if (= (-> osapuoli :_selected :value) "yritys")
-      (merge codes
-             {:yritys  (get-yritys-data (:yritys osapuoli))}
-             {:henkilo (get-yhteyshenkilo-data (get-in osapuoli [:yritys :yhteyshenkilo]))})
-      (merge codes {:henkilo (get-henkilo-data henkilo)}))))
-
-(defn- get-suunnittelija-data [suunnittelija party-type]
-  (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
-        codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
-               :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
-        patevyys (:patevyys suunnittelija)
-        henkilo (merge (get-name (:henkilotiedot suunnittelija))
-                       {:osoite (get-simple-osoite (:osoite suunnittelija))}
-                       (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
-        base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
-                                :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
-                                :henkilo henkilo})]
-    (if (contains? suunnittelija :yritys)
-      (assoc base-data :yritys (assoc
-                                 (get-simple-yritys (:yritys suunnittelija))
-                                 :postiosoite (get-simple-osoite (:osoite suunnittelija))
-                                 ))
-      base-data)))
-
-(defn- get-parties-by-type [documents tag-name party-type doc-transformer]
-  (for [doc (documents party-type)
-        :let [osapuoli (:data doc)]
-        :when (seq osapuoli)]
-    {tag-name (doc-transformer osapuoli party-type)}))
-
-(defn get-parties [documents]
-  (into
-    (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
-    (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))
-
-(defn- get-designers [documents]
-  (into
-    (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
-    (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
-
-(defn- get-state [application]
-  (let [state (keyword (:state application))]
-    {:Tilamuutos
-     {:tila (application-state-to-krysp-state state)
-      :pvm (to-xml-date ((state-timestamps state) application))
-      :kasittelija (get-handler application)}}))
-
 (defn- get-huoneisto-data [huoneistot]
   (for [huoneisto (vals huoneistot)
         :let [tyyppi (:huoneistonTyyppi huoneisto)
@@ -344,27 +202,6 @@
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
                    :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
-(defn- change-value-to-when [value to_compare new_val]
-  (if (= value to_compare) new_val
-    value))
-
-(defn- get-bulding-places [documents application]
-  (for [doc (:rakennuspaikka documents)
-        :let [rakennuspaikka (:data doc)
-              kiinteisto (:kiinteisto rakennuspaikka)
-              id (:id doc)]]
-    {:Rakennuspaikka
-     {:yksilointitieto id
-      :alkuHetki (to-xml-datetime (now))
-      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste :value) "eiKaavaa" "ei kaavaa")
-      :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
-                                      {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
-                                       :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
-                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
-                                                                             :kiinteistotunnus (:propertyId application)}
-                                                         (when (-> kiinteisto :maaraalaTunnus :value)
-                                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
-
 (defn- get-kayttotapaus [documents toimenpiteet]
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
@@ -378,24 +215,12 @@
                                                             v)) (:documents application)))
         toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot
-                    {:aineistonnimi (:title application)
-                     :aineistotoimittaja "lupapiste@solita.fi"
-                     :tila toimituksenTiedot-tila
-                     :toimitusPvm (to-xml-date (now))
-                     :kuntakoodi (:municipality application)
-                     :kielitieto ""}
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot
-                      {:LupaTunnus
-                       {:muuTunnustieto {:MuuTunnus {:tunnus (:id application)
-                                                     :sovellus "Lupapiste"}}}}
-                      :osapuolettieto
-                      {:Osapuolet
-                       {:osapuolitieto (get-parties documents)
-                        :suunnittelijatieto (get-designers documents)}}
+                      :luvanTunnisteTiedot (lupatunnus application)
+                      :osapuolettieto (osapuolet documents)
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)

@@ -56,7 +56,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :organizations ["753-R" "753-YA" "753-P"]
+    :organizations ["753-R" "753-YA"]
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
