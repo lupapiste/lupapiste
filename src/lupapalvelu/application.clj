@@ -827,6 +827,8 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
+  (println user)
+  (println params)
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
