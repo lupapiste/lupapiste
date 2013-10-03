@@ -296,7 +296,7 @@
   [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
-      (let [to-user   (and to (or (user/get-non-private-userinfo to)
+      (let [to-user   (and to (or (user/get-user-by-id to)
                                   (fail! :to-is-not-id-of-any-user-in-system)))
             from-user (user/summary user)]
         (update-application command
@@ -348,7 +348,7 @@
   (let [document     (domain/get-document-by-id application documentId)
         schema-name  (get-in document [:schema-info :name])
         schema       (schemas/get-schema (:schema-version application) schema-name)
-        subject      (user/get-non-private-userinfo userId)
+        subject      (user/get-user-by-id userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
                        (user/same-user? user subject))

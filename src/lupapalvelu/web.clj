@@ -310,7 +310,7 @@
   [handler]
   (fn [request]
     (handler (assoc request :user
-                    (or (user/login-with-apikey (get-apikey request))
+                    (or (user/get-user-with-apikey (get-apikey request))
                         (session/get :user))))))
 
 (defn- logged-in-with-apikey? [request]
