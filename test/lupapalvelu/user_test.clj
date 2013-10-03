@@ -1,6 +1,7 @@
 (ns lupapalvelu.user-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.user :refer :all]))
+            [lupapalvelu.user :refer :all]
+            [slingshot.slingshot :refer [try+]]))
 
 (facts
   (applicationpage-for "applicant")      => "applicant"
@@ -24,15 +25,15 @@
     (fact (summary nil) => nil)
     (fact (summary user) => (just (dissoc user :private)))))
 
-(facts "roles"
-  (fact "authority"
-    (authority? {:role "authority"}) => true
-    (authority? {:role :authority}) => true
-    (authority? {}) => false)
-  (fact "applicant"
-    (applicant? {:role "applicant"}) => true
-    (applicant? {:role :applicant}) => true
-    (applicant? {}) => false))
+(fact "authority"
+  (authority? {:role "authority"}) => true
+  (authority? {:role :authority}) => true
+  (authority? {}) => false)
+
+(fact "applicant"
+  (applicant? {:role "applicant"}) => true
+  (applicant? {:role :applicant}) => true
+  (applicant? {}) => false)
 
 (fact "is a map with all the data"
   (create-user-entity {:id             ..id..
@@ -87,6 +88,13 @@
   (same-user? {:id "123"} {:id "123"}) => true
   (same-user? {:id "123"} {:id "234"}) => false)
 
-(facts "with-user"
-  (with-user nil nil) => (contains {:ok false}))
+(fact
+  (with-user-by-email "email" user) => (contains {:id "123" :email "email"})
+  (provided (get-user-by-email "email") => {:id "123" :email "email"}))
 
+(fact
+  (with-user-by-email "email") => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
+  (provided (get-user-by-email "email") => nil))
+
+(fact
+  (with-user-by-email nil) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found"))
