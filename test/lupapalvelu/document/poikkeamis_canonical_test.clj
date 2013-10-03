@@ -504,7 +504,7 @@
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "Elämän koulu"
+        _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
@@ -519,11 +519,11 @@
         maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
         kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
         hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
-        
+
         toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
         toimenpide-count (count toimenpidetieto) => 2
         uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
-        
+
 
 
 
