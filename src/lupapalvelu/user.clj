@@ -4,13 +4,16 @@
             [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
-            [sade.strings :as ss]
+            [sade.strings :as s]
+            [sade.util :refer [fn->]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
 
 ;;
-;; Securing data:
+;; ==============================================================================
+;; Utils:
+;; ==============================================================================
 ;;
 
 (defn non-private
@@ -23,22 +26,59 @@
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
 
+(def authority? (fn-> :role keyword (= :authority)))
+(def applicant? (fn-> :role keyword (= :applicant)))
+
+(defn same-user? [{id1 :id} {id2 :id}]
+  (= id1 id2))
+
 ;;
+;; ==============================================================================
+;; Getting user data:
+;; ==============================================================================
+;;
+
+(defn get-non-private-userinfo [user-id]
+  (when user-id
+    (non-private (mongo/select-one :users {:_id user-id}))))
+
+(defn get-user-by-email [email]
+  (when email
+    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
+
+(defmacro with-user-by-email [email & body]
+  `(let [~'user (get-user-by-email ~email)]
+     (when-not ~'user
+       (debugf "user '%s' not found with email" ~email)
+       (fail! :error.user-not-found :email ~email))
+     ~@body))
+
+;;
+;; ==============================================================================
 ;; User management:
+;; ==============================================================================
 ;;
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
-
 
 (defn current-user
   "fetches the current user from session"
   ([] (current-user (request/ring-request)))
   ([request] (request :user)))
 
+(defn user-in-role [user role & params]
+  (merge (apply hash-map params) (assoc (summary user) :role role)))
+
+;;
+;; ==============================================================================
+;; Loading user data:
+;; ==============================================================================
+;;
+
 (defn- load-user [username]
   (when username
-    (mongo/select-one :users {:username (ss/lower-case username)})))
+    (mongo/select-one :users {:username (s/lower-case username)})))
 
 (defn load-current-user
   "fetch the current user from db"
@@ -53,11 +93,22 @@
     (debug "user session refresh successful, username:" (:username user))
     (session/put! :user user)))
 
-(defn user-in-role [user role & params]
-  (merge (apply hash-map params) (assoc (summary user) :role role)))
 
 
 
+
+
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Login:
+;; ==============================================================================
+;;
 
 (defn login
   "returns non-private information of enabled user with the username and password"
@@ -75,25 +126,56 @@
     (when-let [user (non-private (mongo/select-one :users {:private.apikey apikey}))]
       (when (:enabled user) user))))
 
-(defn get-non-private-userinfo [user-id]
-  (when user-id
-    (non-private (mongo/select-one :users {:_id user-id}))))
 
-(defn get-user-by-email [email]
-  (when email
-    (non-private (mongo/select-one :users {:email (ss/lower-case email)}))))
+
+
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Creating API keys:
+;; ==============================================================================
+;;
 
 (defn create-apikey [email]
   (let [apikey (security/random-password)
-        result (mongo/update :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
+        result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
     (when result
       apikey)))
+
+
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Change password:
+;; ==============================================================================
+;;
 
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
+    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
+
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Creating users:
+;; ==============================================================================
+;;
 
 (def required-user-keys [:email :id :role])
 (def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
@@ -102,7 +184,7 @@
 
 (defn create-user-entity [{:keys [email password] :as user-data}]
   (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
-  (let [email    (ss/lower-case email)
+  (let [email    (s/lower-case email)
         private  (when password
                    (let [salt (security/dispense-salt)]
                      {:salt     salt
@@ -149,8 +231,19 @@
   (create-any-user (merge user {:role :applicant :enabled true})))
 
 
+
+
+
+
+
+;;
+;; ==============================================================================
+;; Updating user information:
+;; ==============================================================================
+;;
+
 (defn update-user [email data]
-  (mongo/update :users {:email (ss/lower-case email)} {$set data}))
+  (mongo/update :users {:email (s/lower-case email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]
@@ -160,47 +253,21 @@
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt  salt
+    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt  salt
                                                             :private.password hashed-password}})))
 
+;;
+;; ==============================================================================
+;; Other:
+;; ==============================================================================
+;;
+
+; TODO: replace dummy users with tokens
+; When (if?) dummy users are changed with tokens, this should be removed too:
+
 (defn get-or-create-user-by-email [email]
-  (let [email (ss/lower-case email)]
+  (let [email (s/lower-case email)]
     (or
       (get-user-by-email email)
       (create-any-user {:email email}))))
-
-(defn authority? [{role :role}]
-  (= :authority (keyword role)))
-
-(defn applicant? [{role :role}]
-  (= :applicant (keyword role)))
-
-(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
-  (= id1 id2))
-
-
-
-
-
-
-
-(defn with-user [email function]
-  (if (nil? email)
-    (fail :error.user-not-found)
-    (if-let [user (get-user-by-email email)]
-      (function user)
-      (do
-        (debugf "user '%s' not found with email" email)
-        (fail :error.user-not-found)))))
-
-
-
-
-
-
-
-
-
-
-
 
