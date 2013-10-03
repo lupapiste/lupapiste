@@ -22,7 +22,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.user :refer [with-user] :as user]
+            [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -145,7 +145,8 @@
   [{app :application user :user}]
   (if app
     (ok :application ((app-post-processor user) app)
-        :authorities (find-authorities-in-applications-organization app))
+        :authorities (find-authorities-in-applications-organization app)
+        :permitSubtypes (permit/permit-subtypes (:permitType app)))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -268,11 +269,10 @@
   (with-application command
     (fn [{application-id :id}]
       (let [email (ss/lower-case email)]
-        (with-user email
-          (fn [_]
-            (mongo/update-by-id :applications application-id
-              {$pull {:auth {$and [{:username email}
-                                   {:type {$ne :owner}}]}}})))))))
+        (with-user-by-email email
+          (mongo/update-by-id :applications application-id
+            {$pull {:auth {$and [{:username email}
+                                 {:type {$ne :owner}}]}}}))))))
 
 (defcommand remove-auth
   {:parameters [:id email]
@@ -290,9 +290,9 @@
                                            :validators  [not-open-inforequest-user-validator]})
 
 (defcommand add-comment
-  {:parameters  [:id :text :target]
-   :roles       [:applicant :authority]
-   :validators  [applicant-cant-set-to]
+  {:parameters [:id :text :target]
+   :roles      [:applicant :authority]
+   :validators [applicant-cant-set-to]
    :on-success  (notify "new-comment")}
   [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
@@ -573,6 +573,7 @@
                          :opened           (when (#{:open :info} state) created)
                          :modified         created
                          :permitType       permit-type
+                         :permitSubtype (first (permit/permit-subtypes permit-type))
                          :infoRequest      info-request?
                          :openInfoRequest  open-inforequest?
                          :operations       [op]
@@ -594,6 +595,7 @@
                             {:attachments            (make-attachments created op organization-id)
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
+
           application   (domain/set-software-version application)]
 
       (mongo/insert :applications application)
@@ -620,6 +622,17 @@
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})))))
+
+(defcommand change-permit-sub-type
+  {:parameters [id permitSubtype]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :validators [permit/validate-permit-has-subtypes]}
+  [{:keys [application created]}]
+  (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
+    validation-errors
+    (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype
+                                                :modified      created}})))
 
 (defcommand change-location
   {:parameters [id x y address propertyId]
@@ -722,12 +735,12 @@
       verdicts)))
 
 (defcommand check-for-verdict
-  {:description  "Fetches verdicts from municipality backend system.
-                  If the command is run more than once, existing verdicts are
-                  replaced by the new ones."
-   :parameters  [:id]
-   :states      [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
-   :roles       [:authority]
+  {:description "Fetches verdicts from municipality backend system.
+                 If the command is run more than once, existing verdicts are
+                 replaced by the new ones."
+   :parameters [:id]
+   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles      [:authority]
    :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
@@ -828,6 +841,8 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
+  (println user)
+  (println params)
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
