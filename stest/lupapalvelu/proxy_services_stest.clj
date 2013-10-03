@@ -5,6 +5,7 @@
   (:require [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
             [clj-http.client :as c]
+            [sade.env :as env]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
@@ -88,7 +89,7 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Tampere"))))
 
-(facts "raster-images"
+(facts "geoserver-layers"
   (let [base-params {"FORMAT" "image/png"
                      "SERVICE" "WMS"
                      "VERSION" "1.1.1"
@@ -98,13 +99,36 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "taustakartta_5k"}
-                   {"LAYERS" "taustakartta_10k"}
-                   {"LAYERS" "taustakartta_20k"}
-                   {"LAYERS" "taustakartta_40k"}
+    (doseq [layer [{"LAYERS" "Asemakaava"}
+                   {"LAYERS" "Kantakartta"}
+                   {"LAYERS" "Peruskartat"}
                    {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
                    {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
       (let [request {:params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))
-        (:status (wfs/raster-images request)) => 200))))
+        (:status (c/get (env/value :maps :geoserver)
+                {:query-params (:params request)
+                 :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+                 :as :stream})) => 200))))
+
+(facts "raster-images"
+       (let [base-params {"FORMAT" "image/png"
+                          "SERVICE" "WMS"
+                          "VERSION" "1.1.1"
+                          "REQUEST" "GetMap"
+                          "STYLES"  ""
+                          "SRS"     "EPSG:3067"
+                          "BBOX"   "444416,6666496,444672,6666752"
+                          "WIDTH"   "256"
+                          "HEIGHT" "256"}]
+         (doseq [layer [{"LAYERS" "taustakartta_5k"}
+                        {"LAYERS" "taustakartta_10k"}
+                        {"LAYERS" "taustakartta_20k"}
+                        {"LAYERS" "taustakartta_40k"}
+                        {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                        {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+           (let [request {:params (merge base-params layer)
+                          :headers {"accept-encoding" "gzip, deflate"}}]
+             (println "Checking" (get layer "LAYERS"))
+             (:status (wfs/raster-images request)) => 200))))

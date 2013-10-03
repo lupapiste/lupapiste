@@ -126,8 +126,13 @@
     (send-mail-to-recipients! [to-address]  subject msg)))
 
 (defn get-message-for-open-inforequest-invite [host token]
-  (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))]
-    (email/apply-template "open-inforequest-invite.html" {:link-fi (link-fn :fi) :link-sv (link-fn :sv)})))
+  (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
+         info-fn (fn [lang] (str host "/?lang=" (name lang)))] ; FIXME: "myyntipuhe" here!
+    (email/apply-template "open-inforequest-invite.html"
+      {:link-fi (link-fn :fi)
+       :link-sv (link-fn :sv)
+       :info-fi (info-fn :fi)
+       :info-sv (info-fn :sv)})))
 
 (defn send-open-inforequest-invite! [email token application-id host]
   (let [subject "Uusi neuvontapyynt\u00F6"
