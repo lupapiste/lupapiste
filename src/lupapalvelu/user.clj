@@ -18,7 +18,8 @@
 
 (defn non-private
   "Returns user without private details."
-  [user] (dissoc user :private))
+  [user]
+  (dissoc user :private))
 
 (defn summary
   "Returns common information about the user or nil"
@@ -34,17 +35,48 @@
 
 ;;
 ;; ==============================================================================
-;; Getting user data:
+;; Finding user data:
 ;; ==============================================================================
 ;;
 
-(defn get-non-private-userinfo [user-id]
-  (when user-id
-    (non-private (mongo/select-one :users {:_id user-id}))))
+(defn user-query [& query]
+  (assert (seq query))
+  (let [query (apply hash-map query)
+        query (if-let [id (:id query)]
+                (-> query
+                  (assoc :_id id)
+                  (dissoc :id))
+                query)
+        query (if-let [username (:username query)]
+                (assoc query :username (s/lower-case username))
+                query)
+        query (if-let [email (:email query)]
+                (assoc query :email (s/lower-case email))
+                query)]
+    (assert (not (empty? query)))
+    query))
 
-(defn get-user-by-email [email]
-  (when email
-    (non-private (mongo/select-one :users {:email (s/lower-case email)}))))
+(defn find-user [& query]
+  (mongo/select-one :users (apply user-query query)))
+
+;;
+;; ==============================================================================
+;; Getting non-private user data:
+;; ==============================================================================
+;;
+
+(def get-user-by-id (comp non-private (partial find-user :id)))
+(def get-user-by-email (comp non-private (partial find-user :email)))
+
+(defn get-user-with-password [username password]
+  (let [user (find-user :username username)]
+    (when (and (:enabled user) (security/check-password password (get-in user [:private :password])))
+      (non-private user))))
+
+(defn get-user-with-apikey [apikey]
+  (let [user (find-user :private.apikey apikey)]
+    (when (:enabled user)
+      (non-private user))))
 
 (defmacro with-user-by-email [email & body]
   `(let [~'user (get-user-by-email ~email)]
@@ -55,36 +87,31 @@
 
 ;;
 ;; ==============================================================================
-;; User management:
+;; User role:
 ;; ==============================================================================
 ;;
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
 
-(defn current-user
-  "fetches the current user from session"
-  ([] (current-user (request/ring-request)))
-  ([request] (request :user)))
-
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))
 
 ;;
 ;; ==============================================================================
-;; Loading user data:
+;; Current user:
 ;; ==============================================================================
 ;;
 
-(defn- load-user [username]
-  (when username
-    (mongo/select-one :users {:username (s/lower-case username)})))
+(defn current-user
+  "fetches the current user from session"
+  ([] (current-user (request/ring-request)))
+  ([request] (request :user)))
 
 (defn load-current-user
   "fetch the current user from db"
   []
-  (when-let [user (load-user (:username (current-user)))]
-    (non-private user)))
+  (get-user-by-id (:id (current-user))))
 
 (defn refresh-user!
   "Loads user information from db and saves it to session. Call this after you make changes to user information."
@@ -92,48 +119,6 @@
   (when-let [user (load-current-user)]
     (debug "user session refresh successful, username:" (:username user))
     (session/put! :user user)))
-
-
-
-
-
-
-
-
-
-
-
-
-;;
-;; ==============================================================================
-;; Login:
-;; ==============================================================================
-;;
-
-(defn login
-  "returns non-private information of enabled user with the username and password"
-  [username password]
-  (when-let [user (load-user username)]
-    (and
-      (:enabled user)
-      (security/check-password password (-> user :private :password))
-      (non-private user))))
-
-(defn login-with-apikey
-  "returns non-private information of enabled user with the apikey"
-  [apikey]
-  (when apikey
-    (when-let [user (non-private (mongo/select-one :users {:private.apikey apikey}))]
-      (when (:enabled user) user))))
-
-
-
-
-
-
-
-
-
 
 ;;
 ;; ==============================================================================
