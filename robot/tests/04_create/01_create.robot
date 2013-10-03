@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
-  Create application  create-app  753  753-416-17-15
+  Create application  create-app  753  753-416-17-15  R
   It is possible to add operation
 
 Mikko sees application in list
@@ -17,7 +17,7 @@ Mikko sees application in list
   Request should be visible  create-app
 
 Mikko creates a new inforequest
-  Create inforequest  create-info  753  753-416-25-22  Hoblaa
+  Create inforequest  create-info  753  753-416-25-22  Hoblaa  R
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-operation-id='asuinrakennus']
   Element should not be visible  //h2[@data-test-id='wanna-join']
@@ -45,7 +45,8 @@ Mikko inspects inforequest and sees his initial comments
   Open inforequest  create-info  753-416-25-22
   Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//span[text()='Hoblaa']  1
 
-LUPA-585
+#LUPA-585
+The contents of unsent inforequest's message field is resetted properly when moving to another inforequest
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  roskaa
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
