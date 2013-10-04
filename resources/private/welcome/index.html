@@ -4,10 +4,17 @@
     <meta charset="utf-8" />
   </head>
   <body>
-    <footer >
+
+    <!-- ko if: screenMessages.length > 0 -->
+      <ul id="sys-notification" class="wrapper" data-bind="foreach: screenMessages">
+        <li data-bind="text: $data[$root.currentLanguage]"></li>
+      </ul>
+    <!-- /ko -->
+
+    <footer>
       <span id="buildinfo" style="font-style: italic; color: gray;"></span>
       <div class="informations">
-      
+
         <div class="contact-information">
           <h3 data-bind="ltext: 'footer.contact'"></h3>
           <a href="mailto:lupapiste@lupapiste.fi">lupapiste@lupapiste.fi</a><br>
@@ -17,20 +24,20 @@
           Arkadiankatu 2<br>
           00100 Helsinki<br>
         </div>
-          
+
         <div class="user-information">
           <a href="https://www.lupapiste.fi/?page_id=331" data-bind="ltext: 'footer.register'"></a><br>
           <a href="https://www.lupapiste.fi/?page_id=337" data-bind="ltext: 'footer.terms'"></a><br>
                 <a href="#!/licenses" data-bind="ltext: 'footer.license'"></a>
         </div>
-        
+
         <div class="user-information">
           <p>
             <span data-bind="ltext: 'footer.sade'"> </span>
             <a href="http://www.vm.fi/sade">www.vm.fi/sade</a>)
           </p>
         </div>
-    
+
       </div>
     </footer>
   </body>
