@@ -127,7 +127,7 @@
 
 (defn get-message-for-open-inforequest-invite [host token]
   (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
-         info-fn (fn [lang] (str host "/?lang=" (name lang)))] ; FIXME: "myyntipuhe" here!
+         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
     (email/apply-template "open-inforequest-invite.html"
       {:link-fi (link-fn :fi)
        :link-sv (link-fn :sv)

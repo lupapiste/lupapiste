@@ -15,7 +15,8 @@
   (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
-                 :mode              env/mode}]
+                 :mode              env/mode
+                 :wannaJoinUrl      (env/value :oir :wanna-join-url)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn loc->js []
@@ -122,7 +123,7 @@
    :oir          {:depends [:common :authenticated :map :application :attachment
                             :docgen :debug :user-menu]
                   :js ["oir.js"]
-                  :html ["index.html" "contact.html"]}
+                  :html ["index.html"]}
 
    :admins   {:js ["user.js" "users.js"]
               :html ["admin-user-list.html" "user-modification-dialogs.html"]}
