@@ -120,7 +120,7 @@
                   :html ["index.html"]}
 
    :oir          {:depends [:common :authenticated :map :application :attachment
-                            :docgen :debug]
+                            :docgen :debug :user-menu]
                   :js ["oir.js"]
                   :html ["index.html" "contact.html"]}
 
