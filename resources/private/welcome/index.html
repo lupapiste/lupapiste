@@ -5,11 +5,15 @@
   </head>
   <body>
 
-    <!-- ko if: screenMessages.length > 0 -->
-      <ul id="sys-notification" class="wrapper" data-bind="foreach: screenMessages">
-        <li data-bind="text: $data[$root.currentLanguage]"></li>
-      </ul>
-    <!-- /ko -->
+    <header>
+      <div id="sys-notification">
+          <!-- ko if: screenMessages.length > 0 -->
+            <ul class="wrapper" data-bind="foreach: screenMessages">
+              <li data-bind="text: $data[loc.getCurrentLanguage()]"></li>
+            </ul>
+          <!-- /ko -->
+      </div>
+    </header>
 
     <footer>
       <span id="buildinfo" style="font-style: italic; color: gray;"></span>
