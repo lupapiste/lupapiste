@@ -348,7 +348,7 @@
 ;; Screen messages
 ;;
 
-(defonce screenmessages (atom []))
+(def ^:private screenmessages (atom []))
 
 (defjson [:get "/system/screenmessage"] [] @screenmessages)
 
@@ -357,16 +357,13 @@
     (keywordize-keys (json/parse-string json))
     json))
 
-(defjson [:post "/system/screenmessage"] {json :json}
+(defjson [:post "/system/screenmessage"] json
   (if-let [{fi :fi sv :sv} (parse-json-data json)]
     (swap! screenmessages conj {:time (java.lang.System/currentTimeMillis)
                                 :fi fi
                                 :sv sv})))
 
-(defjson [:delete "/system/screenmessage"] []
-  (swap! screenmessages (constantly [])))
-
-(defn screenmessages [] @screenmessages)
+(defjson [:delete "/system/screenmessage"] [] (swap! screenmessages (constantly [])))
 
 ;;
 ;; Server is alive
