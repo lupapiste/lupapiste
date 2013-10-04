@@ -310,7 +310,7 @@
                      :inforequest-enabled true
                      :new-application-enabled true
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"}]
+                     :scope [{:municipality "753" :permitType "R"} {:municipality "753" :permitType "P"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -345,23 +345,6 @@
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
                      :operations-attachments ya-operations-attachments-all}
-
-                    {:id "753-P"
-                     :inforequest-enabled true
-                     :new-application-enabled true
-                     :name {:fi "Sipoon poikkari"}
-                     :scope [{:municipality "753" :permitType "P"}]
-                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                              :url "http://sipoo.fi"}
-                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                     :legacy local-legacy
-                     :poikkeus-ftp-user "sipoo"
-                     :statementPersons [{:id "516560d6c2e6f603beb85147"
-                                         :text "Paloviranomainen",
-                                         :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
 
                     {:id "837-R"
                      :inforequest-enabled true
