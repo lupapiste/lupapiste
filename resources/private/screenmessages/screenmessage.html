@@ -7,11 +7,9 @@
 
     <header>
       <div id="sys-notification">
-        <!-- ko if: $data.screenMessages -->
-          <ul class="wrapper" data-bind="foreach: $data.screenMessages">
-            <li data-bind="text: $data[loc.getCurrentLanguage()]"></li>
-          </ul>
-        <!-- /ko -->
+        <ul class="wrapper" data-bind="foreach: $data.screenMessages">
+          <li data-bind="text: $data[loc.getCurrentLanguage()]"></li>
+        </ul>
       </div>
     </header>
 
