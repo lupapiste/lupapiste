@@ -104,8 +104,8 @@
 
 (defn remove-many
   "Removes all documents matching query. If no match query given, removes all."
-  [collection]       (mc/remove collection)
-  [collection query] (mc/remove collection query))
+  ([collection]       (mc/remove collection))
+  ([collection query] (mc/remove collection query)))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input id)
