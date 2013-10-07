@@ -345,29 +345,6 @@
                                              (assoc  :errorMessage (result :text)))))))))
 
 ;;
-;; Screen messages
-;;
-
-(def ^:private screenmessages (atom []))
-
-(defjson [:get "/system/screenmessage"] []
-  (ok :screenmessages @screenmessages))
-
-(defn parse-json-data [json]
-  (if (string? json)
-    (keywordize-keys (json/parse-string json))
-    json))
-
-(defjson [:post "/system/screenmessage"] json
-  (if-let [{fi :fi sv :sv} (parse-json-data json)]
-    (swap! screenmessages conj {:time (java.lang.System/currentTimeMillis)
-                                :fi fi
-                                :sv sv})))
-
-(defjson [:delete "/system/screenmessage"] []
-  (swap! screenmessages (constantly [])))
-
-;;
 ;; Server is alive
 ;;
 
