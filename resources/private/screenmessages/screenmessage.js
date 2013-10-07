@@ -8,12 +8,9 @@ LUPAPISTE.Screenmessage = function () {
   self.messages = ko.observableArray([]);
 
   self.refresh = function(application) {
-    console.log("messagesModel refresh");
-
     ajax.get("/system/screenmessage")
     //.raw(false)
     .success(function(data) {
-      console.log("/system/screenmessage Success, data: ", data);
       self.messages(data);
     })
     .error(function(e) {
