@@ -162,7 +162,7 @@
     {$set (select-keys data [:firstName :lastName :street :city :zip :phone
                              :architect :degree :experience :fise :qualification
                              :companyName :companyId :companyStreet :companyZip :companyCity])})
-  (session/put! :user (user/get-non-private-userinfo user-id))
+  (session/put! :user (user/get-user-by-id user-id))
   (ok))
 
 ;;
@@ -218,7 +218,7 @@
 (defcommand login
   {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
-  (if-let [user (user/login username password)]
+  (if-let [user (user/get-user-with-password username password)]
     (do
       (info "login successful, username:" username)
       (session/put! :user user)
@@ -328,15 +328,15 @@
 
   (defcommand create-apikey
     {:parameters [:username :password]}
-    [command]
-    (if-let [user (user/login (-> command :data :username) (-> command :data :password))]
-      (let [apikey (user/create-apikey)]
-        (mongo/update
-          :users
-          {:username (:username user)}
-          {$set {"private.apikey" apikey}})
-        (ok :apikey apikey))
-      (fail :error.unauthorized)))
+    [{{:keys [username password]} :data}]
+    (let [apikey (security/random-password)
+          user (user/get-user-with-password username password)]
+      (when-not user (fail! :error.not-found))
+      (mongo/update
+        :users
+        {:_id (:id user)}
+        {$set {"private.apikey" apikey}})
+      (ok :apikey apikey)))
   
   (require '[lupapalvelu.fixture])
   

@@ -3,6 +3,10 @@
             [lupapalvelu.user :refer :all]
             [slingshot.slingshot :refer [try+]]))
 
+(facts user-query
+  (user-query) => (throws AssertionError)
+  (user-query :id "x" :username "UserName" :email "Email@AddreSS.FI" :foo "BoZo") => {:_id "x" :username "username" :email "email@address.fi" :foo "BoZo"})
+
 (facts
   (applicationpage-for "applicant")      => "applicant"
   (applicationpage-for "authority")      => "authority"
@@ -93,8 +97,5 @@
   (provided (get-user-by-email "email") => {:id "123" :email "email"}))
 
 (fact
-  (with-user-by-email "email") => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
-  (provided (get-user-by-email "email") => nil))
-
-(fact
-  (with-user-by-email nil) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found"))
+  (with-user-by-email ...email...) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
+  (provided (get-user-by-email ...email...) => nil))
