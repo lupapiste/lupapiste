@@ -9,7 +9,6 @@ LUPAPISTE.Screenmessage = function () {
 
   self.refresh = function(application) {
     ajax.get("/system/screenmessage")
-    //.raw(false)
     .success(function(data) {
       self.messages(data);
     })

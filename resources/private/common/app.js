@@ -167,8 +167,8 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     var messagesModel = new LUPAPISTE.Screenmessage();
+    // Screen messages are refreshed only when page is reloaded.
     messagesModel.refresh();
-//    hub.onPageChange("welcome", model.refresh);
     $("#sys-notification").applyBindings({
       screenMessages: messagesModel.messages
     });

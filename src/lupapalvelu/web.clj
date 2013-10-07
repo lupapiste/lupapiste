@@ -350,7 +350,8 @@
 
 (def ^:private screenmessages (atom []))
 
-(defjson [:get "/system/screenmessage"] [] @screenmessages)
+(defjson [:get "/system/screenmessage"] []
+  @screenmessages)
 
 (defn parse-json-data [json]
   (if (string? json)
@@ -363,7 +364,8 @@
                                 :fi fi
                                 :sv sv})))
 
-(defjson [:delete "/system/screenmessage"] [] (swap! screenmessages (constantly [])))
+(defjson [:delete "/system/screenmessage"] []
+  (swap! screenmessages (constantly [])))
 
 ;;
 ;; Server is alive
