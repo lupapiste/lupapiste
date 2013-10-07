@@ -88,7 +88,7 @@
         <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
           <div>
             <p data-bind="ltext: 'application.permitSubtypes'"></p>
-            <span>
+            <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                optionsText: function(item) {return loc('permitSubtype.' + item); }">
             </select>
