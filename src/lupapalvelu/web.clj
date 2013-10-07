@@ -351,7 +351,7 @@
 (def ^:private screenmessages (atom []))
 
 (defjson [:get "/system/screenmessage"] []
-  @screenmessages)
+  (ok :screenmessages @screenmessages))
 
 (defn parse-json-data [json]
   (if (string? json)
