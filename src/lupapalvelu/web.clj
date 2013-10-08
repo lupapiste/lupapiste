@@ -343,6 +343,7 @@
                                              (dissoc :upload)
                                              (dissoc ring.middleware.anti-forgery/token-key)
                                              (assoc  :errorMessage (result :text)))))))))
+
 ;;
 ;; Server is alive
 ;;

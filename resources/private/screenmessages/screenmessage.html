@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <body>
+
+    <header>
+      <div id="sys-notification">
+        <ul class="wrapper" data-bind="foreach: $data.screenMessages">
+          <li data-bind="text: $data[loc.getCurrentLanguage()]"></li>
+        </ul>
+      </div>
+    </header>
+
+  </body>
+</html>

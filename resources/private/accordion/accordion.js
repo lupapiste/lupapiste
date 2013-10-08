@@ -47,7 +47,8 @@ var accordion = (function() {
         }
         target.trigger("accordion-" + state);
         if (done) { done(target); }
-      });
+      })
+      .css('overflow', 'visible');
 
     return t;
   }
