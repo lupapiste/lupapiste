@@ -10,7 +10,6 @@ LUPAPISTE.Screenmessage = new (function () {
   self.refresh = function() {
     ajax.query("screenmessages")
     .success(function(data) {
-      console.log("screenmessages (Get) Success, data: ", data);
       self.messages(data.screenmessages);
     })
     .error(function(e) {
@@ -22,9 +21,9 @@ LUPAPISTE.Screenmessage = new (function () {
 
 
   self.add = function() {
-    ajax.command("screenmessages-add", {fi : $("#add-text-fi").val(), sv : $("#add-text-sv").val()})
+    ajax.command("screenmessages-add", {fi : $("#add-text-fi").val(),
+                                        sv : $("#add-text-sv").val()})
     .success(function(data) {
-      console.log("screenmessages-add Success, data: ", data);
       self.refresh();
     })
     .error(function(e) {
@@ -36,7 +35,6 @@ LUPAPISTE.Screenmessage = new (function () {
   self.reset = function() {
     ajax.command("screenmessages-reset")
     .success(function(data) {
-      console.log("screenmessages-reset Success, data: ", data);
       self.refresh();
     })
     .error(function(e) {
