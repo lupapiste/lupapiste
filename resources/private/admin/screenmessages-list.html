@@ -18,29 +18,31 @@
             <tbody data-bind="foreach: $data.messages">
               <!--   TODO: Tee uusi "message-row" "user-row":n tilalle.   -->
               <tr class="user-row">
-                <td data-bind="text: added"></td>
-                <td data-bind="text: 'admin.screenmessages.fi'"></td>
-                <td data-bind="text: 'admin.screenmessages.sv'"></td>
+                <td data-bind="dateTimeString: added"></td>
+                <td data-bind="text: fi"></td>
+                <td data-bind="text: sv"></td>
               </tr>
             </tbody>
           </table>
 
           <hr />
 
-          <h3 id="add-text-fi" data-bind="text: 'admin.screenmessages.fi'"></h3>
-          <textarea rows="4" cols="50"></textarea>
+          <h3 data-bind="ltext: 'admin.screenmessages.fi'"></h3>
+          <textarea id="add-text-fi" rows="4" cols="50"></textarea>
+          <h3 data-bind="ltext: 'admin.screenmessages.sv'"></h3>
+          <textarea id="add-text-sv" rows="4" cols="50"></textarea>
 
-          <h3 id="add-text-sv" data-bind="text: 'admin.screenmessages.sv'"></h3>
-          <textarea rows="4" cols="50"></textarea>
+          <br />
 
           <a href="#"
             data-bind="click: $root.add,
-            text: 'admin.screenmessages.addScreenmessageButtonLabel'"
+            ltext: 'admin.screenmessages.addScreenmessageButtonLabel'"
             class="modal btn btn-primary btn-narrow"
             id="test-add-screenmessage"></a>
+          <hr />
           <a href="#"
             data-bind="click: $root.reset,
-            text: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
+            ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
             class="modal btn btn-primary btn-narrow"
             id="test-delete-screenmessage"></a>
 
