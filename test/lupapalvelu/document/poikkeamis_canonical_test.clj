@@ -520,9 +520,15 @@
         kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
         hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
 
-;        toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
-;        toimenpide-count (count toimenpidetieto) => 2
-;        uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
+        toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
+        toimenpide-count (count toimenpidetieto) => 2
+        uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
+        rakennustunnus (:rakennustunnus uusi) => nil
+        _ (:liitetieto uusi) => nil
+        kuvauskoodi (:kuvausKoodi uusi) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusi) => nil
+        tavoitetilatieto (:tavoitetilatieto uusi) => truthy
+
 
 
 
