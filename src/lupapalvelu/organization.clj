@@ -97,7 +97,7 @@
    :authenticated true
    :verified true}
   [{user :user}]
-  (ok :organizations (mongo/select :organizations {} {:name 1})))
+  (ok :organizations (mongo/select :organizations {})))
 
 (defquery "organization-names"
   {:authenticated true

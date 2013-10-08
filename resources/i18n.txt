@@ -7,3 +7,7 @@ admin.screenmessages.fi: Suomeksi
 admin.screenmessages.sv: Ruotsiksi
 admin.screenmessages.addScreenmessageButtonLabel: Lisää ennakkoilmoitus
 admin.screenmessages.deleteScreenmessageButtonLabel: Poista kaikki ennakkoilmoitukset
+organization.name: Organisaation nimi
+organization.inforequests.on-or-off: Neuvontapyynnöt päällä
+organization.applications.on-or-off: Hakemukset päällä
+

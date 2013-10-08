@@ -6,11 +6,22 @@
 
         <h2>Organizations</h2>
 
-        <ul data-bind="foreach: organizations">
-          <li>
-            <span data-bind="text: $data.name[loc.getCurrentLanguage()]"></span>
-          </li>
-        </ul>
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'organization.name'"></th>
+              <th data-bind="ltext: 'organization.inforequests.on-or-off'"></th>
+              <th data-bind="ltext: 'organization.applications.on-or-off'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: organizations">
+            <tr>
+              <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
+              <td data-bind="text: $data['new-application-enabled']"></td>
+              <td data-bind="text: $data['inforequest-enabled']"></td>
+            </tr>
+          </tbody>
+        </table>
 
       </div>
     </section>
