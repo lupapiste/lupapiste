@@ -50,8 +50,7 @@
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore
-                            :moment :i18n :selectm :licenses :screenmessages]
+   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "authorization.js" "vetuma.js"]
@@ -63,7 +62,7 @@
 
    :user-menu     {:html ["nav.html"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :user-menu ]
+   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :user-menu :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -162,7 +161,7 @@
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
 
-   :welcome {:depends [:login :register :debug :user-menu]
+   :welcome {:depends [:login :register :debug :user-menu :screenmessages]
              :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 
@@ -173,7 +172,7 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :neighbor {:depends [:common :map :debug :docgen :debug :user-menu]
+   :neighbor {:depends [:common :map :debug :docgen :debug :user-menu :screenmessages]
               :html ["neighbor-show.html" "index.html"]
               :js ["neighbor-app.js" "neighbor-show.js"]}})
 
