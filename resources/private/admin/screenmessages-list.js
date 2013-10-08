@@ -3,10 +3,10 @@
 
   var messagesModel = new LUPAPISTE.Screenmessage();
 
-  hub.onPageChange("screenMessages", messagesModel.refresh);
+  hub.onPageChange("screenmessages", messagesModel.refresh);
 
   $(function() {
-    $("#screenMessages").applyBindings(messagesModel);
+    $("#screenmessages").applyBindings(messagesModel);
   });
 
 })();
