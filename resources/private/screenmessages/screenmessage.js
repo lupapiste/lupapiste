@@ -2,7 +2,7 @@ if (typeof LUPAPISTE === "undefined") {
   var LUPAPISTE = {};
 }
 
-LUPAPISTE.Screenmessage = function () {
+LUPAPISTE.Screenmessage = new (function () {
   var self = this;
 
   self.messages = ko.observableArray([]);
@@ -45,4 +45,4 @@ LUPAPISTE.Screenmessage = function () {
     .call();
   };
 
-}
+})();
