@@ -25,7 +25,8 @@
             [lupapalvelu.etag :as etag]
             [lupapalvelu.document.schema-repository]
             [lupapalvelu.common-actions]
-            [lupapalvelu.migration.migration :as migration]))
+            [lupapalvelu.migration.migration :as migration]
+            [lupapalvelu.screenmessage]))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
