@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organizations">
+      <div class="container">
+
+        <h2>Organizations</h2>
+
+        <ul data-bind="foreach: organizations">
+          <li>
+            <span data-bind="text: $data.name[loc.getCurrentLanguage()]"></span>
+          </li>
+        </ul>
+
+      </div>
+    </section>
+  </body>
+</html>
