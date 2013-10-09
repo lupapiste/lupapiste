@@ -80,9 +80,7 @@
   (when-not (security/valid-password? password) (fail! :error.password-too-short))
   (let [new-user (user/create-authority-admin data)]
     (when-not new-user (fail! :error.create-admin-user))
-    (future*
-      (let [pimped-user (merge new-user {:_id (:id new-user)})] ;; FIXME
-        (activation/send-activation-mail-for pimped-user)))
+    (activation/send-activation-mail-for new-user)
     (ok :id (:_id new-user))))
 
 (defcommand create-authority-user
@@ -247,7 +245,7 @@
           (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
           (if-let [user (user/create-user (merge data vetuma-data {:email email}))]
             (do
-              (future* (activation/send-activation-mail-for user))
+              (activation/send-activation-mail-for user)
               (vetuma/consume-user stamp)
               (ok :id (:_id user)))
             (fail :error.create-user))
