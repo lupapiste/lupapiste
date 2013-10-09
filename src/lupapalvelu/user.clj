@@ -198,16 +198,22 @@
           (mongo/insert :users new-user)))
       (get-user-by-email (:email new-user))
       (catch com.mongodb.MongoException$DuplicateKey e
-        (warn e)
+        (warn e "Duplicate key detected when inserting new user")
         (throw (IllegalArgumentException.
                  (condp re-find (.getMessage e)
-                   #"\.personId\."  "error.duplicate-person-id"
-                   #"\.email\."     "error.duplicate-email"
-                   #"\.username\."  "error.duplicate-email"
-                   "error.create-user")))))))
+                   #"E11000 duplicate key error index: lupapiste\.users\.\$personId_1"  "error.duplicate-person-id"
+                   #"E11000 duplicate key error index: lupapiste\.users\.\$email_1"     "error.duplicate-email"
+                   #"E11000 duplicate key error index: lupapiste\.users\.\$username_1"  "error.duplicate-email"
+                   (str "error.create-user"))))))))
 
 (defn create-authority [user]
-  (create-any-user (merge user {:role :authority :enabled true})))
+  (try
+    (create-any-user (merge user {:role :authority :enabled true}))
+    (catch IllegalArgumentException e
+      (when (= "error.duplicate-email" (.getMessage e))
+        (info "Adding user to organization: user:" (:email user) ", organizations:" (:organizations user))
+        (mongo/update :users {:email (:email user)} {$pushAll {:organizations (:organizations user)}})
+        {:ok true}))))
 
 (defn create-authority-admin [user]
   (create-any-user (merge user {:role :authorityAdmin :enabled true})))
