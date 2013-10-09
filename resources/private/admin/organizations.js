@@ -21,6 +21,7 @@
   function EditOrganizationModel() {
     var self = this;
     self.dialogSelector = "#dialog-edit-organization";
+    self.errorMessage = ko.observable(null);
 
     // Model
 
@@ -52,6 +53,10 @@
     self.onSuccess = function() {
       self.errorMessage(null);
       LUPAPISTE.ModalDialog.close();
+    };
+
+    self.onError = function(resp) {
+      self.errorMessage(resp.text);
     };
 
     self.updateOrganization = function() {
