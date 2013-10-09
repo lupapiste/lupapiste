@@ -238,21 +238,20 @@
   {:parameters [:stamp :email :password :street :zip :city :phone]
    :verified   true}
   [{{:keys [stamp] :as data} :data}]
-  (if-let [vetuma-data (vetuma/get-user stamp)]
-    (let [email (-> data :email s/lower-case s/trim)]
-      (if (.contains email "@")
-        (try
-          (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-          (if-let [user (user/create-user (merge data vetuma-data {:email email}))]
-            (do
-              (activation/send-activation-mail-for user)
-              (vetuma/consume-user stamp)
-              (ok :id (:_id user)))
-            (fail :error.create-user))
-          (catch IllegalArgumentException e
-            (fail (keyword (.getMessage e)))))
-        (fail :error.email)))
-    (fail :error.create-user)))
+  (let [vetuma-data (vetuma/get-user stamp)
+        email (-> data :email s/lower-case s/trim)]
+    (when-not vetuma-data (fail :error.create-user))
+    (when-not (.contains email "@") (fail :error.email))
+    (try
+      (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+      (if-let [user (user/create-user (merge data vetuma-data {:email email}))]
+        (do
+          (activation/send-activation-mail-for user)
+          (vetuma/consume-user stamp)
+          (ok :id (:_id user)))
+        (fail :error.create-user))
+      (catch IllegalArgumentException e
+        (fail (keyword (.getMessage e)))))))
 
 ;;
 ;; ==============================================================================
