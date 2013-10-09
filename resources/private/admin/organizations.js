@@ -20,13 +20,44 @@
 
   function EditOrganizationModel() {
     var self = this;
+    self.dialogSelector = "#dialog-edit-organization";
 
-    self.organization = ko.observable();
+    // Model
+
+    self.id = 0;
+    self.applicationEnabled = ko.observable(false);
+    self.inforequestEnabled = ko.observable(false);
+    self.processing = ko.observable();
+    self.pending = ko.observable();
+
+    self.reset = function(organization) {
+      self.id = organization.id;
+      self.applicationEnabled(organization['new-application-enabled']);
+      self.inforequestEnabled(organization['inforequest-enabled']);
+      self.processing(false);
+      self.pending(false);
+    };
+
+    self.ok = ko.computed(function() {
+      return true;
+    });
+
+    // Open the dialog
 
     self.open = function(organization) {
-      self.organization(organization);
-      LUPAPISTE.ModalDialog.open("#dialog-edit-organization");
-      return self;
+      self.reset(organization);
+      LUPAPISTE.ModalDialog.open(self.dialogSelector);
+    };
+
+    self.updateOrganization = function() {
+      var data = {id: self.id, inforequestEnabled: self.inforequestEnabled, applicationEnabled: self.applicationEnabled};
+      ajax.command("update-organization", data)
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(self.onSuccess)
+        .error(self.onError)
+        .call();
+      return false;
     };
 
     self.execute = function(attachments) {
@@ -47,7 +78,10 @@
   hub.onPageChange("organizations", organizationsModel.load);
 
   $(function() {
-    $("#organizations").applyBindings({ "organizationsModel": organizationsModel});
+    $("#organizations").applyBindings({
+      "organizationsModel": organizationsModel,
+      "editOrganizationModel": editOrganizationModel
+    });
   });
 
 })();

@@ -10,8 +10,8 @@
           <thead>
             <tr>
               <th data-bind="ltext: 'organization.name'"></th>
-              <th data-bind="ltext: 'organization.inforequests.on-or-off'"></th>
-              <th data-bind="ltext: 'organization.applications.on-or-off'"></th>
+              <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
+              <th data-bind="ltext: 'organization.application.enabled'"></th>
               <th data-bind="ltext: 'edit'"></th>
             </tr>
           </thead>
@@ -20,23 +20,44 @@
               <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
               <td data-bind="text: $data['new-application-enabled']"></td>
               <td data-bind="text: $data['inforequest-enabled']"></td>
-              <td>[<a href="#" data-bind="ltext: 'edit'" data-test-id="edit-organization" class="modal"></a>]</td>
+              <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit'" data-test-id="edit-organization" class="modal"></a>]</td>
             </tr>
           </tbody>
         </table>
 
       </div>
 
+      <div id="dialog-edit-organization" class="window autosized">
+        <div data-bind="with: editOrganizationModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'edit'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
 
-    <div id="dialog-edit-organization" class="window autosized selectm-dialog" style="height: 610px;">
-      <div class="dialog-header">
-        <p nnnnnnnnnnnnnnnnnnnnndata-bind="text: $root.editOrganization.organization">teksti</p>
-        <p class="dialog-close close">X</p>
+          <div class="dialog-content">
+
+            <div>
+              <div>
+                <input type="checkbox" data-bind="value: inforequestEnabled" data-test-id="inforequest-enabled" class="form-input"></input>
+                <label class="form-label" data-bind ="ltext: 'organization.inforequest.enabled'"></label>
+              </div>
+
+              <div>
+                <input type="checkbox" data-bind="value: applicationEnabled" data-test-id="application-enabled" class="form-input"></input>
+                <label class="form-label" data-bind ="ltext: 'organization.application.enabled'"></label>
+              </div>
+
+              <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">
+                <span data-bind="ltext: 'save'"></span>
+                <em data-bind="visible: pending" class="button-loader"></em>
+              </button>
+
+              <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+            </div>
+
+          </div>
+        </div>
       </div>
-      <div class="dialog-content">
-        <div class="organizations"></div>
-      </div>
-    </div>
 
     </section>
   </body>
