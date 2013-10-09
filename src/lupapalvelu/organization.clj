@@ -67,7 +67,8 @@
    :roles [:admin]
    :verified true}
   [{{:keys [organizationId inforequestEnabled applicationEnabled]} :data {:keys [organizations] :as user} :user}]
-  (mongo/update :organizations {:_id organizationId} {$set {"inforequest-enabled" inforequestEnabled "new-application-enabled" applicationEnabled}})
+  (mongo/update :organizations {:_id organizationId} {$set {"inforequest-enabled" inforequestEnabled
+                                                            "new-application-enabled" applicationEnabled}})
   (ok))
 
 (defcommand "add-organization-link"

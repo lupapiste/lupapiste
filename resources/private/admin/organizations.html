@@ -38,13 +38,13 @@
 
             <div>
               <div>
-                <input type="checkbox" data-bind="checked: inforequestEnabled" data-test-id="inforequest-enabled" class="form-input"></input>
-                <label class="form-label" data-bind ="ltext: 'organization.inforequest.enabled'"></label>
+                <input type="checkbox" data-bind="checked: inforequestEnabled" data-test-id="inforequest-enabled" class="form-input" id="inforequest-enabled"></input>
+                <label for="inforequest-enabled" class="form-label" data-bind ="ltext: 'organization.inforequest.enabled'"></label>
               </div>
 
               <div>
-                <input type="checkbox" data-bind="checked: applicationEnabled" data-test-id="application-enabled" class="form-input"></input>
-                <label class="form-label" data-bind ="ltext: 'organization.application.enabled'"></label>
+                <input type="checkbox" data-bind="checked: applicationEnabled" data-test-id="application-enabled" class="form-input" id="application-enabled"></input>
+                <label class="form-label" for="application-enabled" data-bind ="ltext: 'organization.application.enabled'"></label>
               </div>
 
               <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">
