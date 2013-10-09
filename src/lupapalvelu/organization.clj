@@ -61,6 +61,15 @@
     (ok :organization (assoc organization :operations-attachments ops)
         :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
 
+(defcommand "update-organization"
+  {:description "Update organization details."
+   :parameters [:organizationId :inforequestEnabled :applicationEnabled]
+   :roles [:admin]
+   :verified true}
+  [{{:keys [organizationId inforequestEnabled applicationEnabled]} :data {:keys [organizations] :as user} :user}]
+  (mongo/update :organizations {:_id organizationId} {$set {"inforequest-enabled" inforequestEnabled "new-application-enabled" applicationEnabled}})
+  (ok))
+
 (defcommand "add-organization-link"
   {:description "Adds link to organization."
    :parameters [:url :nameFi :nameSv]

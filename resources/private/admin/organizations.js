@@ -53,6 +53,7 @@
     self.onSuccess = function() {
       self.errorMessage(null);
       LUPAPISTE.ModalDialog.close();
+      organizationsModel.load();
     };
 
     self.onError = function(resp) {
@@ -60,7 +61,7 @@
     };
 
     self.updateOrganization = function() {
-      var data = {id: self.id, inforequestEnabled: self.inforequestEnabled(), applicationEnabled: self.applicationEnabled()};
+      var data = {organizationId: self.id, inforequestEnabled: self.inforequestEnabled(), applicationEnabled: self.applicationEnabled()};
       ajax.command("update-organization", data)
         .processing(self.processing)
         .pending(self.pending)
@@ -70,9 +71,6 @@
       return false;
     };
 
-    self.execute = function(attachments) {
-      alert("exe");
-    };
 
   }
 
