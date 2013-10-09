@@ -49,8 +49,13 @@
       LUPAPISTE.ModalDialog.open(self.dialogSelector);
     };
 
+    self.onSuccess = function() {
+      self.errorMessage(null);
+      LUPAPISTE.ModalDialog.close();
+    };
+
     self.updateOrganization = function() {
-      var data = {id: self.id, inforequestEnabled: self.inforequestEnabled, applicationEnabled: self.applicationEnabled};
+      var data = {id: self.id, inforequestEnabled: self.inforequestEnabled(), applicationEnabled: self.applicationEnabled()};
       ajax.command("update-organization", data)
         .processing(self.processing)
         .pending(self.pending)
@@ -64,13 +69,6 @@
       alert("exe");
     };
 
-    $(function() {
-      self.selectm = $("#dialog-edit-organization .organizations").selectm();
-      self.selectm
-        .allowDuplicates(false)
-        .ok(self.execute)
-        .cancel(LUPAPISTE.ModalDialog.close);
-    });
   }
 
   var editOrganizationModel = new EditOrganizationModel();
