@@ -484,14 +484,12 @@ var docgen = (function () {
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
-      var clearDiv = document.createElement("div");
       var label = makeLabel("group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
-      clearDiv.className = "clear";
 
       div.appendChild(label);
 
@@ -500,7 +498,6 @@ var docgen = (function () {
       }
 
       div.appendChild(partsDiv);
-      div.appendChild(clearDiv);
       return div;
     }
 
@@ -514,8 +511,7 @@ var docgen = (function () {
       }
 
       var partsDiv = document.createElement("div");
-      var clearDiv = document.createElement("div");
-      clearDiv.className = "clear";
+
       var span = makeEntrySpan(subSchema, myPath);
       span.className = span.className + " radioGroup";
       partsDiv.id = pathStrToID(myPath);
@@ -531,7 +527,6 @@ var docgen = (function () {
       });
 
       partsDiv.appendChild(span);
-      partsDiv.appendChild(clearDiv);
       return partsDiv;
     }
 
@@ -728,9 +723,6 @@ var docgen = (function () {
         }
 
         if (subSchema.type === "group") {
-          var clearDiv = document.createElement("div");
-          clearDiv.className = "clear";
-          elem.appendChild(clearDiv);
         }
         return elem;
       }
@@ -1010,9 +1002,6 @@ var docgen = (function () {
       appendElements(elements, self.schema, self.model, []);
 
       sectionContainer.appendChild(elements);
-      var clearDiv = document.createElement("div");
-      clearDiv.className = "clear";
-      sectionContainer.appendChild(clearDiv);
       section.appendChild(title);
       section.appendChild(sectionContainer);
       return section;

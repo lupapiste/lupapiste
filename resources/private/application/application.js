@@ -341,7 +341,7 @@
     });
 
     self.openOskariMap = function() {
-      var url = '/oskari/fullmap.html?coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
+      var url = '/oskari/fullmap.html?id=' + self.id() + '&coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
       window.open(url);
       var applicationId = self.id();
     };

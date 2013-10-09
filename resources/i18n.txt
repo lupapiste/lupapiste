@@ -1,0 +1,9 @@
+application.permitSubtypes: Luvan tyyppi
+permitSubtype.poikkeamislupa: Poikkeamislupa
+permitSubtype.suunnittelutarveratkaisu: Suunnittelutarveratkaisu
+admin.screenmessages.list-title: Ennakkoilmoitukset
+admin.screenmessages.added: Ilmoitus lisätty
+admin.screenmessages.fi: Suomeksi
+admin.screenmessages.sv: Ruotsiksi
+admin.screenmessages.addScreenmessageButtonLabel: Lisää ennakkoilmoitus
+admin.screenmessages.deleteScreenmessageButtonLabel: Poista kaikki ennakkoilmoitukset
