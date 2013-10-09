@@ -119,31 +119,34 @@
 
 ; Creating duplicate authority adds organization (don't blame me, that's how I found this)
 
+(def naantali-email "rakennustarkastaja@naantali.fi")
+(def naantali-apikey "a0ac77ecd2e6c2ea6e73f840")
+
 (facts "creating duplicate authority adds organization"
   (apply-remote-minimal)
+
+  (fact "Sanity check"
+    (-> (query naantali-apikey :user) :user) => (contains {:email naantali-email}))
   
-  (fact "User rakennustarkastaja@naantali.fi has organization"
-    (-> (query "a0ac77ecd2e6c2ea6e73f840" :user) :user) => (contains {:email "rakennustarkastaja@naantali.fi"
-                                                                      :organizations ["529-R"]}))
+  (fact "User rakennustarkastaja@naantali.fi belongs to organization 529-R only"
+    (-> (query naantali-apikey :user) :user) => (contains {:organizations ["529-R"]}))
   
   (fact "User rakennustarkastaja@naantali.fi does not belong to Sipoo rak.val"
-    (->> (query sipoo :authority-users)
-      :users
-      (map :email)) =not=> (contains "rakennustarkastaja@naantali.fi"))
+    (->> (query sipoo :authority-users) :users (map :email)) =not=> (contains naantali-email))
   
-  (fact
-    (command sipoo :create-authority-user :email "rakennustarkastaja@naantali.fi"
-                                          :firstName "xxx"
-                                          :lastName "yyy"
-                                          :password "zzzzzzzz") => ok?)
+  (fact "'create' user rakennustarkastaja@naantali.fi to Sipoo"
+    (command sipoo :create-authority-user :email       naantali-email
+                                          :firstName   "xxx"
+                                          :lastName    "yyy"
+                                          :password    "zzzzzzzz") => ok?)
   
   (fact "User rakennustarkastaja@naantali.fi does now belong to Sipoo rak.val"
-    (->> (query sipoo :authority-users)
-      :users
-      (map :email)) => (contains "rakennustarkastaja@naantali.fi"))
+    (->> (query sipoo :authority-users) :users (map :email)) => (contains naantali-email))
   
   (fact "User rakennustarkastaja@naantali.fi has organization"
-    (-> (query "a0ac77ecd2e6c2ea6e73f840" :user) :user) => (contains {:email "rakennustarkastaja@naantali.fi"
-                                                                      :organizations ["529-R" "753-R"]
-                                                                      :firstName "Rakennustarkastaja"
-                                                                      :lastName "Naantali"})))
+    (-> (query naantali-apikey :user) :user) => (contains {:organizations ["529-R" "753-R"]}))
+  
+  (fact "Users other data fields have not changed"
+    (-> (query naantali-apikey :user) :user) => (contains {:email naantali-email
+                                                           :firstName "Rakennustarkastaja"
+                                                           :lastName "Naantali"})))
