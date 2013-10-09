@@ -522,18 +522,37 @@
 
         toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
         toimenpide-count (count toimenpidetieto) => 2
-        uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
+        uusi (some #(when (= (get-in % [:Toimenpide :kayttotarkoitus]) "011 yhden asunnon talot") %) toimenpidetieto)
         rakennustunnus (:rakennustunnus uusi) => nil
         _ (:liitetieto uusi) => nil
         kuvauskoodi (:kuvausKoodi uusi) => "uusi"
         kerrosalatieto (:kerrosalatieto uusi) => nil
         tavoitetilatieto (:tavoitetilatieto uusi) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "011 yhden asunnon talot"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => 2
+        kokonaisala (:kokonaisala Tavoitetila) => 220
+        huoneistoja (:huoneistoja Tavoitetila) => 1
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala Tavoitetila) => truthy
+        pintala (:pintaAla kerrosala) => 200
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "011 yhden asunnon talot"
 
-
-
-
-
-
+        uusit (some #(when (= (get-in % [:Toimenpide :kayttotarkoitus]) "941 talousrakennukset") %) toimenpidetieto)
+        rakennustunnus (:rakennustunnus uusit) => nil
+        _ (:liitetieto uusi) => nil
+        kuvauskoodi (:kuvausKoodi uusit) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusit) => nil
+        tavoitetilatieto (:tavoitetilatieto uusit) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => 1
+        kokonaisala (:kokonaisala Tavoitetila) => 30
+        huoneistoja (:huoneistoja Tavoitetila) => 1
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala Tavoitetila) => truthy
+        pintala (:pintaAla kerrosala) => 30
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
 
         ;paaKayttotarkoitus ???
