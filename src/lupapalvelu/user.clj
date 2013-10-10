@@ -122,25 +122,6 @@
 
 ;;
 ;; ==============================================================================
-;; Creating API keys:
-;; ==============================================================================
-;;
-
-(defn create-apikey [email]
-  (let [apikey (security/random-password)
-        result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
-    (when result
-      apikey)))
-
-
-
-
-
-
-
-
-;;
-;; ==============================================================================
 ;; Change password:
 ;; ==============================================================================
 ;;
@@ -148,13 +129,9 @@
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
-                                                              :private.password hashed-password}})))
-
-
-
-
-
+    (mongo/update :users {:email (s/lower-case email)}
+                         {$set {:private.salt     salt
+                                :private.password hashed-password}})))
 
 ;;
 ;; ==============================================================================
