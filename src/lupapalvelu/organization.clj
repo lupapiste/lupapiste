@@ -61,6 +61,16 @@
     (ok :organization (assoc organization :operations-attachments ops)
         :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
 
+(defcommand "update-organization"
+  {:description "Update organization details."
+   :parameters [:organizationId :inforequestEnabled :applicationEnabled]
+   :roles [:admin]
+   :verified true}
+  [{{:keys [organizationId inforequestEnabled applicationEnabled]} :data {:keys [organizations] :as user} :user}]
+  (mongo/update :organizations {:_id organizationId} {$set {"inforequest-enabled" inforequestEnabled
+                                                            "new-application-enabled" applicationEnabled}})
+  (ok))
+
 (defcommand "add-organization-link"
   {:description "Adds link to organization."
    :parameters [:url :nameFi :nameSv]
@@ -91,6 +101,13 @@
     (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
+(defquery "organizations"
+  {:roles       [:admin]
+   :authenticated true
+   :verified true}
+  [{user :user}]
+  (ok :organizations (mongo/select :organizations {})))
+
 (defquery "organization-names"
   {:authenticated true
    :verified true}
@@ -110,6 +127,10 @@
     (when (> (count organizations) 1)
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
+
+(defquery "organization-by-id"
+  [{{:keys [organizationId]} :data}]
+  (mongo/select-one :organizations {:_id organizationId}))
 
 (defquery "organization-details"
   {:parameters [:municipality :operation :lang] :verified true}
