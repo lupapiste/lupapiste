@@ -53,4 +53,15 @@
                               {:a [3 4 5]}]) => [6 9 12])
 
 (facts future*
-  (deref (future* (/ 1 0))) => (throws java.util.concurrent.ExecutionException "java.lang.ArithmeticException: Divide by zero"))
+  (deref (future* (throw (Exception. "bang!")))) => (throws java.util.concurrent.ExecutionException "java.lang.Exception: bang!"))
+
+(facts missing-keys
+  (missing-keys ...what-ever... nil)          => (throws AssertionError)
+  (missing-keys nil [:a :b :c])               => (just [:a :b :c] :in-any-order)
+  (missing-keys {} [:a :b :c])                => (just [:a :b :c] :in-any-order)
+  (missing-keys {:a 1} [:a :b :c])            => (just [:b :c] :in-any-order)
+  (missing-keys {:b 1} [:a :b :c])            => (just [:a :c] :in-any-order)
+  (missing-keys {:a 1 :b 1} [:a :b :c])       => [:c]
+  (missing-keys {:a 1 :b 1 :c 1} [:a :b :c])  => nil
+  (missing-keys {:a false} [:a])              => nil
+  (missing-keys {:a nil} [:a])                => [:a])
