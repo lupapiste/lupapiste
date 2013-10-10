@@ -6,7 +6,7 @@
 
         <h2>Organizations</h2>
 
-        <table>
+        <table data-test-id="organizations-table">
           <thead>
             <tr>
               <th data-bind="ltext: 'organization.id'"></th>
@@ -20,9 +20,9 @@
             <tr>
               <td data-bind="text: $data.id"></td>
               <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
-              <td data-bind="text: $data['inforequest-enabled']"></td>
-              <td data-bind="text: $data['new-application-enabled']"></td>
-              <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit'" data-test-id="edit-organization" class="modal"></a>]</td>
+              <td data-bind="text: $data['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + $data.id}"></td>
+              <td data-bind="text: $data['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + $data.id}"></td>
+              <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.id}" class="modal"></a>]</td>
             </tr>
           </tbody>
         </table>
