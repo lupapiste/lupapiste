@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.organization :refer :all]
             [lupapalvelu.core :refer [ok?]]
-            [lupapalvelu.itest-util :refer [admin pena query]]
+            [lupapalvelu.itest-util :refer [admin pena query command]]
             [sade.util :refer [fn->]]))
 
 (facts "Organization itests"
