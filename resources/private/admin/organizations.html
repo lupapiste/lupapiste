@@ -20,8 +20,8 @@
             <tr>
               <td data-bind="text: $data.id"></td>
               <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
-              <td data-bind="text: $data['new-application-enabled']"></td>
               <td data-bind="text: $data['inforequest-enabled']"></td>
+              <td data-bind="text: $data['new-application-enabled']"></td>
               <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit'" data-test-id="edit-organization" class="modal"></a>]</td>
             </tr>
           </tbody>
