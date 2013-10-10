@@ -48,10 +48,10 @@
                   (dissoc :id))
                 query)
         query (if-let [username (:username query)]
-                (assoc query :username (s/lower-case username))
+                (assoc query :username (ss/lower-case username))
                 query)
         query (if-let [email (:email query)]
-                (assoc query :email (s/lower-case email))
+                (assoc query :email (ss/lower-case email))
                 query)]
     (assert (not (empty? query)))
     query))
@@ -128,7 +128,7 @@
 
 (defn create-apikey [email]
   (let [apikey (security/random-password)
-        result (mongo/update :users {:email (s/lower-case email)} {$set {:private.apikey apikey}})]
+        result (mongo/update :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
     (when result
       apikey)))
 
