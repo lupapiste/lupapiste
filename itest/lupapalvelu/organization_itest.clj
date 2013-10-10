@@ -13,13 +13,14 @@
      resp => (fn-> :links count (> 0))))
 
   (fact "query /organizations"
-        (let [resp            (query admin :organizations)]
-          resp => ok?))
+    (let [resp            (query admin :organizations)]
+      resp => ok?
+      (count (:organizations resp)) => pos?))
 
   (fact "update organization"
-        (let [organization   (first (:organizations (query admin :organizations)))
-              organization-id      (:id organization)
-              resp                 (command admin :update-organization :organizationId organization-id :inforequestEnabled (not (:inforequest-enabled organization)) :applicationEnabled (not (:new-application-enabled organization)))
-              updated-organization (query admin :organization-by-id :organizationId organization-id)]
-        (= (:inforequest-enabled updated-organization) (not (:inforequest-enabled organization))) => true
-        (= (:new-application-enabled updated-organization) (not (:new-application-enabled organization))) => true)))
+    (let [organization   (first (:organizations (query admin :organizations)))
+          organization-id      (:id organization)
+          resp                 (command admin :update-organization :organizationId organization-id :inforequestEnabled (not (:inforequest-enabled organization)) :applicationEnabled (not (:new-application-enabled organization)))
+          updated-organization (query admin :organization-by-id :organizationId organization-id)]
+      (:inforequest-enabled updated-organization) => (not (:inforequest-enabled organization))
+      (:new-application-enabled updated-organization) => (not (:new-application-enabled organization)))))
