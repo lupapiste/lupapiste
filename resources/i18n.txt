@@ -1,5 +1,0 @@
-admin.screenmessages.deleteScreenmessageButtonLabel: Poista kaikki ennakkoilmoitukset
-organization.id: Tunnus
-organization.name: Organisaation nimi
-organization.inforequest.enabled: Neuvontapyynnöt päällä
-organization.application.enabled: Hakemukset päällä
