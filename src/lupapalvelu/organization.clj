@@ -101,7 +101,6 @@
     (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-
 (defquery "organizations"
   {:roles       [:admin]
    :authenticated true

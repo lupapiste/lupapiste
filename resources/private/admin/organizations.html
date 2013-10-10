@@ -9,6 +9,7 @@
         <table>
           <thead>
             <tr>
+              <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.application.enabled'"></th>
@@ -17,6 +18,7 @@
           </thead>
           <tbody data-bind="foreach: organizationsModel.organizations">
             <tr>
+              <td data-bind="text: $data.id"></td>
               <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
               <td data-bind="text: $data['new-application-enabled']"></td>
               <td data-bind="text: $data['inforequest-enabled']"></td>
