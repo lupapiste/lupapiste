@@ -60,32 +60,6 @@
 
 ;;
 ;; ==============================================================================
-;; User role:
-;; ==============================================================================
-;;
-
-(facts
-  (applicationpage-for "applicant")      => "applicant"
-  (applicationpage-for "authority")      => "authority"
-  (applicationpage-for "authorityAdmin") => "authority-admin"
-  (applicationpage-for "admin")          => "admin")
-
-(facts user-in-role
-  
-  (fact "role is overridden"
-    (user-in-role {:id 1 :role :applicant} :reader) => {:id 1 :role :reader})
-  
-  (fact "takes optional name & value parameter pair"
-    (user-in-role {:id 1 :role :applicant} :reader :age 16) => {:id 1 :role :reader :age 16})
-  
-  (fact "takes optional name & value parameter pairS"
-    (user-in-role {:id 1 :role :applicant} :reader :age 16 :size :L) => {:id 1 :role :reader :age 16 :size :L})
-  
-  (fact "fails with uneven optional parameter pairs"
-    (user-in-role {:id 1 :role :applicant} :reader :age) => (throws Exception)))
-
-;;
-;; ==============================================================================
 ;; Getting non-private user data:
 ;; ==============================================================================
 ;;
@@ -117,6 +91,43 @@
   (fact unknown-user
     (get-user-with-password "username" "password") => nil
       (provided (mongo/select-one :users {:username "username"}) => nil)))
+
+;;
+;; ==============================================================================
+;; User role:
+;; ==============================================================================
+;;
+
+(facts
+  (applicationpage-for "applicant")      => "applicant"
+  (applicationpage-for "authority")      => "authority"
+  (applicationpage-for "authorityAdmin") => "authority-admin"
+  (applicationpage-for "admin")          => "admin")
+
+(facts user-in-role
+  
+  (fact "role is overridden"
+    (user-in-role {:id 1 :role :applicant} :reader) => {:id 1 :role :reader})
+  
+  (fact "takes optional name & value parameter pair"
+    (user-in-role {:id 1 :role :applicant} :reader :age 16) => {:id 1 :role :reader :age 16})
+  
+  (fact "takes optional name & value parameter pairS"
+    (user-in-role {:id 1 :role :applicant} :reader :age 16 :size :L) => {:id 1 :role :reader :age 16 :size :L})
+  
+  (fact "fails with uneven optional parameter pairs"
+    (user-in-role {:id 1 :role :applicant} :reader :age) => (throws Exception)))
+
+;;
+;; ==============================================================================
+;; Creating users:
+;; ==============================================================================
+;;
+
+
+
+
+
 
 
 
