@@ -5,6 +5,7 @@
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
@@ -95,13 +96,12 @@
     (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
 
-(def required-user-keys [:email :id :role])
 (def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-(def user-defaults      {:firstName "" :lastName "" :enabled false})
+(def user-defaults      {:firstName "" :lastName "" :enabled false :role :dummy})
 (def known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
 
-(defn create-user-entity [{:keys [email password] :as user-data}]
-  (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
+(defn create-user-entity [{:keys [email password role] :as user-data}]
+  (when-let [missing (util/missing-keys user-data [:email :id])] (fail! :error.missing-required-key :missing missing))
   (let [email    (ss/lower-case email)
         private  (when password
                    (let [salt (security/dispense-salt)]
