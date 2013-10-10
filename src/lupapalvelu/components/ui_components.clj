@@ -55,7 +55,7 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
-                  :html ["404.html"]}
+                  :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.13_20130911.min.lupapiste.js" "gis.js" "locationsearch.js"]}

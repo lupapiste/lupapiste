@@ -116,3 +116,34 @@
     
     (command pena "remove-user-attachment" :attachment-id attachment-id)
     (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))
+
+; Creating duplicate authority adds organization (don't blame me, that's how I found this)
+
+(facts "creating duplicate authority adds organization"
+  (apply-remote-minimal)
+  
+  (fact "User rakennustarkastaja@naantali.fi has organization"
+    (-> (query "a0ac77ecd2e6c2ea6e73f840" :user) :user) => (contains {:email "rakennustarkastaja@naantali.fi"
+                                                                      :organizations ["529-R"]}))
+  
+  (fact "User rakennustarkastaja@naantali.fi does not belong to Sipoo rak.val"
+    (->> (query sipoo :authority-users)
+      :users
+      (map :email)) =not=> (contains "rakennustarkastaja@naantali.fi"))
+  
+  (fact
+    (command sipoo :create-authority-user :email "rakennustarkastaja@naantali.fi"
+                                          :firstName "xxx"
+                                          :lastName "yyy"
+                                          :password "zzzzzzzz") => ok?)
+  
+  (fact "User rakennustarkastaja@naantali.fi does now belong to Sipoo rak.val"
+    (->> (query sipoo :authority-users)
+      :users
+      (map :email)) => (contains "rakennustarkastaja@naantali.fi"))
+  
+  (fact "User rakennustarkastaja@naantali.fi has organization"
+    (-> (query "a0ac77ecd2e6c2ea6e73f840" :user) :user) => (contains {:email "rakennustarkastaja@naantali.fi"
+                                                                      :organizations ["529-R" "753-R"]
+                                                                      :firstName "Rakennustarkastaja"
+                                                                      :lastName "Naantali"})))

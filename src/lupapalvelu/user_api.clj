@@ -90,10 +90,9 @@
    :roles      [:authorityAdmin]
    :verified   true}
   [{{:keys [organizations]} :user data :data}]
-  (let [organization (first organizations)]
-    (when-not (security/valid-password? (:password data)) (fail! :error.password-too-short))
-    (let [new-user (user/create-authority (merge data {:organizations [organization]}))]
-      (ok :id (:_id new-user)))))
+  (when-not (security/valid-password? (:password data)) (fail! :error.password-too-short))
+  (let [new-user (user/create-authority (merge data {:organizations organizations}))]
+    (ok :id (:_id new-user))))
 
 ;;
 ;; ==============================================================================
@@ -337,9 +336,9 @@
         {:_id (:id user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey)))
-  
+
   (require '[lupapalvelu.fixture])
-  
+
   (defquery fixtures {} [_]
     (ok :fixtures (keys @lupapalvelu.fixture/fixtures)))
 
