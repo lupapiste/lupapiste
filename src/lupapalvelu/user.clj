@@ -4,8 +4,8 @@
             [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
-            [sade.strings :as s]
-            [sade.util :refer [fn->]]
+            [sade.strings :as ss]
+            [sade.util :refer [fn->] :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
@@ -148,7 +148,7 @@
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt     salt
+    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
 
 
@@ -162,14 +162,13 @@
 ;; ==============================================================================
 ;;
 
-(def required-user-keys [:email :id :role])
 (def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-(def user-defaults      {:firstName "" :lastName "" :enabled false})
+(def user-defaults      {:firstName "" :lastName "" :enabled false :role :dummy})
 (def known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
 
-(defn create-user-entity [{:keys [email password] :as user-data}]
-  (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
-  (let [email    (s/lower-case email)
+(defn create-user-entity [{:keys [email password role] :as user-data}]
+  (when-let [missing (util/missing-keys user-data [:email :id])] (fail! :error.missing-required-key :missing missing))
+  (let [email    (ss/lower-case email)
         private  (when password
                    (let [salt (security/dispense-salt)]
                      {:salt     salt
@@ -234,7 +233,7 @@
 ;;
 
 (defn update-user [email data]
-  (mongo/update :users {:email (s/lower-case email)} {$set data}))
+  (mongo/update :users {:email (ss/lower-case email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]
@@ -244,7 +243,7 @@
 (defn change-password [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (s/lower-case email)} {$set {:private.salt  salt
+    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt  salt
                                                             :private.password hashed-password}})))
 
 ;;
@@ -257,8 +256,43 @@
 ; When (if?) dummy users are changed with tokens, this should be removed too:
 
 (defn get-or-create-user-by-email [email]
-  (let [email (s/lower-case email)]
+  (let [email (ss/lower-case email)]
     (or
       (get-user-by-email email)
       (create-any-user {:email email}))))
+
+(defn authority? [{role :role}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{role :role}]
+  (= :applicant (keyword role)))
+
+(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
+  (= id1 id2))
+
+
+
+
+
+
+
+(defn with-user [email function]
+  (if (nil? email)
+    (fail :error.user-not-found)
+    (if-let [user (get-user-by-email email)]
+      (function user)
+      (do
+        (debugf "user '%s' not found with email" email)
+        (fail :error.user-not-found)))))
+
+
+
+
+
+
+
+
+
+
+
 

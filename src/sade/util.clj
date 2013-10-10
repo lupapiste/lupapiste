@@ -93,3 +93,13 @@
          (println (format "unhandled exception in future at %s:%d: %s" *file* ~(-> &form meta :line) e#))
          (.printStackTrace e#)
          (throw e#)))))
+
+(defn missing-keys
+  "Returns seq of keys from 'required-keys' that are not present or have nil value in 'src-map', or
+   nil if all required keys are present. If 'required-keys' is nil, returns nil. Not lazy."
+  [src-map required-keys]
+  (assert required-keys "required-keys is required (no pun intended)")
+  (seq (reduce
+         (fn [missing k] (if (nil? (get src-map k)) (cons k missing) missing))
+         ()
+         required-keys)))
