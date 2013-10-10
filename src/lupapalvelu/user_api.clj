@@ -240,8 +240,8 @@
   [{{:keys [stamp] :as data} :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (-> data :email s/lower-case s/trim)]
-    (when-not vetuma-data (fail :error.create-user))
-    (when-not (.contains email "@") (fail :error.email))
+    (when-not vetuma-data (fail! :error.create-user))
+    (when-not (.contains email "@") (fail! :error.email))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (if-let [user (user/create-user (merge data vetuma-data {:email email}))]
