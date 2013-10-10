@@ -95,12 +95,12 @@
     (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
                                                               :private.password hashed-password}})))
 
-(def required-user-keys [:email :id :role])
+(def required-user-keys [:email :id])
 (def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
 (def user-defaults      {:firstName "" :lastName "" :enabled false})
 (def known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
 
-(defn create-user-entity [{:keys [email password] :as user-data}]
+(defn create-user-entity [{:keys [email password role] :as user-data}]
   (when-not (every? identity (map user-data required-user-keys)) (fail! :error.missing-required-key))
   (let [email    (ss/lower-case email)
         private  (when password
@@ -112,6 +112,7 @@
       (select-keys user-data user-keys)
       {:username email
        :email    email
+       :role     (or role :dummy)
        :private  private})))
 
 
