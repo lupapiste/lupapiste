@@ -128,6 +128,10 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
+(defquery "organization-by-id"
+  [{{:keys [organizationId]} :data}]
+  (mongo/select-one :organizations {:_id organizationId}))
+
 (defquery "organization-details"
   {:parameters [:municipality :operation :lang] :verified true}
   [{{:keys [municipality operation lang]} :data}]

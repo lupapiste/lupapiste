@@ -12,7 +12,6 @@
         .query("organizations")
         .pending(self.pending)
         .success(function(d) {
-
           self.organizations(_.sortBy(d.organizations, function(d) { return d.name[loc.getCurrentLanguage()]; }));
         })
         .call();
