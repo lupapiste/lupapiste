@@ -88,6 +88,23 @@ Sonja (the Authority) is not allowed to invite people
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   Logout
 
+Mikko invites previously unknown user Oskari
+  Mikko logs in
+  Open application  invite-app  753-416-25-25
+  Open tab  parties
+  Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
+  Click by test id  application-invite-paasuunnittelija
+  Wait until  Element should be visible  invite-email
+  Input Text  invite-email  oskari@example.com
+  Input Text  invite-text  Tuu mukaan tunkkaan lupaa
+  Click by test id  application-invite-submit
+  Wait until  Mask is invisible
+  Wait until  Element should not be visible  invite-email
+  Wait until  Invite count is  1
+  Logout
+
+# TODO: should create new user "oskari@example.com" and make sure he has access
+
 *** Keywords ***
 
 Error message is present on invite form
