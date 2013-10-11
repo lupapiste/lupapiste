@@ -122,39 +122,20 @@
 
 ;;
 ;; ==============================================================================
-;; Creating API keys:
-;; ==============================================================================
-;;
-
-(defn create-apikey [email]
-  (let [apikey (security/random-password)
-        result (mongo/update :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
-    (when result
-      apikey)))
-
-
-
-
-
-
-
-
-;;
-;; ==============================================================================
 ;; Change password:
 ;; ==============================================================================
 ;;
 
-(defn change-password [email password]
+(defn change-password
+  "Update users password. If user is not found, raises an exception."
+  [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
-                                                              :private.password hashed-password}})))
-
-
-
-
-
+    (when-not (= 1 (mongo/update-n :users
+                                   {:email (ss/lower-case email)}
+                                   {$set {:private.salt salt
+                                          :private.password hashed-password}}))
+      (fail! :unknown-user :email email))))
 
 ;;
 ;; ==============================================================================

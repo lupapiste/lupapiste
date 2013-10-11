@@ -7,6 +7,19 @@
             [clojure.walk :refer [keywordize-keys]]
             [clj-http.client :as c]))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 (fact "changing user info"
   (apply-remote-minimal)
   (let [resp (query teppo :user)]
