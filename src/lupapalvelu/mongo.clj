@@ -40,6 +40,11 @@
 ;; Database Api
 ;;
 
+(defn update-n
+  "Updates data into collection by query, returns a number of updated documents."
+  [collection query data & {:as opts}]
+  (.getN (apply mc/update collection query data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
+
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
