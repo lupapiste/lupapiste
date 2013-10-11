@@ -15,8 +15,8 @@
                 <th data-bind="ltext: 'admin.screenmessages.sv'"></th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: $data.messages">
-              <!--   TODO: Tee uusi "message-row" "user-row":n tilalle.   -->
+            <tbody data-bind="foreach: $root.screenmessages.messages">
+              <!--   TODO: Tee uusi "message-row" "user-row":n tilalle. Missa user-row on maaritelty?  -->
               <tr class="user-row">
                 <td data-bind="dateTimeString: added"></td>
                 <td data-bind="text: fi"></td>
@@ -27,24 +27,29 @@
 
           <hr />
 
-          <h3 data-bind="ltext: 'admin.screenmessages.fi'"></h3>
-          <textarea id="add-text-fi" rows="4" cols="50"></textarea>
-          <h3 data-bind="ltext: 'admin.screenmessages.sv'"></h3>
-          <textarea id="add-text-sv" rows="4" cols="50"></textarea>
+          <div data-bind="with: screenMessagesListModel">
 
-          <br />
+            <h3 data-bind="ltext: 'admin.screenmessages.fi'"></h3>
+            <textarea id="add-text-fi" rows="4" cols="50" data-bind="value: textFi, valueUpdate: 'afterkeydown'"></textarea>
+            <h3 data-bind="ltext: 'admin.screenmessages.sv'"></h3>
+            <textarea id="add-text-sv" rows="4" cols="50" data-bind="value: textSv, valueUpdate: 'afterkeydown'"></textarea>
 
-          <a href="#"
-            data-bind="click: $root.add,
-            ltext: 'admin.screenmessages.addScreenmessageButtonLabel'"
-            class="modal btn btn-primary btn-narrow"
-            id="test-add-screenmessage"></a>
-          <hr />
-          <a href="#"
-            data-bind="click: $root.reset,
-            ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
-            class="modal btn btn-primary btn-narrow"
-            id="test-delete-screenmessage"></a>
+            <br />
+
+            <button href="#"
+              data-bind="click: $root.screenmessages.add,
+                         ltext: 'admin.screenmessages.addScreenmessageButtonLabel',
+                         disable: disabled"
+              class="modal btn btn-primary btn-narrow screenmessagebutton"
+              id="test-add-screenmessage"></button>
+            <hr />
+            <button href="#"
+              data-bind="click: $root.screenmessages.reset,
+                         ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
+              class="modal btn btn-primary btn-narrow screenmessagebutton"
+              id="test-delete-screenmessage"></button>
+
+          </div>
 
         </section>
       </div>
