@@ -65,32 +65,41 @@
 ;;
 
 (facts get-user-by-id
-  (get-user-by-id ...id...) => {:id ...id... :email ...email...}
-    (provided (mongo/select-one :users {:_id ...id...}) => {:id ...id... :email ...email... :private ...private...}))
+  (get-user-by-id ..id..) => {:id ..id.. :email ..email..}
+    (provided (mongo/select-one :users {:_id ..id..}) => {:id ..id.. :email ..email.. :private ..private..}))
 
 (facts get-user-by-email
-  (get-user-by-email "email") => {:id ...id... :email "email"}
-    (provided (mongo/select-one :users {:email "email"}) => {:id ...id... :email "email" :private ...private...}))
+  (get-user-by-email "email") => {:id ..id.. :email "email"}
+    (provided (mongo/select-one :users {:email "email"}) => {:id ..id.. :email "email" :private ..private..}))
 
 (facts get-user-with-password
   
   (fact happy-case
-    (get-user-with-password "username" "password") => {:id ...id... :enabled true}
-      (provided (mongo/select-one :users {:username "username"}) => {:id ...id... :enabled true :private {:password "from-db"}}
+    (get-user-with-password "username" "password") => {:id ..id.. :enabled true}
+      (provided (mongo/select-one :users {:username "username"}) => {:id ..id.. :enabled true :private {:password "from-db"}}
                 (security/check-password "password" "from-db") => true))
     
   (fact wrong-password
     (get-user-with-password "username" "password") => nil
-      (provided (mongo/select-one :users {:username "username"}) => {:id ...id... :enabled true :private {:password "from-db"}}
+      (provided (mongo/select-one :users {:username "username"}) => {:id ..id.. :enabled true :private {:password "from-db"}}
                 (security/check-password "password" "from-db") => false))
   
   (fact disabled-user
     (get-user-with-password "username" "password") => nil
-      (provided (mongo/select-one :users {:username "username"}) => {:id ...id... :enabled false :private {:password "from-db"}}))
+      (provided (mongo/select-one :users {:username "username"}) => {:id ..id.. :enabled false :private {:password "from-db"}}))
   
   (fact unknown-user
     (get-user-with-password "username" "password") => nil
       (provided (mongo/select-one :users {:username "username"}) => nil)))
+
+(facts with-user-by-email
+  (fact
+    (with-user-by-email "email" user) => (contains {:id "123" :email "email"})
+      (provided (get-user-by-email "email") => {:id "123" :email "email"}))
+
+  (fact
+    (with-user-by-email ..email..) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
+      (provided (get-user-by-email ..email..) => nil)))
 
 ;;
 ;; ==============================================================================
@@ -124,74 +133,49 @@
 ;; ==============================================================================
 ;;
 
+(facts create-user-entity
+  
+  (fact "can't create with nil"
+    (create-user-entity nil) => (throws Exception))
+  
+  (fact "need both :email and :id"
+    (create-user-entity {:email "foo"}) => (throws Exception)
+    (create-user-entity {:id "foo"}) => (throws Exception)
+    (create-user-entity {:email "foo" :id "bar"}) => (contains {:email "foo" :id "bar"}))
+  
+  (fact "default values"
+    
+    (create-user-entity {:email "foo"
+                         :id    ..id..})
+      => (contains {:email     "foo"
+                    :id        ..id..
+                    :firstName ""
+                    :lastName  ""
+                    :enabled   false
+                    :role      :dummy})
+    
+    (create-user-entity {:email     "foo"
+                         :id        ..id..
+                         :firstName ..firstName..
+                         :lastName  ..lastName..
+                         :enabled   ..enabled..
+                         :role      ..role..})
+      => (contains {:email     "foo"
+                    :id        ..id..
+                    :firstName ..firstName..
+                    :lastName  ..lastName..
+                    :enabled   ..enabled..
+                    :role      ..role..}))
+  
+  (fact "email is converted to lowercase"
+    (create-user-entity {:id  ..id.. :email "Foo@Bar.Com"}) => (contains {:email "foo@bar.com"}))
 
-
-
-
-
-
-
-
-
-
-
-(fact "is a map with all the data"
-  (create-user-entity {:id             ..id..
-                       :email          "Foo@Bar.Com"
-                       :password       "some-password"
-                       :personId       ..userid..
-                       :role           ..role..
-                       :firstName      ..firstname..
-                       :lastName       ..lastname..
-                       :phone          ..phone..
-                       :city           ..city..
-                       :street         ..street..
-                       :zip            ..zip..
-                       :enabled        ..enabled..
-                       :organizations  ..organizations..})
-    => (contains {:id           ..id..
-                  :email        "foo@bar.com"
-                  :personId     ..userid..
-                  :role         ..role..
-                  :firstName    ..firstname..
-                  :lastName     ..lastname..
-                  :phone        ..phone..
-                  :city         ..city..
-                  :street       ..street..
-                  :zip          ..zip..
-                  :enabled      ..enabled..}))
-
-(fact "does not contain plaintext password"
-  (let [entity   (create-user-entity {:password  "some-password"
-                                      :id        ..id..
-                                      :email     ..email..
-                                      :role      ..role..})
-        password (get-in entity [:private :password])]
-    password => truthy
-    (.contains password "some-password") => false
-    (.contains (str entity) "some-password") => false))
-
-;; FIXME: fix after refactoring
-#_(fact "applicant does not have organizations"
-    (:organizations
-      (create-user-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
-    => nil)
-
-(fact "authority does have organizations"
-  (create-user-entity {:id             ..id..
-                       :email          ..email..
-                       :role           ..role..
-                       :organizations  ..organizations..})
-    => (contains {:organizations ..organizations..}))
-
-(facts "same-user?"
-  (same-user? {:id "123"} {:id "123"}) => true
-  (same-user? {:id "123"} {:id "234"}) => false)
-
-(fact
-  (with-user-by-email "email" user) => (contains {:id "123" :email "email"})
-  (provided (get-user-by-email "email") => {:id "123" :email "email"}))
-
-(fact
-  (with-user-by-email ...email...) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
-  (provided (get-user-by-email ...email...) => nil))
+  (fact "does not contain plaintext password"
+    (let [entity   (create-user-entity {:password  "some-password"
+                                        :id        ..id..
+                                        :email     "email"
+                                        :role      ..role..})
+          password (get-in entity [:private :password])]
+      password     =>      truthy
+      password     =not=>  #"some-password"
+      (str entity) =not=>  #"some-password")))
