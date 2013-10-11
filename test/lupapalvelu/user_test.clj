@@ -1,5 +1,7 @@
 (ns lupapalvelu.user-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [monger.operators :refer :all]
             [lupapalvelu.user :refer :all]
             [slingshot.slingshot :refer [try+]]
             [lupapalvelu.mongo :as mongo]
@@ -51,12 +53,16 @@
 ;; ==============================================================================
 ;;
 
+(testable-privates lupapalvelu.user user-query)
+
 (facts user-query
-  (user-query) => (throws AssertionError)
-  (user-query :id "x") => {:_id "x"}
-  (user-query :email "x") => {:email "x"}
-  (user-query :email "XyZq") => {:email "xyzq"}
-  (user-query :id "x" :username "UserName" :email "Email@AddreSS.FI" :foo "BoZo") => {:_id "x" :username "username" :email "email@address.fi" :foo "BoZo"})
+  (user-query "hello")          => (throws AssertionError)
+  (user-query nil)              => (throws AssertionError)
+  (user-query {})               => {}
+  (user-query {:id "x"})        => {:_id "x"}
+  (user-query {:email "x"})     => {:email "x"}
+  (user-query {:email "XyZq"})  => {:email "xyzq"}
+  (user-query {:id "x" :username "UserName" :email "Email@AddreSS.FI" :foo "BoZo"}) => {:_id "x" :username "username" :email "email@address.fi" :foo "BoZo"})
 
 ;;
 ;; ==============================================================================

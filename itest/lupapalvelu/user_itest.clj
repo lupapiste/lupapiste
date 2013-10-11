@@ -7,6 +7,50 @@
             [clojure.walk :refer [keywordize-keys]]
             [clj-http.client :as c]))
 
+;;
+;; ==============================================================================
+;; Getting user and users:
+;; ==============================================================================
+;;
+
+(facts "Getting user"
+  (fact (query pena :user) => (contains {:user (contains {:email "pena@example.com"})})))
+
+
+(facts "Getting users"
+  (fact "applicants are not allowed to call this"
+    (query pena :users) =not=> ok?)
+  
+  ; It's not nice to test the number of users, but... well, this is relly easy:
+  (fact (-> (query admin :users :role "admin") :users count) => 2)
+  (fact (-> (query admin :users :organization "753-R") :users count) => 3)
+  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2)
+  
+  (fact (-> (query sipoo :users :role "authority" :organization "753-R") :users count) => 2))
+
+
+
+
+(facts users-query
+  (users-query {:role :admin} "hello")  => (throws AssertionError)
+  (users-query {:role :admin} nil)      => (throws AssertionError)
+  
+  (fact "applicant is not allowed"
+    (users-query {:role :applicant} ...what-ever...) => (throws Exception #"error\.permission-deniend"))
+  
+  (fact "admin can query anything"
+    (users-query {:role :admin} {}) => {}
+    (users-query {:role :admin} {:foo "bar"}) => {:foo "bar"})
+  
+  (fact "query has same features as 'user-query'"
+    (users-query {:role :admin} {:id "x"})        => {:_id "x"}
+    (users-query {:role :admin} {:email "XyZq"})  => {:email "xyzq"})
+  
+  (fact "authorityAdmin can query only users from same organizations"
+    (users-query {:role :authorityAdmin :organizations ["o1" "o2"]} {}) => {:organizations {:organizations {$in ["o1" "o2"]}}}))
+
+
+
 
 
 

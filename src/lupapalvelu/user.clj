@@ -39,10 +39,9 @@
 ;; ==============================================================================
 ;;
 
-(defn user-query [& query]
-  (assert (seq query))
-  (let [query (apply hash-map query)
-        query (if-let [id (:id query)]
+(defn- user-query [query]
+  (assert (map? query))
+  (let [query (if-let [id (:id query)]
                 (-> query
                   (assoc :_id id)
                   (dissoc :id))
@@ -53,11 +52,13 @@
         query (if-let [email (:email query)]
                 (assoc query :email (ss/lower-case email))
                 query)]
-    (assert (not (empty? query)))
     query))
 
-(defn find-user [& query]
-  (mongo/select-one :users (apply user-query query)))
+(defn find-user [& {:as query}]
+  (mongo/select-one :users (user-query query)))
+
+(defn find-users [& {:as query}]
+  (mongo/select :users (user-query query)))
 
 ;;
 ;; ==============================================================================
@@ -84,6 +85,9 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
+
+(defn get-users [caller & query-params]
+  (map non-private (apply find-users caller query-params)))
 
 ;;
 ;; ==============================================================================
@@ -161,8 +165,6 @@
        :email    email
        :private  private})))
 
-
-
 (defn- create-any-user [user-data]
   (let [id           (mongo/create-id)
         new-user     (create-user-entity (assoc user-data :id id))
@@ -201,12 +203,6 @@
 (defn create-user [user]
   (create-any-user (merge user {:role :applicant :enabled true})))
 
-
-
-
-
-
-
 ;;
 ;; ==============================================================================
 ;; Updating user information:
@@ -228,7 +224,7 @@
 ;;
 
 ; TODO: replace dummy users with tokens
-; When (if?) dummy users are changed with tokens, this should be removed too:
+; When (if?) dummy users are replaced with tokens, this should be removed too:
 
 (defn get-or-create-user-by-email [email]
   (let [email (ss/lower-case email)]

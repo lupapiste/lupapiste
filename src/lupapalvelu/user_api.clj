@@ -32,13 +32,14 @@
   (ok :user user))
 
 (defquery users
-  {:roles [:admin]}
-  [{{:keys [role organization]} :data}]
-  (ok :users
-    (map user/non-private
-      (mongo/select :users (merge
-                             (when role {:role role})
-                             (when organization {:organizations {$in [organization]}}))))))
+  {:roles [:admin :authorityAdmin]}
+  [{{:keys [role organizations]} :user data :data}]
+  (ok :users (map user/non-private (-> data
+                                     (select-keys [:id :role :organization :email :username :firstName :lastName :enabled])
+                                     (as-> data (if (= role :authorityAdmin)
+                                                  (assoc data :organizations {$in [organizations]})
+                                                  data))
+                                     (user/find-users)))))
 
 (defquery authority-users
   {:roles [:authorityAdmin]
