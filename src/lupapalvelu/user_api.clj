@@ -103,7 +103,7 @@
    :roles      [:admin]
    :verified   true}
   [{{:keys [email enabled]} :data}]
-  (user/update-user email {:enabled enabled}))
+  (user/update-user-by-email email {:enabled enabled}))
 
 (defcommand edit-authority-admin-user
   {:parameters [:email :firstName :lastName :enabled :organizations]
@@ -111,7 +111,7 @@
    :verified   true}
   [{{:keys [email firstName lastName enabled organizations]} :data}]
   (with-user-by-email email
-    (user/update-user email {:firstName firstName :lastName lastName :enabled enabled :organizations organizations})))
+    (user/update-user-by-email email {:firstName firstName :lastName lastName :enabled enabled :organizations organizations})))
 
 (defcommand reset-authority-admin-password
   {:parameters [:email :password]
@@ -136,7 +136,7 @@
   (with-user-by-email (s/lower-case email)
     (if (not= municipality (:municipality user))
       (fail :error.invalid-authority)
-      (user/update-user email {:firstName firstName :lastName lastName :enabled enabled}))))
+      (user/update-user-by-email email {:firstName firstName :lastName lastName :enabled enabled}))))
 
 (defcommand reset-authority-password
   {:parameters [:email :password]
