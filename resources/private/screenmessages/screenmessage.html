@@ -3,7 +3,7 @@
   <body>
 
     <header>
-      <div id="sys-notification" data-bind="visible: $data.screenMessages && $data.screenMessages.length > 0">
+      <div id="sys-notification" data-bind="visible: $data.screenMessages && $data.screenMessages().length > 0">
         <ul class="wrapper" data-bind="foreach: $data.screenMessages">
           <li data-bind="text: $data[loc.getCurrentLanguage()]"></li>
         </ul>
