@@ -1,3 +1,0 @@
-application.permitSubtypes: Luvan tyyppi
-permitSubtype.poikkeamislupa: Poikkeamislupa
-permitSubtype.suunnittelutarveratkaisu: Suunnittelutarveratkaisu

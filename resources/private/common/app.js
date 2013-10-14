@@ -16,7 +16,7 @@ var LUPAPISTE = LUPAPISTE || {};
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
   self.showUserMenu = (showUserMenu != undefined) ? showUserMenu : !allowAnonymous;
-  
+
   /**
   * Window unload event handler
   */
@@ -165,6 +165,11 @@ var LUPAPISTE = LUPAPISTE || {};
       startPage: self.startPage,
       showUserMenu: self.showUserMenu
     };
+
+    LUPAPISTE.Screenmessage.refresh();
+    $("#sys-notification").applyBindings({
+      screenMessage: LUPAPISTE.Screenmessage
+    });
 
     $("nav").applyBindings(model).css("visibility", "visible");
     $("footer").applyBindings(model).css("visibility", "visible");
