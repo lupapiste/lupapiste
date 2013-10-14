@@ -166,10 +166,12 @@ var LUPAPISTE = LUPAPISTE || {};
       showUserMenu: self.showUserMenu
     };
 
-    LUPAPISTE.Screenmessage.refresh();
-    $("#sys-notification").applyBindings({
-      screenMessage: LUPAPISTE.Screenmessage
-    });
+    if (LUPAPISTE.Screenmessage) {
+      LUPAPISTE.Screenmessage.refresh();
+      $("#sys-notification").applyBindings({
+        screenMessage: LUPAPISTE.Screenmessage
+      });
+    }
 
     $("nav").applyBindings(model).css("visibility", "visible");
     $("footer").applyBindings(model).css("visibility", "visible");
