@@ -43,4 +43,9 @@ LUPAPISTE.Screenmessage = new (function () {
     .call();
   };
 
+  self.hide = function(){
+    $('#sys-notification').hide();
+    event.stopPropagation();
+  };
+
 })();

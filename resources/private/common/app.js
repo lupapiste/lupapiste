@@ -168,7 +168,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     LUPAPISTE.Screenmessage.refresh();
     $("#sys-notification").applyBindings({
-      screenMessages: LUPAPISTE.Screenmessage.messages
+      screenMessage: LUPAPISTE.Screenmessage
     });
 
     $("nav").applyBindings(model).css("visibility", "visible");

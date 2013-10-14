@@ -1,10 +1,25 @@
 ;(function() {
   "use strict";
 
+  var screenMessagesListModel = new (function() {
+    var self = this;
+
+    self.textFi = ko.observable("");
+    self.textSv = ko.observable("");
+
+    self.disabled = ko.computed(function() {
+      return !(self.textFi().length && self.textSv().length);
+    });
+
+  })();
+
   hub.onPageChange("screenmessages", LUPAPISTE.Screenmessage.refresh);
 
   $(function() {
-    $("#screenmessages").applyBindings(LUPAPISTE.Screenmessage);
+    $("#screenmessages").applyBindings({
+      screenmessages: LUPAPISTE.Screenmessage,
+      screenMessagesListModel: screenMessagesListModel
+    });
   });
 
 })();
