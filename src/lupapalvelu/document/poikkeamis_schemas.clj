@@ -227,7 +227,12 @@
              {:name "merkittavyys":type :group
               :body [{:name "rakentamisen_vaikutusten_merkittavyys" :type :text :max-len 4000 :layout :full-width}]}]})
 
+(def poikkeusasian-rakennuspaikka {:info {:name "poikkeusasian-rakennuspaikka" :approvable true
+                                          :order 2}
+                                   :body rakennuspaikka})
+
 (defschemas
   1
   [rakennushanke
-   suunnittelutarveratkaisun-lisaosa])
+   suunnittelutarveratkaisun-lisaosa
+   poikkeusasian-rakennuspaikka])

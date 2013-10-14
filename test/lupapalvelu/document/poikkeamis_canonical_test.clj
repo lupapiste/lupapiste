@@ -144,10 +144,12 @@
                             :kiinteisto {:maaraalaTunnus {:modified 1379422953978
                                                           :value "0008"}
                                          :tilanNimi {:modified 1379422953979
-                                                     :value "Omatila"}}}
+                                                     :value "Omatila"}
+                                         :rantaKytkin {:modified 1379422953974
+                                                     :value true}}}
                                :id "523844e1da063788effc1c5b"
                                :schema-info {:approvable true
-                                           :name "rakennuspaikka"
+                                           :name "poikkeusasian-rakennuspaikka"
                                            :version 1
                                            :order 2}})
 
@@ -553,11 +555,10 @@
         kerrosala (:kerrosala Tavoitetila) => truthy
         pintala (:pintaAla kerrosala) => 30
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
-        
-        lausuntotieto 
 
-        ;paaKayttotarkoitus ???
-        ;rantaKytkin ???
+        ;lausuntotieto
+
+
 
 
 
