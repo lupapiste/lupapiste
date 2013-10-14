@@ -86,12 +86,12 @@
 
 (defcommand update-organization-link
   {:description "Updates organization link."
-   :parameters [url nameFi nameSv index i]
+   :parameters [url nameFi nameSv index]
    :roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update :organizations {:_id organization} {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
 (defcommand remove-organization-link
