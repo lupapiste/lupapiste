@@ -350,7 +350,7 @@
         (lupapalvelu.fixture/apply-fixture name)
         (ok))
       (do
-        (warn "fixture '%s' not found" name)
+        (warnf "fixture '%s' not found" name)
         (fail :error.fixture-not-found))))
 
   (defquery activate-user-by-email
