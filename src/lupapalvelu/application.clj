@@ -217,7 +217,7 @@
    :verified   true}
   [{created :created
     user    :user
-    {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
+    {:keys [id email title text documentName documentId path]} :data :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (let [email (ss/lower-case email)]
@@ -294,7 +294,7 @@
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to]
    :on-success  (notify "new-comment")}
-  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
+  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
       (let [to-user   (and to (or (user/get-user-by-id to)
@@ -333,7 +333,7 @@
 
         ;; LUPA-407
         (when to-user
-          (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) host))))))
+          (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) (env/value :host)))))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -416,7 +416,7 @@
    :roles      [:authority]
    :on-success (notify "state-change")
    :states     [:submitted :complement-needed]}
-  [{{:keys [host]} :web :as command}]
+  [command]
   (with-application command
     (fn [application]
       (let [application-id (:id application)
@@ -438,7 +438,7 @@
    :states     [:draft :info :open :complement-needed]
    :on-success (notify "state-change")
    :validators [validate-owner-or-writer]}
-  [{{:keys [host]} :web :keys [created] :as command}]
+  [{:keys [created] :as command}]
   (with-application command
     (fn [{:keys [id opened] :as application}]
       (mongo/update
@@ -543,7 +543,7 @@
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] {:keys [host]} :web :as command}]
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
         organization-id   (:id organization)
@@ -600,7 +600,7 @@
 
       (mongo/insert :applications application)
       (when open-inforequest?
-        (open-inforequest/new-open-inforequest! application host))
+        (open-inforequest/new-open-inforequest! application))
       (try
         (autofill-rakennuspaikka application created)
         (catch Exception e (error e "KTJ data was not updated")))
