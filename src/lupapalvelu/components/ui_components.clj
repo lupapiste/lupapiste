@@ -62,7 +62,7 @@
 
    :user-menu     {:html ["nav.html"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :user-menu :screenmessages]
+   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -114,28 +114,29 @@
                   :css ["create.css"]}
 
    :applicant    {:depends [:common :authenticated :map :applications :application :attachment
-                            :statement :docgen :create :mypage :debug]
+                            :statement :docgen :create :mypage :user-menu :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application :attachment
-                            :statement :verdict :neighbors :docgen :create :mypage :debug]
+                            :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
    :oir          {:depends [:common :authenticated :map :application :attachment
                             :docgen :debug]
                   :js ["oir.js"]
+                  :css ["oir.css"]
                   :html ["index.html"]}
 
    :admins   {:js ["user.js" "users.js"]
               :html ["admin-user-list.html" "user-modification-dialogs.html"]}
 
-   :authority-admin {:depends [:common :authenticated :admins :mypage :debug]
+   :authority-admin {:depends [:common :authenticated :admins :mypage :user-menu :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
-   :admin   {:depends [:common :authenticated :admins :map :mypage :debug]
+   :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
              :js ["admin.js"
                   "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
