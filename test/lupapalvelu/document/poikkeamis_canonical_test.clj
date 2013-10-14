@@ -553,7 +553,8 @@
         kerrosala (:kerrosala Tavoitetila) => truthy
         pintala (:pintaAla kerrosala) => 30
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
-
+        
+        lausuntotieto 
 
         ;paaKayttotarkoitus ???
         ;rantaKytkin ???
