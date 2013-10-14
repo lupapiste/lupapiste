@@ -1,7 +1,7 @@
 (ns lupapalvelu.statement
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [monger.operators :refer :all]
-            [sade.env :refer :all]
+            [sade.env :as env]
             [sade.strings :refer [lower-case]]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand with-application executed]]
@@ -87,7 +87,7 @@
    :notified    true
    :states      [:draft :info :open :submitted :complement-needed]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
-  [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
+  [{user :user {:keys [id personIds]} :data :as command}]
   (with-application command
     (fn [{:keys [organization] :as application}]
       (organization/with-organization organization
@@ -108,7 +108,7 @@
                 statements    (map ->statement persons)]
             (mongo/update :applications {:_id id} {$pushAll {:statements statements
                                                              :auth unique-writers}})
-            (notifications/send-on-request-for-statement! persons application user host)))))))
+            (notifications/send-on-request-for-statement! persons application user (env/value :host))))))))
 
 (defcommand "delete-statement"
   {:parameters [:id :statementId]
