@@ -20,7 +20,14 @@
   (fact "update organization"
     (let [organization   (first (:organizations (query admin :organizations)))
           organization-id      (:id organization)
-          resp                 (command admin :update-organization :organizationId organization-id :inforequestEnabled (not (:inforequest-enabled organization)) :applicationEnabled (not (:new-application-enabled organization)))
+          resp                 (command admin :update-organization
+                                 :organizationId organization-id
+                                 :inforequestEnabled (not (:inforequest-enabled organization))
+                                 :applicationEnabled (not (:new-application-enabled organization))
+                                 :openInforequestEnabled (not (:open-inforequest organization))
+                                 :openInforequestEmail "someone@localhost")
           updated-organization (query admin :organization-by-id :organizationId organization-id)]
       (:inforequest-enabled updated-organization) => (not (:inforequest-enabled organization))
-      (:new-application-enabled updated-organization) => (not (:new-application-enabled organization)))))
+      (:new-application-enabled updated-organization) => (not (:new-application-enabled organization))
+      (:open-inforequest updated-organization) => (not (:open-inforequest organization))
+      (:open-inforequest-email updated-organization) => "someone@localhost")))
