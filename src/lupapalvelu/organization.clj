@@ -45,12 +45,12 @@
 ;; Actions
 ;;
 
-(defquery "users-in-same-organizations"
+(defquery users-in-same-organizations
   {:roles [:authority]}
   [{user :user}]
   (ok :users (map user/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
-(defquery "organization-by-user"
+(defquery organization-by-user
   {:description "Lists all organization users by organization."
    :roles [:authorityAdmin]
    :verified true}
@@ -73,7 +73,7 @@
                                                             "open-inforequest-email" openInforequestEmail}})
   (ok))
 
-(defcommand "add-organization-link"
+(defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [:url :nameFi :nameSv]
    :roles [:authorityAdmin]
@@ -83,7 +83,7 @@
     (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "update-organization-link"
+(defcommand update-organization-link
   {:description "Updates organization link."
    :parameters [:url :nameFi :nameSv :index]
    :roles [:authorityAdmin]
@@ -93,7 +93,7 @@
     (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "remove-organization-link"
+(defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [:nameFi :nameSv :url]
    :roles [:authorityAdmin]
@@ -103,14 +103,14 @@
     (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defquery "organizations"
+(defquery organizations
   {:roles       [:admin]
    :authenticated true
    :verified true}
   [{user :user}]
   (ok :organizations (mongo/select :organizations {})))
 
-(defquery "organization-names"
+(defquery organization-names
   {:authenticated true
    :verified true}
   [{user :user}]
@@ -119,7 +119,7 @@
 (defquery "municipalities-with-organization"
   {} [_] (ok :municipalities (municipalities-with-organization)))
 
-(defquery "operations-for-municipality"
+(defquery operations-for-municipality
   {:authenticated true}
   [{{:keys [municipality]} :data}]
   (ok :operations (operations/municipality-operations municipality)))
@@ -130,11 +130,11 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
-(defquery "organization-by-id"
+(defquery organization-by-id
   [{{:keys [organizationId]} :data}]
   (mongo/select-one :organizations {:_id organizationId}))
 
-(defquery "organization-details"
+(defquery organization-details
   {:parameters [:municipality :operation :lang] :verified true}
   [{{:keys [municipality operation lang]} :data}]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
@@ -160,7 +160,7 @@
           :links (:links result)
           :attachmentsForOp (-> result :operations-attachments ((keyword operation))))))))
 
-(defcommand "organization-operations-attachments"
+(defcommand organization-operations-attachments
   {:parameters [:operation :attachments]
    :roles [:authorityAdmin]}
   [{{:keys [operation attachments]} :data user :user}]
@@ -170,7 +170,7 @@
     (mongo/update :organizations {:_id organization} {$set {(str "operations-attachments." operation) attachments}})
     (ok)))
 
-(defquery "legacy-system"
+(defquery legacy-system
   {:roles [:authorityAdmin] :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
@@ -178,7 +178,7 @@
       (ok :legacy (:legacy result))
       (fail :error.unknown-organization))))
 
-(defcommand "set-legacy-system"
+(defcommand set-legacy-system
   {:parameters [:legacy]
    :roles      [:authorityAdmin]
    :verified   true}
