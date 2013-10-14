@@ -15,7 +15,8 @@
   (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
-                 :mode              env/mode}]
+                 :mode              env/mode
+                 :wannaJoinUrl      (env/value :oir :wanna-join-url)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn loc->js []
@@ -46,19 +47,22 @@
 
    :licenses     {:html ["licenses.html"]}
 
+   :screenmessages  {:js   ["screenmessage.js"]
+                     :html ["screenmessage.html"]}
+
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
-                  :html ["404.html"]}
+                  :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.13_20130911.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :user-menu     {:html ["nav.html"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :user-menu ]
+   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :user-menu :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -122,7 +126,7 @@
    :oir          {:depends [:common :authenticated :map :application :attachment
                             :docgen :debug :user-menu]
                   :js ["oir.js"]
-                  :html ["index.html" "contact.html"]}
+                  :html ["index.html"]}
 
    :admins   {:js ["user.js" "users.js"]
               :html ["admin-user-list.html" "user-modification-dialogs.html"]}
@@ -133,9 +137,9 @@
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :debug]
              :js ["admin.js"
-                  "fixtures.js" "features.js" "actions.js" "activations.js"]
+                  "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
-                    "fixtures.html" "features.html" "actions.html" "activations.html"]}
+                    "organizations.html" "fixtures.html" "features.html" "actions.html" "activations.html" "screenmessages-list.html"]}
 
    :tree    {:depends [:jquery]
              :js ["tree.js"]
@@ -157,7 +161,7 @@
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
 
-   :welcome {:depends [:login :register :debug :user-menu]
+   :welcome {:depends [:login :register :debug :user-menu :screenmessages]
              :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 
@@ -168,7 +172,7 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :neighbor {:depends [:common :map :debug :docgen :debug :user-menu]
+   :neighbor {:depends [:common :map :debug :docgen :debug :user-menu :screenmessages]
               :html ["neighbor-show.html" "index.html"]
               :js ["neighbor-app.js" "neighbor-show.js"]}})
 

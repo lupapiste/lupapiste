@@ -149,8 +149,6 @@
                                                                                          {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
                                                                         {:tag :kuvaus}
                                                                         {:tag :perusparannusKytkin}]}
-                                               {:tag :perusparannus}
-                                               {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen :child [{:tag :kuvaus}
                                                                         {:tag :purkamisenSyy}
                                                                         {:tag :poistumaPvm }]}

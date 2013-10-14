@@ -224,10 +224,10 @@
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
       (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
+
 ;;
 ;; Raster images:
 ;;
-
 (defn raster-images [request]
   (let [layer (get-in request [:params "LAYERS"])]
     (client/get "https://ws.nls.fi/rasteriaineistot/image"

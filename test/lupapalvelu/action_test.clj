@@ -31,20 +31,7 @@
   (fact (has-required-role {:user {:role "bar"}} {:roles [:foo :bar]}) => truthy)
   (fact (has-required-role {:user {:role "boz"}} {:roles [:foo :bar]}) => falsey))
 
-(let [user {:id 1 :role :applicant}]
-  (facts (against-background (user/summary user) => {:id 1})
 
-    (fact "role is overridden"
-      (user/user-in-role user :reader) => {:id 1 :role :reader})
-
-    (fact "takes optional name & value parameter pair"
-      (user/user-in-role user :reader :age 16) => {:id 1 :role :reader :age 16})
-
-    (fact "takes optional name & value parameter pairS"
-      (user/user-in-role user :reader :age 16 :size :L) => {:id 1 :role :reader :age 16 :size :L})
-
-    (fact "fails with uneven optional parameter pairs"
-      (user/user-in-role user :reader :age) => (throws Exception))))
 
 (facts "Test missing-fields"
   (fact (missing-fields {:data {:foo "Foo" :bar "Bar"}} {:parameters [:foo :bar]}) => empty?)
