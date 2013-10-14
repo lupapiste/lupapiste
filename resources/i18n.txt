@@ -1,0 +1,2 @@
+organization.openinforequest.enabled: Avoin neuvontapyyntö päällä
+organization.openinforequest.email: Sähköpostiosoite avoimille neuvontapyynnöille

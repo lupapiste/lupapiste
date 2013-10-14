@@ -30,6 +30,8 @@
     self.id = 0;
     self.applicationEnabled = ko.observable(false);
     self.inforequestEnabled = ko.observable(false);
+    self.openInforequestEnabled = ko.observable(false);
+    self.openInforequestEmail = ko.observable("");
     self.processing = ko.observable();
     self.pending = ko.observable();
 
@@ -37,6 +39,8 @@
       self.id = organization.id;
       self.applicationEnabled(organization['new-application-enabled']);
       self.inforequestEnabled(organization['inforequest-enabled']);
+      self.openInforequestEnabled(organization['open-inforequest'] || false);
+      self.openInforequestEmail(organization['open-inforequest-email'] || "");
       self.processing(false);
       self.pending(false);
     };
@@ -63,7 +67,11 @@
     };
 
     self.updateOrganization = function() {
-      var data = {organizationId: self.id, inforequestEnabled: self.inforequestEnabled(), applicationEnabled: self.applicationEnabled()};
+      var data = {organizationId: self.id,
+                  inforequestEnabled: self.inforequestEnabled(),
+                  applicationEnabled: self.applicationEnabled(),
+                  openInforequestEnabled: self.openInforequestEnabled(),
+                  openInforequestEmail: self.openInforequestEmail()};
       ajax.command("update-organization", data)
         .processing(self.processing)
         .pending(self.pending)
@@ -72,7 +80,6 @@
         .call();
       return false;
     };
-
 
   }
 
