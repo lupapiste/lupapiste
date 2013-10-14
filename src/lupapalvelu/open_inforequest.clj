@@ -44,10 +44,10 @@
      :username email}))
 
 (defraw openinforequest
-  [{{token-id :token-id} :data lang :lang {:keys [host]} :web}]
+  [{{token-id :token-id} :data lang :lang}]
   (info "open-inforequest: open:" token-id lang)
   (let [token (mongo/by-id :open-inforequest-token token-id)
-        url   (str host "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
+        url   (str (env/value :host) "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
     (when-not token (fail! :error.unknown-open-inforequest-token))
     (mongo/update-by-id :open-inforequest-token token-id {$set {:last-used (now)}})
     (session/put! :user (make-user token))
