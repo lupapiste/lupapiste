@@ -48,13 +48,14 @@
 (defquery users-in-same-organizations
   {:roles [:authority]}
   [{user :user}]
+  ;; TODO toimiiko jos jompi kumpi user on kahdessa organisaatiossa?
   (ok :users (map user/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
 (defquery organization-by-user
   {:description "Lists all organization users by organization."
    :roles [:authorityAdmin]
    :verified true}
-  [{user :user {:keys [organizations]} :user}]
+  [{{:keys [organizations] :as user} :user}]
   (let [orgs (find-user-organizations user)
         organization (first orgs)
         ops (merge (zipmap (keys operations/operations) (repeat [])) (:operations-attachments organization))]
@@ -75,30 +76,30 @@
 
 (defcommand add-organization-link
   {:description "Adds link to organization."
-   :parameters [:url :nameFi :nameSv]
+   :parameters [url nameFi nameSv]
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations]} :user {:keys [url nameFi nameSv]} :data}]
+  [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
     (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
 (defcommand update-organization-link
   {:description "Updates organization link."
-   :parameters [:url :nameFi :nameSv :index]
+   :parameters [url nameFi nameSv index i]
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations]} :user {url :url nameFi :nameFi nameSv :nameSv i :index} :data}]
+  [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
     (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
 (defcommand remove-organization-link
   {:description "Removes organization link."
-   :parameters [:nameFi :nameSv :url]
+   :parameters [nameFi nameSv url]
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations]} :user {nameFi :nameFi nameSv :nameSv url :url} :data}]
+  [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
     (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
@@ -117,11 +118,15 @@
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
 (defquery "municipalities-with-organization"
-  {} [_] (ok :municipalities (municipalities-with-organization)))
+  {:verified true}
+  [_]
+  (ok :municipalities (municipalities-with-organization)))
 
 (defquery operations-for-municipality
-  {:authenticated true}
-  [{{:keys [municipality]} :data}]
+  {:parameters [municipality]
+   :authenticated true
+   :verified true}
+  [_]
   (ok :operations (operations/municipality-operations municipality)))
 
 (defn resolve-organization [municipality permit-type]
@@ -131,12 +136,16 @@
     (first organizations)))
 
 (defquery organization-by-id
-  [{{:keys [organizationId]} :data}]
+  {:parameters [organizationId]
+   :roles [:admin]
+   :verified true}
+  [_]
   (mongo/select-one :organizations {:_id organizationId}))
 
 (defquery organization-details
-  {:parameters [:municipality :operation :lang] :verified true}
-  [{{:keys [municipality operation lang]} :data}]
+  {:parameters [municipality operation lang]
+   :verified true}
+  [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (let [result (mongo/select-one
                       :organizations
@@ -161,9 +170,9 @@
           :attachmentsForOp (-> result :operations-attachments ((keyword operation))))))))
 
 (defcommand organization-operations-attachments
-  {:parameters [:operation :attachments]
+  {:parameters [operation attachments]
    :roles [:authorityAdmin]}
-  [{{:keys [operation attachments]} :data user :user}]
+  [{user :user}]
   ; FIXME: validate operation and attachments
   (let [organizations (:organizations user)
         organization  (first organizations)]
@@ -171,7 +180,8 @@
     (ok)))
 
 (defquery legacy-system
-  {:roles [:authorityAdmin] :verified true}
+  {:roles [:authorityAdmin]
+   :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
     (if-let [result (mongo/select-one :organizations {:_id organization} {"legacy" 1})]
@@ -179,10 +189,10 @@
       (fail :error.unknown-organization))))
 
 (defcommand set-legacy-system
-  {:parameters [:legacy]
+  {:parameters [legacy]
    :roles      [:authorityAdmin]
    :verified   true}
-  [{{:keys [legacy]} :data {:keys [organizations] :as user} :user}]
+  [{{:keys [organizations] :as user} :user}]
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
       (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
