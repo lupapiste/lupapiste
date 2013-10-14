@@ -60,7 +60,7 @@
 
               <div>
                 <label class="form-label" for="open-inforequest-email" data-bind ="ltext: 'organization.openinforequest.email'"></label>
-                <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email"></input>
+                <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
               </div>
 
               <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">
