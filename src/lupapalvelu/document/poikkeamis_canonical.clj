@@ -16,12 +16,11 @@
                                                                                :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)}}}}}))
 
 (defn get-toimenpiteet [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as d}]
-  (for [ordernum_and_toimenpide toimenpiteet]
-    (let [toimenpide (second ordernum_and_toimenpide)
-          toimenpiteet (:toimenpiteet toimenpide)]
-      {:Toimenpide (get-toimenpide toimenpide {:kerrosalatieto (when (-> kaytettykerrosala :pintaAla :value) {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla :value)
-                                                                          :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi :value)}})})}))
-  )
+  (let [kaytettykerrosala-canonical (when (not (s/blank? (-> kaytettykerrosala :pintaAla :value)))
+                                      {:kerrosalatieto {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla :value)
+                                                                    :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi :value)}}})]
+    (for [[_ toimenpide] toimenpiteet]
+      {:Toimenpide (get-toimenpide toimenpide kaytettykerrosala-canonical)})))
 
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang]
   (let [root (root-element application lang)
@@ -42,7 +41,7 @@
                         :luvanTunnistetiedot (lupatunnus application)
                         :osapuolettieto (osapuolet documents)
                         :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
-                        :toimenpidetieto (get-toimenpiteet (first (:rakennushanke documents))) ;only one toimenpide in lupapiste.
+                        :toimenpidetieto (get-toimenpiteet (first (:rakennushanke documents))) ;sanity check only one toimenpide in lupapiste.
                         }}
       ))
   )
