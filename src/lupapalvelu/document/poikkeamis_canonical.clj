@@ -16,6 +16,7 @@
                           nil
                           v))
                       (:documents application)))]
+
     (assoc-in
       root
       poikkeamisasia-path
@@ -23,7 +24,7 @@
                         :kuntakoodi (:municipality application)
                         :luvanTunnistetiedot (lupatunnus application)
                         :osapuolettieto (osapuolet documents)
-                        :rakennuspaikkatieto (get-bulding-places documents application)
+                        :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
                         }}
       ))
   )

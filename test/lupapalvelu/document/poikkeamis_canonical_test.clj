@@ -519,6 +519,7 @@
         tilannimi (:tilannimi Kiinteisto) => "Omatila"
         kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
         maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
+        rantaKytkin (:rantaKytkin Kiinteisto) => true
         kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
         hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
 
@@ -557,6 +558,7 @@
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
         ;lausuntotieto
+
 
 
 

@@ -285,8 +285,8 @@
     value))
 
 
-(defn get-bulding-places [documents application]
-  (for [doc (:rakennuspaikka documents)
+(defn get-bulding-places [docs application]
+  (for [doc docs
         :let [rakennuspaikka (:data doc)
               kiinteisto (:kiinteisto rakennuspaikka)
               id (:id doc)]]
@@ -298,7 +298,8 @@
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
                                        :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
-                                                                             :kiinteistotunnus (:propertyId application)}
+                                                                             :kiinteistotunnus (:propertyId application)
+                                                                             :rantaKytkin (true? (-> kiinteisto :rantaKytkin :value))}
                                                          (when (-> kiinteisto :maaraalaTunnus :value)
                                                            {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
 
