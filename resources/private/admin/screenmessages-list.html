@@ -7,7 +7,7 @@
 
           <h2 data-bind="ltext: 'admin.screenmessages.list-title'"></h2>
 
-          <table class="table table-striped tablesorter" id="test-screenmessages-table">
+          <table class="table table-striped tablesorter" data-test-id="test-screenmessages-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'admin.screenmessages.added'"></th>
@@ -41,13 +41,13 @@
                          ltext: 'admin.screenmessages.addScreenmessageButtonLabel',
                          disable: disabled"
               class="modal btn btn-primary btn-narrow screenmessagebutton"
-              id="test-add-screenmessage"></button>
+              data-test-id="test-add-screenmessage"></button>
             <hr />
             <button href="#"
               data-bind="click: $root.screenmessages.reset,
                          ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
               class="modal btn btn-primary btn-narrow screenmessagebutton"
-              id="test-delete-screenmessage"></button>
+              data-test-id="test-delete-screenmessage"></button>
 
           </div>
 
