@@ -8,7 +8,7 @@
     self.textSv = ko.observable("");
 
     self.disabled = ko.computed(function() {
-      return !(self.textFi().length && self.textSv().length);
+      return !self.textFi().length;
     });
 
   })();

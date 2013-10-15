@@ -13,7 +13,7 @@ Solita admin sees the list of screenmessages
 Admin sets a screenmessage
   Element Should Be Disabled  xpath=//button[@data-test-id="test-add-screenmessage"]
   Wait For Condition  return $("[id='add-text-fi']").val("Testi").change() && true;
-  Element Should Be Disabled  xpath=//button[@data-test-id="test-add-screenmessage"]
+  Element Should Be Enabled  xpath=//button[@data-test-id="test-add-screenmessage"]
   Wait For Condition  return $("[id='add-text-sv']").val("En test").change() && true;
   Click enabled by test id  test-add-screenmessage
 
