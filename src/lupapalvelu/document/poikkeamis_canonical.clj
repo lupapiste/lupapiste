@@ -41,10 +41,9 @@
                         :luvanTunnistetiedot (lupatunnus application)
                         :osapuolettieto (osapuolet documents)
                         :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
-                        :toimenpidetieto (get-toimenpiteet (first (:rakennushanke documents))) ;sanity check only one toimenpide in lupapiste.
-                        }}
-      ))
-  )
+                        :toimenpidetieto (get-toimenpiteet (let [rakennushanke (:rakennushanke documents)
+                                                                 _ (assert (= 1 (count rakennushanke)))]
+                                                             (first rakennushanke)))}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
