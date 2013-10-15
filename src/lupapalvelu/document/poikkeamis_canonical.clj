@@ -15,10 +15,9 @@
                                                   :kerrosalatieto {:kerrosala {:pintaAla (-> toimenpide :kerrosala :value)
                                                                                :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)}}}}}))
 
-(defn get-toimenpiteet [{{toimenpiteet :toimenpiteet} :data}]
+(defn get-toimenpiteet [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as d}]
   (for [ordernum_and_toimenpide toimenpiteet]
     (let [toimenpide (second ordernum_and_toimenpide)
-          kaytettykerrosala (-> :kaytettykerrosala :value)
           toimenpiteet (:toimenpiteet toimenpide)]
       {:Toimenpide (get-toimenpide toimenpide {:kerrosalatieto (when (-> kaytettykerrosala :pintaAla :value) {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla :value)
                                                                           :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi :value)}})})}))

@@ -92,6 +92,32 @@
                                         :created 1379419361123}
                                    :removable true}})
 
+
+(def ^:private laajennus {:created 1379419361123
+                          :data {:kaytettykerrosala {:kayttotarkoitusKoodi {:modified 1381838922854
+                                                                            :value "013 muut erilliset talot"}
+                                                     :pintaAla { :modified 1381838921183
+                                                                :value "99"}}
+                                 :toimenpiteet {:0 {:Toimenpide {:modified 1379419898562
+                                                                 :value "laajennus"}
+                                                    :kayttotarkoitus {:modified 1379419887019
+                                                                      :value "941 talousrakennukset"}
+                                                    :kerroksia {:modified 1379419905008
+                                                                :value "1"}
+                                                    :kerrosala {:modified 1379419906955
+                                                                :value "25"}
+                                                    :kokonaisala {:modified 1379419908874
+                                                                  :value "30"}}}}
+                          :id "523844e1da063788effc1c57"
+                          :schema-info {:order 50
+                                        :version 1
+                                        :name "rakennushanke"
+                                        :op {:id "523844e1da063788effc1c56"
+                                             :name "poikkeamis"
+                                             :created 1379419361123}
+                                        :removable true}})
+
+
 (def ^:private hanke {:created 1379419361123
                       :data {:kuvaus {:modified 1379419749140
                                       :value "Omakotitalon ja tallin rakentaminen."}
@@ -257,6 +283,16 @@
                 suunnittelija
                 lisaosa])
 
+(def ^:private documents-for-laajennus [hakija
+                laajennus
+                hanke
+                maksaja
+                rakennuspaikka
+                lisatieto
+                paasuunnittelija
+                suunnittelija
+                lisaosa])
+
 (fact "Meta test: hakija"          hakija           => valid-against-current-schema?)
 (fact "Meta test: uusi"            uusi             => valid-against-current-schema?)
 (fact "Meta test: maksaja"         maksaja          => valid-against-current-schema?)
@@ -265,6 +301,7 @@
 (fact "Meta test: paasunnitelija"  paasuunnittelija => valid-against-current-schema?)
 (fact "Meta test: suunnittelija"   suunnittelija    => valid-against-current-schema?)
 (fact "Meta test: lisaosa"         lisaosa          => valid-against-current-schema?)
+(fact "Meta test: laajennus"       laajennus        => valid-against-current-schema?)
 
 
 (def ^:private poikkari-hakemus {:schema-version 1
@@ -549,6 +586,26 @@
         kuvauskoodi (:kuvausKoodi uusit) => "uusi"
         kerrosalatieto (:kerrosalatieto uusit) => nil
         tavoitetilatieto (:tavoitetilatieto uusit) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
+
+        laajennus-tp (c/get-toimenpiteet laajennus)
+        laajennus-tp (:Toimenpide (first laajennus-tp))
+        rakennustunnus (:rakennustunnus laajennus-tp) => nil
+        _ (:liitetieto laajennus-tp) => nil
+        kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
+        kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "99"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "013 muut erilliset talot"
+        tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
         Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
         rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
