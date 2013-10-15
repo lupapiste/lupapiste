@@ -11,6 +11,12 @@
       return !self.textFi().length;
     });
 
+    self.addMessage = function() {
+      LUPAPISTE.Screenmessage.add($("#add-text-fi").val(), $("#add-text-sv").val());
+      self.textFi("");
+      self.textSv("");
+    };
+
   })();
 
   hub.onPageChange("screenmessages", LUPAPISTE.Screenmessage.refresh);
