@@ -11,10 +11,12 @@ Solita admin sees the list of screenmessages
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="test-screenmessages-table"]
 
 Admin sets a screenmessage
+  Element Should Be Visible  xpath=//textarea[@id='add-text-fi']
+  Element Should Be Visible  xpath=//textarea[@id='add-text-sv']
   Element Should Be Disabled  xpath=//button[@data-test-id="test-add-screenmessage"]
-  Wait For Condition  return $("[id='add-text-fi']").val("Testi").change() && true;
+  Input text  xpath=//textarea[@id='add-text-fi']  Testi
   Element Should Be Enabled  xpath=//button[@data-test-id="test-add-screenmessage"]
-  Wait For Condition  return $("[id='add-text-sv']").val("En test").change() && true;
+  Input text  xpath=//textarea[@id='add-text-sv']  En test
   Click enabled by test id  test-add-screenmessage
 
 Admin sees the screenmessage correctly in both languages
