@@ -120,7 +120,7 @@
   {:tag :Rakennusvalvonta
    :ns "rakval"
    :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
+                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
                                http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
                                http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"
           :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
