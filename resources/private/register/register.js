@@ -12,6 +12,7 @@
     }
 
     delete d.confirmPassword;
+    delete d.confirmEmail;
     return d;
   }
 
@@ -71,6 +72,7 @@
     reset: reset
   };
   plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
+  plainModel.confirmEmail = ko.observable().extend({equal: plainModel.email});
 
   var confirmModel = {
     email: ""
