@@ -8,8 +8,14 @@
     self.textSv = ko.observable("");
 
     self.disabled = ko.computed(function() {
-      return !(self.textFi().length && self.textSv().length);
+      return !self.textFi().length;
     });
+
+    self.addMessage = function() {
+      LUPAPISTE.Screenmessage.add($("#add-text-fi").val(), $("#add-text-sv").val());
+      self.textFi("");
+      self.textSv("");
+    };
 
   })();
 
