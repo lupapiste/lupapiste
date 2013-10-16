@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'confirmEmail', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
   var model;
   var confirmModel = {
     email: ko.observable("")
