@@ -43,7 +43,8 @@
                         :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
                         :toimenpidetieto (get-toimenpiteet (let [rakennushanke (:rakennushanke documents)
                                                                  _ (assert (= 1 (count rakennushanke)))]
-                                                             (first rakennushanke)))}})))
+                                                             (first rakennushanke)))
+                        :lausuntotieto (get-statements (:statements application))}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
