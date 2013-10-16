@@ -7,7 +7,6 @@ Resource        ../../common_resource.robot
 
 Admin goes to screen messages view and sets a screenmessage (only in Finnish)
   Solita Admin goes to screen messages view of admin page
-  Verify fields of the screenmessages view
   Input text  xpath=//textarea[@id='add-text-fi']  Testi
   Element Should Be Enabled  xpath=//button[@data-test-id="test-add-screenmessage"]
   Click enabled by test id  test-add-screenmessage
@@ -27,7 +26,6 @@ Mikko (applicant) does not anymore see the screenmessage
 
 Admin sets a screenmessage (in both Finnish and Swedish)
   Solita Admin goes to screen messages view of admin page
-  Verify fields of the screenmessages view
   Input text  xpath=//textarea[@id='add-text-fi']  Testi
   Element Should Be Enabled  xpath=//button[@data-test-id="test-add-screenmessage"]
   Input text  xpath=//textarea[@id='add-text-sv']  En test
@@ -42,6 +40,11 @@ Mikko (applicant) sees the screenmessage correctly
   Check displayed screenmessage in both languages  "Testi"  "En test"
   Logout
 
+Finally, admin clears all screenmessages
+  Solita Admin goes to screen messages view of admin page
+  Click enabled by test id  test-delete-screenmessage
+  Wait until  Element should not be visible  xpath=//li[@data-test-id="test-screenmessage"]
+  Logout
 
 *** Keywords ***
 
@@ -54,6 +57,7 @@ Solita Admin goes to screen messages view of admin page
   SolitaAdmin logs in
   Click link  [screen messages]
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="test-screenmessages-table"]
+  Verify fields of the screenmessages view
 
 Check displayed screenmessage in both languages
   [Arguments]  ${fi}  ${sv}
