@@ -218,13 +218,8 @@
   (create-any-user (merge user {:role :authorityAdmin :enabled true})))
 
 (defn create-user [user]
-  (create-any-user (merge user {:role :applicant :enabled true})))
-
-
-
-
-
-
+  ;; Applicant must activate account
+  (create-any-user (merge user {:role :applicant :enabled false})))
 
 ;;
 ;; ==============================================================================
