@@ -1,2 +1,0 @@
-admin.screenmessages.ifNoSwedishGiven: (Mikäli et anna ruotsinkielistä ilmoitusta, käytetään suomenkielistä myös ruotsinkielisessä käyttöliittymässä)
-register.email2: Sähköpostiosoite uudelleen
