@@ -637,7 +637,6 @@
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"
-
         ]))
 
 
