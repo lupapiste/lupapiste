@@ -21,8 +21,12 @@
 
   function reset(model) {
     for (var i in keys) {
+      if (model[keys[i]] !== undefined) {
       model[keys[i]]('');
+        if (model[keys[i]].isModified) {
       model[keys[i]].isModified(false);
+    }
+      }
     }
     return false;
   }
@@ -126,9 +130,9 @@
           model().firstName(data.firstName);
           model().lastName(data.lastName);
           model().stamp(data.stamp);
-          model().city(data.city || "");
-          model().zip(data.zip || "");
-          model().street(data.street || "");
+          model().city((data.city || ""));
+          model().zip((data.zip || ""));
+          model().street((data.street || ""));
         } else {
           window.location.hash = "!/register";
         }
