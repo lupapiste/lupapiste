@@ -452,7 +452,7 @@
 (validate-all-documents documents)
 
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
+  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi§" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
@@ -635,17 +635,9 @@
         Lisatieto (:Lisatieto lisatietotieto) => truthy
         asioimiskieli (:asiomiskieli Lisatieto) => "suomi"
 
-
-
-
-
-   ;                                  :name "Sonja Sibbo"
-    ;                                 :email "sonja.sibbo@sipoo.fi"
-     ;                                :id "516560d6c2e6f603beb85147"}
         ;end of abstarctPoikkeamistype
-        ;asianTiedot
-        ;kaytttotapaus
-        ;_ (clojure.pprint/pprint canonical)
+        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"
+
         ]))
 
 

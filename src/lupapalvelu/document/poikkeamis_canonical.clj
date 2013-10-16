@@ -47,7 +47,8 @@
                         :lausuntotieto (get-statements (:statements application))
                         :lisatietotieto {:Lisatieto {:asiomiskieli (if (= lang "se")
                                                                      "ruotsi"
-                                                                     "suomi")}}}})))
+                                                                     "suomi")}}
+                        :kayttotapaus "Uusi hakemus"}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
