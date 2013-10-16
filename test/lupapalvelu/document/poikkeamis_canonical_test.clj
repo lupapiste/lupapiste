@@ -617,7 +617,6 @@
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
         lausuntotieto (:lausuntotieto Poikkeamisasia) => truthy
-        _ (clojure.pprint/pprint lausuntotieto)
         Lausunto (:Lausunto (first lausuntotieto)) => truthy
         viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
         pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
@@ -631,6 +630,10 @@
         Puolto (:Puolto puoltotieto) => truthy
         puolto (:puolto Puolto) => "puoltaa"
         lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
+
+        lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
+        Lisatieto (:Lisatieto lisatietotieto) => truthy
+        asioimiskieli (:asiomiskieli Lisatieto) => "suomi"
 
 
 
