@@ -7,14 +7,14 @@
 
 
 (def ^:private statements [{:given 1379423133068
-                                     :id "52385377da063788effc1e93"
-                                     :person {:text "Paloviranomainen"
-                                              :name "Sonja Sibbo"
-                                              :email "sonja.sibbo@sipoo.fi"
-                                              :id "516560d6c2e6f603beb85147"}
-                                     :requested 1379423095616
-                                     :status "yes"
-                                     :text "Lausunto liitteen\u00e4."}])
+                            :id "52385377da063788effc1e93"
+                            :person {:text "Paloviranomainen"
+                                     :name "Sonja Sibbo"
+                                     :email "sonja.sibbo@sipoo.fi"
+                                     :id "516560d6c2e6f603beb85147"}
+                            :requested 1379423095616
+                            :status "yes"
+                            :text "Lausunto liitteen\u00e4."}])
 
 (def ^:private hakija {:id "523844e1da063788effc1c58"
                        :schema-info {:approvable true
@@ -616,13 +616,25 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        ;lausuntotieto
+        lausuntotieto (:lausuntotieto Poikkeamisasia) => truthy
+        Lausunto (:Lausunto lausuntotieto) => truthy
+        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+        pyyntoPvm (:pyyntoPvm Lausunto) => "JOKUPAIVA"
+        lausuntotieto (:lausuntotieto Lausunto) => truthy
+        annettu-lausunto (:Lausunto lausuntotieto) => truthy
+        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "tastdfgsdfg"
+        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "DFgadsrg"
+        puoltotieto (:puoltotieto annettu-lausunto) => "YES"
+        lausuntoId (:lausuntoId Lausunto) => "52385377da063788effc1e93"
 
 
 
 
 
-
+   ;                                  :name "Sonja Sibbo"
+    ;                                 :email "sonja.sibbo@sipoo.fi"
+     ;                                :id "516560d6c2e6f603beb85147"}
         ;end of abstarctPoikkeamistype
         ;asianTiedot
         ;kaytttotapaus
