@@ -3,7 +3,7 @@
         [lupapalvelu.document.poikkeamis-canonical :only [poikkeus-application-to-canonical]]
         [lupapalvelu.document.poikkeamis-canonical-test :only [poikkari-hakemus]]
         [lupapalvelu.xml.emit]
-        [lupapalvelu.xml.krysp.poikkari-mapping :only [rakennuslupa_to_krysp]]
+        [lupapalvelu.xml.krysp.poikkeamis-mapping :only [rakennuslupa_to_krysp]]
         [lupapalvelu.xml.krysp.validator :only [validate]]
         [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :only [has-tag]]
         [clojure.data.xml]
