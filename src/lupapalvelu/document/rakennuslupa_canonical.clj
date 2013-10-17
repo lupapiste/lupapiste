@@ -197,8 +197,8 @@
 
 (defn- get-asian-tiedot [documents maisematyo_documents]
   (let [asian-tiedot (:data (first documents))
-        maisematyo_kuvaukset (for [maismatyo_doc maisematyo_documents]
-                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maismatyo_doc)) ":" (-> maismatyo_doc :data :kuvaus :value )))]
+        maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
+                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc)) ":" (-> maisematyo_doc :data :kuvaus :value )))]
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
                    :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
