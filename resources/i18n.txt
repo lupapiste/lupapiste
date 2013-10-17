@@ -1,1 +1,27 @@
 admin.screenmessages.ifNoSwedishGiven: (Mikäli et anna ruotsinkielistä ilmoitusta, käytetään suomenkielistä myös ruotsinkielisessä käyttöliittymässä)
+tyonjohtaja._group_label: Työnjohtaja
+tyonjohtaja.kuntaRoolikoodi.KVV-työnjohtaja: KVV-työnjohtaja
+tyonjohtaja.kuntaRoolikoodi.IV-työnjohtaja: IV-työnjohtaja
+tyonjohtaja.kuntaRoolikoodi.erityisalojen työnjohtaja: Erityisalojen työnjohtaja
+tyonjohtaja.kuntaRoolikoodi.vastaava työnjohtaja: Vastaava työnjohtaja
+tyonjohtaja.kuntaRoolikoodi.työnjohtaja: Työnjohtaja
+tyonjohtaja.kuntaRoolikoodi.ei tiedossa: Ei tiedossa
+tyonjohtaja.kuntaRoolikoodi._group_label: Työnjohtajarooli
+tyonjohtaja.henkilotiedot._group_label: Henkilötiedot
+tyonjohtaja.henkilotiedot.etunimi: Etunimi
+tyonjohtaja.henkilotiedot.sukunimi: Sukunimi
+tyonjohtaja.henkilotiedot.turvakieltoKytkin: Henkilöllä on voimassa oleva turvakielto
+tyonjohtaja.yritys._group_label: Yritys/yhteisö
+tyonjohtaja.yritys.yritysnimi: Nimi
+tyonjohtaja.yritys.liikeJaYhteisoTunnus: Y-tunnus
+tyonjohtaja.osoite._group_label: Osoite
+tyonjohtaja.osoite.katu: Katuosoite
+tyonjohtaja.osoite.postinumero: Postinumero
+tyonjohtaja.osoite.postitoimipaikannimi: Postitoimipaikka
+tyonjohtaja.yhteystiedot._group_label: Yhteystiedot
+tyonjohtaja.yhteystiedot.puhelin: Puhelin
+tyonjohtaja.yhteystiedot.email: Sähköposti
+tyonjohtaja.patevyysvaatimusluokka.1: 1
+tyonjohtaja.patevyysvaatimusluokka.AA: AA
+tyonjohtaja.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
+tyonjohtaja.patevyysvaatimusluokka._group_label: Pätevyysvaatimusluokka
