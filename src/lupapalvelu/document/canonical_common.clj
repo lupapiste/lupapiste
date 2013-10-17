@@ -183,7 +183,7 @@
 
 (defn- get-yhteystiedot-data [yhteystiedot]
   {:sahkopostiosoite (-> yhteystiedot :email :value)
-  :puhelin (-> yhteystiedot :puhelin :value)})
+   :puhelin (-> yhteystiedot :puhelin :value)})
 
 (defn- get-simple-yritys [yritys]
   {:nimi (-> yritys :yritysnimi :value)
@@ -280,7 +280,7 @@
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi tyonjohtaja party-type)
-        codes {:tyonjohtajaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
+        codes {:tyonjohtajaRooliKoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
         henkilo (merge (get-name (:henkilotiedot tyonjohtaja))
                        {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
