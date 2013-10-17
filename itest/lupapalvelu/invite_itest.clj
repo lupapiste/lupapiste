@@ -30,6 +30,9 @@
       (fact "Teppo must not be able to invite himself!"
         (invite teppo id doc-id "teppo@example.com") => unauthorized?)
 
+      (fact "Empty email is rejected"
+        (:text (invite mikko id doc-id "")) => "error.missing-parameters")
+
       (fact "Mikko must be able to invite Teppo!"
         (invite mikko id doc-id "teppo@example.com") => ok?)
 
