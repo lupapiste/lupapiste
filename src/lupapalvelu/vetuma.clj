@@ -7,7 +7,7 @@
             [noir.response :refer [redirect status json]]
             [noir.session :as session]
             [hiccup.core :refer [html]]
-            [hiccup.form :refer :all]
+            [hiccup.form :as form]
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
             [clj-time.core :as time]
@@ -156,7 +156,7 @@
 (defn session-id [] (get-in (request/ring-request) [:cookies "ring-session" :value]))
 
 (defn- field [[k v]]
-  (hidden-field k v))
+  (form/hidden-field k v))
 
 (defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
 
@@ -184,9 +184,9 @@
       (do
         (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths} :upsert true)
         (html
-          (form-to [:post (:url (config))]
+          (form/form-to [:post (:url (config))]
                    (map field (request-data (host :secure)))
-                   (submit-button "submit")))))))
+                   (form/submit-button "submit")))))))
 
 (defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
