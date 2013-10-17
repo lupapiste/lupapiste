@@ -179,11 +179,11 @@
     (if (non-local? paths)
       (status 400 (format "invalid return paths: %s" paths))
       (do
-        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths} :upsert true)
+        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths :created-at (java.util.Date.)} :upsert true)
         (html
           (form/form-to [:post (:url (config))]
-                   (map field (request-data (host :secure)))
-                   (form/submit-button "submit")))))))
+            (map field (request-data (host :secure)))
+            (form/submit-button "submit")))))))
 
 (defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
@@ -232,5 +232,5 @@
     (let [stamp (generate-stamp)
           user  (select-keys data [:userid :firstname :lastname])
           user  (assoc user :stamp stamp)]
-      (mongo/insert :vetuma {:user user})
+      (mongo/insert :vetuma {:user user :created-at (java.util.Date.)})
       (json user))))
