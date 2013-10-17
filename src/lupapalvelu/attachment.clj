@@ -16,7 +16,8 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
-            [lupapalvelu.stamper :as stamper])
+            [lupapalvelu.stamper :as stamper]
+            [lupapalvelu.statement :as statement])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -405,6 +406,10 @@
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
   (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
+
+  (when (= (:type target) "statement")
+    (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
+      (fail! (:text validation-error))))
 
   (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
     (executed "add-comment"
