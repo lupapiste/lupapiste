@@ -70,7 +70,8 @@
   {:parameters [:email :password]
    :roles      [:admin :authorityAdmin]}
   [{params :data caller :user}]
-  (ok :id (user/create-user caller params)))
+  #_(ok :id (user/create-user caller params))
+  (fail "Not implemented correctly!"))
 
 (defcommand create-authority-admin-user
   {:parameters [:firstName :lastName :email :password :organizations]

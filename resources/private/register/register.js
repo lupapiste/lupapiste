@@ -1,8 +1,11 @@
 ;(function() {
   "use strict";
 
-  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'confirmEmail', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
   var model;
+  var confirmModel = {
+    email: ko.observable("")
+  };
 
   function json(model) {
     var d = {};
@@ -12,13 +15,18 @@
     }
 
     delete d.confirmPassword;
+    delete d.confirmEmail;
     return d;
   }
 
   function reset(model) {
     for (var i in keys) {
+      if (model[keys[i]] !== undefined) {
       model[keys[i]]('');
+        if (model[keys[i]].isModified) {
       model[keys[i]].isModified(false);
+    }
+      }
     }
     return false;
   }
@@ -29,7 +37,7 @@
 
     ajax.command('register-user', json(m))
       .success(function() {
-        confirmModel.email = model().email();
+        confirmModel.email(model().email());
         reset(model());
         window.location.hash = "!/register3";
       })
@@ -54,31 +62,28 @@
   }
 
   var plainModel = {
-    personId: ko.observable(),
-    firstName: ko.observable(),
-    lastName: ko.observable(),
-    stamp: ko.observable(),
-    street: ko.observable().extend({required: true}),
-    city: ko.observable().extend({required: true}),
-    zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
-    phone: ko.observable().extend({required: true}),
-    email: ko.observable().extend({email: true}),
-    password: ko.observable().extend({validPassword: true}),
-    acceptTerms: ko.observable(),
+    personId: ko.observable(""),
+    firstName: ko.observable(""),
+    lastName: ko.observable(""),
+    stamp: ko.observable(""),
+    street: ko.observable("").extend({required: true}),
+    city: ko.observable("").extend({required: true}),
+    zip: ko.observable("").extend({required: true, number: true, maxLength: 5}),
+    phone: ko.observable("").extend({required: true}),
+    email: ko.observable("").extend({email: true}),
+    password: ko.observable("").extend({validPassword: true}),
+    acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
     submit: submit,
     cancel: cancel,
     reset: reset
   };
   plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
-
-  var confirmModel = {
-    email: ""
-  };
+  plainModel.confirmEmail = ko.observable().extend({equal: plainModel.email});
 
   function StatusModel() {
     var self = this;
-    self.subPage = ko.observable();
+    self.subPage = ko.observable("");
     self.isCancel = ko.computed(function() { return self.subPage() === 'cancel'; });
     self.isError = ko.computed(function() { return self.subPage() === 'error'; });
   }
@@ -111,10 +116,12 @@
                                 .attr('id', 'vetuma-init');
     });
     statusModel.subPage(subPage());
-    $('#register').applyBindings(statusModel);
+
   });
 
   hub.onPageChange('register2', function() {
+    reset(model());
+    reset(confirmModel);
     ajax.get('/api/vetuma/user')
       .raw(true)
       .success(function(data) {
@@ -123,10 +130,9 @@
           model().firstName(data.firstName);
           model().lastName(data.lastName);
           model().stamp(data.stamp);
-          if(data.city) { model().city(data.city); }
-          if(data.zip) { model().zip(data.zip); }
-          if(data.street) { model().street(data.street); }
-          $('#register2').applyBindings(model);
+          model().city((data.city || ""));
+          model().zip((data.zip || ""));
+          model().street((data.street || ""));
         } else {
           window.location.hash = "!/register";
         }
@@ -135,7 +141,9 @@
       .call();
   });
 
-  hub.onPageChange('register3', function() {
+  $(function(){
+    $('#register').applyBindings(statusModel);
+    $('#register2').applyBindings(model);
     $('#register3').applyBindings(confirmModel);
   });
 
