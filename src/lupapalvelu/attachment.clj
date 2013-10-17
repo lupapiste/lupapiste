@@ -398,15 +398,14 @@
    :validators [attachment-is-not-locked (fn [{user :user} {state :state}]
                                            (when (and (not= (:role user) "authority") (#{:sent :verdictGiven} (keyword state)))
                                              (fail :error.non-authority-viewing-application-in-verdictgiven-state)))]
-   :input-validators [(fn [{{size :size} :data}]
-                        (when-not (pos? size) (fail :error.select-file)))
-                      (fn [{{filename :filename} :data}]
-                        (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))
-                      (fn [{{attachmentType :attachmentType} :data application :application}]
-                        (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail :error.illegal-attachment-type)))]
+   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
+
+  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
+
   (try
     (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
       (executed "add-comment"
