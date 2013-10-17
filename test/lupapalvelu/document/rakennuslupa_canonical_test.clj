@@ -353,8 +353,8 @@
 
 (defn- validate-company [company]
   (validate-minimal-company company)
-  (fact (:puhelin company) => "03-389 1380")
-  (fact (:sahkopostiosoite company) => "solita@solita.fi"))
+  (fact "puhelin" (:puhelin company) => "03-389 1380")
+  (fact "sahkopostiosoite" (:sahkopostiosoite company) => "solita@solita.fi"))
 
 (facts "Canonical hakija/henkilo model is correct"
   (let [hakija-model (get-osapuoli-data (:data hakija1) :hakija)
@@ -366,7 +366,7 @@
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
     (fact (:turvakieltoKytkin hakija-model) => true)
     (validate-person henkilo)
-    (fact yritys => nil)))
+    (fact "yritys is nil" yritys => nil)))
 
 (facts "Canonical hakija/yritys model is correct"
   (let [hakija-model (get-osapuoli-data (:data hakija2) :hakija)
@@ -386,8 +386,8 @@
   (let [suunnittelija-model (get-suunnittelija-data (:data paasuunnittelija) :paasuunnittelija)
         henkilo (:henkilo suunnittelija-model)
         yritys (:yritys suunnittelija-model)]
-    (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
@@ -397,8 +397,8 @@
 
 (facts "Canonical suunnittelija1 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija1) :suunnittelija)]
-    (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
@@ -407,8 +407,8 @@
 
 (facts "Canonical suunnittelija2 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija2) :suunnittelija)]
-    (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
@@ -417,16 +417,16 @@
 
 (facts "Transforming old sunnittelija schema to canonical model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-old-schema-LUPA-771) :suunnittelija)]
-    (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")))
 
 (facts "Canonical suunnittelija-blank-role model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-blank-role) :suunnittelija)]
-    (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ei tiedossa")
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "ei tiedossa")))
 
 (facts "Canonical maksaja/henkilo model is correct"
@@ -437,15 +437,15 @@
     (fact (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
     (fact (:VRKrooliKoodi maksaja-model) => "maksaja")
     (validate-person henkilo)
-    (fact yritys => nil)))
+    (fact "yritys is nil" yritys => nil)))
 
 (facts "Canonical maksaja/yritys model is correct"
   (let [maksaja-model (get-osapuoli-data (:data maksaja2) :maksaja)
         henkilo (:henkilo maksaja-model)
         yritys (:yritys maksaja-model)]
-    (fact maksaja-model => truthy)
-    (fact (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
-    (fact (:VRKrooliKoodi maksaja-model) => "maksaja")
+    (fact "model" maksaja-model => truthy)
+    (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-model) => "maksaja")
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
@@ -454,9 +454,9 @@
 (facts "Handler is sonja"
   (let [handler (get-handler application)
         name (get-in handler [:henkilo :nimi])]
-    (fact handler => truthy)
-    (fact (:etunimi name) => "Sonja")
-    (fact (:sukunimi name) => "Sibbo")))
+    (fact "handler" handler => truthy)
+    (fact "etunimi" (:etunimi name) => "Sonja")
+    (fact "sukunimi" (:sukunimi name) => "Sibbo")))
 
 (def get-actions #'lupapalvelu.document.rakennuslupa_canonical/get-operations)
 
@@ -464,41 +464,40 @@
   (let [documents (by-type (:documents application))
         actions (get-actions documents application)]
     ;(clojure.pprint/pprint actions)
-    (fact "actions" (seq actions) => truthy)
-    ))
+    (fact "actions" (seq actions) => truthy)))
 
 (def get-huoneisto-data #'lupapalvelu.document.rakennuslupa_canonical/get-huoneisto-data)
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
         h1 (first huoneistot), h2 (last huoneistot)]
-    (fact (count huoneistot) => 2)
-    (fact (:muutostapa h1) => "lis\u00e4ys")
-    (fact (:huoneluku h1) => "66")
-    (fact (:keittionTyyppi h1) => "keittio")
-    (fact (:huoneistoala h1) => "56")
-    (fact (:huoneistonTyyppi h1) => "asuinhuoneisto")
-    (fact (-> h1 :varusteet :WCKytkin) => true)
-    (fact (-> h1 :varusteet :ammeTaiSuihkuKytkin) => false)
-    (fact (-> h1 :varusteet :saunaKytkin) => false)
-    (fact (-> h1 :varusteet :parvekeTaiTerassiKytkin) => true)
-    (fact (-> h1 :varusteet :lamminvesiKytkin) => false)
-    (fact (:huoneistotunnus h1) => truthy)
-    (fact (-> h1 :huoneistotunnus :porras) => "A")
-    (fact (-> h1 :huoneistotunnus :huoneistonumero) => "001")
-    (fact (-> h1 :huoneistotunnus :jakokirjain) => "a")
+    (fact "h1 huoneistot count" (count huoneistot) => 2)
+    (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
+    (fact "h1 huoneluku" (:huoneluku h1) => "66")
+    (fact "h1 keittionTyyppi" (:keittionTyyppi h1) => "keittio")
+    (fact "h1 huoneistoala" (:huoneistoala h1) => "56")
+    (fact "h1 huoneistonTyyppi" (:huoneistonTyyppi h1) => "asuinhuoneisto")
+    (fact "h1 varusteet: WCKytkin" (-> h1 :varusteet :WCKytkin) => true)
+    (fact "h1 varusteet: ammeTaiSuihkuKytkin" (-> h1 :varusteet :ammeTaiSuihkuKytkin) => false)
+    (fact "h1 varusteet: saunaKytkin" (-> h1 :varusteet :saunaKytkin) => false)
+    (fact "h1 varusteet: parvekeTaiTerassiKytkin" (-> h1 :varusteet :parvekeTaiTerassiKytkin) => true)
+    (fact "h1 varusteet: lamminvesiKytkin" (-> h1 :varusteet :lamminvesiKytkin) => false)
+    (fact "h1 huoneistotunnus" (:huoneistotunnus h1) => truthy)
+    (fact "h1 huoneistotunnus: porras" (-> h1 :huoneistotunnus :porras) => "A")
+    (fact "h1 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
+    (fact "h1 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")
 
-    (fact (:muutostapa h2) => "lis\u00e4ys")
-    (fact (:huoneluku h2) => "12")
-    (fact (:keittionTyyppi h2) => "keittokomero")
-    (fact (:huoneistoala h2) => "02")
-    (fact (:huoneistonTyyppi h2) => "toimitila")
-    (fact (-> h2 :varusteet :WCKytkin) => false)
-    (fact (-> h2 :varusteet :ammeTaiSuihkuKytkin) => true)
-    (fact (-> h2 :varusteet :saunaKytkin) => true)
-    (fact (-> h2 :varusteet :parvekeTaiTerassiKytkin) => false)
-    (fact (-> h2 :varusteet :lamminvesiKytkin) => true)
-    (fact (:huoneistotunnus h2) => falsey)))
+    (fact "h2 muutostapa" (:muutostapa h2) => "lis\u00e4ys")
+    (fact "h2 huoneluku" (:huoneluku h2) => "12")
+    (fact "h2 keittionTyyppi" (:keittionTyyppi h2) => "keittokomero")
+    (fact "h2 huoneistoala" (:huoneistoala h2) => "02")
+    (fact "h2 huoneistonTyyppi" (:huoneistonTyyppi h2) => "toimitila")
+    (fact "h2 varusteet: WCKytkin" (-> h2 :varusteet :WCKytkin) => false)
+    (fact "h2 varusteet: ammeTaiSuihkuKytkin" (-> h2 :varusteet :ammeTaiSuihkuKytkin) => true)
+    (fact "h2 varusteet: saunaKytkin" (-> h2 :varusteet :saunaKytkin) => true)
+    (fact "h2 varusteet: parvekeTaiTerassiKytkin" (-> h2 :varusteet :parvekeTaiTerassiKytkin) => false)
+    (fact "h2 varusteet: lamminvesiKytkin" (-> h2 :varusteet :lamminvesiKytkin) => true)
+    (fact "h2 huoneistotunnus" (:huoneistotunnus h2) => falsey)))
 
 (def get-rakennus #'lupapalvelu.document.rakennuslupa_canonical/get-rakennus)
 
@@ -556,7 +555,9 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
         muuTunnustieto (:muuTunnustieto LupaTunnus)
         MuuTunnus (:MuuTunnus muuTunnustieto)]
+
     ;(clojure.pprint/pprint canonical)
+
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "rakennusvalvonta" rakennusvalvonta => truthy)
