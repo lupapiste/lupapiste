@@ -211,38 +211,35 @@
     (ok :invites invites)))
 
 (defcommand invite
-  {:parameters [:id :email :title :text :documentName :path]
+  {:parameters [id email title text documentName documentId path]
+   :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
    :roles      [:applicant :authority]
    :on-success (notify "invite")
    :verified   true}
-  [{created :created
-    user    :user
-    {:keys [id email title text documentName documentId path]} :data :as command}]
-  (with-application command
-    (fn [{application-id :id :as application}]
-      (let [email (ss/lower-case email)]
-        (if (domain/invited? application email)
-          (fail :invite.already-invited)
-          (let [invited (user/get-or-create-user-by-email email)
-                invite  {:title        title
-                         :application  application-id
-                         :text         text
-                         :path         path
-                         :documentName documentName
-                         :documentId   documentId
-                         :created      created
-                         :email        email
-                         :user         (user/summary invited)
-                         :inviter      (user/summary user)}
-                writer  (user/user-in-role invited :writer)
-                auth    (assoc writer :invite invite)]
-            (if (domain/has-auth? application (:id invited))
-              (fail :invite.already-has-auth)
-              (mongo/update
-                :applications
-                {:_id application-id
-                 :auth {$not {$elemMatch {:invite.user.username email}}}}
-                {$push {:auth auth}}))))))))
+  [{:keys [created user application]}]
+  (let [email (ss/lower-case email)]
+    (if (domain/invited? application email)
+      (fail :invite.already-invited)
+      (let [invited (user/get-or-create-user-by-email email)
+            invite  {:title        title
+                     :application  id
+                     :text         text
+                     :path         path
+                     :documentName documentName
+                     :documentId   documentId
+                     :created      created
+                     :email        email
+                     :user         (user/summary invited)
+                     :inviter      (user/summary user)}
+            writer  (user/user-in-role invited :writer)
+            auth    (assoc writer :invite invite)]
+        (if (domain/has-auth? application (:id invited))
+          (fail :invite.already-has-auth)
+          (mongo/update
+            :applications
+            {:_id id
+             :auth {$not {$elemMatch {:invite.user.username email}}}}
+            {$push {:auth auth}}))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
