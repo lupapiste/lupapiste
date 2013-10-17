@@ -107,12 +107,18 @@
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
 (def tyonjohtaja
-  {:id "tyonjohtaja",
-   :schema-info {:name "tyonjohtaja",
-                 :version 1},
+  {:id "tyonjohtaja", :schema-info {:name "tyonjohtaja", :version 1},
    :data (merge suunnittelija-henkilo
            {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"},
             :patevyysvaatimusluokka {:modified 1382006907935, :value "AA"},
+            :yritys yritysnimi-ja-ytunnus})})
+
+(def tyonjohtaja-blank-role-and-blank-qualification
+  {:id "tyonjohtaja", :schema-info {:name "tyonjohtaja", :version 1},
+   :data (merge
+           (assoc-in suunnittelija-henkilo [:henkilotiedot :turvakieltoKytkin] false)
+           {:kuntaRoolikoodi {:value ""},
+            :patevyysvaatimusluokka {:modified 1382006907935, :value "Ei tiedossa"},
             :yritys yritysnimi-ja-ytunnus})})
 
 (def rakennuspaikka
@@ -277,6 +283,7 @@
 (fact "Meta test: suunnittelija2"   suunnittelija2   => valid-against-current-schema?)
 (fact "Meta test: maksaja1"         maksaja1         => valid-against-current-schema?)
 (fact "Meta test: maksaja2"         maksaja2         => valid-against-current-schema?)
+(fact "Meta test: tyonjohtaja"      tyonjohtaja      => valid-against-current-schema?)
 (fact "Meta test: rakennuspaikka"   rakennuspaikka   => valid-against-current-schema?)
 (fact "Meta test: uusi-rakennus"    uusi-rakennus    => valid-against-current-schema?)
 (fact "Meta test: lisatieto"        lisatieto        => valid-against-current-schema?)
@@ -322,7 +329,7 @@
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]})
 
 (defn- validate-minimal-person [person]
-  (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4" :turvakieltoKytkin true}})))
+  (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
 
 (defn- validate-address [address]
   (let [person-katu (:teksti (:osoitenimi address))
@@ -361,10 +368,10 @@
         henkilo (:henkilo hakija-model)
         ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
-    (fact hakija-model => truthy)
-    (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
-    (fact (:VRKrooliKoodi hakija-model) => "hakija")
-    (fact (:turvakieltoKytkin hakija-model) => true)
+    (fact "model" hakija-model => truthy)
+    (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -372,9 +379,10 @@
   (let [hakija-model (get-osapuoli-data (:data hakija2) :hakija)
         henkilo (:henkilo hakija-model)
         yritys (:yritys hakija-model)]
-    (fact hakija-model => truthy)
-    (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
-    (fact (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact "model" hakija-model => truthy)
+    (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
@@ -391,7 +399,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
-
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin suunnittelija-model) => true)
     (validate-person-wo-ssn henkilo)
     (validate-minimal-company yritys)))
 
@@ -402,6 +410,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin suunnittelija-model) => true)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -412,6 +421,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin suunnittelija-model) => true)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -420,6 +430,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin suunnittelija-model) => true)
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")))
 
@@ -429,13 +440,35 @@
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "ei tiedossa")))
 
+(facts "Canonical tyonjohtaja model is correct"
+  (let [tyonjohtaja-model (get-tyonjohtaja-data (:data tyonjohtaja) :tyonjohtaja)
+        henkilo (:henkilo tyonjohtaja-model)
+        yritys (:yritys tyonjohtaja-model)]
+    (fact "model" tyonjohtaja-model => truthy)
+    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "KVV-ty\u00f6njohtaja")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "AA")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin tyonjohtaja-model) => true)
+    (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
+    (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
+    (validate-person-wo-ssn henkilo)
+    (validate-minimal-company yritys)))
+
+(facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
+  (let [tyonjohtaja-model (get-tyonjohtaja-data (:data tyonjohtaja-blank-role-and-blank-qualification) :tyonjohtaja)]
+    (fact "model" tyonjohtaja-model => truthy)
+    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin tyonjohtaja-model) => false)))
+
 (facts "Canonical maksaja/henkilo model is correct"
   (let [maksaja-model (get-osapuoli-data (:data maksaja1) :maksaja)
         henkilo (:henkilo maksaja-model)
         yritys (:yritys maksaja-model)]
-    (fact maksaja-model => truthy)
-    (fact (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
-    (fact (:VRKrooliKoodi maksaja-model) => "maksaja")
+    (fact "model" maksaja-model => truthy)
+    (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-model) => "maksaja")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
@@ -524,9 +557,11 @@
         osapuolettieto (:osapuolettieto rakennusvalvontaasia)
         osapuolet (:Osapuolet osapuolettieto)
         osapuolitieto-hakija (first (:osapuolitieto osapuolet))
-        paasuunnitelija (:Suunnittelija (last (:suunnittelijatieto osapuolet)))
         hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija)
         suunnittelijat (:suunnittelijatieto osapuolet)
+        paasuunnitelija (:Suunnittelija (last suunnittelijat))
+        tyonjohtajat (:tyonjohtajatieto osapuolet)
+        tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat))
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia)
         rakennuspaikkatieto (first rakennuspaikkatiedot)
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto)
@@ -569,7 +604,9 @@
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "hakija-osapuoli1" hakija-osapuoli1 => truthy)
     (fact "Suunnitelijat" suunnittelijat => truthy)
-    (fact "Osapuolien maara" (+ (count suunnittelijat) (count (:osapuolitieto osapuolet))) => 7)
+    (fact "tyonjohtajat" tyonjohtajat => truthy)
+    (fact "tyonjohtajatieto" tyonjohtajatieto => truthy)
+    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
     (fact "rakennuspaikka" rakennuspaikkatieto => truthy)
     (fact "rakennuspaikanKiinteistotieto" rakennuspaikanKiinteistotieto => truthy)

@@ -227,7 +227,9 @@
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
 (defn get-osapuoli-data [osapuoli party-type]
-  (let [henkilo        (:henkilo osapuoli)
+  (let [henkilo        (if (= (-> osapuoli :_selected :value) "yritys")
+                         (get-in osapuoli [:yritys :yhteyshenkilo])
+                         (:henkilo osapuoli))
         kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
         omistajalaji   (muu-select-map
                          :muu (-> osapuoli :muu-omistajalaji :value)
@@ -241,7 +243,7 @@
     (if (= (-> osapuoli :_selected :value) "yritys")
       (merge codes
              {:yritys  (get-yritys-data (:yritys osapuoli))}
-             {:henkilo (get-yhteyshenkilo-data (get-in osapuoli [:yritys :yhteyshenkilo]))})
+             {:henkilo (get-yhteyshenkilo-data henkilo)})
       (merge codes {:henkilo (get-henkilo-data henkilo)}))))
 
 (defn get-parties-by-type [documents tag-name party-type doc-transformer]
@@ -266,6 +268,7 @@
                        (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
+                                :turvakieltoKytkin (true? (-> suunnittelija :henkilotiedot :turvakieltoKytkin :value))
                                 :henkilo henkilo})]
     (if (contains? suunnittelija :yritys)
       (assoc base-data :yritys (assoc
@@ -286,6 +289,7 @@
                        {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
                        (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
         base-data (merge codes {:patevyysvaatimusluokka (-> tyonjohtaja :patevyysvaatimusluokka :value)
+                                :turvakieltoKytkin (true? (-> tyonjohtaja :henkilotiedot :turvakieltoKytkin :value))
                                 :henkilo henkilo})]
     (if (contains? tyonjohtaja :yritys)
       (assoc base-data :yritys (assoc
