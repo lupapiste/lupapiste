@@ -106,6 +106,15 @@
                                 :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
+(def tyonjohtaja
+  {:id "tyonjohtaja",
+   :schema-info {:name "tyonjohtaja",
+                 :version 1},
+   :data (merge suunnittelija-henkilo
+           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"},
+            :patevyysvaatimusluokka {:modified 1382006907935, :value "AA"},
+            :yritys yritysnimi-ja-ytunnus})})
+
 (def rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
                                       :version 1}
@@ -251,6 +260,7 @@
    suunnittelija2
    maksaja1
    maksaja2
+   tyonjohtaja
    rakennuspaikka
    rakennuksen-muuttaminen
    uusi-rakennus
