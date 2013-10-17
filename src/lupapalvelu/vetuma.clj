@@ -5,16 +5,13 @@
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :refer [redirect status json]]
-            [noir.session :as session]
             [hiccup.core :refer [html]]
             [hiccup.form :as form]
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
-            [clj-time.core :as time]
             [clj-time.format :as format]
             [digest]
             [sade.env :as env]
-            [lupapalvelu.core :refer [fail]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]))
 
