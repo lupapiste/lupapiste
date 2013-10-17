@@ -151,6 +151,11 @@
    "LVI-suunnittelija" `            "erityissuunnittelija"
    "RAK-rakennesuunnittelija"       "erityissuunnittelija"
    "ARK-rakennussuunnittelija"      "rakennussuunnittelija"
+   "KVV-ty\u00F6njohtaja"           "ty\u00f6njohtaja"
+   "IV-ty\u00F6njohtaja"            "ty\u00f6njohtaja"
+   "erityisalojen ty\u00F6njohtaja" "ty\u00f6njohtaja"
+   "vastaava ty\u00F6njohtaja"      "ty\u00f6njohtaja"
+   "ty\u00F6njohtaja"               "ty\u00f6njohtaja"
    "ei tiedossa"                    "ei tiedossa"
    "Rakennuksen omistaja"           "rakennuksen omistaja"
 
@@ -159,7 +164,6 @@
    :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
    :naapuri                         "naapuri"
    :lisatietojenantaja              "lis\u00e4tietojen antaja"
-   :tyonjohtaja                     "ty\u00f6njohtaja"
    :muu                             "muu osapuoli"})
 
 (def kuntaRoolikoodit
@@ -274,11 +278,30 @@
     (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
     (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
 
+(defn get-tyonjohtaja-data [tyonjohtaja party-type]
+  (let [kuntaRoolikoodi (get-kuntaRooliKoodi tyonjohtaja party-type)
+        codes {:tyonjohtajaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
+               :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
+        henkilo (merge (get-name (:henkilotiedot tyonjohtaja))
+                       {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
+                       (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
+        base-data (merge codes {:patevyysvaatimusluokka (-> tyonjohtaja :patevyysvaatimusluokka :value)
+                                :henkilo henkilo})]
+    (if (contains? tyonjohtaja :yritys)
+      (assoc base-data :yritys (assoc
+                                 (get-simple-yritys (:yritys tyonjohtaja))
+                                 :postiosoite (get-simple-osoite (:osoite tyonjohtaja))))
+      base-data)))
+
+(defn get-foremans [documents]
+  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
+
 
 (defn osapuolet [documents-by-types]
   {:Osapuolet
    {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)}})
+    :suunnittelijatieto (get-designers documents-by-types)
+    :tyonjohtajatieto (get-foremans documents-by-types)}})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val
