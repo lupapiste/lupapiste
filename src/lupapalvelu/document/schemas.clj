@@ -201,6 +201,7 @@
                    #_{:name "alkamis-pvm" :type :date}
                    #_{:name "paattymis-pvm" :type :date}
                    {:name "patevyysvaatimusluokka" :type :select :required true
+                    ;; *** TODO: Taman enumeraation validius varmistettava (kunnilta). ***
                     :body [{:name "1"}
                            {:name "AA"}
                            {:name "ei tiedossa"}]}))
