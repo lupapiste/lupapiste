@@ -18,7 +18,7 @@
             [lupapalvelu.document.commands]
             [lupapalvelu.user-api]
             [lupapalvelu.operations]
-            [lupapalvelu.statement]
+            [lupapalvelu.statement-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
