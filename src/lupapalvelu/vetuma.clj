@@ -1,22 +1,19 @@
 (ns lupapalvelu.vetuma
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.set :refer [rename-keys]]
+            [clojure.string :as string]
             [noir.core :refer [defpage]]
+            [noir.request :as request]
             [noir.response :refer [redirect status json]]
             [hiccup.core :refer [html]]
+            [hiccup.form :as form]
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
-            [hiccup.form :refer :all]
-            [lupapalvelu.core :refer [fail]]        
+            [clj-time.format :as format]
             [digest]
             [sade.env :as env]
-            [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.vtj :as vtj]
-            [noir.request :as request]
-            [noir.session :as session]
-            [clj-time.core :as time]
-            [clj-time.format :as format]))
+            [lupapalvelu.vtj :as vtj]))
 
 ;;
 ;; Configuration
@@ -156,7 +153,7 @@
 (defn session-id [] (get-in (request/ring-request) [:cookies "ring-session" :value]))
 
 (defn- field [[k v]]
-  (hidden-field k v))
+  (form/hidden-field k v))
 
 (defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
 
@@ -182,11 +179,11 @@
     (if (non-local? paths)
       (status 400 (format "invalid return paths: %s" paths))
       (do
-        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths} :upsert true)
+        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths :created-at (java.util.Date.)} :upsert true)
         (html
-          (form-to [:post (:url (config))]
-                   (map field (request-data (host :secure)))
-                   (submit-button "submit")))))))
+          (form/form-to [:post (:url (config))]
+            (map field (request-data (host :secure)))
+            (form/submit-button "submit")))))))
 
 (defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
@@ -235,5 +232,5 @@
     (let [stamp (generate-stamp)
           user  (select-keys data [:userid :firstname :lastname])
           user  (assoc user :stamp stamp)]
-      (mongo/insert :vetuma {:user user})
+      (mongo/insert :vetuma {:user user :created-at (java.util.Date.)})
       (json user))))
