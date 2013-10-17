@@ -406,20 +406,18 @@
 
   (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
 
-  (try
-    (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
-      (executed "add-comment"
-        (-> command
-          (assoc :data {:id id
-                        :text text,
-                        :type :system
-                        :target {:type :attachment
-                                 :id (:id attachment-version)
-                                 :version (:version attachment-version)
-                                 :filename (:filename attachment-version)
-                                 :fileId (:fileId attachment-version)}})))
-      (fail :error.unknown))
-    (finally (.delete (io/file tempfile)))))
+  (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+    (executed "add-comment"
+      (-> command
+        (assoc :data {:id id
+                      :text text,
+                      :type :system
+                      :target {:type :attachment
+                               :id (:id attachment-version)
+                               :version (:version attachment-version)
+                               :filename (:filename attachment-version)
+                               :fileId (:fileId attachment-version)}})))
+    (fail :error.unknown)))
 
 ;;
 ;; Download

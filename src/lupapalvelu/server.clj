@@ -40,6 +40,7 @@
   (mongo/connect!)
   (mongo/ensure-indexes)
   (migration/update!)
+  (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
   (server/add-middleware uach/add-ua-compatible-header)

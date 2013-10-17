@@ -1,10 +1,11 @@
 (ns lupapalvelu.web
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :as s]
             [clojure.java.io :as io]
+            [clojure.string :as s]
             [cheshire.core :as json]
             [clj-http.client :as client]
+            [me.raynes.fs :as fs]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
             [noir.request :as request]
@@ -353,6 +354,17 @@
           (resp/redirect "/html/pages/upload-ok.html")
           (send-error (:text result))))
       (send-error "error.unauthorized"))))
+
+(defn tempfile-cleanup
+  "Middleware for cleaning up tempfile after each request.
+   Depends on other middleware to collect multi-part-params into params and to keywordize keys."
+  [handler]
+  (fn [request]
+    (try
+      (handler request)
+      (finally
+        (when-let [tempfile (get-in request [:params :upload :tempfile])]
+          (fs/delete tempfile))))))
 
 ;;
 ;; Server is alive
