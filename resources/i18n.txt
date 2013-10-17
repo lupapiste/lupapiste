@@ -1,4 +1,3 @@
-admin.screenmessages.ifNoSwedishGiven: (Mikäli et anna ruotsinkielistä ilmoitusta, käytetään suomenkielistä myös ruotsinkielisessä käyttöliittymässä)
 tyonjohtaja._group_label: Työnjohtaja
 tyonjohtaja.kuntaRoolikoodi.KVV-työnjohtaja: KVV-työnjohtaja
 tyonjohtaja.kuntaRoolikoodi.IV-työnjohtaja: IV-työnjohtaja

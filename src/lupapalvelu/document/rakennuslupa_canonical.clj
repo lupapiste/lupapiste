@@ -7,7 +7,8 @@
             [sade.strings :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.schemas :as schemas]))
 
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
@@ -123,11 +124,16 @@
                   :rakennustieto (get-rakennus-data toimenpide application doc)}
      :created (:created doc)}))
 
+(defn fix-typo-in-kayttotarkotuksen-muutos [v]
+  (if (= v lupapalvelu.document.schemas/kayttotarkotuksen-muutos)
+    "rakennuksen p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"
+    v))
+
 (defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
   (let [toimenpide (:data rakennuksen-muuttaminen-doc)]
     {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
                                       {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value))}
-                                      {:muutostyonLaji (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value)})
+                                      {:muutostyonLaji (fix-typo-in-kayttotarkotuksen-muutos (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value))})
                   :rakennustieto (get-rakennus-data toimenpide application rakennuksen-muuttaminen-doc)}
      :created (:created rakennuksen-muuttaminen-doc)}))
 

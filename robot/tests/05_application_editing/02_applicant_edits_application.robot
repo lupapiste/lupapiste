@@ -1,7 +1,8 @@
 *** Settings ***
 
-Documentation  Sonja should see only applications from Sipoo
-Resource       ../../common_resource.robot
+Documentation   Sonja should see only applications from Sipoo
+Suite teardown  Logout
+Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
@@ -54,6 +55,3 @@ Mikko decides to submit application
 Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
-
-Mikko has worked really hard and now he needs some strong coffee
-  Logout
