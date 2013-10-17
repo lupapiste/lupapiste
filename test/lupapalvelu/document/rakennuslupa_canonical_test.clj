@@ -1,14 +1,14 @@
 (ns lupapalvelu.document.rakennuslupa_canonical-test
-  (:use [lupapalvelu.document.canonical-test-common]
-        [lupapalvelu.document.canonical-common]
-        [lupapalvelu.document.rakennuslupa_canonical]
-        [sade.util :only [contains-value?]]
-        [midje.sweet]
-        [lupapalvelu.xml.emit]
-        [lupapalvelu.xml.krysp.rakennuslupa-mapping]
-        [clojure.data.xml]
-        [clj-time.core :only [date-time]]
-        [lupapalvelu.factlet :as fl]))
+  (:require [lupapalvelu.document.canonical-test-common :refer :all]
+            [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.rakennuslupa_canonical :refer :all]
+            [lupapalvelu.xml.emit :refer :all]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
+            [lupapalvelu.factlet :as fl]
+            [sade.util :refer [contains-value?]]
+            [clojure.data.xml :refer :all]
+            [clj-time.core :refer [date-time]]
+            [midje.sweet :refer :all]))
 
 ;;
 ;; Facts
@@ -20,9 +20,9 @@
 
 (def municipality 753)
 
-(def nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
+(def nimi-with-turvakieltokytkin {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"} :turvakieltoKytkin {:value true}})
 
-(def henkilotiedot (assoc nimi :hetu {:value "210281-9988"} :turvakieltoKytkin {:value true}))
+(def henkilotiedot (assoc nimi-with-turvakieltokytkin :hetu {:value "210281-9988"}))
 
 (def osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
@@ -33,15 +33,18 @@
    :osoite osoite})
 
 (def suunnittelija-henkilo
-  (assoc henkilo :henkilotiedot nimi))
+  (assoc henkilo :henkilotiedot nimi-with-turvakieltokytkin))
+
+(def yritysnimi-ja-ytunnus
+  {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}})
 
 (def yritys
-  {:yritysnimi {:value "Solita Oy"}
-   :liikeJaYhteisoTunnus {:value "1060155-5"}
-   :osoite osoite
-   :yhteyshenkilo {:henkilotiedot nimi
-                   :yhteystiedot {:email {:value "solita@solita.fi"},
-                                  :puhelin {:value "03-389 1380"}}}})
+  (merge
+    yritysnimi-ja-ytunnus
+    {:osoite osoite
+     :yhteyshenkilo {:henkilotiedot nimi-with-turvakieltokytkin
+                     :yhteystiedot {:email {:value "solita@solita.fi"},
+                                    :puhelin {:value "03-389 1380"}}}}))
 
 (def hakija1
   {:id "hakija1" :schema-info {:name "hakija"
@@ -59,7 +62,7 @@
    :data (merge
            suunnittelija-henkilo
            {:patevyys {:koulutus {:value "Arkkitehti"} :patevyysluokka {:value "ei tiedossa"}}}
-           {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
+           {:yritys yritysnimi-ja-ytunnus})})
 
 (def suunnittelija1
   {:id "suunnittelija1" :schema-info {:name "suunnittelija"
@@ -67,7 +70,7 @@
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
                 {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
-                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
+                {:yritys yritysnimi-ja-ytunnus})})
 
 (def suunnittelija2
   {:id "suunnittelija2"  :schema-info {:name "suunnittelija"
@@ -75,7 +78,7 @@
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
                 {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
-                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
+                {:yritys yritysnimi-ja-ytunnus})})
 
 (def suunnittelija-old-schema-LUPA-771
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
@@ -91,7 +94,7 @@
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
                 {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
-                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
+                {:yritys yritysnimi-ja-ytunnus})})
 
 (def maksaja1
   {:id "maksaja1" :schema-info {:name "maksaja"
@@ -309,7 +312,7 @@
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]})
 
 (defn- validate-minimal-person [person]
-  (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
+  (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4" :turvakieltoKytkin true}})))
 
 (defn- validate-address [address]
   (let [person-katu (:teksti (:osoitenimi address))
