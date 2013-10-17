@@ -342,9 +342,9 @@
                           :body [{:name "lammitystapa" :type :select
                                   :body [{:name "vesikeskus"}
                                          {:name "ilmakeskus"}
-                                         {:name "suorasahk\u00f6"}
+                                         {:name "suora s\u00f6hk\u00f6"}
                                          {:name "uuni"}
-                                         {:name "eiLammitysta"}
+                                         {:name "ei l\u00e4mmityst\u00e4"}
                                          {:name "ei tiedossa"}]}
                                  {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
