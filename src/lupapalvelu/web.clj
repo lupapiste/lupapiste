@@ -327,33 +327,29 @@
 (defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
   (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
-  (let [send-error (fn [message]
-                     (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
-                                           (-> (:params (request/ring-request))
-                                             (dissoc :upload)
-                                             (dissoc ring.middleware.anti-forgery/token-key)
-                                             (assoc  :errorMessage message))))))
-        target (when-not (every? s/blank? [targetId targetType])
+  (let [target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
-                   {:type targetType :id targetId}))]
-    (if true ; TODO
-      (let [upload-data (assoc upload
-                          :id applicationId
-                          :attachmentId attachmentId
-                          :target target
-                          :locked (java.lang.Boolean/parseBoolean locked)
-                          :authority (java.lang.Boolean/parseBoolean authority)
-                          :text text)
-            attachment-type (attachment/parse-attachment-type attachmentType)
-            upload-data (if attachment-type
-                          (assoc upload-data :attachmentType attachment-type)
-                          upload-data)
-            result (execute (enriched (action/make-command "upload-attachment" upload-data)))]
-        (if (core/ok? result)
-          (resp/redirect "/html/pages/upload-ok.html")
-          (send-error (:text result))))
-      (send-error "error.unauthorized"))))
+                   {:type targetType :id targetId}))
+        upload-data (assoc upload
+                      :id applicationId
+                      :attachmentId attachmentId
+                      :target target
+                      :locked (java.lang.Boolean/parseBoolean locked)
+                      :authority (java.lang.Boolean/parseBoolean authority)
+                      :text text)
+        attachment-type (attachment/parse-attachment-type attachmentType)
+        upload-data (if attachment-type
+                      (assoc upload-data :attachmentType attachment-type)
+                      upload-data)
+        result (execute (enriched (action/make-command "upload-attachment" upload-data)))]
+    (if (core/ok? result)
+      (resp/redirect "/html/pages/upload-ok.html")
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
+                                        (-> (:params (request/ring-request))
+                                          (dissoc :upload)
+                                          (dissoc ring.middleware.anti-forgery/token-key)
+                                          (assoc  :errorMessage (:text result)))))))))
 
 (defn tempfile-cleanup
   "Middleware for cleaning up tempfile after each request.
