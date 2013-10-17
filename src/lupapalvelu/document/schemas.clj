@@ -185,6 +185,26 @@
                      henkilo-valitsin
                      designer-basic
                      {:name "patevyys" :type :group :body patevyys}))
+
+(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select
+                                   :body [{:name "KVV-ty\u00F6njohtaja"}
+                                          {:name "IV-ty\u00F6njohtaja"}
+                                          {:name "erityisalojen ty\u00F6njohtaja"}
+                                          {:name "vastaava ty\u00F6njohtaja"}
+                                          {:name "ty\u00F6njohtaja"}
+                                          {:name "ei tiedossa"}]}])
+
+(def tyonjohtaja (body
+                   kuntaroolikoodi-tyonjohtaja
+                   henkilo-valitsin
+                   designer-basic
+                   #_{:name "alkamis-pvm" :type :date}
+                   #_{:name "paattymis-pvm" :type :date}
+                   {:name "patevyysvaatimusluokka" :type :select :required true
+                    :body [{:name "1"}
+                           {:name "AA"}
+                           {:name "ei tiedossa"}]}))
+
 (def muutostapa {:name "muutostapa" :type :select
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys"}
@@ -565,6 +585,14 @@
      :body (body
              party
              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
+
+    {:info {:name "tyonjohtaja"
+            :order 7
+            :removable false
+            :repeating false
+            :approvable true
+            :type :party}
+     :body tyonjohtaja}
 
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}
