@@ -1,22 +1,22 @@
 (ns lupapalvelu.vetuma
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.set :refer [rename-keys]]
+            [clojure.string :as string]
             [noir.core :refer [defpage]]
+            [noir.request :as request]
             [noir.response :refer [redirect status json]]
+            [noir.session :as session]
             [hiccup.core :refer [html]]
+            [hiccup.form :refer :all]
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
-            [hiccup.form :refer :all]
-            [lupapalvelu.core :refer [fail]]        
+            [clj-time.core :as time]
+            [clj-time.format :as format]
             [digest]
             [sade.env :as env]
-            [clojure.string :as string]
+            [lupapalvelu.core :refer [fail]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.vtj :as vtj]
-            [noir.request :as request]
-            [noir.session :as session]
-            [clj-time.core :as time]
-            [clj-time.format :as format]))
+            [lupapalvelu.vtj :as vtj]))
 
 ;;
 ;; Configuration
