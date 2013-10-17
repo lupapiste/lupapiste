@@ -585,7 +585,7 @@
                     {:name "ranta"}
                     {:name "rakennus"}
                     {:name "yleis"}
-                    {:name "eiKaavaa"}
+                    {:name "ei kaavaa"}
                     {:name "ei tiedossa"}]}]}
 
     {:info {:name "lisatiedot"
