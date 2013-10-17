@@ -16,12 +16,16 @@ Admin edits organization with id 753-R
   Wait until  Element should be visible  xpath=//input[@data-test-id="inforequest-enabled"]
   Select Checkbox  xpath=//input[@data-test-id="inforequest-enabled"]
   Select Checkbox  xpath=//input[@data-test-id="application-enabled"]
-  Click element  xpath=//button[@data-test-id="save-organization"]
+  Select Checkbox  open-inforequest
+  Input text by test id  open-inforequest-email  root@localhost
+  Click enabled by test id  save-organization
 
 Organization 753-R has now inforequest and application enabled
   Wait Until  Element should be visible  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
   Wait Until  Element text should be  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
   Wait Until  Element text should be  xpath=//td[@data-test-id="application-enabled-753-R"]  true
+  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-753-R"]  true
+  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
 
 Admin sets application disabled
   Wait Until  Element should be visible  xpath=//a[@data-test-id="edit-organization-753-R"]
@@ -29,12 +33,14 @@ Admin sets application disabled
   Wait until  Element should be visible  xpath=//input[@data-test-id="inforequest-enabled"]
   Select Checkbox  xpath=//input[@data-test-id="inforequest-enabled"]
   Unselect Checkbox  xpath=//input[@data-test-id="application-enabled"]
-  Click element  xpath=//button[@data-test-id="save-organization"]
+  Click enabled by test id  save-organization
 
 Organization 753-R has now inforequest enabled and application disabled
   Wait Until  Element should be visible  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
   Wait Until  Element text should be  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
   Wait Until  Element text should be  xpath=//td[@data-test-id="application-enabled-753-R"]  false
+  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-753-R"]  true
+  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
 
 
 *** Keywords ***

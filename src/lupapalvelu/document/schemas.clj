@@ -342,9 +342,9 @@
                           :body [{:name "lammitystapa" :type :select
                                   :body [{:name "vesikeskus"}
                                          {:name "ilmakeskus"}
-                                         {:name "suorasahk\u00f6"}
+                                         {:name "suora s\u00f6hk\u00f6"}
                                          {:name "uuni"}
-                                         {:name "eiLammitysta"}
+                                         {:name "ei l\u00e4mmityst\u00e4"}
                                          {:name "ei tiedossa"}]}
                                  {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
@@ -484,31 +484,30 @@
               :body [{:name "purettu uudisrakentamisen vuoksi"}
                      {:name "purettu muusta syyst\u00e4"}
                      {:name "tuhoutunut"}
-                     {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                     {:name "r\u00e4sistymisen vuoksi hyl\u00e4tty"}
                      {:name "poistaminen"}]}
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
 
 (def rakennuspaikka [{:name "kiinteisto"
-             :type :group
-             :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
-                    {:name "tilanNimi" :type :string :readonly true}
-                    {:name "rekisterointipvm" :type :string :readonly true}
-                    {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                    {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
-                    {:name "rantaKytkin" :type :checkbox}]}
-
-            {:name "hallintaperuste" :type :select :required true
-             :body [{:name "oma"}
-                    {:name "vuokra"}
-                    {:name "ei tiedossa"}]}
-            {:name "kaavanaste" :type :select
-             :body [{:name "asema"}
-                    {:name "ranta"}
-                    {:name "rakennus"}
-                    {:name "yleis"}
-                    {:name "eiKaavaa"}
-                    {:name "ei tiedossa"}]}])
+                      :type :group
+                      :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
+                             {:name "tilanNimi" :type :string :readonly true}
+                             {:name "rekisterointipvm" :type :string :readonly true}
+                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
+                             {:name "rantaKytkin" :type :checkbox}]}
+                     {:name "hallintaperuste" :type :select :required true
+                      :body [{:name "oma"}
+                             {:name "vuokra"}
+                             {:name "ei tiedossa"}]}
+                     {:name "kaavanaste" :type :select
+                      :body [{:name "asema"}
+                             {:name "ranta"}
+                             {:name "rakennus"}
+                             {:name "yleis"}
+                             {:name "ei kaavaa"}
+                             {:name "ei tiedossa"}]}])
 
 
 (defn- approvable-top-level-groups [v]

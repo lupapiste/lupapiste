@@ -3,6 +3,7 @@
             [monger.operators :refer :all]
             [noir.session :as session]
             [noir.response :as resp]
+            [sade.env :as env]
             [lupapalvelu.core :refer [now fail!]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
@@ -10,7 +11,7 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
 
-(defn new-open-inforequest! [{application-id :id organization-id :organization} host]
+(defn new-open-inforequest! [{application-id :id organization-id :organization}]
   (assert application-id)
   (assert organization-id)
   (let [organization    (organization/get-organization organization-id)
@@ -25,7 +26,7 @@
                                            :email            email
                                            :created          (now)
                                            :last-used        nil})
-    (notifications/send-open-inforequest-invite! email token-id application-id host)
+    (notifications/send-open-inforequest-invite! email token-id application-id (env/value :host))
     true))
 
 (defn make-user [token]
@@ -43,10 +44,10 @@
      :username email}))
 
 (defraw openinforequest
-  [{{token-id :token-id} :data lang :lang {:keys [host]} :web}]
+  [{{token-id :token-id} :data lang :lang}]
   (info "open-inforequest: open:" token-id lang)
   (let [token (mongo/by-id :open-inforequest-token token-id)
-        url   (str host "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
+        url   (str (env/value :host) "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
     (when-not token (fail! :error.unknown-open-inforequest-token))
     (mongo/update-by-id :open-inforequest-token token-id {$set {:last-used (now)}})
     (session/put! :user (make-user token))

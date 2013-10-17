@@ -7,7 +7,7 @@
 
           <h2 data-bind="ltext: 'admin.screenmessages.list-title'"></h2>
 
-          <table class="table table-striped tablesorter" id="test-screenmessages-table">
+          <table class="table table-striped tablesorter" data-test-id="test-screenmessages-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'admin.screenmessages.added'"></th>
@@ -31,23 +31,25 @@
 
             <h3 data-bind="ltext: 'admin.screenmessages.fi'"></h3>
             <textarea id="add-text-fi" rows="4" cols="50" data-bind="value: textFi, valueUpdate: 'afterkeydown'"></textarea>
-            <h3 data-bind="ltext: 'admin.screenmessages.sv'"></h3>
+            <h3>
+              <span data-bind="ltext: 'admin.screenmessages.sv'"></span>
+              <span data-bind="ltext: 'admin.screenmessages.ifNoSwedishGiven'"></span>
+            </h3>
             <textarea id="add-text-sv" rows="4" cols="50" data-bind="value: textSv, valueUpdate: 'afterkeydown'"></textarea>
-
             <br />
 
             <button href="#"
-              data-bind="click: $root.screenmessages.add,
+              data-bind="click: addMessage,
                          ltext: 'admin.screenmessages.addScreenmessageButtonLabel',
                          disable: disabled"
               class="modal btn btn-primary btn-narrow screenmessagebutton"
-              id="test-add-screenmessage"></button>
+              data-test-id="test-add-screenmessage"></button>
             <hr />
             <button href="#"
               data-bind="click: $root.screenmessages.reset,
                          ltext: 'admin.screenmessages.deleteScreenmessageButtonLabel'"
               class="modal btn btn-primary btn-narrow screenmessagebutton"
-              id="test-delete-screenmessage"></button>
+              data-test-id="test-delete-screenmessage"></button>
 
           </div>
 

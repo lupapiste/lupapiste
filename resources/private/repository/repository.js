@@ -32,13 +32,16 @@ var repository = (function() {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
           application = loading.application;
-      _.each(application.documents || [], function(doc) {
-        var schemaInfo = doc["schema-info"],
-            schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
-        schema.info = schemaInfo;
-        doc.schema = schema;
-      });
-      hub.send("application-loaded", {applicationDetails: loading});
+
+      if (application) {
+        _.each(application.documents || [], function(doc) {
+          var schemaInfo = doc["schema-info"],
+              schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
+          schema.info = schemaInfo;
+          doc.schema = schema;
+        });
+        hub.send("application-loaded", {applicationDetails: loading});
+      };
     });
   }
 

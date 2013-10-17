@@ -70,7 +70,8 @@
   {:parameters [:email :password]
    :roles      [:admin :authorityAdmin]}
   [{params :data caller :user}]
-  (ok :id (user/create-user caller params)))
+  #_(ok :id (user/create-user caller params))
+  (fail "Not implemented correctly!"))
 
 (defcommand create-authority-admin-user
   {:parameters [:firstName :lastName :email :password :organizations]
@@ -350,7 +351,7 @@
         (lupapalvelu.fixture/apply-fixture name)
         (ok))
       (do
-        (warn "fixture '%s' not found" name)
+        (warnf "fixture '%s' not found" name)
         (fail :error.fixture-not-found))))
 
   (defquery activate-user-by-email

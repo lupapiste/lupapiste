@@ -199,6 +199,9 @@
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
+(defn redirect-to-server-root []
+  (resp/redirect (str (env/value :host) "/")))
+
 (defn redirect-to-frontpage [lang]
   (redirect lang "welcome"))
 
@@ -258,11 +261,11 @@
 
 (defpage "/logout" []
   (logout!)
-  (landing-page))
+  (redirect-to-server-root))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
-  (redirect-to-frontpage lang))
+  (redirect-to-server-root))
 
 ;; Saparate URL outside anti-csrf
 (defjson [:post "/api/login"] []
