@@ -304,7 +304,7 @@
 (fact "Meta test: laajennus"       laajennus        => valid-against-current-schema?)
 
 
-(def ^:private poikkari-hakemus {:schema-version 1
+(def poikkari-hakemus {:schema-version 1
                        :auth [{:lastName "Panaani"
                                :firstName "Pena"
                                :username "pena"
