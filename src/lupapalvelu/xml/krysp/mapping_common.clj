@@ -139,7 +139,13 @@
                              yritys
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}]}]}
-           {:tag :tyonjohtajatieto}
+           {:tag :tyonjohtajatieto
+            :child [{:tag :Tyonjohtaja
+                     :child [{:tag :tyonjohtajaRooliKoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos
