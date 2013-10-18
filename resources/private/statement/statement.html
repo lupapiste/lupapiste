@@ -42,7 +42,7 @@
                 </td>
                 <td>
                 </td>
-                <td><a data-bind="ltext: 'remove', click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id), visible: $root.attachmentsModel.canDeleteAttachment($parent),  enable: $root.attachmentsModel.canDeleteAttachment($parent)" ></a></td>
+                <td><a data-bind="ltext: 'remove', click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id), visible: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement'),  enable: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement')" ></a></td>
               </tr>
             </tbody>
           </table>
@@ -54,8 +54,8 @@
 
         <button
           class="btn modal"
-          data-bind="ltext: 'application.attachmentsAdd', visible: canAddAttachment(), enabled: canAddAttachment(), click: newAttachment"
-          data-test-id="add-inforequest-attachment"
+          data-bind="ltext: 'application.attachmentsAdd', visible: canAddAttachment() && $root.authorization.ok('give-statement'), enabled: canAddAttachment() && $root.authorization.ok('give-statement'), click: newAttachment"
+          data-test-id="add-statement-attachment"
           data-window-id="upload-dialog">
         </button>
       </div>

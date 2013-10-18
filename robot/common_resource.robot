@@ -81,8 +81,6 @@ Wait for jQuery
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
 
-Show dev-box
-  Execute Javascript  $(".dev-debug").show();
 
 #
 # Navigation
@@ -106,7 +104,8 @@ Tab should be visible
 Logout
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Wait until page contains element  login-username
+  Wait until  Title Should Be  Lupapiste
+  Wait until page contains element  xpath=//div[@id='login-form']//input[@id='login-username']
 
 #
 # Login stuff
@@ -294,13 +293,9 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Click by test id  create-search-button
-  # for IE8
-  Focus  xpath=//input[@data-test-id="create-address"]
-  Execute Javascript  $("select[data-test-id='create-municipality-select']").show();
-  Execute Javascript  $("input[data-test-id='create-property-id']").removeAttr("readonly").removeAttr("disabled").val("${propertyId}").change();
+  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
   Input text by test id  create-address  ${address}
-  Select From List by test id  create-municipality-select  ${municipality}
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
@@ -382,13 +377,13 @@ Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  inforequest
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
   [Arguments]  ${address}

@@ -140,7 +140,7 @@
                                :data {:hallintaperuste {:modified 1379419781683
                                                         :value "oma"}
                                       :kaavanaste {:modified 1379419785786
-                                                   :value "eiKaavaa"}
+                                                   :value "ei kaavaa"}
                             :kiinteisto {:maaraalaTunnus {:modified 1379422953978
                                                           :value "0008"}
                                          :tilanNimi {:modified 1379422953979

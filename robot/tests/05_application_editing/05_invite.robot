@@ -39,12 +39,10 @@ Mikko can't reinvite Teppo
 
 # TODO: cant remove auth for owner
 # TODO: can remove auth for someone else
-
-Mikko leaves and Teppo logs in
-  Logout
-  Teppo logs in
+  [Teardown]  logout
 
 Teppo can see the invite
+  Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
@@ -55,7 +53,7 @@ Teppo can edit Mikko's application
   Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
   Wait Until  Page Should Contain  Tiedot tallennettu
   Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
-  Logout
+  [Teardown]  logout
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
@@ -86,7 +84,7 @@ Sonja (the Authority) is not allowed to invite people
   Click element  xpath=//section[@id='applications']//td[text()='invite-app']
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-416-25-25
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
-  Logout
+  [Teardown]  logout
 
 Mikko invites previously unknown user Oskari
   Mikko logs in
@@ -101,7 +99,6 @@ Mikko invites previously unknown user Oskari
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
-  Logout
 
 # TODO: should create new user "oskari@example.com" and make sure he has access
 

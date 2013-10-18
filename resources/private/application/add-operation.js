@@ -1,4 +1,9 @@
 ;(function() {
+  "use strict";
+
+  var currentId = null;
+  var model = null;
+  var tree = null;
 
   function Model() {
     var self = this;
@@ -53,9 +58,7 @@
     };
 
   }
-
-  var model = new Model();
-  var currentId;
+  model = new Model();
 
   hub.onPageChange("add-operation", function(e) {
     var newId = e.pagePath[0];
@@ -63,6 +66,9 @@
       currentId = newId;
       model.clear();
       repository.load(currentId);
+    }
+    if (tree) {
+      tree.start();
     }
   });
 
@@ -76,7 +82,7 @@
 
     $("#add-operation").applyBindings(model);
 
-    var tree = $("#add-operation .operation-tree").selectTree({
+    tree = $("#add-operation .operation-tree").selectTree({
       template: $("#create-templates"),
       last: $("#add-operation-templates .tree-last"),
       onSelect: function(v) { model.operation(v ? v.op : null); },
