@@ -56,13 +56,6 @@ var accordion = (function() {
   function open(t, done)   { set(t, "open", done);   return t; }
   function close(t, done)  { set(t, "closed", done); return t; }
   function toggle(t, done) { set(t, "toggle", done); return t; }
-  function setHeight(t) {
-    var h = t.height();
-    var height = h + "px";
-    t.parent()
-      .attr("data-accordion-height", height)
-      .css("height", height);
-    }
 
   function click(event) {
     var e = getEvent(event);
@@ -80,7 +73,6 @@ var accordion = (function() {
     open:   open,
     close:  close,
     toggle: toggle,
-    setHeight: setHeight,
     click:  click
   };
 
