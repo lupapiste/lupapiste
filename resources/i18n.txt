@@ -10,6 +10,7 @@ tyonjohtaja.henkilotiedot._group_label: Henkilötiedot
 tyonjohtaja.henkilotiedot.etunimi: Etunimi
 tyonjohtaja.henkilotiedot.sukunimi: Sukunimi
 tyonjohtaja.henkilotiedot.turvakieltoKytkin: Henkilöllä on voimassa oleva turvakielto
+tyonjohtaja.henkilotiedot.hetu: Henkilötunnus
 tyonjohtaja.yritys._group_label: Yritys/yhteisö
 tyonjohtaja.yritys.yritysnimi: Nimi
 tyonjohtaja.yritys.liikeJaYhteisoTunnus: Y-tunnus
