@@ -158,11 +158,16 @@ var LUPAPISTE = LUPAPISTE || {};
 
     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
+    var logoHref = window.location.href;
+    if (self.startPage && !self.startPage.charAt(0) != "/") {
+      logoHref = "#!/" + self.startPage;
+    }
+
     var model = {
       languages: loc.getSupportedLanguages(),
       currentLanguage: loc.getCurrentLanguage(),
       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-      startPage: self.startPage,
+      logoHref: logoHref,
       showUserMenu: self.showUserMenu
     };
 
