@@ -293,7 +293,7 @@
 (fact "Meta test: lisatieto"       lisatieto        => valid-against-current-schema?)
 (fact "Meta test: paasunnitelija"  paasuunnittelija => valid-against-current-schema?)
 (fact "Meta test: suunnittelija"   suunnittelija    => valid-against-current-schema?)
-(fact "Meta test: suunnittelija"   tyonjohtaja      => valid-against-current-schema?)
+(fact "Meta test: tyonjohtaja"     tyonjohtaja      => valid-against-current-schema?)
 (fact "Meta test: lisaosa"         lisaosa          => valid-against-current-schema?)
 
 
