@@ -362,7 +362,7 @@
                           :body [{:name "lammitystapa" :type :select
                                   :body [{:name "vesikeskus"}
                                          {:name "ilmakeskus"}
-                                         {:name "suora s\u00f6hk\u00f6"}
+                                         {:name "suora s\u00e4hk\u00f6"}
                                          {:name "uuni"}
                                          {:name "ei l\u00e4mmityst\u00e4"}
                                          {:name "ei tiedossa"}]}
