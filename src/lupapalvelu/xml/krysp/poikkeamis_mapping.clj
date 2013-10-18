@@ -36,6 +36,8 @@
                                          {:tag :puoltotieto
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
+(def kerrosalatieto {:tag :kerrosalatieto :child {:tag :kerrosala :child [{:tag :pintaAla}
+                                                  {:tag :paakayttotarkoitusKoodi}]}})
 
 (def abstractPoikkeamisType [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                              {:tag :luvanTunnistetiedot
@@ -43,7 +45,15 @@
                              {:tag :osapuolettieto
                               :child [mapping-common/osapuolet]}
                              {:tag :rakennuspaikkatieto
-                              :child [mapping-common/rakennuspaikka]}])
+                              :child [mapping-common/rakennuspaikka]}
+                             {:tag :toimenpidetieto :child [{:tag :Toimenpide :child [{:tag :kuvausKoodi }
+                                                                                      kerrosalatieto
+                                                                                      {:tag :tavoitetilatieto :child [{:tag :Tavoitetila :child [{:tag :paakayttotarkoitusKoodi}
+                                                                                                                                               {:tag :asuinhuoneistojenLkm}
+                                                                                                                                                {:tag :rakennuksenKerrosluku}
+                                                                                                                                                {:tag :kokonaisala}
+                                                                                                                                                kerrosalatieto]}]}
+                                                                                      ]}]}])
 
 (def poikkeamis_to_krysp
   {:tag :Popast
@@ -58,7 +68,7 @@
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
-           {:tag :suunnittelutarveasiatieto :child [abstractPoikkeamisType]}
+           {:tag :suunnittelutarveasiatieto :child [:tag :Suunnittelutarveratkaisu :child abstractPoikkeamisType]}
            ]})
 
 
@@ -84,7 +94,7 @@
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint (:attachments application))
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
-    (println xml-s)
+    ;(println xml-s)
     (validate xml-s)
     (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     ))
