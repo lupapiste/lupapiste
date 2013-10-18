@@ -265,10 +265,10 @@
         patevyys (:patevyys suunnittelija)
         henkilo (merge (get-name (:henkilotiedot suunnittelija))
                        {:osoite (get-simple-osoite (:osoite suunnittelija))}
+                       {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
-                                :turvakieltoKytkin (true? (-> suunnittelija :henkilotiedot :turvakieltoKytkin :value))
                                 :henkilo henkilo})]
     (if (contains? suunnittelija :yritys)
       (assoc base-data :yritys (assoc
@@ -287,9 +287,9 @@
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
         henkilo (merge (get-name (:henkilotiedot tyonjohtaja))
                        {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
+                       {:henkilotunnus (-> tyonjohtaja :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
         base-data (merge codes {:patevyysvaatimusluokka (-> tyonjohtaja :patevyysvaatimusluokka :value)
-                                :turvakieltoKytkin (true? (-> tyonjohtaja :henkilotiedot :turvakieltoKytkin :value))
                                 :henkilo henkilo})]
     (if (contains? tyonjohtaja :yritys)
       (assoc base-data :yritys (assoc

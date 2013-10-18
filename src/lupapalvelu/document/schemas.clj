@@ -104,7 +104,7 @@
                                     {:name "sukunimi" :type :string :subtype :vrk-name :required true}
                                     {:name turvakielto :type :checkbox :blacklist [turvakielto]}]}])
 
-(def henkilotiedot-with-hetu {:name "henkilotiedot"
+(def henkilotiedot {:name "henkilotiedot"
                                :type :group
                                :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                       {:name "sukunimi" :type :string :subtype :vrk-name :required true}
@@ -113,16 +113,16 @@
 
 (def henkilo (body
                henkilo-valitsin
-               [henkilotiedot-with-hetu]
+               [henkilotiedot]
                simple-osoite
                yhteystiedot))
 
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
-                                  [(assoc henkilotiedot-with-hetu
+                                  [(assoc henkilotiedot
                                      :body
                                      (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
-                                       (:body henkilotiedot-with-hetu)))]
+                                       (:body henkilotiedot)))]
                                   simple-osoite
                                   yhteystiedot))
 
@@ -144,9 +144,9 @@
              {:name "yritys" :type :group :body yritys}))
 
 (def party-with-required-hetu (body
-                                [{:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                                 {:name "henkilo" :type :group :body henkilo-with-required-hetu}
-                                 {:name "yritys" :type :group :body yritys}]))
+                                {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                                {:name "henkilo" :type :group :body henkilo-with-required-hetu}
+                                {:name "yritys" :type :group :body yritys}))
 
 
 (def patevyys [{:name "koulutus" :type :string :required true}
@@ -158,7 +158,7 @@
                        {:name "ei tiedossa"}]}])
 
 (def designer-basic (body
-                      henkilotiedot-minimal
+                      (schema-body-without-element-by-name henkilotiedot turvakielto)
                       {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
                                                                                           (assoc c :required false)
                                                                                           c)) yritys-minimal)}
@@ -201,7 +201,6 @@
                    #_{:name "alkamis-pvm" :type :date}
                    #_{:name "paattymis-pvm" :type :date}
                    {:name "patevyysvaatimusluokka" :type :select :required true
-                    ;; *** TODO: Taman enumeraation validius varmistettava (kunnilta). ***
                     :body [{:name "1"}
                            {:name "AA"}
                            {:name "ei tiedossa"}]}))
