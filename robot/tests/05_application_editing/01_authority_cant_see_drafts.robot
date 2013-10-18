@@ -20,7 +20,7 @@ Mikko goes to application page
   Open application  authority-cant-see-drafts  753-416-25-30
 
 Application is in draft state
-  Applicantion state is  Luonnos
+  Application state should be  draft
 
 There are no comments yet
   Open tab  conversation
@@ -30,7 +30,7 @@ Mikko adds a comment
   Add comment  huba huba
 
 Application is now in stage valmisteilla
-  Applicantion state is  Valmisteilla
+  Application state should be  open
   It is possible to add operation
   [Teardown]  logout
 
@@ -49,7 +49,3 @@ Veikko should see only zero (Tampere) applications
 Comment count is
   [Arguments]  ${amount}
   Xpath Should Match X Times  //section[@id='application']//table[@data-test-id='comments-table']//tr  ${amount}
-
-Applicantion state is
-  [Arguments]  ${state}
-  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-state']  ${state}

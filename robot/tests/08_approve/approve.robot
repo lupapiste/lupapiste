@@ -21,9 +21,7 @@ Mikko decides to submit application
 
 Mikko still can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
-
-Mikko remembers that it is his turn to pick the kids from day care
-  Logout
+  [Teardown]  logout
 
 Sonja logs in for approval
   Sonja logs in
@@ -38,11 +36,11 @@ Sonja cant re-approve application
 Sonja sees that some completion is needed
   Open application  ${appname}  753-416-25-30
   Click enabled by test id  request-for-complement
-  Logout
+  Wait Until  Application state should be  complement-needed
+  [Teardown]  logout
 
 Mikko comes back, fills in missing parts and makes a resubmit
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Submit application
-  Logout
-
+  [Teardown]  logout
