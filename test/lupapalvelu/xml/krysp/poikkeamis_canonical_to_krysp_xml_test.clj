@@ -3,7 +3,7 @@
         [lupapalvelu.document.poikkeamis-canonical :only [poikkeus-application-to-canonical]]
         [lupapalvelu.document.poikkeamis-canonical-test :only [poikkari-hakemus]]
         [lupapalvelu.xml.emit]
-        [lupapalvelu.xml.krysp.poikkeamis-mapping :only [rakennuslupa_to_krysp]]
+        [lupapalvelu.xml.krysp.poikkeamis-mapping :only [poikkeamis_to_krysp]]
         [lupapalvelu.xml.krysp.validator :only [validate]]
         [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :only [has-tag]]
         [clojure.data.xml]
@@ -13,14 +13,14 @@
 (fact ":tag is set" (has-tag poikkeamis_to_krysp) => true)
 
 (facts "Poikkeuslupa to canonical and then to poikkeuslupa xml with schema validation"
-  (let [canonical (poikkeus-application-to-canonical application "fi")
-        xml (element-to-xml canonical rakennuslupa_to_krysp)
+  (let [canonical (poikkeus-application-to-canonical poikkari-hakemus "fi")
+        xml (element-to-xml canonical poikkeamis_to_krysp)
         xml-s (indent-str xml)]
 
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     ;; TODO: own test
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:poikkari-ftp-user "sipoo"})
+    (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:poikkari-ftp-user "sipoo"})
 
     ;(clojure.pprint/pprint application)
 
@@ -29,5 +29,5 @@
     ;    (emit xml out-file))
     (fact "xml exist" xml => truthy)
 
-    (validate xml-s)  ;; in lupapalvelu.xml.krysp.validator
+   ; (validate xml-s)  ;; in lupapalvelu.xml.krysp.validator
     ))

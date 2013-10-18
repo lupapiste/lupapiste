@@ -37,6 +37,14 @@
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
+(def abstractPoikkeamisType [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
+                             {:tag :luvanTunnistetiedot
+                              :child [mapping-common/lupatunnus]}
+                             {:tag :osapuolettieto
+                              :child [mapping-common/osapuolet]}
+                             {:tag :rakennuspaikkatieto
+                              :child [mapping-common/rakennuspaikka]}])
+
 (def poikkeamis_to_krysp
   {:tag :Popast
    :ns "ppst"
@@ -49,6 +57,8 @@
           :xmlns:xlink "http://www.w3.org/1999/xlink"
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+           {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
+           {:tag :suunnittelutarveasiatieto :child [abstractPoikkeamisType]}
            ]})
 
 
@@ -74,7 +84,7 @@
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint (:attachments application))
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
-    ;(println xml-s)
+    (println xml-s)
     (validate xml-s)
     (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     ))

@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
-            [lupapalvelu.xml.krysp.poikkari-mapping :as p-mapping]
+            [lupapalvelu.xml.krysp.poikkeamis-mapping :as p-mapping]
             [lupapalvelu.permit :as permit]
             [sade.env :as env]
             [me.raynes.fs :as fs]))
