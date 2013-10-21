@@ -81,8 +81,6 @@ Wait for jQuery
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
 
-Show dev-box
-  Execute Javascript  $(".dev-debug").show();
 
 #
 # Navigation
@@ -379,13 +377,13 @@ Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  inforequest
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
   [Arguments]  ${address}

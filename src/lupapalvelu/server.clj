@@ -18,7 +18,7 @@
             [lupapalvelu.document.commands]
             [lupapalvelu.user-api]
             [lupapalvelu.operations]
-            [lupapalvelu.statement]
+            [lupapalvelu.statement-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
@@ -38,8 +38,9 @@
     (System/getProperty "javax.net.ssl.trustStore"))
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
-  (mongo/ensure-indexes)
   (migration/update!)
+  (mongo/ensure-indexes)
+  (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
   (server/add-middleware uach/add-ua-compatible-header)

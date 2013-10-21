@@ -1,10 +1,11 @@
 (ns lupapalvelu.web
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :as s]
             [clojure.java.io :as io]
+            [clojure.string :as s]
             [cheshire.core :as json]
             [clj-http.client :as client]
+            [me.raynes.fs :as fs]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
             [noir.request :as request]
@@ -326,14 +327,17 @@
 (defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
   (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
-  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
+  (let [target (when-not (every? s/blank? [targetId targetType])
+                 (if (s/blank? targetId)
+                   {:type targetType}
+                   {:type targetType :id targetId}))
         upload-data (assoc upload
-                           :id applicationId
-                           :attachmentId attachmentId
-                           :target target
-                           :locked (java.lang.Boolean/parseBoolean locked)
-                           :authority (java.lang.Boolean/parseBoolean authority)
-                           :text text)
+                      :id applicationId
+                      :attachmentId attachmentId
+                      :target target
+                      :locked (java.lang.Boolean/parseBoolean locked)
+                      :authority (java.lang.Boolean/parseBoolean authority)
+                      :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
@@ -342,10 +346,21 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
-                                           (-> (:params (request/ring-request))
-                                             (dissoc :upload)
-                                             (dissoc ring.middleware.anti-forgery/token-key)
-                                             (assoc  :errorMessage (result :text)))))))))
+                                        (-> (:params (request/ring-request))
+                                          (dissoc :upload)
+                                          (dissoc ring.middleware.anti-forgery/token-key)
+                                          (assoc  :errorMessage (:text result)))))))))
+
+(defn tempfile-cleanup
+  "Middleware for cleaning up tempfile after each request.
+   Depends on other middleware to collect multi-part-params into params and to keywordize keys."
+  [handler]
+  (fn [request]
+    (try
+      (handler request)
+      (finally
+        (when-let [tempfile (get-in request [:params :upload :tempfile])]
+          (fs/delete tempfile))))))
 
 ;;
 ;; Server is alive
