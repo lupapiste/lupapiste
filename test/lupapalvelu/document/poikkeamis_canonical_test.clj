@@ -633,7 +633,7 @@
 
         lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
-        asioimiskieli (:asiomiskieli Lisatieto) => "suomi"
+        asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"

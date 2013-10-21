@@ -30,7 +30,8 @@
                                                                                                                                                 {:tag :rakennuksenKerrosluku}
                                                                                                                                                 {:tag :kokonaisala}
                                                                                                                                                 kerrosalatieto]}]}]}]}
-                             {:tag :lausuntotieto :child [mapping-common/lausunto]}])
+                             {:tag :lausuntotieto :child [mapping-common/lausunto]}
+                             {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}])
 
 
 

@@ -45,7 +45,7 @@
                                                                  _ (assert (= 1 (count rakennushanke)))]
                                                              (first rakennushanke)))
                         :lausuntotieto (get-statements (:statements application))
-                        :lisatietotieto {:Lisatieto {:asiomiskieli (if (= lang "se")
+                        :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
                                                                      "ruotsi"
                                                                      "suomi")}}
                         :kayttotapaus "Uusi hakemus"}})))
