@@ -234,7 +234,9 @@
                                    :osoite {:katu {:modified 1380191655585 :value "Paapankuja 12"}
                                             :postinumero {:modified 1380191660158 :value "10203"}
                                             :postitoimipaikannimi {:modified 1380191655585 :value "Piippola"}}
-                                   :patevyysvaatimusluokka {:modified 1380191690366 :value "AA"}
+                                   :patevyys {:koulutus {:modified 1380191688364 :value "El\u00e4m\u00e4n koulu"}
+                                              :patevyysvaatimusluokka {:modified 1380191690366 :value "AA"}
+                                              :valmistumisvuosi {:modified 1380191690366 :value "2000"}}
                                    :userId {:modified 1380191655618 :value "777777777777777777000020"}
                                    :yhteystiedot {:email {:modified 1380191655585 :value "pena@example.com"}
                                                   :puhelin {:modified 1380191655585 :value "0102030405"}}
@@ -556,6 +558,8 @@
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Tyonjohtaja) => "El\u00e4m\u00e4n koulu"
+        _ (:valmistumisvuosi Tyonjohtaja) => "2000"
         _ (:patevyysvaatimusluokka Tyonjohtaja) => "AA"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy

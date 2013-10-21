@@ -285,11 +285,14 @@
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi tyonjohtaja party-type)
         codes {:tyonjohtajaRooliKoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
+        patevyys (:patevyys tyonjohtaja)
         henkilo (merge (get-name (:henkilotiedot tyonjohtaja))
                        {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
                        {:henkilotunnus (-> tyonjohtaja :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
-        base-data (merge codes {:patevyysvaatimusluokka (-> tyonjohtaja :patevyysvaatimusluokka :value)
+        base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
+                                :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
+                                :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
                                 :henkilo henkilo})]
     (if (contains? tyonjohtaja :yritys)
       (assoc base-data :yritys (assoc

@@ -194,16 +194,20 @@
                                           {:name "ty\u00F6njohtaja"}
                                           {:name "ei tiedossa"}]}])
 
+(def patevyys-tyonjohtaja [{:name "koulutus" :type :string :required true}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
+                           {:name "patevyysvaatimusluokka" :type :select :required true
+                            :body [{:name "1"}
+                                   {:name "AA"}
+                                   {:name "ei tiedossa"}]}])
+
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    #_{:name "alkamis-pvm" :type :date}
                    #_{:name "paattymis-pvm" :type :date}
-                   {:name "patevyysvaatimusluokka" :type :select :required true
-                    :body [{:name "1"}
-                           {:name "AA"}
-                           {:name "ei tiedossa"}]}))
+                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
 
 (def muutostapa {:name "muutostapa" :type :select
                  :body [{:name "poisto"}
@@ -588,8 +592,8 @@
 
     {:info {:name "tyonjohtaja"
             :order 7
-            :removable false
-            :repeating false
+            :removable true
+            :repeating true
             :approvable true
             :type :party}
      :body tyonjohtaja}

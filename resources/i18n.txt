@@ -21,7 +21,12 @@ tyonjohtaja.osoite.postitoimipaikannimi: Postitoimipaikka
 tyonjohtaja.yhteystiedot._group_label: Yhteystiedot
 tyonjohtaja.yhteystiedot.puhelin: Puhelin
 tyonjohtaja.yhteystiedot.email: Sähköposti
-tyonjohtaja.patevyysvaatimusluokka.1: 1
-tyonjohtaja.patevyysvaatimusluokka.AA: AA
-tyonjohtaja.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
-tyonjohtaja.patevyysvaatimusluokka._group_label: Pätevyysvaatimusluokka
+tyonjohtaja.patevyys._group_label: Pätevyys
+tyonjohtaja.patevyys.koulutus: Koulutus
+tyonjohtaja.patevyys.valmistumisvuosi: Valmistumisvuosi
+tyonjohtaja.patevyys.patevyysvaatimusluokka._group_label: Pätevyysvaatimusluokka
+tyonjohtaja.patevyys.patevyysvaatimusluokka.1: 1
+tyonjohtaja.patevyys.patevyysvaatimusluokka.AA: AA
+tyonjohtaja.patevyys.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
+schemas.tyonjohtaja: Työnjohtaja
+tyonjohtaja._append_label: Lisää työnjohtaja

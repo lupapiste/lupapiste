@@ -110,15 +110,15 @@
   {:id "tyonjohtaja", :schema-info {:name "tyonjohtaja", :version 1},
    :data (merge suunnittelija-henkilo
            {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"},
-            :patevyysvaatimusluokka {:modified 1382006907935, :value "AA"},
+            :patevyys {:koulutus {:value "Koulutus"} :patevyysvaatimusluokka {:value "AA"} :valmistumisvuosi {:value "2000"}},
             :yritys yritysnimi-ja-ytunnus})})
 
 (def tyonjohtaja-blank-role-and-blank-qualification
   {:id "tyonjohtaja", :schema-info {:name "tyonjohtaja", :version 1},
    :data (merge
-           suunnittelija-henkilo #_(assoc-in suunnittelija-henkilo [:henkilotiedot :turvakieltoKytkin] false)
+           suunnittelija-henkilo
            {:kuntaRoolikoodi {:value ""},
-            :patevyysvaatimusluokka {:modified 1382006907935, :value "Ei tiedossa"},
+            :patevyys {:koulutus {:value "Koulutus"} :patevyysvaatimusluokka {:value "Ei tiedossa"} :valmistumisvuosi {:value "2000"}},
             :yritys yritysnimi-ja-ytunnus})})
 
 (def rakennuspaikka
@@ -443,6 +443,8 @@
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "KVV-ty\u00f6njohtaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => "Koulutus")
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2000")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "AA")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
@@ -453,7 +455,9 @@
   (let [tyonjohtaja-model (get-tyonjohtaja-data (:data tyonjohtaja-blank-role-and-blank-qualification) :tyonjohtaja)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
-    (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")))
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => "Koulutus")
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2000")))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [maksaja-model (get-osapuoli-data (:data maksaja1) :maksaja)

@@ -145,7 +145,9 @@
                              {:tag :VRKrooliKoodi}
                              henkilo
                              yritys
-                             {:tag :patevyysvaatimusluokka}]}]}
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos
