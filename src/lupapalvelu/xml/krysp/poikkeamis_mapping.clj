@@ -36,8 +36,8 @@
                                          {:tag :puoltotieto
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
-(def kerrosalatieto {:tag :kerrosalatieto :child {:tag :kerrosala :child [{:tag :pintaAla}
-                                                  {:tag :paakayttotarkoitusKoodi}]}})
+(def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
+                                                  {:tag :paakayttotarkoitusKoodi}]}]})
 
 (def abstractPoikkeamisType [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                              {:tag :luvanTunnistetiedot
@@ -68,7 +68,7 @@
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
-           {:tag :suunnittelutarveasiatieto :child [:tag :Suunnittelutarveratkaisu :child abstractPoikkeamisType]}
+           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveratkaisu :child abstractPoikkeamisType}]}
            ]})
 
 
