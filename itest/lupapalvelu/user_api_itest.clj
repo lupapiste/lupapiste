@@ -24,17 +24,6 @@
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
 
-(facts create-apikey
-  (apply-remote-minimal)
-  (fact (-> (find-user :email "tampere-ya") :private :apikey) => nil)
-  (fact (create-apikey "tampere-ya") =not=> nil)
-  (fact (-> (find-user :email "tampere-ya") :private :apikey) =not=> nil))
-
-;;
-;; ==============================================================================
-;; Change password:
-;; ==============================================================================
-;;
 
 
 
@@ -43,10 +32,7 @@
 
 
 
-
-
-
-
+;; dragons ahead...
 
 (fact "changing user info"
   (apply-remote-minimal)
