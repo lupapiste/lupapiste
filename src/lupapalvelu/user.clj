@@ -151,8 +151,7 @@
         hashed-password   (security/get-hash password salt)]
     (when-not (= 1 (mongo/update-n :users
                                    {:email (ss/lower-case email)}
-                                   {$set {:private.salt salt
-                                          :private.password hashed-password}}))
+                                   {$set {:private.password hashed-password}}))
       (fail! :unknown-user :email email))
     nil))
 
@@ -171,8 +170,7 @@
   (let [email    (ss/lower-case email)
         private  (when password
                    (let [salt (security/dispense-salt)]
-                     {:salt     salt
-                      :password (security/get-hash password salt)}))]
+                     {:password (security/get-hash password salt)}))]
     (merge
       user-defaults
       (select-keys user-data user-keys)
