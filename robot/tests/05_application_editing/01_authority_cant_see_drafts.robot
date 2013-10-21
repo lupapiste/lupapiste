@@ -8,19 +8,19 @@ Resource       ../../common_resource.robot
 Mikko creates application
   Mikko logs in
   Create application the fast way  authority-cant-see-drafts  753  753-416-25-30
-  Logout
+  [Teardown]  logout
 
 Sonja should not see applications at this stage
   Sonja logs in
   Request should not be visible  authority-cant-see-drafts
-  Logout
+  [Teardown]  logout
 
 Mikko goes to application page
   Mikko logs in
   Open application  authority-cant-see-drafts  753-416-25-30
 
 Application is in draft state
-  Applicantion state is  Luonnos
+  Application state should be  draft
 
 There are no comments yet
   Open tab  conversation
@@ -30,26 +30,22 @@ Mikko adds a comment
   Add comment  huba huba
 
 Application is now in stage valmisteilla
-  Applicantion state is  Valmisteilla
+  Application state should be  open
   It is possible to add operation
-  Logout
+  [Teardown]  logout
 
 Sonja should see one (Sipoo) application
   Sonja logs in
   Request should be visible  authority-cant-see-drafts
-  Logout
+  [Teardown]  logout
 
 Veikko should see only zero (Tampere) applications
   Veikko logs in
   Request should not be visible  authority-cant-see-drafts
-  Logout
+  [Teardown]  logout
 
 *** Keywords ***
 
 Comment count is
   [Arguments]  ${amount}
   Xpath Should Match X Times  //section[@id='application']//table[@data-test-id='comments-table']//tr  ${amount}
-
-Applicantion state is
-  [Arguments]  ${state}
-  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-state']  ${state}

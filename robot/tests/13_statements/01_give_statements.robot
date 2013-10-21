@@ -131,10 +131,12 @@ Open statement
   Wait until  element should be visible  statement-type-select
 
 Statement is disabled
-  Wait until  element should be disabled  statement-type-select
+  Wait until  Element should be disabled  statement-type-select
+  Wait until  Element should not be visible  xpath=//section[@id="statement"]//button[@data-test-id="add-statement-attachment"]
 
 Statement is not disabled
-  Wait until  element should be enabled  statement-type-select
+  Wait until  Element should be enabled  statement-type-select
+  Wait until  Element should be visible  xpath=//section[@id="statement"]//button[@data-test-id="add-statement-attachment"]
 
 Statement person count is
   [Arguments]  ${amount}
@@ -152,4 +154,3 @@ Create statement person
   Wait Until  Page Should Contain  ${email}
   ${countAfter} =  Evaluate  ${count} + 1
   Statement person count is  ${countAfter}
-  

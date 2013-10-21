@@ -69,7 +69,7 @@ Mikko closes application at Latokuja 3 and logs out
   Wait Until  Request should be visible  create-app
   Wait Until  Request should be visible  create-info
   Wait Until  Request should not be visible  create-app-2
-  Logout
+  [Teardown]  logout
 
 # LUPA-23
 Authority (Veikko) can create an application
@@ -85,4 +85,4 @@ Veikko can submit the application he created
 Veikko sees application in list
   Go to page  applications
   Request should be visible  create-veikko-auth-app
-  Logout
+  [Teardown]  logout
