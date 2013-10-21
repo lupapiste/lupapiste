@@ -37,7 +37,8 @@
                    mapping-common/sijantitieto
                    {:tag :rakennuksenTiedot
                     :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
-                                                          {:tag :kiinttun}]}
+                                                          {:tag :kiinttun}
+                                                          {:tag :rakennusnro}]}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}

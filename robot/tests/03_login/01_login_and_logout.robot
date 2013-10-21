@@ -51,10 +51,10 @@ Mikko remembers he's Finnish
   Page Should Not Contain  På svenska >>
   Click link  xpath=//*[@data-test-id='lang-fi']
   Wait Until  Page Should Contain  På svenska >>
+  [Teardown]  logout
 
-Mikko logs out
+Mikko is logged out
   [Tags]  ie8
-  Logout
   User should not be logged in
 
 Mikko logs in via iframe
@@ -65,15 +65,15 @@ Mikko logs in via iframe
   User should be logged in  ${USERNAME}
   Applications page should be open
   Number of visible applications  0
-  Logout
+  [Teardown]  logout
 
 Mikko logs in with username that has capital letters
   [Tags]  ie8
   Login  Mikko@Example.COM  ${PASSWORD}
   User should be logged in  ${USERNAME}
-  Logout
+  [Teardown]  logout
 
 Solita Admin can log in
   [Tags]  ie8
   SolitaAdmin logs in
-  Logout
+  [Teardown]  logout

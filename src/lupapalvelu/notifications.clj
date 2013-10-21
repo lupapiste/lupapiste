@@ -196,9 +196,10 @@
 ;; Da notify
 ;;
 
-(defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
-  (condp = (keyword template)
-    :new-comment  (send-notifications-on-new-comment! application user host)
-    :invite       (send-invite! (:email data) (:text data) application host)
-    :state-change (send-notifications-on-application-state-change! application host)
-    :verdict      (send-notifications-on-verdict! application host)))
+(defn notify! [template {:keys [user created application data] :as command}]
+  (let [host (env/value :host)]
+    (condp = (keyword template)
+      :new-comment  (send-notifications-on-new-comment! application user host)
+      :invite       (send-invite! (:email data) (:text data) application host)
+      :state-change (send-notifications-on-application-state-change! application host)
+      :verdict      (send-notifications-on-verdict! application host))))

@@ -154,3 +154,6 @@
                                                  strip-nils))
                                   (:documents app))}}))
           applications)))))
+
+(defmigration vetuma-token-cleanup-LUPA-976
+  (mongo/drop-collection :vetuma))

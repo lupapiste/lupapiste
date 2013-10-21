@@ -13,6 +13,8 @@
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.application.enabled'"></th>
+              <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
+              <th data-bind="ltext: 'organization.openinforequest.email'"></th>
               <th data-bind="ltext: 'edit'"></th>
             </tr>
           </thead>
@@ -22,6 +24,8 @@
               <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
               <td data-bind="text: $data['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + $data.id}"></td>
               <td data-bind="text: $data['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + $data.id}"></td>
+              <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + $data.id}"></td>
+              <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.id}"></td>
               <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.id}" class="modal"></a>]</td>
             </tr>
           </tbody>
@@ -47,6 +51,16 @@
               <div>
                 <input type="checkbox" data-bind="checked: applicationEnabled" data-test-id="application-enabled" class="form-input" id="application-enabled"></input>
                 <label class="form-label" for="application-enabled" data-bind ="ltext: 'organization.application.enabled'"></label>
+              </div>
+
+              <div>
+                <input type="checkbox" data-bind="checked: openInforequestEnabled" class="form-input" id="open-inforequest"></input>
+                <label class="form-label" for="open-inforequest" data-bind ="ltext: 'organization.openinforequest.enabled'"></label>
+              </div>
+
+              <div>
+                <label class="form-label" for="open-inforequest-email" data-bind ="ltext: 'organization.openinforequest.email'"></label>
+                <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
               </div>
 
               <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">

@@ -17,7 +17,7 @@ Mikko sets turvakielto for himself
   Open tab  parties
   Wait and click  xpath=//div[@id="application-parties-tab"]//input[@data-docgen-path="henkilo.henkilotiedot.turvakieltoKytkin"]
   Wait Until  Page Should Contain  Tallennettu
-  Logout
+  [Teardown]  Logout
 
 Sonja adds some neighbors
   Sonja logs in
@@ -79,9 +79,7 @@ Sonja opens status details dialog
   Element should not be visible  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-usereid']
   Click element  xpath=//div[@id='dialog-neighbor-status']//button[@data-test-id='neighbor-status-ok']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-neighbor-status']
-
-Sonja has done her part
-  Logout
+  [Teardown]  Logout
 
 Mikko sees neighbors and their status
   Mikko logs in
@@ -102,7 +100,7 @@ Mikko sends an email invitation to neighbor 'b'
   Wait until  Input text  xpath=//input[@id='neighbors-sendemail-email']  b@example.com
   Click element  xpath=//div[@id='dialog-send-neighbor-email']//button[@data-test-id='neighbors-sendemail-send']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-send-neighbor-email']
-  Logout
+  [Teardown]  Logout
 
 Mail is sent
   Go to  ${SERVER}/api/last-email

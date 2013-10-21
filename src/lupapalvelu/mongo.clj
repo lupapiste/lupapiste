@@ -264,6 +264,7 @@
   (mc/ensure-index :activation {:email 1})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
   (mc/ensure-index :vetuma {:user.stamp 1})
+  (mc/ensure-index :vetuma {:sessionid 1})
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1}))

@@ -18,7 +18,7 @@ Application does not have verdict
 
 Mikko submits application & goes for lunch
   Submit application
-  Logout
+  [Teardown]  logout
 
 Sonja logs in and throws in a verdict
   Sonja logs in

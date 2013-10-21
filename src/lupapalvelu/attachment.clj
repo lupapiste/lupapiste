@@ -16,7 +16,8 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
-            [lupapalvelu.stamper :as stamper])
+            [lupapalvelu.stamper :as stamper]
+            [lupapalvelu.statement :as statement])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -393,32 +394,35 @@
     (update-or-create-attachment application-id attachment-id attachment-type file-id sanitazed-filename content-type file-size timestamp user attachment-target locked)))
 
 (defcommand upload-attachment
-  {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
+  {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
    :validators [attachment-is-not-locked (fn [{user :user} {state :state}]
                                            (when (and (not= (:role user) "authority") (#{:sent :verdictGiven} (keyword state)))
                                              (fail :error.non-authority-viewing-application-in-verdictgiven-state)))]
+   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
-  (when-not (pos? size) (fail! :error.select-file))
-  (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
+  [{:keys [created user application] {:keys [text target locked]} :data :as command}]
+
   (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
 
-  (try
-    (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
-      (executed "add-comment"
-        (-> command
-          (assoc :data {:id id
-                        :text text,
-                        :type :system
-                        :target {:type :attachment
-                                 :id (:id attachment-version)
-                                 :version (:version attachment-version)
-                                 :filename (:filename attachment-version)
-                                 :fileId (:fileId attachment-version)}})))
-      (fail :error.unknown))
-    (finally (.delete (io/file tempfile)))))
+  (when (= (:type target) "statement")
+    (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
+      (fail! (:text validation-error))))
+
+  (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+    (executed "add-comment"
+      (-> command
+        (assoc :data {:id id
+                      :text text,
+                      :type :system
+                      :target {:type :attachment
+                               :id (:id attachment-version)
+                               :version (:version attachment-version)
+                               :filename (:filename attachment-version)
+                               :fileId (:fileId attachment-version)}})))
+    (fail :error.unknown)))
 
 ;;
 ;; Download

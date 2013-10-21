@@ -158,18 +158,25 @@ var LUPAPISTE = LUPAPISTE || {};
 
     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
+    var logoHref = window.location.href;
+    if (self.startPage && !self.startPage.charAt(0) != "/") {
+      logoHref = "#!/" + self.startPage;
+    }
+
     var model = {
       languages: loc.getSupportedLanguages(),
       currentLanguage: loc.getCurrentLanguage(),
       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-      startPage: self.startPage,
+      logoHref: logoHref,
       showUserMenu: self.showUserMenu
     };
 
-    LUPAPISTE.Screenmessage.refresh();
-    $("#sys-notification").applyBindings({
-      screenMessages: LUPAPISTE.Screenmessage.messages
-    });
+    if (LUPAPISTE.Screenmessage) {
+      LUPAPISTE.Screenmessage.refresh();
+      $("#sys-notification").applyBindings({
+        screenMessage: LUPAPISTE.Screenmessage
+      });
+    }
 
     $("nav").applyBindings(model).css("visibility", "visible");
     $("footer").applyBindings(model).css("visibility", "visible");

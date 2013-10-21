@@ -558,7 +558,7 @@
     var x = (application.location && application.location().x) ? application.location().x() : 0;
     var y = (application.location && application.location().y) ? application.location().y() : 0;
     hub.send("documents-map", {
-      data:  [{location: {x: x, y: y}}],
+      data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
       clear: true
     });
   });

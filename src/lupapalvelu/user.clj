@@ -126,6 +126,25 @@
 
 ;;
 ;; ==============================================================================
+;; Creating API keys:
+;; ==============================================================================
+;;
+
+(defn create-apikey [email]
+  (let [apikey (security/random-password)
+        result (mongo/update :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
+    (when result
+      apikey)))
+
+
+
+
+
+
+
+
+;;
+;; ==============================================================================
 ;; Change password:
 ;; ==============================================================================
 ;;
@@ -201,7 +220,8 @@
   (create-any-user (merge user {:role :authorityAdmin :enabled true})))
 
 (defn create-user [user]
-  (create-any-user (merge user {:role :applicant :enabled true})))
+  ;; Applicant must activate account
+  (create-any-user (merge user {:role :applicant :enabled false})))
 
 ;;
 ;; ==============================================================================
@@ -231,4 +251,39 @@
     (or
       (get-user-by-email email)
       (create-any-user {:email email}))))
+
+(defn authority? [{role :role}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{role :role}]
+  (= :applicant (keyword role)))
+
+(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
+  (= id1 id2))
+
+
+
+
+
+
+
+(defn with-user [email function]
+  (if (nil? email)
+    (fail :error.user-not-found)
+    (if-let [user (get-user-by-email email)]
+      (function user)
+      (do
+        (debugf "user '%s' not found with email" email)
+        (fail :error.user-not-found)))))
+
+
+
+
+
+
+
+
+
+
+
 

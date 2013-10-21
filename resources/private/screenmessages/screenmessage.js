@@ -20,9 +20,8 @@ LUPAPISTE.Screenmessage = new (function () {
   };
 
 
-  self.add = function() {
-    ajax.command("screenmessages-add", {fi : $("#add-text-fi").val(),
-                                        sv : $("#add-text-sv").val()})
+  self.add = function(fi, sv) {
+    ajax.command("screenmessages-add", {fi : fi, sv : sv})
     .success(function(data) {
       self.refresh();
     })
@@ -41,6 +40,11 @@ LUPAPISTE.Screenmessage = new (function () {
       debug("Could not reset screen messages", e);
     })
     .call();
+  };
+
+  self.hide = function(){
+    $('#sys-notification').hide();
+    event.stopPropagation();
   };
 
 })();
