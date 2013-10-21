@@ -28,5 +28,7 @@ tyonjohtaja.patevyys.patevyysvaatimusluokka._group_label: Pätevyysvaatimusluokk
 tyonjohtaja.patevyys.patevyysvaatimusluokka.1: 1
 tyonjohtaja.patevyys.patevyysvaatimusluokka.AA: AA
 tyonjohtaja.patevyys.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
+tyonjohtaja.patevyys.kokemusvuodet: Kokemus vuosina
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin: Kyseessä työnjohtajahakemus (ei työnjohtajan nimeäminen)
 schemas.tyonjohtaja: Työnjohtaja
 tyonjohtaja._append_label: Lisää työnjohtaja

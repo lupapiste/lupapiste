@@ -194,12 +194,14 @@
                                           {:name "ty\u00F6njohtaja"}
                                           {:name "ei tiedossa"}]}])
 
-(def patevyys-tyonjohtaja [{:name "koulutus" :type :string :required true}
-                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
-                           {:name "patevyysvaatimusluokka" :type :select :required true
+(def patevyys-tyonjohtaja [{:name "patevyysvaatimusluokka" :type :select :required true
                             :body [{:name "1"}
                                    {:name "AA"}
-                                   {:name "ei tiedossa"}]}])
+                                   {:name "ei tiedossa"}]}
+                           {:name "koulutus" :type :string :required true}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                           {:name "tyonjohtajaHakemusKytkin" :type :checkbox :required true}])
 
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja

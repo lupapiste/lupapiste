@@ -147,7 +147,9 @@
                              yritys
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
-                             {:tag :valmistumisvuosi}]}]}
+                             {:tag :valmistumisvuosi}
+                             ;{:tag :kokemusvuodet}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :tyonjohtajaHakemusKytkin}]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos

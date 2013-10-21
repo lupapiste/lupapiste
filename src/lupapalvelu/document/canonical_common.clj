@@ -293,6 +293,8 @@
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
                                 :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                                :kokemusvuodet (-> patevyys :kokemusvuodet :value)
+                                :tyonjohtajaHakemusKytkin (true? (-> patevyys :tyonjohtajaHakemusKytkin :value))
                                 :henkilo henkilo})]
     (if (contains? tyonjohtaja :yritys)
       (assoc base-data :yritys (assoc

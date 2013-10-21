@@ -236,7 +236,9 @@
                                             :postitoimipaikannimi {:modified 1380191655585 :value "Piippola"}}
                                    :patevyys {:koulutus {:modified 1380191688364 :value "El\u00e4m\u00e4n koulu"}
                                               :patevyysvaatimusluokka {:modified 1380191690366 :value "AA"}
-                                              :valmistumisvuosi {:modified 1380191690366 :value "2000"}}
+                                              :valmistumisvuosi {:modified 1380191690366 :value "2010"}
+                                              :kokemusvuodet {:modified 1380191690366 :value "3"}
+                                              :tyonjohtajaHakemusKytkin {:modified 1380191690366 :value true}}
                                    :userId {:modified 1380191655618 :value "777777777777777777000020"}
                                    :yhteystiedot {:email {:modified 1380191655585 :value "pena@example.com"}
                                                   :puhelin {:modified 1380191655585 :value "0102030405"}}
@@ -559,8 +561,10 @@
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
         _ (:koulutus Tyonjohtaja) => "El\u00e4m\u00e4n koulu"
-        _ (:valmistumisvuosi Tyonjohtaja) => "2000"
+        _ (:valmistumisvuosi Tyonjohtaja) => "2010"
         _ (:patevyysvaatimusluokka Tyonjohtaja) => "AA"
+        _ (:kokemusvuodet Tyonjohtaja) => "3"
+        _ (:tyonjohtajaHakemusKytkin Tyonjohtaja) => true
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
         Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
