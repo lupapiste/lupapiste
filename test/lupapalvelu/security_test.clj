@@ -7,4 +7,7 @@
 
 (fact check-password
   (check-password "foobar" (get-hash "foobar" (dispense-salt))) => truthy
-  (check-password "foobar" (get-hash "foobaz" (dispense-salt))) => falsey)
+  (check-password "foobar" (get-hash "foobaz" (dispense-salt))) => falsey
+  
+  (check-password "foobar" (get-hash "foobar")) => truthy
+  (check-password "foobar" (get-hash "foobaz")) => falsey)

@@ -19,11 +19,14 @@
 (defn valid-password? [password]
     (>= (count password) (env/value :password :minlength)))  ; length should match the length in util.js
 
-(defn get-hash [password salt]
-  (BCrypt/hashpw password salt))
-
 (defn dispense-salt []
   (BCrypt/gensalt (or (env/value :salt-strength) 10)))
+
+(defn get-hash
+  ([password]
+    (get-hash password (dispense-salt)))
+  ([password salt]
+    (BCrypt/hashpw password salt)))
 
 (defn check-password [candidate hashed]
   (BCrypt/checkpw candidate hashed))
