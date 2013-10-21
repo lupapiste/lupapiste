@@ -182,6 +182,9 @@
                                         :email     "email"
                                         :role      ..role..})
           password (get-in entity [:private :password])]
-      password     =>      truthy
+      password     =not=>  nil
       password     =not=>  #"some-password"
-      (str entity) =not=>  #"some-password")))
+      (str entity) =not=>  #"some-password"))
+  
+  (fact "does not contain extra fields"
+    (-> (create-user-entity {:id "id" :email "email" :foo "bar"}) :foo) => nil))
