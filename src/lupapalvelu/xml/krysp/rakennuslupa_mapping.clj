@@ -92,30 +92,6 @@
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
 
-(def lausunto {:tag :Lausunto
-               :child [{:tag :viranomainen :ns "yht"}
-                       {:tag :pyyntoPvm :ns "yht"}
-                       {:tag :lausuntotieto :ns "yht"
-                        :child [{:tag :Lausunto
-                                 :child [{:tag :viranomainen}
-                                         {:tag :lausunto}
-                                         {:tag :liitetieto
-                                          :child [{:tag :Liite
-                                                   :child [{:tag :kuvaus :ns "yht"}
-                                                           {:tag :linkkiliitteeseen :ns "yht"}
-                                                           {:tag :muokkausHetki :ns "yht"}
-                                                           {:tag :versionumero :ns "yht"}
-                                                           {:tag :tekija :ns "yht"
-                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                    {:tag :VRKrooliKoodi}
-                                                                    mapping-common/henkilo
-                                                                    mapping-common/yritys]}
-                                                           {:tag :tyyppi :ns "yht"}]}]}
-                                         {:tag :lausuntoPvm}
-                                         {:tag :puoltotieto
-                                          :child [{:tag :Puolto
-                                                   :child [{:tag :puolto}]}]}]}]}]})
-
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta
    :ns "rakval"
@@ -164,7 +140,7 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
-                             {:tag :lausuntotieto :child [lausunto]}
+                             {:tag :lausuntotieto :child [mapping-common/lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}

@@ -160,6 +160,30 @@
                         {:tag :kuntakoodi :ns "yht"}
                         {:tag :kielitieto :ns "yht"}])
 
+(def lausunto {:tag :Lausunto
+               :child [{:tag :viranomainen :ns "yht"}
+                       {:tag :pyyntoPvm :ns "yht"}
+                       {:tag :lausuntotieto :ns "yht"
+                        :child [{:tag :Lausunto
+                                 :child [{:tag :viranomainen}
+                                         {:tag :lausunto}
+                                         {:tag :liitetieto
+                                          :child [{:tag :Liite
+                                                   :child [{:tag :kuvaus :ns "yht"}
+                                                           {:tag :linkkiliitteeseen :ns "yht"}
+                                                           {:tag :muokkausHetki :ns "yht"}
+                                                           {:tag :versionumero :ns "yht"}
+                                                           {:tag :tekija :ns "yht"
+                                                            :child [{:tag :kuntaRooliKoodi}
+                                                                    {:tag :VRKrooliKoodi}
+                                                                    henkilo
+                                                                    yritys]}
+                                                           {:tag :tyyppi :ns "yht"}]}]}
+                                         {:tag :lausuntoPvm}
+                                         {:tag :puoltotieto
+                                          :child [{:tag :Puolto
+                                                   :child [{:tag :puolto}]}]}]}]}]})
+
 
 (defn get-file-name-on-server [file-id file-name]
   (str file-id "_" (encode-filename file-name)))

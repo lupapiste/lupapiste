@@ -13,29 +13,6 @@
             [lupapalvelu.mongo :as mongo]))
 
 
-(def lausunto {:tag :Lausunto
-               :child [{:tag :viranomainen :ns "yht"}
-                       {:tag :pyyntoPvm :ns "yht"}
-                       {:tag :lausuntotieto :ns "yht"
-                        :child [{:tag :Lausunto
-                                 :child [{:tag :viranomainen}
-                                         {:tag :lausunto}
-                                         {:tag :liitetieto
-                                          :child [{:tag :Liite
-                                                   :child [{:tag :kuvaus :ns "yht"}
-                                                           {:tag :linkkiliitteeseen :ns "yht"}
-                                                           {:tag :muokkausHetki :ns "yht"}
-                                                           {:tag :versionumero :ns "yht"}
-                                                           {:tag :tekija :ns "yht"
-                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                    {:tag :VRKrooliKoodi}
-                                                                    mapping-common/henkilo
-                                                                    mapping-common/yritys]}
-                                                           {:tag :tyyppi :ns "yht"}]}]}
-                                         {:tag :lausuntoPvm}
-                                         {:tag :puoltotieto
-                                          :child [{:tag :Puolto
-                                                   :child [{:tag :puolto}]}]}]}]}]})
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})
 
@@ -52,8 +29,10 @@
                                                                                                                                                {:tag :asuinhuoneistojenLkm}
                                                                                                                                                 {:tag :rakennuksenKerrosluku}
                                                                                                                                                 {:tag :kokonaisala}
-                                                                                                                                                kerrosalatieto]}]}
-                                                                                      ]}]}])
+                                                                                                                                                kerrosalatieto]}]}]}]}
+                             {:tag :lausuntotieto :child [mapping-common/lausunto]}])
+
+
 
 (def poikkeamis_to_krysp
   {:tag :Popast
@@ -94,7 +73,7 @@
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint (:attachments application))
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
-    ;(println xml-s)
+    (println xml-s)
     (validate xml-s)
     (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     ))
