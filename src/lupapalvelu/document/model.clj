@@ -117,10 +117,13 @@
 
 (defn- validate-required-fields [schema-body path data validation-errors]
   (let [check
-        (fn [{:keys [name required body repeating] :as element}]
+        (fn [{:keys [name required body repeating type] :as element}]
           (let [kw (keyword name)
                 current-path (conj path kw)
-                validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
+                validation-error (when (and
+                                         (not (= type :checkbox))
+                                         required
+                                         (s/blank? (get-in data (conj current-path :value))))
                                    (->validation-result nil current-path element [:tip "illegal-value:required"]))
                 current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
             (concat current-validation-errors
