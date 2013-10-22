@@ -1,6 +1,10 @@
 (ns lupapalvelu.xml.krysp.mapping-common
   (:require [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.attachment :refer [encode-filename]]))
+            [lupapalvelu.attachment :refer [encode-filename]]
+            [sade.util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [me.raynes.fs :as fs]
+            [clojure.java.io :refer :all]))
 
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -201,3 +205,73 @@
         (conj r (get-in l [:Lausunto :id]))
         r))
     #{} lausuntotieto))
+
+(defn get-Liite [title link attachment type file-id]
+   {:kuvaus title
+    :linkkiliitteeseen link
+    :muokkausHetki (to-xml-datetime (:modified attachment))
+    :versionumero 1
+    :tyyppi type
+    :fileId file-id})  ;;TODO: Kysy Terolta mika tama on
+
+(defn get-liite-for-lausunto [attachment application begin-of-link]
+  (let [type "Lausunto"
+        title (str (:title application) ": " type "-" (:id attachment))
+        file-id (get-in attachment [:latestVersion :fileId])
+        attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+        link (str begin-of-link attachment-file-name)]
+    {:Liite (get-Liite title link attachment type file-id)}))
+
+(defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
+  (let [statement-attachments-by-id (group-by
+                                      (fn-> :target :id keyword)
+                                      (filter
+                                        (fn-> :target :type (= "statement"))
+                                        (:attachments application)))
+        canonical-attachments (for [id allowed-statement-ids]
+                                {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
+                                                (get-liite-for-lausunto attachment application begin-of-link))})]
+    (not-empty canonical-attachments)))
+
+(defn get-attachments-as-canonical [application begin-of-link ]
+  (let [attachments (:attachments application)
+        canonical-attachments (for [attachment attachments
+                                    :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
+                                    :let [type (get-in attachment [:type :type-id] )
+                                          title (str (:title application) ": " type "-" (:id attachment))
+                                          file-id (get-in attachment [:latestVersion :fileId])
+                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                                          link (str begin-of-link attachment-file-name)]]
+                                {:Liite (get-Liite title link attachment type file-id)})]
+    (not-empty canonical-attachments)))
+
+(defn write-attachments [attachments output-dir]
+  (doseq [attachment attachments]
+    (let [file-id (get-in attachment [:Liite :fileId])
+          attachment-file (mongo/download file-id)
+          content (:content attachment-file)
+          attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name attachment-file)))
+          attachment-file (file attachment-file-name)
+          ]
+      (with-open [out (output-stream attachment-file)
+                  in (content)]
+        (copy in out)))))
+
+(defn write-statement-attachments [attachments output-dir]
+  (let [f (for [fi attachments]
+            (vals fi))
+        files (reduce concat (reduce concat f))]
+    (write-attachments files output-dir)))
+
+(defn add-statement-attachments [canonical statement-attachments]
+  (if (empty? statement-attachments)
+    canonical
+    (reduce (fn [c a]
+              (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+                    lausunto-id (name (first (keys a)))
+                    paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
+                    index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
+                    paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
+                    paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
+                (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
+              ) canonical statement-attachments)))

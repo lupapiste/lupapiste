@@ -31,6 +31,18 @@
                                                                                                                                                 {:tag :kokonaisala}
                                                                                                                                                 kerrosalatieto]}]}]}]}
                              {:tag :lausuntotieto :child [mapping-common/lausunto]}
+                             {:tag :liitetieto
+                              :child [{:tag :Liite
+                                       :child [{:tag :kuvaus :ns "yht"}
+                                               {:tag :linkkiliitteeseen :ns "yht"}
+                                               {:tag :muokkausHetki :ns "yht"}
+                                               {:tag :versionumero :ns "yht"}
+                                               {:tag :tekija :ns "yht"
+                                                :child [{:tag :kuntaRooliKoodi}
+                                                        {:tag :VRKrooliKoodi}
+                                                        mapping-common/henkilo
+                                                        mapping-common/yritys]}
+                                               {:tag :tyyppi :ns "yht"}]}]}
                              {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}])
 
 
@@ -48,33 +60,58 @@
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
-           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveratkaisu :child abstractPoikkeamisType}]}
-           ]})
+           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveratkaisu :child abstractPoikkeamisType}]}]})
 
 
-(defn- add-statement-attachments [canonical statement-attachments]
+(defn- add-statement-attachments [canonical statement-attachments krysp-polku-lausuntoon]
   (if (empty? statement-attachments)
     canonical
     (reduce (fn [c a]
-              (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+              (let [
+                    lausuntotieto (get-in c krysp-polku-lausuntoon)
                     lausunto-id (name (first (keys a)))
                     paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
                     index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
                     paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
                     paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-                (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
+                (assoc-in c krysp-polku-lausuntoon paivitetty))
               ) canonical statement-attachments)))
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
-        canonical  (poikkeus-application-to-canonical application lang)
+        subtype    (keyword (:permitSubtype application))
+        krysp-polku (cond
+                      (= subtype lupapalvelu.permit/poikkeamislupa)
+                      [:Popast :poikkeamisasiatieto :Poikkeamisasia]
+                      (= subtype lupapalvelu.permit/poikkeamislupa)
+                      [:Popast :suunnittelutarveasiatieto :Suunnittelutarveratkaisu]
+                      :default nil)
+        krysp-polku-lausuntoon (conj krysp-polku :lausuntotieto)
+        canonical-without-attachments  (poikkeus-application-to-canonical application lang)
+        statement-given-ids (mapping-common/statements-ids-with-status
+                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
+        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        canonical-with-statement-attachments  (add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        _ (clojure.pprint/pprint canonical-with-statement-attachments)
+        canonical (assoc-in
+                    canonical-with-statement-attachments
+                    (conj krysp-polku :liitetieto)
+                    attachments)
         xml (element-to-xml canonical poikkeamis_to_krysp)
         xml-s (indent-str xml)]
+
     ;(clojure.pprint/pprint (:attachments application))
-    ;(clojure.pprint/pprint canonical-with-statement-attachments)
-    (println xml-s)
+    ;(clojure.pprint/pprint canonical)
+    ;(println xml-s)
     (validate xml-s)
     (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
-    ))
+    (with-open [out-file-stream (writer tempfile)]
+      (emit xml out-file-stream))
+    (mapping-common/write-attachments attachments output-dir)
+    (mapping-common/write-statement-attachments statement-attachments output-dir)
+
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)))
