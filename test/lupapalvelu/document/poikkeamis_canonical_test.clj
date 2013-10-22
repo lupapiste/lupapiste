@@ -639,8 +639,12 @@
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"
-        ]))
 
+        asianTiedot (:asianTiedot Poikkeamisasia) => truthy
+        Asiantiedot (:Asiantiedot asianTiedot) => truthy
+        _ (println Asiantiedot)
+        vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
+        kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
 
 
 

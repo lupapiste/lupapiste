@@ -32,7 +32,8 @@
                           nil
                           v))
                       (:documents application)))
-        lisatiedot (:data (first (:lisatiedot documents)))]
+        lisatiedot (:data (first (:lisatiedot documents)))
+        hanke (:data (first (:hankkeen-kuvaus documents)))]
     (assoc-in
       root
       poikkeamisasia-path
@@ -49,7 +50,9 @@
                                                                      "ruotsi"
                                                                      "suomi")
                                                      :suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}
-                        :kayttotapaus "Uusi hakemus"}})))
+                        :kayttotapaus "Uusi hakemus"
+                        :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat :value)
+                                                    :poikkeamisasianKuvaus (-> hanke :kuvaus :value)}}}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
