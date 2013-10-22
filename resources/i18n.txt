@@ -1,4 +1,16 @@
 tyonjohtaja._group_label: Työnjohtaja
+tyonjohtaja.vastattavatTyotehtavat: Vastattavat työtehtävät
+tyonjohtaja.vastattavatTyotehtavat._group_label: Vastattavat työtehtävät
+tyonjohtaja.vastattavatTyotehtavat.rakennuksenRakentaminen: Rakennuksen rakentaminen
+tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo: Rakennuksen muutos- ja korjaustyö
+tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen: Rakennuksen purkaminen
+tyonjohtaja.vastattavatTyotehtavat.maanrakennustyo: Maanrakennnustyö
+tyonjohtaja.vastattavatTyotehtavat.rakennelmaTaiLaitos: Rakennelma tai laitos
+tyonjohtaja.vastattavatTyotehtavat.elementtienAsennus: Elementtien asennus
+tyonjohtaja.vastattavatTyotehtavat.terasRakenteet_tiilirakenteet: Teräsrakenteet / Tiilirakenteet
+tyonjohtaja.vastattavatTyotehtavat.kiinteistonVesiJaViemarilaitteistonRakentaminen: Kiinteistön vesi- ja viemärilaitteiston rakentaminen
+tyonjohtaja.vastattavatTyotehtavat.kiinteistonilmanvaihtolaitteistonRakentaminen: Kiinteistön ilmanvaihtolaitteiston rakentaminen
+tyonjohtaja.vastattavatTyotehtavat.muuMika: Muu, mikä
 tyonjohtaja.kuntaRoolikoodi.KVV-työnjohtaja: KVV-työnjohtaja
 tyonjohtaja.kuntaRoolikoodi.IV-työnjohtaja: IV-työnjohtaja
 tyonjohtaja.kuntaRoolikoodi.erityisalojen työnjohtaja: Erityisalojen työnjohtaja
@@ -29,6 +41,9 @@ tyonjohtaja.patevyys.patevyysvaatimusluokka.1: 1
 tyonjohtaja.patevyys.patevyysvaatimusluokka.AA: AA
 tyonjohtaja.patevyys.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
 tyonjohtaja.patevyys.kokemusvuodet: Kokemus vuosina
-tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin: Kyseessä työnjohtajahakemus (ei työnjohtajan nimeäminen)
-schemas.tyonjohtaja: Työnjohtaja
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label: Kyseessä työnjohtajahakemus?
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen: Kyseessä työnjohtajan nimeäminen
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus: Kyseessä työnjohtajahakemus
+tyonjohtaja.patevyys.valvottavienKohteidenMaara: Samanaikaisten valvottavien kohteiden määrä
 tyonjohtaja._append_label: Lisää työnjohtaja
+schemas.tyonjohtaja: Työnjohtaja
