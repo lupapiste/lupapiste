@@ -70,15 +70,16 @@
 (defcommand create-user
   {:parameters [:email :password]
    :roles      [:admin :authorityAdmin]}
-  [{params :data caller :user}]
-  #_(ok :id (user/create-user caller params))
-  (fail "Not implemented correctly!"))
+  [{user-data :data caller :user}]
+  (ok :id (user/create-new-user caller user-data)))
+
 
 (defcommand create-authority-admin-user
   {:parameters [:firstName :lastName :email :password :organizations]
    :roles      [:admin]
    :verified   true}
   [{{:keys [password] :as data} :data}]
+  #_ (create-any-user (merge user {:role :authorityAdmin :enabled true}))
   (when-not (security/valid-password? password) (fail! :error.password-too-short))
   (let [new-user (user/create-authority-admin data)]
     (when-not new-user (fail! :error.create-admin-user))
@@ -90,6 +91,13 @@
    :roles      [:authorityAdmin]
    :verified   true}
   [{{:keys [organizations]} :user data :data}]
+  #_ (try
+      (create-any-user (merge user {:role :authority :enabled true}))
+      (catch IllegalArgumentException e
+        (when (= "error.duplicate-email" (.getMessage e))
+          (info "Adding user to organization: user:" (:email user) ", organizations:" (:organizations user))
+          (mongo/update :users {:email (:email user)} {$pushAll {:organizations (:organizations user)}})
+          {:ok true})))
   (when-not (security/valid-password? (:password data)) (fail! :error.password-too-short))
   (let [new-user (user/create-authority (merge data {:organizations organizations}))]
     (ok :id (:_id new-user))))
@@ -246,7 +254,7 @@
     (when-not (.contains email "@") (fail! :error.email))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (user/create-user (merge data vetuma-data {:email email}))]
+      (if-let [user (user/create-new-user (merge data vetuma-data {:email email}))]
         (do
           (activation/send-activation-mail-for user)
           (vetuma/consume-user stamp)

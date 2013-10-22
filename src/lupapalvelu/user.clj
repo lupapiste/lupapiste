@@ -1,5 +1,5 @@
 (ns lupapalvelu.user
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
             [monger.operators :refer :all]
             [noir.request :as request]
             [noir.session :as session]
@@ -161,61 +161,49 @@
 ;; ==============================================================================
 ;;
 
-(def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-(def user-defaults      {:firstName "" :lastName "" :enabled false :role :dummy})
-(def known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
+(def ^:private user-keys          [:id :email :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
+(def ^:private required-keys      [:id :email])
+(def ^:private user-defaults      {:firstName "" :lastName "" :enabled false :role :dummy})
+(def ^:private known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
 
 (defn create-user-entity [{:keys [email password role] :as user-data}]
-  (when-let [missing (util/missing-keys user-data [:email :id])] (fail! :error.missing-required-key :missing missing))
-  (let [email    (ss/lower-case email)
-        private  (when password
-                   (let [salt (security/dispense-salt)]
-                     {:password (security/get-hash password salt)}))]
+  (when-let [missing (util/missing-keys user-data required-keys)]
+    (fail! :error.missing-required-key :missing missing))
+  (let [email (ss/lower-case email)]
     (merge
       user-defaults
       (select-keys user-data user-keys)
       {:username email
        :email    email
-       :private  private})))
+       :private  (if password
+                   {:password (security/get-hash password)}
+                   {})})))
 
-(defn- create-any-user [user-data]
-  (let [id           (mongo/create-id)
-        new-user     (create-user-entity (assoc user-data :id id))
-        old-user     (get-user-by-email (:email user-data))]
-    (info "register user:" (dissoc new-user :private))
+(defn create-new-user
+  "Insert new user to database, returns new user data without private information. If user
+   exists and has role \"dummy\", overwrites users information. If users exists with any other
+   role, throws exception."
+  [caller user-data]
+  (let [id        (mongo/create-id)
+        new-user  (create-user-entity (assoc user-data :id id))
+        old-user  (get-user-by-email (:email user-data))]
     (try
       (if (= "dummy" (:role old-user))
         (do
           (info "rewriting over dummy user:" (:id old-user) (dissoc new-user :private :id))
-          (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
+          (mongo/update-by-id :users (:id old-user) (dissoc new-user :id)))
         (do
           (info "creating new user" (dissoc new-user :private))
           (mongo/insert :users new-user)))
       (get-user-by-email (:email new-user))
       (catch com.mongodb.MongoException$DuplicateKey e
-        (warn e "Duplicate key detected when inserting new user")
-        (throw (IllegalArgumentException.
-                 (condp re-find (.getMessage e)
-                   #"E11000 duplicate key error index: lupapiste\.users\.\$personId_1"  "error.duplicate-person-id"
-                   #"E11000 duplicate key error index: lupapiste\.users\.\$email_1"     "error.duplicate-email"
-                   #"E11000 duplicate key error index: lupapiste\.users\.\$username_1"  "error.duplicate-email"
-                   (str "error.create-user"))))))))
-
-(defn create-authority [user]
-  (try
-    (create-any-user (merge user {:role :authority :enabled true}))
-    (catch IllegalArgumentException e
-      (when (= "error.duplicate-email" (.getMessage e))
-        (info "Adding user to organization: user:" (:email user) ", organizations:" (:organizations user))
-        (mongo/update :users {:email (:email user)} {$pushAll {:organizations (:organizations user)}})
-        {:ok true}))))
-
-(defn create-authority-admin [user]
-  (create-any-user (merge user {:role :authorityAdmin :enabled true})))
-
-(defn create-user [user]
-  ;; Applicant must activate account
-  (create-any-user (merge user {:role :applicant :enabled false})))
+        (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
+          (do
+            (warnf "Duplicate key detected when inserting new user: field=%s" field)
+            (fail! :duplicate-key :field field))
+          (do
+            (warn e "Inserting new user failed")
+            (fail! :cant-insert)))))))
 
 ;;
 ;; ==============================================================================
@@ -244,7 +232,7 @@
   (let [email (ss/lower-case email)]
     (or
       (get-user-by-email email)
-      (create-any-user {:email email}))))
+      (create-new-user (current-user) {:email email}))))
 
 (defn authority? [{role :role}]
   (= :authority (keyword role)))
@@ -252,32 +240,14 @@
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
 
-(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
+(defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
-
-
-
-
-
-
 
 (defn with-user [email function]
   (if (nil? email)
-    (fail :error.user-not-found)
+    (fail! :error.user-not-found)
     (if-let [user (get-user-by-email email)]
       (function user)
       (do
         (debugf "user '%s' not found with email" email)
-        (fail :error.user-not-found)))))
-
-
-
-
-
-
-
-
-
-
-
-
+        (fail! :error.user-not-found)))))
