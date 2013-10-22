@@ -43,7 +43,8 @@
                                                         mapping-common/henkilo
                                                         mapping-common/yritys]}
                                                {:tag :tyyppi :ns "yht"}]}]}
-                             {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}])
+                             {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}
+                                                                                    {:tag :suoramarkkinointikieltoKytkin}]}]}])
 
 
 
@@ -95,7 +96,6 @@
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical-with-statement-attachments  (add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
-        _ (clojure.pprint/pprint canonical-with-statement-attachments)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
