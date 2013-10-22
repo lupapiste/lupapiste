@@ -320,78 +320,7 @@
                        :state "submitted"
                        :location {:x 404174.92749023
                                   :y 6690687.4923706}
-                       :attachments [{:id "52385207da063788effc1e24"
-                                      :latestVersion {:fileId "52385207da063788effc1e21"
-                                                      :version {:major 1
-                                                                :minor 0}
-                                                      :size 76202
-                                                      :created 1379422727372
-                                                      :filename "3171_001taksi.pdf"
-                                                      :contentType "application/pdf"
-                                                      :user {:role "applicant"
-                                                             :lastName "Panaani"
-                                                             :firstName "Pena"
-                                                             :username "pena"
-                                                             :id "777777777777777777000020"}
-                                                      :stamped false
-                                                      :accepted nil}
-                                      :locked false
-                                      :modified 1379422727372
-                                      :op nil
-                                      :state "requires_authority_action"
-                                      :target nil
-                                      :type {:type-group "paapiirustus"
-                                             :type-id "asemapiirros"}
-                                      :versions [{:fileId "52385207da063788effc1e21"
-                                                  :version {:major 1
-                                                            :minor 0}
-                                                  :size 76202
-                                                  :created 1379422727372
-                                                  :filename "3171_001taksi.pdf"
-                                                  :contentType "application/pdf"
-                                                  :user {:role "applicant"
-                                                         :lastName "Panaani"
-                                                         :firstName "Pena"
-                                                         :username "pena"
-                                                         :id "777777777777777777000020"}
-                                                  :stamped false
-                                                  :accepted nil}]} {:id "5238538dda063788effc1eb2"
-                                                                    :latestVersion {:fileId "5238538dda063788effc1eaf"
-                                                                                    :version {:major 0
-                                                                                              :minor 1}
-                                                                                    :size 15199
-                                                                                    :created 1379423117449
-                                                                                    :filename "3112_001.pdf"
-                                                                                    :contentType "application/pdf"
-                                                                                    :user {:role "authority"
-                                                                                           :lastName "Sibbo"
-                                                                                           :firstName "Sonja"
-                                                                                           :username "sonja"
-                                                                                           :id "777777777777777777000023"}
-                                                                                    :stamped false
-                                                                                    :accepted nil}
-                                                                    :locked true
-                                                                    :modified 1379423117449
-                                                                    :op nil
-                                                                    :state "requires_authority_action"
-                                                                    :target {:type "statement"
-                                                                             :id "52385377da063788effc1e93"}
-                                                                    :type {:type-group "muut"
-                                                                           :type-id "muu"}
-                                                                    :versions [{:fileId "5238538dda063788effc1eaf"
-                                                                                :version {:major 0
-                                                                                          :minor 1}
-                                                                                :size 15199
-                                                                                :created 1379423117449
-                                                                                :filename "3112_001.pdf"
-                                                                                :contentType "application/pdf"
-                                                                                :user {:role "authority"
-                                                                                       :lastName "Sibbo"
-                                                                                       :firstName "Sonja"
-                                                                                       :username "sonja"
-                                                                                       :id "777777777777777777000023"}
-                                                                                :stamped false
-                                                                                :accepted nil}]}]
+                       :attachments []
                        :statements statements
                        :organization "753-P"
                        :title "S\u00f6derkullantie 146"
@@ -642,7 +571,6 @@
 
         asianTiedot (:asianTiedot Poikkeamisasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
-        _ (println Asiantiedot)
         vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
         kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
 

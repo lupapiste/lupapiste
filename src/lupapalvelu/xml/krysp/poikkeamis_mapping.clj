@@ -44,7 +44,10 @@
                                                         mapping-common/yritys]}
                                                {:tag :tyyppi :ns "yht"}]}]}
                              {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}
-                                                                                    {:tag :suoramarkkinointikieltoKytkin}]}]}])
+                                                                                    {:tag :suoramarkkinointikieltoKytkin}]}]}
+                             {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
+                                                                                   {:tag :poikkeamisasianKuvaus}]}]}
+                             {:tag :kayttotapaus}])
 
 
 

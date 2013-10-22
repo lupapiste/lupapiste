@@ -17,7 +17,7 @@
         xml (element-to-xml canonical poikkeamis_to_krysp)
         xml-s (indent-str xml)]
 
-    ;(clojure.pprint/pprint canonical)
+    (clojure.pprint/pprint canonical)
 
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
