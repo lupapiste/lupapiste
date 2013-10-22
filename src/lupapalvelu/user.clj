@@ -242,12 +242,3 @@
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
-
-(defn with-user [email function]
-  (if (nil? email)
-    (fail! :error.user-not-found)
-    (if-let [user (get-user-by-email email)]
-      (function user)
-      (do
-        (debugf "user '%s' not found with email" email)
-        (fail! :error.user-not-found)))))
