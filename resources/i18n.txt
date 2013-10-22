@@ -41,9 +41,9 @@ tyonjohtaja.patevyys.patevyysvaatimusluokka.1: 1
 tyonjohtaja.patevyys.patevyysvaatimusluokka.AA: AA
 tyonjohtaja.patevyys.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
 tyonjohtaja.patevyys.kokemusvuodet: Kokemus vuosina
-tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label: Kyseessä työnjohtajahakemus?
-tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen: Kyseessä työnjohtajan nimeäminen
-tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus: Kyseessä työnjohtajahakemus
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label: Työnjohtajan nimeäminen
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen: Työnjohtajan nimeäminen
+tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus: Työnjohtajahakemus
 tyonjohtaja.patevyys.valvottavienKohteidenMaara: Samanaikaisten valvottavien kohteiden määrä
-tyonjohtaja._append_label: Lisää työnjohtaja
+tyonjohtaja._append_label: +Lisää työnjohtaja
 schemas.tyonjohtaja: Työnjohtaja
