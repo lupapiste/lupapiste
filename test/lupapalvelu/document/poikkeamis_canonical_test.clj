@@ -184,7 +184,8 @@
                               :version 1
                               :order 100}
                 :created 1379419361123
-                :data {}})
+                :data {:suoramarkkinointikielto {:modified 1382436476002
+                                                 :value true}}})
 
 (def ^:private paasuunnittelija {:created 1379419361123
                                  :data {:henkilotiedot {:etunimi {:modified 1379421445541
@@ -634,6 +635,7 @@
         lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
         asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"

@@ -31,8 +31,8 @@
                                  (s/blank? v))
                           nil
                           v))
-                      (:documents application)))]
-
+                      (:documents application)))
+        lisatiedot (:data (first (:lisatiedot documents)))]
     (assoc-in
       root
       poikkeamisasia-path
@@ -47,7 +47,8 @@
                         :lausuntotieto (get-statements (:statements application))
                         :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
                                                                      "ruotsi"
-                                                                     "suomi")}}
+                                                                     "suomi")
+                                                     :suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}
                         :kayttotapaus "Uusi hakemus"}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
