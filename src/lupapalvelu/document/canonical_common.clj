@@ -281,6 +281,19 @@
     (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
     (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
 
+(defn- concat-to-string-when-true [selections]
+  (let [muu (when (and (-> selections :muuMika :value) (-> selections :muuTyotehtava :value s/blank? not))
+              (-> selections :muuTyotehtava :value))
+        joined (clojure.string/join ","
+                 (reduce
+                   (fn [r [k v]]
+                     (if (true? (:value v))
+                       (conj r (name k))
+                       r))
+                   []
+                   (-> (dissoc selections :muuMika) (dissoc :muuTyotehtava))))]
+    (if muu (str joined "," muu) muu)))
+
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi tyonjohtaja party-type)
         codes {:tyonjohtajaRooliKoodi kuntaRoolikoodi ; Note the lower case 'koodi'
@@ -290,11 +303,13 @@
                        {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
                        {:henkilotunnus (-> tyonjohtaja :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
-        base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
+        base-data (merge codes {:vastattavatTyotehtavat (concat-to-string-when-true (:vastattavatTyotehtavat tyonjohtaja))
+                                :koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
                                 :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
                                 :kokemusvuodet (-> patevyys :kokemusvuodet :value)
-                                :tyonjohtajaHakemusKytkin (true? (-> patevyys :tyonjohtajaHakemusKytkin :value))
+                                :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
+                                :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))
                                 :henkilo henkilo})]
     (if (contains? tyonjohtaja :yritys)
       (assoc base-data :yritys (assoc

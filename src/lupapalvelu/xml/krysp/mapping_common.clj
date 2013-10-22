@@ -148,7 +148,9 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
-                             ;{:tag :kokemusvuodet}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}]}]}
            {:tag :naapuritieto}]})
 

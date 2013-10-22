@@ -56,7 +56,8 @@
                                :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
-(def paasuunnittelija {:id "50bc85e4ea3e790c9ff7cdb2",
+(def paasuunnittelija
+  {:id "50bc85e4ea3e790c9ff7cdb2"
    :schema-info {:name "paasuunnittelija"
                  :version 1}
    :data (merge
@@ -107,28 +108,29 @@
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
 (def tyonjohtaja
-  {:id "tyonjohtaja", :schema-info {:name "tyonjohtaja", :version 1},
+  {:id "tyonjohtaja"
+   :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
-           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"},
+           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
             :patevyys {:koulutus {:value "Koulutus"}
                        :patevyysvaatimusluokka {:value "AA"}
                        :valmistumisvuosi {:value "2010"}
-                       :tyonjohtajaHakemusKytkin {:value true}
-                       :kokemusvuodet {:value "3"}},
+                       :tyonjohtajaHakemusKytkin {:value "hakemus"}
+                       :kokemusvuodet {:value "3"}
+                       :valvottavienKohteidenMaara {:value "9"}}
+            :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
+                                     :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
+                                     :maanrakennustyo {:value true}
+                                     :rakennelmaTaiLaitos {:value true}
+                                     :muuMika {:value true}
+                                     :muuTyotehtava {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus})})
 
 (def tyonjohtaja-blank-role-and-blank-qualification
-  {:id "tyonjohtaja", :schema-info {:name "tyonjohtaja", :version 1},
-   :data (merge
-           suunnittelija-henkilo
-           {;; kuntaRoolikoodi not selected by user -> does not appear here
-            :kuntaRoolikoodi {:value ""},
-            :patevyys {:koulutus {:value "Koulutus"}
-                       :patevyysvaatimusluokka {:value "Ei tiedossa"}
-                       :valmistumisvuosi {:value "2010"}
-                       ;; tyonjohtajaHakemusKytkin not selected by user -> does not appear here
-                       :kokemusvuodet {:value "3"}},
-            :yritys yritysnimi-ja-ytunnus})})
+  (-> tyonjohtaja
+    (assoc-in [:data :kuntaRoolikoodi :value] "")
+    (assoc-in [:data :patevyys :patevyysvaatimusluokka :value] "Ei tiedossa")
+    (assoc-in [:data :patevyys :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
 
 (def rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
@@ -456,7 +458,10 @@
     (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2010")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "AA")
     (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => "3")
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => "9")
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
+    (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
+      "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
     (validate-person henkilo)
@@ -467,10 +472,7 @@
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => "Koulutus")
-    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2010")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "Ei tiedossa")
-    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => "3")
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => false)))
 
 (facts "Canonical maksaja/henkilo model is correct"

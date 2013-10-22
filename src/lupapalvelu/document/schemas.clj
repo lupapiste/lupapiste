@@ -186,6 +186,21 @@
                      designer-basic
                      {:name "patevyys" :type :group :body patevyys}))
 
+(def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
+                                           :type :group
+                                           :layout :vertical
+                                           :body [{:name "rakennuksenRakentaminen" :type :checkbox}
+                                                  {:name "rakennuksenMuutosJaKorjaustyo" :type :checkbox}
+                                                  {:name "rakennuksenPurkaminen" :type :checkbox}
+                                                  {:name "maanrakennustyo" :type :checkbox}
+                                                  {:name "rakennelmaTaiLaitos" :type :checkbox}
+                                                  {:name "elementtienAsennus" :type :checkbox}
+                                                  {:name "terasRakenteet_tiilirakenteet" :type :checkbox}
+                                                  {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :type :checkbox}
+                                                  {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
+                                                  {:name "muuMika" :type :checkbox :other-key "muuTyotehtava"}
+                                                  {:name "muuTyotehtava" :type :string}]}])
+
 (def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select
                                    :body [{:name "KVV-ty\u00F6njohtaja"}
                                           {:name "IV-ty\u00F6njohtaja"}
@@ -201,9 +216,15 @@
                            {:name "koulutus" :type :string :required true}
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
-                           {:name "tyonjohtajaHakemusKytkin" :type :checkbox :required true}])
+                           {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
+                           ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
+;                           {:name "tyonjohtajaHakemusKytkin" :type :checkbox :required true :blacklist [:applicant]}
+                           {:name "tyonjohtajaHakemusKytkin" :type :select :required true :blacklist [:applicant]
+                            :body [{:name "nimeaminen"}
+                                   {:name "hakemus"}]}])
 
 (def tyonjohtaja (body
+                   vastattavat-tyotehtavat-tyonjohtaja
                    kuntaroolikoodi-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
