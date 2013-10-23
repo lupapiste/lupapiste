@@ -4,7 +4,7 @@ tyonjohtaja.vastattavatTyotehtavat._group_label: Vastattavat työtehtävät
 tyonjohtaja.vastattavatTyotehtavat.rakennuksenRakentaminen: Rakennuksen rakentaminen
 tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo: Rakennuksen muutos- ja korjaustyö
 tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen: Rakennuksen purkaminen
-tyonjohtaja.vastattavatTyotehtavat.maanrakennustyo: Maanrakennnustyö
+tyonjohtaja.vastattavatTyotehtavat.maanrakennustyo: Maanrakennustyö
 tyonjohtaja.vastattavatTyotehtavat.rakennelmaTaiLaitos: Rakennelma tai laitos
 tyonjohtaja.vastattavatTyotehtavat.elementtienAsennus: Elementtien asennus
 tyonjohtaja.vastattavatTyotehtavat.terasRakenteet_tiilirakenteet: Teräsrakenteet / Tiilirakenteet
