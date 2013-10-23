@@ -95,21 +95,17 @@
                     :type :group
                     :blacklist [:neighbor turvakielto]
                     :body [{:name "puhelin" :type :string :subtype :tel :required true}
-                           {:name "email" :type :string :subtype :email :required true}
-                           #_{:name "fax" :type :string :subtype :tel}]}])
+                           {:name "email" :type :string :subtype :email :required true}]}])
 
-(def henkilotiedot-minimal [{:name "henkilotiedot"
-                             :type :group
-                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]}])
+(def henkilotiedot-minimal {:name "henkilotiedot"
+                            :type :group
+                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
-(def henkilotiedot {:name "henkilotiedot"
-                               :type :group
-                               :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
-                                      {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
+(def henkilotiedot
+  (update-in henkilotiedot-minimal [:body]
+    conj {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}))
 
 (def henkilo (body
                henkilo-valitsin
@@ -135,7 +131,7 @@
               {:name "yhteyshenkilo"
                :type :group
                :body (body
-                       henkilotiedot-minimal
+                       [henkilotiedot-minimal]
                        yhteystiedot)}))
 
 (def party (body
@@ -217,7 +213,6 @@
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                            {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-;                           {:name "tyonjohtajaHakemusKytkin" :type :checkbox :required true :blacklist [:applicant]}
                            {:name "tyonjohtajaHakemusKytkin" :type :select :required true :blacklist [:applicant]
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
@@ -227,8 +222,6 @@
                    kuntaroolikoodi-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
-                   #_{:name "alkamis-pvm" :type :date}
-                   #_{:name "paattymis-pvm" :type :date}
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
 
 (def muutostapa {:name "muutostapa" :type :select
