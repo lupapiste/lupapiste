@@ -47,3 +47,4 @@ tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus: Työnjohtajahakemus
 tyonjohtaja.patevyys.valvottavienKohteidenMaara: Samanaikaisten valvottavien kohteiden määrä
 tyonjohtaja._append_label: +Lisää työnjohtaja
 schemas.tyonjohtaja: Työnjohtaja
+rakennuspaikka.kiinteisto.rantaKytkin: Rakennuspaikka sijaitsee rannalla
