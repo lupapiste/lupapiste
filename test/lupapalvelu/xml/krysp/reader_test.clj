@@ -13,7 +13,7 @@
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
 (facts "KRYSP verdict"
-  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/rakval/verdict.xml"))
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
       cases (->verdicts xml)]
 
     (fact "xml is parsed" cases => truthy)
