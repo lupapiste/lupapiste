@@ -224,7 +224,7 @@
     :muokkausHetki (to-xml-datetime (:modified attachment))
     :versionumero 1
     :tyyppi type
-    :fileId file-id})  ;;TODO: Kysy Terolta mika tama on
+    :fileId file-id})
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -278,12 +278,14 @@
 (defn add-statement-attachments [canonical statement-attachments]
   (if (empty? statement-attachments)
     canonical
-    (reduce (fn [c a]
-              (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
-                    lausunto-id (name (first (keys a)))
-                    paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
-                    index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-                    paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
-                    paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-                (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
-              ) canonical statement-attachments)))
+    (reduce
+      (fn [c a]
+        (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+              lausunto-id (name (first (keys a)))
+              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
+              index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
+              paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
+              paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
+          (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty)))
+      canonical
+      statement-attachments)))
