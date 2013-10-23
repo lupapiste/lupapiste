@@ -122,8 +122,7 @@
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
                                      :rakennelmaTaiLaitos {:value true}
-                                     :muuMika {:value true}
-                                     :muuTyotehtava {:value "Muu tyotehtava"}}
+                                     :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus})})
 
 (def tyonjohtaja-blank-role-and-blank-qualification

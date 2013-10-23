@@ -198,8 +198,7 @@
                                                   {:name "terasRakenteet_tiilirakenteet" :type :checkbox}
                                                   {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :type :checkbox}
                                                   {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
-                                                  {:name "muuMika" :type :checkbox :other-key "muuTyotehtava"}
-                                                  {:name "muuTyotehtava" :type :string}]}])
+                                                  {:name "muuMika" :type :string}]}])
 
 (def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select
                                    :body [{:name "KVV-ty\u00F6njohtaja"}

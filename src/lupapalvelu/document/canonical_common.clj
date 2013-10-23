@@ -281,18 +281,18 @@
     (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
     (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
 
-(defn- concat-to-string-when-true [selections]
-  (let [muu (when (and (-> selections :muuMika :value) (-> selections :muuTyotehtava :value s/blank? not))
-              (-> selections :muuTyotehtava :value))
-        joined (clojure.string/join ","
+(defn- concat-tyotehtavat-to-string [selections]
+  (let [joined (clojure.string/join ","
                  (reduce
                    (fn [r [k v]]
                      (if (true? (:value v))
                        (conj r (name k))
                        r))
                    []
-                   (-> (dissoc selections :muuMika) (dissoc :muuTyotehtava))))]
-    (if muu (str joined "," muu) muu)))
+                   (-> (dissoc selections :muuMika))))]
+    (if (-> selections :muuMika :value s/blank? not)
+      (str joined "," (-> selections :muuMika :value))
+      joined)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi tyonjohtaja party-type)
@@ -303,7 +303,7 @@
                        {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
                        {:henkilotunnus (-> tyonjohtaja :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
-        base-data (merge codes {:vastattavatTyotehtavat (concat-to-string-when-true (:vastattavatTyotehtavat tyonjohtaja))
+        base-data (merge codes {:vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
                                 :koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
                                 :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
