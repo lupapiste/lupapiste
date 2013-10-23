@@ -114,7 +114,7 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas (let [sc ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"]]
-                                (if (env/feature? :tyonjohtaja-osapuoli)
+                                (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja-osapuoli)
                                   (conj sc "tyonjohtaja")
                                   sc)))
 
