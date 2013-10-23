@@ -574,7 +574,7 @@
         viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
         pyyntoPvm (:pyyntoPvm Lausunto) => "2013-05-09"
         lausuntotieto (:lausuntotieto Lausunto) => truthy
-        LL (:Lausunto lausuntotieto) => truthy ;Lausunto oli jo kaytissa, siksi LL
+        LL (:Lausunto lausuntotieto) => truthy  ;Lausunto oli jo kaytossa, siksi LL
         viranomainen (:viranomainen LL) => "Paloviranomainen"
         lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
         lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
@@ -587,33 +587,33 @@
         osapuolitieto-hakija (first (:osapuolitieto osapuolet)) => truthy
         hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija) => truthy
         suunnittelijat (:suunnittelijatieto osapuolet) => truthy
-        paasuunnitelija (:Suunnittelija (last suunnittelijat))
+        paasuunnitelija (:Suunnittelija (last suunnittelijat)) => truthy
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
-        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia)
+        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
         rakennuspaikkatieto (first rakennuspaikkatiedot) => truthy
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy
         rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto rakennuspaikka) => truthy
         RakennuspaikanKiinteistotieto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteistotieto) => truthy
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
-        toimenpiteet(:toimenpidetieto rakennusvalvontaasia)
-        toimenpide (:Toimenpide (nth toimenpiteet 1))
-        muu-muutostyo (:Toimenpide (nth toimenpiteet 0))
-        laajennus-t (:Toimenpide (nth toimenpiteet 2))
-        purku-t (:Toimenpide (nth toimenpiteet 3))
-        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 4))
-        rakennustieto (:rakennustieto toimenpide)
+        toimenpiteet(:toimenpidetieto rakennusvalvontaasia) => truthy
+        toimenpide (:Toimenpide (nth toimenpiteet 1)) => truthy
+        muu-muutostyo (:Toimenpide (nth toimenpiteet 0)) => truthy
+        laajennus-t (:Toimenpide (nth toimenpiteet 2)) => truthy
+        purku-t (:Toimenpide (nth toimenpiteet 3)) => truthy
+        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 4)) => truthy
+        rakennustieto (:rakennustieto toimenpide) => truthy
         rakennus (:Rakennus rakennustieto) => truthy
-        rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus)))
+        rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus))) => truthy
         rakennuksentiedot (:rakennuksenTiedot rakennus) => truthy
-        lisatiedot (:lisatiedot rakennusvalvontaasia)
-        Lisatiedot (:Lisatiedot lisatiedot)
-        kayttotapaus (:kayttotapaus rakennusvalvontaasia)
+        lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
+        Lisatiedot (:Lisatiedot lisatiedot) => truthy
+        kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
         asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
-        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot)
-        rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot)
+        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => truthy
+        rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
         luvanTunnisteTiedot (:luvanTunnisteTiedot rakennusvalvontaasia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
