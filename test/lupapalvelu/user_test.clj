@@ -176,7 +176,19 @@
   (fact "email is converted to lowercase"
     (create-user-entity {:id  ..id.. :email "Foo@Bar.Com"}) => (contains {:email "foo@bar.com"}))
 
+  (fact "password is not required"
+    (create-user-entity {:id "id" :email "email"}) => truthy)
+  
+  (fact "valid password"
+    (create-user-entity {:id "id" :email "email" :password "some-password"}) => truthy
+      (provided (security/valid-password? "some-password") => true))
+  
+  (fact "invalid password"
+    (create-user-entity {:id "id" :email "email" :password "some-password"}) => (throws Exception #"password")
+      (provided (security/valid-password? "some-password") => false))
+  
   (fact "does not contain plaintext password"
+    (against-background (security/valid-password? "some-password") => true)
     (let [entity   (create-user-entity {:password  "some-password"
                                         :id        ..id..
                                         :email     "email"

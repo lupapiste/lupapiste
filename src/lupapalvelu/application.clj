@@ -23,6 +23,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -220,7 +221,7 @@
   (let [email (ss/lower-case email)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
-      (let [invited (user/get-or-create-user-by-email email)
+      (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
                      :text         text

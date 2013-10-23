@@ -24,6 +24,12 @@
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
 
+;;
+;; ==============================================================================
+;; Creating users:
+;; ==============================================================================
+;;
+
 
 
 
