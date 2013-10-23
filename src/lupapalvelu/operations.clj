@@ -109,6 +109,8 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija" "tyonjohtaja"])
 
+(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka" "lisatiedot" "paasuunnittelija"])
+
 
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
 
@@ -316,7 +318,7 @@
                                    :attachments [:paapiirustus [:asemapiirros]]}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type "P"
-                                   :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
+                                   :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
                                    :attachments [:paapiirustus [:asemapiirros]]}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type "R"
