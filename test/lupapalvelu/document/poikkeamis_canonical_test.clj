@@ -637,7 +637,7 @@
         ;Hakija
         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
-        _ (:turvakieltoKytkin Osapuoli) => false
+        _ (:turvakieltoKytkin Osapuoli) => true
         henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
