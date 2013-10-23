@@ -22,7 +22,7 @@
     (for [[_ toimenpide] toimenpiteet]
       {:Toimenpide (get-toimenpide toimenpide kaytettykerrosala-canonical)})))
 
-(defn common-poikkeamis-asia [application poikkeamisasia-path lang]
+(defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain]
   (let [root (root-element application lang)
         documents (by-type
                     (clojure.walk/postwalk
@@ -37,31 +37,30 @@
     (assoc-in
       root
       poikkeamisasia-path
-      {:Poikkeamisasia {:kasittelynTilatieto (get-state application)
-                        :kuntakoodi (:municipality application)
-                        :luvanTunnistetiedot (lupatunnus application)
-                        :osapuolettieto (osapuolet documents)
-                        :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
-                        :toimenpidetieto (get-toimenpiteet (let [rakennushanke (:rakennushanke documents)
-                                                                 _ (assert (= 1 (count rakennushanke)))]
-                                                             (first rakennushanke)))
-                        :lausuntotieto (get-statements (:statements application))
-                        :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
-                                                                     "ruotsi"
-                                                                     "suomi")
-                                                     :suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}
-                        :kayttotapaus "Uusi hakemus"
-                        :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat :value)
-                                                    :poikkeamisasianKuvaus (-> hanke :kuvaus :value)}}}})))
+      {:kasittelynTilatieto (get-state application)
+       :kuntakoodi (:municipality application)
+       :luvanTunnistetiedot (lupatunnus application)
+       :osapuolettieto (osapuolet documents)
+       :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
+       :toimenpidetieto (get-toimenpiteet (let [rakennushanke (:rakennushanke documents)
+                                                _ (assert (= 1 (count rakennushanke)))]
+                                            (first rakennushanke)))
+       :lausuntotieto (get-statements (:statements application))
+       :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
+                                                     "ruotsi"
+                                                     "suomi")
+                                    :suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}
+       :kayttotapaus "Uusi hakemus"
+       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat :value)
+                                   kuvaus-avain (-> hanke :kuvaus :value)}}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
 (defmethod poikkeus-application-to-canonical "poikkeamislupa" [application lang]
-  (common-poikkeamis-asia application [:Popast :poikkeamisasiatieto] lang))
+  (common-poikkeamis-asia application [:Popast :poikkeamisasiatieto :Poikkeamisasia] lang :poikkeamisasianKuvaus ))
 
 (defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
-  (let [root (root-element application lang)]
-    root))
+  (common-poikkeamis-asia application [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia] lang :suunnittelutarveasianKuvaus))
 
 
 

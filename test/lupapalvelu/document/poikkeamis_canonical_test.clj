@@ -378,11 +378,13 @@
                        :id "LP-753-2013-00001"
                        :municipality "753"})
 
+(def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
+
 
 (validate-all-documents documents)
 
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi§" ) => truthy
+  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
@@ -390,7 +392,7 @@
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
 
-        suunnittelutarveasia (:suunnittelutarveasia Popast) => nil
+        suunnittelutarveasiatieto (:suunnittelutarveasiatieto Popast) => nil
         poikkeamisasiatieto (:poikkeamisasiatieto Popast) => truthy
         Poikkeamisasia (:Poikkeamisasia poikkeamisasiatieto)
         ;abstarctPoikkeamistype
@@ -573,6 +575,202 @@
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
         vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
         kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
+
+
+;Suunnitelutarveratkaisu
+
+(fl/fact*
+  (let [canonical (c/poikkeus-application-to-canonical suunnitelutarveratkaisu "fi" ) => truthy
+        Popast (:Popast canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Popast) => truthy
+        aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
+        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => "lupapiste@solita.fi"
+        tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality suunnitelutarveratkaisu)
+
+        suunnittelutarveasiatieto (:suunnittelutarveasiatieto Popast) => truthy
+        poikkeamisasiatieto (:poikkeamisasiatieto Popast) => nil
+        Suunnittelutarveasia (:Suunnittelutarveasia suunnittelutarveasiatieto)
+        ;abstarctPoikkeamistype
+        kasittelynTilatieto (:kasittelynTilatieto Suunnittelutarveasia) => truthy
+        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        pvm (:pvm Tilamuutos) => "2013-09-17"
+
+        kuntakoodi (:kuntakoodi Suunnittelutarveasia) => (:municipality poikkari-hakemus)
+
+        luvanTunnistetiedot (:luvanTunnistetiedot Suunnittelutarveasia) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        tunnus (:tunnus MuuTunnus) => "LP-753-2013-00001"
+        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+
+        osapuolettieto (:osapuolettieto Suunnittelutarveasia) => truthy
+        Osapuolet (:Osapuolet osapuolettieto) => truthy
+        osapuolitieto (:osapuolitieto Osapuolet) => truthy
+
+        ;Maksaja
+        maksaja (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "maksaja") %) osapuolitieto) => truthy
+        Osapuoli (:Osapuoli maksaja) => truthy
+        _ (:turvakieltoKytkin Osapuoli) => false
+        henkilo (:henkilo Osapuoli) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Toimi"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Toimari"
+        _ (:puhelin henkilo) => "020202"
+        _ (:sahkopostiosoite henkilo) => "paajehu@yit.foo"
+        yritys (:yritys Osapuoli) => truthy
+        _ (:nimi yritys ) => "YIT"
+        _ (:liikeJaYhteisotunnus yritys) => "1743842-0"
+        postiosoite (:postiosoite yritys) => truthy
+        _ (get-in postiosoite [:osoitenimi :teksti]) => "Koivukuja 2"
+        _ (:postinumero postiosoite) => "23500"
+        _ (:postitoimipaikannimi postiosoite) => "Helsinki"
+
+        ;Hakija
+        hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
+        Osapuoli (:Osapuoli hakija) => truthy
+        _ (:turvakieltoKytkin Osapuoli) => false
+        henkilo (:henkilo Osapuoli) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        yritys (:yritys Osapuoli) => nil
+
+        ;Paassuunnitelija
+        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
+        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
+        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
+        henkilo (:henkilo Suunnittelija) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Suunnittelija) => "Arkkitehti"
+        _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
+
+        ;Suunnitelija
+        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
+        suunnittelija (some #(when (= (get-in % [:Suunnittelija :suunnittelijaRoolikoodi] %) "KVV-suunnittelija") %) suunnittelijatieto) => truthy
+        Suunnittelija (:Suunnittelija suunnittelija) => truthy
+        henkilo (:henkilo Suunnittelija) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
+        _ (:patevyysvaatimusluokka Suunnittelija) => "C"
+
+        rakennuspaikkatieto (:rakennuspaikkatieto Suunnittelutarveasia) => truthy
+        Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
+        Rakennuspaikka (:Rakennuspaikka Rakennuspaikkaf) => truthy
+        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto Rakennuspaikka) => truthy
+        RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
+        kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy
+        Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
+        tilannimi (:tilannimi Kiinteisto) => "Omatila"
+        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
+        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
+        rantaKytkin (:rantaKytkin Kiinteisto) => true
+        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
+        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
+
+        toimenpidetieto (:toimenpidetieto Suunnittelutarveasia) => truthy
+        toimenpide-count (count toimenpidetieto) => 2
+        uusi (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "011 yhden asunnon talot") %) toimenpidetieto)
+        uusi (:Toimenpide uusi)
+        rakennustunnus (:rakennustunnus uusi) => nil
+        _ (:liitetieto uusi) => nil
+        kuvauskoodi (:kuvausKoodi uusi) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusi) => nil
+        tavoitetilatieto (:tavoitetilatieto uusi) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "011 yhden asunnon talot"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "2"
+        kokonaisala (:kokonaisala Tavoitetila) => "220"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => "1"
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "200"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "011 yhden asunnon talot"
+
+        uusit (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "941 talousrakennukset") %) toimenpidetieto)
+        uusit (:Toimenpide uusit)
+        rakennustunnus (:rakennustunnus uusit) => nil
+        _ (:liitetieto uusit) => nil
+        kuvauskoodi (:kuvausKoodi uusit) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusit) => nil
+        tavoitetilatieto (:tavoitetilatieto uusit) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
+
+        laajennus-tp (c/get-toimenpiteet laajennus)
+        laajennus-tp (:Toimenpide (first laajennus-tp))
+        rakennustunnus (:rakennustunnus laajennus-tp) => nil
+        _ (:liitetieto laajennus-tp) => nil
+        kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
+        kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "99"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "013 muut erilliset talot"
+        tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
+
+        lausuntotieto (:lausuntotieto Suunnittelutarveasia) => truthy
+        Lausunto (:Lausunto (first lausuntotieto)) => truthy
+        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        lausuntotieto (:lausuntotieto Lausunto) => truthy
+        annettu-lausunto (:Lausunto lausuntotieto) => truthy
+        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+
+        puoltotieto (:puoltotieto annettu-lausunto) => truthy
+        Puolto (:Puolto puoltotieto) => truthy
+        puolto (:puolto Puolto) => "puoltaa"
+        lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
+
+        lisatietotieto (:lisatietotieto Suunnittelutarveasia) => truthy
+        Lisatieto (:Lisatieto lisatietotieto) => truthy
+        asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
+
+        ;end of abstarctPoikkeamistype
+        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi hakemus"
+
+        asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
+        Asiantiedot (:Asiantiedot asianTiedot) => truthy
+        vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
+        kuvaus (:suunnittelutarveasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
 
 
 

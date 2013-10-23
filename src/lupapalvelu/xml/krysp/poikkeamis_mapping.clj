@@ -64,7 +64,7 @@
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
-           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveratkaisu :child abstractPoikkeamisType}]}]})
+           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstractPoikkeamisType}]}]})
 
 
 (defn- add-statement-attachments [canonical statement-attachments krysp-polku-lausuntoon]
