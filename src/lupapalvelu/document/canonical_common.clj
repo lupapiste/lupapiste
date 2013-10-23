@@ -295,17 +295,16 @@
       joined)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
-  (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))]
-    (when foremans
-      (let [patevyys (:patevyys tyonjohtaja)]
-        (conj foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
-                        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                        :koulutus (-> patevyys :koulutus :value)
-                        :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
-                        :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
-                        :kokemusvuodet (-> patevyys :kokemusvuodet :value)
-                        :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
-                        :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))))
+  (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))
+        patevyys (:patevyys tyonjohtaja)]
+    (conj foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
+                    :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+                    :koulutus (-> patevyys :koulutus :value)
+                    :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
+                    :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                    :kokemusvuodet (-> patevyys :kokemusvuodet :value)
+                    :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
+                    :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
