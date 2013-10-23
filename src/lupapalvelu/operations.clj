@@ -86,8 +86,14 @@
            ["Pima" :pima]
            ["maa-ainesten_ottaminen" :maa-aineslupa]]]})
 
+(def ^:private operation-tree-for-rakaik
+  {:permit-type permit/R
+   :tree ["Rakentamisen aikaiset"
+          [["Tyonjohtaja" :tyonjohtaja]]]})
+
 (def ^:private operation-tree
   (vector
+    (when (env/feature? :rakentamisen-aikaiset-tyonjohtaja) operation-tree-for-rakaik)
     operation-tree-for-R
     operation-tree-for-environment-R
     (when (env/feature? :poikkari) operation-tree-for-P)
@@ -332,7 +338,12 @@
                                    :permit-type "R"
                                    :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
-                                   :attachments []}}
+                                   :attachments []}
+
+     :tyonjohtaja                 {:schema "tyonjohtaja"
+                                   :permit-type "R"
+                                   :attachments []}
+     }
     ya-operations))
 
 (defn permit-type-of-operation [operation]
