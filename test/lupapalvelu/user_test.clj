@@ -62,7 +62,8 @@
   (user-query {:id "x"})        => {:_id "x"}
   (user-query {:email "x"})     => {:email "x"}
   (user-query {:email "XyZq"})  => {:email "xyzq"}
-  (user-query {:id "x" :username "UserName" :email "Email@AddreSS.FI" :foo "BoZo"}) => {:_id "x" :username "username" :email "email@address.fi" :foo "BoZo"})
+  (user-query {:id "x" :username "UserName" :email "Email@AddreSS.FI" :foo "BoZo"}) => {:_id "x" :username "username" :email "email@address.fi" :foo "BoZo"}
+  (user-query {:organization "x"}) => {:organizations "x"})
 
 ;;
 ;; ==============================================================================
@@ -133,70 +134,3 @@
   (fact "fails with uneven optional parameter pairs"
     (user-in-role {:id 1 :role :applicant} :reader :age) => (throws Exception)))
 
-;;
-;; ==============================================================================
-;; Creating users:
-;; ==============================================================================
-;;
-
-(facts create-user-entity
-  
-  (fact "can't create with nil"
-    (create-user-entity nil) => (throws Exception))
-  
-  (fact "need both :email and :id"
-    (create-user-entity {:email "foo"}) => (throws Exception)
-    (create-user-entity {:id "foo"}) => (throws Exception)
-    (create-user-entity {:email "foo" :id "bar"}) => (contains {:email "foo" :id "bar"}))
-  
-  (fact "default values"
-    
-    (create-user-entity {:email "foo"
-                         :id    ..id..})
-      => (contains {:email     "foo"
-                    :id        ..id..
-                    :firstName ""
-                    :lastName  ""
-                    :enabled   false
-                    :role      :dummy})
-    
-    (create-user-entity {:email     "foo"
-                         :id        ..id..
-                         :firstName ..firstName..
-                         :lastName  ..lastName..
-                         :enabled   ..enabled..
-                         :role      ..role..})
-      => (contains {:email     "foo"
-                    :id        ..id..
-                    :firstName ..firstName..
-                    :lastName  ..lastName..
-                    :enabled   ..enabled..
-                    :role      ..role..}))
-  
-  (fact "email is converted to lowercase"
-    (create-user-entity {:id  ..id.. :email "Foo@Bar.Com"}) => (contains {:email "foo@bar.com"}))
-
-  (fact "password is not required"
-    (create-user-entity {:id "id" :email "email"}) => truthy)
-  
-  (fact "valid password"
-    (create-user-entity {:id "id" :email "email" :password "some-password"}) => truthy
-      (provided (security/valid-password? "some-password") => true))
-  
-  (fact "invalid password"
-    (create-user-entity {:id "id" :email "email" :password "some-password"}) => (throws Exception #"password")
-      (provided (security/valid-password? "some-password") => false))
-  
-  (fact "does not contain plaintext password"
-    (against-background (security/valid-password? "some-password") => true)
-    (let [entity   (create-user-entity {:password  "some-password"
-                                        :id        ..id..
-                                        :email     "email"
-                                        :role      ..role..})
-          password (get-in entity [:private :password])]
-      password     =not=>  nil
-      password     =not=>  #"some-password"
-      (str entity) =not=>  #"some-password"))
-  
-  (fact "does not contain extra fields"
-    (-> (create-user-entity {:id "id" :email "email" :foo "bar"}) :foo) => nil))

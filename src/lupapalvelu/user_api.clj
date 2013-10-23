@@ -8,6 +8,7 @@
             [sade.util :refer [future*]]
             [sade.env :refer [in-dev]]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
@@ -35,7 +36,7 @@
   {:roles [:admin :authorityAdmin]}
   [{{:keys [role organizations]} :user data :data}]
   (ok :users (map user/non-private (-> data
-                                     (select-keys [:id :role :organization :email :username :firstName :lastName :enabled])
+                                     (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled])
                                      (as-> data (if (= role :authorityAdmin)
                                                   (assoc data :organizations {$in [organizations]})
                                                   data))
@@ -47,22 +48,71 @@
 ;; ==============================================================================
 ;;
 
+(defn- validate-create-new-user! [caller user-data]
+  (when-let [missing (util/missing-keys user-data [:email :role])]
+    (fail! :missing-required-key :missing missing))
+  
+  (let [password (:password user-data)
+        user-role (keyword (:role user-data))
+        caller-role (keyword (:role caller))]
+  
+    (when-not (#{:admin :authorityAdmin} caller-role)
+      (fail! :forbidden :caller-role caller-role))
+    
+    (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
+      (fail! :invalid-role :user-role user-role))
+    
+    (when (and (#{:authorityAdmin :applicant} user-role) (not (#{:admin} caller-role)))
+      (fail! :forbidden :user-role user-role :caller-role caller-role))
+
+    (when (and (= user-role :authority) (not (#{:admin :authorityAdmin} caller-role)))
+      (fail! :forbidden :user-role user-role :caller-role caller-role))
+    
+    (when (and (:organizations user-data) (not (#{:admin :authorityAdmin} caller-role)))
+      (fail! :forbidden :organizations (:organizations user-data) :caller-role caller-role))
+    
+    (when (and password (not (security/valid-password? password)))
+      (fail! :password-too-short))
+    
+    (when (and (:organizations user-data)
+               (not= caller-role :admin)
+               (not (every? (set (:organizations caller)) (:organizations user-data))))
+      (fail! :forbidden :organizations (:organizations user-data) :caller-role caller-role)))
+
+  true)
+
+(defn- create-new-user-entity [caller user-data]
+  (let [user-role    (keyword (:role user-data))
+        caller-role  (keyword (:role caller))
+        email        (ss/lower-case (:email user-data))]
+    (-> user-data
+      (select-keys [:email :username :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
+      (as-> user-data (merge {:firstName "" :lastName "" :username email :enabled false} user-data))
+      (assoc :email email
+             :private (if (:password user-data)
+                        {:password (security/get-hash (:password user-data))}
+                        {})))))
+
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
    role, throws exception."
   [caller user-data]
-  (let [id        (mongo/create-id)
-        new-user  (user/create-user-entity (assoc user-data :id id))
-        {old-id :id old-role :role} (user/get-user-by-email (:email user-data))]
+  (validate-create-new-user! caller user-data)
+  (let [new-user  (create-new-user-entity caller user-data)
+        new-user  (assoc new-user :id (mongo/create-id))
+        email     (:email new-user)
+        {old-id :id old-role :role}  (user/get-user-by-email (:email new-user))]
     (try
-      (if (= "dummy" old-role)
-        (do
-          (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
-          (mongo/update-by-id :users old-id (dissoc new-user :id)))
-        (do
-          (info "creating new user" (dissoc new-user :private))
-          (mongo/insert :users new-user)))
+      (condp = old-role
+        nil     (do
+                  (info "creating new user" (dissoc new-user :private))
+                  (mongo/insert :users new-user)
+                  (activation/send-activation-mail-for new-user))
+        "dummy" (do
+                  (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
+                  (mongo/update-by-id :users old-id (dissoc new-user :id)))
+        (fail! :user-exists))
       (user/get-user-by-email (:email new-user))
       (catch com.mongodb.MongoException$DuplicateKey e
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
@@ -73,50 +123,17 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
-; TODO: replace dummy users with tokens
-; When (if?) dummy users are replaced with tokens, this should be removed too:
-
 (defn get-or-create-user-by-email [email]
   (let [email (ss/lower-case email)]
     (or
       (user/get-user-by-email email)
-      (create-new-user (user/current-user) {:email email}))))
-
+      (create-new-user (user/current-user) {:email email :role "dummy"}))))
 
 (defcommand create-user
   {:parameters [:email :password]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
   (ok :id (create-new-user caller user-data)))
-
-#_(defcommand create-authority-admin-user
-    (activation/send-activation-mail-for new-user)
-    {:parameters [:firstName :lastName :email :password :organizations]
-     :roles      [:admin]
-     :verified   true}
-    [{{:keys [password] :as data} :data}]
-    #_ (create-any-user (merge user {:role :authorityAdmin :enabled true}))
-    (when-not (security/valid-password? password) (fail! :error.password-too-short))
-    (let [new-user (user/create-authority-admin data)]
-      (when-not new-user (fail! :error.create-admin-user))
-    
-      (ok :id (:_id new-user))))
-
-#_(defcommand create-authority-user
-   {:parameters [:firstName :lastName :email :password]
-    :roles      [:authorityAdmin]
-    :verified   true}
-   [{{:keys [organizations]} :user data :data}]
-   #_ (try
-       (create-any-user (merge user {:role :authority :enabled true}))
-       (catch IllegalArgumentException e
-         (when (= "error.duplicate-email" (.getMessage e))
-           (info "Adding user to organization: user:" (:email user) ", organizations:" (:organizations user))
-           (mongo/update :users {:email (:email user)} {$pushAll {:organizations (:organizations user)}})
-           {:ok true})))
-   (when-not (security/valid-password? (:password data)) (fail! :error.password-too-short))
-   (let [new-user (user/create-authority (merge data {:organizations organizations}))]
-     (ok :id (:_id new-user))))
 
 ;;
 ;; ==============================================================================
@@ -270,9 +287,8 @@
     (when-not (.contains email "@") (fail! :error.email))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user (merge data vetuma-data {:email email}))]
+      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant"}))]
         (do
-          (activation/send-activation-mail-for user)
           (vetuma/consume-user stamp)
           (ok :id (:_id user)))
         (fail :error.create-user))

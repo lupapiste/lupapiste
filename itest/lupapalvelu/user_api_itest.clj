@@ -1,10 +1,14 @@
 (ns lupapalvelu.user-api-itest
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [clojure.java.io :as io]
-            [cheshire.core :as json]
+  (:require [clojure.java.io :as io]
             [clojure.walk :refer [keywordize-keys]]
-            [clj-http.client :as c]))
+            [cheshire.core :as json]
+            [clj-http.client :as c]
+            [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.user-api :as user-api]
+            ))
 
 ;;
 ;; ==============================================================================
@@ -16,6 +20,8 @@
   (fact (query pena :user) => (contains {:user (contains {:email "pena@example.com"})})))
 
 (facts "Getting users"
+  (apply-remote-minimal)
+  
   (fact "applicants are not allowed to call this"
     (query pena :users) =not=> ok?)
   
@@ -24,20 +30,8 @@
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
 
-;;
-;; ==============================================================================
-;; Creating users:
-;; ==============================================================================
-;;
 
-
-
-
-
-
-
-
-
+(comment
 ;; dragons ahead...
 
 (fact "changing user info"
@@ -183,3 +177,4 @@
     (-> (query naantali-apikey :user) :user) => (contains {:email naantali-email
                                                            :firstName "Rakennustarkastaja"
                                                            :lastName "Naantali"})))
+)

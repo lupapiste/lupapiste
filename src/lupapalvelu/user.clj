@@ -5,7 +5,7 @@
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
-            [sade.util :refer [fn->] :as util]
+            [sade.util :refer [fn->]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
@@ -51,13 +51,18 @@
                 query)
         query (if-let [email (:email query)]
                 (assoc query :email (ss/lower-case email))
+                query)
+        query (if-let [organization (:organization query)]
+                (-> query
+                  (assoc :organizations organization)
+                  (dissoc :organization))
                 query)]
     query))
 
-(defn find-user [& {:as query}]
+(defn find-user [query]
   (mongo/select-one :users (user-query query)))
 
-(defn find-users [& {:as query}]
+(defn find-users [query]
   (mongo/select :users (user-query query)))
 
 ;;
@@ -66,16 +71,19 @@
 ;; ==============================================================================
 ;;
 
-(def get-user-by-id (comp non-private (partial find-user :id)))
-(def get-user-by-email (comp non-private (partial find-user :email)))
+(defn get-user-by-id [id]
+  (non-private (find-user {:id id})))
+
+(defn get-user-by-email [email]
+  (non-private (find-user {:email email})))
 
 (defn get-user-with-password [username password]
-  (let [user (find-user :username username)]
+  (let [user (find-user {:username username})]
     (when (and (:enabled user) (security/check-password password (get-in user [:private :password])))
       (non-private user))))
 
 (defn get-user-with-apikey [apikey]
-  (let [user (find-user :private.apikey apikey)]
+  (let [user (find-user {:private.apikey apikey})]
     (when (:enabled user)
       (non-private user))))
 
@@ -85,9 +93,6 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
-
-(defn get-users [caller & query-params]
-  (map non-private (apply find-users caller query-params)))
 
 ;;
 ;; ==============================================================================
@@ -154,32 +159,6 @@
                                    {$set {:private.password hashed-password}}))
       (fail! :unknown-user :email email))
     nil))
-
-;;
-;; ==============================================================================
-;; Creating users:
-;; ==============================================================================
-;;
-
-(def ^:private user-keys         [:id :email :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-(def ^:private required-keys     [:id :email])
-(def ^:private user-defaults     {:firstName "" :lastName "" :enabled false :role :dummy})
-(def ^:private known-user-roles  #{:admin :authority :authorityAdmin :applicant :dummy})
-
-(defn create-user-entity [{:keys [email password role] :as user-data}]
-  (when-let [missing (util/missing-keys user-data required-keys)]
-    (fail! :error.missing-required-key :missing missing))
-  (when (and password (not (security/valid-password? password)))
-    (fail! :error.password-too-short))
-  (let [email (ss/lower-case email)]
-    (merge
-      user-defaults
-      (select-keys user-data user-keys)
-      {:username email
-       :email    email
-       :private  (if password
-                   {:password (security/get-hash password)}
-                   {})})))
 
 ;;
 ;; ==============================================================================

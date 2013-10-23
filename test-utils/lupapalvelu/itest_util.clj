@@ -1,5 +1,5 @@
 (ns lupapalvelu.itest-util
-  (:use [lupapalvelu.fixture.minimal :only [users]]
+  (:use [lupapalvelu.fixture.minimal :as minimal]
         [lupapalvelu.core :only [fail!]]
         [clojure.walk :only [keywordize-keys]]
         [swiss-arrows.core]
@@ -11,9 +11,9 @@
             [cheshire.core :as json]
             [sade.util :refer [fn-> fn->>]]))
 
-(defn- find-user [username] (some #(when (= (:username %) username) %) users))
-(defn- id-for [username] (:id (find-user username)))
-(defn- apikey-for [username] (get-in (find-user username) [:private :apikey]))
+(defn- find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
+(defn- id-for [username] (:id (find-user-from-minimal username)))
+(defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
