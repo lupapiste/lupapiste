@@ -227,7 +227,7 @@
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto (osapuolet documents)
-                      :rakennuspaikkatieto (get-bulding-places documents application)
+                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
                       :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus (get-kayttotapaus documents toimenpiteet)

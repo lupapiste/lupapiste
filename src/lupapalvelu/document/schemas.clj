@@ -489,6 +489,26 @@
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
 
+(def rakennuspaikka [{:name "kiinteisto"
+                      :type :group
+                      :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
+                             {:name "tilanNimi" :type :string :readonly true}
+                             {:name "rekisterointipvm" :type :string :readonly true}
+                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
+                             {:name "rantaKytkin" :type :checkbox}]}
+                     {:name "hallintaperuste" :type :select :required true
+                      :body [{:name "oma"}
+                             {:name "vuokra"}
+                             {:name "ei tiedossa"}]}
+                     {:name "kaavanaste" :type :select
+                      :body [{:name "asema"}
+                             {:name "ranta"}
+                             {:name "rakennus"}
+                             {:name "yleis"}
+                             {:name "ei kaavaa"}
+                             {:name "ei tiedossa"}]}])
+
 
 (defn- approvable-top-level-groups [v]
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
@@ -568,25 +588,7 @@
 
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}
-     :body [{:name "kiinteisto"
-             :type :group
-             :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
-                    {:name "tilanNimi" :type :string :readonly true}
-                    {:name "rekisterointipvm" :type :string :readonly true}
-                    {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                    {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
-
-            {:name "hallintaperuste" :type :select :required true
-             :body [{:name "oma"}
-                    {:name "vuokra"}
-                    {:name "ei tiedossa"}]}
-            {:name "kaavanaste" :type :select
-             :body [{:name "asema"}
-                    {:name "ranta"}
-                    {:name "rakennus"}
-                    {:name "yleis"}
-                    {:name "ei kaavaa"}
-                    {:name "ei tiedossa"}]}]}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
 
     {:info {:name "lisatiedot"
             :order 100}
