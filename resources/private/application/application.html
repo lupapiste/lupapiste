@@ -451,7 +451,7 @@
                     <table class="table table-striped tablesorter" id="application-verdict-details">
                       <thead>
                         <tr>
-                          <th data-bind="ltext: 'verdict.status'"></th>
+                          <th data-bind="ltext: 'verdict.status'" colspan="2"></th>
                           <th data-bind="ltext: 'verdict.pykala'"></th>
                           <th data-bind="ltext: 'verdict.name'"></th>
                           <th data-bind="ltext: 'verdict.paatospvm'"></th>
@@ -460,12 +460,9 @@
                       </thead>
                       <tbody data-bind="foreach: $data.poytakirjat">
                         <tr class="statement-row" >
-                          <td>
-                          <!-- ko if: $data.status -->
-                          <span data-bind="ltext: 'verdict.status.'+$data.status"></span>
-                          <!-- /ko -->
-                          <span data-bind="text: $data.paatos"></span>
-                          </td>
+                          <td data-bind="if: $data.status">
+                            <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td>
+                          <td data-bind="text: $data.paatos"></td>
                           <td data-bind="text: $data.pykala"></td>
                           <td data-bind="text: $data.paatoksentekija"></td>
                           <td data-bind="dateString: $data.paatospvm"></td>
