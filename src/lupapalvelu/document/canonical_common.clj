@@ -295,31 +295,20 @@
       joined)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
-  (let [kuntaRoolikoodi (get-kuntaRooliKoodi tyonjohtaja party-type)
-        codes {:tyonjohtajaRooliKoodi kuntaRoolikoodi ; Note the lower case 'koodi'
-               :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
-        patevyys (:patevyys tyonjohtaja)
-        henkilo (merge (get-name (:henkilotiedot tyonjohtaja))
-                       {:osoite (get-simple-osoite (:osoite tyonjohtaja))}
-                       {:henkilotunnus (-> tyonjohtaja :henkilotiedot :hetu :value)}
-                       (get-yhteystiedot-data (:yhteystiedot tyonjohtaja)))
-        base-data (merge codes {:vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                                :koulutus (-> patevyys :koulutus :value)
-                                :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
-                                :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
-                                :kokemusvuodet (-> patevyys :kokemusvuodet :value)
-                                :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
-                                :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))
-                                :henkilo henkilo})]
-    (if (contains? tyonjohtaja :yritys)
-      (assoc base-data :yritys (assoc
-                                 (get-simple-yritys (:yritys tyonjohtaja))
-                                 :postiosoite (get-simple-osoite (:osoite tyonjohtaja))))
-      base-data)))
+  (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))]
+    (when foremans
+      (let [patevyys (:patevyys tyonjohtaja)]
+        (conj foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
+                        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+                        :koulutus (-> patevyys :koulutus :value)
+                        :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
+                        :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                        :kokemusvuodet (-> patevyys :kokemusvuodet :value)
+                        :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
+                        :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))))
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
-
 
 (defn osapuolet [documents-by-types]
   {:Osapuolet
