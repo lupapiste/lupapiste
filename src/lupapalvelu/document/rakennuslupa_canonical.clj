@@ -1,7 +1,6 @@
 (ns lupapalvelu.document.rakennuslupa_canonical
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
-            [clojure.zip :as zip]
             [clojure.string :as s]
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
