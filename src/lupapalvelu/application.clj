@@ -658,9 +658,12 @@
    :states     [:draft :info :answered :open :complement-needed :submitted]  ;; TODO: Nama ok?
    :input-validators [(partial non-blank-parameters [:appId :linkPermit])]}
   [{application :application}]
+;  [{:keys [application] :as command}]  ;; Tama toimii
 
   (println "\n defcommand save-link-permit, application: ")
   (clojure.pprint/pprint application)
+;  (println "\n defcommand save-link-permit, command: ")
+;  (clojure.pprint/pprint command)
   (println "\n defcommand save-link-permit, appId:" appId ", linkPermit:" linkPermit)
   (println "\n")
 
@@ -680,11 +683,11 @@
 
 
 ;; TODO: Ota tama kayttoon
-  #_(let [smaller (if (< app-id link-permit) app-id link-permit)]
+  #_(let [smaller (if (< appId linkPermit) appId linkPermit)]
     (mongo/insert :app-links {:id (mongo/create-id)
                               :link (+
                                       smaller
-                                      (if (= smaller link-permit) app-id link-permit))}))
+                                      (if (= smaller linkPermit) appId linkPermit))}))
   )
 
 
