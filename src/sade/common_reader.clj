@@ -2,9 +2,10 @@
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.coerce :as coerce]
-            [sade.xml :refer :all]
             [clj-time.format :as timeformat]
             [clj-http.client :as http]
+            [sade.env :as env]
+            [sade.xml :refer :all]
             [sade.strings :as ss]))
 
 ;;
@@ -132,9 +133,12 @@
   ([url]
     (get-xml url nil))
   ([url credentials]
-    (let [raw (:body (if credentials (http/get url {:basic-auth credentials
-                                                    :socket-timeout 10000 ;10 sekunttia
-                                                    :conn-timeout 10000}) (http/get url)))
+    (let [options {:socket-timeout 10000 ;10 sekunttia
+                   :conn-timeout 10000
+                   :insecure? (not (env/value :ssl-cert-validation))}
+          raw (:body (if credentials
+                       (http/get url (merge options {:basic-auth credentials}))
+                       (http/get url options)))
           xml (parse raw)]
       xml)))
 
