@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="add-link-permit" style="visibility: visible; display: block;">
+      <div id="dialog-add-link-permit" class="window autosized" >
+        <div data-bind="with: addLinkPermitModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'linkPermit.dialog.header'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+
+          <div class="dialog-content">
+
+            <p data-bind ="ltext: 'linkPermit.dialog.helpParagraph'"></p>
+
+            <div>
+              <!--
+                TODO: Tehdäkö tästä
+                      autocomplete select, jolla valitaan olemassaoleva hakemus mongosta
+                      VAI
+                      Nappi, jolla avataan uusi popup (jossa se autocomplete on)?
+              -->
+              <label class="form-label" data-bind ="ltext: 'linkPermit.dialog.choosePermit'"></label>
+              <input data-bind="value: chosenLinkPermit, valueUpdate: 'afterkeydown'"
+                     data-test-id="application-choose-link-permit"
+                     type="text" maxlength="100" class="form-input text long">
+              </input>
+
+              <p data-bind ="ltext: 'linkPermit.dialog.or'"></p>
+
+              <label class="form-label" data-bind ="ltext: 'linkPermit.dialog.kuntalupatunnus'"></label>
+              <input data-bind="value: kuntalupatunnus, valueUpdate: 'afterkeydown'"
+                     data-test-id="application-kuntalupatunnus-for-link-permit"
+                     type="text" maxlength="100" class="form-input text long">
+              </input>
+
+              <div data-bind="if: errorMessage" >
+                <div data-bind="ltext: errorMessage" class="context-error"></div>
+              </div>
+
+              <button class="btn btn-primary btn-dialog"
+                      data-bind="click: addLinkPermit, enable: ok, disable: processing"
+                      data-test-id="button-add-link-permit">
+                <span data-bind="ltext: 'linkPermit.dialog.continue'"></span>
+                <em data-bind="visible: pending" class="button-loader"></em>
+              </button>
+
+              <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

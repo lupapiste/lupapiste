@@ -8,6 +8,7 @@
   var applicationMap = null;
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
+  var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
 
@@ -894,12 +895,14 @@
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
       sendNeighborEmailModel: sendNeighborEmailModel,
-      neighborStatusModel: neighborStatusModel
+      neighborStatusModel: neighborStatusModel,
+      addLinkPermitModel: addLinkPermitModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
     $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
+    $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
     attachmentTemplatesModel.init();
   });
 
