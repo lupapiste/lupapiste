@@ -1,6 +1,6 @@
 LUPAPISTE.AddLinkPermitModel = function() {
   var self = this;
-  self.dialogSelector = "#add-link-permit";
+  self.dialogSelector = "#dialog-add-link-permit";
 
   self.appId = 0;
   self.kuntalupatunnus = ko.observable("");
