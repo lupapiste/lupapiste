@@ -61,9 +61,9 @@
 (def ^:private operation-tree-for-YA
   {:permit-type permit/YA
    :tree ["yleisten-alueiden-luvat"
-          [["kaivuulupa" :ya-kaivuulupa]
-           ["kayttolupa"
-            [["tyomaasuojat-ja-muut-rakennelmat" :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat]
+          [["kayttolupa"
+            [["kaivuulupa" :ya-kaivuulupa]
+             ["tyomaasuojat-ja-muut-rakennelmat" :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat]
              ["mainoslaitteet-ja-opasteviitat" :ya-kayttolupa-mainostus-ja-viitoitus]
              ["muut-yleisten-alueiden-tilojen-kaytot" :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot]
              ["messujen-ja-tapahtumien-alueiden-kaytot" :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot]
