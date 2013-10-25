@@ -31,11 +31,11 @@ var gis = (function() {
       // use the new geoserver in IBM cloud
       var wmsServer = LUPAPISTE.config.maps.geoserver;
       var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
-      var asemakaava = new OpenLayers.Layer.WMS("Asemakaava", wmsServer, {layers: "Asemakaava", format: "image/png"}, {isBaseLayer: false});
-      var kantakartta = new OpenLayers.Layer.WMS("Kantakartta", wmsServer, {layers: "Kantakartta", format: "image/png"}, {isBaseLayer: false});
-      var peruskartat = new OpenLayers.Layer.WMS("Peruskartat", wmsServer, {layers: "Peruskartat", format: "image/png"}, {isBaseLayer: false});
-      var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
-      var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
+      var asemakaava = new OpenLayers.Layer.WMS("Asemakaava", wmsServer, {layers: "lupapiste:Asemakaava", format: "image/png"}, {isBaseLayer: false});
+      var kantakartta = new OpenLayers.Layer.WMS("Kantakartta", wmsServer, {layers: "lupapiste:Kantakartta", format: "image/png"}, {isBaseLayer: false});
+      var peruskartat = new OpenLayers.Layer.WMS("Peruskartat", wmsServer, {layers: "lupapiste:Peruskartat", format: "image/png"}, {isBaseLayer: false});
+      var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "lupapiste:ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
+      var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "lupapiste:ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
 
       self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
 
