@@ -646,6 +646,49 @@
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
+
+(defquery link-permits
+  {:verified true}
+  [_]
+  (ok :app-links (mongo/select :app-links)))
+
+(defcommand add-link-permit
+  {:parameters [appId linkPermit]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :answered :open :complement-needed :submitted]  ;; TODO: Nama ok?
+   :input-validators [(partial non-blank-parameters [:appId :linkPermit])]}
+  [{application :application}]
+
+  (println "\n defcommand save-link-permit, application: ")
+  (clojure.pprint/pprint application)
+  (println "\n defcommand save-link-permit, appId:" appId ", linkPermit:" linkPermit)
+  (println "\n")
+
+;  KasittelynTilaType/Tilamuutos
+;  RakennusvalvontaAsiaType/kayttotapaus
+;  OsapuoletType/Osapuolet/osapuolitieto/Osapuoli
+;    - Hakija
+;  RakennusvalvontaAsiaType/asianTiedot/Asiantiedot/rakennusvalvontaasianKuvaus
+;  LuvanTunnisteTiedotType/LupaTunnus
+;    - viittaus
+;    - kuntalupatunnus
+;    - muuTunnustieto
+;  TyonjohtajaType
+;    - Työnjohtajan tiedot + hetu
+;    - tyonjohtajaHakemusKytkin
+;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
+
+
+;; TODO: Ota tama kayttoon
+  #_(let [smaller (if (< app-id link-permit) app-id link-permit)]
+    (mongo/insert :app-links {:id (mongo/create-id)
+                              :link (+
+                                      smaller
+                                      (if (= smaller link-permit) app-id link-permit))}))
+  )
+
+
+
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
   (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
     (if (= (:new-application-enabled org) true)
