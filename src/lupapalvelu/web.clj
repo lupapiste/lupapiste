@@ -28,7 +28,6 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
-            [lupapalvelu.etag :as etag]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors]))
@@ -147,12 +146,17 @@
 ;; Web UI:
 ;;
 
+(def ^:private build-number (:build-number env/buildinfo))
+
+(def etag (str "\"" "build-number" "\""))
+
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript; charset=utf-8"
                    :css  "text/css; charset=utf-8"})
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
+                   :hashbang anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
@@ -169,10 +173,10 @@
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
-       "ETag"          etag/etag}
+       "ETag"          etag}
       {"Cache-Control" "public, max-age=864000"
        "Vary"          "Accept-Encoding"
-       "ETag"          etag/etag})))
+       "ETag"          etag})))
 
 (def default-lang "fi")
 
@@ -183,15 +187,20 @@
 
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
+    ; Check If-None-Match header, see cache-headers above
+    (if (and (not (s/blank? build-number)) (= (get-in (request/ring-request) [:headers "if-none-match"]) etag))
+      {:status 304}
     (->>
       (java.io.ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
-      (resp/set-headers (cache-headers resource-type)))
+        (resp/set-headers (cache-headers resource-type))))
     failure))
+
+(def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
 (defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
-  (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
+  (single-resource (keyword res-type) (keyword app) unauthorized))
 
 ;; Single Page App HTML
 (def apps-pattern
