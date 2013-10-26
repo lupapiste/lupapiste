@@ -218,18 +218,20 @@
   (when (and v (= -1 (.indexOf v ":")))
     (second (re-matches #"^[#!/]{0,3}(.*)" v))))
 
-(defn serve-app [app hashbang]
+(defn serve-app [app hashbang lang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
-  (when-let [hashbang (->hashbang hashbang)]
-    (session/put! :hashbang hashbang))
-  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+  (if-let [hashbang (->hashbang hashbang)]
+    (do
+      (session/put! :hashbang hashbang)
+      (single-resource :html (keyword app) (redirect-to-frontpage lang)))
+    (single-resource :html (keyword app) (redirect-to-frontpage lang))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  (serve-app app hashbang))
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
+  (serve-app app hashbang lang))
 
 ; Same as above, but with an extra path.
-(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  (serve-app app hashbang))
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
+  (serve-app app hashbang lang))
 
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
