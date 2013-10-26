@@ -153,15 +153,15 @@
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
-                   :welcome anyone
-                   :login-frame anyone
-                   :oskari anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
                    :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
+                   :login-frame anyone
+                   :welcome anyone
+                   :oskari anyone
                    :neighbor anyone})
 
 (defn cache-headers [resource-type]
