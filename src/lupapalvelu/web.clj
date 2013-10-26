@@ -89,7 +89,8 @@
 
 (defn logged-in?
   ([] (logged-in? (request/ring-request)))
-  ([request] (not (nil? (user/current-user request)))))
+  ([request]
+    (not (nil? (:id (user/current-user request))))))
 
 (defn in-role? [role]
   (= role (keyword (:role (user/current-user)))))
@@ -148,7 +149,7 @@
 
 (def ^:private build-number (:build-number env/buildinfo))
 
-(def etag (str "\"" "build-number" "\""))
+(def etag (str "\"" build-number "\""))
 
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript; charset=utf-8"
@@ -178,6 +179,8 @@
        "Vary"          "Accept-Encoding"
        "ETag"          etag})))
 
+(def ^:private never-cache #{:hashbang})
+
 (def default-lang "fi")
 
 (def ^:private compose
@@ -188,12 +191,12 @@
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     ; Check If-None-Match header, see cache-headers above
-    (if (and (not (s/blank? build-number)) (= (get-in (request/ring-request) [:headers "if-none-match"]) etag))
-      {:status 304}
-    (->>
-      (java.io.ByteArrayInputStream. (compose resource-type app))
-      (resp/content-type (resource-type content-type))
-        (resp/set-headers (cache-headers resource-type))))
+    (if (or (never-cache app) (s/blank? build-number) (not= (get-in (request/ring-request) [:headers "if-none-match"]) etag))
+      (->>
+        (java.io.ByteArrayInputStream. (compose resource-type app))
+        (resp/content-type (resource-type content-type))
+        (resp/set-headers (cache-headers resource-type)))
+      {:status 304})
     failure))
 
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
@@ -227,13 +230,19 @@
   (when (and v (= -1 (.indexOf v ":")))
     (second (re-matches #"^[#!/]{0,3}(.*)" v))))
 
+(defn- save-hashbang-on-client []
+  (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}
+    (single-resource :html :hashbang unauthorized)))
+
 (defn serve-app [app hashbang lang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
     (do
       (session/put! :hashbang hashbang)
       (single-resource :html (keyword app) (redirect-to-frontpage lang)))
-    (single-resource :html (keyword app) (redirect-to-frontpage lang))))
+    ; If current user has no access to the app, save hashbang using JS on client side.
+    ; The next call will then be handled by the "true branch" above.
+    (single-resource :html (keyword app) (save-hashbang-on-client))))
 
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
   (serve-app app hashbang lang))

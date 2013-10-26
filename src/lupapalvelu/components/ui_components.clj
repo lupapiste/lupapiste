@@ -139,6 +139,9 @@
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
+   :hashbang     {:depends [:common]
+                  :html ["index.html"]}
+
    :upload       {:depends [:iframe]
                   :js ["upload.js"]
                   :css ["upload.css"]}
