@@ -172,9 +172,34 @@
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
 
-(defn query-application [apikey id]
-  (let [{application :application :as response} (query apikey :application :id id)]
-    response => ok?
+(defn query-application
+  "Fetch application from server.
+   Asserts that application is found and that the application data looks sane."
+  [apikey id]
+  {:post [(:id %)
+          (:created %) (pos? (:created %))
+          (:modified %) (pos? (:modified %))
+          (contains? % :opened)
+          (:permitType %)
+          (contains? % :permitSubtype)
+          (contains? % :infoRequest)
+          (contains? % :openInfoRequest)
+          (:operations %) (pos? (count (:operations %)))
+          (:state %)
+          (:municipality %)
+          (:location %)
+          (:organization %)
+          (:address %)
+          (:propertyId %)
+          (:title %)
+          (:auth %) (pos? (count (:operations %)))
+          (:comments %)
+          (:schema-version %)
+          (:documents %)
+          (:attachments %)
+          (:allowedAttachmentTypes %) (pos? (count (:allowedAttachmentTypes %)))]}
+  (let [{:keys [application ok]} (query apikey :application :id id)]
+    (assert ok)
     application))
 
 (defn create-and-submit-application [apikey & args]
