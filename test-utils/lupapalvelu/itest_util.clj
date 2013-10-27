@@ -168,13 +168,6 @@
     id => truthy
     id))
 
-(defn create-and-submit-application [apikey & args]
-  (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id) => ok?
-        resp  (query pena :application :id id) => ok?
-        app   (:application resp)]
-    app))
-
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
@@ -183,6 +176,11 @@
   (let [{application :application :as response} (query apikey :application :id id)]
     response => ok?
     application))
+
+(defn create-and-submit-application [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        resp  (command apikey :submit-application :id id) => ok?]
+    (query-application apikey id)))
 
 (defn allowed? [action & args]
   (fn [apikey]
@@ -219,7 +217,7 @@
   (when statement-id
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
-        application (query apikey :application :id application-id)
+        application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (c/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
