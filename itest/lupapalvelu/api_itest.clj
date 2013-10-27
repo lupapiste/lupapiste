@@ -6,11 +6,11 @@
 (apply-remote-minimal)
 
 (fact "Disabled user must not be able to create an application!"
-  (command dummy :create-application :operation "asuinrakennus"
+  (raw-command dummy :create-application :operation "asuinrakennus"
     :propertyId "75312312341234"
     :x 444444 :y 6666666
     :address "foo 42, bar"
-    :municipality "753") => unauthorized?)
+    :municipality "753") => invalid-csrf-token?)
 
 (fact "non-admin users should not be able to get actions"
   (query pena :actions) => unauthorized?
@@ -37,7 +37,7 @@
         (:id (first (:applications listing))) => id))
 
     (fact "Disabled user must not see Mikko's application!"
-      (query dummy :application :id id) => unauthorized?)
+      (raw-query dummy :application :id id) => invalid-csrf-token?)
 
     (fact "Teppo must not see Mikko's application!"
       (query teppo :application :id id) => unauthorized?)
