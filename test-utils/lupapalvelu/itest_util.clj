@@ -99,10 +99,6 @@
   (fact (:text resp) => nil)
   (:ok resp))
 
-(defn unauthorized [resp]
-  (fact (:text resp) => "error.unauthorized")
-  (= (:ok resp) false))
-
 (defn invalid-csrf-token? [{:keys [status body]}]
   (and
     (= status 403)

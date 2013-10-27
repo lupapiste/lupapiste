@@ -173,7 +173,7 @@
           (upload-attachment pena (:id application) first-attachment false))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
-  (unauthorized (create-app sonja :municipality veikko-muni)) => true)
+  (create-app sonja :municipality veikko-muni) => unauthorized?)
 
 (facts "Add operations"
   (let [application-id  (create-app-id mikko :municipality veikko-muni)]
