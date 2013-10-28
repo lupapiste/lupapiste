@@ -66,6 +66,31 @@
   (user-query {:organization "x"}) => {:organizations "x"})
 
 ;;
+;; jQuery data-tables:
+;;
+
+(testable-privates lupapalvelu.user users-for-datatables-query)
+
+(facts users-for-datatables-query
+  (fact (users-for-datatables-query {:role :admin} {})                          => {})
+  (fact (users-for-datatables-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations {$in ["a" "b"]}})
+  ; how to test that result has proper regex?
+  (fact (-> (users-for-datatables-query {:role :admin} {:email "foo"}) :email str) => "^foo")
+  (fact (users-for-datatables-query {:role :admin} {:enabled "false"})          => {:enabled false})
+  (fact (users-for-datatables-query {:role :admin} {:enabled "true"})           => {:enabled true})
+  (fact (users-for-datatables-query {} {})                                      => {:enabled true :organizations {$in []}})
+  
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations ["a"]})           => (contains {:organizations {$in ["a"]}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations ["b"]})           => (contains {:organizations {$in ["b"]}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations ["a" "b"]})       => (contains {:organizations {$in ["a" "b"]}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations ["a" "b" "c"]})   => (contains {:organizations {$in ["a" "b"]}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations ["c"]})           => (contains {:organizations {$in []}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations []})              => (contains {:organizations {$in []}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {:organizations nil})             => (contains {:organizations {$in ["a" "b"]}}))
+  (fact (users-for-datatables-query {:organizations ["a" "b"]} {})                               => (contains {:organizations {$in ["a" "b"]}})))
+
+
+;;
 ;; ==============================================================================
 ;; Getting non-private user data:
 ;; ==============================================================================

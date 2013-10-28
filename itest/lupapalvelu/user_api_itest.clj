@@ -30,6 +30,19 @@
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
 
+(facts users-for-datatables
+ (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+   => (contains {:ok true
+                 :data (contains {:aaData (comp (partial = 3) count)
+                                  :iTotalRecords 3
+                                  :iTotalDisplayRecords 3
+                                  :sEcho "123"})}))
+ (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :lastName "Suur"})
+   => (contains {:ok true
+                 :data (contains {:aaData (comp (partial = 1) count)
+                                  :iTotalRecords 3
+                                  :iTotalDisplayRecords 1
+                                  :sEcho "123"})})))
 ;;
 ;; ==============================================================================
 ;; Creating users:

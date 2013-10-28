@@ -17,7 +17,6 @@
 
 (def forbidden (fails-with "forbidden"))
 
-
 ;;
 ;; ==============================================================================
 ;; validate-create-new-user!

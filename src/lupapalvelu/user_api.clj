@@ -1,6 +1,6 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
-            [clojure.set :refer [subset?]]
+            [clojure.set :as set]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.core :refer [defpage]]
@@ -42,6 +42,11 @@
                                                   (assoc data :organizations {$in [organizations]})
                                                   data))
                                      (user/find-users)))))
+
+(defcommand users-for-datatables
+  {:roles [:admin :authorityAdmin]}
+  [{caller :user {params :params} :data}]
+  (ok :data (user/users-for-datatables caller params)))
 
 ;;
 ;; ==============================================================================

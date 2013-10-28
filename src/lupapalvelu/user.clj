@@ -1,11 +1,12 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
             [monger.operators :refer :all]
+            [monger.query :as query]
             [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
-            [sade.util :refer [fn->]]
+            [sade.util :refer [fn->] :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.core :refer [fail fail!]]))
@@ -64,6 +65,41 @@
 
 (defn find-users [query]
   (mongo/select :users (user-query query)))
+
+;;
+;; jQuery data-tables support:
+;;
+
+(defn- users-for-datatables-base-query [caller params]
+  (let [admin?               (= (-> caller :role keyword) :admin)
+        caller-organizations (set (:organizations caller))
+        organizations        (:organizations params)
+        organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))]
+    (merge {}
+      (when organizations {:organizations {$in organizations}}))))
+
+(defn- users-for-datatables-query [base-query {:keys [enabled email firstName lastName]}]
+  (merge base-query
+    (when enabled   {:enabled (= enabled "true")})
+    (when email     {:email (re-pattern email)})
+    (when firstName {:firstName (re-pattern firstName)})
+    (when lastName  {:lastName (re-pattern lastName)})))
+
+(defn users-for-datatables [caller params]
+ (let [base-query       (users-for-datatables-base-query caller params)
+       base-query-total (mongo/count :users base-query)
+       query            (users-for-datatables-query base-query params)
+       query-total      (mongo/count :users query)
+       users            (query/with-collection "users"
+                          (query/find query)
+                          (query/fields [:_id :email :firstName :lastName :organizations :enabled])
+                          (query/skip (params :iDisplayStart))
+                          (query/limit (params :iDisplayLength)))]
+   {:aaData                users
+    :iTotalRecords         base-query-total
+    :iTotalDisplayRecords  query-total
+    :sEcho                 (str (util/->int (str (params :sEcho))))}))
+
 
 ;;
 ;; ==============================================================================
