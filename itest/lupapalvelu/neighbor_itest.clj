@@ -21,13 +21,11 @@
     (fact "no email" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
 
 (defn- create-app-with-neighbor []
-  (let [resp (create-app pena)
-        application-id (:id resp)
+  (let [application-id (create-app-id pena)
         resp (command pena :add-comment :id application-id :text "foo" :target "application")
         resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
-        resp (query pena :application :id application-id)
-        application (:application resp)
+        application (query-application pena application-id)
         neighbors (:neighbors application)]
     [application neighborId neighbors]))
 
@@ -48,7 +46,7 @@
   (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
         _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
-        application (:application (query pena :application :id application-id))
+        application (query-application pena application-id)
         neighbors (:neighbors application)
         neighbor (find-by-id neighborId neighbors)]
     (fact (count neighbors) => 1)
@@ -63,7 +61,7 @@
   (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
         _ (command sonja "neighbor-remove" :id application-id :neighborId neighborId)
-        application (:application (query pena :application :id application-id))
+        application (query-application pena application-id)
         neighbors (:neighbors application)]
     (fact (count neighbors) => 0)))
 
@@ -90,7 +88,7 @@
                                       :id application-id
                                       :neighborId neighborId
                                       :email "abba@example.com")
-        application     (-> (query pena :application :id application-id) :application)
+        application     (query-application pena application-id)
         hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
         uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))
         _               (command pena :update-doc
@@ -120,7 +118,7 @@
       token =not=> #"="
 
       (fact "application query returns set document info"
-        (let [application (-> (query pena :application :id application-id) :application)
+        (let [application (query-application pena application-id)
               hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
               uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
 
