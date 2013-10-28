@@ -98,24 +98,25 @@
                                                         :street "Mutakatu 7"
                                                         :username "teppo@example.com"
                                                         :zip "33560"})})))
-  (fact (let [data {:firstName "Seppo"
-                   :lastName "Sieninen"
-                   :street "Sutakatu 7"
-                   :city "Sampere"
-                   :zip "33200"
-                   :phone "0505503171"
-                   :architect true
-                   :degree "d"
-                   :experience 5
-                   :fise "f"
-                   :qualification "q"
-                   :companyName "cn"
-                   :companyId "cid"
-                   :companyStreet "cs"
-                   :companyZip "cz"
-                   :companyCity "cc"}]
-         (apply command teppo :update-user (flatten (seq data))) => ok?
-         (query teppo :user) => (contains {:user (contains data)}))))
+  (fact
+    (let [data {:firstName "Seppo"
+                :lastName "Sieninen"
+                :street "Sutakatu 7"
+                :city "Sampere"
+                :zip "33200"
+                :phone "0505503171"
+                :architect true
+                :degree "d"
+                :experience 5
+                :fise "f"
+                :qualification "q"
+                :companyName "cn"
+                :companyId "cid"
+                :companyStreet "cs"
+                :companyZip "cz"
+                :companyCity "cc"}]
+      (apply command teppo :update-user (flatten (seq data))) => ok?
+      (query teppo :user) => (contains {:user (contains data)}))))
 
 ;;
 ;; historical tests, dragons be here...
