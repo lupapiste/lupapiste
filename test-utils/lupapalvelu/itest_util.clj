@@ -159,7 +159,7 @@
      (try
        (do ~@body)
        (finally
-         (set-anti-csrf! old-value#)))))
+         (set-anti-csrf! (not old-value#))))))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
@@ -192,7 +192,7 @@
           (:address %)
           (:propertyId %)
           (:title %)
-          (:auth %) (pos? (count (:operations %)))
+          (:auth %) (pos? (count (:auth %)))
           (:comments %)
           (:schema-version %)
           (:documents %)
