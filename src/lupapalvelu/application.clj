@@ -510,25 +510,25 @@
             hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
         (conj new-docs hakija)))))
 
- (defn- ->location [x y]
-   {:x (util/->double x) :y (util/->double y)})
+(defn- ->location [x y]
+  {:x (util/->double x) :y (util/->double y)})
 
- (defn- make-application-id [municipality]
-   (let [year           (str (year (local-now)))
-         sequence-name  (str "applications-" municipality "-" year)
-         counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
-     (str "LP-" municipality "-" year "-" counter)))
+(defn- make-application-id [municipality]
+  (let [year           (str (year (local-now)))
+        sequence-name  (str "applications-" municipality "-" year)
+        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+    (str "LP-" municipality "-" year "-" counter)))
 
- (defn- make-op [op-name created]
-   {:id (mongo/create-id)
-    :name (keyword op-name)
-    :created created})
+(defn- make-op [op-name created]
+  {:id (mongo/create-id)
+   :name (keyword op-name)
+   :created created})
 
- (defn user-is-authority-in-organization? [user-id organization-id]
-   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
+(defn user-is-authority-in-organization? [user-id organization-id]
+  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
- (defn- operation-validator [{{operation :operation} :data}]
-   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+(defn- operation-validator [{{operation :operation} :data}]
+  (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application

@@ -20,7 +20,6 @@
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
-            [lupapalvelu.etag :as etag]
             [lupapalvelu.document.schema-repository]
             [lupapalvelu.common-actions]
             [lupapalvelu.migration.migration :as migration]
@@ -47,7 +46,6 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/authentication)
   (server/add-middleware web/session-timeout)
-  (server/add-middleware etag/if-none-match-build-number)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)

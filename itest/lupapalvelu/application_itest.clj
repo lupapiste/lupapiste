@@ -20,8 +20,7 @@
 
 (fact "creating application without message"
   (let [id    (create-app-id pena)
-        resp  (query pena :application :id id)
-        app   (:application resp)]
+        app   (query-application pena id)]
     app => (contains {:id id
                       :state "draft"
                       :location {:x 444444.0 :y 6666666.0}
@@ -36,9 +35,8 @@
 
 (fact "creating application with message"
   (let [application-id  (create-app-id pena :messages ["hello"])
-        resp            (query pena :application :id application-id)
-        application     (:application resp)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)
+        hakija          (domain/get-document-by-name application "hakija")]
     (:state application) => "draft"
     (:opened application) => nil
     (count (:comments application)) => 1
@@ -47,22 +45,19 @@
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "753")
-        resp            (query pena :application :id application-id)
-        application     (:application resp)
+        application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "837")
-        resp            (query pena :application :id application-id)
-        application     (:application resp)
+        application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "837-R"))
 
 (fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
   (let [application-id  (create-app-id pena :municipality "626")
-        resp            (query pena :application :id application-id)
-        application     (:application resp)
+        application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "069-R"))
 
@@ -77,12 +72,12 @@
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment to change state to open
         _ (comment-application application-id pena)
-        application (:application (query sonja :application :id application-id))
+        application (query-application sonja application-id)
         authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
-        assigned-app (:application (query sonja :application :id application-id))
+        assigned-app (query-application sonja application-id)
         authority-after-assignation (:authority assigned-app)]
     application-id => truthy
     application => truthy
@@ -96,13 +91,13 @@
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment change set state to open
         _ (comment-application application-id pena)
-        application (:application (query sonja :application :id application-id))
+        application (query-application sonja application-id)
         authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         resp (command sonja :assign-application :id application-id :assigneeId nil)
-        assigned-app (:application (query sonja :application :id application-id))
+        assigned-app (query-application sonja application-id)
         authority-in-the-end (:authority assigned-app)]
     authority-before-assignation => nil
     authority-in-the-end => nil))
@@ -110,17 +105,14 @@
 (fact "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
         application-id (create-app-id pena)
-        resp (command pena :save-application-shape :id application-id :shape shape)
-        resp (query pena :application :id application-id)
-        app   (:application resp)]
+        resp  (command pena :save-application-shape :id application-id :shape shape)
+        app   (query-application pena application-id)]
     (first (:shapes app)) => shape))
 
 (fact "Authority is able to create an application to a municipality in own organization"
   (let [application-id  (create-app-id sonja :municipality sonja-muni)]
     (fact "Application is open"
-       (let [query-resp      (query sonja :application :id application-id)
-             application     (:application query-resp)]
-         query-resp  => ok?
+       (let [application (query-application sonja application-id)]
          application => truthy
          (:state application) => "open"
          (:opened application) => truthy
@@ -129,17 +121,16 @@
       sonja => (allowed? :submit-application :id application-id))
     (fact "Application is submitted"
       (let [resp        (command sonja :submit-application :id application-id)
-            application (:application (query sonja :application :id application-id))]
+            application (query-application sonja application-id)]
         resp => ok?
         (:state application) => "submitted"))))
 
 (facts* "Application has opened when submitted from draft"
   (let [resp (create-app pena) => ok?
         id   (:id resp)
-        app1 (query pena :application :id id) => ok?
+        app1 (query-application pena id) => truthy
         resp (command pena :submit-application :id id) => ok?
-        resp (query pena :application :id id) => ok?
-        app2 (:application resp)]
+        app2 (query-application pena id) => truthy]
     (:opened app1) => nil
     (:opened app2) => number?))
 
@@ -147,12 +138,12 @@
   (doseq [user [sonja pena]]
     (let [application-id  (create-app-id user :municipality sonja-muni)
           resp            (command user :submit-application :id application-id)
-          application     (:application (query user :application :id application-id))]
+          application     (query-application user application-id)]
       (success resp) => true
       (:state application) => "submitted"
 
       (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124)
-            application (:application (query sonja :application :id application-id))
+            application (query-application sonja application-id)
             verdict     (first (:verdicts application))
             paatos      (first (:paatokset verdict))
             poytakirja  (first (:poytakirjat paatos))]
@@ -173,7 +164,7 @@
           (upload-attachment pena (:id application) first-attachment false))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
-  (unauthorized (create-app sonja :municipality veikko-muni)) => true)
+  (create-app sonja :municipality veikko-muni) => unauthorized?)
 
 (facts "Add operations"
   (let [application-id  (create-app-id mikko :municipality veikko-muni)]
@@ -215,7 +206,7 @@
 
     (fact "new person is set"
       (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
-      (let [updated-app (:application (query mikko :application :id application-id))
+      (let [updated-app (query-application mikko application-id)
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
             schema-name  (get-in update-doc [:schema-info :name])
             person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
@@ -225,7 +216,7 @@
 
 (facts "Set user to document"
   (let [application-id   (create-app-id mikko :municipality sonja-muni)
-        application      (:application (query mikko :application :id application-id))
+        application      (query-application mikko application-id)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
         hakija     (domain/get-document-by-name application "hakija")
@@ -244,14 +235,14 @@
 
       (fact "suunnittelija kuntaroolikoodi is set"
         (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code]]) => ok?
-        (let [updated-app          (:application (query mikko :application :id application-id))
+        (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
           (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))
 
       (fact "new suunnittelija is set"
         (command mikko :set-user-to-document :id application-id :documentId (:id suunnittelija) :userId mikko-id :path "") => ok?
-        (let [updated-app           (:application (query mikko :application :id application-id))
+        (let [updated-app           (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
@@ -261,15 +252,15 @@
 (fact "Merging building information from KRYSP does not overwrite the rest of the document"
   (let [application-id  (create-app-id pena :municipality "753")
         resp            (command pena :add-operation :id application-id :operation "kayttotark-muutos")
-        app             (:application (query pena :application :id application-id))
+        app             (query-application pena application-id)
         rakmuu-doc      (domain/get-document-by-name app "rakennuksen-muuttaminen")
         resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
-        updated-app     (:application (query pena :application :id application-id))
+        updated-app     (query-application pena application-id)
         building-info   (command pena :get-building-info-from-legacy :id application-id)
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
         resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :buildingId building-id)
-        merged-app      (:application (query pena :application :id application-id))
+        merged-app      (query-application pena application-id)
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"

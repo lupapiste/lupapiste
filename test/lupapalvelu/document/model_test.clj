@@ -101,6 +101,7 @@
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
+        (apply-update [:henkilotiedot :hetu] "210281-9988")
         (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
         (apply-update [:yritys :yritysnimi] "Suunnittelu Palo")
         (apply-update [:osoite :katu] "katu")

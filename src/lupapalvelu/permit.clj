@@ -15,9 +15,12 @@
 (defpermit Y  "Ymparistoluvat")
 (defpermit P  "Poikkeusluvat")
 
+(def poikkeamislupa :poikkeamislupa)
+(def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
+
 (defn permit-subtypes [permit-type]
   (cond
-    (= permit-type P) [:poikkeamislupa :suunnittelutarveratkaisu]
+    (= permit-type P) [poikkeamislupa suunnittelutarveratkaisu ]
     :default []))
 
 ;;

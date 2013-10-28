@@ -11,7 +11,7 @@
             <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
           </span>
         </h1>
-        <p data-bind="ltext: 'attachment.view.desc'" class="tab-info"></p>
+        <p data-bind="html: loc('attachment.view.desc')"  class="tab-info"></p>
          <button class="attachment-delete inline-block" data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
           style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
         <a class="btn attachment-back inline-block" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment"> <span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a>

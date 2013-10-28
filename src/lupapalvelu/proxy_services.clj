@@ -3,7 +3,6 @@
             [clj-http.client :as client]
             [noir.response :as resp]
             [clojure.xml :as xml]
-            [clojure.zip :as zip]
             [clojure.string :as s]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.find-address :as find-address]

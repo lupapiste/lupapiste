@@ -99,11 +99,11 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "Asemakaava"}
-                   {"LAYERS" "Kantakartta"}
-                   {"LAYERS" "Peruskartat"}
-                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+    (doseq [layer [{"LAYERS" "lupapiste:Asemakaava"}
+                   {"LAYERS" "lupapiste:Kantakartta"}
+                   {"LAYERS" "lupapiste:Peruskartat"}
+                   {"LAYERS" "lupapiste:ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                   {"LAYERS" "lupapiste:ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
       (let [request {:params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))

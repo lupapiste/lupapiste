@@ -7,14 +7,14 @@
 
 
 (def ^:private statements [{:given 1379423133068
-                                     :id "52385377da063788effc1e93"
-                                     :person {:text "Paloviranomainen"
-                                              :name "Sonja Sibbo"
-                                              :email "sonja.sibbo@sipoo.fi"
-                                              :id "516560d6c2e6f603beb85147"}
-                                     :requested 1379423095616
-                                     :status "yes"
-                                     :text "Lausunto liitteen\u00e4."}])
+                            :id "52385377da063788effc1e93"
+                            :person {:text "Paloviranomainen"
+                                     :name "Sonja Sibbo"
+                                     :email "sonja.sibbo@sipoo.fi"
+                                     :id "516560d6c2e6f603beb85147"}
+                            :requested 1379423095616
+                            :status "yes"
+                            :text "Lausunto liitteen\u00e4."}])
 
 (def ^:private hakija {:id "523844e1da063788effc1c58"
                        :schema-info {:approvable true
@@ -29,7 +29,9 @@
                        :data {:yritys {:yhteyshenkilo {:henkilotiedot {:etunimi {:modified 1379419361123
                                                                                  :value "Pena"}
                                                                        :sukunimi {:modified 1379419361123
-                                                                                  :value "Panaani"}}
+                                                                                  :value "Panaani"}
+                                                                       :turvakieltoKytkin {:modified 1379419361123
+                                                                                           :value true}}
                                                        :yhteystiedot {:email {:modified 1379419361123
                                                                               :value "pena@example.com"}
                                                                       :puhelin {:modified 1379419361123
@@ -47,7 +49,9 @@
                                                         :etunimi {:modified 1379419361123
                                                                   :value "Pena"}
                                                         :sukunimi {:modified 1379419361123
-                                                                   :value "Panaani"}}
+                                                                   :value "Panaani"}
+                                                        :turvakieltoKytkin {:modified 1379419361123
+                                                                            :value true}}
                                         :yhteystiedot {:email {:modified 1379419361123
                                                                :value "pena@example.com"}
                                                        :puhelin {:modified 1379419361123
@@ -92,6 +96,32 @@
                                         :created 1379419361123}
                                    :removable true}})
 
+
+(def ^:private laajennus {:created 1379419361123
+                          :data {:kaytettykerrosala {:kayttotarkoitusKoodi {:modified 1381838922854
+                                                                            :value "013 muut erilliset talot"}
+                                                     :pintaAla { :modified 1381838921183
+                                                                :value "99"}}
+                                 :toimenpiteet {:0 {:Toimenpide {:modified 1379419898562
+                                                                 :value "laajennus"}
+                                                    :kayttotarkoitus {:modified 1379419887019
+                                                                      :value "941 talousrakennukset"}
+                                                    :kerroksia {:modified 1379419905008
+                                                                :value "1"}
+                                                    :kerrosala {:modified 1379419906955
+                                                                :value "25"}
+                                                    :kokonaisala {:modified 1379419908874
+                                                                  :value "30"}}}}
+                          :id "523844e1da063788effc1c57"
+                          :schema-info {:order 50
+                                        :version 1
+                                        :name "rakennushanke"
+                                        :op {:id "523844e1da063788effc1c56"
+                                             :name "poikkeamis"
+                                             :created 1379419361123}
+                                        :removable true}})
+
+
 (def ^:private hanke {:created 1379419361123
                       :data {:kuvaus {:modified 1379419749140
                                       :value "Omakotitalon ja tallin rakentaminen."}
@@ -133,8 +163,7 @@
                                       :repeating true
                                       :version 1
                                       :type "party"
-                                      :order 6}}
-  )
+                                      :order 6}})
 
 (def ^:private rakennuspaikka {:created 1379419361123
                                :data {:hallintaperuste {:modified 1379419781683
@@ -144,10 +173,12 @@
                             :kiinteisto {:maaraalaTunnus {:modified 1379422953978
                                                           :value "0008"}
                                          :tilanNimi {:modified 1379422953979
-                                                     :value "Omatila"}}}
+                                                     :value "Omatila"}
+                                         :rantaKytkin {:modified 1379422953974
+                                                     :value true}}}
                                :id "523844e1da063788effc1c5b"
                                :schema-info {:approvable true
-                                           :name "rakennuspaikka"
+                                           :name "poikkeusasian-rakennuspaikka"
                                            :version 1
                                            :order 2}})
 
@@ -156,13 +187,16 @@
                               :version 1
                               :order 100}
                 :created 1379419361123
-                :data {}})
+                :data {:suoramarkkinointikielto {:modified 1382436476002
+                                                 :value true}}})
 
 (def ^:private paasuunnittelija {:created 1379419361123
                                  :data {:henkilotiedot {:etunimi {:modified 1379421445541
                                            :value "Pena"}
                                  :sukunimi {:modified 1379421445541
-                                            :value "Panaani"}}
+                                            :value "Panaani"}
+                                 :hetu {:modified 1379421445541
+                                        :value "210281-9988"}}
                  :osoite {:katu {:modified 1379421445541
                                  :value "Paapankuja 12"}
                           :postinumero {:modified 1379421453475
@@ -198,7 +232,8 @@
                                            :created 1379419361123
                                            :data {:henkilotiedot
                                                   {:etunimi {:modified 1380191655585 :value "Pena"}
-                                                   :sukunimi {:modified 1380191655585 :value "Panaani"}}
+                                                   :sukunimi {:modified 1380191655585 :value "Panaani"}
+                                                   :hetu {:modified 1380191655585 :value "210281-9988"}}
                                                   :kuntaRoolikoodi {:modified 1380191654305 :value "KVV-suunnittelija"}
                                                   :osoite {:katu {:modified 1380191655585 :value "Paapankuja 12"}
                                                            :postinumero {:modified 1380191660158 :value "10203"}
@@ -255,6 +290,16 @@
                 suunnittelija
                 lisaosa])
 
+(def ^:private documents-for-laajennus [hakija
+                laajennus
+                hanke
+                maksaja
+                rakennuspaikka
+                lisatieto
+                paasuunnittelija
+                suunnittelija
+                lisaosa])
+
 (fact "Meta test: hakija"          hakija           => valid-against-current-schema?)
 (fact "Meta test: uusi"            uusi             => valid-against-current-schema?)
 (fact "Meta test: maksaja"         maksaja          => valid-against-current-schema?)
@@ -263,9 +308,10 @@
 (fact "Meta test: paasunnitelija"  paasuunnittelija => valid-against-current-schema?)
 (fact "Meta test: suunnittelija"   suunnittelija    => valid-against-current-schema?)
 (fact "Meta test: lisaosa"         lisaosa          => valid-against-current-schema?)
+(fact "Meta test: laajennus"       laajennus        => valid-against-current-schema?)
 
 
-(def ^:private poikkari-hakemus {:schema-version 1
+(def poikkari-hakemus {:schema-version 1
                        :auth [{:lastName "Panaani"
                                :firstName "Pena"
                                :username "pena"
@@ -280,78 +326,7 @@
                        :state "submitted"
                        :location {:x 404174.92749023
                                   :y 6690687.4923706}
-                       :attachments [{:id "52385207da063788effc1e24"
-                                      :latestVersion {:fileId "52385207da063788effc1e21"
-                                                      :version {:major 1
-                                                                :minor 0}
-                                                      :size 76202
-                                                      :created 1379422727372
-                                                      :filename "3171_001taksi.pdf"
-                                                      :contentType "application/pdf"
-                                                      :user {:role "applicant"
-                                                             :lastName "Panaani"
-                                                             :firstName "Pena"
-                                                             :username "pena"
-                                                             :id "777777777777777777000020"}
-                                                      :stamped false
-                                                      :accepted nil}
-                                      :locked false
-                                      :modified 1379422727372
-                                      :op nil
-                                      :state "requires_authority_action"
-                                      :target nil
-                                      :type {:type-group "paapiirustus"
-                                             :type-id "asemapiirros"}
-                                      :versions [{:fileId "52385207da063788effc1e21"
-                                                  :version {:major 1
-                                                            :minor 0}
-                                                  :size 76202
-                                                  :created 1379422727372
-                                                  :filename "3171_001taksi.pdf"
-                                                  :contentType "application/pdf"
-                                                  :user {:role "applicant"
-                                                         :lastName "Panaani"
-                                                         :firstName "Pena"
-                                                         :username "pena"
-                                                         :id "777777777777777777000020"}
-                                                  :stamped false
-                                                  :accepted nil}]} {:id "5238538dda063788effc1eb2"
-                                                                    :latestVersion {:fileId "5238538dda063788effc1eaf"
-                                                                                    :version {:major 0
-                                                                                              :minor 1}
-                                                                                    :size 15199
-                                                                                    :created 1379423117449
-                                                                                    :filename "3112_001.pdf"
-                                                                                    :contentType "application/pdf"
-                                                                                    :user {:role "authority"
-                                                                                           :lastName "Sibbo"
-                                                                                           :firstName "Sonja"
-                                                                                           :username "sonja"
-                                                                                           :id "777777777777777777000023"}
-                                                                                    :stamped false
-                                                                                    :accepted nil}
-                                                                    :locked true
-                                                                    :modified 1379423117449
-                                                                    :op nil
-                                                                    :state "requires_authority_action"
-                                                                    :target {:type "statement"
-                                                                             :id "52385377da063788effc1e93"}
-                                                                    :type {:type-group "muut"
-                                                                           :type-id "muu"}
-                                                                    :versions [{:fileId "5238538dda063788effc1eaf"
-                                                                                :version {:major 0
-                                                                                          :minor 1}
-                                                                                :size 15199
-                                                                                :created 1379423117449
-                                                                                :filename "3112_001.pdf"
-                                                                                :contentType "application/pdf"
-                                                                                :user {:role "authority"
-                                                                                       :lastName "Sibbo"
-                                                                                       :firstName "Sonja"
-                                                                                       :username "sonja"
-                                                                                       :id "777777777777777777000023"}
-                                                                                :stamped false
-                                                                                :accepted nil}]}]
+                       :attachments []
                        :statements statements
                        :organization "753-P"
                        :title "S\u00f6derkullantie 146"
@@ -409,6 +384,8 @@
                        :id "LP-753-2013-00001"
                        :municipality "753"})
 
+(def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
+
 
 (validate-all-documents documents)
 
@@ -421,7 +398,7 @@
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
 
-        suunnittelutarveasia (:suunnittelutarveasia Popast) => nil
+        suunnittelutarveasiatieto (:suunnittelutarveasiatieto Popast) => nil
         poikkeamisasiatieto (:poikkeamisasiatieto Popast) => truthy
         Poikkeamisasia (:Poikkeamisasia poikkeamisasiatieto)
         ;abstarctPoikkeamistype
@@ -462,7 +439,205 @@
         ;Hakija
         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
+        _ (:turvakieltoKytkin Osapuoli) => true
+        henkilo (:henkilo Osapuoli) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        yritys (:yritys Osapuoli) => nil
+
+        ;Paassuunnittelija
+        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
+        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
+        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
+        henkilo (:henkilo Suunnittelija) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Suunnittelija) => "Arkkitehti"
+        _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
+
+        ;Suunnittelija
+        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
+        suunnittelija (some #(when (= (get-in % [:Suunnittelija :suunnittelijaRoolikoodi] %) "KVV-suunnittelija") %) suunnittelijatieto) => truthy
+        Suunnittelija (:Suunnittelija suunnittelija) => truthy
+        henkilo (:henkilo Suunnittelija) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
+        _ (:puhelin henkilo) => "0102030405"
+        _ (:sahkopostiosoite henkilo) => "pena@example.com"
+        osoite (:osoite henkilo) => truthy
+        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
+        _ (:postinumero osoite) => "10203"
+        _ (:postitoimipaikannimi osoite) => "Piippola"
+        _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
+        _ (:patevyysvaatimusluokka Suunnittelija) => "C"
+
+        rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
+        Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
+        Rakennuspaikka (:Rakennuspaikka Rakennuspaikkaf) => truthy
+        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto Rakennuspaikka) => truthy
+        RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
+        kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy
+        Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
+        tilannimi (:tilannimi Kiinteisto) => "Omatila"
+        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
+        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
+        rantaKytkin (:rantaKytkin Kiinteisto) => true
+        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
+        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
+
+        toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
+        toimenpide-count (count toimenpidetieto) => 2
+        uusi (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "011 yhden asunnon talot") %) toimenpidetieto)
+        uusi (:Toimenpide uusi)
+        rakennustunnus (:rakennustunnus uusi) => nil
+        _ (:liitetieto uusi) => nil
+        kuvauskoodi (:kuvausKoodi uusi) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusi) => nil
+        tavoitetilatieto (:tavoitetilatieto uusi) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "011 yhden asunnon talot"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "2"
+        kokonaisala (:kokonaisala Tavoitetila) => "220"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => "1"
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "200"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "011 yhden asunnon talot"
+
+        uusit (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "941 talousrakennukset") %) toimenpidetieto)
+        uusit (:Toimenpide uusit)
+        rakennustunnus (:rakennustunnus uusit) => nil
+        _ (:liitetieto uusit) => nil
+        kuvauskoodi (:kuvausKoodi uusit) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusit) => nil
+        tavoitetilatieto (:tavoitetilatieto uusit) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
+
+        laajennus-tp (c/get-toimenpiteet laajennus)
+        laajennus-tp (:Toimenpide (first laajennus-tp))
+        rakennustunnus (:rakennustunnus laajennus-tp) => nil
+        _ (:liitetieto laajennus-tp) => nil
+        kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
+        kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "99"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "013 muut erilliset talot"
+        tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
+
+        lausuntotieto (:lausuntotieto Poikkeamisasia) => truthy
+        Lausunto (:Lausunto (first lausuntotieto)) => truthy
+        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        lausuntotieto (:lausuntotieto Lausunto) => truthy
+        annettu-lausunto (:Lausunto lausuntotieto) => truthy
+        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+
+        puoltotieto (:puoltotieto annettu-lausunto) => truthy
+        Puolto (:Puolto puoltotieto) => truthy
+        puolto (:puolto Puolto) => "puoltaa"
+        lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
+
+        lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
+        Lisatieto (:Lisatieto lisatietotieto) => truthy
+        asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
+
+        ;end of abstarctPoikkeamistype
+        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"
+
+        asianTiedot (:asianTiedot Poikkeamisasia) => truthy
+        Asiantiedot (:Asiantiedot asianTiedot) => truthy
+        vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
+        kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
+
+
+;Suunnitelutarveratkaisu
+
+(fl/fact*
+  (let [canonical (c/poikkeus-application-to-canonical suunnitelutarveratkaisu "fi" ) => truthy
+        Popast (:Popast canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Popast) => truthy
+        aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
+        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => "lupapiste@solita.fi"
+        tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality suunnitelutarveratkaisu)
+
+        suunnittelutarveasiatieto (:suunnittelutarveasiatieto Popast) => truthy
+        poikkeamisasiatieto (:poikkeamisasiatieto Popast) => nil
+        Suunnittelutarveasia (:Suunnittelutarveasia suunnittelutarveasiatieto)
+        ;abstarctPoikkeamistype
+        kasittelynTilatieto (:kasittelynTilatieto Suunnittelutarveasia) => truthy
+        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        pvm (:pvm Tilamuutos) => "2013-09-17"
+
+        kuntakoodi (:kuntakoodi Suunnittelutarveasia) => (:municipality poikkari-hakemus)
+
+        luvanTunnistetiedot (:luvanTunnistetiedot Suunnittelutarveasia) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        tunnus (:tunnus MuuTunnus) => "LP-753-2013-00001"
+        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+
+        osapuolettieto (:osapuolettieto Suunnittelutarveasia) => truthy
+        Osapuolet (:Osapuolet osapuolettieto) => truthy
+        osapuolitieto (:osapuolitieto Osapuolet) => truthy
+
+        ;Maksaja
+        maksaja (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "maksaja") %) osapuolitieto) => truthy
+        Osapuoli (:Osapuoli maksaja) => truthy
         _ (:turvakieltoKytkin Osapuoli) => false
+        henkilo (:henkilo Osapuoli) => truthy
+        _ (get-in henkilo [:nimi :etunimi]) => "Toimi"
+        _ (get-in henkilo [:nimi :sukunimi]) => "Toimari"
+        _ (:puhelin henkilo) => "020202"
+        _ (:sahkopostiosoite henkilo) => "paajehu@yit.foo"
+        yritys (:yritys Osapuoli) => truthy
+        _ (:nimi yritys ) => "YIT"
+        _ (:liikeJaYhteisotunnus yritys) => "1743842-0"
+        postiosoite (:postiosoite yritys) => truthy
+        _ (get-in postiosoite [:osoitenimi :teksti]) => "Koivukuja 2"
+        _ (:postinumero postiosoite) => "23500"
+        _ (:postitoimipaikannimi postiosoite) => "Helsinki"
+
+        ;Hakija
+        hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
+        Osapuoli (:Osapuoli hakija) => truthy
+        _ (:turvakieltoKytkin Osapuoli) => true
         henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
@@ -507,7 +682,7 @@
         _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
-        rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
+        rakennuspaikkatieto (:rakennuspaikkatieto Suunnittelutarveasia) => truthy
         Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
         Rakennuspaikka (:Rakennuspaikka Rakennuspaikkaf) => truthy
         rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto Rakennuspaikka) => truthy
@@ -517,30 +692,93 @@
         tilannimi (:tilannimi Kiinteisto) => "Omatila"
         kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
         maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
+        rantaKytkin (:rantaKytkin Kiinteisto) => true
         kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
         hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
 
-;        toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
-;        toimenpide-count (count toimenpidetieto) => 2
-;        uusi (some #(when (= (get-in % [:Toimenpide :kuvausKoodi]) "uusi") %) toimenpidetieto)
+        toimenpidetieto (:toimenpidetieto Suunnittelutarveasia) => truthy
+        toimenpide-count (count toimenpidetieto) => 2
+        uusi (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "011 yhden asunnon talot") %) toimenpidetieto)
+        uusi (:Toimenpide uusi)
+        rakennustunnus (:rakennustunnus uusi) => nil
+        _ (:liitetieto uusi) => nil
+        kuvauskoodi (:kuvausKoodi uusi) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusi) => nil
+        tavoitetilatieto (:tavoitetilatieto uusi) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "011 yhden asunnon talot"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "2"
+        kokonaisala (:kokonaisala Tavoitetila) => "220"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => "1"
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "200"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "011 yhden asunnon talot"
 
+        uusit (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "941 talousrakennukset") %) toimenpidetieto)
+        uusit (:Toimenpide uusit)
+        rakennustunnus (:rakennustunnus uusit) => nil
+        _ (:liitetieto uusit) => nil
+        kuvauskoodi (:kuvausKoodi uusit) => "uusi"
+        kerrosalatieto (:kerrosalatieto uusit) => nil
+        tavoitetilatieto (:tavoitetilatieto uusit) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
+        laajennus-tp (c/get-toimenpiteet laajennus)
+        laajennus-tp (:Toimenpide (first laajennus-tp))
+        rakennustunnus (:rakennustunnus laajennus-tp) => nil
+        _ (:liitetieto laajennus-tp) => nil
+        kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
+        kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "99"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "013 muut erilliset talot"
+        tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
+        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
+        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
+        kokonaisala (:kokonaisala Tavoitetila) => "30"
+        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
+        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+        kerrosala (:kerrosala kerrosalatieto) => truthy
+        pintala (:pintaAla kerrosala) => "25"
+        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
+        lausuntotieto (:lausuntotieto Suunnittelutarveasia) => truthy
+        Lausunto (:Lausunto (first lausuntotieto)) => truthy
+        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        lausuntotieto (:lausuntotieto Lausunto) => truthy
+        annettu-lausunto (:Lausunto lausuntotieto) => truthy
+        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
+        puoltotieto (:puoltotieto annettu-lausunto) => truthy
+        Puolto (:Puolto puoltotieto) => truthy
+        puolto (:puolto Puolto) => "puoltaa"
+        lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
 
-
-
-        ;paaKayttotarkoitus ???
-        ;rantaKytkin ???
-
-
+        lisatietotieto (:lisatietotieto Suunnittelutarveasia) => truthy
+        Lisatieto (:Lisatieto lisatietotieto) => truthy
+        asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
 
         ;end of abstarctPoikkeamistype
-        ;asianTiedot
-        ;kaytttotapaus
-        ;_ (clojure.pprint/pprint canonical)
-        ]))
+        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi hakemus"
 
+        asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
+        Asiantiedot (:Asiantiedot asianTiedot) => truthy
+        vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
+        kuvaus (:suunnittelutarveasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
 
 
 
