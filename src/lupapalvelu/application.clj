@@ -647,26 +647,6 @@
     (fail :error.property-in-other-muinicipality)))
 
 
-(defquery link-permits
-  {:verified true}
-  [_]
-  (ok :app-links (mongo/select :app-links)))
-
-(defcommand add-link-permit
-  {:parameters [appId linkPermit]
-   :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed :submitted]  ;; TODO: Nama ok?
-   :input-validators [(partial non-blank-parameters [:appId :linkPermit])]}
-  [{application :application}]
-;  [{:keys [application] :as command}]  ;; Tama toimii
-
-  (println "\n defcommand save-link-permit, application: ")
-  (clojure.pprint/pprint application)
-;  (println "\n defcommand save-link-permit, command: ")
-;  (clojure.pprint/pprint command)
-  (println "\n defcommand save-link-permit, appId:" appId ", linkPermit:" linkPermit)
-  (println "\n")
-
 ;  KasittelynTilaType/Tilamuutos
 ;  RakennusvalvontaAsiaType/kayttotapaus
 ;  OsapuoletType/Osapuolet/osapuolitieto/Osapuoli
@@ -681,16 +661,37 @@
 ;    - tyonjohtajaHakemusKytkin
 ;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
 
+(defquery link-permits
+  {:verified true}
+  [_]
+  (ok :app-links (mongo/select :app-links)))
 
-;; TODO: Ota tama kayttoon
-  #_(let [smaller (if (< appId linkPermit) appId linkPermit)]
-    (mongo/insert :app-links {:id (mongo/create-id)
-                              :link (+
-                                      smaller
-                                      (if (= smaller linkPermit) appId linkPermit))}))
-  )
+(defcommand add-link-permit
+  {:parameters [id linkPermitId #_operationType propertyId]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :answered :open :complement-needed :submitted]  ;; TODO: Nama ok?
+   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+  [{application :application}]
 
+;  (println "\n defcommand save-link-permit, application: ")
+;  (clojure.pprint/pprint application)
+;  (println "\n defcommand save-link-permit, id:" id
+;                                         ", linkPermitId:" linkPermitId
+;                                         ", operationType: " (-> application :operations first :name) #_operationType
+;                                         ", propertyId: " propertyId)
+;  (println "\n")
 
+  (try
+    (mongo/insert :app-links {:_id (if (<= (.compareTo id linkPermitId) 0)
+                                     (str id "|" linkPermitId)
+                                     (str linkPermitId "|" id))
+                              :link [id linkPermitId]
+                              (keyword id) {:type (-> application :operations first name)
+                                            :propertyId propertyId}
+                              (keyword linkPermitId) {:propertyId propertyId}})
+    (catch com.mongodb.MongoException$DuplicateKey e
+        (warn e "Duplicate key detected when inserting new link permit")
+        (throw (IllegalArgumentException. "error.link-permit-already-added")))))
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
   (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]

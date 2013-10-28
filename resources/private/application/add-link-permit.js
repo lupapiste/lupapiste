@@ -3,6 +3,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.dialogSelector = "#dialog-add-link-permit";
 
   self.appId = 0;
+  self.propertyId = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
   self.chosenLinkPermit = ko.observable("");
   self.errorMessage = ko.observable(null);
@@ -12,11 +13,12 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.ok = ko.computed(function() {
     // XOR in javascript
     return (self.kuntalupatunnus() || self.chosenLinkPermit()) &&
-          !(self.kuntalupatunnus() && self.chosenLinkPermit());
+           !(self.kuntalupatunnus() && self.chosenLinkPermit());
   });
 
   self.reset = function(app) {
     self.appId = app.id();
+    self.propertyId(app.propertyId());
     self.kuntalupatunnus("");
 //    self.kuntalupatunnus(app.kuntalupatunnus());  // ??
     self.chosenLinkPermit("");
@@ -59,10 +61,11 @@ LUPAPISTE.AddLinkPermitModel = function() {
 
   self.addLinkPermit = function() {
     // *** TODO: Miten lupatunnus selvitetään? ***
-    var lupatunnus = self.chosenLinkPermit() || self.kuntalupatunnus();  // ** TODO: Korjaa tama! **
-    console.log("addLinkPermit, lupatunnus: ", lupatunnus);
+    var lupatunnus = self.chosenLinkPermit() || self.kuntalupatunnus();
+//    console.log("addLinkPermit, lupatunnus: ", lupatunnus);
+//    console.log("addLinkPermit, self.propertyId: ", self.propertyId());
 
-    var data = {appId: self.appId, linkPermit: lupatunnus};
+    var data = {id: self.appId, linkPermitId: lupatunnus, propertyId: self.propertyId()};
     ajax.command("add-link-permit", data)
       .processing(self.processing)
       .pending(self.pending)
