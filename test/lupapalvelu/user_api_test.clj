@@ -180,14 +180,3 @@
   (fact (authority-admin-for-organization? {:data {:organization "a"} :user {:organizations ["a" "b"]}}) => nil?)
   (fact (authority-admin-for-organization? {:data {:organization "b"} :user {:organizations ["a" "b"]}}) => nil?)
   (fact (authority-admin-for-organization? {:data {:organization "x"} :user {:organizations ["a" "b"]}}) => (contains {:ok false :text "forbidden"})))
-
-
-
-
-
-
-
-
-
-
-
