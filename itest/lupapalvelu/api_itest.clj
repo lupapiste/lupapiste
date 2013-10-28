@@ -5,6 +5,9 @@
 
 (apply-remote-minimal)
 
+(fact "anti-csrf is active"
+  (feature? :disable-anti-csrf) => false)
+
 (fact "Disabled user must not be able to create an application!"
   (raw-command dummy :create-application :operation "asuinrakennus"
     :propertyId "75312312341234"
