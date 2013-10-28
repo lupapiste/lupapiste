@@ -99,10 +99,6 @@
   (fact (:text resp) => nil)
   (:ok resp))
 
-(defn unauthorized [resp]
-  (fact (:text resp) => "error.unauthorized")
-  (= (:ok resp) false))
-
 (defn invalid-csrf-token? [{:keys [status body]}]
   (and
     (= status 403)
@@ -163,7 +159,7 @@
      (try
        (do ~@body)
        (finally
-         (set-anti-csrf! old-value#)))))
+         (set-anti-csrf! (not old-value#))))))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
@@ -172,21 +168,44 @@
     id => truthy
     id))
 
-(defn create-and-submit-application [apikey & args]
-  (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id) => ok?
-        resp  (query pena :application :id id) => ok?
-        app   (:application resp)]
-    app))
-
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
 
-(defn query-application [apikey id]
-  (let [{application :application :as response} (query apikey :application :id id)]
-    response => ok?
+(defn query-application
+  "Fetch application from server.
+   Asserts that application is found and that the application data looks sane."
+  [apikey id]
+  {:post [(:id %)
+          (:created %) (pos? (:created %))
+          (:modified %) (pos? (:modified %))
+          (contains? % :opened)
+          (:permitType %)
+          (contains? % :permitSubtype)
+          (contains? % :infoRequest)
+          (contains? % :openInfoRequest)
+          (:operations %)
+          (:state %)
+          (:municipality %)
+          (:location %)
+          (:organization %)
+          (:address %)
+          (:propertyId %)
+          (:title %)
+          (:auth %) (pos? (count (:auth %)))
+          (:comments %)
+          (:schema-version %)
+          (:documents %)
+          (:attachments %)
+          (:allowedAttachmentTypes %) (pos? (count (:allowedAttachmentTypes %)))]}
+  (let [{:keys [application ok]} (query apikey :application :id id)]
+    (assert ok)
     application))
+
+(defn create-and-submit-application [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        resp  (command apikey :submit-application :id id) => ok?]
+    (query-application apikey id)))
 
 (defn allowed? [action & args]
   (fn [apikey]
@@ -223,7 +242,7 @@
   (when statement-id
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
-        application (query apikey :application :id application-id)
+        application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (c/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
