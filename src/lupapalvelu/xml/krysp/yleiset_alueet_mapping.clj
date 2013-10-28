@@ -117,6 +117,8 @@
                                                                   :child [{:tag :nimi :ns "yht"
                                                                            :child [{:tag :etunimi}
                                                                                    {:tag :sukunimi}]}]}]}]}]}]}
+                             {:tag :luvanTunnisteTiedot
+                              :child [mapping-common/lupatunnus]}
                              {:tag :alkuPvm}
                              {:tag :loppuPvm}
                              {:tag :sijaintitieto
