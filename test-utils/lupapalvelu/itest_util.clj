@@ -184,7 +184,7 @@
           (contains? % :permitSubtype)
           (contains? % :infoRequest)
           (contains? % :openInfoRequest)
-          (:operations %) (pos? (count (:operations %)))
+          (:operations %)
           (:state %)
           (:municipality %)
           (:location %)
