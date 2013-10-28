@@ -1,14 +1,14 @@
 (ns lupapalvelu.user-api-itest
   (:require [clojure.java.io :as io]
             [clojure.walk :refer [keywordize-keys]]
+            [monger.operators :refer :all]
             [cheshire.core :as json]
             [clj-http.client :as c]
             [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.user-api :as user-api]
-            ))
+            [lupapalvelu.user-api :as user-api]))
 
 ;;
 ;; ==============================================================================
@@ -30,9 +30,48 @@
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
 
+;;
+;; ==============================================================================
+;; Creating users:
+;; ==============================================================================
+;;
+ 
+(facts create-user
+  (apply-remote-minimal)
+  (fact (command pena :create-user :email "x" :role "dummy" :password "foobarbozbiz") => fail?)
+  (fact (command admin :create-user :email "x" :role "dummy" :password "foobarbozbiz") => ok?)
+  ; Check that user was created
+  (fact (-> (query admin :users :email "x") :users first) => (contains {:role "dummy" :email "x" :enabled false})))
 
-(comment
+;;
+;; ==============================================================================
+;; Updating user data:
+;; ==============================================================================
+;;
+
+(facts update-user
+  (apply-remote-minimal)
+  (fact (command admin :create-user :email "foo" :role "applicant" :enabled "true" :apikey "xyz") => ok?)
+  (fact (command "xyz" :update-user :firstName "f" :lastName "l") => ok?)
+  (fact (-> (query "xyz" :user) :user) => (contains {:firstName "f" :lastName "l"})))
+
+(facts update-user-organization
+  (apply-remote-minimal)
+  (fact (command admin :create-user :email "foo" :role "applicant" :enabled "true" :apikey "xyz") => ok?)
+  (fact (-> (query "xyz" :user) :user :organizations) => nil?)
+  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "add") => ok?)
+  (fact (-> (query "xyz" :user) :user :organizations) = ["753-R"])
+  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "remove") => ok?)
+  (fact (-> (query "xyz" :user) :user :organizations) = [])
+  
+  (fact (command sipoo :update-user-organization :email "foo" :organization "123" :operation "add") => (contains {:ok false :text "forbidden"}))
+  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"})))
+
+
+
+
 ;; dragons ahead...
+(comment
 
 (fact "changing user info"
   (apply-remote-minimal)

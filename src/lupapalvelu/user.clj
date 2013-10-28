@@ -79,7 +79,7 @@
 
 (defn get-user-with-password [username password]
   (let [user (find-user {:username username})]
-    (when (and (:enabled user) (security/check-password password (get-in user [:private :password])))
+    (when (and user (:enabled user) (security/check-password password (get-in user [:private :password])))
       (non-private user))))
 
 (defn get-user-with-apikey [apikey]
@@ -173,6 +173,7 @@
   (let [old-orgs (:organizations (get-user-by-email email))]
     (when (every? #(not (= % new-organization)) old-orgs)
       (update-user-by-email email {:organizations (merge old-orgs new-organization)}))))
+
 
 ;;
 ;; ==============================================================================

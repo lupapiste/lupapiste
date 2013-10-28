@@ -136,6 +136,8 @@
 (defn ok? [resp]
   (= (:ok resp) true))
 
+(def fail? (complement ok?))
+
 (fact "ok?"
   (ok? {:ok true}) => true
   (ok? {:ok false}) => false)

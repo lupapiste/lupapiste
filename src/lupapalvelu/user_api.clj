@@ -1,12 +1,13 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+            [clojure.set :refer [subset?]]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
             [sade.util :refer [future*]]
-            [sade.env :refer [in-dev]]
+            [sade.env :refer [in-dev dev-mode?]]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
@@ -52,46 +53,56 @@
   (when-let [missing (util/missing-keys user-data [:email :role])]
     (fail! :missing-required-key :missing missing))
   
-  (let [password (:password user-data)
-        user-role (keyword (:role user-data))
-        caller-role (keyword (:role caller))]
+  (let [password         (:password user-data)
+        user-role        (keyword (:role user-data))
+        caller-role      (keyword (:role caller))
+        admin?           (= caller-role :admin)
+        authorityAdmin?  (= caller-role :authorityAdmin)]
   
-    (when-not (#{:admin :authorityAdmin} caller-role)
-      (fail! :forbidden :caller-role caller-role))
-    
     (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
-      (fail! :invalid-role :user-role user-role))
+      (fail! :invalid-role :desc "new user has unsupported role" :user-role user-role))
     
-    (when (and (#{:authorityAdmin :applicant} user-role) (not (#{:admin} caller-role)))
-      (fail! :forbidden :user-role user-role :caller-role caller-role))
+    (when (and (#{:authorityAdmin :applicant} user-role) (not admin?))
+      (fail! :forbidden :desc "only admin can create authorityAdmin and applicant users"))
+    
+    (when (and (= user-role :authority) (not authorityAdmin?))
+      (fail! :forbidden :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
+    
+    (when (and (= user-role :authority) (not (:organization user-data)))
+      (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
+    
+    (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
+      (fail! :forbidden :desc "authorityAdmin can create users into his/her own organization only"))
 
-    (when (and (= user-role :authority) (not (#{:admin :authorityAdmin} caller-role)))
-      (fail! :forbidden :user-role user-role :caller-role caller-role))
-    
-    (when (and (:organizations user-data) (not (#{:admin :authorityAdmin} caller-role)))
-      (fail! :forbidden :organizations (:organizations user-data) :caller-role caller-role))
+    (when (and (= user-role :dummy) (:organization user-data))
+      (fail! :forbidden :desc "dummy user may not have an organization" :missing :organization))
     
     (when (and password (not (security/valid-password? password)))
-      (fail! :password-too-short))
+      (fail! :password-too-short :desc "password specified, but it's not valid"))
     
-    (when (and (:organizations user-data)
-               (not= caller-role :admin)
-               (not (every? (set (:organizations caller)) (:organizations user-data))))
-      (fail! :forbidden :organizations (:organizations user-data) :caller-role caller-role)))
+    (when (and (= "true" (:enabled user-data)) (not admin?))
+      (fail! :forbidden :desc "only admin can create enabled users"))
+    
+    (when (and (:apikey user-data) (not admin?))
+      (fail! :forbidden :desc "only admin can create create users with apikey")))
 
   true)
 
 (defn- create-new-user-entity [caller user-data]
-  (let [user-role    (keyword (:role user-data))
-        caller-role  (keyword (:role caller))
-        email        (ss/lower-case (:email user-data))]
+  (let [email (ss/lower-case (:email user-data))]
     (-> user-data
       (select-keys [:email :username :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-      (as-> user-data (merge {:firstName "" :lastName "" :username email :enabled false} user-data))
-      (assoc :email email
-             :private (if (:password user-data)
-                        {:password (security/get-hash (:password user-data))}
-                        {})))))
+      (assoc :enabled (= "true" (:enabled user-data)))
+      (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
+      (assoc
+        :email email
+        :private (merge {}
+                   (when (:password user-data)
+                     {:password (security/get-hash (:password user-data))})
+                   (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
+                     {:apikey (if (and (dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
+                                (:apikey user-data)
+                                (security/random-password))}))))))
 
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
@@ -113,7 +124,7 @@
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
         (fail! :user-exists))
-      (user/get-user-by-email (:email new-user))
+      (user/get-user-by-email email)
       (catch com.mongodb.MongoException$DuplicateKey e
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
           (do
@@ -123,17 +134,17 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
+(defcommand create-user
+  {:parameters [:email :role]
+   :roles      [:admin :authorityAdmin]}
+  [{user-data :data caller :user}]
+  (ok :id (create-new-user caller user-data)))
+
 (defn get-or-create-user-by-email [email]
   (let [email (ss/lower-case email)]
     (or
       (user/get-user-by-email email)
       (create-new-user (user/current-user) {:email email :role "dummy"}))))
-
-(defcommand create-user
-  {:parameters [:email :password]
-   :roles      [:admin :authorityAdmin]}
-  [{user-data :data caller :user}]
-  (ok :id (create-new-user caller user-data)))
 
 ;;
 ;; ==============================================================================
@@ -141,76 +152,66 @@
 ;; ==============================================================================
 ;;
 
-(defcommand edit-applicant-user
-  {:parameters [:email :enabled]
-   :roles      [:admin]
-   :verified   true}
-  [{{:keys [email enabled]} :data}]
-  (user/update-user-by-email email {:enabled enabled}))
+;;
+;; General changes:
+;;
 
-(defcommand edit-authority-admin-user
-  {:parameters [:email :firstName :lastName :enabled :organizations]
-   :roles      [:admin]
-   :verified   true}
-  [{{:keys [email firstName lastName enabled organizations]} :data}]
-  (with-user-by-email email
-    (user/update-user-by-email email {:firstName firstName :lastName lastName :enabled enabled :organizations organizations})))
+(def ^:private user-data-editable-fields [:firstName :lastName    
+                                          :street :city :zip :phone
+                                          :architect :degree :experience :fise :qualification
+                                          :companyName :companyId :companyStreet :companyZip :companyCity])
 
-(defcommand reset-authority-admin-password
-  {:parameters [:email :password]
-   :roles      [:admin]
-   :verified true}
-  [{{:keys [email password]} :data}]
-  (with-user-by-email email
-    (user/change-password email password)))
+(defn- validate-update-user! [caller user-data]
+  (let [admin?          (= (-> caller :role keyword) :admin)
+        caller-email    (:email caller)
+        user-email      (:email user-data)]
 
-(defcommand update-authority-user-organisations
-  {:parameters [:email :organization]
-   :roles      [:authorityAdmin]
-   :verified   true}
-  [{{:keys [email organization]} :data}]
-  (user/update-organizations-of-authority-user email organization))
+    (if admin?
+      (when (= user-email caller-email)    (fail! :forbidden :desc "admin may not change his/her own data"))
+      (when (not= user-email caller-email) (fail! :forbidden :desc "can't edit others data")))
+    
+    true))
 
-(defcommand edit-authority-user
-  {:parameters [:email :firstName :lastName :enabled]
-   :roles      [:authorityAdmin]
-   :verified   true}
-  [{{:keys [municipality]} :user {:keys [email firstName lastName enabled]} :data}]
-  (with-user-by-email (ss/lower-case email)
-    (if (not= municipality (:municipality user))
-      (fail :error.invalid-authority)
-      (user/update-user-by-email email {:firstName firstName :lastName lastName :enabled enabled}))))
+(defcommand update-user
+  [{caller :user user-data :data}]
+  (let [email     (ss/lower-case (or (:email user-data) (:email caller)))
+        user-data (assoc user-data :email email)]
+    (validate-update-user! caller user-data)
+    (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
+      (ok)
+      (fail :not-found :email email))))
 
-(defcommand reset-authority-password
-  {:parameters [:email :password]
-   :roles      [:authorityAdmin]
-   :verified true}
-  [{{:keys [municipality]} :user {:keys [email password]} :data}]
-  (with-user-by-email email
-    (if-not (= municipality (:municipality user))
-      (fail :error.invalid-authority)
-      (user/change-password email password))))
-
-(defcommand save-user-info
-  {:parameters [:firstName :lastName]
-   :authenticated true
-   :verified true}
-  [{data :data {user-id :id} :user}]
-  (mongo/update-by-id
-    :users
-    user-id
-    {$set (select-keys data [:firstName :lastName :street :city :zip :phone
-                             :architect :degree :experience :fise :qualification
-                             :companyName :companyId :companyStreet :companyZip :companyCity])})
-  (session/put! :user (user/get-user-by-id user-id))
-  (ok))
+; TODO: Does above need:
+; (when (= email (:email caller))
+;   (session/put! :user (user/get-user-by-email email)))
 
 ;;
-;; ==============================================================================
+;; Change organization data:
+;;
+
+(defn- authority-admin-for-organization? [{data :data caller :user}]
+  (when-not (some (partial = (:organization data)) (:organizations caller))
+    (fail :forbidden :desc (str "caller (id=" (:id caller) ") is not authorized to operate on organization " (:organization data)))))
+
+(defn- valid-organization-operation? [{data :data}]
+  (when-not (#{"add" "remove"} (:operation data))
+    (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
+
+(defcommand update-user-organization
+  {:parameters       [:email :organization :operation]
+   :roles            [:authorityAdmin]
+   :input-validators [valid-organization-operation? authority-admin-for-organization?]}
+  [{{:keys [email organization operation]} :data caller :user}]
+  (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
+    (ok)
+    (fail :not-found :email email)))
+
+;;
 ;; Change and reset password:
-;; ==============================================================================
 ;;
 
+;; TODO: Remove this, change all password changes to use 'reset-password'.
+;; Note: When this is removed, remove user/change-password too. 
 (defcommand change-passwd
   {:parameters [:oldPassword :newPassword]
    :authenticated true
@@ -247,6 +248,23 @@
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
     (resp/status 200 (resp/json {:ok true}))))
+
+;;
+;; apikey:
+;;
+
+(in-dev
+  (defcommand create-apikey
+    {:parameters [:username :password]}
+    [{{:keys [username password]} :data}]
+    (let [apikey (security/random-password)
+          user   (user/get-user-with-password username password)]
+      (when-not user (fail! :error.not-found))
+      (mongo/update
+        :users
+        {:_id (:id user)}
+        {$set {"private.apikey" apikey}})
+      (ok :apikey apikey))))
 
 ;;
 ;; ==============================================================================
@@ -360,21 +378,8 @@
 ;; ==============================================================================
 ;;
 
-
 ; FIXME: generalize
 (in-dev
-
-  (defcommand create-apikey
-    {:parameters [:username :password]}
-    [{{:keys [username password]} :data}]
-    (let [apikey (security/random-password)
-          user (user/get-user-with-password username password)]
-      (when-not user (fail! :error.not-found))
-      (mongo/update
-        :users
-        {:_id (:id user)}
-        {$set {"private.apikey" apikey}})
-      (ok :apikey apikey)))
 
   (defquery activate-user-by-email
     {:parameters [:email]}
