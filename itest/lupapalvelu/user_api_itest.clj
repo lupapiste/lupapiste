@@ -80,81 +80,46 @@
   (fact (command sipoo :update-user-organization :email "foo" :organization "123" :operation "add") => (contains {:ok false :text "forbidden"}))
   (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"})))
 
-
-
-
-;; dragons ahead...
-(comment
-
 (fact "changing user info"
   (apply-remote-minimal)
-  (let [resp (query teppo :user)]
-    resp => ok?
-    resp => (contains
-              {:user
-               (just
-                 {:city "Tampere"
-                  :email "teppo@example.com"
-                  :enabled true
-                  :firstName "Teppo"
-                  :id "5073c0a1c2e6c470aef589a5"
-                  :lastName "Nieminen"
-                  :personId "210281-0001"
-                  :phone "0505503171"
-                  :postalCode "33200"
-                  :role "applicant"
-                  :street "Mutakatu 7"
-                  :username "teppo@example.com"
-                  :zip "33560"})}))
+  (fact (query teppo :user) => (every-checker ok? (contains
+                                                    {:user
+                                                     (just
+                                                       {:city "Tampere"
+                                                        :email "teppo@example.com"
+                                                        :enabled true
+                                                        :firstName "Teppo"
+                                                        :id "5073c0a1c2e6c470aef589a5"
+                                                        :lastName "Nieminen"
+                                                        :personId "210281-0001"
+                                                        :phone "0505503171"
+                                                        :postalCode "33200"
+                                                        :role "applicant"
+                                                        :street "Mutakatu 7"
+                                                        :username "teppo@example.com"
+                                                        :zip "33560"})})))
+  (fact (let [data {:firstName "Seppo"
+                   :lastName "Sieninen"
+                   :street "Sutakatu 7"
+                   :city "Sampere"
+                   :zip "33200"
+                   :phone "0505503171"
+                   :architect true
+                   :degree "d"
+                   :experience 5
+                   :fise "f"
+                   :qualification "q"
+                   :companyName "cn"
+                   :companyId "cid"
+                   :companyStreet "cs"
+                   :companyZip "cz"
+                   :companyCity "cc"}]
+         (apply command teppo :update-user (flatten (seq data))) => ok?
+         (query teppo :user) => (contains {:user (contains data)}))))
 
-  (let [data {:firstName "Seppo"
-              :lastName "Sieninen"
-              :street "Sutakatu 7"
-              :city "Sampere"
-              :zip "33200"
-              :phone "0505503171"
-              :architect true
-              :degree "d"
-              :experience 5
-              :fise "f"
-              :qualification "q"
-              :companyName "cn"
-              :companyId "cid"
-              :companyStreet "cs"
-              :companyZip "cz"
-              :companyCity "cc"}]
-
-  (apply command teppo :save-user-info (flatten (seq data))) => ok?
-  (query teppo :user) => (contains {:user (contains data)})))
-
-(defn upload-user-attachment [apikey attachment-type expect-to-succeed]
-  (let [filename    "dev-resources/test-attachment.txt"
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload/user-attachment")
-        resp        (c/post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart [{:name "attachmentType"  :content attachment-type}
-                                   {:name "files[]"         :content uploadfile}]})
-        body        (-> resp :body json/parse-string keywordize-keys)]
-    (if expect-to-succeed
-      (facts "successful"
-        (:status resp) => 200
-        body => (contains {:ok true}))
-      (facts "should fail"
-        (:status resp) =not=> 200
-        body => (contains {:ok false})))
-    body))
-
-(defn current-user [apikey]
-  (let [resp (decode-response (c/get (str (server-address) "/dev/user")
-                                     {:headers {"authorization" (str "apikey=" apikey)}}))]
-    (assert (= 200 (:status resp)))
-    (:body resp)))
-
-(defn file-info [id]
-  (let [resp (c/get (str (server-address) "/dev/fileinfo/" id) {:throw-exceptions false})]
-    (when (= 200 (:status resp))
-      (:body (decode-response resp)))))
+;;
+;; historical tests, dragons be here...
+;;
 
 (facts "uploading user attachment"
   (apply-remote-minimal)
@@ -196,37 +161,3 @@
     (command pena "remove-user-attachment" :attachment-id attachment-id)
     (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))
 
-; Creating duplicate authority adds organization (don't blame me, that's how I found this)
-
-(def naantali-email "rakennustarkastaja@naantali.fi")
-(def naantali-apikey "a0ac77ecd2e6c2ea6e73f840")
-
-(facts "creating duplicate authority adds organization"
-  (apply-remote-minimal)
-
-  (fact "Sanity check"
-    (-> (query naantali-apikey :user) :user) => (contains {:email naantali-email}))
-  
-  (fact "User rakennustarkastaja@naantali.fi belongs to organization 529-R only"
-    (-> (query naantali-apikey :user) :user) => (contains {:organizations ["529-R"]}))
-  
-  (fact "User rakennustarkastaja@naantali.fi does not belong to Sipoo rak.val"
-    (->> (query sipoo :authority-users) :users (map :email)) =not=> (contains naantali-email))
-  
-  (fact "'create' user rakennustarkastaja@naantali.fi to Sipoo"
-    (command sipoo :create-authority-user :email       naantali-email
-                                          :firstName   "xxx"
-                                          :lastName    "yyy"
-                                          :password    "zzzzzzzz") => ok?)
-  
-  (fact "User rakennustarkastaja@naantali.fi does now belong to Sipoo rak.val"
-    (->> (query sipoo :authority-users) :users (map :email)) => (contains naantali-email))
-  
-  (fact "User rakennustarkastaja@naantali.fi has organization"
-    (-> (query naantali-apikey :user) :user) => (contains {:organizations ["529-R" "753-R"]}))
-  
-  (fact "Users other data fields have not changed"
-    (-> (query naantali-apikey :user) :user) => (contains {:email naantali-email
-                                                           :firstName "Rakennustarkastaja"
-                                                           :lastName "Naantali"})))
-)
