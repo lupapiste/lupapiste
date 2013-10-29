@@ -78,12 +78,15 @@
     (merge {}
       (when organizations {:organizations {$in organizations}}))))
 
-(defn- users-for-datatables-query [base-query {:keys [enabled email firstName lastName]}]
+(defn- users-for-datatables-query [base-query {:keys [email firstName lastName enabled]}]
   (merge base-query
-    (when enabled   {:enabled (= enabled "true")})
-    (when email     {:email (re-pattern email)})
+    (when email     {:email     (re-pattern email)})
     (when firstName {:firstName (re-pattern firstName)})
-    (when lastName  {:lastName (re-pattern lastName)})))
+    (when lastName  {:lastName  (re-pattern lastName)})
+    (when-not (nil? enabled) {:enabled (condp = enabled
+                                         "true" true
+                                         true   true
+                                         false)})))
 
 (defn users-for-datatables [caller params]
  (let [base-query       (users-for-datatables-base-query caller params)
