@@ -8,4 +8,5 @@ linkPermit.dialog.choosePermit: Valitse lupa
 linkPermit.dialog.or: TAI
 linkPermit.dialog.kuntalupatunnus: Kuntalupatunnus
 linkPermit.dialog.continue: Jatka
-error.link-permit-already-added: Tämä viitelupa on lisätty jo aiemmin 
+linkPermit.dialog.choosePermitPlaceholder: Valitse viitelupa...
+error.link-permit-already-added: Tämä viitelupa on lisätty jo aiemmin
