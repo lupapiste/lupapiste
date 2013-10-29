@@ -74,9 +74,12 @@
   (let [admin?               (= (-> caller :role keyword) :admin)
         caller-organizations (set (:organizations caller))
         organizations        (:organizations params)
-        organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))]
+        organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
+        roles                (:roles params)
+        roles                (if admin? roles roles)]
     (merge {}
-      (when organizations {:organizations {$in organizations}}))))
+      (when organizations {:organizations {$in organizations}})
+      (when roles         {:role {$in roles}}))))
 
 (defn- users-for-datatables-query [base-query {:keys [email firstName lastName enabled]}]
   (merge base-query
@@ -95,9 +98,9 @@
        query-total      (mongo/count :users query)
        users            (query/with-collection "users"
                           (query/find query)
-                          (query/fields [:_id :email :firstName :lastName :organizations :enabled])
-                          (query/skip (params :iDisplayStart))
-                          (query/limit (params :iDisplayLength)))]
+                          (query/fields [:email :firstName :lastName :role :organizations :enabled])
+                          (query/skip (util/->int (:iDisplayStart params) 0))
+                          (query/limit (util/->int (:iDisplayLength params) 16)))]
    {:aaData                users
     :iTotalRecords         base-query-total
     :iTotalDisplayRecords  query-total
