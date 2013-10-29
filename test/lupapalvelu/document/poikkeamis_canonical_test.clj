@@ -29,7 +29,9 @@
                        :data {:yritys {:yhteyshenkilo {:henkilotiedot {:etunimi {:modified 1379419361123
                                                                                  :value "Pena"}
                                                                        :sukunimi {:modified 1379419361123
-                                                                                  :value "Panaani"}}
+                                                                                  :value "Panaani"}
+                                                                       :turvakieltoKytkin {:modified 1379419361123
+                                                                                           :value true}}
                                                        :yhteystiedot {:email {:modified 1379419361123
                                                                               :value "pena@example.com"}
                                                                       :puhelin {:modified 1379419361123
@@ -47,7 +49,9 @@
                                                         :etunimi {:modified 1379419361123
                                                                   :value "Pena"}
                                                         :sukunimi {:modified 1379419361123
-                                                                   :value "Panaani"}}
+                                                                   :value "Panaani"}
+                                                        :turvakieltoKytkin {:modified 1379419361123
+                                                                            :value true}}
                                         :yhteystiedot {:email {:modified 1379419361123
                                                                :value "pena@example.com"}
                                                        :puhelin {:modified 1379419361123
@@ -159,8 +163,7 @@
                                       :repeating true
                                       :version 1
                                       :type "party"
-                                      :order 6}}
-  )
+                                      :order 6}})
 
 (def ^:private rakennuspaikka {:created 1379419361123
                                :data {:hallintaperuste {:modified 1379419781683
@@ -191,7 +194,9 @@
                                  :data {:henkilotiedot {:etunimi {:modified 1379421445541
                                            :value "Pena"}
                                  :sukunimi {:modified 1379421445541
-                                            :value "Panaani"}}
+                                            :value "Panaani"}
+                                 :hetu {:modified 1379421445541
+                                        :value "210281-9988"}}
                  :osoite {:katu {:modified 1379421445541
                                  :value "Paapankuja 12"}
                           :postinumero {:modified 1379421453475
@@ -227,7 +232,8 @@
                                            :created 1379419361123
                                            :data {:henkilotiedot
                                                   {:etunimi {:modified 1380191655585 :value "Pena"}
-                                                   :sukunimi {:modified 1380191655585 :value "Panaani"}}
+                                                   :sukunimi {:modified 1380191655585 :value "Panaani"}
+                                                   :hetu {:modified 1380191655585 :value "210281-9988"}}
                                                   :kuntaRoolikoodi {:modified 1380191654305 :value "KVV-suunnittelija"}
                                                   :osoite {:katu {:modified 1380191655585 :value "Paapankuja 12"}
                                                            :postinumero {:modified 1380191660158 :value "10203"}
@@ -433,7 +439,7 @@
         ;Hakija
         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
-        _ (:turvakieltoKytkin Osapuoli) => false
+        _ (:turvakieltoKytkin Osapuoli) => true
         henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
@@ -446,13 +452,14 @@
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
         yritys (:yritys Osapuoli) => nil
 
-        ;Paassuunnitelija
+        ;Paassuunnittelija
         suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
         paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
         Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
         henkilo (:henkilo Suunnittelija) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
         _ (:puhelin henkilo) => "0102030405"
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
         osoite (:osoite henkilo) => truthy
@@ -462,13 +469,14 @@
         _ (:koulutus Suunnittelija) => "Arkkitehti"
         _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
 
-        ;Suunnitelija
+        ;Suunnittelija
         suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
         suunnittelija (some #(when (= (get-in % [:Suunnittelija :suunnittelijaRoolikoodi] %) "KVV-suunnittelija") %) suunnittelijatieto) => truthy
         Suunnittelija (:Suunnittelija suunnittelija) => truthy
         henkilo (:henkilo Suunnittelija) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
+        _ (:henkilotunnus henkilo) => "210281-9988"
         _ (:puhelin henkilo) => "0102030405"
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
         osoite (:osoite henkilo) => truthy
@@ -629,7 +637,7 @@
         ;Hakija
         hakija (some #(when (= (get-in % [:Osapuoli :VRKrooliKoodi] %) "hakija") %) osapuolitieto) => truthy
         Osapuoli (:Osapuoli hakija) => truthy
-        _ (:turvakieltoKytkin Osapuoli) => false
+        _ (:turvakieltoKytkin Osapuoli) => true
         henkilo (:henkilo Osapuoli) => truthy
         _ (get-in henkilo [:nimi :etunimi]) => "Pena"
         _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"

@@ -1,1 +1,0 @@
-rakennuspaikka.kiinteisto.rantaKytkin: Rakennuspaikka sijaitsee rannalla
