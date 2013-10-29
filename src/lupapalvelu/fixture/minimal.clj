@@ -322,10 +322,12 @@
                                               :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
-                                                                         [:muut :valaistussuunnitelma]]}
+                                                                         [:muut :valaistussuunnitelma]]
+                                              :poikkeamis [[:paapiirustus :asemapiirros]]}
                      ;;:legacy "http://212.213.116.162/geoserver/wfs"}
                      :legacy local-legacy
                      :rakennus-ftp-user "sipoo"
+                     :poikkari-ftp-user "poik_sipoo"
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
