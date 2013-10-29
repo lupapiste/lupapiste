@@ -58,9 +58,9 @@
   ([x default]
     (try
       (Integer/parseInt (cond
-                                    (keyword? x) (name x)
-                                    (number? x) (str (int x))
-                                    :else (str x)))
+                          (keyword? x) (name x)
+                          (number? x)  (str (int x))
+                          :else        (str x)))
       (catch Exception e
         default))))
 
