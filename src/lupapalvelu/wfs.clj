@@ -1,7 +1,7 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn errorf fatal]]
-            [clj-http.client :as client]
+            [clj-http.client :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
@@ -230,7 +230,7 @@
 ;;
 (defn raster-images [request]
   (let [layer (get-in request [:params "LAYERS"])]
-    (client/get "https://ws.nls.fi/rasteriaineistot/image"
+    (http/get "https://ws.nls.fi/rasteriaineistot/image"
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :basic-auth (:raster auth)
