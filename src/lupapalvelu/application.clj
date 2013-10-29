@@ -14,6 +14,7 @@
             [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -661,37 +662,67 @@
 ;    - tyonjohtajaHakemusKytkin
 ;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
 
+(defquery app-matches-for-link-permits
+  {:parameters [id]
+   :verified true
+;   :authenticated true                            ;; *** Tarvitseeko taman?
+;   :validators [validate-owner-or-writer]
+   }
+  [{{:keys [propertyId]} :application user :user :as command}]
+  (let [results (mongo/select :applications
+                  #_{$and [{:propertyId propertyId}
+                         {:auth.type :owner}
+                         {:auth.id (:id user)}]}
+                  {:auth.id (:id user)}
+                  {:_id 1 :permitType 1 :address 1 :propertyId 1})
+
+        filtered-results (filter #(not (= id (:id %))) results)
+
+        enriched-results (map (fn [r]
+                                (assoc r :text
+                                  (str
+                                    (:address r) ", "
+                                    (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
+                                    (:id r))))
+                           filtered-results)
+
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (into [] (filter same-property-id-fn enriched-results))
+        without-same-property-id (into [] (filter (comp not same-property-id-fn) enriched-results))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+
+        final-results (map (fn [r]
+                             (-> r
+                               (dissoc :address)
+                               (dissoc :permitType)
+                               (dissoc :propertyId)))
+                        organized-results)]
+
+    (ok :app-links final-results)))
+
 (defquery link-permits
   {:verified true}
   [_]
   (ok :app-links (mongo/select :app-links)))
 
 (defcommand add-link-permit
-  {:parameters [id linkPermitId #_operationType propertyId]
+  {:parameters [id linkPermitId propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed :submitted]  ;; TODO: Nama ok?
+   :states     [:draft :info :answered :open :complement-needed :submitted]  ;; *** TODO: Nama ok? ***
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
-
-;  (println "\n defcommand save-link-permit, application: ")
-;  (clojure.pprint/pprint application)
-;  (println "\n defcommand save-link-permit, id:" id
-;                                         ", linkPermitId:" linkPermitId
-;                                         ", operationType: " (-> application :operations first :name) #_operationType
-;                                         ", propertyId: " propertyId)
-;  (println "\n")
-
   (try
-    (mongo/insert :app-links {:_id (if (<= (.compareTo id linkPermitId) 0)
+    (mongo/insert :app-links {:_id (if (<= (compare id linkPermitId) 0)
                                      (str id "|" linkPermitId)
                                      (str linkPermitId "|" id))
                               :link [id linkPermitId]
-                              (keyword id) {:type (-> application :operations first name)
+                              (keyword id) {:type (-> application :operations first :name)
                                             :propertyId propertyId}
                               (keyword linkPermitId) {:propertyId propertyId}})
     (catch com.mongodb.MongoException$DuplicateKey e
         (warn e "Duplicate key detected when inserting new link permit")
         (throw (IllegalArgumentException. "error.link-permit-already-added")))))
+
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
   (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]

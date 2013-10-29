@@ -9,6 +9,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.errorMessage = ko.observable(null);
   self.processing = ko.observable();
   self.pending = ko.observable();
+  self.appMatches = ko.observableArray([]);
 
   self.ok = ko.computed(function() {
     // XOR in javascript
@@ -16,16 +17,33 @@ LUPAPISTE.AddLinkPermitModel = function() {
            !(self.kuntalupatunnus() && self.chosenLinkPermit());
   });
 
+  self.onError = function(resp) {
+    self.errorMessage(resp.text);
+  };
+
+  var getAppMatchesForLinkPermits = function(app) {
+    ajax.query("app-matches-for-link-permits", {id: app.id()})
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(data) {
+        self.errorMessage(null);
+        self.appMatches(data["app-links"]);
+      })
+      .error(self.onError)
+      .call();
+    return false;
+  };
+
   self.reset = function(app) {
     self.appId = app.id();
     self.propertyId(app.propertyId());
     self.kuntalupatunnus("");
-//    self.kuntalupatunnus(app.kuntalupatunnus());  // ??
     self.chosenLinkPermit("");
-//    self.chosenLinkPermit(app.chosenLinkPermit());  // ??
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
+
+    getAppMatchesForLinkPermits(app);
   };
 
 
@@ -41,35 +59,26 @@ LUPAPISTE.AddLinkPermitModel = function() {
 //  };
 
 
-  self.setChosenLinkPermit = function(linkPermit) {
+/*  self.setChosenLinkPermit = function(linkPermit) {
 //    self.beginUpdateRequest().chosenLinkPermit(linkPermit);
     self.chosenLinkPermit(linkPermit);
-  };
+  };*/
 
-
-  //Saving
-
-  self.onSuccess = function() {
-    self.errorMessage(null);
-    repository.load(self.appId);   // TODO: Mihin tata tarvitaan?
-    LUPAPISTE.ModalDialog.close();
-  };
-
-  self.onError = function(resp) {
-    self.errorMessage(resp.text);
-  };
 
   self.addLinkPermit = function() {
+    //
     // *** TODO: Miten lupatunnus selvitetään? ***
+    //
     var lupatunnus = self.chosenLinkPermit() || self.kuntalupatunnus();
-//    console.log("addLinkPermit, lupatunnus: ", lupatunnus);
-//    console.log("addLinkPermit, self.propertyId: ", self.propertyId());
-
     var data = {id: self.appId, linkPermitId: lupatunnus, propertyId: self.propertyId()};
     ajax.command("add-link-permit", data)
       .processing(self.processing)
       .pending(self.pending)
-      .success(self.onSuccess)
+      .success(function() {
+        self.errorMessage(null);
+        repository.load(self.appId);   // TODO: Mihin tata tarvitaan?
+        LUPAPISTE.ModalDialog.close();
+      })
       .error(self.onError)
       .call();
     return false;
