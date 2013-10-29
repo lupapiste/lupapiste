@@ -5,16 +5,18 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.appId = 0;
   self.propertyId = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
-  self.chosenLinkPermit = ko.observable("");
+  self.userSelectedLinkPermit = ko.observable("");
+  self.appMatches = ko.observableArray([]);
   self.errorMessage = ko.observable(null);
   self.processing = ko.observable();
   self.pending = ko.observable();
-  self.appMatches = ko.observableArray([]);
+
+  self.finalLinkPermit = ko.observable("");
 
   self.ok = ko.computed(function() {
     // XOR in javascript
-    return (self.kuntalupatunnus() || self.chosenLinkPermit()) &&
-           !(self.kuntalupatunnus() && self.chosenLinkPermit());
+    return (self.kuntalupatunnus() || self.userSelectedLinkPermit()) &&
+           !(self.kuntalupatunnus() && self.userSelectedLinkPermit());
   });
 
   self.onError = function(resp) {
@@ -38,7 +40,8 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.appId = app.id();
     self.propertyId(app.propertyId());
     self.kuntalupatunnus("");
-    self.chosenLinkPermit("");
+    self.userSelectedLinkPermit("");
+    self.finalLinkPermit("");
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
@@ -59,22 +62,17 @@ LUPAPISTE.AddLinkPermitModel = function() {
 //  };
 
 
-/*  self.setChosenLinkPermit = function(linkPermit) {
-//    self.beginUpdateRequest().chosenLinkPermit(linkPermit);
-    self.chosenLinkPermit(linkPermit);
-  };*/
-
-
   self.addLinkPermit = function() {
     //
     // *** TODO: Miten lupatunnus selvitetään? ***
     //
-    var lupatunnus = self.chosenLinkPermit() || self.kuntalupatunnus();
+    var lupatunnus = self.userSelectedLinkPermit() || self.kuntalupatunnus();
     var data = {id: self.appId, linkPermitId: lupatunnus, propertyId: self.propertyId()};
     ajax.command("add-link-permit", data)
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
+        self.finalLinkPermit(lupatunnus);
         self.errorMessage(null);
         repository.load(self.appId);   // TODO: Mihin tata tarvitaan?
         LUPAPISTE.ModalDialog.close();

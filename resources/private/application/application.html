@@ -18,20 +18,23 @@
              data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
           </h1>
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
           </div>
+
           <!-- State: -->
           <div>
-            <p data-bind="ltext: 'application.state'">Tila:</p>
+            <p data-bind="ltext: 'application.state'"></p>
             <span
               data-bind="ltext: state, attr: {'data-test-state': state}"
               data-test-id="application-state"
               class="application_summary_text">
             </span>
           </div>
+
           <!-- Submitted: -->
           <div data-bind="with: $root.application.data">
             <p data-bind="ltext: 'application.submissionDate'"></p>
@@ -49,6 +52,7 @@
               class="application_summary_text">
             </span>
           </div>
+
           <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
@@ -82,10 +86,8 @@
           </div>
           <!-- /ko -->
 
-
-        <!-- Subtypes: -->
-
-        <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
+          <!-- Subtypes: -->
+          <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
           <div>
             <p data-bind="ltext: 'application.permitSubtypes'"></p>
             <span class="application_summary_text">
@@ -95,6 +97,19 @@
             </span>
           </div>
           <!-- /ko -->
+
+          <!-- Link-permits: -->
+          <!-- ko if: $root.authorization.ok('add-link-permit') -->
+          <div>
+            <p data-bind="ltext: 'application.linkPermit'"></p>
+            <span class="application_summary_text"
+                  data-bind="text: $root.addLinkPermitModel.finalLinkPermit,
+                             attr: {'data-test-state': $root.addLinkPermitModel.finalLinkPermit}"
+                  data-test-id="test-application-link-permit">
+            </span>
+          </div>
+          <!-- /ko -->
+
         </div>
 
 
