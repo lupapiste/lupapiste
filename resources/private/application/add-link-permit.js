@@ -5,7 +5,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.appId = 0;
   self.propertyId = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
-  self.userSelectedLinkPermit = ko.observable("");
+  self.selectedLinkPermit = ko.observable("");
   self.appMatches = ko.observableArray([]);
   self.errorMessage = ko.observable(null);
   self.processing = ko.observable();
@@ -15,8 +15,8 @@ LUPAPISTE.AddLinkPermitModel = function() {
 
   self.ok = ko.computed(function() {
     // XOR in javascript
-    return (self.kuntalupatunnus() || self.userSelectedLinkPermit()) &&
-           !(self.kuntalupatunnus() && self.userSelectedLinkPermit());
+    return (self.kuntalupatunnus() || self.selectedLinkPermit()) &&
+           !(self.kuntalupatunnus() && self.selectedLinkPermit());
   });
 
   self.onError = function(resp) {
@@ -37,16 +37,18 @@ LUPAPISTE.AddLinkPermitModel = function() {
   };
 
   self.reset = function(app) {
-    self.appId = app.id();
-    self.propertyId(app.propertyId());
+    self.appId = app.id;
+    self.propertyId(app.propertyId);
     self.kuntalupatunnus("");
-    self.userSelectedLinkPermit("");
+    self.selectedLinkPermit("");
     self.finalLinkPermit("");
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
 
-    getAppMatchesForLinkPermits(app);
+//    initValues(app.id);
+    getAppMatchesForLinkPermitsSelect(app.id);
+//    repository.load(app.id);
   };
 
 
@@ -66,7 +68,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
     //
     // *** TODO: Miten lupatunnus selvitetään? ***
     //
-    var lupatunnus = self.userSelectedLinkPermit() || self.kuntalupatunnus();
+    var lupatunnus = self.selectedLinkPermit() || self.kuntalupatunnus();
     var data = {id: self.appId, linkPermitId: lupatunnus, propertyId: self.propertyId()};
     ajax.command("add-link-permit", data)
       .processing(self.processing)
@@ -89,5 +91,9 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.reset(app);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
+
+//  self.refresh = function(app) {
+//    self.reset(app);
+//  };
 
 };
