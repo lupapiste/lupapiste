@@ -341,9 +341,12 @@
     });
 
     self.openOskariMap = function() {
-      var url = '/oskari/fullmap.html?id=' + self.id() + '&coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
+      var coords = "&coord=" + self.location().x() + '_' + self.location().y()
+      var zoom = "&zoomLevel=12";
+      var features = "&addPoint=1&addArea=1";
+      var lang = "&lang=" + loc.getCurrentLanguage();
+      var url = '/oskari/fullmap.html?id=' + self.id() + coords + zoom + features + lang;
       window.open(url);
-      var applicationId = self.id();
     };
 
     self.submitApplication = function() {
