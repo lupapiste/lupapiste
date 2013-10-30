@@ -134,8 +134,8 @@
     (get-xml url nil))
   ([url credentials]
     (let [raw (:body (if credentials
-                       (http/get url :basic-auth credentials))
-                       (http/get url))
+                       (http/get url :basic-auth credentials)
+                       (http/get url)))
           xml (parse raw)]
       xml)))
 
