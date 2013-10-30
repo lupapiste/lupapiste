@@ -5,7 +5,7 @@
             [clojure.java.io :as io]
             [cheshire.core :as json]
             [clojure.walk :refer [keywordize-keys]]
-            [clj-http.client :as http]))
+            [sade.http :as http]))
 
 (fact "changing user info"
   (apply-remote-minimal)

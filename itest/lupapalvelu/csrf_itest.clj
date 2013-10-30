@@ -1,7 +1,7 @@
 (ns lupapalvelu.csrf-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
-            [clj-http.client :as http]))
+            [sade.http :as http]))
 
 (fact "Valid apikey bypasses CSRF check"
   (with-anti-csrf

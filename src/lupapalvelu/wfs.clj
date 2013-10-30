@@ -1,7 +1,7 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn errorf fatal]]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
@@ -13,8 +13,6 @@
 ;;
 ;; config:
 ;;
-
-(def ^:private timeout 10000)
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
@@ -163,12 +161,8 @@
 ;; Executing HTTP calls to Maanmittauslaitos:
 ;;
 
-(def ^:private base-request {:socket-timeout timeout
-                             :conn-timeout timeout
-                             :throw-exceptions false})
-
-(def ^:private http-method {:post [client/post :body]
-                            :get  [client/get  :query-params]})
+(def ^:private http-method {:post [http/post :body]
+                            :get  [http/get  :query-params]})
 
 (defn- exec-http [http-fn url request]
   (try
@@ -181,11 +175,12 @@
 
 (defn- exec [method url q]
   (let [[http-fn param-key] (method http-method)
-        request (assoc base-request
-                       :basic-auth (auth url)
-                       param-key q)
+        timeout (env/value :http-client :conn-timeout)
+        request {:throw-exceptions false
+                 :basic-auth (auth url)
+                 param-key q}
         task (future* (exec-http http-fn url request))
-        [status data] (deref task timeout [:timeout])]
+        [status data] (deref task [:timeout])]
     (condp = status
       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
       :error   (do (errorf "wfs status %s: url=%s" data url) nil)

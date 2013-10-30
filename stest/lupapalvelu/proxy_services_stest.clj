@@ -4,7 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [sade.env :as env]
             [cheshire.core :as json]))
 

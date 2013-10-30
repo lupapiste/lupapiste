@@ -3,7 +3,7 @@
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [sade.env :as env]
             [sade.xml :refer :all]
             [sade.strings :as ss]))

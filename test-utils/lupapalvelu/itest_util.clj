@@ -4,7 +4,7 @@
             [clojure.walk :refer [keywordize-keys]]
             [swiss-arrows.core :refer [-<>>]]
             [midje.sweet :refer :all]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
@@ -176,7 +176,8 @@
   "Fetch application from server.
    Asserts that application is found and that the application data looks sane."
   [apikey id]
-  {:post [(:id %)
+  {:pre  [apikey id]
+   :post [(:id %)
           (:created %) (pos? (:created %))
           (:modified %) (pos? (:modified %))
           (contains? % :opened)

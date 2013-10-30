@@ -1,7 +1,7 @@
 (ns lupapalvelu.web-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [clojure.walk :refer [keywordize-keys]]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [midje.sweet :refer :all]
             [cheshire.core :as json])
   (:import org.apache.http.client.CookieStore

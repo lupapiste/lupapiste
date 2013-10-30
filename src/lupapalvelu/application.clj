@@ -4,7 +4,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.env :as env]
