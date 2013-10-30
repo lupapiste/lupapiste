@@ -8,7 +8,6 @@
             [sade.security-headers :as headers]
             [sade.dummy-email-server]
             [lupapalvelu.fixture :as fixture]
-            [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.fixture.finland-rakval]
