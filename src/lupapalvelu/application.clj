@@ -286,6 +286,7 @@
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to]
+   :notified   true
    :on-success  (notify "new-comment")}
   [{{:keys [text target to mark-answered] :or {mark-answered true}} :data :keys [user created] :as command}]
   (with-application command
@@ -293,6 +294,9 @@
       (let [to-user   (and to (or (user/get-user-by-id to)
                                   (fail! :to-is-not-id-of-any-user-in-system)))
             from-user (user/summary user)]
+
+        ; FIXME compine all updates into a single mongo update
+
         (update-application command
           {$set  {:modified created}
            $push {:comments {:text    text
@@ -387,6 +391,7 @@
 (defcommand cancel-application
   {:parameters [:id]
    :roles      [:applicant]
+   :notified   true
    :on-success (notify "state-change")
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
@@ -397,6 +402,7 @@
 (defcommand request-for-complement
   {:parameters [:id]
    :roles      [:authority]
+   :notified   true
    :on-success (notify "state-change")
    :states     [:sent]}
   [{:keys [created] :as command}]
@@ -407,6 +413,7 @@
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
+   :notified   true
    :on-success (notify "state-change")
    :states     [:submitted :complement-needed]}
   [command]
@@ -429,6 +436,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
+   :notified   true
    :on-success (notify "state-change")
    :validators [validate-owner-or-writer]}
   [{:keys [created] :as command}]
