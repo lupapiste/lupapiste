@@ -73,7 +73,7 @@
     (:body resp)))
 
 (defn file-info [id]
-  (let [resp (http/get (str (server-address) "/dev/fileinfo/" id) {:throw-exceptions false})]
+  (let [resp (http/get (str (server-address) "/dev/fileinfo/" id) :throw-exceptions false)]
     (when (= 200 (:status resp))
       (:body (decode-response resp)))))
 

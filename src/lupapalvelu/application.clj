@@ -710,7 +710,7 @@
                              (fn [pk]
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
                                  (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                       resp            (http/get url {:as :stream})
+                                       resp            (http/get url :as :stream)
                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                        urlhash         (digest/sha1 url)
                                        attachment-id   urlhash

@@ -133,12 +133,9 @@
   ([url]
     (get-xml url nil))
   ([url credentials]
-    (let [options {:socket-timeout 10000 ;10 sekunttia
-                   :conn-timeout 10000
-                   :insecure? (not (env/value :ssl-cert-validation))}
-          raw (:body (if credentials
-                       (http/get url (merge options {:basic-auth credentials}))
-                       (http/get url options)))
+    (let [raw (:body (if credentials
+                       (http/get url :basic-auth credentials))
+                       (http/get url))
           xml (parse raw)]
       xml)))
 
