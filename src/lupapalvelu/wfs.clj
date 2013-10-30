@@ -180,7 +180,7 @@
                  :basic-auth (auth url)
                  param-key q}
         task (future* (exec-http http-fn url request))
-        [status data] (deref task [:timeout])]
+        [status data] (deref task timeout [:timeout])]
     (condp = status
       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
       :error   (do (errorf "wfs status %s: url=%s" data url) nil)
