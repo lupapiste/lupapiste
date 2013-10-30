@@ -513,17 +513,16 @@
   }
 
   function updatePermitSubtype(value){
-      if (isInitializing) { return; }
+    if (isInitializing) { return; }
 
-      ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        authorizationModel.refresh(currentId);
-        })
-      .error(function(data) {
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+    ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
+    .success(function() {
+      authorizationModel.refresh(currentId);
       })
-      .call();
-
+    .error(function(data) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+    })
+    .call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
