@@ -24,3 +24,6 @@
   (fact "new parameter" (merge-to-defaults :b 2) => {:jokuavain "oletusarvo" :b 2})
   (fact "new parameters" (merge-to-defaults :b 2 :c 3) => {:jokuavain "oletusarvo" :b 2 :c 3})
   (fact "override parameter" (merge-to-defaults :jokuavain 2 :c 3) => {:jokuavain 2 :c 3}))
+
+(fact "uneven number of options is not allowed"
+  (merge-to-defaults :a :b 2) => (throws IllegalArgumentException "uneven number of options"))
