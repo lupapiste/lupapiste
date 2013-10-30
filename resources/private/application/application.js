@@ -341,7 +341,7 @@
     });
 
     self.openOskariMap = function() {
-      var coords = "&coord=" + self.location().x() + '_' + self.location().y()
+      var coords = "&coord=" + self.location().x() + "_" + self.location().y();
       var zoom = "&zoomLevel=12";
       var features = "&addPoint=1&addArea=1";
       var lang = "&lang=" + loc.getCurrentLanguage();
@@ -529,7 +529,7 @@
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
-  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);})
+  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
