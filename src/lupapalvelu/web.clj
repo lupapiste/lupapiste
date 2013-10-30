@@ -4,7 +4,6 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [me.raynes.fs :as fs]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]

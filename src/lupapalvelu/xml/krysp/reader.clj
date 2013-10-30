@@ -7,7 +7,7 @@
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [ring.util.codec :as codec]
             [sade.common-reader :as cr]))
 
