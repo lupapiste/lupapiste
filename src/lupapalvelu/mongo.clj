@@ -100,11 +100,13 @@
 
 (defn remove
   "Removes documents by id."
-  [collection id] (mc/remove collection {:_id id}))
+  [collection id]
+  (.ok (.getLastError (mc/remove collection {:_id id}))))
 
 (defn remove-many
-  "Removes all documents matching query."
-  [collection query] (mc/remove collection query))
+  "Removes all documents matching query. Returns the success status."
+  [collection query]
+  (.ok (.getLastError (mc/remove collection query))))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input id)
@@ -262,8 +264,7 @@
   (mc/ensure-index :vetuma {:sessionid 1})
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
-  (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1} {:unique true}))
+  (mc/ensure-index :open-inforequest-token {:application-id 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

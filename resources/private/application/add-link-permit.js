@@ -11,8 +11,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.processing = ko.observable();
   self.pending = ko.observable();
 
-  self.finalLinkPermit = ko.observable("");
-
   self.ok = ko.computed(function() {
     // XOR in javascript
     return (self.kuntalupatunnus() || self.selectedLinkPermit()) &&
@@ -23,13 +21,32 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.errorMessage(resp.text);
   };
 
-  var getAppMatchesForLinkPermits = function(app) {
-    ajax.query("app-matches-for-link-permits", {id: app.id()})
+  // With these the initialization of self.selectedLinkPermit and self.kuntalupatunnus will work.
+  // If it is done already in self.reset, it seems that Knockout will override
+  // the initialized value when the new appMatches are received (for the select list in UI).
+  self.tempLinkPermitIdForInit = "";
+  self.tempLinkPermitTypeForInit = "";
+
+  var getAppMatchesForLinkPermitsSelect = function(appId) {
+    ajax.query("app-matches-for-link-permits", {id: appId})
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
         self.errorMessage(null);
         self.appMatches(data["app-links"]);
+
+        if (self.tempLinkPermitIdForInit && self.tempLinkPermitTypeForInit) {
+          if (self.tempLinkPermitTypeForInit === "lupapistetunnus") {
+            self.selectedLinkPermit(self.tempLinkPermitIdForInit);
+            self.kuntalupatunnus("");
+          } else {
+            self.selectedLinkPermit("");
+            self.kuntalupatunnus(self.tempLinkPermitIdForInit);
+          }
+        } else {
+          self.selectedLinkPermit("");
+          self.kuntalupatunnus("");
+        }
       })
       .error(self.onError)
       .call();
@@ -37,46 +54,34 @@ LUPAPISTE.AddLinkPermitModel = function() {
   };
 
   self.reset = function(app) {
-    self.appId = app.id;
-    self.propertyId(app.propertyId);
-    self.kuntalupatunnus("");
+    self.tempLinkPermitIdForInit = "";
+    self.tempLinkPermitTypeForInit = "";
+
+    var data = app.linkPermitData();
+    if (_.size(data) && data.id && data.type) {
+      self.tempLinkPermitIdForInit = data.id();
+      self.tempLinkPermitTypeForInit = data.type();
+    }
+    self.appId = app.id();
+    self.propertyId(app.propertyId());
     self.selectedLinkPermit("");
-    self.finalLinkPermit("");
+    self.kuntalupatunnus("");
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
 
-//    initValues(app.id);
-    getAppMatchesForLinkPermitsSelect(app.id);
-//    repository.load(app.id);
+    getAppMatchesForLinkPermitsSelect(app.id());
   };
 
-
-  //
-  // Concurrency control    *** TODO: Onko talle tarvetta? ***
-  //
-
-//  self.requestContext = new RequestContext();
-//  self.beginUpdateRequest = function() {
-//    self.errorMessage(null);
-//    self.requestContext.begin();
-//    return self;
-//  };
-
-
   self.addLinkPermit = function() {
-    //
-    // *** TODO: Miten lupatunnus selvitetään? ***
-    //
     var lupatunnus = self.selectedLinkPermit() || self.kuntalupatunnus();
     var data = {id: self.appId, linkPermitId: lupatunnus, propertyId: self.propertyId()};
     ajax.command("add-link-permit", data)
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
-        self.finalLinkPermit(lupatunnus);
         self.errorMessage(null);
-        repository.load(self.appId);   // TODO: Mihin tata tarvitaan?
+        repository.load(self.appId);
         LUPAPISTE.ModalDialog.close();
       })
       .error(self.onError)
@@ -84,21 +89,21 @@ LUPAPISTE.AddLinkPermitModel = function() {
     return false;
   };
 
-
   self.removeSelectedLinkPermit = function(appId) {
-    if (self.finalLinkPermit()) {
-      ajax.command("remove-link-permit-by-app-id", {id: /*self.appId*/appId})
-      .processing(self.processing)
-      .pending(self.pending)
-      .success(function() {
-        self.errorMessage(null);
-        repository.load(/*self.appId*/appId);   // TODO: Mihin tata tarvitaan?
-        LUPAPISTE.ModalDialog.close();
-      })
-      .error(self.onError)
-      .call();
-    return false;
-    }
+    ajax.command("remove-link-permit-by-app-id", {id: appId})
+    .processing(self.processing)
+    .pending(self.pending)
+    .success(function(data) {
+      self.errorMessage(null);
+      self.tempLinkPermitIdForInit = "";
+      self.tempLinkPermitTypeForInit = "";
+      self.selectedLinkPermit("");
+      self.kuntalupatunnus("");
+      repository.load(appId);
+    })
+    .error(self.onError)
+    .call();
+  return false;
   };
 
   //Open the dialog
@@ -107,9 +112,5 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.reset(app);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
-
-//  self.refresh = function(app) {
-//    self.reset(app);
-//  };
 
 };

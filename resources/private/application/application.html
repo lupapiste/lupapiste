@@ -99,18 +99,17 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
-          <!-- ko if: $root.authorization.ok('add-link-permit') && $root.addLinkPermitModel.finalLinkPermit() -->
-          <div>
+          <!-- ko if: $root.application.linkPermitData() && $root.application.linkPermitData().id -->
+          <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermit'"></p>
             <span class="application_summary_text"
-                  data-bind="text: $root.addLinkPermitModel.finalLinkPermit,
-                             attr: {'data-test-link': $root.addLinkPermitModel.finalLinkPermit}"
+                  data-bind="text: $data.id,
+                             attr: {'data-test-link': $data.id}"
                   data-test-id="test-application-link-permit">
             </span>
-
-            <a href="#" data-bind="ltext: 'application.linkPermitRemoveSelected'
-                                   click: $root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id())"></a>
-
+            <a data-bind="ltext: 'application.linkPermitRemoveSelected',
+                          click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id())}"
+               href="#" class="remove-link-permit"></a>
           </div>
           <!-- /ko -->
 

@@ -132,30 +132,19 @@
    (keyword (str id ".type")) "application"})
 
 (defn- enrich-with-link-permit-data [app]
-  (println "\n enrich-with-link-permit-data, app id: " (:id app) "\n")
-
-   (let [query (make-link-permit-by-app-id-query (:id app))
-         link-data (first (mongo/select :app-links query))
-         link-array (:link link-data)]
-    (if (seq link-array)
-      (let [app-index (.indexOf link-array (:id app))
-            link-permit-index (if (= 0 app-index) 1 0)
-            link-permit-id (link-array link-permit-index)]
-
-        (println "\n enrich-with-link-permit-data, link-data: ")
-        (clojure.pprint/pprint link-data)
-        (println "\n enrich-with-link-permit-data, app-index: " app-index)
-        (println "\n enrich-with-link-permit-data, link permit index: " link-permit-index)
-        (println "\n enrich-with-link-permit-data, link permit id: " (keyword link-permit-id))
-        (println "\n enrich-with-link-permit-data, xxx: " (:linkpermittype ((keyword link-permit-id) link-data)))
-;        (println "\n enrich-with-link-permit-data, xxx: " (-> link-data (keyword link-permit-id) :linkpermittype))
-        (println "\n")
-
-        ;app
-        (assoc app :linkPermitData {:id link-permit-id
-                                    :type (:linkpermittype ((keyword link-permit-id) link-data))}))
-
-      app)))
+  (let [query (make-link-permit-by-app-id-query (:id app))
+        link-data (first (mongo/select :app-links query))
+        link-array (:link link-data)]
+    (assoc app :linkPermitData
+      (if (seq link-array)
+        ;; Link found
+        (let [app-index (.indexOf link-array (:id app))
+              link-permit-index (if (= 0 app-index) 1 0)
+              link-permit-id (link-array link-permit-index)
+              link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+          {:id link-permit-id :type link-permit-type})
+        ;; No link found
+        nil))))
 
 ;;
 ;; Query application:
@@ -165,7 +154,7 @@
   (comp
     without-system-keys
     (partial with-meta-fields user)
-    #_(partial enrich-with-link-permit-data)))
+    (partial enrich-with-link-permit-data)))
 
 ;; TODO: Mista tata kutsutaan?
 (defquery applications {:authenticated true :verified true} [{user :user}]
@@ -178,7 +167,6 @@
   {:authenticated true
    :parameters [:id]}
   [{app :application user :user}]
-  (println "\n entered application query")
   (if app
     (ok :application ((app-post-processor user) app)
         :authorities (find-authorities-in-applications-organization app)
@@ -699,15 +687,10 @@
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
-   :verified true
-;   :authenticated true                            ;; *** Tarvitseeko taman?
-;   :validators [validate-owner-or-writer]
-   }
+   :verified   true
+   :roles      [:applicant :authority]}
   [{{:keys [propertyId]} :application user :user :as command}]
   (let [results (mongo/select :applications
-                  #_{$and [{:propertyId propertyId}
-                         {:auth.type :owner}
-                         {:auth.id (:id user)}]}
                   {:auth.id (:id user)}
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
 
@@ -737,31 +720,21 @@
 
 (defquery link-permits-by-id
   {:parameters [id]
-   :verified true}
+   :roles      [:applicant :authority]}
   [_]
   (let [query (make-link-permit-by-app-id-query id)]
     (ok :app-links (mongo/select :app-links query))))
 
 (defn- remove-link-permit [app-id]
-  (println "\n remove-link-permit, app-id: " app-id)
-  (println "\n")
-  (try
-    (let [query (make-link-permit-by-app-id-query app-id)]
-      (mongo/remove-many :app-links query))
-    (catch Exception e
-      (warn e "Duplicate key detected when removing link permit")
-      (throw (IllegalArgumentException. "error.link-permit-removal-failed")))))
+  (let [query (make-link-permit-by-app-id-query app-id)]
+    (mongo/remove-many :app-links query)))
 
 (defcommand add-link-permit
   {:parameters [id linkPermitId propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed :submitted]  ;; *** TODO: Nama ok? ***
+   :states     [:draft :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
-
-  (println "\n add-link-permit, id: " id ", linkPermitId: " linkPermitId ", propertyId: " propertyId)
-  (println "\n")
-
   (try
     (remove-link-permit id)
     (mongo/insert :app-links {:_id (if (<= (compare id linkPermitId) 0)
@@ -782,9 +755,9 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed :submitted]}  ;; *** TODO: Nama ok? ***
+   :states     [:draft :open :complement-needed :submitted]}
   [{application :application}]
-  (remove-link-permit id))
+  (if (remove-link-permit id) (ok) (fail :error.unknown)))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

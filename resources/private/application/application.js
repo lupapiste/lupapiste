@@ -313,6 +313,7 @@
     self.neighbors = ko.observable();
     self.nonpartyDocumentIndicator = ko.observable(0);
     self.partyDocumentIndicator = ko.observable(0);
+    self.linkPermitData = ko.observable({});
 
     self.attachmentsRequiringAction = ko.observable();
     self.unseenStatements = ko.observable();
