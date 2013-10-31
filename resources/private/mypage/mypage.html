@@ -59,12 +59,10 @@
         </div>
 
         <div data-bind="visible: architect">
-          <div data-bind="if: features.enabled('architect-info')"
-            class="architect-info form-group feature">
-            <span class="legend">architect-info</span>
-            <div>
-
+          <div data-bind="if: features.enabled('architect-info')">
+            <div class="architect-info form-group feature">
               <h2 data-bind="ltext: 'architect.company.title'"></h2>
+
               <div class="form-entry">
                 <label
                   data-bind="ltext: 'userinfo.architect.company.name'"
@@ -105,8 +103,11 @@
                   id="architect.company.city" type="text"
                   class="form-input"></input>
               </div>
-
+            </div>
+            
+            <div class="architect-info form-group feature">
               <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+              
               <div class="form-entry">
                 <label data-bind="ltext: 'userinfo.architect.degree'"
                   for="architect.degree" class="form-label"></label> <input
