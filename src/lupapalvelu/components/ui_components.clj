@@ -133,8 +133,10 @@
    :login        {:depends [:common]
                   :js      ["login.js"]}
 
-   :admins       {:js ["user.js" "users.js"]
-                  :html ["admin-user-list.html" "user-modification-dialogs.html"]}
+   :users        {:js ["users.js"]
+                  :html ["users.html"]}
+   
+   :admins       {:depends [:users]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

@@ -1,0 +1,7 @@
+users.table.email: email
+users.table.firstName: Etunimi
+users.table.lastName: Sukunimi
+users.table.role: Rooli
+users.table.organizations: Organizaatiot
+users.table.active: Aktiivinen
+users.table.actions:
