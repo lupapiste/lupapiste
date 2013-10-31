@@ -4,7 +4,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.env :as env]
@@ -711,7 +711,7 @@
                              (fn [pk]
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
                                  (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                       resp            (http/get url {:as :stream})
+                                       resp            (http/get url :as :stream)
                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                        urlhash         (digest/sha1 url)
                                        attachment-id   urlhash
