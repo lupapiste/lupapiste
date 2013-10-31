@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [cheshire.core :as json]
             [midje.sweet :refer :all]
+            [sade.http :as http]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -120,6 +121,24 @@
 ;;
 ;; historical tests, dragons be here...
 ;;
+
+(defn upload-user-attachment [apikey attachment-type expect-to-succeed]
+  (let [filename    "dev-resources/test-attachment.txt"
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/upload/user-attachment")
+        resp        (http/post uri
+                      {:headers {"authorization" (str "apikey=" apikey)}
+                       :multipart [{:name "attachmentType"  :content attachment-type}
+                                   {:name "files[]"         :content uploadfile}]})
+        body        (-> resp :body json/parse-string keywordize-keys)]
+    (if expect-to-succeed
+      (facts "successful"
+        (:status resp) => 200
+        body => (contains {:ok true}))
+      (facts "should fail"
+        (:status resp) =not=> 200
+        body => (contains {:ok false})))
+    body))
 
 (facts "uploading user attachment"
   (apply-remote-minimal)
