@@ -681,7 +681,7 @@
 ;    - kuntalupatunnus
 ;    - muuTunnustieto
 ;  TyonjohtajaType
-;    - Työnjohtajan tiedot + hetu
+;    - Tyonjohtajan tiedot + hetu
 ;    - tyonjohtajaHakemusKytkin
 ;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
 
