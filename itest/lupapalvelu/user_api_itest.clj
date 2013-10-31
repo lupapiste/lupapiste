@@ -3,7 +3,6 @@
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer :all]
             [cheshire.core :as json]
-            [clj-http.client :as c]
             [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
