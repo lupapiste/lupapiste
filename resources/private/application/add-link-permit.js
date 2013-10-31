@@ -85,6 +85,22 @@ LUPAPISTE.AddLinkPermitModel = function() {
   };
 
 
+  self.removeSelectedLinkPermit = function(appId) {
+    if (self.finalLinkPermit()) {
+      ajax.command("remove-link-permit-by-app-id", {id: /*self.appId*/appId})
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function() {
+        self.errorMessage(null);
+        repository.load(/*self.appId*/appId);   // TODO: Mihin tata tarvitaan?
+        LUPAPISTE.ModalDialog.close();
+      })
+      .error(self.onError)
+      .call();
+    return false;
+    }
+  };
+
   //Open the dialog
 
   self.openAddLinkPermitDialog = function(app) {

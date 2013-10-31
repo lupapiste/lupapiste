@@ -127,13 +127,47 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
+(defn- make-link-permit-by-app-id-query [id]
+  {:link {$in [id]}
+   (keyword (str id ".type")) "application"})
+
+(defn- enrich-with-link-permit-data [app]
+  (println "\n enrich-with-link-permit-data, app id: " (:id app) "\n")
+
+   (let [query (make-link-permit-by-app-id-query (:id app))
+         link-data (first (mongo/select :app-links query))
+         link-array (:link link-data)]
+    (if (seq link-array)
+      (let [app-index (.indexOf link-array (:id app))
+            link-permit-index (if (= 0 app-index) 1 0)
+            link-permit-id (link-array link-permit-index)]
+
+        (println "\n enrich-with-link-permit-data, link-data: ")
+        (clojure.pprint/pprint link-data)
+        (println "\n enrich-with-link-permit-data, app-index: " app-index)
+        (println "\n enrich-with-link-permit-data, link permit index: " link-permit-index)
+        (println "\n enrich-with-link-permit-data, link permit id: " (keyword link-permit-id))
+        (println "\n enrich-with-link-permit-data, xxx: " (:linkpermittype ((keyword link-permit-id) link-data)))
+;        (println "\n enrich-with-link-permit-data, xxx: " (-> link-data (keyword link-permit-id) :linkpermittype))
+        (println "\n")
+
+        ;app
+        (assoc app :linkPermitData {:id link-permit-id
+                                    :type (:linkpermittype ((keyword link-permit-id) link-data))}))
+
+      app)))
+
 ;;
 ;; Query application:
 ;;
 
 (defn- app-post-processor [user]
-  (comp without-system-keys (partial with-meta-fields user)))
+  (comp
+    without-system-keys
+    (partial with-meta-fields user)
+    #_(partial enrich-with-link-permit-data)))
 
+;; TODO: Mista tata kutsutaan?
 (defquery applications {:authenticated true :verified true} [{user :user}]
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
@@ -144,6 +178,7 @@
   {:authenticated true
    :parameters [:id]}
   [{app :application user :user}]
+  (println "\n entered application query")
   (if app
     (ok :application ((app-post-processor user) app)
         :authorities (find-authorities-in-applications-organization app)
@@ -700,10 +735,22 @@
 
     (ok :app-links final-results)))
 
-(defquery link-permits
-  {:verified true}
+(defquery link-permits-by-id
+  {:parameters [id]
+   :verified true}
   [_]
-  (ok :app-links (mongo/select :app-links)))
+  (let [query (make-link-permit-by-app-id-query id)]
+    (ok :app-links (mongo/select :app-links query))))
+
+(defn- remove-link-permit [app-id]
+  (println "\n remove-link-permit, app-id: " app-id)
+  (println "\n")
+  (try
+    (let [query (make-link-permit-by-app-id-query app-id)]
+      (mongo/remove-many :app-links query))
+    (catch Exception e
+      (warn e "Duplicate key detected when removing link permit")
+      (throw (IllegalArgumentException. "error.link-permit-removal-failed")))))
 
 (defcommand add-link-permit
   {:parameters [id linkPermitId propertyId]
@@ -711,17 +758,33 @@
    :states     [:draft :info :answered :open :complement-needed :submitted]  ;; *** TODO: Nama ok? ***
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
+
+  (println "\n add-link-permit, id: " id ", linkPermitId: " linkPermitId ", propertyId: " propertyId)
+  (println "\n")
+
   (try
+    (remove-link-permit id)
     (mongo/insert :app-links {:_id (if (<= (compare id linkPermitId) 0)
                                      (str id "|" linkPermitId)
                                      (str linkPermitId "|" id))
                               :link [id linkPermitId]
-                              (keyword id) {:type (-> application :operations first :name)
+                              (keyword id) {:type "application"
+                                            :apptype (-> application :operations first :name)
                                             :propertyId propertyId}
-                              (keyword linkPermitId) {:propertyId propertyId}})
+                              (keyword linkPermitId) {:type "linkpermit"
+                                                      :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
+                                                                        "lupapistetunnus"
+                                                                        "kuntalupatunnus")}})
     (catch com.mongodb.MongoException$DuplicateKey e
         (warn e "Duplicate key detected when inserting new link permit")
         (throw (IllegalArgumentException. "error.link-permit-already-added")))))
+
+(defcommand remove-link-permit-by-app-id
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :answered :open :complement-needed :submitted]}  ;; *** TODO: Nama ok? ***
+  [{application :application}]
+  (remove-link-permit id))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

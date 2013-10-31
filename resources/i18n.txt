@@ -11,3 +11,4 @@ linkPermit.dialog.kuntalupatunnus: Kuntalupatunnus
 linkPermit.dialog.continue: Jatka
 linkPermit.dialog.choosePermitPlaceholder: Valitse viitelupa...
 error.link-permit-already-added: Tämä viitelupa on lisätty jo aiemmin
+error.link-permit-removal-failed: Viiteluvan poistaminen epäonnistui
