@@ -142,12 +142,6 @@
   [schema element-name]
   (assoc schema :body (schema-body-without-element-by-name (:body schema) element-name)))
 
-(defn with-required-elements-by-name [x & elements]
-    (let [elements (set elements)]
-            (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
-                                             (assoc c :required (contains? elements (:name c)))
-                                             c)) x)))
-
 (defn deep-find
   "Finds 0..n locations in the m structured where target is found.
    Target can be a single key or any deep vector of keys.

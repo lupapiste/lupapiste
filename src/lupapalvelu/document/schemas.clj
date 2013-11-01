@@ -107,10 +107,6 @@
   (update-in henkilotiedot-minimal [:body]
     conj {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}))
 
-(def henkilotiedot-with-osoite 
-  (update-in henkilotiedot [:body]
-    #(apply conj % (:body (first simple-osoite)))))
-
 (def henkilo (body
                henkilo-valitsin
                [henkilotiedot]
@@ -128,10 +124,6 @@
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
-
-(def yritys-with-osoite (body
-                          yritys-minimal
-                          (:body (first simple-osoite))))
 
 (def yritys (body
               yritys-minimal
@@ -153,8 +145,10 @@
                                 {:name "yritys" :type :group :body yritys}))
 
 
-(def patevyys [{:name "koulutus" :type :string :required true}
-               {:name "patevyysluokka" :type :select :required true
+(def patevyys [{:name "tutkinto" :type :string :required false}
+               {:name "kokemus" :type :string :subtype :number :required false}
+               {:name "fise" :type :string :required false}
+               {:name "patevyysluokka" :type :select :required false
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -162,9 +156,11 @@
                        {:name "ei tiedossa"}]}])
 
 (def designer-basic (body
-                      (with-required-elements-by-name 
-                        (schema-body-without-element-by-name henkilotiedot-with-osoite turvakielto))
-                      {:name "yritys" :type :group :body (with-required-elements-by-name yritys-with-osoite)}
+                      (schema-body-without-element-by-name henkilotiedot turvakielto)
+                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
+                                                                                          (assoc c :required false)
+                                                                                          c)) yritys-minimal)}
+                      simple-osoite
                       yhteystiedot))
 
 (def paasuunnittelija (body

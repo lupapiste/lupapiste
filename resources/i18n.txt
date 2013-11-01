@@ -1,0 +1,7 @@
+architect.company.title: Yrityksen tiedot
+architect.experience.title: Suunnittelijan kokemus
+paasuunnittelija.patevyys.tutkinto: Tutkinto
+paasuunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
+suunnittelija.patevyys.tutkinto: Tutkinto
+suunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
+suunnittelija.patevyys.kokemus: Kokemus
