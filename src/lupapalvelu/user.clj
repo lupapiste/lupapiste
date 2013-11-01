@@ -75,21 +75,19 @@
         caller-organizations (set (:organizations caller))
         organizations        (:organizations params)
         organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
-        roles                (:roles params)
-        roles                (if admin? roles roles)]
+        role                 (:filter-role params)
+        role                 (if admin? role #_ "TODO: mask roles" role)
+        enabled              (if admin? (:filter-enabled params) true)]
     (merge {}
-      (when organizations {:organizations {$in organizations}})
-      (when roles         {:role {$in roles}}))))
+      (when organizations       {:organizations {$in organizations}})
+      (when role                {:role role})
+      (when-not (nil? enabled)  {:enabled enabled}))))
 
-(defn- users-for-datatables-query [base-query {:keys [email firstName lastName enabled]}]
+(defn- users-for-datatables-query [base-query {:keys [email firstName lastName]}]
   (merge base-query
     (when email     {:email     (re-pattern email)})
     (when firstName {:firstName (re-pattern firstName)})
-    (when lastName  {:lastName  (re-pattern lastName)})
-    (when-not (nil? enabled) {:enabled (condp = enabled
-                                         "true" true
-                                         true   true
-                                         false)})))
+    (when lastName  {:lastName  (re-pattern lastName)})))
 
 (defn users-for-datatables [caller params]
   (println "params:" (filter (fn [[k v]] (.startsWith (name k) "filter-")) params))

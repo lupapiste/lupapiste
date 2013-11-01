@@ -46,13 +46,13 @@ var users = (function() {
       .map(function(id) { return {id: id, name: loc(id ? id : "users.filters.role.all")}; })
       .value();
     
-    self.availableActives = _([null, true, false])
-      .map(function(id) { return {id: id, name: loc(id ? "users.data.enabled." + id : "users.filters.active.all")}; })
+    self.availableEnableds = _([null, true, false])
+      .map(function(id) { return {id: id, name: loc(id === null ? "users.filters.enabled.all" : "users.data.enabled." + id)}; })
       .value();
     
     self.filters = {
       role:     ko.observable(),
-      active:   ko.observable()
+      enabled:  ko.observable()
     };
     
     self.ops = function(user) {
@@ -92,11 +92,6 @@ var users = (function() {
     self.rowCreated = function(row, data) {
       $(row).attr("data-user-id", data.id);
     };
-
-    var config = _.clone(dataTableConfig);
-    config.fnServerData = self.fetch;
-    config.fnCreatedRow = self.rowCreated;
-    self.dataTable = self.table$.dataTable(config);
     
     self.table$.click(function(e) {
       var target = $(e.target),
@@ -106,10 +101,14 @@ var users = (function() {
       return true;
     });
     
-    ko.applyBindings(self, component[0]);
-    
+    var config = _.clone(dataTableConfig);
+    config.fnServerData = self.fetch;
+    config.fnCreatedRow = self.rowCreated;
+    self.dataTable = self.table$.dataTable(config);
+
     _.each(self.filters, function(o) { o.subscribe(function() { self.dataTable.fnDraw(true); }); });
-    
+
+    component.applyBindings(self);
     return self;
   }
   
