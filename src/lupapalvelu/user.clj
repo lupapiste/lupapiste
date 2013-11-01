@@ -106,10 +106,10 @@
                            (query/skip (util/->int (:iDisplayStart params) 0))
                            (query/limit (util/->int (:iDisplayLength params) 16)))
         rows             (map user->row users)]
-    {:aaData                rows
-     :iTotalRecords         base-query-total
-     :iTotalDisplayRecords  query-total
-     :sEcho                 (str (util/->int (str (:sEcho params))))}))
+    {:rows     rows
+     :total    base-query-total
+     :display  query-total
+     :echo     (str (util/->int (str (:sEcho params))))}))
 
 
 ;;

@@ -36,7 +36,6 @@ var users = (function() {
                        sInfoFiltered: ""}
   };
 
-  
   function UsersModel(table) {
     var self = this;
     self.table = table;
@@ -49,6 +48,16 @@ var users = (function() {
       return ["disable", "edit", "resetPassword"];
     };
     
+    self.processResults = function(r) {
+      console.log("r:", r);
+      var data = r.data;
+      _.each(data.rows, function(row) { return row.push(self.ops(row)); });
+      return {aaData:               data.rows,
+              iTotalRecords:        data.total,
+              iTotalDisplayRecords: data.display,
+              sEcho:                data.echo};
+    };
+    
     self.fetch = function(source, data, callback) {
       var params = _(data)
         .concat(_.map(self.filter, function(v, k) { return {name: "filter-" + k, value: v()}; }))
@@ -56,7 +65,7 @@ var users = (function() {
       ajax
         .command("users-for-datatables")
         .json({params: params})
-        .success(function(r) { _.each(r.data.aaData, function(row) { return row.push(self.ops(row)); }); callback(r.data); })
+        .success(_.compose(callback, self.processResults))
         .call();
     };
 
@@ -68,6 +77,8 @@ var users = (function() {
     config.fnServerData = self.fetch;
     config.fnCreatedRow = self.rowCreated;
     self.table.dataTable(config);
+    
+    self.table.click(function(e) { console.log("click:", $(e)); });
   }
   
   var template;
