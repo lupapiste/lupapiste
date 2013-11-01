@@ -212,6 +212,24 @@
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
 
+(defn- get-viitelupatieto [link-permit-data]
+  (when link-permit-data
+    (let [keymap (select-keys link-permit-data
+                   (map #(keyword %) (:link link-permit-data)))
+          filter-by-match-type (fn [m match-type] (filter #(= match-type (:type (second %))) m))
+          ;hakemus-data (first (filter-by-match-type keymap "application"))
+          ;hakemus-id (first hakemus-data)
+          ;;    TODO: hakemus-type esim. "tyonjohtaja". Tarvitaanko tata johonkin? On sama kuin operation...
+          ;hakemus-type (:apptype (second hakemus-data))
+          viitelupa-data (first (filter-by-match-type keymap "linkpermit"))
+          viitelupa-id (name (first viitelupa-data))
+          viitelupa-type (:linkpermittype (second viitelupa-data))]
+      (->
+        (if (= viitelupa-type "lupapistetunnus")
+          (lupatunnus viitelupa-id)
+          {:LupaTunnus {:kuntalupatunnus viitelupa-id}})
+        (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))))
+
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
@@ -224,7 +242,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
                       :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
                       :lausuntotieto (get-statements (:statements application))
