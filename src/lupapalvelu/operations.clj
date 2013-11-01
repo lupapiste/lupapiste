@@ -342,7 +342,7 @@
 
      :tyonjohtaja                 {:schema "tyonjohtaja"
                                    :permit-type "R"
-                                   :required ["hankkeen-kuvaus"]
+                                   :required ["hankkeen-kuvaus-minimum"]
                                    :attachments []}
      }
     ya-operations))
