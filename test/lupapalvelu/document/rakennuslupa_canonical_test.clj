@@ -692,19 +692,8 @@
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
 
-;  KasittelynTilaType/Tilamuutos
-;  RakennusvalvontaAsiaType/kayttotapaus                       (* jo testattu ylla*)
-;  OsapuoletType/Osapuolet/osapuolitieto/Osapuoli              (* jo testattu ylla*)
-;    - Hakija
-;  RakennusvalvontaAsiaType/asianTiedot/Asiantiedot/rakennusvalvontaasianKuvaus
-;  LuvanTunnisteTiedotType/LupaTunnus
-;    - viittaus
-;    - kuntalupatunnus
-;    - muuTunnustieto
-;  TyonjohtajaType                                              (* jo testattu ylla*)
-;    - Tyonjohtajan tiedot + hetu
-;    - tyonjohtajaHakemusKytkin
-;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
+
+
 
 (def get-viitelupatieto #'lupapalvelu.document.rakennuslupa_canonical/get-viitelupatieto)
 
