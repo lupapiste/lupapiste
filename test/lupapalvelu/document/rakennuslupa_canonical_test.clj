@@ -269,21 +269,9 @@
                                                :version 1}
                 :data {:suoramarkkinointikielto {:value true}}})
 
-(def link-permit-data-kuntalupatunnus {:id "123-123-123-123|LP-753-2013-00004"
-                                       :link ["123-123-123-123" "LP-753-2013-00004"]
-                                       :LP-753-2013-00004 {:type "application"
-                                                           :apptype "tyonjohtaja"
-                                                           :propertyId "75341600550005"}
-                                       :123-123-123-123 {:type "linkpermit"
-                                                         :linkpermittype "kuntalupatunnus"}})
+(def link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
 
-(def link-permit-data-lupapistetunnus {:id "LP-753-2013-00002|LP-753-2013-00004"
-                                       :link ["LP-753-2013-00002" "LP-753-2013-00004"]
-                                       :LP-753-2013-00004 {:type "application"
-                                                           :apptype "tyonjohtaja"
-                                                           :propertyId "75341600550005"}
-                                       :LP-753-2013-00002 {:type "linkpermit"
-                                                            :linkpermittype "lupapistetunnus"}})
+(def link-permit-data-lupapistetunnus {:id "LP-753-2013-00002" :type "lupapistetunnus"})
 
 ;TODO LIITETIETO
 

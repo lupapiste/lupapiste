@@ -442,32 +442,20 @@
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-
-        ;;
-        ;; **** TODO: Kayta tassa enrich-with-link-permit-data:aa ****
-        ;;
-
-        (let [resp (mongo/select :app-links (make-link-permit-by-app-id-query application-id))
-              ;; Attach link permit info into the application, if such info exists
-              application-with-link-permit-info (if (seq resp)
-                                                  (assoc application :linkPermitData resp)
-                                                  application)]
-          (try
-            ;; **** TODO: Kumpaan parametrina annettavaan applicationiin
-            ;;            application-with-link-permit-info pitaisi laittaa?
+        (try
             (mapping-to-krysp/save-application-as-krysp
-              application-with-link-permit-info
+              (enrich-with-link-permit-data application)
               lang
               submitted-application
               organization)
 
-            (mongo/update
-              :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
-              {$set {:state :sent}})
+          (mongo/update
+            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
+            {$set {:state :sent}})
 
-            (catch org.xml.sax.SAXParseException e
-              (info e "Invalid KRYSM XML message")
-              (fail (.getMessage e)))))))))
+          (catch org.xml.sax.SAXParseException e
+            (info e "Invalid KRYSM XML message")
+            (fail (.getMessage e))))))))
 
 (defcommand submit-application
   {:parameters [:id]

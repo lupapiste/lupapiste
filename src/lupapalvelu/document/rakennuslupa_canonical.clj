@@ -219,21 +219,11 @@
 
 (defn- get-viitelupatieto [link-permit-data]
   (when link-permit-data
-    (let [keymap (select-keys link-permit-data
-                   (map #(keyword %) (:link link-permit-data)))
-          filter-by-match-type (fn [m match-type] (filter #(= match-type (:type (second %))) m))
-          ;hakemus-data (first (filter-by-match-type keymap "application"))
-          ;hakemus-id (first hakemus-data)
-          ;;    TODO: hakemus-type esim. "tyonjohtaja". Tarvitaanko tata johonkin? On sama kuin operation...
-          ;hakemus-type (:apptype (second hakemus-data))
-          viitelupa-data (first (filter-by-match-type keymap "linkpermit"))
-          viitelupa-id (name (first viitelupa-data))
-          viitelupa-type (:linkpermittype (second viitelupa-data))]
-      (->
-        (if (= viitelupa-type "lupapistetunnus")
-          (lupatunnus viitelupa-id)
-          {:LupaTunnus {:kuntalupatunnus viitelupa-id}})
-        (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))))
+    (->
+      (if (= (:type link-permit-data) "lupapistetunnus")
+        (lupatunnus (:id link-permit-data))
+        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
+      (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia"))))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
