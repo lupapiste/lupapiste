@@ -1,7 +1,12 @@
 users.table.email: email
-users.table.firstName: Etunimi
-users.table.lastName: Sukunimi
+users.table.name: Nimi
 users.table.role: Rooli
 users.table.organizations: Organizaatiot
-users.table.active: Aktiivinen
-users.table.actions:
+users.table.active: Tila
+users.table.actions: Toiminnot
+users.op.edit: muokkaa
+users.op.enable: avaa
+users.op.disable: sulje
+users.op.resetPassword: resetoi salasana
+users.data.enabled.true: Käytössä
+users.data.enabled.false: Suljettu

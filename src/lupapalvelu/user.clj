@@ -91,20 +91,25 @@
                                          true   true
                                          false)})))
 
+(defn user->row [user-data]
+  (reduce (fn [row kf] (conj row (kf user-data))) [] [:email (fn [u] (str (:firstName u) \space (:lastName u))) :role :organizations :enabled]))
+
 (defn users-for-datatables [caller params]
- (let [base-query       (users-for-datatables-base-query caller params)
-       base-query-total (mongo/count :users base-query)
-       query            (users-for-datatables-query base-query params)
-       query-total      (mongo/count :users query)
-       users            (query/with-collection "users"
-                          (query/find query)
-                          (query/fields [:email :firstName :lastName :role :organizations :enabled])
-                          (query/skip (util/->int (:iDisplayStart params) 0))
-                          (query/limit (util/->int (:iDisplayLength params) 16)))]
-   {:aaData                users
-    :iTotalRecords         base-query-total
-    :iTotalDisplayRecords  query-total
-    :sEcho                 (str (util/->int (str (params :sEcho))))}))
+  (println "params:" (filter (fn [[k v]] (.startsWith (name k) "filter-")) params))
+  (let [base-query       (users-for-datatables-base-query caller params)
+        base-query-total (mongo/count :users base-query)
+        query            (users-for-datatables-query base-query params)
+        query-total      (mongo/count :users query)
+        users            (query/with-collection "users"
+                           (query/find query)
+                           (query/fields [:email :firstName :lastName :role :organizations :enabled])
+                           (query/skip (util/->int (:iDisplayStart params) 0))
+                           (query/limit (util/->int (:iDisplayLength params) 16)))
+        rows             (map user->row users)]
+    {:aaData                rows
+     :iTotalRecords         base-query-total
+     :iTotalDisplayRecords  query-total
+     :sEcho                 (str (util/->int (str (:sEcho params))))}))
 
 
 ;;
