@@ -216,8 +216,8 @@
 
         <div id="application-info-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-          <p data-bind="ltext: 'application.applicationInfoDesc'" class="tab-info"></p>
-          <p data-bind="ltext: 'required.field.desc'"></p>
+          <p data-bind="lhtml: 'application.applicationInfoDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="applicationDocgen">
@@ -230,8 +230,8 @@
         </div>
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <p data-bind="ltext: 'application.partiesDesc'" class="tab-info"></p>
-          <p data-bind="ltext: 'required.field.desc'"></p>
+          <p data-bind="lhtml: 'application.partiesDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <div class="application_section" data-bind="with: application">
             <h2 class="application_section_header " onclick="accordion.click();">
               <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
@@ -276,7 +276,22 @@
 
         <div id="application-attachments-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'application.attachmentsDesc'" class="tab-info"></p>
+
+          <div class="attachment-legend">
+            <span class="ok icon"></span> 
+            <span data-bind="ltext: 'ok.title'"></span> 
+          </div>
+          <div class="attachment-legend">
+            <span class="new icon"></span> 
+            <span data-bind="ltext: 'new.title'"></span> 
+          </div>
+          <div class="attachment-legend">
+            <span class="missing icon"></span> 
+            <span data-bind="ltext: 'missing.title'"></span> 
+          </div>
+
+          
           <div class="tab-wrapper">
             <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
 
@@ -296,7 +311,7 @@
 
                   <!-- ko foreach: attachments -->
                   <tr style="cursor: pointer;">
-                    <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></span> </td>
+                    <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span> </td>
                     <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                       <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                         <span data-bind="if: type">
@@ -359,7 +374,7 @@
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'application.verdictDesc'" class="tab-info"></p>
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
@@ -529,7 +544,7 @@
           <div data-bind="with: $root.application.data" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="ltext: 'application.statementsDesc'" class="tab-info"></p>
+            <p data-bind="lhtml: 'application.statementsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -575,7 +590,7 @@
           <div data-bind="with: application" class="application-neighbors">
 
             <h1 data-bind="ltext: 'application.neighbors'">Naapurit</h1>
-            <p data-bind="ltext: 'application.neighborsDesc'" class="tab-info"></p>
+            <p data-bind="lhtml: 'application.neighborsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
@@ -645,7 +660,7 @@
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
-          <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'application.conversationDesc'" class="tab-info"></p>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
           <div class="process-nav"></div>
         </div>
