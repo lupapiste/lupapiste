@@ -40,13 +40,20 @@ var users = (function() {
     var self = this;
     
     self.component = component;
-    
-    self.filter = {
-      role: ko.observable("foozzaa")
-    };
-    
-    self.role$ = $("select.role", component);
     self.table$ = $("table", component);
+    
+    self.availableRoles = _([null, "admin", "authority", "applicant"])
+      .map(function(id) { return {id: id, name: loc(id ? id : "users.filters.role.all")}; })
+      .value();
+    
+    self.availableActives = _([null, true, false])
+      .map(function(id) { return {id: id, name: loc(id ? "users.data.enabled." + id : "users.filters.active.all")}; })
+      .value();
+    
+    self.filters = {
+      role:     ko.observable(),
+      active:   ko.observable()
+    };
     
     self.ops = function(user) {
       return user.enabled ? ["disable", "edit", "resetPassword"] : ["enable"];
@@ -73,7 +80,7 @@ var users = (function() {
     
     self.fetch = function(source, data, callback) {
       var params = _(data)
-        .concat(_.map(self.filter, function(v, k) { return {name: "filter-" + k, value: v()}; }))
+        .concat(_.map(self.filters, function(v, k) { return {name: "filter-" + k, value: v()}; }))
         .reduce(function(m, p) { m[p.name] = p.value; return m; }, {});
       ajax
         .command("users-for-datatables")
@@ -89,7 +96,7 @@ var users = (function() {
     var config = _.clone(dataTableConfig);
     config.fnServerData = self.fetch;
     config.fnCreatedRow = self.rowCreated;
-    self.table$.dataTable(config);
+    self.dataTable = self.table$.dataTable(config);
     
     self.table$.click(function(e) {
       var target = $(e.target),
@@ -100,6 +107,8 @@ var users = (function() {
     });
     
     ko.applyBindings(self, component[0]);
+    
+    _.each(self.filters, function(o) { o.subscribe(function() { self.dataTable.fnDraw(true); }); });
     
     return self;
   }

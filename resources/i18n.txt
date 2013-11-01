@@ -1,6 +1,6 @@
 users.table.email: email
 users.table.name: Nimi
-users.table.role: Rooli
+role: Rooli
 users.table.organizations: Organizaatiot
 users.table.active: Tila
 users.table.actions: Toiminnot
@@ -10,3 +10,7 @@ users.op.disable: sulje
 users.op.resetPassword: resetoi salasana
 users.data.enabled.true: Käytössä
 users.data.enabled.false: Suljettu
+users.filters.role: Rooli:
+users.filters.active: Tila:
+users.filters.role.all: Kaikki
+users.filters.active.all: Kaikki
