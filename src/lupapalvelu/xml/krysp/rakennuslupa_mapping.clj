@@ -151,7 +151,10 @@
                                                                                     {:tag :pitaja}
                                                                                     {:tag :katselmuksenLaji}
                                                                                     {:tag :vaadittuLupaehtonaKytkin}
-                                                                                    {:tag :huomautukset}
+                                                                                    {:tag :huomautukset :child [{:tag :huomautus :child [{:tag :kuvaus}
+                                                                                                                                         {:tag :maaraAika}
+                                                                                                                                         {:tag :toteamisHetki}
+                                                                                                                                         {:tag :toteaja}]}]}
                                                                                     {:tag :katselmuspoytakirja}
                                                                                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                                                                                     {:tag :lasnaolijat}
