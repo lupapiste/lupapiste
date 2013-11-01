@@ -131,20 +131,21 @@
   {:link {$in [id]}
    (keyword (str id ".type")) "application"})
 
+;; TODO: Muuta tama tukemaan montaa viitelupaa?
 (defn- enrich-with-link-permit-data [app]
   (let [query (make-link-permit-by-app-id-query (:id app))
-        link-data (first (mongo/select :app-links query))
-        link-array (:link link-data)]
-    (assoc app :linkPermitData
-      (if (seq link-array)
-        ;; Link found
-        (let [app-index (.indexOf link-array (:id app))
-              link-permit-index (if (= 0 app-index) 1 0)
-              link-permit-id (link-array link-permit-index)
-              link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-          {:id link-permit-id :type link-permit-type})
-        ;; No link found
-        nil))))
+        resp (mongo/select :app-links query)]
+
+    (if (seq resp)
+      ;; Link permit data was found
+      (let [link-data (first resp)
+            link-array (:link link-data)
+            app-index (.indexOf link-array (:id app))
+            link-permit-id (link-array (if (= 0 app-index) 1 0))
+            link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+        (assoc app :linkPermitData {:id link-permit-id :type link-permit-type}))
+      ;; No link permit data found
+      (assoc app :linkPermitData nil))))
 
 ;;
 ;; Query application:
@@ -441,13 +442,32 @@
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
-          (mongo/update
-            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
-            {$set {:state :sent}})
-          (catch org.xml.sax.SAXParseException e
-            (info e "Invalid KRYSM XML message")
-            (fail (.getMessage e))))))))
+
+        ;;
+        ;; **** TODO: Kayta tassa enrich-with-link-permit-data:aa ****
+        ;;
+
+        (let [resp (mongo/select :app-links (make-link-permit-by-app-id-query application-id))
+              ;; Attach link permit info into the application, if such info exists
+              application-with-link-permit-info (if (seq resp)
+                                                  (assoc application :linkPermitData resp)
+                                                  application)]
+          (try
+            ;; **** TODO: Kumpaan parametrina annettavaan applicationiin
+            ;;            application-with-link-permit-info pitaisi laittaa?
+            (mapping-to-krysp/save-application-as-krysp
+              application-with-link-permit-info
+              lang
+              submitted-application
+              organization)
+
+            (mongo/update
+              :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
+              {$set {:state :sent}})
+
+            (catch org.xml.sax.SAXParseException e
+              (info e "Invalid KRYSM XML message")
+              (fail (.getMessage e)))))))))
 
 (defcommand submit-application
   {:parameters [:id]
@@ -670,21 +690,6 @@
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
-
-;  KasittelynTilaType/Tilamuutos
-;  RakennusvalvontaAsiaType/kayttotapaus
-;  OsapuoletType/Osapuolet/osapuolitieto/Osapuoli
-;    - Hakija
-;  RakennusvalvontaAsiaType/asianTiedot/Asiantiedot/rakennusvalvontaasianKuvaus
-;  LuvanTunnisteTiedotType/LupaTunnus
-;    - viittaus
-;    - kuntalupatunnus
-;    - muuTunnustieto
-;  TyonjohtajaType
-;    - Tyonjohtajan tiedot + hetu
-;    - tyonjohtajaHakemusKytkin
-;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
-
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :verified   true
@@ -717,13 +722,6 @@
                         organized-results)]
 
     (ok :app-links final-results)))
-
-(defquery link-permits-by-id
-  {:parameters [id]
-   :roles      [:applicant :authority]}
-  [_]
-  (let [query (make-link-permit-by-app-id-query id)]
-    (ok :app-links (mongo/select :app-links query))))
 
 (defn- remove-link-permit [app-id]
   (let [query (make-link-permit-by-app-id-query app-id)]
