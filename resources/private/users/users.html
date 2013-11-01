@@ -2,20 +2,30 @@
 <html lang="en">
 <body>
   <section class="page" id="users-table">
-    <table class="table table-striped tablesorter">
-      <thead>
-        <tr>
-          <th>users.table.email</th>
-          <th>users.table.name</th>
-          <th>users.table.role</th>
-          <th>users.table.organizations</th>
-          <th>users.table.active</th>
-          <th>users.table.actions</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+    
+    <!--
+      WARNING:
+      This is a template that will be cloned to 
+      multiple places, so DO NOT USE element ID's.
+    -->
+    
+    <div class="component">
+      <table class="table table-striped tablesorter">
+        <thead>
+          <tr>
+            <th data-bind="ltext: 'users.table.email'"></th>
+            <th data-bind="ltext: 'users.table.name'"></th>
+            <th data-bind="ltext: 'users.table.role'"></th>
+            <th data-bind="ltext: 'users.table.organizations'"></th>
+            <th data-bind="ltext: 'users.table.active'"></th>
+            <th data-bind="ltext: 'users.table.actions'"></th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    
   </section>
 </body>
 </html>

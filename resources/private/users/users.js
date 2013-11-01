@@ -36,13 +36,17 @@ var users = (function() {
                        sInfoFiltered: ""}
   };
 
-  function UsersModel(table) {
+  function UsersModel(component, opts) {
     var self = this;
-    self.table = table;
+    
+    self.component = component;
     
     self.filter = {
       role: ko.observable("foozzaa")
     };
+    
+    self.role$ = $("select.role", component);
+    self.table$ = $("table", component);
     
     self.ops = function(user) {
       return user.enabled ? ["disable", "edit", "resetPassword"] : ["enable"];
@@ -85,32 +89,27 @@ var users = (function() {
     var config = _.clone(dataTableConfig);
     config.fnServerData = self.fetch;
     config.fnCreatedRow = self.rowCreated;
-    self.table.dataTable(config);
+    self.table$.dataTable(config);
     
-    self.table.click(function(e) {
+    self.table$.click(function(e) {
       var target = $(e.target),
           op = target.attr("data-op"),
           id = target.parent().parent().attr("data-user-id");
-      console.log("click:", op, id);
+      if (op && id) { console.log("click:", op, id); return false; }
+      return true;
     });
+    
+    ko.applyBindings(self, component[0]);
+    
+    return self;
   }
   
-  var template;
-  
-  $(function() {
-    template = $("#users-table table").clone();
-    $("th", template).each(function(i, e) {
-      var th = $(e);
-      th.text(loc(th.text()));
-    });
-  });
-  
   return {
-    create: function(elementOrId) {
-      var table = template.clone();
-      var div = _.isString(elementOrId) ? $("#" + elementOrId) : elementOrId;
-      div.append(table);
-      return new UsersModel(table);
+    create: function(targetOrId, opts) {
+      var component = $("#users-table .component").clone();
+      var usersModel = new UsersModel(component, opts);
+      (_.isString(targetOrId) ? $("#" + targetOrId) : targetOrId).append(component);
+      return usersModel;
     }
   };
 
