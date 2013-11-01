@@ -11,7 +11,7 @@ var users = (function() {
     _.each(oData[5], function(op) {
       td.append($("<a>")
         .attr("href", "#")
-        .data("op", op)
+        .attr("data-op", op)
         .text("[" + loc("users.op." + op) + "]"));
     });
   }
@@ -44,15 +44,24 @@ var users = (function() {
       role: ko.observable("foozzaa")
     };
     
-    self.ops = function(row) {
-      return ["disable", "edit", "resetPassword"];
+    self.ops = function(user) {
+      return user.enabled ? ["disable", "edit", "resetPassword"] : ["enable"];
+    };
+    
+    self.userToRow = function(user) {
+      return {id: user._id,
+              0: user.email,
+              1: user.firstName + " " + user.lastName,
+              2: user.role,
+              3: user.organizations ? user.organizations : [],
+              4: user.enabled,
+              5: self.ops(user),};
     };
     
     self.processResults = function(r) {
       console.log("r:", r);
       var data = r.data;
-      _.each(data.rows, function(row) { return row.push(self.ops(row)); });
-      return {aaData:               data.rows,
+      return {aaData:               _.map(data.rows, self.userToRow),
               iTotalRecords:        data.total,
               iTotalDisplayRecords: data.display,
               sEcho:                data.echo};
@@ -70,7 +79,7 @@ var users = (function() {
     };
 
     self.rowCreated = function(row, data) {
-      $(row).attr("data-id", "data.id");
+      $(row).attr("data-user-id", data.id);
     };
 
     var config = _.clone(dataTableConfig);
@@ -78,7 +87,12 @@ var users = (function() {
     config.fnCreatedRow = self.rowCreated;
     self.table.dataTable(config);
     
-    self.table.click(function(e) { console.log("click:", $(e)); });
+    self.table.click(function(e) {
+      var target = $(e.target),
+          op = target.attr("data-op"),
+          id = target.parent().parent().attr("data-user-id");
+      console.log("click:", op, id);
+    });
   }
   
   var template;

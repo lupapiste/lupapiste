@@ -91,9 +91,6 @@
                                          true   true
                                          false)})))
 
-(defn user->row [user-data]
-  (reduce (fn [row kf] (conj row (kf user-data))) [] [:email (fn [u] (str (:firstName u) \space (:lastName u))) :role :organizations :enabled]))
-
 (defn users-for-datatables [caller params]
   (println "params:" (filter (fn [[k v]] (.startsWith (name k) "filter-")) params))
   (let [base-query       (users-for-datatables-base-query caller params)
@@ -104,9 +101,8 @@
                            (query/find query)
                            (query/fields [:email :firstName :lastName :role :organizations :enabled])
                            (query/skip (util/->int (:iDisplayStart params) 0))
-                           (query/limit (util/->int (:iDisplayLength params) 16)))
-        rows             (map user->row users)]
-    {:rows     rows
+                           (query/limit (util/->int (:iDisplayLength params) 16)))]
+    {:rows     users
      :total    base-query-total
      :display  query-total
      :echo     (str (util/->int (str (:sEcho params))))}))
