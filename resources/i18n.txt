@@ -13,3 +13,5 @@ linkPermit.dialog.continue: Jatka
 linkPermit.dialog.choosePermitPlaceholder: Valitse viitelupa...
 error.link-permit-already-added: Tämä viitelupa on lisätty jo aiemmin
 error.link-permit-removal-failed: Viiteluvan poistaminen epäonnistui
+hankkeen-kuvaus-minimum._group_label: Hankkeen kuvaus
+hankkeen-kuvaus-minimum.kuvaus: Selostus rakennushankkeesta tai toimenpiteestä
