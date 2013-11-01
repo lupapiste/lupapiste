@@ -33,13 +33,15 @@
                                            {:tag :jakokirjain}]}]})
 
 
+(def rakennustunnus [{:tag :jarjestysnumero}
+                     {:tag :kiinttun}
+                     {:tag :rakennusnro}])
+
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
                    {:tag :alkuHetki :ns "yht"}
                    mapping-common/sijantitieto
                    {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
-                                                          {:tag :kiinttun}
-                                                          {:tag :rakennusnro}]}
+                    :child [{:tag :rakennustunnus :child rakennustunnus}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}
@@ -142,6 +144,18 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
+                             {:tag :katselmustieto :child [{:tag :Katselmus :child [{:tag :rakennustunnus :child rakennustunnus}
+                                                                                    {:tag :tilanneKoodi}
+                                                                                    {:tag :pitoPvm}
+                                                                                    {:tag :osittainen}
+                                                                                    {:tag :pitaja}
+                                                                                    {:tag :katselmuksenLaji}
+                                                                                    {:tag :vaadittuLupaehtonaKytkin}
+                                                                                    {:tag :huomautukset}
+                                                                                    {:tag :katselmuspoytakirja}
+                                                                                    {:tag :tarkastuksenTaiKatselmuksenNimi}
+                                                                                    {:tag :lasnaolijat}
+                                                                                    {:tag :poikkeamat}]}]}
                              {:tag :lausuntotieto :child [mapping-common/lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
