@@ -17,3 +17,6 @@ error.link-permit-removal-failed: Viiteluvan poistaminen epäonnistui
 new.title: Suunnitelma on päivitetty
 missing.title: Suunnitelmaa ei ole liitetty tai viranomainen on merkinnyt sen puutteelliseksi
 ok.title: Viranomainen on alustavasti hyväksynyt suunnitelman
+
+info.title: Hakemuksella muuttuneita tietoja
+conversation.title: Hakemuksella uusia viestejä keskustelussa
