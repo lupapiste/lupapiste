@@ -83,14 +83,12 @@
       (when role                {:role role})
       (when-not (nil? enabled)  {:enabled enabled}))))
 
-(defn- users-for-datatables-query [base-query {:keys [email firstName lastName]}]
-  (merge base-query
-    (when email     {:email     (re-pattern email)})
-    (when firstName {:firstName (re-pattern firstName)})
-    (when lastName  {:lastName  (re-pattern lastName)})))
+(defn- users-for-datatables-query [base-query {:keys [filter-search]}]
+  (if (ss/blank? filter-search)
+    base-query
+    (assoc base-query $or (map hash-map [:email :firstName :lastName] (repeat (re-pattern filter-search))))))
 
 (defn users-for-datatables [caller params]
-  (println "params:" (filter (fn [[k v]] (.startsWith (name k) "filter-")) params))
   (let [base-query       (users-for-datatables-base-query caller params)
         base-query-total (mongo/count :users base-query)
         query            (users-for-datatables-query base-query params)

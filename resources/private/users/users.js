@@ -52,7 +52,8 @@ var users = (function() {
     
     self.filters = {
       role:     ko.observable(),
-      enabled:  ko.observable()
+      enabled:  ko.observable(),
+      search:   ko.observable()
     };
     
     self.ops = function(user) {
@@ -70,7 +71,6 @@ var users = (function() {
     };
     
     self.processResults = function(r) {
-      console.log("r:", r);
       var data = r.data;
       return {aaData:               _.map(data.rows, self.userToRow),
               iTotalRecords:        data.total,

@@ -14,3 +14,4 @@ users.filters.role: Rooli:
 users.filters.role.all: Kaikki
 users.filters.enabled: Tila:
 users.filters.enabled.all: Kaikki
+users.filters.search: Hae:

@@ -51,3 +51,5 @@
 (defn ^String lower-case [^CharSequence x] (when x (s/lower-case x)))
 
 (defn ^String trim [^CharSequence x] (when x (s/trim x)))
+
+(def blank? s/blank?)

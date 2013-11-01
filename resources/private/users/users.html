@@ -16,6 +16,8 @@
         <select data-bind="options: availableRoles, value: filters.role, optionsText: 'name', optionsValue: 'id'"></select>
         <span data-bind="ltext: 'users.filters.enabled'"></span>
         <select data-bind="options: availableEnableds, value: filters.enabled, optionsText: 'name', optionsValue: 'id'"></select>
+        <span data-bind="ltext: 'users.filters.search'"></span>
+        <input data-bind="value: filters.search" type="text"></input>
       </div>
     
       <table class="table table-striped tablesorter">
