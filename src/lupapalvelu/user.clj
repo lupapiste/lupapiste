@@ -86,7 +86,12 @@
 (defn- users-for-datatables-query [base-query {:keys [filter-search]}]
   (if (ss/blank? filter-search)
     base-query
-    (assoc base-query $or (map hash-map [:email :firstName :lastName] (repeat (re-pattern filter-search))))))
+    (let [searches (ss/split filter-search #"\s+")]
+      (assoc base-query $and (map (fn [t]
+                                    {$or (map hash-map
+                                           [:email :firstName :lastName]
+                                           (repeat t))})
+                               (map re-pattern searches))))))
 
 (defn users-for-datatables [caller params]
   (let [base-query       (users-for-datatables-base-query caller params)
