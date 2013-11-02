@@ -106,7 +106,7 @@ var users = (function() {
     config.fnCreatedRow = self.rowCreated;
     self.dataTable = self.table$.dataTable(config);
 
-    _.each(self.filters, function(o) { o.subscribe(function() { self.dataTable.fnDraw(true); }); });
+    _.each(self.filters, function(o) { o.subscribe(_.throttle(function() { self.dataTable.fnDraw(true); }, 600)); });
 
     component.applyBindings(self);
     return self;
