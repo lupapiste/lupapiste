@@ -111,6 +111,7 @@
                      :child [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                              {:tag :luvanTunnisteTiedot
                               :child [mapping-common/lupatunnus]}
+                             {:tag :viitelupatieto :child [mapping-common/lupatunnus]}
                              {:tag :osapuolettieto
                               :child [mapping-common/osapuolet]}
                              {:tag :rakennuspaikkatieto
