@@ -145,15 +145,8 @@
                                 {:name "yritys" :type :group :body yritys}))
 
 
-(def patevyys [{:name "tutkinto" :type :string :required false}
-               {:name "kokemus" :type :string :subtype :number :required false}
-               {:name "fise" :type :string :required false}
-               {:name "patevyysluokka" :type :select :required false
-                :body [{:name "AA"}
-                       {:name "A"}
-                       {:name "B"}
-                       {:name "C"}
-                       {:name "ei tiedossa"}]}])
+(def patevyys [{:name "koulutus" :type :string :required false}
+               {:name "fise" :type :string :required false}])
 
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)

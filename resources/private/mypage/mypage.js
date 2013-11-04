@@ -32,22 +32,15 @@
     self.role = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable();
-    self.experience = ko.observable();
     self.fise = ko.observable();
-    self.qualification = ko.observable();
     self.companyName = ko.observable();
     self.companyId = ko.observable();
-    self.companyStreet = ko.observable();
-    self.companyZip = ko.observable();
-    self.companyCity = ko.observable()
     self.attachments = ko.observable();
     self.hasAttachments = ko.computed(function() {
       var a = self.attachments();
       return a && a.length > 0;
     });
     self.loadingAttachments = ko.observable();
-
-    self.availableQualifications = ["AA", "A", "B", "C"];
 
     self.init = function(u) {
       return self
@@ -62,14 +55,9 @@
         .role(u.role)
         .architect(u.architect)
         .degree(u.degree)
-        .experience(u.experience)
         .fise(u.fise)
-        .qualification(u.qualification)
         .companyName(u.companyName)
         .companyId(u.companyId)
-        .companyStreet(u.companyStreet)
-        .companyZip(u.companyZip)
-        .companyCity(u.companyCity)
         .updateAttachments();
     };
 
@@ -94,8 +82,8 @@
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
-         "degree", "experience", "fise", "qualification",
-         "companyName", "companyId", "companyStreet", "companyZip", "companyCity"]);
+         "degree", "fise", 
+         "companyName", "companyId"]);
 
     self.updateUserName = function() {
       $("#user-name")

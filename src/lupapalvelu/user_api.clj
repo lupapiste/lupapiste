@@ -160,7 +160,7 @@
     :users
     user-id
     {$set (select-keys data [:firstName :lastName :street :city :zip :phone
-                             :architect :degree :experience :fise :qualification
+                             :architect :degree :fise
                              :companyName :companyId])})
   (session/put! :user (user/get-user-by-id user-id))
   (ok))

@@ -115,7 +115,7 @@
                 :postitoimipaikannimi {:value city}}
        :yritys {:yritysnimi           {:value companyName}
                 :liikeJaYhteisoTunnus {:value companyId}}
-       :patevyys {:tutkinto           {:value degree}
+       :patevyys {:koulutus           {:value degree}
                   :patevyysluokka     {:value qualification}
                   :kokemus            {:value experience}
                   :fise               {:value fise}

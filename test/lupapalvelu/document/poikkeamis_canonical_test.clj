@@ -206,7 +206,11 @@
                  :patevyys {:koulutus {:modified 1379421460882
                                        :value "Arkkitehti"}
                             :patevyysluokka {:modified 1379421462104
-                                             :value "AA"}}
+                                             :value "AA"}
+                            :kokemus {:modified 1379421462104
+                                         :value "10"}
+                            :fise {:modified 1379421462104
+                                   :value "http://www.solita.fi"}}
                  :userId {:modified 1379421445564
                           :value "777777777777777777000020"}
                  :yhteystiedot {:email {:modified 1379421445541
@@ -239,7 +243,9 @@
                                                            :postinumero {:modified 1380191660158 :value "10203"}
                                                            :postitoimipaikannimi {:modified 1380191655585 :value "Piippola"}}
                                                   :patevyys {:koulutus {:modified 1380191688364 :value "El\u00e4m\u00e4n koulu"}
-                                                             :patevyysluokka {:modified 1380191690366 :value "C"}}
+                                                             :patevyysluokka {:modified 1380191690366 :value "C"}
+                                                             :kokemus {:modified 1379421462104 :value "5"}
+                                                             :fise {:modified 1379421462104 :value "http://www.ym.fi"}}
                                                   :userId {:modified 1380191655618 :value "777777777777777777000020"}
                                                   :yhteystiedot {:email {:modified 1380191655585 :value "pena@example.com"}
                                                                  :puhelin {:modified 1380191655585 :value "0102030405"}}

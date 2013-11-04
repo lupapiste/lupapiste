@@ -40,10 +40,7 @@
               :fise "f"
               :qualification "q"
               :companyName "cn"
-              :companyId "cid"
-              :companyStreet "cs"
-              :companyZip "cz"
-              :companyCity "cc"}]
+              :companyId "cid"}]
 
   (apply command teppo :save-user-info (flatten (seq data))) => ok?
   (query teppo :user) => (contains {:user (contains data)})))
