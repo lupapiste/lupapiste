@@ -36,7 +36,6 @@
               :phone "0505503171"
               :architect true
               :degree "d"
-              :experience 5
               :fise "f"
               :qualification "q"
               :companyName "cn"
