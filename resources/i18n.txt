@@ -11,14 +11,11 @@ linkPermit.dialog.or: TAI
 linkPermit.dialog.kuntalupatunnus: Kuntalupatunnus
 linkPermit.dialog.continue: Jatka
 linkPermit.dialog.choosePermitPlaceholder: Valitse viitelupa...
-error.link-permit-already-added: Tämä viitelupa on lisätty jo aiemmin
 error.link-permit-removal-failed: Viiteluvan poistaminen epäonnistui
 hankkeen-kuvaus-minimum._group_label: Hankkeen kuvaus
 hankkeen-kuvaus-minimum.kuvaus: Selostus rakennushankkeesta tai toimenpiteestä
-
 new.title: Suunnitelma on päivitetty
 missing.title: Suunnitelmaa ei ole liitetty tai viranomainen on merkinnyt sen puutteelliseksi
 ok.title: Viranomainen on alustavasti hyväksynyt suunnitelman
-
 info.title: Hakemuksella muuttuneita tietoja
 conversation.title: Hakemuksella uusia viestejä keskustelussa

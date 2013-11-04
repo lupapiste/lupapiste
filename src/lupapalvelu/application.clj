@@ -707,39 +707,36 @@
 
     (ok :app-links final-results)))
 
-(defn- remove-link-permit [app-id]
-  (let [query (make-link-permit-by-app-id-query app-id)]
-    (mongo/remove-many :app-links query)))
-
 (defcommand add-link-permit
   {:parameters [id linkPermitId propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
-  (try
-    (remove-link-permit id)
-    (mongo/insert :app-links {:_id (if (<= (compare id linkPermitId) 0)
-                                     (str id "|" linkPermitId)
-                                     (str linkPermitId "|" id))
-                              :link [id linkPermitId]
-                              (keyword id) {:type "application"
-                                            :apptype (-> application :operations first :name)
-                                            :propertyId propertyId}
-                              (keyword linkPermitId) {:type "linkpermit"
-                                                      :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
-                                                                        "lupapistetunnus"
-                                                                        "kuntalupatunnus")}})
-    (catch com.mongodb.MongoException$DuplicateKey e
-        (warn e "Duplicate key detected when inserting new link permit")
-        (throw (IllegalArgumentException. "error.link-permit-already-added")))))
+  (let [db-id (if (<= (compare id linkPermitId) 0)
+             (str id "|" linkPermitId)
+             (str linkPermitId "|" id))]
+    (mongo/update-by-id :app-links db-id
+      {:_id db-id
+       :link [id linkPermitId]
+       (keyword id) {:type "application"
+                     :apptype (-> application :operations first :name)
+                     :propertyId propertyId}
+       (keyword linkPermitId) {:type "linkpermit"
+                               :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
+                                                 "lupapistetunnus"
+                                                 "kuntalupatunnus")}}
+      :upsert true)))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]}
   [{application :application}]
-  (if (remove-link-permit id) (ok) (fail :error.unknown)))
+  (let [query (make-link-permit-by-app-id-query id)]
+    (if (mongo/remove-many :app-links query)
+      (ok)
+      (fail :error.unknown))))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

@@ -48,8 +48,8 @@
 
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
-  [collection id data]
-  (mc/update-by-id collection id data)
+  [collection id data & opts]
+  (apply mc/update-by-id collection id data opts)
   nil)
 
 (defn update-by-query
