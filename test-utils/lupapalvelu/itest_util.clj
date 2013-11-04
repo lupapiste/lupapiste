@@ -14,6 +14,7 @@
 (defn- find-user [username] (some #(when (= (:username %) username) %) users))
 (defn- id-for [username] (:id (find-user username)))
 (defn- apikey-for [username] (get-in (find-user username) [:private :apikey]))
+(defn email-for [username] (:email (find-user username)))
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
@@ -27,6 +28,7 @@
 (def veikko-muni "837")
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
+(def ronja-id    (id-for "ronja"))
 ;TODO should get this through organization
 (def sonja-muni  "753")
 (def sipoo       (apikey-for "sipoo"))
@@ -217,9 +219,14 @@
       (and ok allowed?))))
 
 (defn last-email []
-  (let [{:keys [ok message]} (query pena :last-email)] ; query with any user will do
+  (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
+
+(defn sent-emails []
+  (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
+    (assert ok)
+    messages))
 
 ;;
 ;; Stuffin' data in
