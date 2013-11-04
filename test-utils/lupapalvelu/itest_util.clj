@@ -114,8 +114,10 @@
   (invalid-csrf-token? {:status 403 :body {:ok false :text "error.SOME_OTHER_REASON"}}) => false
   (invalid-csrf-token? {:status 200 :body {:ok true}}) => false)
 
-(defn unauthorized? [{:keys [ok text]}]
-  (and (= ok false) (= text "error.unauthorized")))
+(defn expected-failure? [expected-text {:keys [ok text]}]
+  (and (= ok false) (= text expected-text)))
+
+(def unauthorized? (partial expected-failure? "error.unauthorized"))
 
 (fact "unauthorized?"
   (unauthorized? {:ok false :text "error.unauthorized"}) => true

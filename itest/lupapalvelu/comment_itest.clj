@@ -9,8 +9,14 @@
       pena =not=> (allowed? :add-comment :id id :to irrelevant)
       (command pena :add-comment :id id :text "comment1" :target "application") => ok?
       (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) =not=> ok?)
+
     (fact "authority can comment with to"
       sonja => (allowed? :can-target-comment-to-authority)
       sonja => (allowed? :add-comment :id id :to sonja-id)
       (command sonja :add-comment :id id :text "comment1" :target "application") => ok?
-      (command sonja :add-comment :id id :text "comment1" :target "application" :to sonja-id) => ok?)))
+      (command sonja :add-comment :id id :text "comment1" :target "application" :to sonja-id) => ok?)
+
+    (fact "can't refer to non-existent user id"
+      (command sonja :add-comment :id id :text "comment1" :target "application" :to 0) => (partial expected-failure? "to-is-not-id-of-any-user-in-system"))
+
+    ))
