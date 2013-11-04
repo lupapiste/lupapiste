@@ -1,10 +1,9 @@
 (ns lupapalvelu.application-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet]
-        [lupapalvelu.factlet]
-        [clojure.pprint :only [pprint]]
-        [clojure.string :only [join]])
-  (:require [lupapalvelu.operations :as operations]
+  (:require [midje.sweet :refer :all]
+            [clojure.string :refer [join]]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.factlet  :refer :all]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -177,19 +176,6 @@
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
-(fact "adding comments"
-  (let [{id :id}  (create-and-submit-application pena)]
-    (fact "applicant can't comment with to"
-      pena =not=> (allowed? :can-target-comment-to-authority)
-      pena =not=> (allowed? :add-comment :id id :to irrelevant)
-      (command pena :add-comment :id id :text "comment1" :target "application") => ok?
-      (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) =not=> ok?)
-    (fact "authority can comment with to"
-      sonja => (allowed? :can-target-comment-to-authority)
-      sonja => (allowed? :add-comment :id id :to sonja-id)
-      (command sonja :add-comment :id id :text "comment1" :target "application") => ok?
-      (command sonja :add-comment :id id :text "comment1" :target "application" :to sonja-id) => ok?)))
-
 (fact "create-and-submit-application"
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
@@ -265,12 +251,3 @@
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
-
-(comment
-  (apply-remote-minimal)
-  ; Do 70 applications in each municipality:
-  (doseq [muni ["753" "837" "186"]
-          address-type ["Katu " "Kuja " "V\u00E4yl\u00E4 " "Tie " "Polku " "H\u00E4meentie " "H\u00E4meenkatu "]
-          address (map (partial str address-type) (range 1 11))]
-    (create-app pena :municipality muni :address address)))
-

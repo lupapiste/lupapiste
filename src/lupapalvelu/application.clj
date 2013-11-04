@@ -272,6 +272,7 @@
    :verified   true}
   [{user :user application :application :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
+    ; FIXME combine mongo writes
     (executed "set-user-to-document"
       (-> command
         (assoc-in [:data :documentId] (:documentId my-invite))
