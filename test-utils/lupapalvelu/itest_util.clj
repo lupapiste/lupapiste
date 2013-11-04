@@ -216,6 +216,11 @@
           allowed? (-> actions action :ok)]
       (and ok allowed?))))
 
+(defn last-email []
+  (let [{:keys [ok message]} (query pena :last-email)] ; query with any user will do
+    (assert ok)
+    message))
+
 ;;
 ;; Stuffin' data in
 ;;

@@ -72,9 +72,7 @@
                                                 :id application-id
                                                 :neighborId neighbor-id
                                                 :email "abba@example.com")
-        _                         (Thread/sleep 20) ; delivery time
-        email                     (query pena :last-email)
-        body                      (get-in email [:message :body :plain])
+        body                      (get-in (last-email) [:body :plain])
         [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
     a-id => application-id
