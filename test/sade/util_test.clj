@@ -19,6 +19,24 @@
                      {:a {:b {:c 2 :d {:z 9} :z 3} :e 100}})
     => {:a {:b {:z 3, :c 3, :d {:z 9, :x 1, :y 2}}, :e 103}, :f 4}))
 
+(facts "deep-merge"
+  (fact "empty" (deep-merge {} {}) => {})
+  (fact "nil" (deep-merge {} nil) => {})
+  (fact "nil in the middle" (deep-merge {} nil {}) => {})
+  (fact "data & nil in the middle" (deep-merge {:a 1} nil {:b 1}) => {:a 1 :b 1})
+  (fact "three deep maps"
+    (deep-merge
+      (assoc-in {} [:a :b :c] 2)
+      (assoc-in {} [:a :b :d] 3)
+      (assoc-in {} [:a :b :e] nil)) => {:a {:b {:c 2 :d 3 :e nil}}})
+
+  (fact "last value wins"
+    (deep-merge
+    (assoc-in {} [:a :b :c] 2)
+    (assoc-in {} [:a :b :d] 3)
+    (assoc-in {} [:a :b :d] 4)
+    (assoc-in {} [:a :b :d] 5)) => {:a {:b {:c 2 :d5}}}))
+
 (facts "Contains value"
   (fact (contains-value? nil nil) => false)
   (fact (contains-value? [] nil) => false)

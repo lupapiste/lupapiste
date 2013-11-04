@@ -37,7 +37,13 @@
       (if (every? map? maps)
         (apply merge-with m maps)
         (apply f maps)))
-    maps))
+    (filter (comp not nil?) maps)))
+
+(defn deep-merge
+  "Merges maps recursively using deep-merge-with:
+   leaf values from the later maps win conflicts."
+  [& maps]
+  (apply deep-merge-with (fn [_ x] x) maps))
 
 (defn contains-value? [coll checker]
   (if (coll? coll)
