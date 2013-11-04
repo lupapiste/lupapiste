@@ -3,6 +3,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.dialogSelector = "#dialog-add-link-permit";
 
   self.appId = 0;
+  self.tempLinkPermitDataForInit = [];
   self.propertyId = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
   self.selectedLinkPermit = ko.observable("");
@@ -21,32 +22,18 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.errorMessage(resp.text);
   };
 
-  // With these the initialization of self.selectedLinkPermit and self.kuntalupatunnus will work.
-  // If it is done already in self.reset, it seems that Knockout will override
-  // the initialized value when the new appMatches are received (for the select list in UI).
-  self.tempLinkPermitIdForInit = "";
-  self.tempLinkPermitTypeForInit = "";
-
   var getAppMatchesForLinkPermitsSelect = function(appId) {
     ajax.query("app-matches-for-link-permits", {id: appId})
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
+
+        data["app-links"] =
+          _.reject(data["app-links"],
+                   function(link){ return _.contains(self.tempLinkPermitDataForInit, link.id); });
+
         self.errorMessage(null);
         self.appMatches(data["app-links"]);
-
-        if (self.tempLinkPermitIdForInit && self.tempLinkPermitTypeForInit) {
-          if (self.tempLinkPermitTypeForInit === "lupapistetunnus") {
-            self.selectedLinkPermit(self.tempLinkPermitIdForInit);
-            self.kuntalupatunnus("");
-          } else {
-            self.selectedLinkPermit("");
-            self.kuntalupatunnus(self.tempLinkPermitIdForInit);
-          }
-        } else {
-          self.selectedLinkPermit("");
-          self.kuntalupatunnus("");
-        }
       })
       .error(self.onError)
       .call();
@@ -54,14 +41,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
   };
 
   self.reset = function(app) {
-    self.tempLinkPermitIdForInit = "";
-    self.tempLinkPermitTypeForInit = "";
-
-    var data = app.linkPermitData();
-    if (_.size(data) && data.id && data.type) {
-      self.tempLinkPermitIdForInit = data.id();
-      self.tempLinkPermitTypeForInit = data.type();
-    }
     self.appId = app.id();
     self.propertyId(app.propertyId());
     self.selectedLinkPermit("");
@@ -69,6 +48,17 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
+
+    self.tempLinkPermitDataForInit = [];
+
+    var data = app.linkPermitData();
+    if (_.size(data)) {
+      self.tempLinkPermitDataForInit = _.reduce(data,
+          function(memo, linkData){
+        memo.push(linkData.id());
+        return memo;
+      }, []);
+    }
 
     getAppMatchesForLinkPermitsSelect(app.id());
   };
@@ -89,14 +79,12 @@ LUPAPISTE.AddLinkPermitModel = function() {
     return false;
   };
 
-  self.removeSelectedLinkPermit = function(appId) {
-    ajax.command("remove-link-permit-by-app-id", {id: appId})
+  self.removeSelectedLinkPermit = function(appId, linkPermitId) {
+    ajax.command("remove-link-permit-by-app-id", {id: appId, linkPermitId: linkPermitId})
     .processing(self.processing)
     .pending(self.pending)
     .success(function(data) {
       self.errorMessage(null);
-      self.tempLinkPermitIdForInit = "";
-      self.tempLinkPermitTypeForInit = "";
       self.selectedLinkPermit("");
       self.kuntalupatunnus("");
       repository.load(appId);

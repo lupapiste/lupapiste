@@ -127,23 +127,21 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
-(defn- make-link-permit-by-app-id-query [id]
-  {:link {$in [id]}
-   (keyword (str id ".type")) "application"})
-
-;; TODO: Muuta tama tukemaan montaa viitelupaa?
 (defn- enrich-with-link-permit-data [app]
-  (let [query (make-link-permit-by-app-id-query (:id app))
-        resp (mongo/select :app-links query)]
-
+  (let [resp (mongo/select :app-links {:link {$in [(:id app)]}
+;; **** TODO: Ota tama pois, jos haluat listaan mukaan myos tahan lupaan viittaavat luvat. ****
+                                       (keyword (str (:id app) ".type")) "application"
+                                       })]
     (if (seq resp)
       ;; Link permit data was found
-      (let [link-data (first resp)
-            link-array (:link link-data)
-            app-index (.indexOf link-array (:id app))
-            link-permit-id (link-array (if (= 0 app-index) 1 0))
-            link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-        (assoc app :linkPermitData {:id link-permit-id :type link-permit-type}))
+      (let [convert-fn (fn [link-data]
+                         (let [link-array (:link link-data)
+                               app-index (.indexOf link-array (:id app))
+                               link-permit-id (link-array (if (= 0 app-index) 1 0))
+                               link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+                           {:id link-permit-id :type link-permit-type}))]
+        (assoc app :linkPermitData
+          (into [] (map convert-fn resp))))
       ;; No link permit data found
       (assoc app :linkPermitData nil))))
 
@@ -707,15 +705,18 @@
 
     (ok :app-links final-results)))
 
+(defn- make-mongo-id-for-link-permit [app-id link-permit-id]
+  (if (<= (compare app-id link-permit-id) 0)
+    (str app-id "|" link-permit-id)
+    (str link-permit-id "|" app-id)))
+
 (defcommand add-link-permit
   {:parameters [id linkPermitId propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
-  (let [db-id (if (<= (compare id linkPermitId) 0)
-             (str id "|" linkPermitId)
-             (str linkPermitId "|" id))]
+  (let [db-id (make-mongo-id-for-link-permit id linkPermitId)]
     (mongo/update-by-id :app-links db-id
       {:_id db-id
        :link [id linkPermitId]
@@ -729,14 +730,13 @@
       :upsert true)))
 
 (defcommand remove-link-permit-by-app-id
-  {:parameters [id]
+  {:parameters [id linkPermitId]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]}
   [{application :application}]
-  (let [query (make-link-permit-by-app-id-query id)]
-    (if (mongo/remove-many :app-links query)
-      (ok)
-      (fail :error.unknown))))
+  (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
+    (ok)
+    (fail :error.unknown)))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

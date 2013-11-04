@@ -99,19 +99,17 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
-          <!-- ko if: $root.application.linkPermitData() && $root.application.linkPermitData().id -->
           <div data-bind="with: linkPermitData">
-            <p data-bind="ltext: 'application.linkPermit'"></p>
-            <span class="application_summary_text"
-                  data-bind="text: $data.id,
-                             attr: {'data-test-link': $data.id}"
-                  data-test-id="test-application-link-permit">
+            <p data-bind="ltext: 'application.linkPermits'"></p>
+            <span class="application_summary_text" data-bind="foreach: $data">
+                <span data-bind="text: $data.id, attr: {'data-test-link': $data.id}"
+                      data-test-id="test-application-link-permit">
+                </span>
+              <a data-bind="ltext: 'application.linkPermitRemoveSelected',
+                            click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                 href="#" class="remove-link-permit"></a>
             </span>
-            <a data-bind="ltext: 'application.linkPermitRemoveSelected',
-                          click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id())}"
-               href="#" class="remove-link-permit"></a>
           </div>
-          <!-- /ko -->
 
         </div>
 
@@ -279,19 +277,19 @@
           <p data-bind="lhtml: 'application.attachmentsDesc'" class="tab-info"></p>
 
           <div class="attachment-legend">
-            <span class="ok icon"></span> 
-            <span data-bind="ltext: 'ok.title'"></span> 
+            <span class="ok icon"></span>
+            <span data-bind="ltext: 'ok.title'"></span>
           </div>
           <div class="attachment-legend">
-            <span class="new icon"></span> 
-            <span data-bind="ltext: 'new.title'"></span> 
+            <span class="new icon"></span>
+            <span data-bind="ltext: 'new.title'"></span>
           </div>
           <div class="attachment-legend">
-            <span class="missing icon"></span> 
-            <span data-bind="ltext: 'missing.title'"></span> 
+            <span class="missing icon"></span>
+            <span data-bind="ltext: 'missing.title'"></span>
           </div>
 
-          
+
           <div class="tab-wrapper">
             <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
 
