@@ -1,5 +1,6 @@
 (ns lupapalvelu.action-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.env :as env]
             [lupapalvelu.core :refer :all]
@@ -24,7 +25,7 @@
                                                           :oldPassword "*****"
                                                           :newPassword "*****"}}))
 
-(def has-required-role #'lupapalvelu.action/has-required-role)
+(testable-privates lupapalvelu.action has-required-role)
 
 (facts "Test has-required-role"
   (fact (has-required-role {:user {:role "foo"}} {:roles [:foo :bar]}) => truthy)

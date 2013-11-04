@@ -8,7 +8,8 @@
             [sade.util :refer [contains-value?]]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 ;;
 ;; Facts
@@ -515,7 +516,7 @@
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
-(def get-handler #'lupapalvelu.document.canonical-common/get-handler)
+(testable-privates lupapalvelu.document.canonical-common get-handler)
 
 (facts "Handler is sonja"
   (let [handler (get-handler application)
@@ -524,15 +525,15 @@
     (fact "etunimi" (:etunimi name) => "Sonja")
     (fact "sukunimi" (:sukunimi name) => "Sibbo")))
 
-(def get-actions #'lupapalvelu.document.rakennuslupa_canonical/get-operations)
+(testable-privates lupapalvelu.document.rakennuslupa_canonical get-operations)
 
 (facts "Toimenpiteet"
   (let [documents (by-type (:documents application))
-        actions (get-actions documents application)]
+        actions (get-operations documents application)]
     ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)))
 
-(def get-huoneisto-data #'lupapalvelu.document.rakennuslupa_canonical/get-huoneisto-data)
+(testable-privates lupapalvelu.document.rakennuslupa_canonical get-huoneisto-data)
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
@@ -565,7 +566,7 @@
     (fact "h2 varusteet: lamminvesiKytkin" (-> h2 :varusteet :lamminvesiKytkin) => true)
     (fact "h2 huoneistotunnus" (:huoneistotunnus h2) => falsey)))
 
-(def get-rakennus #'lupapalvelu.document.rakennuslupa_canonical/get-rakennus)
+(testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
@@ -682,8 +683,7 @@
 
 
 
-
-(def get-viitelupatieto #'lupapalvelu.document.rakennuslupa_canonical/get-viitelupatieto)
+(testable-privates lupapalvelu.document.rakennuslupa_canonical get-viitelupatieto)
 
 (fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi") => truthy
