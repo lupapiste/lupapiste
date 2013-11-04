@@ -238,6 +238,7 @@
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
    :roles      [:applicant :authority]
+   :notified   true
    :on-success (notify "invite")
    :verified   true}
   [{:keys [created user application]}]
@@ -565,6 +566,7 @@
 (defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
+   :notified   true ; OIR
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
@@ -802,6 +804,7 @@
   {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
+   :notified   true
    :on-success (notify "verdict")
    :roles      [:authority]}
   [{:keys [created] :as command}]
@@ -856,6 +859,7 @@
    :parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
+   :notified   true
    :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
