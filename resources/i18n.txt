@@ -1,0 +1,22 @@
+operations.tree.Tyonjohtaja: Työnjohtajan nimeäminen
+operations.tyonjohtaja: Työnjohtajan nimeäminen
+operations.tyonjohtaja.desc: Hankkeesi vaatii luvan. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa kunnan käytännöistä.<br><br><i>Tarvitset hankkeellesi pätevän pääsuunnittelijan, jonka tehtävänä on huolehtia hankkeeseen liittyvästä, ammattilaisen osaamista vaativasta asioinnista. </i>Pääsuunnittelijan kelpoisuusvaatimukset riippuvat hankkeesi vaativuudesta.<br><br> Jos hankkeessasi poiketaan rakennusjärjestyksestä, kaavamääräyksistä tai rakentaminen tapahtuu asemakaava-alueen ulkopuolella ranta-alueella, tulee sinun hakea ensin lupaa poikkeamiselle. Poikkeamiseen vaaditaan aina erityinen syy. Suunnittelutarvealueille lupaa haettaessa sinun tulee ensin hakea suunnittelutarveratkaisua. Asiointi tehdään kunnan kanssa.<br><br>Voit kysyä pääsuunnittelijavaatimuksista, poikkeamisista ja muista hankkeeseesi liittyvistä asioista kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.<br><br>Lähetämme sinulle tiedon saapuneesta vastauksesta sähköpostiviestin välityksellä.
+application.linkPermit: Viitelupa
+application.addLinkPermit: Lisää viitelupa
+application.linkPermitRemoveSelected: Poista
+linkPermit.dialog.header: Viitelupa
+linkPermit.dialog.helpParagraph: Jos olet hakenut aikaisemmin lupaa, joka liittyy tähän lupahakemukseen, voit siirtää sen viiteluvaksi.<br>Valitse lupa omista luvistasi tai kirjoita lupatunnus tekstikenttään.
+linkPermit.dialog.choosePermit: Valitse lupa
+linkPermit.dialog.or: TAI
+linkPermit.dialog.kuntalupatunnus: Kuntalupatunnus
+linkPermit.dialog.continue: Jatka
+linkPermit.dialog.choosePermitPlaceholder: Valitse viitelupa...
+error.link-permit-already-added: Tämä viitelupa on lisätty jo aiemmin
+error.link-permit-removal-failed: Viiteluvan poistaminen epäonnistui
+
+new.title: Suunnitelma on päivitetty
+missing.title: Suunnitelmaa ei ole liitetty tai viranomainen on merkinnyt sen puutteelliseksi
+ok.title: Viranomainen on alustavasti hyväksynyt suunnitelman
+
+info.title: Hakemuksella muuttuneita tietoja
+conversation.title: Hakemuksella uusia viestejä keskustelussa

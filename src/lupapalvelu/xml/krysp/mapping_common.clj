@@ -164,10 +164,12 @@
            {:tag :tila}
            {:tag :kasittelija :child [henkilo]}]})
 
-(def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :muuTunnustieto
+(def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :kuntalupatunnus}
+                                                    {:tag :muuTunnustieto
                                                      :child [{:tag :MuuTunnus :child [{:tag :tunnus}
                                                                                       {:tag :sovellus}]}]}
-                                                    {:tag :saapumisPvm}]})
+                                                    {:tag :saapumisPvm}
+                                                    {:tag :viitaus}]})
 
 (def toimituksenTiedot [{:tag :aineistonnimi :ns "yht"}
                         {:tag :aineistotoimittaja :ns "yht"}

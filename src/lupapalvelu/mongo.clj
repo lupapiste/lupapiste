@@ -100,11 +100,13 @@
 
 (defn remove
   "Removes documents by id."
-  [collection id] (mc/remove collection {:_id id}))
+  [collection id]
+  (.ok (.getLastError (mc/remove collection {:_id id}))))
 
 (defn remove-many
-  "Removes all documents matching query."
-  [collection query] (mc/remove collection query))
+  "Removes all documents matching query. Returns the success status."
+  [collection query]
+  (.ok (.getLastError (mc/remove collection query))))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input id)

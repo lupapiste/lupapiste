@@ -14,6 +14,7 @@
             [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -126,13 +127,36 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
+(defn- make-link-permit-by-app-id-query [id]
+  {:link {$in [id]}
+   (keyword (str id ".type")) "application"})
+
+(defn- enrich-with-link-permit-data [app]
+  (let [query (make-link-permit-by-app-id-query (:id app))
+        link-data (first (mongo/select :app-links query))
+        link-array (:link link-data)]
+    (assoc app :linkPermitData
+      (if (seq link-array)
+        ;; Link found
+        (let [app-index (.indexOf link-array (:id app))
+              link-permit-index (if (= 0 app-index) 1 0)
+              link-permit-id (link-array link-permit-index)
+              link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+          {:id link-permit-id :type link-permit-type})
+        ;; No link found
+        nil))))
+
 ;;
 ;; Query application:
 ;;
 
 (defn- app-post-processor [user]
-  (comp without-system-keys (partial with-meta-fields user)))
+  (comp
+    without-system-keys
+    (partial with-meta-fields user)
+    (partial enrich-with-link-permit-data)))
 
+;; TODO: Mista tata kutsutaan?
 (defquery applications {:authenticated true :verified true} [{user :user}]
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
@@ -653,6 +677,96 @@
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
+
+
+;  KasittelynTilaType/Tilamuutos
+;  RakennusvalvontaAsiaType/kayttotapaus
+;  OsapuoletType/Osapuolet/osapuolitieto/Osapuoli
+;    - Hakija
+;  RakennusvalvontaAsiaType/asianTiedot/Asiantiedot/rakennusvalvontaasianKuvaus
+;  LuvanTunnisteTiedotType/LupaTunnus
+;    - viittaus
+;    - kuntalupatunnus
+;    - muuTunnustieto
+;  TyonjohtajaType
+;    - Tyonjohtajan tiedot + hetu
+;    - tyonjohtajaHakemusKytkin
+;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
+
+(defquery app-matches-for-link-permits
+  {:parameters [id]
+   :verified   true
+   :roles      [:applicant :authority]}
+  [{{:keys [propertyId]} :application user :user :as command}]
+  (let [results (mongo/select :applications
+                  {:auth.id (:id user)}
+                  {:_id 1 :permitType 1 :address 1 :propertyId 1})
+
+        filtered-results (filter #(not (= id (:id %))) results)
+
+        enriched-results (map (fn [r]
+                                (assoc r :text
+                                  (str
+                                    (:address r) ", "
+                                    (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
+                                    (:id r))))
+                           filtered-results)
+
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (into [] (filter same-property-id-fn enriched-results))
+        without-same-property-id (into [] (filter (comp not same-property-id-fn) enriched-results))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+
+        final-results (map (fn [r]
+                             (-> r
+                               (dissoc :address)
+                               (dissoc :permitType)
+                               (dissoc :propertyId)))
+                        organized-results)]
+
+    (ok :app-links final-results)))
+
+(defquery link-permits-by-id
+  {:parameters [id]
+   :roles      [:applicant :authority]}
+  [_]
+  (let [query (make-link-permit-by-app-id-query id)]
+    (ok :app-links (mongo/select :app-links query))))
+
+(defn- remove-link-permit [app-id]
+  (let [query (make-link-permit-by-app-id-query app-id)]
+    (mongo/remove-many :app-links query)))
+
+(defcommand add-link-permit
+  {:parameters [id linkPermitId propertyId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+  [{application :application}]
+  (try
+    (remove-link-permit id)
+    (mongo/insert :app-links {:_id (if (<= (compare id linkPermitId) 0)
+                                     (str id "|" linkPermitId)
+                                     (str linkPermitId "|" id))
+                              :link [id linkPermitId]
+                              (keyword id) {:type "application"
+                                            :apptype (-> application :operations first :name)
+                                            :propertyId propertyId}
+                              (keyword linkPermitId) {:type "linkpermit"
+                                                      :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
+                                                                        "lupapistetunnus"
+                                                                        "kuntalupatunnus")}})
+    (catch com.mongodb.MongoException$DuplicateKey e
+        (warn e "Duplicate key detected when inserting new link permit")
+        (throw (IllegalArgumentException. "error.link-permit-already-added")))))
+
+(defcommand remove-link-permit-by-app-id
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]}
+  [{application :application}]
+  (if (remove-link-permit id) (ok) (fail :error.unknown)))
+
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
   (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
