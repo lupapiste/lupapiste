@@ -155,11 +155,7 @@
   (comp
     without-system-keys
     (partial with-meta-fields user)
-    (partial enrich-with-link-permit-data)))
-
-;; TODO: Mista tata kutsutaan?
-(defquery applications {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
+    enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
