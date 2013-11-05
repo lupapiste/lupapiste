@@ -29,7 +29,27 @@
               data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'"
               id="phone" type="text" class="form-input"></input>
           </div>
+
           
+          <div data-bind="if: features.enabled('architect-info')">
+            <div class="form-entry feature">
+              <label
+                data-bind="ltext: 'userinfo.architect.company.name'"
+                for="architect.company.name" class="form-label"></label>
+              <input data-bind="value: companyName"
+                id="architect.company.name" type="text"
+                class="form-input"></input>
+            </div>
+            <div class="form-entry feature">
+              <label
+                data-bind="ltext: 'userinfo.architect.company.id'"
+                for="architect.company.id" class="form-label"></label>
+              <input data-bind="value: companyId"
+                id="architect.company.id" type="text"
+                class="form-input"></input>
+            </div>
+          </div>
+                    
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.street'" for="street"
               class="form-label"></label> <input
@@ -50,23 +70,6 @@
           </div>
           
           <div data-bind="if: features.enabled('architect-info')">
-            <div class="form-entry feature">
-              <label
-                data-bind="ltext: 'userinfo.architect.company.name'"
-                for="architect.company.name" class="form-label"></label>
-              <input data-bind="value: companyName"
-                id="architect.company.name" type="text"
-                class="form-input"></input>
-            </div>
-            <div class="form-entry feature">
-              <label
-                data-bind="ltext: 'userinfo.architect.company.id'"
-                for="architect.company.id" class="form-label"></label>
-              <input data-bind="value: companyId"
-                id="architect.company.id" type="text"
-                class="form-input"></input>
-            </div>
-
             <div class="form-entry architect-toggle feature">
               <input data-bind="checked: architect" id="architect"
                 type="checkbox" class="form-input"></input> <label
