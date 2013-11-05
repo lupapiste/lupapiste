@@ -39,7 +39,7 @@
       poikkeamisasia-path
       {:kasittelynTilatieto (get-state application)
        :kuntakoodi (:municipality application)
-       :luvanTunnistetiedot (lupatunnus application)
+       :luvanTunnistetiedot (lupatunnus (:id application))
        :osapuolettieto (osapuolet documents)
        :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
        :toimenpidetieto (get-toimenpiteet (let [rakennushanke (:rakennushanke documents)

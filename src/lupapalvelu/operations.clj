@@ -148,12 +148,14 @@
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
+                                      ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                       :required (conj yleiset-alueet-common-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
                                       :attachments attachment/attachment-types-YA})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
+                                       ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                        :required (conj yleiset-alueet-common-schemas
                                                    "sijoituslupa-sijoituksen-tarkoitus")
                                        :attachments attachment/attachment-types-YA})
@@ -161,7 +163,7 @@
 (def ya-operations
   {:ya-kaivuulupa   {:schema "tyomaastaVastaava"
                      :permit-type "YA"
-                     :schema-data [[["_selected" :value] "yritys"]]
+                     :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                      :required (conj yleiset-alueet-common-schemas
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
@@ -340,9 +342,9 @@
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []}
 
-     :tyonjohtaja                 {:schema "tyonjohtaja"
+     :tyonjohtaja                 {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["hankkeen-kuvaus"]
+                                   :required ["tyonjohtaja" ]
                                    :attachments []}
      }
     ya-operations))

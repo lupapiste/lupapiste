@@ -558,7 +558,12 @@
 
 (defschemas
   1
-  [{:info {:name "hankkeen-kuvaus"
+  [{:info {:name "hankkeen-kuvaus-minimum"
+           :approvable true
+           :order 1}
+    :body [kuvaus]}
+
+   {:info {:name "hankkeen-kuvaus"
            :approvable true
            :order 1}
     :body [kuvaus
