@@ -4,8 +4,8 @@ var users = (function() {
   function toLoc(data, type, row) { return loc(data); }
   function toActive(data, type, row) { return loc(["users.data.enabled", data]); }
   function toOrgs(data, type, row) { return data ? data.join(", ") : ""; }
-    
-
+  function rowCreated(row, data) { $(row).attr("data-user-email", data[0]); }
+  
   function UsersModel(component, opts) {
     var self = this;
     
@@ -33,19 +33,16 @@ var users = (function() {
       search:         !opts.hideSearch
     };
 
-    self.ops = function(user) {
-      return _.filter(opts.ops || [], function(op) { return op.showFor(user); });
-    };
-  
     self.toOps = function(td, sData, oData, iRow, iCol) {
       var user = oData.user,
-          ops = _.filter(opts.ops || [], function(op) { return op.showFor(user); }),
           td = $(td);
-      _.each(ops, function(op) {
-        td.append($("<a>")
-          .attr("href", "#")
-          .attr("data-op", op.name)
-          .text("[" + loc("users.op." + op.name) + "]"));
+      _.each(opts.ops, function(op) {
+        if (op.showFor(user)) {
+          td.append($("<a>")
+            .attr("href", "#")
+            .attr("data-op", op.name)
+            .text("[" + loc("users.op." + op.name) + "]"));
+        }
       });
     };
     
@@ -56,7 +53,7 @@ var users = (function() {
               2: user.role,
               3: user.organizations ? user.organizations : [],
               4: user.enabled,
-              5: ""}; // col 5 will be set by toOps 
+              5: ""}; // column 5 will be set by toOps 
     };
     
     self.processResults = function(r) {
@@ -78,10 +75,7 @@ var users = (function() {
         .call();
     };
 
-    self.rowCreated = function(row, data) {
-      $(row).attr("data-user-email", data[0]);
-    };
-    
+    self.redraw = function() { self.dataTable.fnDraw(true); };
     self.redrawCallback = function(redraw) { if (redraw) self.redraw(); };
     
     self.table$.click(function(e) {
@@ -118,11 +112,9 @@ var users = (function() {
                          sInfo:         loc("users.table.info"),
                          sInfoFiltered: ""},
       fnServerData: self.fetch,
-      fnCreatedRow: self.rowCreated
+      fnCreatedRow: rowCreated
     });
 
-    self.redraw = function() { self.dataTable.fnDraw(true); };
-    
     _.each(self.filters, function(o) { o.subscribe(_.throttle(self.redraw, 600)); });
 
     component.applyBindings(self);
