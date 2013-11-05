@@ -658,3 +658,31 @@
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
+
+
+(fl/facts* "Canonical model for aloitusilmoitus is correct"
+  (let [canonical (aloitusilmoitus-canonical (assoc application :state "verdictGiven") "sv" 1354532324658 "12244")
+        Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+        RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+        kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+
+        luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        tunnus (:tunnus MuuTunnus) => "50bc85e4ea3e790c9ff7cdb0"
+        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+        katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+        Katselmus (:Katselmus katselmustieto) => truthy
+        rakennustunnus (:rakennustunnus Katselmus) => truthy
+        rakennusnumero (:rakennusnro rakennustunnus) => "12244"
+        kiinttun (:kiinttun rakennustunnus) => "21111111111111"
+        pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
+        katselmuksenLaji (:katselmuksenLaji Katselmus)
+        tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
+        kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]))

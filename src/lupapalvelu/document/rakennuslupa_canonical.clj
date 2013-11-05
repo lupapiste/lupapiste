@@ -94,16 +94,16 @@
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (cond (-> toimenpide :manuaalinen_rakennusnro :value)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
-                                                     :jarjestysnumero nil
-                                                    :kiinttun (:propertyId application)}}
-                                     (-> toimenpide :rakennusnro :value)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
-                                                     :jarjestysnumero nil
-                                                     :kiinttun (:propertyId application)}}
-                                     :default
-                                       {:rakennustunnus {:jarjestysnumero nil
-                                                         :kiinttun (:propertyId application)}})
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 (-> toimenpide :rakennusnro :value)
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 :default
+                                 {:rakennustunnus {:jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
@@ -233,3 +233,23 @@
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] toimenpiteet)))
+
+(defn aloitusilmoitus-canonical [application lang started building-id]
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
+        canonical {:Rakennusvalvonta
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :rakennusvalvontaAsiatieto
+                    {:RakennusvalvontaAsia
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus application)
+                      :katselmustieto {:Katselmus (merge {:pitoPvm (to-xml-date started)
+                                                          :katselmuksenLaji "ei tiedossa"
+                                                          :tarkastuksenTaiKatselmuksenNimi "Aloitusilmoitus"}
+                                                         (when building-id {:rakennustunnus {:rakennusnro building-id
+                                                                                             :kiinttun (:propertyId application)}}))}
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :kayttotapaus "Aloitusilmoitus"
+                      }}}}]
+    canonical))

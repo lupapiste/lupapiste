@@ -266,6 +266,10 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id]
+  (let [model {}])
+  )
+
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
