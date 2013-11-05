@@ -110,8 +110,9 @@
            :statements.$.given (now)
            :statements.$.text text}})
   (let [text (if (statement-given? application statementId)
-                 "Hakemuksen lausuntoa on p\u00e4ivitetty."
+                 "Hakemuksen lausuntoa on p\u00e4ivitetty." ; TODO localize?
                  "Hakemukselle lis\u00e4tty lausunto.")]
+    ; FIXME combine mongo writes
     (executed "add-comment"
       (-> command
         (assoc :data {:id id

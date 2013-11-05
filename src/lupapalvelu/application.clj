@@ -431,6 +431,7 @@
       (let [application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
             organization (mongo/by-id :organizations (:organization application))]
+        ; FIXME combine mongo writes
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
         (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)

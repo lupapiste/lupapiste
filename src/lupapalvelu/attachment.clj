@@ -412,6 +412,7 @@
       (fail! (:text validation-error))))
 
   (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+    ; FIXME try to combine mongo writes
     (executed "add-comment"
       (-> command
         (assoc :data {:id id
