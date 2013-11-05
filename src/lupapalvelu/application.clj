@@ -128,22 +128,30 @@
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
 (defn- enrich-with-link-permit-data [app]
-  (let [resp (mongo/select :app-links {:link {$in [(:id app)]}
-;; **** TODO: Ota tama pois, jos haluat listaan mukaan myos tahan lupaan viittaavat luvat. ****
-                                       (keyword (str (:id app) ".type")) "application"
-                                       })]
+  (let [app-id (:id app)
+        resp (mongo/select :app-links {:link {$in [app-id]}})]
     (if (seq resp)
       ;; Link permit data was found
       (let [convert-fn (fn [link-data]
                          (let [link-array (:link link-data)
-                               app-index (.indexOf link-array (:id app))
+                               app-index (.indexOf link-array app-id)
                                link-permit-id (link-array (if (= 0 app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-                           {:id link-permit-id :type link-permit-type}))]
-        (assoc app :linkPermitData
-          (into [] (map convert-fn resp))))
+                           {:id link-permit-id :type link-permit-type}))
+            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
+            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
+
+        (-> app
+          (assoc :linkPermitData (if (seq our-link-permits)
+                                   (into [] (map convert-fn our-link-permits))
+                                   nil))
+          (assoc :appsLinkingToUs (if (seq apps-linking-to-us)
+                                    (into [] (map convert-fn apps-linking-to-us))
+                                    nil))))
       ;; No link permit data found
-      (assoc app :linkPermitData nil))))
+      (-> app
+        (assoc :linkPermitData nil)
+        (assoc :appsLinkingToUs nil)))))
 
 ;;
 ;; Query application:

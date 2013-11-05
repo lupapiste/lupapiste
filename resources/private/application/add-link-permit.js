@@ -81,17 +81,22 @@ LUPAPISTE.AddLinkPermitModel = function() {
 
   self.removeSelectedLinkPermit = function(appId, linkPermitId) {
     ajax.command("remove-link-permit-by-app-id", {id: appId, linkPermitId: linkPermitId})
-    .processing(self.processing)
-    .pending(self.pending)
-    .success(function(data) {
-      self.errorMessage(null);
-      self.selectedLinkPermit("");
-      self.kuntalupatunnus("");
-      repository.load(appId);
-    })
-    .error(self.onError)
-    .call();
-  return false;
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(data) {
+        self.errorMessage(null);
+        self.selectedLinkPermit("");
+        self.kuntalupatunnus("");
+        repository.load(appId);
+      })
+      .error(self.onError)
+      .call();
+    return false;
+  };
+
+  self.followAppLink = function(linkId) {
+    window.location.hash = "#!/application/" + linkId;
+    return false;
   };
 
   //Open the dialog
