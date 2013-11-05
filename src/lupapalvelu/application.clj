@@ -475,9 +475,8 @@
                :opened    (or opened created)
                :submitted created}})
       (try
-        (mongo/insert
-          :submitted-applications
-          (assoc (dissoc application :id) :_id id))
+        (mongo/insert :submitted-applications
+          (-> (enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
         (catch com.mongodb.MongoException$DuplicateKey e
           ; This is ok. Only the first submit is saved.
             )))))
