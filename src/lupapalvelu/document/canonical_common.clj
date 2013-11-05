@@ -274,7 +274,7 @@
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
                                 :henkilo henkilo})]
-    (if (contains? suunnittelija :yritys)
+    (if (-> suunnittelija :yritys :yritysnimi :value s/blank? not)
       (assoc base-data :yritys (assoc
                                  (get-simple-yritys (:yritys suunnittelija))
                                  :postiosoite (get-simple-osoite (:osoite suunnittelija))))
