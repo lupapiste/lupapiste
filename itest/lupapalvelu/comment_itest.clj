@@ -6,7 +6,7 @@
   (let [{:keys [id state]}  (create-and-submit-application pena)
         has-html-and-plain? (fn [{body :body}] (and (:html body) (:plain body)))
         has-correct-link? (fn [email] (let [body (get-in email [:body :plain])
-                                            [_ a-id a-id-again tab]   (re-find #"(?sm)/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/conversation#!/application/([A-Za-z0-9-]+)/([a-z]+)" body)]
+                                            [href a-id a-id-again tab]   (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/conversation#!/application/([A-Za-z0-9-]+)/([a-z]+)" body)]
                                         (and (= id a-id a-id-again) (= tab "conversation"))))]
 
     (fact "...to a submitted application"
