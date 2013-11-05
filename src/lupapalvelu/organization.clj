@@ -68,10 +68,10 @@
    :roles [:admin]
    :verified true}
   [_]
-  (mongo/update :organizations {:_id organizationId} {$set {"inforequest-enabled" inforequestEnabled
-                                                            "new-application-enabled" applicationEnabled
-                                                            "open-inforequest" openInforequestEnabled
-                                                            "open-inforequest-email" openInforequestEmail}})
+  (mongo/update-by-id :organizations organizationId {$set {"inforequest-enabled" inforequestEnabled
+                                                           "new-application-enabled" applicationEnabled
+                                                           "open-inforequest" openInforequestEnabled
+                                                           "open-inforequest-email" openInforequestEmail}})
   (ok))
 
 (defcommand add-organization-link
@@ -81,7 +81,7 @@
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update-by-id :organizations organization {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
 (defcommand update-organization-link
@@ -91,7 +91,7 @@
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update-by-id :organizations organization {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
 (defcommand remove-organization-link
@@ -101,7 +101,7 @@
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update-by-id :organizations organization {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
 (defquery organizations
@@ -176,7 +176,7 @@
   ; FIXME: validate operation and attachments
   (let [organizations (:organizations user)
         organization  (first organizations)]
-    (mongo/update :organizations {:_id organization} {$set {(str "operations-attachments." operation) attachments}})
+    (mongo/update-by-id :organizations organization {$set {(str "operations-attachments." operation) attachments}})
     (ok)))
 
 (defquery legacy-system
@@ -195,7 +195,7 @@
   [{{:keys [organizations] :as user} :user}]
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
-      (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
+      (mongo/update-by-id :organizations organization {$set {:legacy legacy}})
       (fail :error.legacy_is_dead))))
 
 ;;

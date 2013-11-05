@@ -1,11 +1,12 @@
 (ns lupapalvelu.attachment-test
-  (:use [lupapalvelu.attachment]
-        [clojure.test]
-        [midje.sweet])
   (:require [clojure.string :as s]
             [monger.core :as monger]
             [lupapalvelu.core :as core]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.attachment :refer :all]
+            [clojure.test :refer :all]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -33,7 +34,7 @@
   (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
 
-(def next-attachment-version #'lupapalvelu.attachment/next-attachment-version)
+(testable-privates lupapalvelu.attachment next-attachment-version)
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
@@ -41,7 +42,7 @@
   (fact (next-attachment-version nil {:role :authority})  => {:major 0 :minor 1})
   (fact (next-attachment-version nil {:role :dude})       => {:major 1 :minor 0}))
 
-(def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
+(testable-privates lupapalvelu.attachment allowed-attachment-type-for?)
 
 (facts "Facts about allowed-attachment-type-for?"
   (let [allowed-types [["a" ["1" "2"]] ["b" ["3" "4"]]]]

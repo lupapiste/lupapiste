@@ -48,8 +48,8 @@
 
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
-  [collection id data]
-  (mc/update-by-id collection id data)
+  [collection id data & opts]
+  (apply mc/update-by-id collection id data opts)
   nil)
 
 (defn update-by-query
@@ -264,7 +264,8 @@
   (mc/ensure-index :vetuma {:sessionid 1})
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
-  (mc/ensure-index :open-inforequest-token {:application-id 1}))
+  (mc/ensure-index :open-inforequest-token {:application-id 1})
+  (mc/ensure-index :app-links {:link 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

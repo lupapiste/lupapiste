@@ -84,8 +84,8 @@
                                              :given     nil
                                              :status    nil})
                 statements    (map ->statement persons)]
-            (mongo/update :applications {:_id id} {$pushAll {:statements statements
-                                                             :auth unique-writers}})
+            (mongo/update-by-id :applications id {$pushAll {:statements statements
+                                                            :auth unique-writers}})
             (notifications/send-on-request-for-statement! persons application user (env/value :host))))))))
 
 (defcommand "delete-statement"
@@ -93,7 +93,7 @@
    :states      [:draft :info :open :submitted :complement-needed]
    :roles      [:authority]}
   [{{:keys [id statementId]} :data}]
-  (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
+  (mongo/update-by-id :applications id {$pull {:statements {:id statementId}}}))
 
 (defcommand "give-statement"
   {:parameters  [:id :statementId :status :text]

@@ -1,8 +1,8 @@
 (ns lupapalvelu.web-test
-  (:require [lupapalvelu.core])
-  (:use [lupapalvelu.web]
-        [midje.sweet]
-        [midje.util :only [testable-privates]])
+  (:require [lupapalvelu.core :refer :all]
+            [lupapalvelu.web :refer :all]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]])
   (:import [org.apache.commons.io IOUtils]))
 
 (testable-privates lupapalvelu.web parse ->hashbang)

@@ -1,14 +1,13 @@
 (ns sade.email-test
   (:require [sade.email :refer :all]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
             [postal.core :as postal]
             [clojure.java.io :as io]))
 
 (facts "Facts about sending emails"
   ; Need some body:
   (send-mail ...to... ...subject...) => (throws AssertionError)
-  
+
   ; Send plain text only:
   (send-mail ...to... ...subject... :plain "plain text") => nil
     (provided (deliver-email ...to... ...subject... [{:type "text/plain; charset=utf-8" :content "plain text"}]) => nil)
@@ -16,11 +15,11 @@
   ; Send html only:
   (send-mail ...to... ...subject... :html "html text") => nil
     (provided (deliver-email ...to... ...subject... [{:type "text/html; charset=utf-8" :content "html text"}]) => nil)
-    
+
   ; Send both plain and html body, content is Multi-Part/alternative, and plain text is first:
   (send-mail ...to... ...subject... :plain "plain text" :html "html text") => nil
     (provided (deliver-email ...to... ...subject... [:alternative {:type "text/plain; charset=utf-8" :content "plain text"} {:type "text/html; charset=utf-8" :content "html text"}]) => nil)
-    
+
   ; Return error when postal returns an error:
   (send-mail ...to... ...subject... :plain "plain text") => {:error "oh noes"}
     (provided (deliver-email ...to... ...subject... irrelevant) => {:error "oh noes"}))
