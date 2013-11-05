@@ -3,7 +3,6 @@ var users = (function() {
 
   function toLoc(data, type, row) { return loc(data); }
   function toActive(data, type, row) { return loc(["users.data.enabled", data]); }
-  
   function toOrgs(data, type, row) { return data ? data.join(", ") : ""; }
   
   function addOps(td, sData, oData, iRow, iCol) {
@@ -57,7 +56,7 @@ var users = (function() {
     };
     
     self.ops = function(user) {
-      return user.enabled ? ["disable", "edit", "resetPassword"] : ["enable"];
+      return user.enabled ? ["disable", "resetPassword"] : ["enable"];
     };
     
     self.userToRow = function(user) {
@@ -90,23 +89,44 @@ var users = (function() {
     };
 
     self.rowCreated = function(row, data) {
-      $(row).attr("data-user-id", data.id);
+      $(row).attr("data-user-email", data[0]);
     };
     
     self.table$.click(function(e) {
       var target = $(e.target),
           op = target.attr("data-op"),
-          id = target.parent().parent().attr("data-user-id");
-      if (op && id) { console.log("click:", op, id); return false; }
-      return true;
+          email = target.parent().parent().attr("data-user-email");
+      if (!op || !email) return true;
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("users.op." + op + ".title"),
+          loc("users.op." + op + ".message"),
+          {title: loc("yes"), fn: function() { self["op" + _.capitalize(op)](email); }},
+          {title: loc("cancel")});
+      return false;
     });
+
+    self.opResetPassword = function(email) {
+      ajax.command("reset-password", {email: email}).call();
+    };
+
+    self.opDisable = function(email) { self.setUserEnabled(email, false); };
+    self.opEnable = function(email) { self.setUserEnabled(email, true); };
+
+    self.setUserEnabled = function(email, enabled) {
+      ajax
+        .command("set-user-enabled", {email: email, enabled: enabled})
+        .success(self.redraw)
+        .call();
+    };
     
     var config = _.clone(dataTableConfig);
     config.fnServerData = self.fetch;
     config.fnCreatedRow = self.rowCreated;
     self.dataTable = self.table$.dataTable(config);
 
-    _.each(self.filters, function(o) { o.subscribe(_.throttle(function() { self.dataTable.fnDraw(true); }, 600)); });
+    self.redraw = function() { self.dataTable.fnDraw(true); };
+    
+    _.each(self.filters, function(o) { o.subscribe(_.throttle(self.redraw, 600)); });
 
     component.applyBindings(self);
     return self;
@@ -114,7 +134,7 @@ var users = (function() {
   
   return {
     create: function(targetOrId, opts) {
-      var component = $("#users-table .component").clone();
+      var component = $("#users-templates .users-table").clone();
       var usersModel = new UsersModel(component, opts);
       (_.isString(targetOrId) ? $("#" + targetOrId) : targetOrId).append(component);
       return usersModel;

@@ -255,6 +255,21 @@
     (resp/status 200 (resp/json {:ok true}))))
 
 ;;
+;; enable/disable:
+;;
+
+(defcommand set-user-enabled
+  {:parameters    [:email :enabled]
+   :roles         [:admin]}
+  [{{:keys [email enabled]} :data}]
+  (let [email (ss/lower-case email)
+       enabled (contains? #{true "true"} enabled)]
+   (infof "%s user: email=%s" (if enabled "enable" "disable") email)
+   (if (= 1 (mongo/update-n :users {:email email} {$set {:enabled enabled}}))
+     (ok)
+     (fail :not-found))))
+
+;;
 ;; apikey:
 ;;
 

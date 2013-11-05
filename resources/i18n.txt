@@ -16,6 +16,13 @@ users.filters.enabled: Tila:
 users.filters.enabled.all: Kaikki
 users.filters.search: Hae:
 
+users.op.disable.title: Suljetaan käyttäjän tili
+users.op.disable.message: Oletko varma että haluat sulkea käyttäjän tilin?
+users.op.enable.title: Avataan käyttäjän tili
+users.op.enable.message: Oletko varma että haluat avata käyttäjän tilin?
+users.op.resetPassword.title: Salasanan resetointi
+users.op.resetPassword.message: Oletko varma että haluat lähettää käyttäjälle salasanan resetointi viestin?
+
 operations.tree.Tyonjohtaja: Työnjohtajan nimeäminen
 operations.tyonjohtaja: Työnjohtajan nimeäminen
 operations.tyonjohtaja.desc: Hankkeesi vaatii luvan. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa kunnan käytännöistä.<br><br><i>Tarvitset hankkeellesi pätevän pääsuunnittelijan, jonka tehtävänä on huolehtia hankkeeseen liittyvästä, ammattilaisen osaamista vaativasta asioinnista. </i>Pääsuunnittelijan kelpoisuusvaatimukset riippuvat hankkeesi vaativuudesta.<br><br> Jos hankkeessasi poiketaan rakennusjärjestyksestä, kaavamääräyksistä tai rakentaminen tapahtuu asemakaava-alueen ulkopuolella ranta-alueella, tulee sinun hakea ensin lupaa poikkeamiselle. Poikkeamiseen vaaditaan aina erityinen syy. Suunnittelutarvealueille lupaa haettaessa sinun tulee ensin hakea suunnittelutarveratkaisua. Asiointi tehdään kunnan kanssa.<br><br>Voit kysyä pääsuunnittelijavaatimuksista, poikkeamisista ja muista hankkeeseesi liittyvistä asioista kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.<br><br>Lähetämme sinulle tiedon saapuneesta vastauksesta sähköpostiviestin välityksellä.
