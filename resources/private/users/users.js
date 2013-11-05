@@ -26,12 +26,12 @@ var users = (function() {
     aaSorting:        [[0, "desc"]],
     sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
     iDisplayLength:   10,
-    oLanguage:        {sLengthMenu:   loc("applications.lengthMenu"),
+    oLanguage:        {sLengthMenu:   loc("users.table.lengthMenu"),
                        sProcessing:   "&nbsp;",
                        sSearch:       loc("search") + ":",
-                       sZeroRecords:  loc("applications.welcome"),
+                       sZeroRecords:  loc("users.table.zeroRecords"),
                        oPaginate:     {"sNext": loc("next"), "sPrevious": loc("previous")},
-                       sInfo:         loc("applications.results"),
+                       sInfo:         loc("users.table.info"),
                        sInfoFiltered: ""}
   };
 

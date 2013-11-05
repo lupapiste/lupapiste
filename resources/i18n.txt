@@ -4,6 +4,9 @@ users.table.role: Rooli
 users.table.organizations: Organizaatiot
 users.table.active: Tila
 users.table.actions: Toiminnot
+users.table.lengthMenu: _MENU_ käyttäjää sivulla
+users.table.zeroRecords: <div style='padding: 50px'>Antamillasi hakuehdoilla ei löytynyt yhtään käyttäjää</div>
+users.table.info: Käyttäjät _START_ – _END_ / _TOTAL_
 users.op.edit: muokkaa
 users.op.enable: avaa
 users.op.disable: sulje
