@@ -194,22 +194,19 @@
 ;; Change organization data:
 ;;
 
-(defn- authority-admin-for-organization? [{data :data caller :user}]
-  (when-not (some (partial = (:organization data)) (:organizations caller))
-    (fail :forbidden :desc (str "caller (id=" (:id caller) ") is not authorized to operate on organization " (:organization data)))))
-
 (defn- valid-organization-operation? [{data :data}]
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
 (defcommand update-user-organization
-  {:parameters       [:email :organization :operation]
+  {:parameters       [:email :operation]
    :roles            [:authorityAdmin]
-   :input-validators [valid-organization-operation? authority-admin-for-organization?]}
-  [{{:keys [email organization operation]} :data caller :user}]
-  (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
-    (ok)
-    (fail :not-found :email email)))
+   :input-validators [valid-organization-operation?]}
+  [{{:keys [email operation]} :data caller :user}]
+  (let [organization (first (:organizations caller))]
+    (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
+     (ok)
+     (fail :not-found :email email))))
 
 ;;
 ;; Change and reset password:

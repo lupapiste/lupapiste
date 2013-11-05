@@ -76,7 +76,7 @@
         organizations        (:organizations params)
         organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
-        role                 (if admin? role #_ "TODO: mask roles" role)
+        role                 (if admin? role :authority)
         enabled              (if admin? (:filter-enabled params) true)]
     (merge {}
       (when organizations       {:organizations {$in organizations}})
