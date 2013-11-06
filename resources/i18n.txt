@@ -1,4 +1,5 @@
 dummy: Tilapäinen
+ok: Ok
 
 users.table.email: email
 users.table.name: Nimi
@@ -31,6 +32,14 @@ users.op.removeFromOrg.title: Poista käyttäjä organisaatiosta
 users.op.removeFromOrg.message: Oletko varma että haluat poistaa käyttäjän organisaatiosta?
 
 auth-admin.admins: Organisaation viranomaiset:
+auth-admin.add-dialog.title: Lisää viranomainen organizaatioon
+auth-admin.add-dialog.email: Sähköposti:
+auth-admin.add-dialog.continue: Jatka...
+auth-admin.add-dialog.searching: Odota, käyttäjän tietoja haetaan...
+auth-admin.add-dialog.userAdded: Käyttäjä lisätty organisaatioon onnistuneesti.
+auth-admin.add-dialog.invitationSent: Käyttäjälle lähetetty kutsu sähköpostilla.
+
+authority-invite.title: Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi
 
 operations.tree.Tyonjohtaja: Työnjohtajan nimeäminen
 operations.tyonjohtaja: Työnjohtajan nimeäminen

@@ -108,5 +108,37 @@
     </form>
   </section>
 
+  <section class="page container" id="auth-invite">
+    <form data-bind="submit: send">
+
+      <h1 data-bind="ltext: 'setpw.title'"></h1>
+      <p data-bind="ltext: 'setpw.info'"></p>
+
+      <label data-bind="ltext: 'setpw.password.1'" class="form-label"></label>
+      <input data-bind="value: password1, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.1')}" class="form-input" type="password" autofocus="autofocus">
+      <div>
+        <span data-bind="ltext: 'setpw.quality'"></span>
+        <span data-bind="visible: passwordQuality,
+                         attr: {'class': 'setpw-quality-' + passwordQuality()},
+                         text: loc(['setpw.quality', passwordQuality()])"></span>
+      </div>
+
+      <label data-bind="ltext: 'setpw.password.2'" class="form-label"></label>
+      <input data-bind="value: password2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.2')}" class="form-input" type="password">
+      <div>
+        <span data-bind="ltext: 'setpw.notSame', visible: password2() != null && password1() != password2()"></span><span>&nbsp;</span>
+      </div>
+
+      <button data-bind="click: send, enable: ok, ltext: 'setpw.send'" class="btn btn-primary"></button>
+
+      <div data-bind="visible: success">
+        <a data-bind="ltext: 'setpw.success'" href="#!/login"></a>
+      </div>
+
+      <div data-bind="ltext: 'setpw.fail', visible: fail"></div>
+
+    </form>
+  </section>
+
 </body>
 </html>

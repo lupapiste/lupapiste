@@ -96,11 +96,12 @@
 (defn- create-new-user-entity [caller user-data]
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-      (assoc :enabled (= "true" (:enabled user-data)))
+      (select-keys [:email :username :role :firstName :lastName :personId :phone :city :street :zip :enabled :organization])
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
+        :enabled (= "true" (str (:enabled user-data)))
+        :organizations (when (:organization user-data) [(:organization user-data)])
         :private (merge {}
                    (when (:password user-data)
                      {:password (security/get-hash (:password user-data))})
@@ -203,10 +204,24 @@
    :roles            [:authorityAdmin]
    :input-validators [valid-organization-operation?]}
   [{{:keys [email operation]} :data caller :user}]
-  (let [organization (first (:organizations caller))]
-    (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
-     (ok)
-     (fail :not-found :email email))))
+  (let [email        (ss/lower-case email)
+       organization (first (:organizations caller))]
+   (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
+    (ok :operation operation)
+    (if (= operation "add")
+      (let [token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
+        (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
+        (notifications/send-invite-new-authority! email token)
+        (ok :operation "invited"))
+      (fail :not-found :email email)))))
+
+(defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
+  (infof "invitation for new authority: email=%s: processing..." email)
+  (let [caller (user/get-user-by-email caller-email)]
+    (when-not caller (fail! :not-found :desc (format "can't process invitation token for email %s, authority admin (%s) no longer exists" email caller-email)))
+    (create-new-user caller {:email email :role :authority :organization organization :password password :enabled true})
+    (infof "invitation was accepted: email=%s, organization=%s" email organization)
+    (ok)))
 
 ;;
 ;; Change and reset password:
