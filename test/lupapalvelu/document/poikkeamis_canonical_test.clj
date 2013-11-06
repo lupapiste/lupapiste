@@ -177,7 +177,9 @@
                                                            :postitoimipaikannimi {:value "Piippola"}}
                                                   :patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"}
                                                              :valmistumisvuosi {:value "2010"}
-                                                             :patevyysluokka {:value "C"}}
+                                                             :patevyysluokka {:value "C"}
+                                                             :kokemus {:value "10"}
+                                                             :fise {:value "http://www.solita.fi"}}
                                                   :userId {:value "777777777777777777000020"}
                                                   :yhteystiedot {:email {:value "pena@example.com"}
                                                                  :puhelin {:value "0102030405"}}
