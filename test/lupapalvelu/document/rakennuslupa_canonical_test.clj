@@ -63,7 +63,11 @@
                  :version 1}
    :data (merge
            suunnittelija-henkilo
-           {:patevyys {:koulutus {:value "Arkkitehti"} :patevyysluokka {:value "ei tiedossa"}}}
+           {:patevyys {:koulutus {:value "Arkkitehti"}
+                       :patevyysluokka {:value "ei tiedossa"}
+                       :valmistumisvuosi {:value "2010"}
+                       :kokemus {:value "5"}
+                       :fise {:value "http://www.ym.fi"}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
 (def ^:private suunnittelija1
@@ -71,7 +75,11 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
-                {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
+                {:patevyys {:koulutus {:value "Koulutus"}
+                            :patevyysluokka {:value "B"}
+                            :valmistumisvuosi {:value "2010"}
+                            :kokemus {:value "5"}
+                            :fise {:value "http://www.ym.fi"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def ^:private suunnittelija2
@@ -79,7 +87,11 @@
                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
-                {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
+                {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"}
+                            :patevyysluokka {:value "AA"}
+                            :valmistumisvuosi {:value "2010"}
+                            :kokemus {:value "5"}
+                            :fise {:value "http://www.ym.fi"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def ^:private suunnittelija-old-schema-LUPA-771
@@ -88,14 +100,21 @@
    :data (merge suunnittelija-henkilo
                 {:patevyys {:koulutus {:value "Koulutus"}
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
-                            :patevyysluokka {:value "B"}}})})
+                            :patevyysluokka {:value "B"}
+                            :valmistumisvuosi {:value "2010"}
+                            :kokemus {:value "5"}
+                            :fise {:value "http://www.ym.fi"}}})})
 
 (def ^:private suunnittelija-blank-role
   {:id "suunnittelija-blank-role" :schema-info {:name "suunnittelija"
                                                 :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
-                {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
+                {:patevyys {:koulutus {:value "Koulutus"}
+                            :patevyysluokka {:value "B"}
+                            :valmistumisvuosi {:value "2010"}
+                            :kokemus {:value "5"}
+                            :fise {:value "http://www.ym.fi"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def ^:private maksaja-henkilo
