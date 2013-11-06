@@ -156,12 +156,7 @@
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
                                                {:tag :tunniste}]}]}
-                             {:tag :kayttotarkoitus}
-                             {:tag :johtoselvitysviitetieto
-                              :child [{:tag :Johtoselvitysviite
-                                       :child [{:tag :vaadittuKytkin
-                                                ;:tag :tunniste
-                                                }]}]}]}]}]})
+                             {:tag :kayttotarkoitus}]}]}]})
 
 (defn- get-Liite [title link attachment type file-id]
    {:kuvaus title
