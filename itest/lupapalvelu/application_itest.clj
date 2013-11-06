@@ -257,6 +257,10 @@
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
+          (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
+          (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
+          (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
+          (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
 
