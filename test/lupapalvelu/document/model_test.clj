@@ -101,6 +101,7 @@
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
+        (apply-update [:henkilotiedot :hetu] "210281-9988")
         (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
         (apply-update [:yritys :yritysnimi] "Suunnittelu Palo")
         (apply-update [:osoite :katu] "katu")
@@ -247,6 +248,26 @@
         (apply-update [:yritys :osoite :postinumero])) => missing-required-fields?
       (-> document
         (apply-update [:yritys :osoite :postitoimipaikannimi])) => missing-required-fields?)))
+
+(fact "Rakennuksen omistaja: omistajalaji"
+  (with-timestamp some-time
+    (let [schema {:info {:name "rakennuksen-omistajat"} :body schemas/rakennuksen-omistajat}
+          document (-> (new-document schema ..now..)
+                     (apply-update [:rakennuksenOmistajat :0 :_selected] "yritys")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :yritysnimi] "Solita")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :liikeJaYhteisoTunnus] "1060155-5")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :katu] "Satakunnankatu 18 A")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :postinumero] "33720")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :osoite :postitoimipaikannimi] "Tampere")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
+                     (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo  :yhteystiedot :puhelin] "050")
+                     (apply-update [:rakennuksenOmistajat :0 :muu-omistajalaji] "jotain muuta"))]
+
+      document => (invalid-with? schema [:tip "illegal-value:required"])
+      (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "jotain muuta") => (invalid-with? schema [:warn "illegal-value:select"])
+      (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "ei tiedossa") => (valid-against? schema))))
 
 
 (fact "apply-approval"

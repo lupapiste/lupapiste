@@ -1,16 +1,17 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [me.raynes.fs :as fs]
             [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
             [sade.util :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.core :as core]
-            [lupapalvelu.mongo :as mongo]))
+            [clojure.java.io :refer :all]
+            [me.raynes.fs :as fs]
+            ))
 
 ;RakVal
 
@@ -93,35 +94,11 @@
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
 
-(def lausunto {:tag :Lausunto
-               :child [{:tag :viranomainen :ns "yht"}
-                       {:tag :pyyntoPvm :ns "yht"}
-                       {:tag :lausuntotieto :ns "yht"
-                        :child [{:tag :Lausunto
-                                 :child [{:tag :viranomainen}
-                                         {:tag :lausunto}
-                                         {:tag :liitetieto
-                                          :child [{:tag :Liite
-                                                   :child [{:tag :kuvaus :ns "yht"}
-                                                           {:tag :linkkiliitteeseen :ns "yht"}
-                                                           {:tag :muokkausHetki :ns "yht"}
-                                                           {:tag :versionumero :ns "yht"}
-                                                           {:tag :tekija :ns "yht"
-                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                    {:tag :VRKrooliKoodi}
-                                                                    mapping-common/henkilo
-                                                                    mapping-common/yritys]}
-                                                           {:tag :tyyppi :ns "yht"}]}]}
-                                         {:tag :lausuntoPvm}
-                                         {:tag :puoltotieto
-                                          :child [{:tag :Puolto
-                                                   :child [{:tag :puolto}]}]}]}]}]})
-
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta
    :ns "rakval"
    :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
+                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
                                http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
                                http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"
           :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
@@ -165,7 +142,7 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
-                             {:tag :lausuntotieto :child [lausunto]}
+                             {:tag :lausuntotieto :child [mapping-common/lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
@@ -193,7 +170,7 @@
 ;; *** TODO: Naita common fileen? ***
 ;;
 
-(defn- get-Liite [title link attachment type file-id]
+(defn get-Liite [title link attachment type file-id]
    {:kuvaus title
     :linkkiliitteeseen link
     :muokkausHetki (to-xml-datetime (:modified attachment))
@@ -201,7 +178,7 @@
     :tyyppi type
     :fileId file-id})  ;;TODO: Kysy Terolta mika tama on
 
-(defn- get-liite-for-lausunto [attachment application begin-of-link]
+(defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
@@ -209,7 +186,7 @@
         link (str begin-of-link attachment-file-name)]
     {:Liite (get-Liite title link attachment type file-id)}))
 
-(defn- get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
+(defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
                                       (fn-> :target :id keyword)
                                       (filter
@@ -220,7 +197,7 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn- get-attachments-as-canonical [application begin-of-link ]
+(defn get-attachments-as-canonical [application begin-of-link ]
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
                                     :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
@@ -232,7 +209,7 @@
                                 {:Liite (get-Liite title link attachment type file-id)})]
     (not-empty canonical-attachments)))
 
-(defn- write-attachments [attachments output-dir]
+(defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (get-in attachment [:Liite :fileId])
           attachment-file (mongo/download file-id)
@@ -244,20 +221,13 @@
                   in (content)]
         (copy in out)))))
 
-(defn- write-statement-attachments [attachments output-dir]
+(defn write-statement-attachments [attachments output-dir]
   (let [f (for [fi attachments]
             (vals fi))
         files (reduce concat (reduce concat f))]
     (write-attachments files output-dir)))
 
-(defn- write-application-pdf-versions [output-dir application submitted-application lang]
-  (let [id (:id application)
-        submitted-file (file (str output-dir "/" (mapping-common/get-submitted-filename id)))
-        current-file (file (str output-dir "/"  (mapping-common/get-current-filename id)))]
-    (ke6666/generate submitted-application lang submitted-file)
-    (ke6666/generate application lang current-file)))
-
-(defn- add-statement-attachments [canonical statement-attachments]
+(defn add-statement-attachments [canonical statement-attachments]
   (if (empty? statement-attachments)
     canonical
     (reduce (fn [c a]
@@ -269,6 +239,15 @@
                     paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
                 (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
               ) canonical statement-attachments)))
+
+
+
+(defn- write-application-pdf-versions [output-dir application submitted-application lang]
+  (let [id (:id application)
+        submitted-file (file (str output-dir "/" (mapping-common/get-submitted-filename id)))
+        current-file (file (str output-dir "/"  (mapping-common/get-current-filename id)))]
+    (ke6666/generate submitted-application lang submitted-file)
+    (ke6666/generate application lang current-file)))
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))

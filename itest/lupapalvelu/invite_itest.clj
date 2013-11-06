@@ -24,7 +24,7 @@
 
   (let [resp   (create-app mikko :municipality sonja-muni) => ok?
         id     (:id resp) => truthy
-        app    (:application (query mikko :application :id id))
+        app    (query-application mikko id)
         doc-id (:id (domain/get-document-by-name app "suunnittelija"))]
 
       (fact "Teppo must not be able to invite himself!"
@@ -77,7 +77,7 @@
 
   (let [resp  (create-app sonja :municipality sonja-muni) => ok?
         id    (:id resp) => truthy
-        app    (:application (query sonja :application :id id))
+        app    (query-application sonja id)
         doc-id (:id (domain/get-document-by-name app "suunnittelija"))]
 
     (fact "Sonja must be able to invite Teppo!"

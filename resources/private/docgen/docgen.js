@@ -19,6 +19,10 @@ var docgen = (function () {
 
     self.schema = schema;
     self.schemaName = schema.info.name;
+    self.schemaI18name = schema.info.i18name;
+    if (!self.schemaI18name) {
+        self.schemaI18name = self.schemaName;
+    }
     self.model = model;
     self.meta = meta;
     self.docId = docId;
@@ -125,7 +129,7 @@ var docgen = (function () {
     }
 
     function locKeyFromPath(pathStr) {
-      return (self.schemaName + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+      return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     }
 
     function makeLabel(type, pathStr, groupLabel) {
@@ -455,7 +459,7 @@ var docgen = (function () {
       $.each(subSchema.body, function (i, o) {
         var name = o.name;
         var option = document.createElement("option");
-        var locKey = self.schemaName + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
+        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
 
         option.value = name;
         option.appendChild(document.createTextNode(loc(locKey)));
@@ -735,7 +739,7 @@ var docgen = (function () {
           return makeElem(myModel, key);
         });
 
-        var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaName + "." + myPath.join(".") + "._append_label"));
+        var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaI18name + "." + myPath.join(".") + "._append_label"));
 
         var appender = function () {
           var parent$ = $(this.parentNode);
@@ -934,7 +938,7 @@ var docgen = (function () {
       }
       var op = self.schema.info.op;
 
-      var documentName = loc(self.schemaName + "._group_label");
+      var documentName = loc(self.schemaI18name + "._group_label");
       if (op) {
         documentName = loc(op.name + "._group_label");
       }
@@ -977,7 +981,7 @@ var docgen = (function () {
       if (op) {
         title.appendChild(document.createTextNode(loc(op.name + "._group_label")));
       } else {
-        title.appendChild(document.createTextNode(loc(self.schemaName + "._group_label")));
+        title.appendChild(document.createTextNode(loc(self.schemaI18name + "._group_label")));
       }
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);

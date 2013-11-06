@@ -151,6 +151,11 @@
    "LVI-suunnittelija" `            "erityissuunnittelija"
    "RAK-rakennesuunnittelija"       "erityissuunnittelija"
    "ARK-rakennussuunnittelija"      "rakennussuunnittelija"
+   "KVV-ty\u00F6njohtaja"           "ty\u00f6njohtaja"
+   "IV-ty\u00F6njohtaja"            "ty\u00f6njohtaja"
+   "erityisalojen ty\u00F6njohtaja" "ty\u00f6njohtaja"
+   "vastaava ty\u00F6njohtaja"      "ty\u00f6njohtaja"
+   "ty\u00F6njohtaja"               "ty\u00f6njohtaja"
    "ei tiedossa"                    "ei tiedossa"
    "Rakennuksen omistaja"           "rakennuksen omistaja"
 
@@ -159,7 +164,6 @@
    :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
    :naapuri                         "naapuri"
    :lisatietojenantaja              "lis\u00e4tietojen antaja"
-   :tyonjohtaja                     "ty\u00f6njohtaja"
    :muu                             "muu osapuoli"})
 
 (def kuntaRoolikoodit
@@ -179,7 +183,7 @@
 
 (defn- get-yhteystiedot-data [yhteystiedot]
   {:sahkopostiosoite (-> yhteystiedot :email :value)
-  :puhelin (-> yhteystiedot :puhelin :value)})
+   :puhelin (-> yhteystiedot :puhelin :value)})
 
 (defn- get-simple-yritys [yritys]
   {:nimi (-> yritys :yritysnimi :value)
@@ -223,7 +227,9 @@
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
 (defn get-osapuoli-data [osapuoli party-type]
-  (let [henkilo        (:henkilo osapuoli)
+  (let [henkilo        (if (= (-> osapuoli :_selected :value) "yritys")
+                         (get-in osapuoli [:yritys :yhteyshenkilo])
+                         (:henkilo osapuoli))
         kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
         omistajalaji   (muu-select-map
                          :muu (-> osapuoli :muu-omistajalaji :value)
@@ -237,7 +243,7 @@
     (if (= (-> osapuoli :_selected :value) "yritys")
       (merge codes
              {:yritys  (get-yritys-data (:yritys osapuoli))}
-             {:henkilo (get-yhteyshenkilo-data (get-in osapuoli [:yritys :yhteyshenkilo]))})
+             {:henkilo (get-yhteyshenkilo-data henkilo)})
       (merge codes {:henkilo (get-henkilo-data henkilo)}))))
 
 (defn get-parties-by-type [documents tag-name party-type doc-transformer]
@@ -259,6 +265,7 @@
         patevyys (:patevyys suunnittelija)
         henkilo (merge (get-name (:henkilotiedot suunnittelija))
                        {:osoite (get-simple-osoite (:osoite suunnittelija))}
+                       {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
@@ -274,19 +281,47 @@
     (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
     (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
 
+(defn- concat-tyotehtavat-to-string [selections]
+  (let [joined (clojure.string/join ","
+                 (reduce
+                   (fn [r [k v]]
+                     (if (true? (:value v))
+                       (conj r (name k))
+                       r))
+                   []
+                   (-> (dissoc selections :muuMika))))]
+    (if (-> selections :muuMika :value s/blank? not)
+      (str joined "," (-> selections :muuMika :value))
+      joined)))
+
+(defn get-tyonjohtaja-data [tyonjohtaja party-type]
+  (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))
+        patevyys (:patevyys tyonjohtaja)]
+    (conj foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
+                    :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+                    :koulutus (-> patevyys :koulutus :value)
+                    :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
+                    :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                    :kokemusvuodet (-> patevyys :kokemusvuodet :value)
+                    :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
+                    :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))
+
+(defn get-foremans [documents]
+  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
 
 (defn osapuolet [documents-by-types]
   {:Osapuolet
    {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)}})
+    :suunnittelijatieto (get-designers documents-by-types)
+    :tyonjohtajatieto (get-foremans documents-by-types)}})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val
     value))
 
 
-(defn get-bulding-places [documents application]
-  (for [doc (:rakennuspaikka documents)
+(defn get-bulding-places [docs application]
+  (for [doc docs
         :let [rakennuspaikka (:data doc)
               kiinteisto (:kiinteisto rakennuspaikka)
               id (:id doc)]]
@@ -298,7 +333,8 @@
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
                                        :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
-                                                                             :kiinteistotunnus (:propertyId application)}
+                                                                             :kiinteistotunnus (:propertyId application)
+                                                                             :rantaKytkin (true? (-> kiinteisto :rantaKytkin :value))}
                                                          (when (-> kiinteisto :maaraalaTunnus :value)
                                                            {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
 

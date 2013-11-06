@@ -336,7 +336,7 @@
   (mongo/update
     :applications
     {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified (:created created)
+    {$set {:modified created
            :attachments.$.state :ok}}))
 
 (defcommand reject-attachment
@@ -348,7 +348,7 @@
   (mongo/update
     :applications
     {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified (:created created)
+    {$set {:modified created
            :attachments.$.state :requires_user_action}}))
 
 (defcommand create-attachments

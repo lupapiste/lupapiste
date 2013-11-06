@@ -58,9 +58,9 @@
 (def ^:private operation-tree-for-YA
   {:permit-type permit/YA
    :tree ["yleisten-alueiden-luvat"
-          [["kaivuulupa" :ya-kaivuulupa]
-           ["kayttolupa"
-            [["tyomaasuojat-ja-muut-rakennelmat" :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat]
+          [["kayttolupa"
+            [["kaivuulupa" :ya-kaivuulupa]
+             ["tyomaasuojat-ja-muut-rakennelmat" :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat]
              ["mainoslaitteet-ja-opasteviitat" :ya-kayttolupa-mainostus-ja-viitoitus]
              ["muut-yleisten-alueiden-tilojen-kaytot" :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot]
              ["messujen-ja-tapahtumien-alueiden-kaytot" :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot]
@@ -107,7 +107,12 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
+(def ^:private common-schemas (let [sc ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"]]
+                                (if (env/feature? :tyonjohtaja-osapuoli)
+                                  (conj sc "tyonjohtaja")
+                                  sc)))
+
+(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka" "lisatiedot" "paasuunnittelija"])
 
 
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
@@ -316,7 +321,7 @@
                                    :attachments [:paapiirustus [:asemapiirros]]}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type "P"
-                                   :required  (conj common-schemas "suunnittelutarveratkaisun-lisaosa")
+                                   :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
                                    :attachments [:paapiirustus [:asemapiirros]]}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type "R"

@@ -23,7 +23,8 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (def ui-components
-  {:cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
+  {;; 3rd party libs
+   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]
                     :css ["jquery-ui.css"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
@@ -33,8 +34,11 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
 
+   ;; Init can also be used as a standalone lib, see web.clj
    :init         {:js [conf "hub.js" "log.js"]
                   :depends [:underscore]}
+
+   ;; Components to be included in a SPA
 
    :debug        (if (env/dev-mode?) debugjs {})
 
@@ -60,6 +64,11 @@
    :map          {:depends [:common]
                   :js ["openlayers.2.13_20130911.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
+   :mypage       {:depends [:common]
+                  :js ["mypage.js"]
+                  :html ["mypage.html"]
+                  :css ["mypage.css"]}
+
    :user-menu     {:html ["nav.html"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :screenmessages]
@@ -71,6 +80,11 @@
 
    :repository   {:depends [:common]
                   :js ["repository.js"]}
+
+   :tree         {:depends [:jquery]
+                  :js ["tree.js"]
+                  :html ["tree.html"]
+                  :css ["tree.css"]}
 
    :accordion    {:depends [:jquery]
                   :js ["accordion.js"]
@@ -113,6 +127,25 @@
                   :html ["create.html"]
                   :css ["create.css"]}
 
+   :iframe       {:depends [:common]
+                  :css ["iframe.css"]}
+
+   :login        {:depends [:common]
+                  :js      ["login.js"]}
+
+   :admins       {:js ["user.js" "users.js"]
+                  :html ["admin-user-list.html" "user-modification-dialogs.html"]}
+
+   ;; Single Page Apps and standalone components:
+   ;; (compare to auth-methods in web.clj)
+
+   :hashbang     {:depends [:common]
+                  :html ["index.html"]}
+
+   :upload       {:depends [:iframe]
+                  :js ["upload.js"]
+                  :css ["upload.css"]}
+
    :applicant    {:depends [:common :authenticated :map :applications :application :attachment
                             :statement :docgen :create :mypage :user-menu :debug]
                   :js ["applicant.js"]
@@ -129,9 +162,6 @@
                   :css ["oir.css"]
                   :html ["index.html"]}
 
-   :admins   {:js ["user.js" "users.js"]
-              :html ["admin-user-list.html" "user-modification-dialogs.html"]}
-
    :authority-admin {:depends [:common :authenticated :admins :mypage :user-menu :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
@@ -141,21 +171,6 @@
                   "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
                     "organizations.html" "fixtures.html" "features.html" "actions.html" "activations.html" "screenmessages-list.html"]}
-
-   :tree    {:depends [:jquery]
-             :js ["tree.js"]
-             :html ["tree.html"]
-             :css ["tree.css"]}
-
-   :iframe  {:depends [:common]
-             :css ["iframe.css"]}
-
-   :upload  {:depends [:iframe]
-             :js ["upload.js"]
-             :css ["upload.css"]}
-
-   :login   {:depends [:common]
-             :js      ["login.js"]}
 
    :login-frame {:depends [:login]
                  :html    ["login-frame.html"]
@@ -167,11 +182,6 @@
              :html ["index.html" "login.html"]}
 
    :oskari  {:css ["oskari.css"]}
-
-   :mypage  {:depends [:common]
-             :js ["mypage.js"]
-             :html ["mypage.html"]
-             :css ["mypage.css"]}
 
    :neighbor {:depends [:common :map :debug :docgen :debug :user-menu :screenmessages]
               :html ["neighbor-show.html" "index.html"]

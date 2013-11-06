@@ -4,7 +4,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
-            [clj-http.client :as http]
+            [sade.http :as http]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.env :as env]
@@ -509,25 +509,25 @@
             hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
         (conj new-docs hakija)))))
 
- (defn- ->location [x y]
-   {:x (util/->double x) :y (util/->double y)})
+(defn- ->location [x y]
+  {:x (util/->double x) :y (util/->double y)})
 
- (defn- make-application-id [municipality]
-   (let [year           (str (year (local-now)))
-         sequence-name  (str "applications-" municipality "-" year)
-         counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
-     (str "LP-" municipality "-" year "-" counter)))
+(defn- make-application-id [municipality]
+  (let [year           (str (year (local-now)))
+        sequence-name  (str "applications-" municipality "-" year)
+        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+    (str "LP-" municipality "-" year "-" counter)))
 
- (defn- make-op [op-name created]
-   {:id (mongo/create-id)
-    :name (keyword op-name)
-    :created created})
+(defn- make-op [op-name created]
+  {:id (mongo/create-id)
+   :name (keyword op-name)
+   :created created})
 
- (defn user-is-authority-in-organization? [user-id organization-id]
-   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
+(defn user-is-authority-in-organization? [user-id organization-id]
+  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
- (defn- operation-validator [{{operation :operation} :data}]
-   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+(defn- operation-validator [{{operation :operation} :data}]
+  (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
@@ -709,19 +709,23 @@
                            (map
                              (fn [pk]
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                 (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                       resp            (http/get url {:as :stream})
-                                       content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                       urlhash         (digest/sha1 url)
-                                       attachment-id   urlhash
-                                       attachment-type {:type-group "muut" :type-id "muu"}
-                                       target          {:type "verdict" :id urlhash}
-                                       locked          true
-                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                   ; If the attachment-id, i.e., hash of the URL matches
-                                   ; any old attachment, a new version will be added
-                                   (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
-                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                 (do
+                                   (debug "Download" url)
+                                   (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                        resp            (http/get url :as :stream :throw-exceptions false)
+                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                        urlhash         (digest/sha1 url)
+                                        attachment-id   urlhash
+                                        attachment-type {:type-group "muut" :type-id "muu"}
+                                        target          {:type "verdict" :id urlhash}
+                                        locked          true
+                                        attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                     ; If the attachment-id, i.e., hash of the URL matches
+                                     ; any old attachment, a new version will be added
+                                     (if (= 200 (:status resp))
+                                       (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                       (error (str (:status resp) " - unable to download " url ": " resp)))
+                                     (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
                                  pk))
                              (:poytakirjat paatos))))
                        (:paatokset verdict))))
@@ -737,10 +741,11 @@
    :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
-    (do (update-application command
-      {$set {:verdicts verdicts-with-attachments
-             :modified created
-             :state    :verdictGiven}})
+    (do
+      (update-application command
+        {$set {:verdicts verdicts-with-attachments
+               :modified created
+               :state    :verdictGiven}})
       (ok :verdictCount (count verdicts-with-attachments)))
     (fail :info.no-verdicts-found-from-backend)))
 

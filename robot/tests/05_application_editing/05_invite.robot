@@ -86,7 +86,7 @@ Sonja (the Authority) is not allowed to invite people
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   [Teardown]  logout
 
-Mikko invites previously unknown user Oskari
+Mikko invites previously unknown user Oskari as paasuunnittelija
   Mikko logs in
   Open application  invite-app  753-416-25-25
   Open tab  parties
@@ -101,6 +101,17 @@ Mikko invites previously unknown user Oskari
   Wait until  Invite count is  1
 
 # TODO: should create new user "oskari@example.com" and make sure he has access
+
+Mikko invites previously unknown user Unto as tyonjohtaja
+  Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
+  Click by test id  application-invite-tyonjohtaja
+  Wait until  Element should be visible  invite-email
+  Input Text  invite-email  unto@example.com
+  Input Text  invite-text  Tuu mulle tyonjohtajaksi
+  Click by test id  application-invite-submit
+  Wait until  Mask is invisible
+  Wait until  Element should not be visible  invite-email
+  Wait until  Invite count is  2
 
 *** Keywords ***
 

@@ -1,7 +1,6 @@
 (ns lupapalvelu.document.rakennuslupa_canonical
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
-            [clojure.zip :as zip]
             [clojure.string :as s]
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
@@ -197,14 +196,14 @@
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
     {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
-                  :asioimiskieli (if (= lang "se")
+                  :asioimiskieli (if (= lang "sv")
                                    "ruotsi"
                                    "suomi")}}))
 
 (defn- get-asian-tiedot [documents maisematyo_documents]
   (let [asian-tiedot (:data (first documents))
-        maisematyo_kuvaukset (for [maismatyo_doc maisematyo_documents]
-                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maismatyo_doc)) ":" (-> maismatyo_doc :data :kuvaus :value )))]
+        maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
+                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc)) ":" (-> maisematyo_doc :data :kuvaus :value )))]
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
                    :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
@@ -227,7 +226,7 @@
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto (osapuolet documents)
-                      :rakennuspaikkatieto (get-bulding-places documents application)
+                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
                       :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus (get-kayttotapaus documents toimenpiteet)

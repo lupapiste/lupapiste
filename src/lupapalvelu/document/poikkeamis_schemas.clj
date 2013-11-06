@@ -4,7 +4,8 @@
 
 
 (def rakennushanke {:info {:name "rakennushanke"
-                           :order 50}
+                           :order 50
+                           :removable false}
                     :body [{:name "kaytettykerrosala" :type :group
                             :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select
@@ -89,8 +90,9 @@
                            {:name "toimenpiteet"
                             :type :group
                             :repeating true
+                            :approvable true
                             :body [{:name "kayttotarkoitus" :type :select
-                                   :body [{:name yhden-asunnon-talot}
+                                    :body [{:name yhden-asunnon-talot}
                                           {:name "012 kahden asunnon talot"}
                                           {:name "013 muut erilliset talot"}
                                           {:name "021 rivitalot"}
@@ -225,7 +227,12 @@
              {:name "merkittavyys":type :group
               :body [{:name "rakentamisen_vaikutusten_merkittavyys" :type :text :max-len 4000 :layout :full-width}]}]})
 
+(def poikkeusasian-rakennuspaikka {:info {:name "poikkeusasian-rakennuspaikka" :i18name "rakennuspaikka" :approvable true
+                                          :order 2}
+                                   :body rakennuspaikka})
+
 (defschemas
   1
   [rakennushanke
-   suunnittelutarveratkaisun-lisaosa])
+   suunnittelutarveratkaisun-lisaosa
+   poikkeusasian-rakennuspaikka])

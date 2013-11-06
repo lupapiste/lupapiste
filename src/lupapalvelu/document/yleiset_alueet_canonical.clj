@@ -227,6 +227,7 @@
                                                         }})
 
         body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
+                               :luvanTunnisteTiedot (lupatunnus application)
                                :alkuPvm alku-pvm
                                :loppuPvm loppu-pvm
                                :sijaintitieto (get-sijaintitieto application)
@@ -252,12 +253,6 @@
   [application lang]
   (let [app (assoc application :documents
               (clojure.walk/postwalk empty-strings-to-nil (:documents application)))]
-    {:YleisetAlueet {:toimituksenTiedot
-                     {:aineistonnimi (:title app)
-                      :aineistotoimittaja "lupapiste@solita.fi"
-                      :tila toimituksenTiedot-tila
-                      :toimitusPvm (to-xml-date (now))
-                      :kuntakoodi (:municipality app)
-                      :kielitieto ""}
+    {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot app lang)
                      :yleinenAlueAsiatieto (permits app lang)}}))
 

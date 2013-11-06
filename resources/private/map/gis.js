@@ -26,49 +26,23 @@ var gis = (function() {
                   new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
 
-    // TODO: when nginx has been configured to proxy map requests, remove this feature block
-    if(features.enabled('geoserver-in-cloud')) {
-      // use the new geoserver in IBM cloud
-      var wmsServer = LUPAPISTE.config.maps.geoserver;
-      var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
-      var asemakaava = new OpenLayers.Layer.WMS("Asemakaava", wmsServer, {layers: "Asemakaava", format: "image/png"}, {isBaseLayer: false});
-      var kantakartta = new OpenLayers.Layer.WMS("Kantakartta", wmsServer, {layers: "Kantakartta", format: "image/png"}, {isBaseLayer: false});
-      var peruskartat = new OpenLayers.Layer.WMS("Peruskartat", wmsServer, {layers: "Peruskartat", format: "image/png"}, {isBaseLayer: false});
-      var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
-      var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
 
-      self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
+    // use the old proxy server to wms
+    var wmsServer = LUPAPISTE.config.maps.proxyserver;
+    if (LUPAPISTE.config.maps.proxyserver.indexOf(",") > -1) {
+      wmsServer = LUPAPISTE.config.maps.proxyserver.split(",");
+    }
+    var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
+    var taustakartta = new OpenLayers.Layer.WMS("taustakartta", wmsServer, {layers: "taustakartta", format: "image/png"}, {isBaseLayer: false});
+    var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
+    var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
 
-      if (!features.enabled("maps-disabled")) {
-        self.map.addLayers([base, peruskartat, kiinteistorajat, kiinteistotunnukset, self.vectorLayer]);
-      } else {
-        self.map.addLayers([base, self.vectorLayer]);
-      }
+    self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
+
+    if (!features.enabled("maps-disabled")) {
+      self.map.addLayers([base, taustakartta, kiinteistorajat, kiinteistotunnukset, self.vectorLayer]);
     } else {
-      // use the old proxy server to wms
-      var wmsServer = LUPAPISTE.config.maps.proxyserver;
-      var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
-      var taustakartta_5k = new OpenLayers.Layer.WMS("taustakartta_5k", wmsServer, {layers: "taustakartta_5k", format: "image/png"}, {isBaseLayer: false, maxScale: 1, minScale: 5000});
-      var taustakartta_10k = new OpenLayers.Layer.WMS("taustakartta_10k", wmsServer, {layers: "taustakartta_10k", format: "image/png"}, {isBaseLayer: false, maxScale: 5001, minScale: 20000});
-      var taustakartta_20k = new OpenLayers.Layer.WMS("taustakartta_20k", wmsServer, {layers: "taustakartta_20k", format: "image/png"}, {isBaseLayer: false, maxScale: 20001, minScale: 54000});
-      var taustakartta_40k = new OpenLayers.Layer.WMS("taustakartta_40k", wmsServer, {layers: "taustakartta_40k", format: "image/png"}, {isBaseLayer: false, maxScale: 54001, minScale: 133000});
-      var taustakartta_160k = new OpenLayers.Layer.WMS("taustakartta_160k", wmsServer, {layers: "taustakartta_160k", format: "image/png"}, {isBaseLayer: false, maxScale: 133001, minScale: 250000});
-      var taustakartta_320k = new OpenLayers.Layer.WMS("taustakartta_320k", wmsServer, {layers: "taustakartta_320k", format: "image/png"}, {isBaseLayer: false, maxScale: 250001, minScale: 350000});
-      var taustakartta_800k = new OpenLayers.Layer.WMS("taustakartta_800k", wmsServer, {layers: "taustakartta_800k", format: "image/png"}, {isBaseLayer: false, maxScale: 350001, minScale: 800000});
-      var taustakartta_2m = new OpenLayers.Layer.WMS("taustakartta_2m", wmsServer, {layers: "taustakartta_2m", format: "image/png"}, {isBaseLayer: false, maxScale: 800001, minScale: 2000000});
-      var taustakartta_4m = new OpenLayers.Layer.WMS("taustakartta_4m", wmsServer, {layers: "taustakartta_4m", format: "image/png"}, {isBaseLayer: false, maxScale: 2000001, minScale: 4000000});
-      var taustakartta_8m = new OpenLayers.Layer.WMS("taustakartta_8m", wmsServer, {layers: "taustakartta_8m", format: "image/png"}, {isBaseLayer: false, maxScale: 4000001, minScale: 1.5E7});
-
-      var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
-      var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
-
-      self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
-
-      if (!features.enabled("maps-disabled")) {
-        self.map.addLayers([base, taustakartta_5k, taustakartta_10k, taustakartta_20k, taustakartta_40k, taustakartta_160k, taustakartta_320k, taustakartta_800k, taustakartta_2m, taustakartta_4m, taustakartta_8m, kiinteistorajat, kiinteistotunnukset, self.vectorLayer]);
-      } else {
-        self.map.addLayers([base, self.vectorLayer]);
-      }
+      self.map.addLayers([base, self.vectorLayer]);
     }
 
     self.markerLayer = new OpenLayers.Layer.Markers("Markers");

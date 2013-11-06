@@ -4,7 +4,6 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [me.raynes.fs :as fs]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
@@ -28,7 +27,6 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
-            [lupapalvelu.etag :as etag]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors]))
@@ -90,7 +88,8 @@
 
 (defn logged-in?
   ([] (logged-in? (request/ring-request)))
-  ([request] (not (nil? (user/current-user request)))))
+  ([request]
+    (not (nil? (:id (user/current-user request))))))
 
 (defn in-role? [role]
   (= role (keyword (:role (user/current-user)))))
@@ -147,21 +146,26 @@
 ;; Web UI:
 ;;
 
+(def ^:private build-number (:build-number env/buildinfo))
+
+(def etag (str "\"" build-number "\""))
+
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript; charset=utf-8"
                    :css  "text/css; charset=utf-8"})
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
-                   :welcome anyone
-                   :login-frame anyone
-                   :oskari anyone
+                   :hashbang anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
                    :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
+                   :login-frame anyone
+                   :welcome anyone
+                   :oskari anyone
                    :neighbor anyone})
 
 (defn cache-headers [resource-type]
@@ -169,10 +173,12 @@
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
-       "ETag"          etag/etag}
+       "ETag"          etag}
       {"Cache-Control" "public, max-age=864000"
        "Vary"          "Accept-Encoding"
-       "ETag"          etag/etag})))
+       "ETag"          etag})))
+
+(def ^:private never-cache #{:hashbang})
 
 (def default-lang "fi")
 
@@ -183,15 +189,20 @@
 
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
-    (->>
-      (java.io.ByteArrayInputStream. (compose resource-type app))
-      (resp/content-type (resource-type content-type))
-      (resp/set-headers (cache-headers resource-type)))
+    ; Check If-None-Match header, see cache-headers above
+    (if (or (never-cache app) (s/blank? build-number) (not= (get-in (request/ring-request) [:headers "if-none-match"]) etag))
+      (->>
+        (java.io.ByteArrayInputStream. (compose resource-type app))
+        (resp/content-type (resource-type content-type))
+        (resp/set-headers (cache-headers resource-type)))
+      {:status 304})
     failure))
+
+(def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
 (defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
-  (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
+  (single-resource (keyword res-type) (keyword app) unauthorized))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -218,18 +229,26 @@
   (when (and v (= -1 (.indexOf v ":")))
     (second (re-matches #"^[#!/]{0,3}(.*)" v))))
 
-(defn serve-app [app hashbang]
-  ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
-  (when-let [hashbang (->hashbang hashbang)]
-    (session/put! :hashbang hashbang))
-  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+(defn- save-hashbang-on-client []
+  (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}
+    (single-resource :html :hashbang unauthorized)))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  (serve-app app hashbang))
+(defn serve-app [app hashbang lang]
+  ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (if-let [hashbang (->hashbang hashbang)]
+    (do
+      (session/put! :hashbang hashbang)
+      (single-resource :html (keyword app) (redirect-to-frontpage lang)))
+    ; If current user has no access to the app, save hashbang using JS on client side.
+    ; The next call will then be handled by the "true branch" above.
+    (single-resource :html (keyword app) (save-hashbang-on-client))))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
+  (serve-app app hashbang lang))
 
 ; Same as above, but with an extra path.
-(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  (serve-app app hashbang))
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
+  (serve-app app hashbang lang))
 
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))

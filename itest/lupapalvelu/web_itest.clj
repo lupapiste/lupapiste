@@ -1,7 +1,7 @@
 (ns lupapalvelu.web-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [clojure.walk :refer [keywordize-keys]]
-            [clj-http.client :as client]
+            [sade.http :as http]
             [midje.sweet :refer :all]
             [cheshire.core :as json])
   (:import org.apache.http.client.CookieStore
@@ -33,9 +33,9 @@
         params {:cookie-store (->cookie-store store)
                 :follow-redirects false
                 :throw-exceptions false}
-        resp (client/get (str (server-address) "/app/fi/applicant" "?hashbang=/foo/bar") params)]
+        resp (http/get (str (server-address) "/app/fi/applicant" "?hashbang=/foo/bar") params)]
     (:status resp) => 302
     (:headers resp) => (contains {"location" "/app/fi/welcome"})
-    (let [resp (client/get (str (server-address) "/api/hashbang") params)]
+    (let [resp (http/get (str (server-address) "/api/hashbang") params)]
       (:status resp) => 200
       (json/parse-string (:body resp)) => (contains {"bang" "foo/bar"}))))

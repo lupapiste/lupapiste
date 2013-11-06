@@ -1,18 +1,18 @@
 (ns lupapalvelu.proxy-services-stest
-  (:use [lupapalvelu.proxy-services]
-        [lupapalvelu.itest-util]
-        [midje.sweet])
-  (:require [lupapalvelu.wfs :as wfs]
+  (:require [lupapalvelu.proxy-services :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
-            [clj-http.client :as c]
+            [sade.http :as http]
             [sade.env :as env]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
-(c/post (str (server-address) "/api/proxy-ctrl/on"))
+(http/post (str (server-address) "/api/proxy-ctrl/on"))
 
 (defn- proxy-request [apikey proxy-name & args]
-  (-> (c/post
+  (-> (http/post
         (str (server-address) "/proxy/" (name proxy-name))
         {:headers {"authorization" (str "apikey=" apikey)
                    "content-type" "application/json;charset=utf-8"}
@@ -99,15 +99,15 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "Asemakaava"}
-                   {"LAYERS" "Kantakartta"}
-                   {"LAYERS" "Peruskartat"}
-                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+    (doseq [layer [{"LAYERS" "lupapiste:Asemakaava"}
+                   {"LAYERS" "lupapiste:Kantakartta"}
+                   {"LAYERS" "lupapiste:Peruskartat"}
+                   {"LAYERS" "lupapiste:ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                   {"LAYERS" "lupapiste:ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
       (let [request {:params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))
-        (:status (c/get (env/value :maps :geoserver)
+        (:status (http/get (env/value :maps :geoserver)
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :as :stream})) => 200))))

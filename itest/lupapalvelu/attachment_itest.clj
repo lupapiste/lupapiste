@@ -1,11 +1,10 @@
 (ns lupapalvelu.attachment-itest
-  (:use [lupapalvelu.attachment]
-        [lupapalvelu.itest-util]
-        [midje.sweet])
-  (:require [clj-http.client :as c]))
+  (:require [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [application-id attachment-id]
-  (let [application     (:application (query pena :application :id application-id))]
+  (let [application     (query-application pena application-id)]
     (some #(when (= (:id %) attachment-id) %) (:attachments application))))
 
 (defn- approve-attachment [application-id attachment-id]
@@ -47,9 +46,9 @@
                                                                             :versions []}))
 
       (fact "uploading files"
-        (let [application (:application (query pena :application :id application-id))
+        (let [application (query-application pena application-id)
               _           (upload-attachment-to-all-placeholders pena application)
-              application (:application (query pena :application :id application-id))]
+              application (query-application pena application-id)]
 
           (fact "download all"
             (let [resp (raw pena "download-all-attachments" :id application-id)]
@@ -84,8 +83,8 @@
         (reject-attachment application-id (first attachment-ids)))
 
       (fact "Pena submits the application"
-        (success (command pena :submit-application :id application-id)) => true
-        (-> (query veikko :application :id application-id) :application :state) => "submitted")
+        (command pena :submit-application :id application-id) => ok?
+        (:state (query-application veikko application-id)) => "submitted")
 
       (fact "Veikko can still approve attachment"
         (approve-attachment application-id (first attachment-ids)))
@@ -95,7 +94,7 @@
 
 (fact "pdf does not work with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-kaivuulupa")
-        application (:application (query pena :application :id application-id))]
+        application (query-application pena application-id)]
     (:organization application) => "753-YA"
     pena =not=> (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http404?))
