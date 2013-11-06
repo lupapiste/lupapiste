@@ -263,8 +263,9 @@
         codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
         patevyys (:patevyys suunnittelija)
+        osoite (get-simple-osoite (:osoite suunnittelija))
         henkilo (merge (get-name (:henkilotiedot suunnittelija))
-                       {:osoite (get-simple-osoite (:osoite suunnittelija))}
+                       {:osoite osoite}
                        {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
@@ -273,7 +274,7 @@
     (if (contains? suunnittelija :yritys)
       (assoc base-data :yritys (assoc
                                  (get-simple-yritys (:yritys suunnittelija))
-                                 :postiosoite (get-simple-osoite (:osoite suunnittelija))))
+                                 :postiosoite osoite))
       base-data)))
 
 (defn- get-designers [documents]
