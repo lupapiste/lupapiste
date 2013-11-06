@@ -709,19 +709,23 @@
                            (map
                              (fn [pk]
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                 (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                       resp            (http/get url :as :stream)
-                                       content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                       urlhash         (digest/sha1 url)
-                                       attachment-id   urlhash
-                                       attachment-type {:type-group "muut" :type-id "muu"}
-                                       target          {:type "verdict" :id urlhash}
-                                       locked          true
-                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                   ; If the attachment-id, i.e., hash of the URL matches
-                                   ; any old attachment, a new version will be added
-                                   (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
-                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                 (do
+                                   (debug "Download" url)
+                                   (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                        resp            (http/get url :as :stream :throw-exceptions false)
+                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                        urlhash         (digest/sha1 url)
+                                        attachment-id   urlhash
+                                        attachment-type {:type-group "muut" :type-id "muu"}
+                                        target          {:type "verdict" :id urlhash}
+                                        locked          true
+                                        attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                     ; If the attachment-id, i.e., hash of the URL matches
+                                     ; any old attachment, a new version will be added
+                                     (if (= 200 (:status resp))
+                                       (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                       (error (str (:status resp) " - unable to download " url ": " resp)))
+                                     (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
                                  pk))
                              (:poytakirjat paatos))))
                        (:paatokset verdict))))
@@ -737,10 +741,11 @@
    :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
-    (do (update-application command
-      {$set {:verdicts verdicts-with-attachments
-             :modified created
-             :state    :verdictGiven}})
+    (do
+      (update-application command
+        {$set {:verdicts verdicts-with-attachments
+               :modified created
+               :state    :verdictGiven}})
       (ok :verdictCount (count verdicts-with-attachments)))
     (fail :info.no-verdicts-found-from-backend)))
 
