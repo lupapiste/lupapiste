@@ -38,12 +38,15 @@
                     ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
                     ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
                     ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-                  ["Rakennuksen purkaminen" :purkaminen]]]
+                  ["Rakennuksen purkaminen" :purkaminen]]
+        treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
+                   (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+                   treepart)
+        treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
+                   (conj treepart ["Suunnittelija" :suunnittelija])
+                   treepart)]
     {:permit-type permit/R
-     :tree ["Rakentaminen ja purkaminen"
-            (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-              (conj treepart ["Tyonjohtaja" :tyonjohtaja])
-              treepart)]}))
+     :tree ["Rakentaminen ja purkaminen" treepart]}))
 
 (def ^:private operation-tree-for-environment-R
   {:permit-type permit/R
@@ -344,7 +347,12 @@
 
      :tyonjohtaja                 {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["tyonjohtaja" ]
+                                   :required ["tyonjohtaja"]
+                                   :attachments []}
+
+     :suunnittelija               {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["suunnittelija"]
                                    :attachments []}
      }
     ya-operations))
