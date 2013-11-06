@@ -245,7 +245,7 @@
           code "RAK-rakennesuunnittelija"]
 
       (fact "suunnittelija kuntaroolikoodi is set"
-        (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code]]) => ok?
+        (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code] ["patevyys.kokemus" "10"] ["patevyys.patevyysluokka" "AA"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
@@ -261,6 +261,8 @@
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
           (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
+          (get-in updated-suunnittelija [:data :patevyys :kokemus :value]) => "10"
+          (get-in updated-suunnittelija [:data :patevyys :patevyysluokka :value]) => "AA"
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
 
