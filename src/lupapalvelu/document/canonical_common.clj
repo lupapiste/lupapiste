@@ -270,6 +270,8 @@
                        (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
+                                :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                                :kokemusvuodet (-> patevyys :kokemus :value)
                                 :henkilo henkilo})]
     (if (contains? suunnittelija :yritys)
       (assoc base-data :yritys (assoc

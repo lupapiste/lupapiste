@@ -418,6 +418,8 @@
         _ (:postitoimipaikannimi osoite) => "Piippola"
         _ (:koulutus Suunnittelija) => "Arkkitehti"
         _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
+        _ (:valmistumisvuosi Suunnittelija) => "2010"
+        _ (:kokemusvuodet Suunnittelija) => "10"
 
         ;Suunnittelija
         suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
@@ -435,6 +437,8 @@
         _ (:postitoimipaikannimi osoite) => "Piippola"
         _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
+        _ (:valmistumisvuosi Suunnittelija) => "2010"
+        _ (:kokemusvuodet Suunnittelija) => "10"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
         Rakennuspaikkaf (first rakennuspaikkatieto) => truthy

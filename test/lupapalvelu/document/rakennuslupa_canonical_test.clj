@@ -455,6 +455,8 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
+    (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -465,6 +467,8 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -475,6 +479,8 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
+    (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -484,7 +490,9 @@
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
-    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
 
 (facts "Canonical suunnittelija-blank-role model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-blank-role) :suunnittelija)]

@@ -145,13 +145,16 @@
                                 {:name "yritys" :type :group :body yritys}))
 
 
-(def patevyys [{:name "koulutus" :type :string :required true}
-               {:name "patevyysluokka" :type :select :required true
+(def patevyys [{:name "koulutus" :type :string :required false}
+               {:name "fise" :type :string :required false}
+               {:name "patevyysluokka" :type :select :required false
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
                        {:name "C"}
-                       {:name "ei tiedossa"}]}])
+                       {:name "ei tiedossa"}]}
+               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+               {:name "kokemus" :type :string :subtype :number :required false}])
 
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)
@@ -204,16 +207,16 @@
                                           {:name "ty\u00F6njohtaja"}
                                           {:name "ei tiedossa"}]}])
 
-(def patevyys-tyonjohtaja [{:name "patevyysvaatimusluokka" :type :select :required true
+(def patevyys-tyonjohtaja [{:name "patevyysvaatimusluokka" :type :select :required false
                             :body [{:name "1"}
                                    {:name "AA"}
                                    {:name "ei tiedossa"}]}
-                           {:name "koulutus" :type :string :required true}
-                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
-                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
-                           {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
+                           {:name "koulutus" :type :string :required false}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+                           {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :type :select :required true :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :type :select :required false :blacklist [:applicant]
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
