@@ -232,6 +232,11 @@
     :zip "55550"
     :city "Sipoo"
     :phone "0505503171"
+    :architect true
+    :degree "Tutkinto"
+    :companyName "Yritys Oy"
+    :companyId "1234567-1"
+    :fise "f"
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
               :salt "$2a$10$sVFCAX/MB7wDKA2aNp1gre"
               :apikey "502cb9e58426c613c8b85abc"}}

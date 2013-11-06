@@ -198,6 +198,11 @@
     resp =not=> ok?
     (:text resp) => "error.new-applications-disabled"))
 
+(defn in? 
+  "true if seq contains elm"
+  [seq elm]  
+  (some #(= elm %) seq))
+
 (defn- set-and-check-person [api-key application-id initial-document path]
   (fact "initially there is no person data"
        initial-document => truthy
@@ -208,10 +213,17 @@
       (let [updated-app (query-application mikko application-id)
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
             schema-name  (get-in update-doc [:schema-info :name])
-            person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
+            person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))
+            company-path (into [] (concat [:data] (map keyword path) [:yritys]))
+            experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
+            suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
 
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
-        (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen")))
+        (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
+        (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
+        (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
+        (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
+        (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
 
 (facts "Set user to document"
   (let [application-id   (create-app-id mikko :municipality sonja-muni)
