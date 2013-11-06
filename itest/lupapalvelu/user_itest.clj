@@ -37,7 +37,6 @@
               :architect true
               :degree "d"
               :fise "f"
-              :qualification "q"
               :companyName "cn"
               :companyId "cid"}]
 

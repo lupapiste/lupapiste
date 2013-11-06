@@ -352,7 +352,7 @@
                        person)
         updates      (tools/path-vals model)
         ; Path should exist in schema!
-        updates 	   (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
+        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s" model schema-name documentId)

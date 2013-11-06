@@ -40,8 +40,7 @@
     (:state application) => "draft"
     (:opened application) => nil
     (count (:comments application)) => 1
-    (-> (:comments application) first :text) => "hello"
-    (tools/unwrapped (-> hakija :data :henkilo :henkilotiedot)) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
+    (-> (:comments application) first :text) => "hello"))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "753")

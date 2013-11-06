@@ -32,8 +32,10 @@
       (:text rest)
       application => truthy
       (:username (first (:auth application))) => "mikko@example.com"
-      (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Mikko"
-      (get-in hakija [:data :henkilo :henkilotiedot :sukunimi :value]) => "Intonen"
+      (:role (first (:auth application))) => "owner"
+      ; These are not filled automatically any more
+      ;(get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Mikko"
+      ;(get-in hakija [:data :henkilo :henkilotiedot :sukunimi :value]) => "Intonen"
 
       (let [listing (query mikko :applications)]
         listing => ok?
