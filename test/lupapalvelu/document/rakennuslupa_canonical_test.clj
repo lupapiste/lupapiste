@@ -75,7 +75,7 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
-                {:patevyys {:koulutus {:value "Koulutus"}
+                {:patevyys {:koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -98,7 +98,7 @@
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
    :data (merge suunnittelija-henkilo
-                {:patevyys {:koulutus {:value "Koulutus"}
+                {:patevyys {:koulutus {:value "Arkkitehti"}
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -110,7 +110,7 @@
                                                 :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
-                {:patevyys {:koulutus {:value "Koulutus"}
+                {:patevyys {:koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -296,8 +296,8 @@
                           :data {:suoramarkkinointikielto {:value true}}})
 
 (def ^:private link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
-
 (def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00002" :type "lupapistetunnus"})
+(def ^:private app-linking-to-us {:id "LP-753-2013-00008"})
 
 ;TODO LIITETIETO
 
@@ -338,30 +338,29 @@
 (validate-all-documents documents)
 
 (def application
-  {:permitType "R",
-   :municipality municipality,
-   :auth
-   [{:lastName "Panaani",
-     :firstName "Pena",
-     :username "pena",
-     :type "owner",
-     :role "owner",
-     :id "777777777777777777000020"}],
+  {:permitType "R"
+   :municipality municipality
+   :auth [{:lastName "Panaani"
+           :firstName "Pena"
+           :username "pena"
+           :type "owner"
+           :role "owner"
+           :id "777777777777777777000020"}]
    :state "open"
    :opened 1354532324658
    :location {:x 408048, :y 6693225},
    :attachments [],
-   :authority {:id "777777777777777777000023",
-               :username "sonja",
-               :firstName "Sonja",
-               :lastName "Sibbo",
-               :role "authority"},
-   :title "s",
-   :created 1354532324658,
-   :documents documents,
+   :authority {:id "777777777777777777000023"
+               :username "sonja"
+               :firstName "Sonja"
+               :lastName "Sibbo"
+               :role "authority"}
+   :title "s"
+   :created 1354532324658
+   :documents documents
    :propertyId "21111111111111"
-   :modified 1354532324691,
-   :address "Katutie 54",
+   :modified 1354532324691
+   :address "Katutie 54"
    :id "LP-753-2013-00001"
    :statements [{:given 1368080324142
                  :id "518b3ee60364ff9a63c6d6a1"
@@ -375,13 +374,28 @@
 
 (def application-tyonjohtajan-nimeaminen
   (merge application {:organization "753-R"
-                      :operations [{:id "5272668be8db5aaa01084601"
-                                    :name "tyonjohtaja"
+                      :state "submitted"
+                      :operations [{:name "tyonjohtaja"
+                                    :id "5272668be8db5aaa01084601"
                                     :created 1383229067483}]
                       :documents [hakija-henkilo
                                   tyonjohtaja
                                   hankkeen-kuvaus-minimum]
-                      :linkPermitData [link-permit-data-kuntalupatunnus]}))
+                      :linkPermitData [link-permit-data-kuntalupatunnus]
+                      :appsLinkingToUs [app-linking-to-us]}))
+
+(def application-suunnittelijan-nimeaminen
+  (merge application {:organization "753-R"
+                      :state "submitted"
+                      :propertyId "75341600550007"
+                      :operations [{:name "suunnittelija"
+                                    :id "527b3392e8dbbb95047a89de"
+                                    :created 1383805842761}]
+                      :documents [hakija-henkilo
+                                  suunnittelija1
+                                  hankkeen-kuvaus-minimum]
+                      :linkPermitData [link-permit-data-lupapistetunnus]
+                      :appsLinkingToUs [app-linking-to-us]}))
 
 
 (defn- validate-minimal-person [person]
@@ -465,7 +479,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
-    (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
@@ -489,7 +503,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
-    (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
@@ -752,6 +766,41 @@
       (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
       (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
+
+
+    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00001")
+    (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
+
+    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
+    (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")))
+
+
+(fl/facts* "Canonical model for suunnittelijan nimeaminen is correct"
+  (let [canonical (application-to-canonical application-suunnittelijan-nimeaminen "fi") => truthy
+        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+
+        viitelupatieto (:viitelupatieto rakennusvalvontaasia) => truthy
+        viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
+        viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
+
+        luvanTunnisteTiedot-MuuTunnus (-> rakennusvalvontaasia
+                                        :luvanTunnisteTiedot
+                                        :LupaTunnus
+                                        :muuTunnustieto
+                                        :MuuTunnus) => truthy
+
+        kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
+        Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
+        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
+        rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy]
+
+    (facts "\"lupapistetunnus\" type of link permit data"
+      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
+      (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
+      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => falsey)
+      (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
 
 
     (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00001")
