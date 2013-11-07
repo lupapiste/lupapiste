@@ -169,7 +169,7 @@
                                                      :child [{:tag :MuuTunnus :child [{:tag :tunnus}
                                                                                       {:tag :sovellus}]}]}
                                                     {:tag :saapumisPvm}
-                                                    {:tag :viitaus}]})
+                                                    {:tag :viittaus}]})
 
 (def toimituksenTiedot [{:tag :aineistonnimi :ns "yht"}
                         {:tag :aineistotoimittaja :ns "yht"}

@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [sade.util :refer [contains-value?]]))
@@ -86,9 +87,9 @@
                                :municipality municipality,
                                :statements statements})
 
-(def get-maksaja #'lupapalvelu.document.yleiset-alueet-canonical/get-maksaja)
-(def get-hakija #'lupapalvelu.document.yleiset-alueet-canonical/get-hakija)
-(def get-sijoituksen-tarkoitus #'lupapalvelu.document.yleiset-alueet-canonical/get-sijoituksen-tarkoitus)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-maksaja)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-hakija)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-sijoituksen-tarkoitus)
 
 (facts* "Sijoituslupa canonical model is correct"
   (let [canonical (application-to-canonical sijoituslupa-application "fi")

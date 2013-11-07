@@ -24,6 +24,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -127,24 +128,31 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
-(defn- make-link-permit-by-app-id-query [id]
-  {:link {$in [id]}
-   (keyword (str id ".type")) "application"})
-
 (defn- enrich-with-link-permit-data [app]
-  (let [query (make-link-permit-by-app-id-query (:id app))
-        link-data (first (mongo/select :app-links query))
-        link-array (:link link-data)]
-    (assoc app :linkPermitData
-      (if (seq link-array)
-        ;; Link found
-        (let [app-index (.indexOf link-array (:id app))
-              link-permit-index (if (= 0 app-index) 1 0)
-              link-permit-id (link-array link-permit-index)
-              link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-          {:id link-permit-id :type link-permit-type})
-        ;; No link found
-        nil))))
+  (let [app-id (:id app)
+        resp (mongo/select :app-links {:link {$in [app-id]}})]
+    (if (seq resp)
+      ;; Link permit data was found
+      (let [convert-fn (fn [link-data]
+                         (let [link-array (:link link-data)
+                               app-index (.indexOf link-array app-id)
+                               link-permit-id (link-array (if (= 0 app-index) 1 0))
+                               link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+                           {:id link-permit-id :type link-permit-type}))
+            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
+            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
+
+        (-> app
+          (assoc :linkPermitData (if (seq our-link-permits)
+                                   (into [] (map convert-fn our-link-permits))
+                                   nil))
+          (assoc :appsLinkingToUs (if (seq apps-linking-to-us)
+                                    (into [] (map convert-fn apps-linking-to-us))
+                                    nil))))
+      ;; No link permit data found
+      (-> app
+        (assoc :linkPermitData nil)
+        (assoc :appsLinkingToUs nil)))))
 
 ;;
 ;; Query application:
@@ -154,11 +162,7 @@
   (comp
     without-system-keys
     (partial with-meta-fields user)
-    (partial enrich-with-link-permit-data)))
-
-;; TODO: Mista tata kutsutaan?
-(defquery applications {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
+    enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
@@ -245,7 +249,7 @@
   (let [email (ss/lower-case email)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
-      (let [invited (user/get-or-create-user-by-email email)
+      (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
                      :text         text
@@ -434,10 +438,17 @@
         ; FIXME combine mongo writes
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
+        (try
+            (mapping-to-krysp/save-application-as-krysp
+              (enrich-with-link-permit-data application)
+              lang
+              submitted-application
+              organization)
+
           (mongo/update
             :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
             {$set {:state :sent}})
+
           (catch org.xml.sax.SAXParseException e
             (info e "Invalid KRYSM XML message")
             (fail (.getMessage e))))))))
@@ -459,9 +470,8 @@
                :opened    (or opened created)
                :submitted created}})
       (try
-        (mongo/insert
-          :submitted-applications
-          (assoc (dissoc application :id) :_id id))
+        (mongo/insert :submitted-applications
+          (-> (enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
         (catch com.mongodb.MongoException$DuplicateKey e
           ; This is ok. Only the first submit is saved.
             )))))
@@ -665,21 +675,6 @@
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
-
-;  KasittelynTilaType/Tilamuutos
-;  RakennusvalvontaAsiaType/kayttotapaus
-;  OsapuoletType/Osapuolet/osapuolitieto/Osapuoli
-;    - Hakija
-;  RakennusvalvontaAsiaType/asianTiedot/Asiantiedot/rakennusvalvontaasianKuvaus
-;  LuvanTunnisteTiedotType/LupaTunnus
-;    - viittaus
-;    - kuntalupatunnus
-;    - muuTunnustieto
-;  TyonjohtajaType
-;    - Tyonjohtajan tiedot + hetu
-;    - tyonjohtajaHakemusKytkin
-;    - TyonjohtajaType/patevyysvaatimusluokka (jos annettu)
-
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :verified   true
@@ -713,16 +708,10 @@
 
     (ok :app-links final-results)))
 
-(defquery link-permits-by-id
-  {:parameters [id]
-   :roles      [:applicant :authority]}
-  [_]
-  (let [query (make-link-permit-by-app-id-query id)]
-    (ok :app-links (mongo/select :app-links query))))
-
-(defn- remove-link-permit [app-id]
-  (let [query (make-link-permit-by-app-id-query app-id)]
-    (mongo/remove-many :app-links query)))
+(defn- make-mongo-id-for-link-permit [app-id link-permit-id]
+  (if (<= (compare app-id link-permit-id) 0)
+    (str app-id "|" link-permit-id)
+    (str link-permit-id "|" app-id)))
 
 (defcommand add-link-permit
   {:parameters [id linkPermitId propertyId]
@@ -730,29 +719,27 @@
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
-  (try
-    (remove-link-permit id)
-    (mongo/insert :app-links {:_id (if (<= (compare id linkPermitId) 0)
-                                     (str id "|" linkPermitId)
-                                     (str linkPermitId "|" id))
-                              :link [id linkPermitId]
-                              (keyword id) {:type "application"
-                                            :apptype (-> application :operations first :name)
-                                            :propertyId propertyId}
-                              (keyword linkPermitId) {:type "linkpermit"
-                                                      :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
-                                                                        "lupapistetunnus"
-                                                                        "kuntalupatunnus")}})
-    (catch com.mongodb.MongoException$DuplicateKey e
-        (warn e "Duplicate key detected when inserting new link permit")
-        (throw (IllegalArgumentException. "error.link-permit-already-added")))))
+  (let [db-id (make-mongo-id-for-link-permit id linkPermitId)]
+    (mongo/update-by-id :app-links db-id
+      {:_id db-id
+       :link [id linkPermitId]
+       (keyword id) {:type "application"
+                     :apptype (-> application :operations first :name)
+                     :propertyId propertyId}
+       (keyword linkPermitId) {:type "linkpermit"
+                               :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
+                                                 "lupapistetunnus"
+                                                 "kuntalupatunnus")}}
+      :upsert true)))
 
 (defcommand remove-link-permit-by-app-id
-  {:parameters [id]
+  {:parameters [id linkPermitId]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]}
   [{application :application}]
-  (if (remove-link-permit id) (ok) (fail :error.unknown)))
+  (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
+    (ok)
+    (fail :error.unknown)))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
@@ -819,19 +806,23 @@
                            (map
                              (fn [pk]
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                 (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                       resp            (http/get url :as :stream)
-                                       content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                       urlhash         (digest/sha1 url)
-                                       attachment-id   urlhash
-                                       attachment-type {:type-group "muut" :type-id "muu"}
-                                       target          {:type "verdict" :id urlhash}
-                                       locked          true
-                                       attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                   ; If the attachment-id, i.e., hash of the URL matches
-                                   ; any old attachment, a new version will be added
-                                   (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
-                                   (-> pk (assoc :urlHash urlhash) (dissoc :liite)))
+                                 (do
+                                   (debug "Download" url)
+                                   (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                        resp            (http/get url :as :stream :throw-exceptions false)
+                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                        urlhash         (digest/sha1 url)
+                                        attachment-id   urlhash
+                                        attachment-type {:type-group "muut" :type-id "muu"}
+                                        target          {:type "verdict" :id urlhash}
+                                        locked          true
+                                        attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                     ; If the attachment-id, i.e., hash of the URL matches
+                                     ; any old attachment, a new version will be added
+                                     (if (= 200 (:status resp))
+                                       (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                       (error (str (:status resp) " - unable to download " url ": " resp)))
+                                     (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
                                  pk))
                              (:poytakirjat paatos))))
                        (:paatokset verdict))))
@@ -848,10 +839,11 @@
    :on-success  (notify     "verdict")}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
-    (do (update-application command
-      {$set {:verdicts verdicts-with-attachments
-             :modified created
-             :state    :verdictGiven}})
+    (do
+      (update-application command
+        {$set {:verdicts verdicts-with-attachments
+               :modified created
+               :state    :verdictGiven}})
       (ok :verdictCount (count verdicts-with-attachments)))
     (fail :info.no-verdicts-found-from-backend)))
 
@@ -945,8 +937,6 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
-  (println user)
-  (println params)
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)

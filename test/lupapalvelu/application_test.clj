@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.operations :as operations]
@@ -88,8 +89,8 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update :applications {:_id ..id..} ..changes..) => true))
 
-(def validate-x #'lupapalvelu.application/validate-x)
-(def validate-y #'lupapalvelu.application/validate-y)
+(testable-privates lupapalvelu.application validate-x)
+(testable-privates lupapalvelu.application validate-y)
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil

@@ -64,7 +64,7 @@ p {
 (defn activate-account [activation-key]
   (let [act     (mongo/select-one :activation {:activation-key activation-key})
         userid  (:user-id act)
-        success (mongo/update :users {:_id userid} {$set {:enabled true}})]
+        success (mongo/update-by-id :users userid {$set {:enabled true}})]
     (when success
       (mongo/remove :activation (:_id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
@@ -72,7 +72,7 @@ p {
 (defn activate-account-by-email [email]
   (let [act     (mongo/select-one :activation {:email (lower-case email)})
         userid  (:user-id act)
-        success (mongo/update :users {:_id userid} {$set {:enabled true}})]
+        success (mongo/update-by-id :users userid {$set {:enabled true}})]
     (when success
       (mongo/remove :activation (:_id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))

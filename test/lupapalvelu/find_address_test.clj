@@ -1,7 +1,7 @@
 (ns lupapalvelu.find-address-test
-  (:use [midje.sweet]
-        [midje.util :only [testable-privates]]
-        [lupapalvelu.find-address]))
+  (:require [lupapalvelu.find-address :refer :all]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 (testable-privates lupapalvelu.find-address pwz to-property-id)
 

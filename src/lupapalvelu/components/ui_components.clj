@@ -135,8 +135,10 @@
    :login        {:depends [:common]
                   :js      ["login.js"]}
 
-   :admins       {:js ["user.js" "users.js"]
-                  :html ["admin-user-list.html" "user-modification-dialogs.html"]}
+   :users        {:js ["users.js"]
+                  :html ["users.html"]}
+   
+   :admins       {:depends [:users]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
@@ -170,9 +172,9 @@
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
              :js ["admin.js"
-                  "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
+                  "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
-                    "organizations.html" "fixtures.html" "features.html" "actions.html" "activations.html" "screenmessages-list.html"]}
+                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html" "activations.html" "screenmessages-list.html"]}
 
    :login-frame {:depends [:login]
                  :html    ["login-frame.html"]
