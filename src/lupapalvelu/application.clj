@@ -498,6 +498,14 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
+(defcommand save-application-drawings
+  {:parameters [:id drawings]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :submitted :complement-needed :info]}
+  [command]
+  (update-application command
+    {$set {:drawings drawings}}))
+
 (defn make-attachments [created operation organization-id & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]

@@ -550,11 +550,24 @@
   }
 
   // When Oskari map has initialized itself, draw shapes and marker
-  hub.subscribe("map-initialized", function() {
-    if (application.shapes && application.shapes().length) {
+  hub.subscribe("oskari-map-initialized", function() {
+
+    if (application.drawings && application.drawings().length) {
+      var drawings = _.map(application.drawings(), function(d) {
+        return {
+          "id": d.id(),
+          "name": d.name(),
+          "desc": d.desc(),
+          "category": d.category(),
+          "geometry": d.geometry()
+        }});
+
+      var drawing = drawings[0].geometry;
       // only one shape per application is currently supported
-      hub.send("map-viewvectors", {
-        drawing: application.shapes()[0],
+
+      debugger;
+      hub.send("oskari-show-shapes", {
+        drawing: drawing,
         style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
         clear: true
       });
@@ -569,9 +582,8 @@
   });
 
   // When a shape is draw in Oskari map, save it to application
-  hub.subscribe("map-draw-done", function(e) {
-    var drawing = "" + e.data.drawing;
-    ajax.command("save-application-shape", {id: currentId, shape: drawing})
+  hub.subscribe("oskari-save-drawings", function(e) {
+    ajax.command("save-application-drawings", {id: currentId, drawings: e.data.drawings})
     .success(function() {
       repository.load(currentId);
     })
