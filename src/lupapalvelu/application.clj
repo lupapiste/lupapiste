@@ -137,7 +137,9 @@
                                app-index (.indexOf link-array app-id)
                                link-permit-id (link-array (if (= 0 app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-                           {:id link-permit-id :type link-permit-type}))
+                           (if (= (:type ((keyword app-id) link-data)) "application")
+                             {:id link-permit-id :type link-permit-type}
+                             {:id link-permit-id})))
             our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
             apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
 
