@@ -33,16 +33,16 @@
 (facts users-for-datatables
  (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
-                 :data (contains {:aaData (comp (partial = 3) count)
-                                  :iTotalRecords 3
-                                  :iTotalDisplayRecords 3
-                                  :sEcho "123"})}))
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :lastName "Suur"})
+                 :data (contains {:rows (comp (partial = 3) count)
+                                  :total 3
+                                  :display 3
+                                  :echo "123"})}))
+ (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
-                 :data (contains {:aaData (comp (partial = 1) count)
-                                  :iTotalRecords 3
-                                  :iTotalDisplayRecords 1
-                                  :sEcho "123"})})))
+                 :data (contains {:rows (comp (partial = 1) count)
+                                  :total 3
+                                  :display 1
+                                  :echo "123"})})))
 ;;
 ;; ==============================================================================
 ;; Creating users:

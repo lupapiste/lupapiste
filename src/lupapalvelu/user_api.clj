@@ -101,7 +101,7 @@
       (assoc
         :email email
         :enabled (= "true" (str (:enabled user-data)))
-        :organizations (when (:organization user-data) [(:organization user-data)])
+        :organizations (if (:organization user-data) [(:organization user-data)] [])
         :private (merge {}
                    (when (:password user-data)
                      {:password (security/get-hash (:password user-data))})
