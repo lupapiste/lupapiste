@@ -234,7 +234,7 @@
                      }}}]
     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] toimenpiteet)))
 
-(defn aloitusilmoitus-canonical [application lang started building-id]
+(defn aloitusilmoitus-canonical [application lang started building user]
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
@@ -244,11 +244,21 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus application)
+                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
+                                                                               :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                                :sukunimi (:lastName user)}
+                                                                                         :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                                  :postitoimipaikannimi (:city user)
+                                                                                                  :postinumero (:zip user)}
+                                                                                         :sahkopostiosoite (:email user)
+                                                                                         :puhelin (:phone user)}}}}}
                       :katselmustieto {:Katselmus (merge {:pitoPvm (to-xml-date started)
                                                           :katselmuksenLaji "ei tiedossa"
+                                                          :vaadittuLupaehtonaKytkin false
                                                           :tarkastuksenTaiKatselmuksenNimi "Aloitusilmoitus"}
-                                                         (when building-id {:rakennustunnus {:rakennusnro building-id
-                                                                                             :kiinttun (:propertyId application)}}))}
+                                                         (when building {:rakennustunnus {:jarjestysnumero (:jarjestysnumero building)
+                                                                                             :kiinttun (:propertyId application)
+                                                                                             :rakennusnro  (:rakennusnro building)}}))}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Aloitusilmoitus"
                       }}}}]
