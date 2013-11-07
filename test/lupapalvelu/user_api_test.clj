@@ -173,10 +173,3 @@
   (fact "non-admin users can change only their own data"
     (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "foo"}) => truthy)
     (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "bar"}) => forbidden)))
-
-(testable-privates lupapalvelu.user-api authority-admin-for-organization?)
-
-(facts authority-admin-for-organization?
-  (fact (authority-admin-for-organization? {:data {:organization "a"} :user {:organizations ["a" "b"]}}) => nil?)
-  (fact (authority-admin-for-organization? {:data {:organization "b"} :user {:organizations ["a" "b"]}}) => nil?)
-  (fact (authority-admin-for-organization? {:data {:organization "x"} :user {:organizations ["a" "b"]}}) => (contains {:ok false :text "forbidden"})))

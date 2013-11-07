@@ -84,16 +84,7 @@
   (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations []})              => (contains {:organizations {$in []}}))
   (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations nil})             => (contains {:organizations {$in ["a" "b"]}}))
   (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {})                               => (contains {:organizations {$in ["a" "b"]}}))
-  (fact (users-for-datatables-base-query {} {})                                                       => {:organizations {$in []}}))
-
-(testable-privates lupapalvelu.user users-for-datatables-query)
-
-(facts users-for-datatables-query
-  (fact (users-for-datatables-query {:foo "foo"} {})                   => {:foo "foo"})
-  (fact (users-for-datatables-query {:foo "foo"} {:enabled "false"})   => {:enabled false :foo "foo"})
-  (fact (users-for-datatables-query {} {:enabled "true"})              => {:enabled true})
-  (fact (-> (users-for-datatables-query {} {:email "foo"}) :email)     => (partial instance? java.util.regex.Pattern))
-  (fact (-> (users-for-datatables-query {} {:email "foo"}) :email str) => "foo"))
+  (fact (users-for-datatables-base-query {} {})                                                       => (contains {:organizations {$in []}})))
 
 ;;
 ;; ==============================================================================
