@@ -10,8 +10,6 @@
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
-            [lupapalvelu.fixture.finland-rakval]
-            [lupapalvelu.fixture.cgi-test-users]
             [lupapalvelu.application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]

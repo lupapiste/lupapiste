@@ -106,6 +106,13 @@
                                                        :link-sv link-sv})]
     (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
 
+(defn send-invite-new-authority! [to token]
+  (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
+        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
+        msg (email/apply-template "authority-invite.md" {:link-fi link-fi
+                                                         :link-sv link-sv})]
+    (send-mail-to-recipients! [to] (loc "authority-invite.title") msg)))
+
 ;;
 ;; New stuff
 ;;
