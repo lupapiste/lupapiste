@@ -221,8 +221,8 @@
                                    {:name "hakemus"}]}])
 
 (def tyonjohtaja (body
-                   vastattavat-tyotehtavat-tyonjohtaja
                    kuntaroolikoodi-tyonjohtaja
+                   vastattavat-tyotehtavat-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
