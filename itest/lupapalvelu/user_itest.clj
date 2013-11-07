@@ -6,21 +6,6 @@
 
 ;;
 ;; ==============================================================================
-;; Creating API keys:
-;; ==============================================================================
-;;
-
-(facts create-apikey
-  (apply-remote-minimal)
-  
-  (fact (-> (user/find-user {:email "tampere-ya"}) :private :apikey) => nil)
-  (fact (user/create-apikey "tampere-ya") =not=> nil)
-  (fact (-> (user/find-user {:email "tampere-ya"}) :private :apikey) =not=> nil)
-  
-  (fact (user/create-apikey "does.not@exist.at.all") => (throws Exception #"unknown-user")))
-
-;;
-;; ==============================================================================
 ;; Change password:
 ;; ==============================================================================
 ;;

@@ -205,7 +205,7 @@
    :input-validators [valid-organization-operation?]}
   [{{:keys [email operation]} :data caller :user}]
   (let [email        (ss/lower-case email)
-       organization (first (:organizations caller))]
+       organization  (first (:organizations caller))]
    (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
     (ok :operation operation)
     (if (= operation "add")
@@ -280,23 +280,6 @@
    (if (= 1 (mongo/update-n :users {:email email} {$set {:enabled enabled}}))
      (ok)
      (fail :not-found))))
-
-;;
-;; apikey:
-;;
-
-(in-dev
-  (defcommand create-apikey
-    {:parameters [:username :password]}
-    [{{:keys [username password]} :data}]
-    (let [apikey (security/random-password)
-          user   (user/get-user-with-password username password)]
-      (when-not user (fail! :error.not-found))
-      (mongo/update
-        :users
-        {:_id (:id user)}
-        {$set {"private.apikey" apikey}})
-      (ok :apikey apikey))))
 
 ;;
 ;; ==============================================================================
@@ -422,3 +405,4 @@
 
   (defquery activations {} [query]
     (ok :activations (activation/activations))))
+
