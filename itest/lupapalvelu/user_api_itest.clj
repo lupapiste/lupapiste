@@ -71,13 +71,12 @@
 (facts update-user-organization
   (apply-remote-minimal)
   (fact (command admin :create-user :email "foo" :role "applicant" :enabled "true" :apikey "xyz") => ok?)
-  (fact (-> (query "xyz" :user) :user :organizations) => nil?)
-  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "add") => ok?)
+  (fact (-> (query "xyz" :user) :user :organizations) => [])
+  (fact (command sipoo :update-user-organization :email "foo" :operation "add") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = ["753-R"])
-  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "remove") => ok?)
+  (fact (command sipoo :update-user-organization :email "foo" :operation "remove") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = [])
-  
-  (fact (command sipoo :update-user-organization :email "foo" :organization "123" :operation "add") => (contains {:ok false :text "forbidden"}))
+
   (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"})))
 
 (fact "changing user info"
