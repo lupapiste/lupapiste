@@ -95,16 +95,16 @@
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (cond (-> toimenpide :manuaalinen_rakennusnro :value)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
-                                                     :jarjestysnumero nil
-                                                    :kiinttun (:propertyId application)}}
-                                     (-> toimenpide :rakennusnro :value)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
-                                                     :jarjestysnumero nil
-                                                     :kiinttun (:propertyId application)}}
-                                     :default
-                                       {:rakennustunnus {:jarjestysnumero nil
-                                                         :kiinttun (:propertyId application)}})
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 (-> toimenpide :rakennusnro :value)
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 :default
+                                 {:rakennustunnus {:jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
@@ -247,12 +247,43 @@
       ;; The link permit data exists in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-          (get-viitelupatieto link-permit-data)))
+                  (get-viitelupatieto link-permit-data)))
       ;; The link permit data does not exist in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
-          (get-bulding-places (:rakennuspaikka documents) application))
+                  (get-bulding-places (:rakennuspaikka documents) application))
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
-          toimenpiteet)
+                  toimenpiteet)
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-          (get-statements (:statements application)))))))
+                  (get-statements (:statements application)))))))
+
+
+(defn aloitusilmoitus-canonical [application lang started building user]
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
+        canonical {:Rakennusvalvonta
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :rakennusvalvontaAsiatieto
+                    {:RakennusvalvontaAsia
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
+                                                                              :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                               :sukunimi (:lastName user)}
+                                                                                        :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                                 :postitoimipaikannimi (:city user)
+                                                                                                 :postinumero (:zip user)}
+                                                                                         :sahkopostiosoite (:email user)
+                                                                                         :puhelin (:phone user)}}}}}
+                      :katselmustieto {:Katselmus (merge {:pitoPvm (to-xml-date started)
+                                                          :katselmuksenLaji "ei tiedossa"
+                                                          :vaadittuLupaehtonaKytkin false
+                                                          :tarkastuksenTaiKatselmuksenNimi "Aloitusilmoitus"}
+                                                         (when building {:rakennustunnus {:jarjestysnumero (:jarjestysnumero building)
+                                                                                          :kiinttun (:propertyId application)
+                                                                                          :rakennusnro  (:rakennusnro building)}}))}
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :kayttotapaus "Aloitusilmoitus"
+                      }}}}]
+    canonical))

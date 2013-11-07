@@ -17,7 +17,9 @@
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
    :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"})
+   :complement-needed "vireill\u00e4"
+   :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
+   :constructions-started "rakennusty\u00f6t aloitettu"})
 
 (def state-timestamps
   {:draft :created
@@ -26,7 +28,9 @@
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
    :submitted :opened
    ; Enables XML to be formed from sent applications
-   :sent :opened})
+   :sent :opened
+   :verdictGiven :opened
+   :constructions-started :opened})
 
 (defn to-xml-date [timestamp]
   (let [dt (tc/from-long timestamp)]
@@ -273,7 +277,7 @@
                                 :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
                                 :kokemusvuodet (-> patevyys :kokemus :value)
                                 :henkilo henkilo})]
-    (if (contains? suunnittelija :yritys)
+    (if (-> suunnittelija :yritys :yritysnimi :value s/blank? not)
       (assoc base-data :yritys (assoc
                                  (get-simple-yritys (:yritys suunnittelija))
                                  :postiosoite osoite))

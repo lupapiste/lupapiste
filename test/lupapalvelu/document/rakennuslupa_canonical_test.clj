@@ -709,7 +709,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
-    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
+    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")
 
     (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
@@ -727,8 +727,6 @@
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
-
-
 
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-viitelupatieto)
 
@@ -808,4 +806,60 @@
 
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")))
+
+(fl/facts* "Canonical model for aloitusilmoitus is correct"
+           (let [canonical (aloitusilmoitus-canonical (assoc application :state "verdictGiven") "sv" 1354532324658
+                                                      {:rakennusnro "002" :jarjestysnumero 1} {:id "777777777777777777000017"
+                                                                                               :email "jussi.viranomainen@tampere.fi"
+                                                                                               :enabled true
+                                                                                               :role "authority"
+                                                                                               :username "jussi"
+                                                                                               :organizations ["837-YA"]
+                                                                                               :firstName "Jussi"
+                                                                                               :lastName "Viranomainen"
+                                                                                               :street "Katuosoite 1 a 1"
+                                                                                               :phone "1231234567"
+                                                                                               :zip "33456"
+                                                                                               :city "Tampere"})
+
+                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+
+                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+                 mt (:MuuTunnus muuTunnustieto) => truthy
+
+                 tunnus (:tunnus mt) => "LP-753-2013-00001"
+                 sovellus (:sovellus mt) => "Lupapiste"
+
+                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+                 Osapuolet (:Osapuolet osapuolettieto) => truthy
+                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
+                 Osapuoli (:Osapuoli osapuolitieto) => truthy
+                 kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+                 henkilo (:henkilo Osapuoli) => truthy
+                 nimi (:nimi henkilo) => truthy
+                 etunimi (:etunimi nimi) => "Jussi"
+                 sukunimi (:sukunimi nimi) => "Viranomainen"
+                 osoite (:osoite henkilo) => truthy
+                 osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+                 puhelin (:puhelin henkilo) => "1231234567"
+
+                 katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+                 Katselmus (:Katselmus katselmustieto) => truthy
+                 rakennustunnus (:rakennustunnus Katselmus) => truthy
+                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 rakennusnumero (:rakennusnro rakennustunnus) => "002"
+                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"
+                 pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
+                 katselmuksenLaji (:katselmuksenLaji Katselmus)
+                 tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
+                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]))
 
