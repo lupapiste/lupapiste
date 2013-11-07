@@ -154,7 +154,7 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
             <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
-            <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
+            <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" class="error-message"></span>
           </div>
           <div class="clear"></div>
           <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
