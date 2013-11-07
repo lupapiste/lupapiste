@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.strings :refer :all]
             [clojure.walk :refer [keywordize-keys]]
+            [clojure.set :refer [union difference]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
@@ -111,8 +112,11 @@
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
 
+(defn- one-of-many-options [sub-schemas]
+  (map :name (:body (sub-schema-by-name sub-schemas schemas/select-one-of-key))))
+
 (defn- one-of-many-selection [sub-schemas path data]
-  (when-let [one-of (seq (map :name (:body (sub-schema-by-name sub-schemas "_selected"))))]
+  (when-let [one-of (seq (one-of-many-options sub-schemas))]
     (or (get-in data (conj path :_selected :value)) (first one-of))))
 
 (defn- validate-required-fields [schema-body path data validation-errors]
@@ -128,10 +132,14 @@
                       (if repeating
                         (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
                         (validate-required-fields body current-path data []))
-                      []))))]
-    (if-let [selected (one-of-many-selection schema-body path data)]
-      [(check (sub-schema-by-name schema-body selected))]
-      (map check schema-body))))
+                      []))))
+
+        selected (one-of-many-selection schema-body path data)
+        sub-schemas-to-validate (-> (set (map :name schema-body))
+                                  (difference (set (one-of-many-options schema-body)) #{schemas/select-one-of-key})
+                                  (union (when selected #{selected})))]
+
+      (map #(check (sub-schema-by-name schema-body %)) sub-schemas-to-validate)))
 
 (defn get-document-schema [{schema-info :schema-info}]
   (schemas/get-schema schema-info))

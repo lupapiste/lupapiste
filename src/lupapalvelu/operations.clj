@@ -14,33 +14,36 @@
 (def default-description "operations.tree.default-description")
 
 (def ^:private operation-tree-for-R
-  {:permit-type permit/R
-   :tree ["Rakentaminen ja purkaminen"
-          [["Uuden rakennuksen rakentaminen"
-            [["Asuinrakennus" :asuinrakennus]
-             ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
-             ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
-             ["Julkinen rakennus" :julkinen-rakennus]
-             ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
-           ["Rakennuksen korjaaminen tai muuttaminen"
-            [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
-             ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
-             ["Kayttotarkoituksen muutos" :kayttotark-muutos]
-             ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
-             ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
-             ["Markatilan laajentaminen" :markatilan-laajentaminen]
-             ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
-             ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
-             ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
-           ["Rakennelman rakentaminen"
-            [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
-             ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
-             ["Mainoslaite" :mainoslaite]
-             ["Aita" :aita]
-             ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
-             ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
-             ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-           ["Rakennuksen purkaminen" :purkaminen]]]})
+  (let [treepart [["Uuden rakennuksen rakentaminen"
+                   [["Asuinrakennus" :asuinrakennus]
+                    ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
+                    ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
+                    ["Julkinen rakennus" :julkinen-rakennus]
+                    ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
+                  ["Rakennuksen korjaaminen tai muuttaminen"
+                   [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
+                    ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
+                    ["Kayttotarkoituksen muutos" :kayttotark-muutos]
+                    ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
+                    ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
+                    ["Markatilan laajentaminen" :markatilan-laajentaminen]
+                    ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+                    ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
+                    ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
+                  ["Rakennelman rakentaminen"
+                   [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
+                    ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
+                    ["Mainoslaite" :mainoslaite]
+                    ["Aita" :aita]
+                    ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
+                    ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
+                    ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
+                  ["Rakennuksen purkaminen" :purkaminen]]]
+    {:permit-type permit/R
+     :tree ["Rakentaminen ja purkaminen"
+            (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
+              (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+              treepart)]}))
 
 (def ^:private operation-tree-for-environment-R
   {:permit-type permit/R
@@ -108,7 +111,7 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas (let [sc ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"]]
-                                (if (env/feature? :tyonjohtaja-osapuoli)
+                                (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja-osapuoli)
                                   (conj sc "tyonjohtaja")
                                   sc)))
 
@@ -145,12 +148,14 @@
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
+                                      ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                       :required (conj yleiset-alueet-common-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
                                       :attachments attachment/attachment-types-YA})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
+                                       ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                        :required (conj yleiset-alueet-common-schemas
                                                    "sijoituslupa-sijoituksen-tarkoitus")
                                        :attachments attachment/attachment-types-YA})
@@ -158,7 +163,7 @@
 (def ya-operations
   {:ya-kaivuulupa   {:schema "tyomaastaVastaava"
                      :permit-type "YA"
-                     :schema-data [[["_selected" :value] "yritys"]]
+                     :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                      :required (conj yleiset-alueet-common-schemas
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
@@ -335,7 +340,13 @@
                                    :permit-type "R"
                                    :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
-                                   :attachments []}}
+                                   :attachments []}
+
+     :tyonjohtaja                 {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["tyonjohtaja" ]
+                                   :attachments []}
+     }
     ya-operations))
 
 (defn permit-type-of-operation [operation]

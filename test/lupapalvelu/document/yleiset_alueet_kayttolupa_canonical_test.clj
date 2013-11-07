@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [sade.util :refer [contains-value?]]))
@@ -52,7 +53,7 @@
                              :statements statements})
 
 
-(def get-maksaja #'lupapalvelu.document.yleiset-alueet-canonical/get-maksaja)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-maksaja)
 
 (facts* "Kayttolupa canonical model is correct"
   (let [canonical (application-to-canonical kayttolupa-application "fi")

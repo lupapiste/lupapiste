@@ -18,20 +18,23 @@
              data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
           </h1>
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
           </div>
+
           <!-- State: -->
           <div>
-            <p data-bind="ltext: 'application.state'">Tila:</p>
+            <p data-bind="ltext: 'application.state'"></p>
             <span
               data-bind="ltext: state, attr: {'data-test-state': state}"
               data-test-id="application-state"
               class="application_summary_text">
             </span>
           </div>
+
           <!-- Submitted: -->
           <div data-bind="with: $root.application.data">
             <p data-bind="ltext: 'application.submissionDate'"></p>
@@ -49,6 +52,7 @@
               class="application_summary_text">
             </span>
           </div>
+
           <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
@@ -82,10 +86,8 @@
           </div>
           <!-- /ko -->
 
-
-        <!-- Subtypes: -->
-
-        <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
+          <!-- Subtypes: -->
+          <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
           <div>
             <p data-bind="ltext: 'application.permitSubtypes'"></p>
             <span class="application_summary_text">
@@ -95,6 +97,32 @@
             </span>
           </div>
           <!-- /ko -->
+
+          <!-- Link-permits: -->
+          <div data-bind="with: linkPermitData">
+            <p data-bind="ltext: 'application.linkPermits'"></p>
+            <span class="application_summary_text" data-bind="foreach: $data">
+              <span data-bind="text: $data.id, attr: {'data-test-link-permit': $data.id}"
+                    data-test-id="test-application-link-permit">
+              </span>
+              <a data-bind="ltext: 'application.linkPermitRemoveSelected',
+                            click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                 href="#" class="remove-link-permit"></a>
+            </span>
+          </div>
+
+          <!-- Applications linking to us: -->
+          <div data-bind="with: appsLinkingToUs">
+            <p data-bind="ltext: 'application.appsLinkingToUs'"></p>
+            <span class="application_summary_text" data-bind="foreach: $data">
+              <a data-bind="text: $data.id,
+                            click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                            attr: {'data-test-app-linking-to-us': $data.id}"
+                 data-test-id="test-application-app-linking-to-us"
+                 href="#" class="remove-link-permit"></a>
+            </span>
+          </div>
+
         </div>
 
 
@@ -120,9 +148,13 @@
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
+          <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export'),     enable: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
+          </button>
+          <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,  visible: $root.authorization.ok('add-link-permit'),        enable: $root.authorization.ok('add-link-permit')"        data-test-id="application-add-link-permit-btn">
+            <span data-bind="ltext: 'application.addLinkPermit'"></span>
+            <span class="icon add-grey left-align"></span>
           </button>
           <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
@@ -194,8 +226,8 @@
 
         <div id="application-info-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-          <p data-bind="ltext: 'application.applicationInfoDesc'" class="tab-info"></p>
-          <p data-bind="ltext: 'required.field.desc'"></p>
+          <p data-bind="lhtml: 'application.applicationInfoDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="applicationDocgen">
@@ -208,8 +240,8 @@
         </div>
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <p data-bind="ltext: 'application.partiesDesc'" class="tab-info"></p>
-          <p data-bind="ltext: 'required.field.desc'"></p>
+          <p data-bind="lhtml: 'application.partiesDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <div class="application_section" data-bind="with: application">
             <h2 class="application_section_header " onclick="accordion.click();">
               <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
@@ -254,7 +286,22 @@
 
         <div id="application-attachments-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'application.attachmentsDesc'" class="tab-info"></p>
+
+          <div class="attachment-legend">
+            <span class="ok icon"></span>
+            <span data-bind="ltext: 'ok.title'"></span>
+          </div>
+          <div class="attachment-legend">
+            <span class="new icon"></span>
+            <span data-bind="ltext: 'new.title'"></span>
+          </div>
+          <div class="attachment-legend">
+            <span class="missing icon"></span>
+            <span data-bind="ltext: 'missing.title'"></span>
+          </div>
+
+
           <div class="tab-wrapper">
             <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
 
@@ -274,7 +321,7 @@
 
                   <!-- ko foreach: attachments -->
                   <tr style="cursor: pointer;">
-                    <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></span> </td>
+                    <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span> </td>
                     <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                       <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                         <span data-bind="if: type">
@@ -337,7 +384,7 @@
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'application.verdictDesc'" class="tab-info"></p>
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
@@ -355,127 +402,129 @@
                   <span data-bind="text: $index() + 1"></span>
                 </h2>
                 <div class="accordion_content expanded">
-                <!--  ko if:  $data.paivamaarat -->
-                <div data-bind="if: paivamaarat.aloitettava" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.aloitettava'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.aloitettava"></span>
-                </div>
-                <div data-bind="if: paivamaarat.lainvoimainen" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.lainvoimainen'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.lainvoimainen"></span>
-                </div>
-                <div data-bind="if: paivamaarat.voimassaHetki" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.voimassaHetki'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.voimassaHetki"></span>
-                </div>
-                <div data-bind="if: paivamaarat.raukeamis" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.raukeamis'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.raukeamis"></span>
-                </div>
-                <div data-bind="if: paivamaarat.anto" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.anto'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.anto"></span>
-                </div>
-                <div data-bind="if: paivamaarat.viimeinenValitus" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.viimeinenValitus'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
-                </div>
-                <div data-bind="if: paivamaarat.julkipano" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.julkipano'"></label>
-                  <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
-                </div>
-                <!-- /ko --> <!-- /paivamaarat -->
+                  <div class="accordion-fields">
+                    <!--  ko if:  $data.paivamaarat -->
+                    <div data-bind="if: paivamaarat.aloitettava" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.aloitettava'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.aloitettava"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.lainvoimainen" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.lainvoimainen'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.lainvoimainen"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.voimassaHetki" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.voimassaHetki'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.voimassaHetki"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.raukeamis" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.raukeamis'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.raukeamis"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.anto" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.anto'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.anto"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.viimeinenValitus" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.viimeinenValitus'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.julkipano" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.julkipano'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
+                    </div>
+                    <!-- /ko --> <!-- /paivamaarat -->
 
-                <!--  ko if:  $data.lupamaaraykset -->
-                <h3 data-bind="ltext: 'verdict.lupamaaraukset'"></h3>
+                    <!--  ko if:  $data.lupamaaraykset -->
+                    <h3 data-bind="ltext: 'verdict.lupamaaraukset'"></h3>
 
-                <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
-                <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.autopaikkojaVahintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaVahintaan"></span></div>
-                <div data-bind="if: lupamaaraykset.autopaikkojaRakennettava" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.autopaikkojaRakennettava'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaRakennettava"></span></div>
-                <div data-bind="if: lupamaaraykset.autopaikkojaRakennettu" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.autopaikkojaRakennettu'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaRakennettu"></span></div>
-                <div data-bind="if: lupamaaraykset.autopaikkojaKiinteistolla" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.autopaikkojaKiinteistolla'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaKiinteistolla"></span></div>
-                <div data-bind="if: lupamaaraykset.autopaikkojaUlkopuolella" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.autopaikkojaUlkopuolella'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaUlkopuolella"></span></div>
-                <div data-bind="if: lupamaaraykset.kerrosala" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.kerrosala'"></label><span class="value" data-bind="text: lupamaaraykset.kerrosala"></span></div>
-                <div data-bind="if: lupamaaraykset.kokonaisala" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.kokonaisala'"></label><span class="value" data-bind="text: lupamaaraykset.kokonaisala"></span></div>
+                    <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
+                    <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.autopaikkojaVahintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaVahintaan"></span></div>
+                    <div data-bind="if: lupamaaraykset.autopaikkojaRakennettava" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.autopaikkojaRakennettava'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaRakennettava"></span></div>
+                    <div data-bind="if: lupamaaraykset.autopaikkojaRakennettu" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.autopaikkojaRakennettu'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaRakennettu"></span></div>
+                    <div data-bind="if: lupamaaraykset.autopaikkojaKiinteistolla" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.autopaikkojaKiinteistolla'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaKiinteistolla"></span></div>
+                    <div data-bind="if: lupamaaraykset.autopaikkojaUlkopuolella" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.autopaikkojaUlkopuolella'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaUlkopuolella"></span></div>
+                    <div data-bind="if: lupamaaraykset.kerrosala" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.kerrosala'"></label><span class="value" data-bind="text: lupamaaraykset.kerrosala"></span></div>
+                    <div data-bind="if: lupamaaraykset.kokonaisala" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.kokonaisala'"></label><span class="value" data-bind="text: lupamaaraykset.kokonaisala"></span></div>
 
-                <div data-bind="if: lupamaaraykset.vaaditutTyonjohtajat" class="key-value-pair">
-                  <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
-                  <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
-                </div>
+                    <div data-bind="if: lupamaaraykset.vaaditutTyonjohtajat" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
+                      <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
+                    </div>
 
-                <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
-                  <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
+                    <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
+                      <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
 
-                  <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
-                    <li data-bind='if: $data.katselmuksenLaji'>
-                      <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
-                      <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
-                        (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
-                      </span>
-                    </li>
-                  </ul>
-                </div>
+                      <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
+                        <li data-bind='if: $data.katselmuksenLaji'>
+                          <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
+                          <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
+                            (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
 
-                <div data-bind='if: lupamaaraykset.maaraykset'>
-                  <h3 data-bind="ltext: 'verdict.maaraykset'"></h3>
-                  <table class="table table-striped tablesorter">
-                    <thead>
-                      <tr>
-                        <th data-bind="ltext: 'verdict.maaraykset.maaraysaika'" style="width: 25%"></th>
-                        <!-- <th data-bind="ltext: 'verdict.maaraykset.toteutusHetki'"></th> -->
-                        <th data-bind="ltext: 'verdict.maaraykset.sisalto'"></th>
-                      </tr>
-                    </thead>
-                    <tbody data-bind="foreach: lupamaaraykset.maaraykset">
-                      <tr>
-                        <td data-bind='dateString: $data.maaraysaika'></td>
-                        <!-- <td data-bind='dateString: toteutusHetki'></td> -->
-                        <td data-bind='text: $data.sisalto'></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                    <div data-bind='if: lupamaaraykset.maaraykset'>
+                      <h3 data-bind="ltext: 'verdict.maaraykset'"></h3>
+                      <table class="table table-striped tablesorter">
+                        <thead>
+                          <tr>
+                            <th data-bind="ltext: 'verdict.maaraykset.maaraysaika'" style="width: 25%"></th>
+                            <!-- <th data-bind="ltext: 'verdict.maaraykset.toteutusHetki'"></th> -->
+                            <th data-bind="ltext: 'verdict.maaraykset.sisalto'"></th>
+                          </tr>
+                        </thead>
+                        <tbody data-bind="foreach: lupamaaraykset.maaraykset">
+                          <tr>
+                            <td data-bind='dateString: $data.maaraysaika'></td>
+                            <!-- <td data-bind='dateString: toteutusHetki'></td> -->
+                            <td data-bind='text: $data.sisalto'></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
 
-                <!-- /ko --> <!-- lupamaaraykset -->
+                    <!-- /ko --> <!-- lupamaaraykset -->
 
-                  <div data-bind="if: $data.poytakirjat">
-                    <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
-                    <table class="table table-striped tablesorter" id="application-verdict-details">
-                      <thead>
-                        <tr>
-                          <th data-bind="ltext: 'verdict.status'" colspan="2"></th>
-                          <th data-bind="ltext: 'verdict.pykala'"></th>
-                          <th data-bind="ltext: 'verdict.name'"></th>
-                          <th data-bind="ltext: 'verdict.paatospvm'"></th>
-                          <th data-bind="ltext: 'verdict.attachments'"></th>
-                        </tr>
-                      </thead>
-                      <tbody data-bind="foreach: $data.poytakirjat">
-                        <tr class="statement-row" >
-                          <td data-bind="if: $data.status">
-                            <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td>
-                          <td data-bind="text: $data.paatos"></td>
-                          <td data-bind="text: $data.pykala"></td>
-                          <td data-bind="text: $data.paatoksentekija"></td>
-                          <td data-bind="dateString: $data.paatospvm"></td>
-                          <td data-bind="foreach: $data.attachments">
-                            <span data-bind="with: $data.latestVersion">
-                              <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
-                                <i data-bind="ltext: contentType"></i>
-                                <i data-bind="size: size"></i><br/>
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <div data-bind="if: $data.poytakirjat">
+                      <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
+                      <table class="table table-striped tablesorter" id="application-verdict-details">
+                        <thead>
+                          <tr>
+                            <th data-bind="ltext: 'verdict.status'" colspan="2"></th>
+                            <th data-bind="ltext: 'verdict.pykala'"></th>
+                            <th data-bind="ltext: 'verdict.name'"></th>
+                            <th data-bind="ltext: 'verdict.paatospvm'"></th>
+                            <th data-bind="ltext: 'verdict.attachments'"></th>
+                          </tr>
+                        </thead>
+                        <tbody data-bind="foreach: $data.poytakirjat">
+                          <tr class="statement-row" >
+                            <td data-bind="if: $data.status">
+                              <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td>
+                            <td data-bind="text: $data.paatos"></td>
+                            <td data-bind="text: $data.pykala"></td>
+                            <td data-bind="text: $data.paatoksentekija"></td>
+                            <td data-bind="dateString: $data.paatospvm"></td>
+                            <td data-bind="foreach: $data.attachments">
+                              <span data-bind="with: $data.latestVersion">
+                                <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+                                  <i data-bind="ltext: contentType"></i>
+                                  <i data-bind="size: size"></i><br/>
+                              </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -505,7 +554,7 @@
           <div data-bind="with: $root.application.data" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="ltext: 'application.statementsDesc'" class="tab-info"></p>
+            <p data-bind="lhtml: 'application.statementsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -551,7 +600,7 @@
           <div data-bind="with: application" class="application-neighbors">
 
             <h1 data-bind="ltext: 'application.neighbors'">Naapurit</h1>
-            <p data-bind="ltext: 'application.neighborsDesc'" class="tab-info"></p>
+            <p data-bind="lhtml: 'application.neighborsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
@@ -621,7 +670,7 @@
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
-          <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
+          <p data-bind="lhtml: 'application.conversationDesc'" class="tab-info"></p>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
           <div class="process-nav"></div>
         </div>

@@ -1,0 +1,42 @@
+dummy: Tilapäinen
+ok: Ok
+
+users.table.email: email
+users.table.name: Nimi
+users.table.role: Rooli
+users.table.organizations: Organizaatiot
+users.table.active: Tila
+users.table.actions: Toiminnot
+users.table.lengthMenu: _MENU_ käyttäjää sivulla
+users.table.zeroRecords: <div style='padding: 50px'>Antamillasi hakuehdoilla ei löytynyt yhtään käyttäjää</div>
+users.table.info: Käyttäjät _START_ – _END_ / _TOTAL_
+users.data.enabled.true: Käytössä
+users.data.enabled.false: Suljettu
+users.filters.role: Rooli:
+users.filters.role.all: Kaikki
+users.filters.enabled: Tila:
+users.filters.enabled.all: Kaikki
+users.filters.search: Hae:
+
+users.op.disable: sulje
+users.op.disable.title: Suljetaan käyttäjän tili
+users.op.disable.message: Oletko varma että haluat sulkea käyttäjän tilin?
+users.op.enable: avaa
+users.op.enable.title: Avataan käyttäjän tili
+users.op.enable.message: Oletko varma että haluat avata käyttäjän tilin?
+users.op.resetPassword: resetoi salasana
+users.op.resetPassword.title: Salasanan resetointi
+users.op.resetPassword.message: Oletko varma että haluat lähettää käyttäjälle salasanan resetointi viestin?
+users.op.removeFromOrg: Poista
+users.op.removeFromOrg.title: Poista käyttäjä organisaatiosta
+users.op.removeFromOrg.message: Oletko varma että haluat poistaa käyttäjän organisaatiosta?
+
+auth-admin.admins: Organisaation viranomaiset:
+auth-admin.add-dialog.title: Lisää viranomainen organizaatioon
+auth-admin.add-dialog.email: Sähköposti:
+auth-admin.add-dialog.continue: Jatka...
+auth-admin.add-dialog.searching: Odota, käyttäjän tietoja haetaan...
+auth-admin.add-dialog.userAdded: Käyttäjä lisätty organisaatioon onnistuneesti.
+auth-admin.add-dialog.invitationSent: Käyttäjälle lähetetty kutsu sähköpostilla.
+
+authority-invite.title: Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi

@@ -54,7 +54,7 @@
   function SetPW() {
     var self = this;
 
-    self.token = ko.observable(window.location.hash.split("/")[2]);
+    self.token = ko.observable();
     self.password1 = ko.observable();
     self.password2 = ko.observable();
     self.passwordQuality = ko.computed(function() { return quality(self.password1()); });

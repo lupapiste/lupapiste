@@ -4,7 +4,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]))
 
-(def parse-target-env #'sade.env/parse-target-env)
+(testable-privates sade.env parse-target-env)
 
 (facts "target environment ID is parsed from build tag"
   (fact (parse-target-env "lupapiste - PROD - Build") => "PROD")

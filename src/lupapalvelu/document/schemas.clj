@@ -457,7 +457,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji"
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -523,7 +523,7 @@
               :body [{:name "purettu uudisrakentamisen vuoksi"}
                      {:name "purettu muusta syyst\u00e4"}
                      {:name "tuhoutunut"}
-                     {:name "r\u00e4sistymisen vuoksi hyl\u00e4tty"}
+                     {:name "r\u00e4nsistymisen vuoksi hyl\u00e4tty"}
                      {:name "poistaminen"}]}
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
@@ -558,7 +558,12 @@
 
 (defschemas
   1
-  [{:info {:name "hankkeen-kuvaus"
+  [{:info {:name "hankkeen-kuvaus-minimum"
+           :approvable true
+           :order 1}
+    :body [kuvaus]}
+
+   {:info {:name "hankkeen-kuvaus"
            :approvable true
            :order 1}
     :body [kuvaus
