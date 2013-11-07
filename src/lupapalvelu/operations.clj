@@ -345,9 +345,9 @@
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []}
 
-     :tyonjohtaja                 {:schema "hankkeen-kuvaus-minimum"
+     :tyonjohtaja                 {:schema "tyonjohtaja"
                                    :permit-type "R"
-                                   :required ["tyonjohtaja"]
+                                   :required ["hankkeen-kuvaus-minimum"]
                                    :attachments []}
 
      :suunnittelija               {:schema "hankkeen-kuvaus-minimum"
