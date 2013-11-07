@@ -191,9 +191,6 @@
 
 
 
-
-
-
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
     {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
@@ -241,10 +238,10 @@
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
                       :kayttotapaus (get-kayttotapaus documents toimenpiteet)
-                      :asianTiedot
-                      (if link-permit-data
-                        (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
-                        (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))}
+                      :asianTiedot (if link-permit-data
+                                     (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
+                                     (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}
                      }}}]
     (if link-permit-data
       ;; The link permit data exists in the received application
@@ -258,6 +255,4 @@
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
           toimenpiteet)
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-          (get-statements (:statements application)))
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lisatiedot]
-          (get-lisatiedot (:lisatiedot documents) lang))))))
+          (get-statements (:statements application)))))))
