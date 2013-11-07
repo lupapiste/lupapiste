@@ -378,7 +378,9 @@
         model        (if-not (blank? path)
                        (assoc-in {} (map keyword (split path #"\.")) person)
                        person)
-        updates      (tools/path-vals model)]
+        updates      (tools/path-vals model)
+        ; Path should exist in schema!
+        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
@@ -538,9 +540,7 @@
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
-            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
+                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
         (conj new-docs hakija)))))
 
 (defn- ->location [x y]

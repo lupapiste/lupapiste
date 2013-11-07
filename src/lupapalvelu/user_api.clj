@@ -162,10 +162,9 @@
 ;; General changes:
 ;;
 
-(def ^:private user-data-editable-fields [:firstName :lastName    
-                                          :street :city :zip :phone
-                                          :architect :degree :experience :fise :qualification
-                                          :companyName :companyId :companyStreet :companyZip :companyCity])
+(def ^:private user-data-editable-fields [:firstName :lastName :street :city :zip :phone
+                                          :architect :degree :fise
+                                          :companyName :companyId])
 
 (defn- validate-update-user! [caller user-data]
   (let [admin?          (= (-> caller :role keyword) :admin)
