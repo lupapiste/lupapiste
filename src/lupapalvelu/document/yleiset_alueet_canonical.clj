@@ -227,7 +227,7 @@
                                                         }})
 
         body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
-                               :luvanTunnisteTiedot (lupatunnus application)
+                               :luvanTunnisteTiedot (lupatunnus (:id application))
                                :alkuPvm alku-pvm
                                :loppuPvm loppu-pvm
                                :sijaintitieto (get-sijaintitieto application)

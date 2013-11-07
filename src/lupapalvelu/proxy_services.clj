@@ -1,6 +1,5 @@
 (ns lupapalvelu.proxy-services
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [clj-http.client :as client]
             [noir.response :as resp]
             [clojure.xml :as xml]
             [clojure.string :as s]

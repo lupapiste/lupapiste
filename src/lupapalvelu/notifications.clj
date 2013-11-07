@@ -106,6 +106,13 @@
                                                        :link-sv link-sv})]
     (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
 
+(defn send-invite-new-authority! [to token]
+  (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
+        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
+        msg (email/apply-template "authority-invite.md" {:link-fi link-fi
+                                                         :link-sv link-sv})]
+    (send-mail-to-recipients! [to] (loc "authority-invite.title") msg)))
+
 ;;
 ;; New stuff
 ;;
@@ -124,6 +131,7 @@
                                                       :link-fi (link-fn :fi)
                                                       :link-sv (link-fn :sv)})]
     (send-mail-to-recipients! [to-address]  subject msg)))
+
 
 (defn get-message-for-open-inforequest-invite [host token]
   (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
@@ -172,9 +180,8 @@
 
 (defn send-invite! [email text application host]
   (let [subject (get-email-subject application "invite")
-        msg     (message
-                (template "invite.html")
-                (replace-application-links "#link" application "" host))]
+        msg     (email/apply-template "invite.md" {:link-fi (get-application-link application "" host "fi")
+                                                   :link-sv (get-application-link application "" host "sv")})]
     (send-mail-to-recipients! [email] subject msg)))
 
 (defn send-notifications-on-application-state-change! [{:keys [id]} host]

@@ -8,6 +8,7 @@
   var applicationMap = null;
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
+  var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
 
@@ -312,6 +313,8 @@
     self.neighbors = ko.observable();
     self.nonpartyDocumentIndicator = ko.observable(0);
     self.partyDocumentIndicator = ko.observable(0);
+    self.linkPermitData = ko.observable({});
+    self.appsLinkingToUs = ko.observable({});
 
     self.attachmentsRequiringAction = ko.observable();
     self.unseenStatements = ko.observable();
@@ -341,9 +344,12 @@
     });
 
     self.openOskariMap = function() {
-      var url = '/oskari/fullmap.html?id=' + self.id() + '&coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
+      var coords = "&coord=" + self.location().x() + "_" + self.location().y();
+      var zoom = "&zoomLevel=12";
+      var features = "&addPoint=1&addArea=1";
+      var lang = "&lang=" + loc.getCurrentLanguage();
+      var url = '/oskari/fullmap.html?id=' + self.id() + coords + zoom + features + lang;
       window.open(url);
-      var applicationId = self.id();
     };
 
     self.submitApplication = function() {
@@ -512,21 +518,20 @@
   }
 
   function updatePermitSubtype(value){
-      if (isInitializing) { return; }
+    if (isInitializing) { return; }
 
-      ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
-      .success(function() {
-        authorizationModel.refresh(currentId);
-        })
-      .error(function(data) {
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+    ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
+    .success(function() {
+      authorizationModel.refresh(currentId);
       })
-      .call();
-
+    .error(function(data) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+    })
+    .call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
-  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);})
+  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
@@ -894,12 +899,14 @@
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
       sendNeighborEmailModel: sendNeighborEmailModel,
-      neighborStatusModel: neighborStatusModel
+      neighborStatusModel: neighborStatusModel,
+      addLinkPermitModel: addLinkPermitModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
     $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
+    $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
     attachmentTemplatesModel.init();
   });
 

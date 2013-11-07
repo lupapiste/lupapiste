@@ -1,7 +1,7 @@
 (ns lupapalvelu.api-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet])
-  (:require [lupapalvelu.domain :as domain]))
+  (:require [lupapalvelu.domain :as domain]
+            [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
 
@@ -27,19 +27,12 @@
   (let [resp  (query mikko :application :id id)
         application (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
-    (facts "Mikko can see hes application!"
+
+    (facts "Mikko can see his application!"
       (:ok resp)
       (:text rest)
       application => truthy
-      (:username (first (:auth application))) => "mikko@example.com"
-      (:role (first (:auth application))) => "owner"
-      ; These are not filled automatically any more
-      ;(get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Mikko"
-      ;(get-in hakija [:data :henkilo :henkilotiedot :sukunimi :value]) => "Intonen"
-
-      (let [listing (query mikko :applications)]
-        listing => ok?
-        (:id (first (:applications listing))) => id))
+      (:username (first (:auth application))) => "mikko@example.com")
 
     (fact "Disabled user must not see Mikko's application!"
       (raw-query dummy :application :id id) => invalid-csrf-token?)
@@ -57,9 +50,8 @@
       (command veikko :add-comment :id id :text "sonja" :target "application") => unauthorized?)
 
     (fact "Sonja must be able to see the application!"
-      (let [listing (query sonja :applications)]
-        listing => ok?
-        (-> listing :applications first :id) => id))
+      (let [resp (query sonja :application :id id)]
+        resp => ok?))
 
     (fact "Sonja must be able to comment!"
       (command sonja :add-comment :id id :text "sonja" :target "application") => ok?)

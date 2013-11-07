@@ -4,7 +4,7 @@
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical aloitusilmoitus-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.ke6666 :as ke6666]
@@ -33,13 +33,15 @@
                                            {:tag :jakokirjain}]}]})
 
 
+(def rakennustunnus [{:tag :jarjestysnumero}
+                     {:tag :kiinttun}
+                     {:tag :rakennusnro}])
+
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
                    {:tag :alkuHetki :ns "yht"}
                    mapping-common/sijantitieto
                    {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
-                                                          {:tag :kiinttun}
-                                                          {:tag :rakennusnro}]}
+                    :child [{:tag :rakennustunnus :child rakennustunnus}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}
@@ -111,6 +113,7 @@
                      :child [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                              {:tag :luvanTunnisteTiedot
                               :child [mapping-common/lupatunnus]}
+                             {:tag :viitelupatieto :child [mapping-common/lupatunnus]}
                              {:tag :osapuolettieto
                               :child [mapping-common/osapuolet]}
                              {:tag :rakennuspaikkatieto
@@ -142,6 +145,21 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
+                             {:tag :katselmustieto :child [{:tag :Katselmus :child [{:tag :rakennustunnus :child rakennustunnus}
+                                                                                    {:tag :tilanneKoodi}
+                                                                                    {:tag :pitoPvm}
+                                                                                    {:tag :osittainen}
+                                                                                    {:tag :pitaja}
+                                                                                    {:tag :katselmuksenLaji}
+                                                                                    {:tag :vaadittuLupaehtonaKytkin}
+                                                                                    {:tag :huomautukset :child [{:tag :huomautus :child [{:tag :kuvaus}
+                                                                                                                                         {:tag :maaraAika}
+                                                                                                                                         {:tag :toteamisHetki}
+                                                                                                                                         {:tag :toteaja}]}]}
+                                                                                    {:tag :katselmuspoytakirja}
+                                                                                    {:tag :tarkastuksenTaiKatselmuksenNimi}
+                                                                                    {:tag :lasnaolijat}
+                                                                                    {:tag :poikkeamat}]}]}
                              {:tag :lausuntotieto :child [mapping-common/lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
@@ -248,6 +266,18 @@
         current-file (file (str output-dir "/"  (mapping-common/get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
+
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
+  (let [canonical (aloitusilmoitus-canonical application lang started building-id user)
+        xml (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s (indent-str xml)]
+    (validate xml-s)
+    ;(with-open [out-file (writer "/Users/terotu/aloitusilmoitus.xml" )]
+     ;   (emit xml out-file))
+    ;TODO sanoaman muodostus ja muut jutut kallin teon yhteydessa
+    (println xml-s)
+    )
+  )
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))

@@ -4,7 +4,6 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [me.raynes.fs :as fs]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
@@ -289,8 +288,10 @@
   (redirect-to-server-root))
 
 ;; Saparate URL outside anti-csrf
-(defjson [:post "/api/login"] []
-  (execute-command "login"))
+(defjson [:post "/api/login"] {username :username :as params}
+  (if username
+    (execute-command "login" params)
+    (execute-command "login")))
 
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))

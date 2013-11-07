@@ -1,19 +1,19 @@
 (ns lupapalvelu.itest-util
-  (:use [lupapalvelu.fixture.minimal :only [users]]
-        [lupapalvelu.core :only [fail!]]
-        [clojure.walk :only [keywordize-keys]]
-        [swiss-arrows.core]
-        [midje.sweet])
-  (:require [clj-http.client :as c]
+  (:require [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.core :refer [fail!]]
+            [clojure.walk :refer [keywordize-keys]]
+            [swiss-arrows.core :refer [-<>>]]
+            [midje.sweet :refer :all]
+            [sade.http :as http]
             [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
             [cheshire.core :as json]
             [sade.util :refer [fn-> fn->>]]))
 
-(defn- find-user [username] (some #(when (= (:username %) username) %) users))
-(defn- id-for [username] (:id (find-user username)))
-(defn- apikey-for [username] (get-in (find-user username) [:private :apikey]))
+(defn- find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
+(defn- id-for [username] (:id (find-user-from-minimal username)))
+(defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
@@ -42,7 +42,7 @@
 (defn printed [x] (println x) x)
 
 (defn raw [apikey action & args]
-  (c/get
+  (http/get
     (str (server-address) "/api/raw/" (name action))
     {:headers {"authorization" (str "apikey=" apikey)}
      :query-params (apply hash-map args)
@@ -50,7 +50,7 @@
 
 (defn raw-query [apikey query-name & args]
   (decode-response
-    (c/get
+    (http/get
       (str (server-address) "/api/query/" (name query-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "accepts" "application/json;charset=utf-8"}
@@ -65,7 +65,7 @@
 
 (defn raw-command [apikey command-name & args]
   (decode-response
-    (c/post
+    (http/post
       (str (server-address) "/api/command/" (name command-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "content-type" "application/json;charset=utf-8"}
@@ -79,7 +79,7 @@
       body)))
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (decode-response (c/get (str (server-address) "/dev/fixture/" fixture-name)))]
+  (let [resp (decode-response (http/get (str (server-address) "/dev/fixture/" fixture-name)))]
     (assert (-> resp :body :ok))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
@@ -132,6 +132,8 @@
 (defn ok? [resp]
   (= (:ok resp) true))
 
+(def fail? (complement ok?))
+
 (fact "ok?"
   (ok? {:ok true}) => true
   (ok? {:ok false}) => false)
@@ -176,7 +178,8 @@
   "Fetch application from server.
    Asserts that application is found and that the application data looks sane."
   [apikey id]
-  {:post [(:id %)
+  {:pre  [apikey id]
+   :post [(:id %)
           (:created %) (pos? (:created %))
           (:modified %) (pos? (:modified %))
           (contains? % :opened)
@@ -221,7 +224,7 @@
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
-        resp        (c/post uri
+        resp        (http/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
                                    {:name "Content/type"   :content "text/plain"}
@@ -244,7 +247,7 @@
         uploadfile  (io/file filename)
         application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
-        resp        (c/post uri
+        resp        (http/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
                                    {:name "Content/type"   :content "text/plain"}
@@ -276,7 +279,7 @@
 
 (defn vetuma! [{:keys [userid firstname lastname] :as data}]
   (->
-    (c/get
+    (http/get
       (str (server-address) "/dev/api/vetuma")
       {:query-params (select-keys data [:userid :firstname :lastname])})
     decode-response

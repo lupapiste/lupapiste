@@ -3,30 +3,10 @@
   <body>
     <section class="page" id="admin">
       <div class="container">
-
-        <div data-bind="template: {name: 'admin-user-list-template',
-                                   data: {type: $root.users.type,
-                                          users: $root.users.data(),
-                                          usersListTitle: 'admin.admin-users',
-                                          addUserButtonLabel: 'admin.addAdminUser',
-                                          openCommandAddModal: $root.users.openCreateModal,
-                                          openCommandEditModal: $root.users.openModifyModal,
-                                          openCommandResetPwModal: $root.users.openPasswordModal}}">
-        </div>
-
-        <div data-bind="template: {name: 'admin-user-list-template',
-                                   data: {type: $root.applicantUsers.type,
-                                          users: $root.applicantUsers.data(),
-                                          usersListTitle: 'admin.applicant-users',
-                                          addUserButtonLabel: 'admin.addApplicantUser',
-                                          openCommandEditModal: $root.applicantUsers.openModifyModal}}">
-        </div>
-
-
-        <div data-bind="template: {name: 'user-modification-dialogs-template',
-                                   data: {addUserTitle: 'admin.addAdminUser',
-                                          modifyUserTitle: 'admin.editAdminUser'}}">
-        </div>
+        
+        <h1>Admin</h1>
+        
+        <p>Eh, welcome...or what ever.</p>
 
       </div>
     </section>

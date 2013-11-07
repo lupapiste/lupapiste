@@ -1,8 +1,7 @@
 (ns lupapalvelu.attachment-itest
-  (:use [lupapalvelu.attachment]
-        [lupapalvelu.itest-util]
-        [midje.sweet])
-  (:require [clj-http.client :as c]))
+  (:require [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [application-id attachment-id]
   (let [application     (query-application pena application-id)]

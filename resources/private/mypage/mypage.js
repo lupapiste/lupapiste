@@ -78,7 +78,7 @@
     };
 
     self.ok = ko.computed(function() { return isNotBlank(self.firstName()) && isNotBlank(self.lastName()); }, self);
-    self.save = makeSaveFn("save-user-info",
+    self.save = makeSaveFn("update-user",
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",

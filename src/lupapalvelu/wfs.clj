@@ -1,7 +1,7 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn errorf fatal]]
-            [clj-http.client :as client]
+            [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
@@ -13,8 +13,6 @@
 ;;
 ;; config:
 ;;
-
-(def ^:private timeout 10000)
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
@@ -163,12 +161,8 @@
 ;; Executing HTTP calls to Maanmittauslaitos:
 ;;
 
-(def ^:private base-request {:socket-timeout timeout
-                             :conn-timeout timeout
-                             :throw-exceptions false})
-
-(def ^:private http-method {:post [client/post :body]
-                            :get  [client/get  :query-params]})
+(def ^:private http-method {:post [http/post :body]
+                            :get  [http/get  :query-params]})
 
 (defn- exec-http [http-fn url request]
   (try
@@ -181,9 +175,10 @@
 
 (defn- exec [method url q]
   (let [[http-fn param-key] (method http-method)
-        request (assoc base-request
-                       :basic-auth (auth url)
-                       param-key q)
+        timeout (env/value :http-client :conn-timeout)
+        request {:throw-exceptions false
+                 :basic-auth (auth url)
+                 param-key q}
         task (future* (exec-http http-fn url request))
         [status data] (deref task timeout [:timeout])]
     (condp = status
@@ -230,7 +225,7 @@
 ;;
 (defn raster-images [request]
   (let [layer (get-in request [:params "LAYERS"])]
-    (client/get "https://ws.nls.fi/rasteriaineistot/image"
+    (http/get "https://ws.nls.fi/rasteriaineistot/image"
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :basic-auth (:raster auth)
