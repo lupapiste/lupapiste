@@ -31,7 +31,7 @@
 
     (validate xml-s)  ;; in lupapalvelu.xml.krysp.validator
 
-    (save-aloitusilmoitus-as-krysp (assoc application :state "verdictGiven") "fi" "" (lupapalvelu.core/now) {:jarjestysnumero 1 :rakennusnro "123"} {:id "777777777777777777000017"
+    #_(save-aloitusilmoitus-as-krysp (assoc application :state "verdictGiven") "fi" "" (lupapalvelu.core/now) {:jarjestysnumero 1 :rakennusnro "123"} {:id "777777777777777777000017"
                                                                                       :email "jussi.viranomainen@tampere.fi"
                                                                                       :enabled true
                                                                                       :role "authority"

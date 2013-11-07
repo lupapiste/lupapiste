@@ -271,8 +271,9 @@
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     (validate xml-s)
-    (with-open [out-file (writer "/Users/terotu/aloitusilmoitus.xml" )]
-        (emit xml out-file))
+    ;(with-open [out-file (writer "/Users/terotu/aloitusilmoitus.xml" )]
+     ;   (emit xml out-file))
+    ;TODO sanoaman muodostus ja muut jutut kallin teon yhteydessa
     (println xml-s)
     )
   )
