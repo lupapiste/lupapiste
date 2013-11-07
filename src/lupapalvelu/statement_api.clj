@@ -7,6 +7,7 @@
             [lupapalvelu.action :refer [defquery defcommand with-application executed]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]
@@ -73,7 +74,7 @@
           (let [now            (now)
                 personIdSet    (set personIds)
                 persons        (filter #(-> % :id personIdSet) statementPersons)
-                users          (map #(user/get-or-create-user-by-email (:email %)) persons)
+                users          (map #(user-api/get-or-create-user-by-email (:email %)) persons)
                 writers        (map #(user/user-in-role % :writer) users)
                 new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
                 new-userids    (set (map :id new-writers))
