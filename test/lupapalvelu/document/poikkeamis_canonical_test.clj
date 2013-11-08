@@ -145,7 +145,7 @@
                  :patevyys {:koulutus {:value "Arkkitehti"}
                             :valmistumisvuosi {:value "2010"}
                             :patevyysluokka {:value "AA"}
-                            :kokemus {:value "10"}
+                            :kokemus {:value "3"}
                             :fise {:value "http://www.solita.fi"}}
                  :userId {:value "777777777777777777000020"}
                  :yhteystiedot {:email {:value "pena@example.com"}
@@ -178,7 +178,7 @@
                                                   :patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"}
                                                              :valmistumisvuosi {:value "2010"}
                                                              :patevyysluokka {:value "C"}
-                                                             :kokemus {:value "10"}
+                                                             :kokemus {:value "3"}
                                                              :fise {:value "http://www.solita.fi"}}
                                                   :userId {:value "777777777777777777000020"}
                                                   :yhteystiedot {:email {:value "pena@example.com"}
@@ -419,7 +419,7 @@
         _ (:koulutus Suunnittelija) => "Arkkitehti"
         _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
         _ (:valmistumisvuosi Suunnittelija) => "2010"
-        _ (:kokemusvuodet Suunnittelija) => "10"
+        _ (:kokemusvuodet Suunnittelija) => "3"
 
         ;Suunnittelija
         suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
@@ -438,7 +438,7 @@
         _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
         _ (:valmistumisvuosi Suunnittelija) => "2010"
-        _ (:kokemusvuodet Suunnittelija) => "10"
+        _ (:kokemusvuodet Suunnittelija) => "3"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
         Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
