@@ -57,37 +57,37 @@
 (defn- validate-create-new-user! [caller user-data]
   (when-let [missing (util/missing-keys user-data [:email :role])]
     (fail! :missing-required-key :missing missing))
-  
+
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
         caller-role      (keyword (:role caller))
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
-  
+
     (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
       (fail! :invalid-role :desc "new user has unsupported role" :user-role user-role))
-    
+
     (when (and (#{:authorityAdmin :applicant} user-role) (not admin?))
       (fail! :forbidden :desc "only admin can create authorityAdmin and applicant users"))
-    
+
     (when (and (= user-role :authority) (not authorityAdmin?))
       (fail! :forbidden :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
-    
+
     (when (and (= user-role :authority) (not (:organization user-data)))
       (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
-    
+
     (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
       (fail! :forbidden :desc "authorityAdmin can create users into his/her own organization only"))
 
     (when (and (= user-role :dummy) (:organization user-data))
       (fail! :forbidden :desc "dummy user may not have an organization" :missing :organization))
-    
+
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
-    
+
     (when (and (= "true" (:enabled user-data)) (not admin?))
       (fail! :forbidden :desc "only admin can create enabled users"))
-    
+
     (when (and (:apikey user-data) (not admin?))
       (fail! :forbidden :desc "only admin can create create users with apikey")))
 
@@ -174,24 +174,21 @@
     (if admin?
       (when (= user-email caller-email)    (fail! :forbidden :desc "admin may not change his/her own data"))
       (when (not= user-email caller-email) (fail! :forbidden :desc "can't edit others data")))
-    
+
     true))
 
 (defcommand update-user
+  {:authenticated true}
   [{caller :user user-data :data}]
   (let [email     (ss/lower-case (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
-    (clojure.pprint/pprint user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
-      (let [user (user/get-user-by-email email)]
-        (session/put! :user user)
+      (do
+        (when (= email (:email caller))
+          (session/put! :user (user/get-user-by-email email)))
         (ok))
       (fail :not-found :email email))))
-
-; TODO: Does above need:
-; (when (= email (:email caller))
-;   (session/put! :user (user/get-user-by-email email)))
 
 ;;
 ;; Change organization data:
@@ -230,7 +227,7 @@
 ;;
 
 ;; TODO: Remove this, change all password changes to use 'reset-password'.
-;; Note: When this is removed, remove user/change-password too. 
+;; Note: When this is removed, remove user/change-password too.
 (defcommand change-passwd
   {:parameters [:oldPassword :newPassword]
    :authenticated true
@@ -381,7 +378,8 @@
      :body (str "can't file attachment: id=" attachment-id)}))
 
 (defcommand remove-user-attachment
-  {:parameters [attachment-id]}
+  {:parameters [attachment-id]
+   :authenticated true}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$unset {(str "attachments." attachment-id) nil}})
