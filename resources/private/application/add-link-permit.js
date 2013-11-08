@@ -79,20 +79,46 @@ LUPAPISTE.AddLinkPermitModel = function() {
     return false;
   };
 
-  self.removeSelectedLinkPermit = function(appId, linkPermitId) {
-    ajax.command("remove-link-permit-by-app-id", {id: appId, linkPermitId: linkPermitId})
+
+  // Permit link removal
+  //
+
+  self.removeAppId = null;
+  self.removeLinkPermitId = null;
+
+  self.doRemove = function() {
+    ajax.command("remove-link-permit-by-app-id", {id: self.removeAppId, linkPermitId: self.removeLinkPermitId})
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
         self.errorMessage(null);
         self.selectedLinkPermit("");
         self.kuntalupatunnus("");
-        repository.load(appId);
+        repository.load(self.removeAppId);
+      })
+      .complete(function() {
+        self.removeAppId = null;
+        self.removeLinkPermitId = null;
       })
       .error(self.onError)
       .call();
     return false;
   };
+
+  self.removeSelectedLinkPermit = function(appId, linkPermitId) {
+    self.removeAppId = appId;
+    self.removeLinkPermitId = linkPermitId;
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("linkPermit.remove.header"),
+        loc("linkPermit.remove.message", linkPermitId),
+        {title: loc("yes"), fn: self.doRemove},
+        {title: loc("no")}
+      );
+  };
+
+
+  // Follow link to app that is linking to us
+  //
 
   self.followAppLink = function(linkId) {
     window.location.hash = "#!/application/" + linkId;
