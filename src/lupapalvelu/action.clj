@@ -124,6 +124,10 @@
     (tracef "command '%s' is unauthorized for role '%s'" (-> command :action) (-> command :user :role))
     (fail :error.unauthorized)))
 
+(defn impersonation [command]
+  (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
+    (fail :error.unauthorized)))
+
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
     (info "missing parameters:" (s/join ", " missing))
@@ -169,18 +173,16 @@
           (infof "no handler for action '%s'" name))
         (ok)))))
 
-(def execute-validators [missing-command
-                         missing-feature
-                         not-authenticated
-                         invalid-type
-                         missing-roles
-                         missing-parameters
-                         input-validators-fail])
-
 (def authorize-validators [missing-command
                            missing-feature
                            not-authenticated
-                           missing-roles])
+                           missing-roles
+                           impersonation])
+
+(def execute-validators (conj authorize-validators
+                          invalid-type
+                          missing-parameters
+                          input-validators-fail))
 
 (defn requires-application? [{data :data}]
   (contains? data :id))
