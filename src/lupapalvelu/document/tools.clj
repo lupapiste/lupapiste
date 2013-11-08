@@ -30,6 +30,7 @@
                         :vrk-address      "Ranta\"tie\" 66:*"
                         :vrk-name         "Ilkka"
                         :y-tunnus         "2341528-4"
+                        :rakennusnumero   "001"
                         nil               "string"
                         :letter           (condp = (keyword case)
                                             :lower "a"
