@@ -96,15 +96,15 @@
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (cond (-> toimenpide :manuaalinen_rakennusnro :value)
                                  {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro :value)
-                                                   :jarjestysnumero nil
-                                                   :kiinttun (:propertyId application)}}
-                                 (-> toimenpide :rakennusnro :value)
-                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
-                                                   :jarjestysnumero nil
-                                                   :kiinttun (:propertyId application)}}
-                                 :default
-                                 {:rakennustunnus {:jarjestysnumero nil
-                                                   :kiinttun (:propertyId application)}})
+                                                     :jarjestysnumero nil
+                                                    :kiinttun (:propertyId application)}}
+                                     (-> toimenpide :rakennusnro :value)
+                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                                                     :jarjestysnumero nil
+                                                     :kiinttun (:propertyId application)}}
+                                     :default
+                                       {:rakennustunnus {:jarjestysnumero nil
+                                                         :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
