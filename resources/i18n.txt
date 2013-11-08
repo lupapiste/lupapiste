@@ -40,3 +40,46 @@ auth-admin.add-dialog.userAdded: Käyttäjä lisätty organisaatioon onnistunees
 auth-admin.add-dialog.invitationSent: Käyttäjälle lähetetty kutsu sähköpostilla.
 
 authority-invite.title: Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi
+
+help.R.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot. Voit halutessasi hakea samalla hakemuksella lupaa <b>useammalle toimenpiteelle</b>, kuten omakotitalon rakentamiselle ja vanhan rakennuksen purkamiselle, jos toimenpiteet suoritetaan samalla kiinteistöllä tai rakennusalueella. Uusia toimenpiteitä voit lisätä painamalla "Lisää toimenpide" - nappia sivun oikeassa yläreunassa.
+help.YA.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot. 
+help.Y.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot.
+help.P.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot.
+
+help.R.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat tai suunnittelijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>. 
+help.YA.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat tai suunnittelijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>. 
+help.Y.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat tai suunnittelijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>. 
+help.P.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat tai suunnittelijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>. 
+
+help.R.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+help.YA.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+help.Y.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+help.P.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+
+help.R.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
+help.YA.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
+help.Y.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
+help.P.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
+
+help.R.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
+help.YA.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
+help.Y.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
+help.P.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
+
+help.R.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai lähettää naapurille <b>tiedotteen sähköpostitse</b> Lupapisteen kautta.
+help.YA.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai lähettää naapurille <b>tiedotteen sähköpostitse</b> Lupapisteen kautta.
+help.Y.neighborstDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai lähettää naapurille <b>tiedotteen sähköpostitse</b> Lupapisteen kautta.
+help.P.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai lähettää naapurille <b>tiedotteen sähköpostitse</b> Lupapisteen kautta.
+
+help.R.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, <b>viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin</b>. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+help.YA.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten ja hakemukselle valtuutettujen henkilöiden kanssa. Kun kirjoitat viestin, <b>viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin</b>. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+help.Y.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten ja hakemukselle valtuutettujen henkilöiden kanssa. Kun kirjoitat viestin, <b>viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin</b>. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+help.P.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten ja hakemukselle valtuutettujen henkilöiden kanssa. Kun kirjoitat viestin, <b>viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin</b>. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+
+help.undefined.applicationInfoDesc: 
+help.undefined.PartiesDesc: 
+help.undefined.attachmentsDesc: 
+help.undefined.verdictDesc: 
+help.undefined.neighborsDesc: 
+help.undefined.conversationDesc: 
+help.undefined.statementsDesc:  
