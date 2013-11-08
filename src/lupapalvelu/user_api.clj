@@ -162,10 +162,9 @@
 ;; General changes:
 ;;
 
-(def ^:private user-data-editable-fields [:firstName :lastName    
-                                          :street :city :zip :phone
-                                          :architect :degree :experience :fise :qualification
-                                          :companyName :companyId :companyStreet :companyZip :companyCity])
+(def ^:private user-data-editable-fields [:firstName :lastName :street :city :zip :phone
+                                          :architect :degree :fise
+                                          :companyName :companyId])
 
 (defn- validate-update-user! [caller user-data]
   (let [admin?          (= (-> caller :role keyword) :admin)
@@ -183,8 +182,11 @@
   (let [email     (ss/lower-case (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
+    (clojure.pprint/pprint user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
-      (ok)
+      (let [user (user/get-user-by-email email)]
+        (session/put! :user user)
+        (ok))
       (fail :not-found :email email))))
 
 ; TODO: Does above need:

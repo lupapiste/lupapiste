@@ -40,8 +40,7 @@
     (:state application) => "draft"
     (:opened application) => nil
     (count (:comments application)) => 1
-    (-> (:comments application) first :text) => "hello"
-    (tools/unwrapped (-> hakija :data :henkilo :henkilotiedot)) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
+    (-> (:comments application) first :text) => "hello"))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "753")
@@ -199,6 +198,11 @@
     resp =not=> ok?
     (:text resp) => "error.new-applications-disabled"))
 
+(defn in? 
+  "true if seq contains elm"
+  [seq elm]  
+  (some #(= elm %) seq))
+
 (defn- set-and-check-person [api-key application-id initial-document path]
   (fact "initially there is no person data"
        initial-document => truthy
@@ -209,10 +213,17 @@
       (let [updated-app (query-application mikko application-id)
             update-doc (domain/get-document-by-id updated-app (:id initial-document))
             schema-name  (get-in update-doc [:schema-info :name])
-            person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))]
+            person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))
+            company-path (into [] (concat [:data] (map keyword path) [:yritys]))
+            experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
+            suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
 
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
-        (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen")))
+        (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
+        (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
+        (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
+        (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
+        (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
 
 (facts "Set user to document"
   (let [application-id   (create-app-id mikko :municipality sonja-muni)
@@ -234,7 +245,7 @@
           code "RAK-rakennesuunnittelija"]
 
       (fact "suunnittelija kuntaroolikoodi is set"
-        (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code]]) => ok?
+        (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code] ["patevyys.kokemus" "10"] ["patevyys.patevyysluokka" "AA"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
@@ -246,6 +257,12 @@
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
+          (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
+          (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
+          (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
+          (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
+          (get-in updated-suunnittelija [:data :patevyys :kokemus :value]) => "10"
+          (get-in updated-suunnittelija [:data :patevyys :patevyysluokka :value]) => "AA"
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
 

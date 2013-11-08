@@ -40,3 +40,11 @@ auth-admin.add-dialog.userAdded: Käyttäjä lisätty organisaatioon onnistunees
 auth-admin.add-dialog.invitationSent: Käyttäjälle lähetetty kutsu sähköpostilla.
 
 authority-invite.title: Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi
+
+architect.company.title: Yrityksen tiedot
+architect.experience.title: Suunnittelijan kokemus
+paasuunnittelija.patevyys.tutkinto: Tutkinto
+paasuunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
+suunnittelija.patevyys.tutkinto: Tutkinto
+suunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
+suunnittelija.patevyys.kokemus: Kokemus

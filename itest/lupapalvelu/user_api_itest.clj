@@ -106,14 +106,9 @@
                 :phone "0505503171"
                 :architect true
                 :degree "d"
-                :experience 5
                 :fise "f"
-                :qualification "q"
                 :companyName "cn"
-                :companyId "cid"
-                :companyStreet "cs"
-                :companyZip "cz"
-                :companyCity "cc"}]
+                :companyId "cid"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 
