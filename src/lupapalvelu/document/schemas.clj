@@ -68,7 +68,7 @@
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}
-                           {:name "manuaalinen_rakennusnro" :type :string}])
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :number :max-len 3}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
