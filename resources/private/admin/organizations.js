@@ -18,7 +18,13 @@
     };
 
     self.loginAs = function(organization) {
-      console.log(organization);
+      ajax
+        .command("impersonate-authority", {organizationId: organization.id})
+        .success(function(d) {
+          console.log(d);
+          console.log(organization);
+        })
+        .call();
       return false;
     };
   }
