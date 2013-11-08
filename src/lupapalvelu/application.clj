@@ -958,7 +958,7 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
-(defcommand "applications-for-datatables"
+(defquery "applications-for-datatables"
   {:parameters [:params]
    :verified true}
   [{user :user {params :params} :data}]
