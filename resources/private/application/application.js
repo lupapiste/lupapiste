@@ -458,6 +458,10 @@
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     };
 
+    self.sendUnsentAttachmentsToBackingSystem = function() {
+      attachment.sendUnsentAttachmentsToBackingSystem();
+    };
+
     self.changeTab = function(model,event) {
       var $target = $(event.target);
       while ($target.is("span")) {

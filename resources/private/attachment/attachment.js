@@ -288,12 +288,36 @@ var attachment = (function() {
     iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
   }
 
+
+
+  // Tarvittaessa tahan voi tehda confirmation modaalin, kts. esim "deleteAttachment"
+  function sendUnsentAttachmentsToBackingSystem() {
+    console.log("entered sendUnsentAttachmentsToBackingSystem");
+
+    ajax
+      .command("move-attachments-to-backing-system"/*, {id: applicationId, attachmentId: attachmentId}*/)
+      .success(function() {
+        console.log("sendUnsentAttachmentsToBackingSystem, SUCCESS");
+        repository.load(applicationId);
+//        return false;
+      })
+      .error(function() {
+        console.log("sendUnsentAttachmentsToBackingSystem, ERROR");
+        repository.load(applicationId);
+      })
+    .call();
+  return false;
+  }
+
+
+
   function regroupAttachmentTypeList(types) {
     return _.map(types, function(v) { return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })}; });
   }
 
   return {
     initFileUpload: initFileUpload,
+    sendUnsentAttachmentsToBackingSystem: sendUnsentAttachmentsToBackingSystem,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 

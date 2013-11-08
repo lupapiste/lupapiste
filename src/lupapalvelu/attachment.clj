@@ -390,6 +390,11 @@
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
+(defn if-not-authority-states-must-match [state-set]
+  (fn [{user :user} {state :state}]
+    (when (and (not= (:role user) "authority") (state-set (keyword state)))
+      (fail :error.non-authority-viewing-application-in-verdictgiven-state))))
+
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
@@ -404,9 +409,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked (fn [{user :user} {state :state}]
-                                           (when (and (not= (:role user) "authority") (#{:sent :verdictGiven} (keyword state)))
-                                             (fail :error.non-authority-viewing-application-in-verdictgiven-state)))]
+   :validators [attachment-is-not-locked (if-not-authority-states-must-match #{:sent :verdictGiven})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
@@ -431,6 +434,23 @@
                                :filename (:filename attachment-version)
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
+
+(defcommand move-attachments-to-backing-system
+  {;:parameters []
+   :roles      [:authority]
+   :validators [attachment-is-not-locked (if-not-authority-states-must-match #{:sent :verdictGiven})]
+   ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?
+;   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
+;                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
+   :states     [:sent :verdictGiven]
+   :description "Sends such attachments to backing system that are not yet sent."}
+  [{:keys [created user application] {:keys [text target locked]} :data :as command}]
+
+  (println "\n entered defcommand move-attachments-to-backing-system")
+  ;;
+  ;; TODO
+  ;;
+  )
 
 ;;
 ;; Download
