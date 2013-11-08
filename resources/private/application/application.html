@@ -218,7 +218,7 @@
       <div class="sidebar">
         <aside class="instructions">
             <h3 data-bind="ltext: 'help'">Ohje</h3>
-            <p data-bind="ltext: 'application.helpText'"></p>
+            <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
         </aside>
       </div>
 
@@ -226,7 +226,7 @@
 
         <div id="application-info-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-          <p data-bind="lhtml: 'application.applicationInfoDesc'" class="tab-info"></p>
+          <p data-bind="html: loc('help.' + $root.application.permitType() + '.applicationInfoDesc')" class="tab-info"></p>
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
@@ -240,7 +240,7 @@
         </div>
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <p data-bind="lhtml: 'application.partiesDesc'" class="tab-info"></p>
+          <p data-bind="html: loc('help.' + $root.application.permitType() + '.PartiesDesc')" class="tab-info"></p>
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <div class="application_section" data-bind="with: application">
             <h2 class="application_section_header " onclick="accordion.click();">
@@ -281,13 +281,11 @@
             <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments"><span data-bind="ltext: 'application.next-tab'"></span><span class="icon drill-right-orange inline-right"></span></a>
             <a class="btn process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="info"><span data-bind="ltext: 'application.previous-tab'"></span><span class="icon drill-left-black-bigger inline-left"></span></a>
           </div>
-
         </div>
 
         <div id="application-attachments-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <p data-bind="lhtml: 'application.attachmentsDesc'" class="tab-info"></p>
-
+          <p data-bind="html: loc('help.' + $root.application.permitType() + '.attachmentsDesc')" class="tab-info"></p>
           <div class="attachment-legend">
             <span class="ok icon"></span>
             <span data-bind="ltext: 'ok.title'"></span>
@@ -384,7 +382,7 @@
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <p data-bind="lhtml: 'application.verdictDesc'" class="tab-info"></p>
+          <p data-bind="html: loc('help.' + $root.application.permitType() + '.verdictDesc')" class="tab-info"></p>
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
@@ -554,7 +552,7 @@
           <div data-bind="with: $root.application.data" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="lhtml: 'application.statementsDesc'" class="tab-info"></p>
+            <p data-bind="html: loc('help.' + $root.application.permitType() + '.statementsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -600,7 +598,7 @@
           <div data-bind="with: application" class="application-neighbors">
 
             <h1 data-bind="ltext: 'application.neighbors'">Naapurit</h1>
-            <p data-bind="lhtml: 'application.neighborsDesc'" class="tab-info"></p>
+            <p data-bind="html: loc('help.' + $root.application.permitType() + '.neighborsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
@@ -670,7 +668,7 @@
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
-          <p data-bind="lhtml: 'application.conversationDesc'" class="tab-info"></p>
+          <p data-bind="html: loc('help.' + $root.application.permitType() + '.conversationDesc')" class="tab-info"></p>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
           <div class="process-nav"></div>
         </div>
