@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Authority admin goes to admin page
   Sipoo logs in
-  Wait until page contains element  test-authority-admin-users-table
+  Wait until page contains  Organisaation viranomaiset
 
 Statement person can be deleted - no questions asked
   Statement person count is  1
