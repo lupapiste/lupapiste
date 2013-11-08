@@ -218,7 +218,7 @@
       <div class="sidebar">
         <aside class="instructions">
             <h3 data-bind="ltext: 'help'">Ohje</h3>
-            <p data-bind="ltext: 'application.helpText'"></p>
+            <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
         </aside>
       </div>
 
