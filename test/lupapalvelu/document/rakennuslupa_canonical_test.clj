@@ -808,19 +808,23 @@
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [canonical (aloitusilmoitus-canonical (assoc application :state "verdictGiven") "sv" 1354532324658
-                                                      {:rakennusnro "002" :jarjestysnumero 1} {:id "777777777777777777000017"
-                                                                                               :email "jussi.viranomainen@tampere.fi"
-                                                                                               :enabled true
-                                                                                               :role "authority"
-                                                                                               :username "jussi"
-                                                                                               :organizations ["837-YA"]
-                                                                                               :firstName "Jussi"
-                                                                                               :lastName "Viranomainen"
-                                                                                               :street "Katuosoite 1 a 1"
-                                                                                               :phone "1231234567"
-                                                                                               :zip "33456"
-                                                                                               :city "Tampere"})
+           (let [canonical (aloitusilmoitus-canonical
+                             (assoc application :state "verdictGiven")
+                             "sv"
+                             1354532324658
+                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:id "777777777777777777000017"
+                              :email "jussi.viranomainen@tampere.fi"
+                              :enabled true
+                              :role "authority"
+                              :username "jussi"
+                              :organizations ["837-YA"]
+                              :firstName "Jussi"
+                              :lastName "Viranomainen"
+                              :street "Katuosoite 1 a 1"
+                              :phone "1231234567"
+                              :zip "33456"
+                              :city "Tampere"})
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
