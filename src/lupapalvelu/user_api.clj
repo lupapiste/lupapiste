@@ -308,8 +308,11 @@
   {:parameters [organizationId]
    :roles [:admin]
    :description "Changes admin session into authority session with access to given organization"}
-  (ok)
-  )
+  [{user :user}]
+  ; TODO check (secondary) password or other security measures?
+  (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
+    (session/put! :user imposter)
+    (ok :user imposter)))
 
 ;;
 ;; ==============================================================================

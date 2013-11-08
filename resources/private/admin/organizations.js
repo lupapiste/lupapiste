@@ -21,8 +21,7 @@
       ajax
         .command("impersonate-authority", {organizationId: organization.id})
         .success(function(d) {
-          console.log(d);
-          console.log(organization);
+          window.location.href = "/app/fi/authority";
         })
         .call();
       return false;
