@@ -49,3 +49,7 @@ paasuunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
 suunnittelija.patevyys.tutkinto: Tutkinto
 suunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
 suunnittelija.patevyys.kokemus: Kokemus
+
+attachmentType.rakentamisen_aikaiset._group_label: Rakentamisen aikaiset
+attachmentType.rakentamisen_aikaiset.erityissuunnitelma: Erityissuunnitelma
+application.attachmentsMoveToBackingSystem: Siirrä liitteet taustajärjestelmään
