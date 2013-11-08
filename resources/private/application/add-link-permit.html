@@ -11,7 +11,7 @@
 
           <div class="dialog-content">
 
-            <p><b data-bind ="ltext: 'linkPermit.dialog.helpParagraph'"></b></p>
+            <p data-bind ="lhtml: 'linkPermit.dialog.helpParagraph'"></p>
 
             <span data-bind="ltext: 'linkPermit.dialog.choosePermit'"></span><br>
             <select id="choose-link-permit"
@@ -23,9 +23,7 @@
               data-test-id="choose-linkPermit-select"
               class="combobox long">
             </select>
-
-            <br><br>
-            <p data-bind="ltext: 'linkPermit.dialog.or'"></p>
+            <div data-bind="ltext: 'linkPermit.dialog.or'" class="or"></div>
 
             <label class="form-label" data-bind ="ltext: 'linkPermit.dialog.kuntalupatunnus'"></label>
             <input data-bind="value: kuntalupatunnus, valueUpdate: 'afterkeydown'"
