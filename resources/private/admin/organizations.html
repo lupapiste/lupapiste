@@ -16,6 +16,7 @@
               <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
               <th data-bind="ltext: 'edit'"></th>
+              <th >Kirjaudu oikeuksin</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: organizationsModel.organizations">
@@ -27,6 +28,7 @@
               <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + $data.id}"></td>
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.id}"></td>
               <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.id}" class="modal"></a>]</td>
+              <td>[<a href="#" data-bind="click: $parent.organizationsModel.loginAs, ltext: 'loginframe.login'"></a>]</td>
             </tr>
           </tbody>
         </table>

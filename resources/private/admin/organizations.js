@@ -16,6 +16,11 @@
         })
         .call();
     };
+
+    self.loginAs = function(organization) {
+      console.log(organization);
+      return false;
+    };
   }
 
   var organizationsModel = new OrganizationsModel();

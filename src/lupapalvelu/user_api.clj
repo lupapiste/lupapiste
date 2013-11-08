@@ -303,6 +303,14 @@
       (info "login failed, username:" username)
       (fail :error.login))))
 
+
+(defcommand impersonate-authority
+  {:parameters [organizationId]
+   :roles [:admin]
+   :description "Changes admin session into authority session with access to given organization"}
+  (ok)
+  )
+
 ;;
 ;; ==============================================================================
 ;; Registering:
