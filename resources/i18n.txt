@@ -41,6 +41,7 @@ auth-admin.add-dialog.invitationSent: Käyttäjälle lähetetty kutsu sähköpos
 
 authority-invite.title: Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi
 
+
 architect.company.title: Yrityksen tiedot
 architect.experience.title: Suunnittelijan kokemus
 paasuunnittelija.patevyys.tutkinto: Tutkinto
