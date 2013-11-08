@@ -66,6 +66,7 @@
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
+        Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
 
         Sijainti-osoite (-> Tyolupa :sijaintitieto :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
@@ -140,6 +141,7 @@
       (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => ((keyword (:name operation)) ya-operation-type-to-usage-description))
+      (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false)
 
       ;; Sijainti
       (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kaivulupa-application))

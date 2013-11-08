@@ -150,7 +150,7 @@
                         :tyoaika true
                         :hankkeen-kuvaus true}
 
-        configs-per-permit-name {:Tyolupa      default-config
+        configs-per-permit-name {:Tyolupa      (assoc default-config :johtoselvitysviitetieto true)
 
                                  :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
 
@@ -219,6 +219,11 @@
                                  {:Sijoituslupaviite {:vaadittuKytkin false
                                                       :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
 
+        johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
+                                  {:Johtoselvitysviite {:vaadittuKytkin false
+                                                        ;:tunniste "..."
+                                                        }})
+
         body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
                                :luvanTunnisteTiedot (lupatunnus (:id application))
                                :alkuPvm alku-pvm
@@ -231,7 +236,8 @@
                                :lupaAsianKuvaus lupaAsianKuvaus
                                :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
                                :sijoituslupaviitetieto sijoituslupaviitetieto
-                               :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)}}
+                               :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
+                               :johtoselvitysviitetieto johtoselvitysviitetieto}}
 
         body (if (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
                (assoc-in body [permit-name-key :toimintajaksotieto]
