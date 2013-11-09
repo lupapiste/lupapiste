@@ -136,7 +136,7 @@
         body => (contains {:ok false})))
     body))
 
-(facts "uploading user attachment"
+(facts* "uploading user attachment"
   (apply-remote-minimal)
 
   ;
@@ -157,14 +157,12 @@
 
     ; Attachment is in GridFS
 
-    (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id)]
-      (:status resp) => 200
+    (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id) => http200?]
       (:body resp) => "This is test file for file upload in itest.")
 
     ; Sonja can not get attachment
 
-    (let [resp (raw sonja "download-user-attachment" :attachment-id attachment-id)]
-      (:status resp) => 404)
+    (raw sonja "download-user-attachment" :attachment-id attachment-id) => http404?
 
     ; Sonja can not delete attachment
 
@@ -173,7 +171,7 @@
 
     ; Pena can delete attachment
 
-    (command pena "remove-user-attachment" :attachment-id attachment-id)
+    (command pena "remove-user-attachment" :attachment-id attachment-id) => ok?
     (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))
 
 ;;
