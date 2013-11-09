@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Authority admin goes to admin page
   Sipoo logs in
-  Wait until page contains element  test-authority-admin-users-table
+  Wait until page contains  Organisaation viranomaiset
 
 Statement person can be deleted - no questions asked
   Statement person count is  1
@@ -38,8 +38,11 @@ New applications does not have statements
   Element should be visible  xpath=//*[@data-test-id='application-no-statements']
   [Teardown]  logout
 
-Sonja adds four statement persons to application
+Sonja sees indicators from pre-filled fields
   Sonja logs in
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  2
+
+Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Element should be visible  xpath=//*[@data-test-id='application-no-statements']
@@ -110,7 +113,7 @@ Veikko from Tampere can give verdict to own statement
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  18
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
 
 # add attachment
 

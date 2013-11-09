@@ -67,29 +67,32 @@
     (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
       (fail! :invalid-role :desc "new user has unsupported role" :user-role user-role))
 
-    (when (and (#{:authorityAdmin :applicant} user-role) (not admin?))
-      (fail! :forbidden :desc "only admin can create authorityAdmin and applicant users"))
+    (when (and (= user-role :applicant) caller)
+      (fail! :error.unauthorized :desc "applicants are born via registration"))
+
+    (when (and (= user-role :authorityAdmin) (not admin?))
+      (fail! :error.unauthorized :desc "only admin can create authorityAdmin users"))
 
     (when (and (= user-role :authority) (not authorityAdmin?))
-      (fail! :forbidden :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
+      (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
 
     (when (and (= user-role :authority) (not (:organization user-data)))
       (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
 
     (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
-      (fail! :forbidden :desc "authorityAdmin can create users into his/her own organization only"))
+      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only"))
 
     (when (and (= user-role :dummy) (:organization user-data))
-      (fail! :forbidden :desc "dummy user may not have an organization" :missing :organization))
+      (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
 
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
 
     (when (and (= "true" (:enabled user-data)) (not admin?))
-      (fail! :forbidden :desc "only admin can create enabled users"))
+      (fail! :error.unauthorized :desc "only admin can create enabled users"))
 
     (when (and (:apikey user-data) (not admin?))
-      (fail! :forbidden :desc "only admin can create create users with apikey")))
+      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
 
   true)
 
@@ -172,8 +175,8 @@
         user-email      (:email user-data)]
 
     (if admin?
-      (when (= user-email caller-email)    (fail! :forbidden :desc "admin may not change his/her own data"))
-      (when (not= user-email caller-email) (fail! :forbidden :desc "can't edit others data")))
+      (when (= user-email caller-email)    (fail! :error.unauthorized :desc "admin may not change his/her own data"))
+      (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
 
     true))
 

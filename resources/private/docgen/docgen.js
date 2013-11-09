@@ -973,6 +973,7 @@ var docgen = (function () {
       var elements = document.createElement("div");
 
       section.className = "accordion";
+      section.setAttribute("data-doc-type", self.schemaName);
       elements.className = "accordion-fields";
 
       icon.className = "icon toggle-icon drill-down-white";
