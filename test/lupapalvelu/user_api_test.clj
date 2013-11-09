@@ -72,6 +72,7 @@
     (provided (security/valid-password? "z") => true))
 
   (fact "only admin can create enabled users"
+    (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :email "x" :enabled "true"}) => truthy)
     (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "false"}) => truthy)
     (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "true"}) => forbidden))
 
