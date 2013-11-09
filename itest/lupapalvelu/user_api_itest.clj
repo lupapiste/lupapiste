@@ -21,10 +21,10 @@
 
 (facts "Getting users"
   (apply-remote-minimal)
-  
+
   (fact "applicants are not allowed to call this"
     (query pena :users) =not=> ok?)
-  
+
   ; It's not nice to test the number of users, but... well, this is relly easy:
   (fact (-> (query admin :users :role "admin") :users count) => 2)
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
@@ -48,7 +48,7 @@
 ;; Creating users:
 ;; ==============================================================================
 ;;
- 
+
 (facts create-user
   (apply-remote-minimal)
   (fact (command pena :create-user :email "x" :role "dummy" :password "foobarbozbiz") => fail?)
@@ -64,13 +64,13 @@
 
 (facts update-user
   (apply-remote-minimal)
-  (fact (command admin :create-user :email "foo" :role "applicant" :enabled "true" :apikey "xyz") => ok?)
+  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
   (fact (command "xyz" :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query "xyz" :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
 (facts update-user-organization
   (apply-remote-minimal)
-  (fact (command admin :create-user :email "foo" :role "applicant" :enabled "true" :apikey "xyz") => ok?)
+  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) => [])
   (fact (command sipoo :update-user-organization :email "foo" :operation "add") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = ["753-R"])
@@ -148,7 +148,7 @@
   ;
 
   (let [attachment-id (:attachment-id (upload-user-attachment pena "examination" true))]
-    
+
     ; Now Pena has attachment
 
     (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => (contains {:attachment-id attachment-id :attachment-type "examination"})
@@ -160,17 +160,17 @@
       (:body resp) => "This is test file for file upload in itest.")
 
     ; Sonja can not get attachment
-    
+
     (let [resp (raw sonja "download-user-attachment" :attachment-id attachment-id)]
       (:status resp) => 404)
 
     ; Sonja can not delete attachment
-    
+
     (command sonja "remove-user-attachment" :attachment-id attachment-id)
     (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) =not=> nil?
-    
+
     ; Pena can delete attachment
-    
+
     (command pena "remove-user-attachment" :attachment-id attachment-id)
     (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))
 
