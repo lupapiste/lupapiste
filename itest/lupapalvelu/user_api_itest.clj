@@ -1,8 +1,6 @@
 (ns lupapalvelu.user-api-itest
   (:require [clojure.java.io :as io]
-            [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer :all]
-            [cheshire.core :as json]
             [midje.sweet :refer :all]
             [ring.util.codec :as codec]
             [sade.http :as http]
@@ -126,14 +124,14 @@
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "attachmentType"  :content attachment-type}
                                    {:name "files[]"         :content uploadfile}]})
-        body        (-> resp :body json/parse-string keywordize-keys)]
+        body        (:body (decode-response resp))]
     (if expect-to-succeed
       (facts "successful"
-        (:status resp) => 200
-        body => (contains {:ok true}))
+        resp => http200?
+        body => ok?)
       (facts "should fail"
         (:status resp) =not=> 200
-        body => (contains {:ok false})))
+        body => fail?))
     body))
 
 (facts* "uploading user attachment"

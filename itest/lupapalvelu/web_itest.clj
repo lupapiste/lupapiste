@@ -28,5 +28,5 @@
     (:status resp) => 302
     (:headers resp) => (contains {"location" "/app/fi/welcome"})
     (let [resp (http/get (str (server-address) "/api/hashbang") params)]
-      (:status resp) => 200
-      (json/parse-string (:body resp)) => (contains {"bang" "foo/bar"}))))
+      resp => http200?
+      (get-in (decode-response resp) [:body :bang]) => "foo/bar")))
