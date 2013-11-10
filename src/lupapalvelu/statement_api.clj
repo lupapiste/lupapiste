@@ -17,7 +17,7 @@
 ;; Authority Admin operations
 ;;
 
-(defquery "get-statement-persons"
+(defquery get-statement-persons
   {:roles [:authority :authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [organization (mongo/select-one :organizations {:_id (first organizations)})
@@ -43,10 +43,10 @@
                                    :name (str (:firstName user) " " (:lastName user))}}})
       (notifications/notify! "new-statement-person"  {:user user :data {:text text :organization organization}}))))
 
-(defcommand "delete-statement-person"
-  {:parameters [:personId]
+(defcommand delete-statement-person
+  {:parameters [personId]
    :roles      [:authorityAdmin]}
-  [{{:keys [personId]} :data {:keys [organizations] :as user} :user}]
+  [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
   (mongo/update
     :organizations
@@ -57,52 +57,49 @@
 ;; Authority operations
 ;;
 
-(defcommand "should-see-unsubmitted-statements"
-  {:roles       [:authority]} [_])
+(defcommand should-see-unsubmitted-statements
+  {:roles [:authority]} [_])
 
-(defcommand "request-for-statement"
-  {:parameters  [:id :personIds]
+(defcommand request-for-statement
+  {:parameters  [id personIds]
    :roles       [:authority]
    :notified    true
    :states      [:draft :info :open :submitted :complement-needed]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
-  [{user :user {:keys [id personIds]} :data :as command}]
-  (with-application command
-    (fn [{:keys [organization] :as application}]
-      (organization/with-organization organization
-        (fn [{:keys [statementPersons]}]
-          (let [now            (now)
-                personIdSet    (set personIds)
-                persons        (filter #(-> % :id personIdSet) statementPersons)
-                users          (map #(user-api/get-or-create-user-by-email (:email %)) persons)
-                writers        (map #(user/user-in-role % :writer) users)
-                new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
-                new-userids    (set (map :id new-writers))
-                unique-writers (distinct new-writers)
-                ->statement    (fn [person] {:id        (mongo/create-id)
-                                             :person    person
-                                             :requested now
-                                             :given     nil
-                                             :status    nil})
-                statements    (map ->statement persons)]
-            (mongo/update-by-id :applications id {$pushAll {:statements statements
-                                                            :auth unique-writers}})
-            (notifications/send-on-request-for-statement! persons application user (env/value :host))))))))
+  [{user :user {:keys [organization] :as application} :application now :created :as command}]
+  (organization/with-organization organization
+    (fn [{:keys [statementPersons]}]
+      (let [personIdSet    (set personIds)
+            persons        (filter #(-> % :id personIdSet) statementPersons)
+            users          (map #(user-api/get-or-create-user-by-email (:email %)) persons)
+            writers        (map #(user/user-in-role % :writer) users)
+            new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
+            new-userids    (set (map :id new-writers))
+            unique-writers (distinct new-writers)
+            ->statement    (fn [person] {:id        (mongo/create-id)
+                                         :person    person
+                                         :requested now
+                                         :given     nil
+                                         :status    nil})
+            statements    (map ->statement persons)]
+        (mongo/update-by-id :applications id {$pushAll {:statements statements
+                                                        :auth unique-writers}})
+        (notifications/send-on-request-for-statement! persons application user (env/value :host))))))
 
-(defcommand "delete-statement"
-  {:parameters [:id :statementId]
-   :states      [:draft :info :open :submitted :complement-needed]
+(defcommand delete-statement
+  {:parameters [id statementId]
+   :states     [:draft :info :open :submitted :complement-needed]
    :roles      [:authority]}
-  [{{:keys [id statementId]} :data}]
+  [_]
   (mongo/update-by-id :applications id {$pull {:statements {:id statementId}}}))
 
-(defcommand "give-statement"
-  {:parameters  [:id :statementId :status :text]
+(defcommand give-statement
+  {:parameters  [id statementId status text]
    :validators  [statement-exists statement-owner #_statement-not-given]
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{{:keys [id statementId status text]} :data :keys [application] :as command}]
+  [{:keys [application] :as command}]
   (mongo/update
     :applications
     {:_id id
