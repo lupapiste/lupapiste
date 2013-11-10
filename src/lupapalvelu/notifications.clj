@@ -207,6 +207,7 @@
   (let [host (env/value :host)]
     (condp = (keyword template)
       :new-comment  (send-notifications-on-new-comment! application user host)
+      :targetted-comment (send-notifications-on-new-targetted-comment! application (:email user) host)
       :invite       (send-invite! (:email data) (:text data) application host)
       :state-change (send-notifications-on-application-state-change! application host)
       :verdict      (send-notifications-on-verdict! application host))))

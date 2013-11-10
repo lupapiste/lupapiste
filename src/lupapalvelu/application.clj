@@ -319,7 +319,11 @@
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to]
    :notified   true
-   :on-success  (notify "new-comment")}
+   :on-success [(notify "new-comment")
+                (fn [{data :data :as command} _]
+                  (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
+                    ;; LUPA-407
+                    (notifications/notify! "targetted-comment" (assoc command :user to-user))))] }
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
@@ -341,11 +345,7 @@
           ;; LUPA-371 (was: mark-inforequest-answered)
           :answered (when (user/applicant? user) {$set {:state :info}})
 
-          nil)))
-
-    ;; LUPA-407
-    (when to-user
-      (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) (env/value :host)))))
+          nil)))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
