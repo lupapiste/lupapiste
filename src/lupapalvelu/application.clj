@@ -12,7 +12,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys]]
+            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
@@ -33,12 +33,6 @@
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as open-inforequest])
   (:import [java.net URL]))
-
-;; Notificator
-
-(defn notify [notification]
-  (fn [command status]
-    (notifications/notify! notification command)))
 
 ;; Validators
 
