@@ -11,4 +11,12 @@
       email => has-html-and-plain?
       (:subject email) => "Lupapiste.fi: Lausunnot"
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
-      (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))))
+      (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;")))
+
+  (let [application-id (create-app-id sonja :municipality sonja-muni)
+        resp (command sonja :request-for-statement :id application-id :personIds [ronja-id])
+        email (last-email)]
+    resp => ok?
+    application-id => truthy
+    (:to email) => (email-for "ronja")
+    ))
