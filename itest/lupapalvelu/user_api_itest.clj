@@ -238,5 +238,6 @@
     (fact "every available action is a query or raw, i.e. not a command
           (or any other mutating action type we might have in the future)"
       (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
+        ; Make sure we have required all the actions
+        (require 'lupapalvelu.server)
         (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
-
