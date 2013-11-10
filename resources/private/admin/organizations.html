@@ -28,7 +28,7 @@
               <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + $data.id}"></td>
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.id}"></td>
               <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.id}" class="modal"></a>]</td>
-              <td>[<a href="#" data-bind="click: $parent.loginAsModel.open, ltext: 'loginframe.login'"></a>]</td>
+              <td>[<a href="#" data-bind="click: $parent.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': $data.id}"></a>]</td>
             </tr>
           </tbody>
         </table>
@@ -88,10 +88,12 @@
           <div class="dialog-content">
             <div>
               <label class="form-label" for="login-as-password">Admin-salasana</label>
-              <input type="password" data-bind="value: password" class="form-input" id="login-as-password" ></input>
+              <input type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input" id="login-as-password" ></input>
             </div>
 
-            <button data-bind="click: login, ltext: 'loginframe.login'" class="btn btn-primary btn-dialog" ></button>
+            <button data-bind="click: login, ltext: 'loginframe.login'"
+                    data-test-id="submit-login-as"
+                    class="btn btn-primary btn-dialog" ></button>
 
             <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
           </div>
