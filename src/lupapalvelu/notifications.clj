@@ -83,7 +83,7 @@
 ;; Sending
 ;;
 
-(defn send-create-statement-person! [email text organization]
+(defn- send-create-statement-person! [email text organization]
   (let [subject (get-email-subject {:subject "Lausunnot"})
         msg   (email/apply-template "add-statement-person.md"
                                     {:text text
@@ -210,4 +210,6 @@
       :targetted-comment (send-notifications-on-new-targetted-comment! application (:email user) host)
       :invite       (send-invite! (:email data) (:text data) application host)
       :state-change (send-notifications-on-application-state-change! application host)
-      :verdict      (send-notifications-on-verdict! application host))))
+      :verdict      (send-notifications-on-verdict! application host)
+      :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
+      )))

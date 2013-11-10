@@ -28,7 +28,7 @@
   {:parameters [:email :text]
    :notified   true
    :roles      [:authorityAdmin]}
-  [{{:keys [email text]} :data {:keys [organizations] :as user} :user}]
+  [{{:keys [email text]} :data {:keys [organizations]} :user}]
   (let [organization-id (first organizations)
         organization    (mongo/select-one :organizations {:_id organization-id})
         email           (ss/lower-case email)]
@@ -41,7 +41,7 @@
                                    :text text
                                    :email email
                                    :name (str (:firstName user) " " (:lastName user))}}})
-      (notifications/send-create-statement-person! email text organization))))
+      (notifications/notify! "new-statement-person"  {:user user :data {:text text :organization organization}}))))
 
 (defcommand "delete-statement-person"
   {:parameters [:personId]
