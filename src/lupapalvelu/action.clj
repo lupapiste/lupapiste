@@ -82,7 +82,7 @@
 (defn serializable-actions []
   (into {} (for [[k v] (get-actions)]
              [k (-> v
-                  (dissoc :handler :validators :input-validators)
+                  (dissoc :handler :validators :input-validators :on-success)
                   (assoc :name k))])))
 
 ;;

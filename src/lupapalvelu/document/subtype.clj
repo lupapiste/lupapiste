@@ -70,6 +70,12 @@
     (re-matches #"^\d{5}$" v) nil
     :else [:warn "illegal-zip"]))
 
+(defmethod subtype-validation :rakennusnumero [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^\d{3}$" v) nil
+    :else [:warn "illegal-rakennusnumero"]))
+
 (defn- validate-hetu-date [hetu]
   (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
         yy (last (butlast dateparsts))

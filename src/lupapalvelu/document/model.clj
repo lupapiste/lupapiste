@@ -253,10 +253,10 @@
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
-              [{:keys [name approvable repeating body] :as element}]
+              [{:keys [name approvable repeating body type] :as element}]
               (let [current-path (conj path (keyword name))
                     current-approvable (or approvable-parent approvable)]
-                (if body
+                (if (= :group type)
                   (if repeating
                     (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))

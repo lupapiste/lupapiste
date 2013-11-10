@@ -32,9 +32,7 @@
       (:ok resp)
       (:text rest)
       application => truthy
-      (:username (first (:auth application))) => "mikko@example.com"
-      (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Mikko"
-      (get-in hakija [:data :henkilo :henkilotiedot :sukunimi :value]) => "Intonen")
+      (:username (first (:auth application))) => "mikko@example.com")
 
     (fact "Disabled user must not see Mikko's application!"
       (raw-query dummy :application :id id) => invalid-csrf-token?)
