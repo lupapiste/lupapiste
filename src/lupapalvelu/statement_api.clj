@@ -24,11 +24,11 @@
         permitPersons (or (:statementPersons organization) [])]
     (ok :data permitPersons)))
 
-(defcommand "create-statement-person"
-  {:parameters [:email :text]
+(defcommand create-statement-person
+  {:parameters [email text]
    :notified   true
    :roles      [:authorityAdmin]}
-  [{{:keys [email text]} :data {:keys [organizations]} :user}]
+  [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)
         organization    (mongo/select-one :organizations {:_id organization-id})
         email           (ss/lower-case email)]
