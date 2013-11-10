@@ -230,6 +230,9 @@
     (assert ok)
     messages))
 
+(defn has-html-and-plain? [{body :body}]
+  (and (:html body) (:plain body)))
+
 ;;
 ;; Stuffin' data in
 ;;
