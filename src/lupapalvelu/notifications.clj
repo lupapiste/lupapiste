@@ -84,7 +84,7 @@
 ;;
 
 (defn- send-create-statement-person! [email text organization]
-  (let [subject (get-email-subject {:subject "Lausunnot"})
+  (let [subject (get-email-subject {:title "Lausunnot"})
         msg   (email/apply-template "add-statement-person.md"
                                     {:text text
                                      :organization-fi (:fi (:name organization))
