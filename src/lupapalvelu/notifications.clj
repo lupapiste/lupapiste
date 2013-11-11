@@ -132,13 +132,13 @@
     (if-let [conf (template mail-config)]
       (when ((get conf :pred-fn (constantly true)) command)
         (let [application-fn (get conf :application-fn identity)
-             application    (application-fn application)
-             recipients-fn  (get conf :recipients-fn default-recipients-fn)
-             recipients     (recipients-fn command)
-             subject        (get-email-subject application (get conf :subject-key (name template)))
-             model          (create-app-model application (:tab conf))
-             template-file  (get conf :template (str (name template) ".md"))
-             msg            (email/apply-template template-file model)]
+              application    (application-fn application)
+              recipients-fn  (get conf :recipients-fn default-recipients-fn)
+              recipients     (recipients-fn command)
+              subject        (get-email-subject application (get conf :subject-key (name template)))
+              model          (create-app-model application (:tab conf))
+              template-file  (get conf :template (str (name template) ".md"))
+              msg            (email/apply-template template-file model)]
           (send-mail-to-recipients! recipients subject msg)))
     (case template
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
