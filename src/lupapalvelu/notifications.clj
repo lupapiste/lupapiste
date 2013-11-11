@@ -147,7 +147,7 @@
 
 (defn send-token! [template to token]
   {:pre (contains? mail-config template)}
-  (let [conf    (template token-mail-config)
+  (let [conf    (template mail-config)
         link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
         msg (email/apply-template (:template conf) {:link-fi link-fi :link-sv link-sv})]
