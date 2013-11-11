@@ -9,7 +9,7 @@
             [sade.env :as env]
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
-            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
+            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
