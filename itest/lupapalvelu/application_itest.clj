@@ -144,6 +144,7 @@
       email => has-html-and-plain?
       (:to email) => (email-for-key user)
       (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
+      (get-in email [:body :plain]) => (contains "Vireill\u00e4")
       email => (partial contains-application-link? application-id)
 
       (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
