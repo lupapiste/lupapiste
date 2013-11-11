@@ -184,9 +184,9 @@
     resp =not=> ok?
     (:text resp) => "error.new-applications-disabled"))
 
-(defn in? 
+(defn in?
   "true if seq contains elm"
-  [seq elm]  
+  [seq elm]
   (some #(= elm %) seq))
 
 (defn- set-and-check-person [api-key application-id initial-document path]
@@ -268,3 +268,23 @@
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
+
+(facts "Open inforequest"
+  ; Reset emails
+  (last-email)
+
+  (let [application-id (create-app-id pena :municipality "433" :infoRequest true)
+        application    (query-application pena application-id)]
+
+    (fact "Inforequest was created"
+      (:infoRequest application) => true)
+
+    (fact "Inforequest is an open inforequest"
+      (:openInfoRequest application) => true)
+
+    (let [email          (last-email)
+          [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain]))]
+      (:to email) => "erajorma@takahikia.fi"
+      (:subject email) => "Uusi neuvontapyyntö"
+      (count token) => pos?)))
+
