@@ -57,7 +57,7 @@
    :state-sv (i18n/localize :sv (str (:state application)))})
 
 ;;
-;; Sending
+;; Statement person
 ;;
 
 (defn- send-create-statement-person! [email text organization]
@@ -67,6 +67,10 @@
                                      :organization-fi (:fi (:name organization))
                                      :organization-sv (:sv (:name organization))})]
     (send-mail-to-recipients! [email] subject msg)))
+
+;;
+;; Neighbor
+;;
 
 (defn- send-neighbor-invite! [to-address token neighbor-id application host]
   (let [neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
@@ -83,6 +87,9 @@
                                                       :link-sv (link-fn :sv)})]
     (send-mail-to-recipients! [to-address]  subject msg)))
 
+;;
+;; Open Inforequest
+;;
 
 (defn- get-message-for-open-inforequest-invite [host token]
   (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
@@ -93,55 +100,71 @@
        :info-fi (info-fn :fi)
        :info-sv (info-fn :sv)})))
 
+
 (defn- send-open-inforequest-invite! [email token application-id host]
   (let [subject "Uusi neuvontapyynt\u00F6"
         msg     (get-message-for-open-inforequest-invite host token)]
     (send-mail-to-recipients! [email] subject msg)))
 
+;;
+;; Generic
+;;
+
+(def ^:private mail-config
+  {:new-comment       {:template    "new-comment.md"
+                       :tab          "/conversation"}
+   :targetted-comment {:template    "application-targeted-comment.md"
+                       :subject-key "new-comment"
+                       :tab          "/conversation"}
+   :invite            {:template    "invite.md"}
+   :state-change      {:template    "application-state-change.md"}
+   :verdict           {:template    "application-verdict.md"
+                       :tab          "/verdict"}
+;:new-statement-person
+   :request-statement {:template    "add-statement-request.md"}
+;:neighbor-invite
+;:open-inforequest-invite
+   })
+
+(defn- subject-and-message [message-type application host]
+  {:pre (contains? mail-config message-type)}
+  (let [conf (message-type mail-config)]
+    [(get-email-subject application (get conf :subject-key (name message-type)))
+     (email/apply-template (:template conf) (create-app-model application (:tab conf) host))]))
+
+
 (defn- send-on-request-for-statement! [persons application user host]
-  (doseq [{:keys [email text]} persons]
-    (let [subject (get-email-subject application "statement-request")
-          msg   (email/apply-template "add-statement-request.md" (create-app-model application nil host))]
-      (send-mail-to-recipients! [email] subject msg))))
+  (let [[subject msg] (subject-and-message :request-statement application host)]
+    (send-mail-to-recipients! (map :email persons) subject msg)))
 
 (defn- send-notifications-on-new-comment! [application user host]
   (when (user/authority? user)
     (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
-          path-suffix  "/conversation"
-          subject      (get-email-subject application "new-comment")
-          msg          (email/apply-template "new-comment.md" (create-app-model application path-suffix host)
-                          )]
+          [subject msg] (subject-and-message :new-comment application host)]
       (send-mail-to-recipients! recipients subject msg))))
 
 (defn- send-notifications-on-new-targetted-comment! [application to-email host]
-  (let [subject      (get-email-subject application "new-comment")
-        path-suffix  "/conversation"
-        msg          (email/apply-template "application-targeted-comment.md" (create-app-model application path-suffix host))]
+  (let [[subject msg] (subject-and-message :targetted-comment application host)]
     (send-mail-to-recipients! [to-email]  subject msg)))
 
 (defn- send-invite! [email text application host]
-  (let [subject (get-email-subject application "invite")
-        msg     (email/apply-template "invite.md" (create-app-model application nil host))]
+  (let [[subject msg] (subject-and-message :invite application host)]
     (send-mail-to-recipients! [email] subject msg)))
 
 (defn- send-notifications-on-application-state-change! [{:keys [id]} host]
   (let [application (mongo/by-id :applications id) ; Load new state from DB
         recipients  (get-email-recipients-for-application application nil ["statementGiver"])
-        msg         (email/apply-template "application-state-change.md" (create-app-model application nil host))
-        subject     (get-email-subject application "state-change")]
+        [subject msg] (subject-and-message :state-change application host)]
     (send-mail-to-recipients! recipients subject msg)))
 
 (defn- send-notifications-on-verdict! [application host]
-  (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
-        path-suffix  "/verdict"
-        msg         (email/apply-template "application-verdict.md" (create-app-model application path-suffix host))
-        subject     (get-email-subject application "verdict")]
+  (let [recipients    (get-email-recipients-for-application application nil ["statementGiver"])
+        [subject msg] (subject-and-message :verdict application host)]
     (send-mail-to-recipients! recipients subject msg)))
 
 ;;
 ;; Public API
 ;;
-
 (defn notify! [template {:keys [user created application data] :as command}]
   (let [host (env/value :host)]
     (case (keyword template)
