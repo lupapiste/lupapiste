@@ -100,28 +100,21 @@
         msg     (get-message-for-open-inforequest-invite host token)]
     (send-mail-to-recipients! [email] subject msg)))
 
-(defn- get-message-for-new-comment [application host]
-  (let [path-suffix  "/conversation"]
-    (email/apply-template "new-comment.md"
-                          {:link-fi (get-application-link application path-suffix host "fi")
-                           :link-sv (get-application-link application path-suffix host "sv")})))
-
-(defn- get-message-for-targeted-comment [application host]
-  (let [path-suffix  "/conversation"]
-    (email/apply-template "application-targeted-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
-                                                             :link-sv (get-application-link application path-suffix host "sv")})))
-
 (defn- send-notifications-on-new-comment! [application user host]
   (when (user/authority? user)
     (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
+          path-suffix  "/conversation"
           subject      (get-email-subject application "new-comment")
-          msg          (get-message-for-new-comment application host)]
+          msg          (email/apply-template "new-comment.md"
+                          {:link-fi (get-application-link application path-suffix host "fi")
+                           :link-sv (get-application-link application path-suffix host "sv")})]
       (send-mail-to-recipients! recipients subject msg))))
 
 (defn- send-notifications-on-new-targetted-comment! [application to-email host]
   (let [subject      (get-email-subject application "new-comment")
         path-suffix  "/conversation"
-        msg          (get-message-for-targeted-comment application host)]
+        msg          (email/apply-template "application-targeted-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
+                                                                              :link-sv (get-application-link application path-suffix host "sv")})]
     (send-mail-to-recipients! [to-email]  subject msg)))
 
 (defn- send-invite! [email text application host]
