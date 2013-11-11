@@ -73,7 +73,7 @@
     (fn [{:keys [statementPersons]}]
       (let [personIdSet    (set personIds)
             persons        (filter #(personIdSet (:id %)) statementPersons)
-            users          (map #(user-api/get-or-create-user-by-email (:email %)) persons)
+            users          (map #(assoc (user-api/get-or-create-user-by-email (:email %)) :text (:text %)) persons)
             writers        (map #(user/user-in-role % :writer) users)
             new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
             new-userids    (set (map :id new-writers))
@@ -86,7 +86,7 @@
             statements    (map ->statement persons)]
         (mongo/update-by-id :applications id {$pushAll {:statements statements
                                                         :auth unique-writers}})
-        (notifications/notify! "request-statement" (assoc command :data {:persons persons}))))))
+        (notifications/notify! "request-statement" (assoc command :data {:users users}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]

@@ -212,5 +212,5 @@
       :state-change (send-notifications-on-application-state-change! application host)
       :verdict      (send-notifications-on-verdict! application host)
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
-      :request-statement (send-on-request-for-statement! (:persons data) application user host)
+      :request-statement (send-on-request-for-statement! (:users data) application user host)
       )))
