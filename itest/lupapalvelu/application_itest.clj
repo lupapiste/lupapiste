@@ -186,6 +186,26 @@
     (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
     email => (partial contains-application-link-with-tab? application-id "verdict")))
 
+(facts* "cancel application"
+  (last-email) ; Inbox zero
+
+  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
+        application-id (:id application)]
+
+    (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
+    (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
+
+    (command mikko :cancel-application :id application-id) => ok?
+
+    (fact "Sonja does not see the application" (query sonja :application :id application-id) => fail?)
+
+    (let [email (last-email)]
+      email => has-html-and-plain?
+      (:to email) => (email-for-key mikko)
+      (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
+      (get-in email [:body :plain]) => (contains "Peruutettu")
+      email => (partial contains-application-link? application-id))))
+
 (fact "Authority in unable to create an application to a municipality in another organization"
   (create-app sonja :municipality veikko-muni) => unauthorized?)
 
