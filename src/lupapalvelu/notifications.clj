@@ -113,11 +113,7 @@
                                                          :link-sv link-sv})]
     (send-mail-to-recipients! [to] (loc "authority-invite.title") msg)))
 
-;;
-;; New stuff
-;;
-
-(defn send-neighbor-invite! [to-address token neighbor-id application host]
+(defn- send-neighbor-invite! [to-address token neighbor-id application host]
   (let [neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
         address        (get application :address)
         municipality   (get application :municipality)
@@ -213,4 +209,5 @@
       :verdict      (send-notifications-on-verdict! application host)
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
       :request-statement (send-on-request-for-statement! (:users data) application user host)
+      :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application host)
       )))
