@@ -11,7 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw]]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -305,6 +305,19 @@
     (do
       (info "login failed, username:" username)
       (fail :error.login))))
+
+
+(defcommand impersonate-authority
+  {:parameters [organizationId password]
+   :roles [:admin]
+   :input-validators [(partial non-blank-parameters [:organizationId])]
+   :description "Changes admin session into authority session with access to given organization"}
+  [{user :user}]
+  (if (user/get-user-with-password (:username user) password)
+    (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
+      (session/put! :user imposter)
+      (ok))
+    (fail :error.login)))
 
 ;;
 ;; ==============================================================================

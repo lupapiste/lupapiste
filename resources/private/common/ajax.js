@@ -174,12 +174,17 @@ var ajax = (function() {
     return new Call("/api/query/" + name, "GET").params(data);
   }
 
+  function datatables(name, data) {
+    return new Call("/api/datatables/" + name, "POST").json(data);
+  }
+
   return {
     post:      post,
     postJson:  postJson,
     get:       get,
     command:   command,
-    query:     query
+    query:     query,
+    datatables: datatables
   };
 
 })();
