@@ -106,7 +106,7 @@
                                                        :link-sv link-sv})]
     (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
 
-(defn send-invite-new-authority! [to token]
+(defn- send-invite-new-authority! [to token]
   (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
         msg (email/apply-template "authority-invite.md" {:link-fi link-fi
@@ -213,6 +213,8 @@
       :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application) host)
       )))
 
-(defn send-token! [template to]
-
-  )
+(defn send-token! [template to token]
+  (case (keyword template)
+    :invite-authority (send-invite-new-authority! to token)
+    :password         (send-password-reset-email! to token)
+    ))

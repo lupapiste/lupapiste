@@ -214,7 +214,7 @@
      (if (= operation "add")
        (let [token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
          (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
-         (notifications/send-invite-new-authority! email token)
+         (notifications/send-token! :invite-authority email token)
          (ok :operation "invited"))
        (fail :not-found :email email)))))
 
