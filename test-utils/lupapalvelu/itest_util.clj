@@ -9,9 +9,11 @@
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
             [cheshire.core :as json]
-            [sade.util :refer [fn-> fn->>]]))
+            [sade.util :refer [fn-> fn->>]])
+  (:import org.apache.http.client.CookieStore
+           org.apache.http.cookie.Cookie))
 
-(defn- find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
+(defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
 (defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
@@ -291,3 +293,14 @@
        :lastname "Banaani"}
     vetuma!
     :stamp))
+
+;;
+;; HTTP Client cookie store
+;;
+
+(defn ->cookie-store [store]
+  (proxy [org.apache.http.client.CookieStore] []
+    (getCookies []       (or (vals @store) []))
+    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
+    (clear []            (reset! store {}))
+    (clearExpired [])))

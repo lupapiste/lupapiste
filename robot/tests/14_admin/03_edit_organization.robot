@@ -41,7 +41,26 @@ Organization 753-R has now inforequest enabled and application disabled
   Wait Until  Element text should be  xpath=//td[@data-test-id="application-enabled-753-R"]  false
   Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-753-R"]  true
   Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
+  [Teardown]  Logout
 
+Mikko creates an inforequest in Sipoo
+  Mikko logs in
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  admin${secs}
+  Create inforequest the fast way  ${appname}  753  753-416-25-30  The winter is coming
+  [Teardown]  Logout
+
+Admin impersonated Sipoo authority
+  SolitaAdmin logs in
+  Click link  [organizations]
+  Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
+  Click link  xpath=//a[@data-impersonate="753-R"]
+  Wait Until  Element should be visible  login-as-password
+  Input text  login-as-password  admin
+  Click enabled by test id  submit-login-as
+
+Admin sees Mikko's inforequest
+  Request should be visible  ${appname}
 
 *** Keywords ***
 

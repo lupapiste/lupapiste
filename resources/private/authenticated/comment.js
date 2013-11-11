@@ -12,9 +12,9 @@ var comments = (function() {
     self.pending = ko.observable();
     self.to = ko.observable();
     self.markAnswered = ko.observable();
-    
+
     self.to.subscribe(function(value) { if (value) self.markAnswered(false); });
-    
+
     self.refresh = function(application, target) {
       self
         .applicationId(application.id)
@@ -31,7 +31,7 @@ var comments = (function() {
 
     self.isForMe = function(model) {
       return model.to && model.to.id && model.to.id() === currentUser.id();
-    }
+    };
 
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(self.text());

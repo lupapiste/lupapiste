@@ -3,9 +3,7 @@
             [clojure.walk :refer [keywordize-keys]]
             [sade.http :as http]
             [midje.sweet :refer :all]
-            [cheshire.core :as json])
-  (:import org.apache.http.client.CookieStore
-           org.apache.http.cookie.Cookie))
+            [cheshire.core :as json]))
 
 (facts
   (fact "ping"
@@ -21,14 +19,7 @@
     (query pena :ping!) =not=> ok?
     (raw pena :ping!) => (contains {:status 404})))
 
-(defn ->cookie-store [store]
-  (proxy [org.apache.http.client.CookieStore] []
-    (getCookies []       (or (vals @store) []))
-    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
-    (clear []            (reset! store {}))
-    (clearExpired [])))
-
-(facts "facts about hashbang functionality"
+(facts "hashbang functionality"
   (let [store (atom {})
         params {:cookie-store (->cookie-store store)
                 :follow-redirects false
@@ -37,5 +28,5 @@
     (:status resp) => 302
     (:headers resp) => (contains {"location" "/app/fi/welcome"})
     (let [resp (http/get (str (server-address) "/api/hashbang") params)]
-      (:status resp) => 200
-      (json/parse-string (:body resp)) => (contains {"bang" "foo/bar"}))))
+      resp => http200?
+      (get-in (decode-response resp) [:body :bang]) => "foo/bar")))
