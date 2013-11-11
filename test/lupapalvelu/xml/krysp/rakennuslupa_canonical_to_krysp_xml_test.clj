@@ -32,7 +32,7 @@
     ;(clojure.pprint/pprint application)
 
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)
-    ;(with-open [out-file (writer "/Users/terotu/example.xml" )]
+    ;(with-open [out-file (writer "/Users/terotu/jatkolupa_example.xml" )]
     ;    (emit xml out-file))
     (fact "xml exist" xml => truthy)
 
