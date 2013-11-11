@@ -118,12 +118,12 @@
 ;;
 
 (defn send-neighbor-invite! [to-address token neighbor-id application host]
-  (let [neighbor-name  (get-in application [:neighbors neighbor-id :neighbor :owner :name])
+  (let [neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
         address        (get application :address)
         municipality   (get application :municipality)
         subject        (get-email-subject application "neighbor")
         page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
-        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" (name neighbor-id) "/" token))
+        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" neighbor-id "/" token))
         msg            (email/apply-template "neighbor.md" {:name neighbor-name
                                                       :address address
                                                       :city-fi (i18n/localize :fi "municipality" municipality)
