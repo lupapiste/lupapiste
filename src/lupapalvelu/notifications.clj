@@ -1,11 +1,8 @@
 (ns lupapalvelu.notifications
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [monger.operators]
             [clojure.set :as set]
             [lupapalvelu.i18n :refer [loc] :as i18n]
             [sade.util :refer [future*]]
-            [clojure.java.io :as io]
-            [clojure.string :as s]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.email :as email]
@@ -100,7 +97,6 @@
        :info-fi (info-fn :fi)
        :info-sv (info-fn :sv)})))
 
-
 (defn- send-open-inforequest-invite! [email token application-id]
   (let [subject "Uusi neuvontapyynt\u00F6"
         msg     (get-message-for-open-inforequest-invite token)]
@@ -114,14 +110,19 @@
   (get-email-recipients-for-application application nil ["statementGiver"]))
 
 (def ^:private mail-config
-  {:application-targeted-comment {:subject-key    "new-comment"   :tab "/conversation" :recipients-fn  (fn [{user :user}] [(:email user)])}
-   :application-state-change     {:subject-key    "state-change"  :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
-   :application-verdict          {:subject-key    "verdict"       :tab  "/verdict"}
-   :new-comment                  {:tab "/conversation"  :pred-fn (fn [{user :user}] (user/authority? user))}
+  {:application-targeted-comment {:subject-key    "new-comment"
+                                  :tab            "/conversation"
+                                  :recipients-fn  (fn [{user :user}] [(:email user)])}
+   :application-state-change     {:subject-key    "state-change"
+                                  :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
+   :application-verdict          {:subject-key    "verdict"
+                                  :tab            "/verdict"}
+   :new-comment                  {:tab            "/conversation"
+                                  :pred-fn        (fn [{user :user}] (user/authority? user))}
    :invite                       {:recipients-fn  (fn [{data :data}] [(:email data)])}
    :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))}
-   :invite-authority             {:subject-key "authority-invite.title" :template "authority-invite.md" }
-   :reset-password               {:subject-key "reset.email.title"      :template "password-reset.md"   }})
+   :invite-authority             {:subject-key    "authority-invite.title"}
+   :reset-password               {:subject-key    "reset.email.title"}})
 
 ;;
 ;; Public API
@@ -148,7 +149,8 @@
 (defn send-token! [template to token]
   {:pre (contains? mail-config template)}
   (let [conf    (template mail-config)
+        template-file  (get conf :template (str (name template) ".md"))
         link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
-        msg (email/apply-template (:template conf) {:link-fi link-fi :link-sv link-sv})]
+        msg (email/apply-template template-file {:link-fi link-fi :link-sv link-sv})]
     (send-mail-to-recipients! [to] (loc (:subject-key conf)) msg)))
