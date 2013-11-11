@@ -255,3 +255,18 @@
         ; Make sure we have required all the actions
         (require 'lupapalvelu.server)
         (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
+
+(facts* "reset password email"
+  (last-email) ; Inbox zero
+
+  (let [params {:form-params {:email (email-for "pena")}
+                :content-type :json
+                :follow-redirects false
+                :throw-exceptions false}
+        resp   (http/post (str (server-address) "/api/reset-password") params) => http200?
+        email  (last-email)]
+    (-> resp decode-response :body) => ok?
+    email => has-html-and-plain?
+    (:to email) => (email-for "pena")
+    (:subject email) => "Salasanan vaihto"
+    (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
