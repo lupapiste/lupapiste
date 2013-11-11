@@ -898,19 +898,7 @@
    :created 1384167268234,
    :propertyId "75340800010051",
    :documents
-   [{:id "5280b764420622588b2f04fe",
-     :schema-info
-     {:approvable true,
-      :subtype "hakija",
-      :name "hakija",
-      :removable true,
-      :repeating true,
-      :version 1,
-      :type "party",
-      :order 3},
-     :created 1384167268234,
-     :data {:_selected {:value "henkilo"}}}
-    {:created 1384167268234,
+   [{:created 1384167268234,
      :data
      {:kuvaus
       {:modified 1384167309006,
@@ -927,18 +915,7 @@
        :name "jatkoaika",
        :created 1384167268234},
       :removable true}}
-    {:id "5280b764420622588b2f04ff",
-     :schema-info
-     {:approvable true,
-      :subtype "hakija",
-      :name "hakija",
-      :removable true,
-      :repeating true,
-      :version 1,
-      :type "party",
-      :order 3},
-     :created 1384167268234,
-     :data {}}],
+    hakija-henkilo],
    :_software_version "1.0.5",
    :modified 1384167309006,
    :allowedAttachmentTypes
@@ -1008,23 +985,19 @@
    :address "It\u00e4inen Hangelbyntie 163",
    :permitType "R",
    :id "LP-753-2013-00005",
-   :municipality "753"})
-
-(def jatkoaika-lp-links
-  '({:id "LP-753-2013-00001|LP-753-2013-00005",
-  :link ["LP-753-2013-00005" "LP-753-2013-00001"],
-  :LP-753-2013-00005
-  {:type "application",
-   :apptype "jatkoaika",
-   :propertyId "75340800010051"},
-  :LP-753-2013-00001
-  {:type "linkpermit", :linkpermittype "lupapistetunnus"}}))
-
+   :municipality "753"
+   :authority {:id "777777777777777777000023"
+               :username "sonja"
+               :firstName "Sonja"
+               :lastName "Sibbo"
+               :role "authority"}
+  :linkPermitData [{:id "LP-753-2013-00001", :type "lupapistetunnus"}]})
 
 (fl/facts* "Canonical model for jatkoaika is correct"
-  (let [jatkoaika-link (first jatkoaika-lp-links)
-        canonical (jatkoaika-canonical jatkolupa-application jatkoaika-link "sv")]
-    (clojure.pprint/pprint canonical)))
+  (let [canonical (application-to-canonical jatkolupa-application "sv")]
+    (clojure.pprint/pprint canonical)
+    ;TODO tests
+    ))
 
 
 

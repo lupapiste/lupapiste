@@ -1,9 +1,12 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa_canonical_to_krysp_xml_test
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
+                                                                 jatkoaika-canonical]]
             [lupapalvelu.document.rakennuslupa_canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
-                                                                      application-suunnittelijan-nimeaminen]]
+                                                                      application-suunnittelijan-nimeaminen
+                                                                      jatkolupa-application
+                                                                      ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
                                                                 save-aloitusilmoitus-as-krysp]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
@@ -56,6 +59,8 @@
        :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
                  :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
                  :apikey "5051ba0caa2480f374dcfefg"}})
+
+
 
     ))
 

@@ -251,7 +251,8 @@
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
                   (condp = (-> application :operations first :name)
                     "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
-                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen")))
+                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
+                    "jatkoaika" "Jatkoaikahakemus")))
       ;; The link permit data does not exist in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
@@ -295,8 +296,9 @@
     canonical))
 
 
-(defn jatkoaika-canonical [application application-link lang]
-  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+(defn jatkoaika-canonical [application lang]
+  (let [link-permit-data (first (:linkPermitData application))
+        documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
         canonical {:Rakennusvalvonta
@@ -305,12 +307,14 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :viitelupatieto (get-viitelupatieto application-link)
+                      :viitelupatieto (get-viitelupatieto link-permit-data)
                       :osapuolettieto (osapuolet documents)
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Jatkoaikahakemus"
                       :asianTiedot
                       (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) nil false)}}}}
+        canonical (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+                            (get-statements (:statements application)))
         ]
     canonical)
   )
