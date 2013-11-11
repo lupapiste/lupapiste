@@ -75,13 +75,12 @@
 (defn- send-neighbor-invite! [to-address token neighbor-id application]
   (let [host           (env/value :host)
         neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
-        address        (get application :address)
-        municipality   (get application :municipality)
+        municipality   (:municipality application )
         subject        (get-email-subject application "neighbor")
         page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
         link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" neighbor-id "/" token))
         msg            (email/apply-template "neighbor.md" {:name neighbor-name
-                                                      :address address
+                                                      :address (:address application)
                                                       :city-fi (i18n/localize :fi "municipality" municipality)
                                                       :city-sv (i18n/localize :sv "municipality" municipality)
                                                       :link-fi (link-fn :fi)
@@ -119,7 +118,7 @@
    :application-state-change     {:subject-key    "state-change"  :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
    :application-verdict          {:subject-key    "verdict"       :tab  "/verdict"}
    :new-comment                  {:tab "/conversation"  :pred-fn (fn [{user :user}] (user/authority? user))}
-   :invite                        {:recipients-fn  (fn [{data :data}] [(:email data)])}
+   :invite                       {:recipients-fn  (fn [{data :data}] [(:email data)])}
    :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))}
    :invite-authority             {:subject-key "authority-invite.title" :template "authority-invite.md" }
    :reset-password               {:subject-key "reset.email.title"      :template "password-reset.md"   }})
