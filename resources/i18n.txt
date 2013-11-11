@@ -46,13 +46,13 @@ architect.company.title: Yrityksen tiedot
 architect.experience.title: Koulutus ja pätevyydet
 userinfo.architect.graduatingYear: Valmistumisvuosi
 paasuunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
-paasuunnittelija.patevyys.kokemus: Kokemusvuodet
-paasuunnittelija.patevyys.koulutus: Koulutus
+paasuunnittelija.patevyys.koulutus: Tutkinto
 paasuunnittelija.patevyys.valmistumisvuosi: Valmistumisvuosi
+paasuunnittelija.patevyys.kokemus: Kokemusvuodet
 suunnittelija.patevyys.fise: FISE pätevyyskortti (linkki)
-suunnittelija.patevyys.koulutus: Koulutus
-suunnittelija.patevyys.kokemus: Kokemusvuodet
+suunnittelija.patevyys.koulutus: Tutkinto
 suunnittelija.patevyys.valmistumisvuosi: Valmistumisvuosi
+suunnittelija.patevyys.kokemus: Kokemusvuodet
 
 operations.tree.Suunnittelija: Suunnittelijan nimeäminen
 operations.suunnittelija: Suunnittelijan nimeäminen
