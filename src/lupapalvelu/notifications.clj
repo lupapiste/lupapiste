@@ -50,6 +50,12 @@
         (map #(-> % :person :email) statements))
       auth-user-emails)))
 
+(defn- create-app-model [application tab host]
+  {:link-fi (get-application-link application tab host "fi")
+   :link-sv (get-application-link application tab host "sv")
+   :state-fi (i18n/localize :fi (str (:state application)))
+   :state-sv (i18n/localize :sv (str (:state application)))})
+
 ;;
 ;; Sending
 ;;
@@ -65,9 +71,7 @@
 (defn- send-on-request-for-statement! [persons application user host]
   (doseq [{:keys [email text]} persons]
     (let [subject (get-email-subject application "statement-request")
-          msg   (email/apply-template "add-statement-request.md"
-                          {:link-fi (get-application-link application nil host "fi")
-                           :link-sv (get-application-link application nil host "sv")})]
+          msg   (email/apply-template "add-statement-request.md" (create-app-model application nil host))]
       (send-mail-to-recipients! [email] subject msg))))
 
 (defn- send-neighbor-invite! [to-address token neighbor-id application host]
@@ -105,40 +109,32 @@
     (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
           path-suffix  "/conversation"
           subject      (get-email-subject application "new-comment")
-          msg          (email/apply-template "new-comment.md"
-                          {:link-fi (get-application-link application path-suffix host "fi")
-                           :link-sv (get-application-link application path-suffix host "sv")})]
+          msg          (email/apply-template "new-comment.md" (create-app-model application path-suffix host)
+                          )]
       (send-mail-to-recipients! recipients subject msg))))
 
 (defn- send-notifications-on-new-targetted-comment! [application to-email host]
   (let [subject      (get-email-subject application "new-comment")
         path-suffix  "/conversation"
-        msg          (email/apply-template "application-targeted-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
-                                                                              :link-sv (get-application-link application path-suffix host "sv")})]
+        msg          (email/apply-template "application-targeted-comment.md" (create-app-model application path-suffix host))]
     (send-mail-to-recipients! [to-email]  subject msg)))
 
 (defn- send-invite! [email text application host]
   (let [subject (get-email-subject application "invite")
-        msg     (email/apply-template "invite.md" {:link-fi (get-application-link application "" host "fi")
-                                                   :link-sv (get-application-link application "" host "sv")})]
+        msg     (email/apply-template "invite.md" (create-app-model application nil host))]
     (send-mail-to-recipients! [email] subject msg)))
 
 (defn- send-notifications-on-application-state-change! [{:keys [id]} host]
   (let [application (mongo/by-id :applications id) ; Load new state from DB
         recipients  (get-email-recipients-for-application application nil ["statementGiver"])
-        msg         (email/apply-template "application-state-change.md"
-                          {:link-fi (get-application-link application nil host "fi")
-                           :link-sv (get-application-link application nil host "sv")
-                           :state-fi (i18n/localize :fi (str (:state application)))
-                           :state-sv (i18n/localize :sv (str (:state application)))})
+        msg         (email/apply-template "application-state-change.md" (create-app-model application nil host))
         subject     (get-email-subject application "state-change")]
     (send-mail-to-recipients! recipients subject msg)))
 
 (defn- send-notifications-on-verdict! [application host]
   (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         path-suffix  "/verdict"
-        msg         (email/apply-template "application-verdict.md" {:link-fi (get-application-link application path-suffix host "fi")
-                                                                    :link-sv (get-application-link application path-suffix host "sv")})
+        msg         (email/apply-template "application-verdict.md" (create-app-model application path-suffix host))
         subject     (get-email-subject application "verdict")]
     (send-mail-to-recipients! recipients subject msg)))
 
