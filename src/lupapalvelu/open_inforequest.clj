@@ -11,7 +11,7 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
 
-(defn new-open-inforequest! [{application-id :id organization-id :organization}]
+(defn new-open-inforequest! [{application-id :id organization-id :organization :as application}]
   (assert application-id)
   (assert organization-id)
   (let [organization    (organization/get-organization organization-id)
@@ -26,7 +26,8 @@
                                            :email            email
                                            :created          (now)
                                            :last-used        nil})
-    (notifications/send-open-inforequest-invite! email token-id application-id (env/value :host))
+    (notifications/notify! "open-inforequest-invite" {:data {:email email :token-id token-id}
+                                                      :application application})
     true))
 
 (defn make-user [token]

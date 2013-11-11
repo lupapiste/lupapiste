@@ -138,7 +138,7 @@
        :info-fi (info-fn :fi)
        :info-sv (info-fn :sv)})))
 
-(defn send-open-inforequest-invite! [email token application-id host]
+(defn- send-open-inforequest-invite! [email token application-id host]
   (let [subject "Uusi neuvontapyynt\u00F6"
         msg     (get-message-for-open-inforequest-invite host token)]
     (send-mail-to-recipients! [email] subject msg)))
@@ -210,4 +210,5 @@
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
       :request-statement (send-on-request-for-statement! (:users data) application user host)
       :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application host)
+      :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application) host)
       )))
