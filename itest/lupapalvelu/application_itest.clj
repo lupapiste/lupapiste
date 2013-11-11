@@ -132,20 +132,26 @@
     (:opened app1) => nil
     (:opened app2) => number?))
 
-(fact "Authority is able to add an attachment to an application after verdict has been given for it"
+(fact* "Authority is able to add an attachment to an application after verdict has been given for it"
   (doseq [user [sonja pena]]
-    (let [application-id  (create-app-id user :municipality sonja-muni)
-          resp            (command user :submit-application :id application-id)
-          application     (query-application user application-id)]
-      (success resp) => true
-      (:state application) => "submitted"
+    (last-email) ; Inbox zero
 
-      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124)
+    (let [application-id  (create-app-id user :municipality sonja-muni :address "Paatoskuja 9")
+          resp            (command user :submit-application :id application-id) => ok?
+          application     (query-application user application-id)
+          email           (last-email)]
+      (:state application) => "submitted"
+      email => has-html-and-plain?
+      (:to email) => (email-for-key user)
+      (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
+      email => (partial contains-application-link? application-id)
+
+      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
             application (query-application sonja application-id)
             verdict     (first (:verdicts application))
             paatos      (first (:paatokset verdict))
-            poytakirja  (first (:poytakirjat paatos))]
-        (success resp) => true
+            poytakirja  (first (:poytakirjat paatos))
+            email       (last-email)]
         (:state application) => "verdictGiven"
         (count (:verdicts application)) => 1
         (count (:paatokset verdict)) => 1
@@ -159,7 +165,12 @@
 
         (let [first-attachment (get-in application [:attachments 0])]
           (upload-attachment sonja (:id application) first-attachment true)
-          (upload-attachment pena (:id application) first-attachment false))))))
+          (upload-attachment pena (:id application) first-attachment false))
+
+        email => has-html-and-plain?
+        (:to email) => (email-for-key user)
+        (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
+        email => (partial contains-application-link-with-tab? application-id "verdict")))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (create-app sonja :municipality veikko-muni) => unauthorized?)
