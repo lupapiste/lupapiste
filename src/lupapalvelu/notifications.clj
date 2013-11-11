@@ -9,7 +9,6 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.email :as email]
-            [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]))
 
@@ -17,32 +16,10 @@
 ;; Helpers
 ;;
 
-(defn- emit [xml] (apply str (enlive/emit* xml)))
-
-(defmacro message [& xml] `(emit (-> ~@xml)))
-
-(defn- get-styles []
-  (slurp (io/resource "email-templates/styles.css")))
-
 (defn- get-application-link [{:keys [infoRequest id]} suffix host lang]
   (let [permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
     (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
-
-(defn- replace-style [e style]
-  (enlive/transform e [:style] (enlive/content style)))
-
-(defn- replace-application-link [e selector lang f]
-  (enlive/transform e [(keyword (str selector lang))]
-    (fn [e] (assoc-in e [:attrs :href] (f lang)))))
-
-(defn- replace-links-in-fi-sv [e selector f]
-  (-> e
-    (replace-application-link (str selector "-") "fi" f)
-    (replace-application-link (str selector "-") "sv" f)))
-
-(defn- replace-application-links [e selector application suffix host]
-  (replace-links-in-fi-sv e selector (partial get-application-link application suffix host)))
 
 (defn- send-mail-to-recipients! [recipients subject msg]
   (future*
@@ -72,12 +49,6 @@
         (set auth-user-emails)
         (map #(-> % :person :email) statements))
       auth-user-emails)))
-
-(defn- template [s]
-  (->
-    (str "email-templates/" s)
-    enlive/html-resource
-    (replace-style (get-styles))))
 
 ;;
 ;; Sending
