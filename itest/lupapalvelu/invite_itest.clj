@@ -40,14 +40,11 @@
 
         (count (:invites (query teppo :invites))) => 1
 
-        (let [email (last-email)
-              plain (get-in email [:body :plain])
-              [href a-id a-id-again]   (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" plain)]
+        (let [email (last-email)]
           email => has-html-and-plain?
+          email => (partial contains-application-link? id)
           (:to email) => "teppo@example.com"
-          (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
-          a-id => id
-          a-id-again => id))
+          (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"))
 
       (fact "Sonja must NOT be able to uninvite Teppo!"
         (command sonja :remove-invite :id id :email "teppo@example.com") => unauthorized?

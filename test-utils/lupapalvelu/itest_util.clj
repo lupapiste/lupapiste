@@ -16,7 +16,9 @@
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
 (defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
+
 (defn email-for [username] (:email (find-user-from-minimal username)))
+(defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
@@ -244,6 +246,14 @@
 
 (defn has-html-and-plain? [{body :body}]
   (and (:html body) (:plain body)))
+
+(defn contains-application-link? [application-id {body :body}]
+  (let [[href a-id a-id-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" (:plain body))]
+    (= application-id a-id a-id-again)))
+
+(defn contains-application-link-with-tab? [application-id tab {body :body}]
+  (let [[href a-id a-tab a-id-again a-tab-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/([a-z]+)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
+    (and (= application-id a-id a-id-again) (= tab a-tab a-tab-again))))
 
 ;;
 ;; Stuffin' data in
