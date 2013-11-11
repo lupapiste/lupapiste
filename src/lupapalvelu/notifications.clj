@@ -68,12 +68,6 @@
                                      :organization-sv (:sv (:name organization))})]
     (send-mail-to-recipients! [email] subject msg)))
 
-(defn- send-on-request-for-statement! [persons application user host]
-  (doseq [{:keys [email text]} persons]
-    (let [subject (get-email-subject application "statement-request")
-          msg   (email/apply-template "add-statement-request.md" (create-app-model application nil host))]
-      (send-mail-to-recipients! [email] subject msg))))
-
 (defn- send-neighbor-invite! [to-address token neighbor-id application host]
   (let [neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
         address        (get application :address)
@@ -103,6 +97,12 @@
   (let [subject "Uusi neuvontapyynt\u00F6"
         msg     (get-message-for-open-inforequest-invite host token)]
     (send-mail-to-recipients! [email] subject msg)))
+
+(defn- send-on-request-for-statement! [persons application user host]
+  (doseq [{:keys [email text]} persons]
+    (let [subject (get-email-subject application "statement-request")
+          msg   (email/apply-template "add-statement-request.md" (create-app-model application nil host))]
+      (send-mail-to-recipients! [email] subject msg))))
 
 (defn- send-notifications-on-new-comment! [application user host]
   (when (user/authority? user)
