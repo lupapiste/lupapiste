@@ -100,13 +100,6 @@
         msg     (get-message-for-open-inforequest-invite host token)]
     (send-mail-to-recipients! [email] subject msg)))
 
-(defn- get-message-for-application-state-change [application host]
-  (email/apply-template "application-state-change.md"
-                          {:link-fi (get-application-link application nil host "fi")
-                           :link-sv (get-application-link application nil host "sv")
-                           :state-fi (i18n/localize :fi (str (:state application)))
-                           :state-sv (i18n/localize :sv (str (:state application)))}))
-
 (defn- get-message-for-new-comment [application host]
   (let [path-suffix  "/conversation"]
     (email/apply-template "new-comment.md"
@@ -140,7 +133,11 @@
 (defn- send-notifications-on-application-state-change! [{:keys [id]} host]
   (let [application (mongo/by-id :applications id) ; Load new state from DB
         recipients  (get-email-recipients-for-application application nil ["statementGiver"])
-        msg         (get-message-for-application-state-change application host)
+        msg         (email/apply-template "application-state-change.md"
+                          {:link-fi (get-application-link application nil host "fi")
+                           :link-sv (get-application-link application nil host "sv")
+                           :state-fi (i18n/localize :fi (str (:state application)))
+                           :state-sv (i18n/localize :sv (str (:state application)))})
         subject     (get-email-subject application "state-change")]
     (send-mail-to-recipients! recipients subject msg)))
 

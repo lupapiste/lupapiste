@@ -5,7 +5,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.dummy-email-server :as dummy]))
 
-(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-message-for-new-comment get-email-recipients-for-application get-message-for-application-state-change get-message-for-open-inforequest-invite)
+(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-message-for-new-comment get-email-recipients-for-application get-message-for-open-inforequest-invite)
 
 (facts "email titles"
   (get-email-subject {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
@@ -64,14 +64,6 @@
     (mongo/by-id :users "w1" {:email 1}) => {:email "w1@foo.com"}
     (mongo/by-id :users "w2" {:email 1}) => {:email "w2@foo.com"}
     (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
-
-(fact "Email for application open is like"
-  (let [msg (get-message-for-application-state-change { :id 123 :state "open"} "http://localhost:8000")]
-    (first msg) => (contains "http://localhost:8000/app/sv/applicant?hashbang=!/application/123#!/application/123")
-    (first msg) => (contains "Valmisteilla")))
-
-(fact "Email for application submitted contains the state string."
-  (first (get-message-for-application-state-change { :state "submitted"} ..host..)) => (contains "Vireill\u00E4"))
 
 (fact "Email for sending an open inforequest is like"
   (let  [html (first (get-message-for-open-inforequest-invite "http://lupapiste.fi" "123"))]
