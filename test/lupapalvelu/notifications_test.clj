@@ -1,8 +1,11 @@
 (ns lupapalvelu.notifications-test
   (:require [lupapalvelu.notifications :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.mongo :as mongo]
             [sade.dummy-email-server :as dummy]))
+
+(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-message-for-new-comment get-email-recipients-for-application get-message-for-application-state-change get-message-for-open-inforequest-invite)
 
 (facts "email titles"
   (get-email-subject {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
@@ -17,7 +20,7 @@
       => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
 
 (fact "Email for new comment contains link to application"
-      (first (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000")) => (contains "http://localhost:8000/app/fi/applicant?hashbang=!/application/123/conversation#!/application/123/conversation"))
+  (first (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000")) => (contains "http://localhost:8000/app/fi/applicant?hashbang=!/application/123/conversation#!/application/123/conversation"))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
