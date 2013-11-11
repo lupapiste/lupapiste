@@ -196,12 +196,12 @@
     (send-mail-to-recipients! recipients subject msg)))
 
 ;;
-;; Da notify
+;; Public API
 ;;
 
 (defn notify! [template {:keys [user created application data] :as command}]
   (let [host (env/value :host)]
-    (condp = (keyword template)
+    (case (keyword template)
       :new-comment  (send-notifications-on-new-comment! application user host)
       :targetted-comment (send-notifications-on-new-targetted-comment! application (:email user) host)
       :invite       (send-invite! (:email data) (:text data) application host)
@@ -212,3 +212,7 @@
       :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application host)
       :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application) host)
       )))
+
+(defn send-token! [template to]
+
+  )
