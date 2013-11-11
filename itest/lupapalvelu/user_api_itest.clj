@@ -89,7 +89,7 @@
     (let [email (last-email)]
       email => has-html-and-plain?
       (:to email) => "tonja.sibbo@sipoo.fi"
-      (:subject email) => "Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi"
+      (:subject email) => "Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 

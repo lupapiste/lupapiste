@@ -54,5 +54,5 @@
     (let [email          (last-email)
           [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain]))]
       (:to email) => "erajorma@takahikia.fi"
-      (:subject email) => "Uusi neuvontapyyntö"
+      (:subject email) => "Uusi neuvontapyynt\u00f6"
       (count token) => pos?)))
