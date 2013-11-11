@@ -91,7 +91,7 @@
                                      :organization-sv (:sv (:name organization))})]
     (send-mail-to-recipients! [email] subject msg)))
 
-(defn send-on-request-for-statement! [persons application user host]
+(defn- send-on-request-for-statement! [persons application user host]
   (doseq [{:keys [email text]} persons]
     (let [subject (get-email-subject application "statement-request")
           msg   (email/apply-template "add-statement-request.md"
@@ -212,4 +212,5 @@
       :state-change (send-notifications-on-application-state-change! application host)
       :verdict      (send-notifications-on-verdict! application host)
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
+      :request-statement (send-on-request-for-statement! (:persons data) application user host)
       )))

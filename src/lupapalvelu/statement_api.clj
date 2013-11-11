@@ -86,7 +86,7 @@
             statements    (map ->statement persons)]
         (mongo/update-by-id :applications id {$pushAll {:statements statements
                                                         :auth unique-writers}})
-        (notifications/send-on-request-for-statement! persons application user (env/value :host))))))
+        (notifications/notify! "request-statement" (assoc command :data {:persons persons}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
