@@ -1,7 +1,6 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa_canonical_to_krysp_xml_test
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
-                                                                 jatkoaika-canonical]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
             [lupapalvelu.document.rakennuslupa_canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen

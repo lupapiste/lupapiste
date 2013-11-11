@@ -995,7 +995,7 @@
 
 (fl/facts* "Canonical model for jatkoaika is correct"
   (let [canonical (application-to-canonical jatkolupa-application "sv")]
-    (clojure.pprint/pprint canonical)
+    ;(clojure.pprint/pprint canonical)
     ;TODO tests
     ))
 
