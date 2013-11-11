@@ -41,8 +41,13 @@
                   ["Rakennuksen purkaminen" :purkaminen]]]
     {:permit-type permit/R
      :tree ["Rakentaminen ja purkaminen"
-            (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-              (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+            (let [treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
+                             (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+                             treepart)
+                  treepart (if (env/feature? :jatkoaika)
+                             (conj treepart ["Jatkoaika" :jatkoaika])
+                             treepart)]
+              (clojure.pprint/pprint treepart)
               treepart)]}))
 
 (def ^:private operation-tree-for-environment-R
@@ -345,6 +350,11 @@
      :tyonjohtaja                 {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
                                    :required ["tyonjohtaja" ]
+                                   :attachments []}
+
+     :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["hakija" ]
                                    :attachments []}
      }
     ya-operations))

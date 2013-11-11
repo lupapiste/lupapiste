@@ -292,3 +292,24 @@
                       :kayttotapaus "Aloitusilmoitus"
                       }}}}]
     canonical))
+
+
+(defn jatkoaika-canonical [application application-link lang]
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
+        canonical {:Rakennusvalvonta
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :rakennusvalvontaAsiatieto
+                    {:RakennusvalvontaAsia
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :viitelupatieto (get-viitelupatieto link-permit-data)
+                      :osapuolettieto (osapuolet documents)
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :kayttotapaus "Jatkoaikahakemus"
+                      :asianTiedot
+                      (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) nil false)}}}}
+        ]
+    canonical)
+  )

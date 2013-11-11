@@ -781,3 +781,161 @@
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
                  kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]))
 
+
+;Jatkolupa
+
+(def jatkolupa-application
+  {:schema-version 1,
+   :auth
+   [{:lastName "Panaani",
+     :firstName "Pena",
+     :username "pena",
+     :type "owner",
+     :role "owner",
+     :id "777777777777777777000020"}],
+   :submitted 1384167310181,
+   :state "submitted",
+   :permitSubtype nil,
+   :location {:x 411063.82824707, :y 6685145.8129883},
+   :attachments [],
+   :organization "753-R",
+   :title "It\u00e4inen Hangelbyntie 163",
+   :operations
+   [{:id "5280b764420622588b2f04fc",
+     :name "jatkoaika",
+     :created 1384167268234}],
+   :infoRequest false,
+   :openInfoRequest false,
+   :opened 1384167310181,
+   :created 1384167268234,
+   :propertyId "75340800010051",
+   :documents
+   [{:id "5280b764420622588b2f04fe",
+     :schema-info
+     {:approvable true,
+      :subtype "hakija",
+      :name "hakija",
+      :removable true,
+      :repeating true,
+      :version 1,
+      :type "party",
+      :order 3},
+     :created 1384167268234,
+     :data {:_selected {:value "henkilo"}}}
+    {:created 1384167268234,
+     :data
+     {:kuvaus
+      {:modified 1384167309006,
+       :value
+       "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
+     :id "5280b764420622588b2f04fd",
+     :schema-info
+     {:order 1,
+      :version 1,
+      :name "hankkeen-kuvaus-minimum",
+      :approvable true,
+      :op
+      {:id "5280b764420622588b2f04fc",
+       :name "jatkoaika",
+       :created 1384167268234},
+      :removable true}}
+    {:id "5280b764420622588b2f04ff",
+     :schema-info
+     {:approvable true,
+      :subtype "hakija",
+      :name "hakija",
+      :removable true,
+      :repeating true,
+      :version 1,
+      :type "party",
+      :order 3},
+     :created 1384167268234,
+     :data {}}],
+   :_software_version "1.0.5",
+   :modified 1384167309006,
+   :allowedAttachmentTypes
+   [["hakija"
+     ["valtakirja"
+      "ote_kauppa_ja_yhdistysrekisterista"
+      "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]]
+    ["rakennuspaikan_hallinta"
+     ["jaljennos_myonnetyista_lainhuudoista"
+      "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta"
+      "rasitustodistus"
+      "todistus_erityisoikeuden_kirjaamisesta"
+      "jaljennos_vuokrasopimuksesta"
+      "jaljennos_perunkirjasta"]]
+    ["rakennuspaikka"
+     ["ote_alueen_peruskartasta"
+      "ote_asemakaavasta_jos_asemakaava_alueella"
+      "ote_kiinteistorekisteristerista"
+      "tonttikartta_tarvittaessa"
+      "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"
+      "kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma"]]
+    ["paapiirustus"
+     ["asemapiirros"
+    "pohjapiirros"
+    "leikkauspiirros"
+    "julkisivupiirros"]]
+    ["ennakkoluvat_ja_lausunnot"
+     ["naapurien_suostumukset"
+    "selvitys_naapurien_kuulemisesta"
+    "elyn_tai_kunnan_poikkeamapaatos"
+    "suunnittelutarveratkaisu"
+    "ymparistolupa"]]
+    ["muut"
+     ["selvitys_rakennuspaikan_terveellisyydesta"
+      "selvitys_rakennuspaikan_korkeusasemasta"
+      "selvitys_liittymisesta_ymparoivaan_rakennuskantaan"
+      "julkisivujen_varityssuunnitelma"
+      "selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta"
+      "piha_tai_istutussuunnitelma"
+      "selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta"
+      "selvitys_rakennuksen_kosteusteknisesta_toimivuudesta"
+      "selvitys_rakennuksen_aaniteknisesta_toimivuudesta"
+      "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"
+      "energiataloudellinen_selvitys"
+      "paloturvallisuussuunnitelma"
+      "liikkumis_ja_esteettomyysselvitys"
+      "kerrosalaselvitys"
+      "vaestonsuojasuunnitelma"
+      "rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo"
+      "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"
+      "selvitys_kiinteiston_jatehuollon_jarjestamisesta"
+      "rakennesuunnitelma"
+      "ilmanvaihtosuunnitelma"
+      "lammityslaitesuunnitelma"
+      "radontekninen_suunnitelma"
+      "kalliorakentamistekninen_suunnitelma"
+      "paloturvallisuusselvitys"
+      "suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta"
+      "merkki_ja_turvavalaistussuunnitelma"
+      "sammutusautomatiikkasuunnitelma"
+      "rakennusautomaatiosuunnitelma"
+      "valaistussuunnitelma"
+      "selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta"
+      "selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta"
+      "muu"]]],
+   :comments [],
+   :address "It\u00e4inen Hangelbyntie 163",
+   :permitType "R",
+   :id "LP-753-2013-00005",
+   :municipality "753"})
+
+(def jatkoaika-lp-links
+  '({:id "LP-753-2013-00001|LP-753-2013-00005",
+  :link ["LP-753-2013-00005" "LP-753-2013-00001"],
+  :LP-753-2013-00005
+  {:type "application",
+   :apptype "jatkoaika",
+   :propertyId "75340800010051"},
+  :LP-753-2013-00001
+  {:type "linkpermit", :linkpermittype "lupapistetunnus"}}))
+
+
+(fl/facts* "Canonical model for jatkoaika is correct"
+  (let [jatkoaika-link (first jatkoaika-links)
+        canonical (jatkoaika-canonical jatkolupa-application jatkoaika-link "sv")]))
+
+
+
