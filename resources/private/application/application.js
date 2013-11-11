@@ -656,7 +656,7 @@
         map.drawShape(application.shapes()[0]);
       }
 
-      if (application.infoRequest()) {
+      if (application.infoRequest() && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
@@ -719,7 +719,7 @@
                       "statement":   {type: "statements", model: application.unseenStatements},
                       "verdict":     {type: "verdicts",   model: application.unseenVerdicts}};
       // Mark comments seen after a second
-      if (tabMeta[tab] && currentId) {
+      if (tabMeta[tab] && currentId && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
           .success(function() {tabMeta[tab].model(0);})
           .call();

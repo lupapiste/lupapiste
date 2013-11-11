@@ -136,6 +136,9 @@
 (defjson "/api/query/:name" {name :name}
   (execute-query name (from-query)))
 
+(defjson [:post "/api/datatables/:name"] {name :name}
+  (execute-query name (:params (request/ring-request))))
+
 (defpage "/api/raw/:name" {name :name}
   (let [response (execute (enriched (action/make-raw name (from-query))))]
     (if-not (= (:ok response) false)
@@ -430,7 +433,7 @@
       (handler request)
       (let [cookie-name "anti-csrf-token"
             cookie-attrs (dissoc (env/value :cookie) :http-only)]
-        (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+        (if (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
                  (not (logged-in-with-apikey? request)))
           (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
           (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
