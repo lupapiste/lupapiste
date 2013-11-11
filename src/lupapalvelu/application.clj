@@ -239,7 +239,7 @@
    :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
    :roles      [:applicant :authority]
    :notified   true
-   :on-success (notify "invite")
+   :on-success (notify :invite)
    :verified   true}
   [{:keys [created user application]}]
   (let [email (ss/lower-case email)]

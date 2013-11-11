@@ -26,7 +26,7 @@
                                            :email            email
                                            :created          (now)
                                            :last-used        nil})
-    (notifications/notify! "open-inforequest-invite" {:data {:email email :token-id token-id}
+    (notifications/notify! :open-inforequest-invite {:data {:email email :token-id token-id}
                                                       :application application})
     true))
 

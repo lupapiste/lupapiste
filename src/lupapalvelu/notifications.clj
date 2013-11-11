@@ -129,25 +129,23 @@
 ;;
 
 (defn notify! [template {:keys [user created application data] :as command}]
-  (let [template (keyword template)]
-    (if-let [conf (template mail-config)]
-      (when ((get conf :pred-fn (constantly true)) command)
-        (let [application-fn (get conf :application-fn identity)
-              application    (application-fn application)
-              recipients-fn  (get conf :recipients-fn default-recipients-fn)
-              recipients     (recipients-fn command)
-              subject        (get-email-subject application (get conf :subject-key (name template)))
-              model          (create-app-model application (:tab conf))
-              template-file  (get conf :template (str (name template) ".md"))
-              msg            (email/apply-template template-file model)]
-          (send-mail-to-recipients! recipients subject msg)))
+  (if-let [conf (template mail-config)]
+    (when ((get conf :pred-fn (constantly true)) command)
+      (let [application-fn (get conf :application-fn identity)
+            application    (application-fn application)
+            recipients-fn  (get conf :recipients-fn default-recipients-fn)
+            recipients     (recipients-fn command)
+            subject        (get-email-subject application (get conf :subject-key (name template)))
+            model          (create-app-model application (:tab conf))
+            template-file  (get conf :template (str (name template) ".md"))
+            msg            (email/apply-template template-file model)]
+        (send-mail-to-recipients! recipients subject msg)))
     (case template
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
       :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application)
-      :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application))))))
+      :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application)))))
 
 (defn send-token! [template to token]
-  {:pre (contains? mail-config template)}
   (let [conf    (template mail-config)
         template-file  (get conf :template (str (name template) ".md"))
         link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))

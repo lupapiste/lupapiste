@@ -42,7 +42,7 @@
                                    :text text
                                    :email email
                                    :name (str (:firstName user) " " (:lastName user))}}})
-      (notifications/notify! "new-statement-person"  {:user user :data {:text text :organization organization}})
+      (notifications/notify! :new-statement-person  {:user user :data {:text text :organization organization}})
       (ok :id statement-person-id))))
 
 (defcommand delete-statement-person
@@ -86,7 +86,7 @@
             statements    (map ->statement persons)]
         (mongo/update-by-id :applications id {$pushAll {:statements statements
                                                         :auth unique-writers}})
-        (notifications/notify! "request-statement" (assoc command :data {:users users}))))))
+        (notifications/notify! :request-statement (assoc command :data {:users users}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
