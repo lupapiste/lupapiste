@@ -22,7 +22,7 @@
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (let [resp   (create-app mikko :municipality sonja-muni) => ok?
+  (let [resp   (create-app mikko :municipality sonja-muni :address "Kutsukatu 13") => ok?
         id     (:id resp) => truthy
         app    (query-application mikko id)
         doc-id (:id (domain/get-document-by-name app "suunnittelija"))]
@@ -34,9 +34,20 @@
         (:text (invite mikko id doc-id "")) => "error.missing-parameters")
 
       (fact "Mikko must be able to invite Teppo!"
-        (invite mikko id doc-id "teppo@example.com") => ok?)
+        (last-email) ; Inbox zero
 
-      (count (:invites (query teppo :invites))) => 1
+        (invite mikko id doc-id "teppo@example.com") => ok?
+
+        (count (:invites (query teppo :invites))) => 1
+
+        (let [email (last-email)
+              plain (get-in email [:body :plain])
+              [href a-id a-id-again]   (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" plain)]
+          email => has-html-and-plain?
+          (:to email) => "teppo@example.com"
+          (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
+          a-id => id
+          a-id-again => id))
 
       (fact "Sonja must NOT be able to uninvite Teppo!"
         (command sonja :remove-invite :id id :email "teppo@example.com") => unauthorized?
