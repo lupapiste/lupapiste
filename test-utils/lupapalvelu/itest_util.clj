@@ -86,7 +86,9 @@
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
-(defn create-app [apikey & args]
+(defn create-app
+  "Runs the create-application command, returns reply map. Use ok? to check it."
+  [apikey & args]
   (let [args (->> args
                (apply hash-map)
                (merge {:operation "asuinrakennus"
@@ -167,7 +169,9 @@
        (finally
          (set-anti-csrf! (not old-value#))))))
 
-(defn create-app-id [apikey & args]
+(defn create-app-id
+  "Verifies that an application was created and returns it's ID"
+  [apikey & args]
   (let [resp (apply create-app apikey args)
         id   (:id resp)]
     resp => ok?
@@ -209,7 +213,9 @@
     (assert ok)
     application))
 
-(defn create-and-submit-application [apikey & args]
+(defn create-and-submit-application
+  "Returns the application map"
+  [apikey & args]
   (let [id    (apply create-app-id apikey args)
         resp  (command apikey :submit-application :id id) => ok?]
     (query-application apikey id)))
@@ -220,12 +226,16 @@
           allowed? (-> actions action :ok)]
       (and ok allowed?))))
 
-(defn last-email []
+(defn last-email
+  "Returns the last email (or nil) and clears the inbox"
+  []
   (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
 
-(defn sent-emails []
+(defn sent-emails
+  "Returns a list of emails and clears the inbox"
+  []
   (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))
