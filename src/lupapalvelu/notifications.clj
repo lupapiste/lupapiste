@@ -70,20 +70,6 @@
                            :link-sv (get-application-link application nil host "sv")})]
       (send-mail-to-recipients! [email] subject msg))))
 
-(defn- send-password-reset-email! [to token]
-  (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
-        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
-        msg (email/apply-template "password-reset.md" {:link-fi link-fi
-                                                       :link-sv link-sv})]
-    (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
-
-(defn- send-invite-new-authority! [to token]
-  (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
-        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
-        msg (email/apply-template "authority-invite.md" {:link-fi link-fi
-                                                         :link-sv link-sv})]
-    (send-mail-to-recipients! [to] (loc "authority-invite.title") msg)))
-
 (defn- send-neighbor-invite! [to-address token neighbor-id application host]
   (let [neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
         address        (get application :address)
@@ -152,7 +138,7 @@
     (send-mail-to-recipients! [email] subject msg)))
 
 (defn- send-notifications-on-application-state-change! [{:keys [id]} host]
-  (let [application (mongo/by-id :applications id)
+  (let [application (mongo/by-id :applications id) ; Load new state from DB
         recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         msg         (get-message-for-application-state-change application host)
         subject     (get-email-subject application "state-change")]
@@ -184,8 +170,14 @@
       :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application) host)
       )))
 
+(def ^:private token-mail-config
+  {:invite-authority {:template "authority-invite.md" :subject-key "authority-invite.title"}
+   :reset-password   {:template "password-reset.md"   :subject-key "reset.email.title"}})
+
 (defn send-token! [template to token]
-  (case (keyword template)
-    :invite-authority (send-invite-new-authority! to token)
-    :reset-password   (send-password-reset-email! to token)
-    ))
+  {:pre (contains? token-mail-config template)}
+  (let [conf    (template token-mail-config)
+        link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
+        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
+        msg (email/apply-template (:template conf) {:link-fi link-fi :link-sv link-sv})]
+    (send-mail-to-recipients! [to] (loc (:subject-key conf)) msg)))
