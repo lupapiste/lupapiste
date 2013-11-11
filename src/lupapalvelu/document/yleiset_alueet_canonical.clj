@@ -137,10 +137,7 @@
                                   :arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)}})
       lisatiedot)))
 
-;;
-;; TODO: Mihin kielitieto (lang) lisataan? Rakval-puolella on lisatiedoissa asioimiskieli.
-;;
-(defn- permits [application lang]
+(defn- permits [application]
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
@@ -209,21 +206,22 @@
                           (-> documents-by-type hankkeen-kuvaus-key first :data))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
-        lupakohtainenLisatieto (if (:sijoitus-lisatiedot config)
-                                 (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                   [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                    {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])
-                                 (when (:mainostus-viitoitus-lisatiedot config)
-                                   (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
+        lupakohtainenLisatietotieto (if (:sijoitus-lisatiedot config)
+                                      (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
+                                        [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
+                                         {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])
+                                      (when (:mainostus-viitoitus-lisatiedot config)
+                                        (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
         sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 {:Sijoituslupaviite {:vaadittuKytkin false  ;; TODO: Muuta trueksi?
+                                 {:Sijoituslupaviite {:vaadittuKytkin false
                                                       :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
+
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
-                                  {:Johtoselvitysviite {:vaadittuKytkin false ;; TODO: Muuta trueksi?
-                                                        ;:tunniste "..."      ;; TODO: Tarvitaanko tunnistetta?
+                                  {:Johtoselvitysviite {:vaadittuKytkin false
+                                                        ;:tunniste "..."
                                                         }})
 
         body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
@@ -236,7 +234,7 @@
                                :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
                                :lausuntotieto (get-statements (:statements application))
                                :lupaAsianKuvaus lupaAsianKuvaus
-                               :lupakohtainenLisatietotieto lupakohtainenLisatieto
+                               :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
                                :sijoituslupaviitetieto sijoituslupaviitetieto
                                :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
                                :johtoselvitysviitetieto johtoselvitysviitetieto}}
@@ -254,5 +252,5 @@
   (let [app (assoc application :documents
               (clojure.walk/postwalk empty-strings-to-nil (:documents application)))]
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot app lang)
-                     :yleinenAlueAsiatieto (permits app lang)}}))
+                     :yleinenAlueAsiatieto (permits app)}}))
 

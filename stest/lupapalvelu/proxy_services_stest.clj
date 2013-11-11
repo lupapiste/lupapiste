@@ -107,10 +107,10 @@
       (let [request {:params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))
-        (:status (http/get (env/value :maps :geoserver)
-                {:query-params (:params request)
-                 :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-                 :as :stream})) => 200))))
+        (http/get (env/value :maps :geoserver)
+          {:query-params (:params request)
+           :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+           :as :stream}) => http200?))))
 
 (facts "raster-images"
        (let [base-params {"FORMAT" "image/png"
@@ -131,4 +131,4 @@
            (let [request {:params (merge base-params layer)
                           :headers {"accept-encoding" "gzip, deflate"}}]
              (println "Checking" (get layer "LAYERS"))
-             (:status (wfs/raster-images request)) => 200))))
+             (wfs/raster-images request) => http200?))))

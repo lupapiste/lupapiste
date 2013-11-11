@@ -138,7 +138,9 @@
                                app-index (.indexOf link-array app-id)
                                link-permit-id (link-array (if (= 0 app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-                           {:id link-permit-id :type link-permit-type}))
+                           (if (= (:type ((keyword app-id) link-data)) "application")
+                             {:id link-permit-id :type link-permit-type}
+                             {:id link-permit-id})))
             our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
             apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
 
@@ -307,8 +309,10 @@
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority]
-                                           :validators  [not-open-inforequest-user-validator]})
+(defcommand can-target-comment-to-authority
+  {:roles [:authority]
+   :validators  [not-open-inforequest-user-validator]
+   :description "Dummy command for UI logic"})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
@@ -958,7 +962,7 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
-(defcommand "applications-for-datatables"
+(defquery "applications-for-datatables"
   {:parameters [:params]
    :verified true}
   [{user :user {params :params} :data}]

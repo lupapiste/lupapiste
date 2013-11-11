@@ -82,7 +82,7 @@
 (defn serializable-actions []
   (into {} (for [[k v] (get-actions)]
              [k (-> v
-                  (dissoc :handler :validators :input-validators)
+                  (dissoc :handler :validators :input-validators :on-success)
                   (assoc :name k))])))
 
 ;;
@@ -122,6 +122,10 @@
 (defn missing-roles [command]
   (when (not (has-required-role command (meta-data command)))
     (tracef "command '%s' is unauthorized for role '%s'" (-> command :action) (-> command :user :role))
+    (fail :error.unauthorized)))
+
+(defn impersonation [command]
+  (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
     (fail :error.unauthorized)))
 
 (defn missing-parameters [command]
@@ -169,18 +173,16 @@
           (infof "no handler for action '%s'" name))
         (ok)))))
 
-(def execute-validators [missing-command
-                         missing-feature
-                         not-authenticated
-                         invalid-type
-                         missing-roles
-                         missing-parameters
-                         input-validators-fail])
-
 (def authorize-validators [missing-command
                            missing-feature
                            not-authenticated
-                           missing-roles])
+                           missing-roles
+                           impersonation])
+
+(def execute-validators (conj authorize-validators
+                          invalid-type
+                          missing-parameters
+                          input-validators-fail))
 
 (defn requires-application? [{data :data}]
   (contains? data :id))

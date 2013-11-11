@@ -9,7 +9,7 @@ Resource       ../../common_resource.robot
 
 Authority admin goes to the authority admin page
   Sipoo logs in
-  Wait until page contains element  test-authority-admin-users-table
+  Wait until page contains  Organisaation viranomaiset
 
 Password minimum length is 8
   [Tags]  fail

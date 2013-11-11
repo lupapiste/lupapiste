@@ -191,9 +191,6 @@
 
 
 
-
-
-
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
     {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
@@ -241,16 +238,20 @@
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
                       :kayttotapaus (get-kayttotapaus documents toimenpiteet)
-                      :asianTiedot
-                      (if link-permit-data
-                        (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
-                        (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))}
+                      :asianTiedot (if link-permit-data
+                                     (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
+                                     (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}
                      }}}]
     (if link-permit-data
       ;; The link permit data exists in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                  (get-viitelupatieto link-permit-data)))
+                  (get-viitelupatieto link-permit-data))
+        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
+                  (condp = (-> application :operations first :name)
+                    "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen")))
       ;; The link permit data does not exist in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
@@ -259,8 +260,8 @@
                   toimenpiteet)
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
                   (get-statements (:statements application)))
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lisatiedot]
-                  (get-lisatiedot (:lisatiedot documents) lang))))))
+        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
+                  (get-kayttotapaus documents toimenpiteet))))))
 
 
 (defn aloitusilmoitus-canonical [application lang started building user]
@@ -304,7 +305,7 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :viitelupatieto (get-viitelupatieto link-permit-data)
+                      :viitelupatieto (get-viitelupatieto application-link)
                       :osapuolettieto (osapuolet documents)
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Jatkoaikahakemus"
