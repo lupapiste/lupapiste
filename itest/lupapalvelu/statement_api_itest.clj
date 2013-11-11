@@ -15,9 +15,23 @@
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))
 
-    (let [application-id (create-app-id sonja :municipality sonja-muni)
-          resp (command sonja :request-for-statement :id application-id :personIds [statement-person-id])
-          email (last-email)]
-      resp => ok?
-      application-id => truthy
-      (:to email) => (email-for "ronja"))))
+    ; Add another statement person for the next test
+    (command sipoo :create-statement-person :email (email-for "veikko") :text "<b>bold</b>") => ok?
+    ; Zero inbox
+    (last-email) => truthy
+
+    (let [application-id     (create-app-id sonja :municipality sonja-muni)
+          application-before (query-application sonja application-id)
+          resp (command sonja :request-for-statement :id application-id :personIds [statement-person-id]) => ok?
+          application-after  (query-application sonja application-id)
+          emails (sent-emails)
+          email (first emails)]
+      (fact "Ronja receives email"
+        (:to email) => (email-for "ronja"))
+      (fact "...but no-one else"
+        (count emails) => 1)
+      (fact "auth array has one entry more (ronja)"
+        (count (:auth application-after)) => (inc (count (:auth application-before)))
+        (count (filter #(= (:username %) "ronja") (:auth application-after))) => 1)
+      (fact "veikko did not get access"
+        (count (filter #(= (:username %) "veikko") (:auth application-after))) => 0))))
