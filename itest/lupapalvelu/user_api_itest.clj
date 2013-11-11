@@ -70,14 +70,28 @@
 
 (facts update-user-organization
   (apply-remote-minimal)
+
   (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) => [])
   (fact (command sipoo :update-user-organization :email "foo" :operation "add") => ok?)
+
   (fact (-> (query "xyz" :user) :user :organizations) = ["753-R"])
   (fact (command sipoo :update-user-organization :email "foo" :operation "remove") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = [])
 
-  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"})))
+  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+
+  (fact "invite new user Tonja to Sipoo"
+    (last-email) ; Inbox zero
+
+    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :operation "add") => ok?
+
+    (let [email (last-email)]
+      email => has-html-and-plain?
+      (:to email) => "tonja.sibbo@sipoo.fi"
+      (:subject email) => "Kutsu Lupapiste.fi palvelun viranomaiskäyttäjäksi"
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+
 
 (fact "changing user info"
   (apply-remote-minimal)
