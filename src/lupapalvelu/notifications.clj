@@ -108,26 +108,26 @@
     (send-mail-to-recipients! [email] subject msg)))
 
 ;;
-;; Generic
+;; Configuration for generic notifications
 ;;
 
 (defn- default-recipients-fn [{application :application}]
   (get-email-recipients-for-application application nil ["statementGiver"]))
 
 (def ^:private mail-config
-  {:application-targetted-comment {:subject-key    "new-comment"
-                                   :tab            "/conversation"
-                                   :recipients-fn  (fn [{user :user}] [(:email user)])}
-   :application-state-change      {:application-fn (fn [{id :id}] (mongo/by-id :applications id))}
-   :application-verdict           {:tab            "/verdict"}
-   :new-comment                   {:tab            "/conversation"
-                                   :pred-fn        (fn [{user :user}] (user/authority? user))}
+  {:application-targeted-comment {:subject-key    "new-comment"   :tab "/conversation" :recipients-fn  (fn [{user :user}] [(:email user)])}
+   :application-state-change     {:subject-key    "state-change"  :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
+   :application-verdict          {:subject-key    "verdict"       :tab  "/verdict"}
+   :new-comment                  {:tab "/conversation"  :pred-fn (fn [{user :user}] (user/authority? user))}
    :invite                        {:recipients-fn  (fn [{data :data}] [(:email data)])}
-   :request-statement             {:recipients-fn  (fn [{{users :users} :data}] (map :email users))}})
+   :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))}
+   :invite-authority             {:subject-key "authority-invite.title" :template "authority-invite.md" }
+   :reset-password               {:subject-key "reset.email.title"      :template "password-reset.md"   }})
 
 ;;
 ;; Public API
 ;;
+
 (defn notify! [template {:keys [user created application data] :as command}]
   (let [template (keyword template)]
     (if-let [conf (template mail-config)]
@@ -146,12 +146,8 @@
       :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application)
       :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application))))))
 
-(def ^:private token-mail-config
-  {:invite-authority {:template "authority-invite.md" :subject-key "authority-invite.title"}
-   :reset-password   {:template "password-reset.md"   :subject-key "reset.email.title"}})
-
 (defn send-token! [template to token]
-  {:pre (contains? token-mail-config template)}
+  {:pre (contains? mail-config template)}
   (let [conf    (template token-mail-config)
         link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
