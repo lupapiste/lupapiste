@@ -31,17 +31,19 @@
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)
         organization    (mongo/select-one :organizations {:_id organization-id})
-        email           (ss/lower-case email)]
+        email           (ss/lower-case email)
+        statement-person-id (mongo/create-id)]
     (with-user-by-email email
       (when-not (user/authority? user) (fail! :error.not-authority))
       (mongo/update
         :organizations
         {:_id organization-id}
-        {$push {:statementPersons {:id (mongo/create-id)
+        {$push {:statementPersons {:id statement-person-id
                                    :text text
                                    :email email
                                    :name (str (:firstName user) " " (:lastName user))}}})
-      (notifications/notify! "new-statement-person"  {:user user :data {:text text :organization organization}}))))
+      (notifications/notify! "new-statement-person"  {:user user :data {:text text :organization organization}})
+      (ok :id statement-person-id))))
 
 (defcommand delete-statement-person
   {:parameters [personId]
@@ -63,14 +65,14 @@
 (defcommand request-for-statement
   {:parameters  [id personIds]
    :roles       [:authority]
-   :notified    true
    :states      [:draft :info :open :submitted :complement-needed]
+   :notified    true
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
   (organization/with-organization organization
     (fn [{:keys [statementPersons]}]
       (let [personIdSet    (set personIds)
-            persons        (filter #(-> % :id personIdSet) statementPersons)
+            persons        (filter #(personIdSet (:id %)) statementPersons)
             users          (map #(user-api/get-or-create-user-by-email (:email %)) persons)
             writers        (map #(user/user-in-role % :writer) users)
             new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
