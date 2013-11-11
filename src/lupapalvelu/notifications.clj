@@ -115,22 +115,15 @@
   (get-email-recipients-for-application application nil ["statementGiver"]))
 
 (def ^:private mail-config
-  {:new-comment       {:template       "new-comment.md"
-                       :tab            "/conversation"
-                       :pred-fn        (fn [{user :user}] (user/authority? user))}
-   :targetted-comment {:template       "application-targeted-comment.md"
-                       :subject-key    "new-comment"
-                       :tab            "/conversation"
-                       :recipients-fn  (fn [{user :user}] [(:email user)])}
-   :invite            {:template       "invite.md"
-                       :recipients-fn  (fn [{data :data}] [(:email data)])}
-   :state-change      {:template       "application-state-change.md"
-                       :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
-   :verdict           {:template       "application-verdict.md"
-                       :tab            "/verdict"}
-   :request-statement {:template       "add-statement-request.md"
-                       :recipients-fn  (fn [{{users :users} :data}] (map :email users))}
-   })
+  {:application-targetted-comment {:subject-key    "new-comment"
+                                   :tab            "/conversation"
+                                   :recipients-fn  (fn [{user :user}] [(:email user)])}
+   :application-state-change      {:application-fn (fn [{id :id}] (mongo/by-id :applications id))}
+   :application-verdict           {:tab            "/verdict"}
+   :new-comment                   {:tab            "/conversation"
+                                   :pred-fn        (fn [{user :user}] (user/authority? user))}
+   :invite                        {:recipients-fn  (fn [{data :data}] [(:email data)])}
+   :request-statement             {:recipients-fn  (fn [{{users :users} :data}] (map :email users))}})
 
 ;;
 ;; Public API
@@ -145,7 +138,7 @@
              recipients     (recipients-fn command)
              subject        (get-email-subject application (get conf :subject-key (name template)))
              model          (create-app-model application (:tab conf))
-             template-file  (:template conf)
+             template-file  (get conf :template (str (name template) ".md"))
              msg            (email/apply-template template-file model)]
           (send-mail-to-recipients! recipients subject msg)))
     (case template

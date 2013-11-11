@@ -315,11 +315,11 @@
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to]
    :notified   true
-   :on-success [(notify "new-comment")
+   :on-success [(notify :new-comment)
                 (fn [{data :data :as command} _]
                   (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
                     ;; LUPA-407
-                    (notifications/notify! "targetted-comment" (assoc command :user to-user))))] }
+                    (notifications/notify! :application-targetted-comment (assoc command :user to-user))))] }
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
@@ -405,7 +405,7 @@
   {:parameters [:id]
    :roles      [:applicant]
    :notified   true
-   :on-success (notify "state-change")
+   :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
@@ -416,7 +416,7 @@
   {:parameters [:id]
    :roles      [:authority]
    :notified   true
-   :on-success (notify "state-change")
+   :on-success (notify :application-state-change)
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
@@ -427,7 +427,7 @@
   {:parameters [:id lang]
    :roles      [:authority]
    :notified   true
-   :on-success (notify "state-change")
+   :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [command]
   (with-application command
@@ -458,7 +458,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
    :notified   true
-   :on-success (notify "state-change")
+   :on-success (notify :application-state-change)
    :validators [validate-owner-or-writer]}
   [{:keys [created] :as command}]
   (with-application command
@@ -775,7 +775,7 @@
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
    :notified   true
-   :on-success (notify "verdict")
+   :on-success (notify :application-verdict)
    :roles      [:authority]}
   [{:keys [created] :as command}]
   (update-application command
@@ -834,7 +834,7 @@
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    :notified   true
-   :on-success  (notify     "verdict")}
+   :on-success  (notify     :application-verdict)}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (do
