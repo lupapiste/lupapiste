@@ -39,19 +39,14 @@
                     ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
                     ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
                   ["Rakennuksen purkaminen" :purkaminen]]
-        treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-                   (conj treepart ["Tyonjohtaja" :tyonjohtaja])
-                   treepart)
-        treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
-                   (conj treepart ["Suunnittelija" :suunnittelija])
-                   treepart)]
+        ]
     {:permit-type permit/R
      :tree ["Rakentaminen ja purkaminen"
             (let [treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
                              (conj treepart ["Tyonjohtaja" :tyonjohtaja])
                              treepart)
-                  treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-                             (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+                  treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
+                             (conj treepart ["Suunnittelija" :suunnittelija])
                              treepart)
                   treepart (if (env/feature? :jatkoaika)
                              (conj treepart ["Jatkoaika" :jatkoaika])
