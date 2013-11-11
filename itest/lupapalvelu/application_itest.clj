@@ -173,6 +173,19 @@
         (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
         email => (partial contains-application-link-with-tab? application-id "verdict")))))
 
+(fact* "Applicant receives email after verdict has been fetched from KRYPS backend"
+  (last-email) ; Inbox zero
+
+  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
+        application-id (:id application)
+        resp  (command sonja :check-for-verdict :id application-id) => ok?
+        email (last-email)]
+
+    email => has-html-and-plain?
+    (:to email) => (email-for-key mikko)
+    (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
+    email => (partial contains-application-link-with-tab? application-id "verdict")))
+
 (fact "Authority in unable to create an application to a municipality in another organization"
   (create-app sonja :municipality veikko-muni) => unauthorized?)
 
