@@ -251,7 +251,8 @@
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
                   (condp = (-> application :operations first :name)
                     "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
-                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen")))
+                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
+                    "jatkoaika" "Jatkoaikahakemus")))
       ;; The link permit data does not exist in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
@@ -293,3 +294,4 @@
                       :kayttotapaus "Aloitusilmoitus"
                       }}}}]
     canonical))
+

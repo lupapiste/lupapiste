@@ -39,14 +39,19 @@
                     ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
                     ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
                   ["Rakennuksen purkaminen" :purkaminen]]
-        treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-                   (conj treepart ["Tyonjohtaja" :tyonjohtaja])
-                   treepart)
-        treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
-                   (conj treepart ["Suunnittelija" :suunnittelija])
-                   treepart)]
+        ]
     {:permit-type permit/R
-     :tree ["Rakentaminen ja purkaminen" treepart]}))
+     :tree ["Rakentaminen ja purkaminen"
+            (let [treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
+                             (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+                             treepart)
+                  treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
+                             (conj treepart ["Suunnittelija" :suunnittelija])
+                             treepart)
+                  treepart (if (env/feature? :jatkoaika)
+                             (conj treepart ["Jatkoaika" :jatkoaika])
+                             treepart)]
+              treepart)]}))
 
 (def ^:private operation-tree-for-environment-R
   {:permit-type permit/R
@@ -350,6 +355,10 @@
                                    :required ["hankkeen-kuvaus-minimum"]
                                    :attachments []}
 
+     :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["hakija" ]
+                                   :attachments []}
      :suunnittelija               {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
                                    :required ["suunnittelija"]

@@ -3,7 +3,9 @@
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
             [lupapalvelu.document.rakennuslupa_canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
-                                                                      application-suunnittelijan-nimeaminen]]
+                                                                      application-suunnittelijan-nimeaminen
+                                                                      jatkolupa-application
+                                                                      ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
                                                                 save-aloitusilmoitus-as-krysp]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
@@ -29,7 +31,7 @@
     ;(clojure.pprint/pprint application)
 
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)
-    ;(with-open [out-file (writer "/Users/terotu/example.xml" )]
+    ;(with-open [out-file (writer "/Users/terotu/jatkolupa_example.xml" )]
     ;    (emit xml out-file))
     (fact "xml exist" xml => truthy)
 
@@ -56,6 +58,8 @@
        :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
                  :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
                  :apikey "5051ba0caa2480f374dcfefg"}})
+
+
 
     ))
 
