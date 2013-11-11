@@ -102,8 +102,8 @@
 
 (defn- get-message-for-application-state-change [application host]
   (email/apply-template "application-state-change.md"
-                          {:application-link-fi (get-application-link application nil host "fi")
-                           :application-link-sv (get-application-link application nil host "sv")
+                          {:link-fi (get-application-link application nil host "fi")
+                           :link-sv (get-application-link application nil host "sv")
                            :state-fi (i18n/localize :fi (str (:state application)))
                            :state-sv (i18n/localize :sv (str (:state application)))}))
 
@@ -115,8 +115,8 @@
 
 (defn- get-message-for-targeted-comment [application host]
   (let [path-suffix  "/conversation"]
-    (email/apply-template "application-targeted-comment.md" {:conversation-link-fi (get-application-link application path-suffix host "fi")
-                                                             :conversation-link-sv (get-application-link application path-suffix host "sv")})))
+    (email/apply-template "application-targeted-comment.md" {:link-fi (get-application-link application path-suffix host "fi")
+                                                             :link-sv (get-application-link application path-suffix host "sv")})))
 
 (defn- send-notifications-on-new-comment! [application user host]
   (when (user/authority? user)
@@ -147,8 +147,8 @@
 (defn- send-notifications-on-verdict! [application host]
   (let [recipients  (get-email-recipients-for-application application nil ["statementGiver"])
         path-suffix  "/verdict"
-        msg         (email/apply-template "application-verdict.md" {:verdict-link-fi (get-application-link application path-suffix host "fi")
-                                                                    :verdict-link-sv (get-application-link application path-suffix host "sv")})
+        msg         (email/apply-template "application-verdict.md" {:link-fi (get-application-link application path-suffix host "fi")
+                                                                    :link-sv (get-application-link application path-suffix host "sv")})
         subject     (get-email-subject application "verdict")]
     (send-mail-to-recipients! recipients subject msg)))
 

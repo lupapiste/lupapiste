@@ -1,9 +1,9 @@
 # Hei,
 
-P&auml;&auml;t&ouml;s annettu hakemukseen {{verdict-link-fi}}
+P&auml;&auml;t&ouml;s annettu hakemukseen {{link-fi}}
 
 ---
 
 # Hej,
 
-Beslut p&aring; ans&ouml;kan {{verdict-link-sv}}
+Beslut p&aring; ans&ouml;kan {{link-sv}}
