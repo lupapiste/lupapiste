@@ -257,7 +257,7 @@
     (if (mongo/select-one :users {:email email :enabled true})
       (let [token (token/make-token :password-reset {:email email})]
         (infof "password reset request: email=%s, token=%s" email token)
-        (notifications/send-password-reset-email! email token)
+        (notifications/send-token! :reset-password email token)
         (ok))
       (do
         (warnf "password reset request: unknown email: email=%s" email)

@@ -70,7 +70,7 @@
                            :link-sv (get-application-link application nil host "sv")})]
       (send-mail-to-recipients! [email] subject msg))))
 
-(defn send-password-reset-email! [to token]
+(defn- send-password-reset-email! [to token]
   (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
         msg (email/apply-template "password-reset.md" {:link-fi link-fi
@@ -187,5 +187,5 @@
 (defn send-token! [template to token]
   (case (keyword template)
     :invite-authority (send-invite-new-authority! to token)
-    :password         (send-password-reset-email! to token)
+    :reset-password   (send-password-reset-email! to token)
     ))
