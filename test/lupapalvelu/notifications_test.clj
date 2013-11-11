@@ -13,10 +13,10 @@
 
 (fact "create application link"
   (fact "..for application"
-    (get-application-link {:id 1} "" "http://localhost:8080" "fi")
+    (get-application-link {:id 1} "" "fi" "http://localhost:8080")
       => "http://localhost:8080/app/fi/applicant?hashbang=!/application/1#!/application/1")
   (fact "..for inforequest"
-    (get-application-link {:id 1 :infoRequest true} "/comment" "http://localhost:8080" "fi")
+    (get-application-link {:id 1 :infoRequest true} "/comment" "fi" "http://localhost:8080" )
       => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
 
 (fact "Every user gets an email"
@@ -63,6 +63,6 @@
     (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
 
 (fact "Email for sending an open inforequest is like"
-  (let  [html (first (get-message-for-open-inforequest-invite "http://lupapiste.fi" "123"))]
+  (let  [html (first (get-message-for-open-inforequest-invite "123" "http://lupapiste.fi"))]
     html => (contains "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi")))
 

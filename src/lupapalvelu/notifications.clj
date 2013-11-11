@@ -16,10 +16,10 @@
 ;; Helpers
 ;;
 
-(defn- get-application-link [{:keys [infoRequest id]} suffix host lang]
+(defn- get-application-link [{:keys [infoRequest id]} suffix lang & [host]]
   (let [permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
-    (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
+    (str (or host (env/value :host)) "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
 
 (defn- send-mail-to-recipients! [recipients subject msg]
   (future*
@@ -50,9 +50,9 @@
         (map #(-> % :person :email) statements))
       auth-user-emails)))
 
-(defn- create-app-model [application tab host]
-  {:link-fi (get-application-link application tab host "fi")
-   :link-sv (get-application-link application tab host "sv")
+(defn- create-app-model [application tab]
+  {:link-fi (get-application-link application tab "fi")
+   :link-sv (get-application-link application tab "sv")
    :state-fi (i18n/localize :fi (str (:state application)))
    :state-sv (i18n/localize :sv (str (:state application)))})
 
@@ -72,8 +72,9 @@
 ;; Neighbor
 ;;
 
-(defn- send-neighbor-invite! [to-address token neighbor-id application host]
-  (let [neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
+(defn- send-neighbor-invite! [to-address token neighbor-id application]
+  (let [host           (env/value :host)
+        neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
         address        (get application :address)
         municipality   (get application :municipality)
         subject        (get-email-subject application "neighbor")
@@ -91,8 +92,8 @@
 ;; Open Inforequest
 ;;
 
-(defn- get-message-for-open-inforequest-invite [host token]
-  (let  [link-fn (fn [lang] (str host "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
+(defn- get-message-for-open-inforequest-invite [token & [host]]
+  (let  [link-fn (fn [lang] (str (or host (env/value :host)) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
          info-fn (fn [lang] (env/value :oir :wanna-join-url))]
     (email/apply-template "open-inforequest-invite.html"
       {:link-fi (link-fn :fi)
@@ -101,83 +102,56 @@
        :info-sv (info-fn :sv)})))
 
 
-(defn- send-open-inforequest-invite! [email token application-id host]
+(defn- send-open-inforequest-invite! [email token application-id]
   (let [subject "Uusi neuvontapyynt\u00F6"
-        msg     (get-message-for-open-inforequest-invite host token)]
+        msg     (get-message-for-open-inforequest-invite token)]
     (send-mail-to-recipients! [email] subject msg)))
 
 ;;
 ;; Generic
 ;;
 
+(defn- default-recipients-fn [{application :application}]
+  (get-email-recipients-for-application application nil ["statementGiver"]))
+
 (def ^:private mail-config
-  {:new-comment       {:template    "new-comment.md"
-                       :tab          "/conversation"}
-   :targetted-comment {:template    "application-targeted-comment.md"
-                       :subject-key "new-comment"
-                       :tab          "/conversation"}
-   :invite            {:template    "invite.md"}
-   :state-change      {:template    "application-state-change.md"}
-   :verdict           {:template    "application-verdict.md"
-                       :tab          "/verdict"}
-;:new-statement-person
-   :request-statement {:template    "add-statement-request.md"}
-;:neighbor-invite
-;:open-inforequest-invite
+  {:new-comment       {:template       "new-comment.md"
+                       :tab            "/conversation"
+                       :pred-fn        (fn [{user :user}] (user/authority? user))}
+   :targetted-comment {:template       "application-targeted-comment.md"
+                       :subject-key    "new-comment"
+                       :tab            "/conversation"
+                       :recipients-fn  (fn [{user :user}] [(:email user)])}
+   :invite            {:template       "invite.md"
+                       :recipients-fn  (fn [{data :data}] [(:email data)])}
+   :state-change      {:template       "application-state-change.md"
+                       :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
+   :verdict           {:template       "application-verdict.md"
+                       :tab            "/verdict"}
+   :request-statement {:template       "add-statement-request.md"
+                       :recipients-fn  (fn [{{users :users} :data}] (map :email users))}
    })
-
-(defn- subject-and-message [message-type application host]
-  {:pre (contains? mail-config message-type)}
-  (let [conf (message-type mail-config)]
-    [(get-email-subject application (get conf :subject-key (name message-type)))
-     (email/apply-template (:template conf) (create-app-model application (:tab conf) host))]))
-
-
-(defn- send-on-request-for-statement! [persons application user host]
-  (let [[subject msg] (subject-and-message :request-statement application host)]
-    (send-mail-to-recipients! (map :email persons) subject msg)))
-
-(defn- send-notifications-on-new-comment! [application user host]
-  (when (user/authority? user)
-    (let [recipients   (get-email-recipients-for-application application nil ["statementGiver"])
-          [subject msg] (subject-and-message :new-comment application host)]
-      (send-mail-to-recipients! recipients subject msg))))
-
-(defn- send-notifications-on-new-targetted-comment! [application to-email host]
-  (let [[subject msg] (subject-and-message :targetted-comment application host)]
-    (send-mail-to-recipients! [to-email]  subject msg)))
-
-(defn- send-invite! [email text application host]
-  (let [[subject msg] (subject-and-message :invite application host)]
-    (send-mail-to-recipients! [email] subject msg)))
-
-(defn- send-notifications-on-application-state-change! [{:keys [id]} host]
-  (let [application (mongo/by-id :applications id) ; Load new state from DB
-        recipients  (get-email-recipients-for-application application nil ["statementGiver"])
-        [subject msg] (subject-and-message :state-change application host)]
-    (send-mail-to-recipients! recipients subject msg)))
-
-(defn- send-notifications-on-verdict! [application host]
-  (let [recipients    (get-email-recipients-for-application application nil ["statementGiver"])
-        [subject msg] (subject-and-message :verdict application host)]
-    (send-mail-to-recipients! recipients subject msg)))
 
 ;;
 ;; Public API
 ;;
 (defn notify! [template {:keys [user created application data] :as command}]
-  (let [host (env/value :host)]
-    (case (keyword template)
-      :new-comment  (send-notifications-on-new-comment! application user host)
-      :targetted-comment (send-notifications-on-new-targetted-comment! application (:email user) host)
-      :invite       (send-invite! (:email data) (:text data) application host)
-      :state-change (send-notifications-on-application-state-change! application host)
-      :verdict      (send-notifications-on-verdict! application host)
+  (let [template (keyword template)]
+    (if-let [conf (template mail-config)]
+      (when ((get conf :pred-fn (constantly true)) command)
+        (let [application-fn (get conf :application-fn identity)
+             application    (application-fn application)
+             recipients-fn  (get conf :recipients-fn default-recipients-fn)
+             recipients     (recipients-fn command)
+             subject        (get-email-subject application (get conf :subject-key (name template)))
+             model          (create-app-model application (:tab conf))
+             template-file  (:template conf)
+             msg            (email/apply-template template-file model)]
+          (send-mail-to-recipients! recipients subject msg)))
+    (case template
       :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
-      :request-statement (send-on-request-for-statement! (:users data) application user host)
-      :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application host)
-      :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application) host)
-      )))
+      :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application)
+      :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application))))))
 
 (def ^:private token-mail-config
   {:invite-authority {:template "authority-invite.md" :subject-key "authority-invite.title"}
