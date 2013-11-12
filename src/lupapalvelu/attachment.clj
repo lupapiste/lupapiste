@@ -532,17 +532,6 @@
     (when-let [application (get-application-no-access-checking (:application attachment))]
       (when (seq application) attachment))))
 
-(def windows-filename-max-length 255)
-
-(defn encode-filename
-  "Replaces all non-ascii chars and other that the allowed punctuation with dash.
-   UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
-  [unencoded-filename]
-  (when-let [de-accented (ss/de-accent unencoded-filename)]
-      (clojure.string/replace
-        (ss/last-n windows-filename-max-length de-accented)
-        #"[^a-zA-Z0-9\.\-_ ]" "-")))
-
 (defn output-attachment
   [attachment-id download? attachment-fn]
   (debugf "file download: attachment-id=%s" attachment-id)
@@ -554,7 +543,7 @@
       (if download?
         (assoc-in response
           [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))))
+          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
@@ -579,13 +568,13 @@
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
 (defn- append-stream [zip file-name in]
   (when in
-    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
 (defn- append-attachment [zip {:keys [filename fileId]}]
