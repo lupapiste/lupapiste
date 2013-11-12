@@ -436,7 +436,7 @@
     (fail :error.unknown)))
 
 (defcommand move-attachments-to-backing-system
-  {;:parameters []
+  {:parameters [id]
    :roles      [:authority]
    :validators [#_attachment-is-not-locked (if-not-authority-states-must-match #{:verdictGiven})]
    ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?
@@ -445,11 +445,74 @@
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (println "\n entered defcommand move-attachments-to-backing-system")
+  (println "\n entered defcommand move-attachments-to-backing-system, app id: " id "\n")
+
+;  (mongo/update
+;    :applications
+;    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+;    {$set {:modified created
+;           :attachments.$.state :requires_user_action}})
+
+;  result-count (mongo/update-by-query
+;                             :applications
+;                             {:_id application-id
+;                              :attachments {$elemMatch {:id attachment-id
+;                                                        :latestVersion.version.major (:major latest-version)
+;                                                        :latestVersion.version.minor (:minor latest-version)}}}
+;                             {$set {:modified now
+;                                    :attachments.$.modified now
+;                                    :attachments.$.state  :requires_authority_action
+;                                    :attachments.$.latestVersion version-model}
+;                              $push {:attachments.$.versions version-model}})
+
+; (mongo/count :applications {:_id application-id :attachments.id attachment-id})
+
+;(mongo/update
+;    :applications
+;    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+;    {$set {:modified created
+;           :attachments.$.state :ok}})
+
   ;;
-  ;; TODO
+  ;; TODO: Laita latestVersionille uusi timestamp "sent"
   ;;
+
+;  (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
+;    (mongo/update-by-id :submitted-applications (:id application)
+;      {$set {:schema-version 1 :documents (map drop-schema-data (:documents application))}}))
+
+  (let [result (mongo/select
+                 :applications
+                 {:_id id
+;                  :attachments.latestVersion {$exists true}
+                  :attachments.latestVersion.sent {$exists false}
+                  }
+;                 {:_id id
+;                  {$and [{:attachments.latestVersion {$exists true}}
+;                         {:attachments.latestVersion.sent {$exists false}}]}
+;                  }
+                 {:attachments.latestVersion 1}
+                 )
+        filtered (filter seq (-> result first :attachments))
+        latestVersions (map #(:latestVersion %) filtered)]
+
+    (println "\n result:")
+    (clojure.pprint/pprint result)
+    (println "\n")
+
+    (println "\n filtered:")
+    (clojure.pprint/pprint filtered)
+    (println "\n")
+
+    (println "\n latestVersions:")
+    (clojure.pprint/pprint latestVersions)
+    (println "\n")
+
+    )
+
   )
+
+
 
 ;;
 ;; Download

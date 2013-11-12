@@ -291,23 +291,20 @@ var attachment = (function() {
 
 
   // Tarvittaessa tahan voi tehda confirmation modaalin, kts. esim "deleteAttachment"
-  function sendUnsentAttachmentsToBackingSystem() {
-    console.log("entered sendUnsentAttachmentsToBackingSystem");
-
-    ajax
-      .command("move-attachments-to-backing-system"/*, {id: applicationId, attachmentId: attachmentId}*/)
-      .success(function() {
-        console.log("sendUnsentAttachmentsToBackingSystem, SUCCESS");
-        repository.load(applicationId);
-//        return false;
-      })
-      .error(function() {
-        console.log("sendUnsentAttachmentsToBackingSystem, ERROR");
-        repository.load(applicationId);
-      })
-    .call();
-  return false;
-  }
+//  function sendUnsentAttachmentsToBackingSystem(appId) {
+//    ajax
+//      .command("move-attachments-to-backing-system")
+//      .success(function() {
+//        console.log("sendUnsentAttachmentsToBackingSystem, SUCCESS, appId: ", appId);
+//        repository.load(appId);
+//      })
+//      .error(function() {
+//        console.log("sendUnsentAttachmentsToBackingSystem, ERROR, appId: ", appId);
+//        repository.load(appId);
+//      })
+//    .call();
+//  return false;
+//  }
 
 
 
@@ -317,7 +314,7 @@ var attachment = (function() {
 
   return {
     initFileUpload: initFileUpload,
-    sendUnsentAttachmentsToBackingSystem: sendUnsentAttachmentsToBackingSystem,
+//    sendUnsentAttachmentsToBackingSystem: sendUnsentAttachmentsToBackingSystem,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 
