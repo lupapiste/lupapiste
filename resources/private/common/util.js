@@ -97,7 +97,8 @@ var util = (function() {
       toHumanFormat: propertyIdToHumanFormat,
       toDbFormat: propertyIdToDbFormat
     },
-    nop: nop
+    nop: nop,
+    constantly: function(value) { return function() { return value; }; }
   };
 
 })();

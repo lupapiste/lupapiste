@@ -16,10 +16,9 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
-    :admin     {}
     (do
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
-      {:_id "-1"}))) ; should not yield any results
+      {:_id nil}))) ; should not yield any results
 
 ;; TODO: test me!
 (defn application-query-for [user]
@@ -28,7 +27,6 @@
     (case (keyword (:role user))
       :applicant {:state {$ne "canceled"}}
       :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
-      :admin     {:state {$ne "canceled"}}
       {})))
 
 (defn get-application-as [application-id user]
@@ -100,7 +98,9 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (model/find-by-name schema-body full-path)))))
 
-(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId]} & {:keys [with-hetu]}]
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+                         companyName companyId
+                         fise degree graduatingYear]} & {:keys [with-hetu]}]
   (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
     (->
       {:userId                        {:value id}
@@ -110,7 +110,13 @@
                       :puhelin        {:value phone}}
        :osoite {:katu                 {:value street}
                 :postinumero          {:value zip}
-                :postitoimipaikannimi {:value city}}}
+                :postitoimipaikannimi {:value city}}
+       :yritys {:yritysnimi           {:value companyName}
+                :liikeJaYhteisoTunnus {:value companyId}}
+       :patevyys {:koulutus           {:value degree}
+                  :valmistumisvuosi   {:value graduatingYear}
+                  :fise               {:value fise}
+                  }}
       merge-hetu
       strip-nils
       strip-empty-maps)))

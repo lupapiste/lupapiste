@@ -24,6 +24,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -137,7 +138,9 @@
                                app-index (.indexOf link-array app-id)
                                link-permit-id (link-array (if (= 0 app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-                           {:id link-permit-id :type link-permit-type}))
+                           (if (= (:type ((keyword app-id) link-data)) "application")
+                             {:id link-permit-id :type link-permit-type}
+                             {:id link-permit-id})))
             our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
             apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
 
@@ -247,7 +250,7 @@
   (let [email (ss/lower-case email)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
-      (let [invited (user/get-or-create-user-by-email email)
+      (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
                      :text         text
@@ -306,8 +309,10 @@
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority]
-                                           :validators  [not-open-inforequest-user-validator]})
+(defcommand can-target-comment-to-authority
+  {:roles [:authority]
+   :validators  [not-open-inforequest-user-validator]
+   :description "Dummy command for UI logic"})
 
 (defcommand add-comment
   {:parameters [:id :text :target]
@@ -377,7 +382,9 @@
         model        (if-not (blank? path)
                        (assoc-in {} (map keyword (split path #"\.")) person)
                        person)
-        updates      (tools/path-vals model)]
+        updates      (tools/path-vals model)
+        ; Path should exist in schema!
+        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
@@ -537,9 +544,7 @@
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
-            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
+                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
         (conj new-docs hakija)))))
 
 (defn- ->location [x y]
@@ -939,8 +944,6 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
-  (println user)
-  (println params)
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
@@ -959,7 +962,7 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
-(defcommand "applications-for-datatables"
+(defquery "applications-for-datatables"
   {:parameters [:params]
    :verified true}
   [{user :user {params :params} :data}]

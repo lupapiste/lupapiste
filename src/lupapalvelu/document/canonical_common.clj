@@ -17,7 +17,9 @@
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
    :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"})
+   :complement-needed "vireill\u00e4"
+   :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
+   :constructions-started "rakennusty\u00f6t aloitettu"})
 
 (def state-timestamps
   {:draft :created
@@ -26,25 +28,29 @@
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
    :submitted :opened
    ; Enables XML to be formed from sent applications
-   :sent :opened})
+   :sent :opened
+   :verdictGiven :opened
+   :constructions-started :opened})
 
-(defn to-xml-date [timestamp]
-  (let [dt (tc/from-long timestamp)]
-    (if-not (nil? timestamp)
+(defn to-xml-date [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
       (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") dt))))
 
-(defn to-xml-datetime [timestamp]
-  (let [dt (tc/from-long timestamp)]
-    (if-not (nil? timestamp)
+(defn to-xml-datetime [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
       (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") dt))))
 
-(defn to-xml-date-from-string [date-as-string]
-  (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
+(defn to-xml-date-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
 
-(defn to-xml-datetime-from-string [date-as-string]
-  (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d)))
+(defn to-xml-datetime-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
@@ -263,17 +269,20 @@
         codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
         patevyys (:patevyys suunnittelija)
+        osoite (get-simple-osoite (:osoite suunnittelija))
         henkilo (merge (get-name (:henkilotiedot suunnittelija))
-                       {:osoite (get-simple-osoite (:osoite suunnittelija))}
+                       {:osoite osoite}
                        {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
                        (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
         base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
                                 :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
+                                :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                                :kokemusvuodet (-> patevyys :kokemus :value)
                                 :henkilo henkilo})]
-    (if (contains? suunnittelija :yritys)
+    (if (-> suunnittelija :yritys :yritysnimi :value s/blank? not)
       (assoc base-data :yritys (assoc
                                  (get-simple-yritys (:yritys suunnittelija))
-                                 :postiosoite (get-simple-osoite (:osoite suunnittelija))))
+                                 :postiosoite osoite))
       base-data)))
 
 (defn- get-designers [documents]

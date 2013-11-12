@@ -17,7 +17,6 @@
     :phone "03030303"
     :username "admin"
     :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
-              :salt "$2a$10$WHPur/hjvaOTlm41VFjtju"
               :apikey "5087ba34c2e667024fbd5992"}}
    ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
    ;; veikko / veikko
@@ -31,7 +30,6 @@
     :phone "03121991"
     :username "veikko"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG" ;; veikko
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5051ba0caa2480f374dcfeff"}}
    ;; Jussi Viranomainen - tamperelainen YA-lupa-arkkitehti
    ;; jussi / jussi
@@ -47,8 +45,7 @@
     :phone "1231234567"
     :zip "33456"
     :city "Tampere"
-    :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
-              :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
+    :private {:password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
               :apikey "5051ba0caa2480f374dcfefg"}}
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti
    ;; sonja / sonja
@@ -62,7 +59,6 @@
     :phone "03121991"
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9d1"}}
    ;; Ronja Sibbo - Sipoon lupa-arkkitehti
    ;; ronja / sonja
@@ -76,7 +72,6 @@
     :phone "03121991"
     :username "ronja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
   {:id "777777777777777777000033"
     :email "pekka.borga@porvoo.fi"
@@ -88,7 +83,6 @@
     :phone "121212"
     :username "pekka"
     :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
-              :salt "$2a$10$C65v2OgWcCzo4SVDtofawu"
               :apikey "4761896258863737181711425832653651926670"}}
   {:id "777777777777777777000034"
     :email "olli.uleaborg@ouka.fi"
@@ -101,7 +95,6 @@
     :phone "121212"
     :username "olli"
     :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
-              :salt "$2a$10$JXFA55BPpNDpI/jDuPv76u"
               :apikey "7634919923210010829057754770828315568705"}}
     ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
@@ -112,8 +105,7 @@
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
-    :private {:salt "$2a$10$VFcksPILCd9ykyl.1FIhwO",
-              :password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
+    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
               :apikey "50ac788ec2e6c2ea6e73f83f"}}
    {:id "50ac77ecd2e6c2ea6e73f83f" ;; naantali
     :email "admin@naantali.fi"
@@ -123,8 +115,7 @@
     :firstName "Admin"
     :lastName "Naantali"
     :username "admin@naantali.fi"
-    :private {:salt "$2a$10$4pvNDXk2g5XgxT.whx1Ua.",
-              :password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
+    :private {:password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
               :apikey "a0ac77ecd2e6c2ea6e73f83f"}}
    {:id "50ac77ecd2e6c2ea6e73f840"
     :email "rakennustarkastaja@naantali.fi"
@@ -134,8 +125,7 @@
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
     :username "rakennustarkastaja@naantali.fi"
-    :private {:salt "$2a$10$4pvNDXk2g5XgxT.whx1Ua.",
-              :password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
+    :private {:password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
               :apikey "a0ac77ecd2e6c2ea6e73f840"}}
    {:id "50ac77ecd2e6c2ea6e73f841"
     :email "lupasihteeri@naantali.fi"
@@ -145,8 +135,7 @@
     :firstName "Lupasihteeri"
     :lastName "Naantali"
     :username "lupasihteeri@naantali.fi"
-    :private {:salt "$2a$10$4pvNDXk2g5XgxT.whx1Ua.",
-              :password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
+    :private {:password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
               :apikey "a0ac77ecd2e6c2ea6e73f841"}}
    {:id "50ac77ecd2e6c2ea6e73f850" ;; jarvenpaa
     :email "admin@jarvenpaa.fi"
@@ -156,8 +145,7 @@
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "admin@jarvenpaa.fi"
-    :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
-              :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f850"}}
    {:id "50ac77ecd2e6c2ea6e73f851"
     :email "rakennustarkastaja@jarvenpaa.fi"
@@ -167,8 +155,7 @@
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
-    :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
-              :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f851"}}
    {:id "50ac77ecd2e6c2ea6e73f852"
     :email "lupasihteeri@jarvenpaa.fi"
@@ -178,8 +165,7 @@
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "lupasihteeri@jarvenpaa.fi"
-    :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
-              :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
    ;; Tampere YA paakayttaja
    ;; tampere-ya / tampere
@@ -195,8 +181,7 @@
     :role "authorityAdmin"
     :zip "010203"
     :organizations ["837-YA"]
-    :private {:salt "$2a$10$hkJ5ZQhqL66iM2.3m4712e"
-              :password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe"}} ;; tampere
+    :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe"}} ;; tampere
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
@@ -209,8 +194,7 @@
     :enabled true
     :postalCode "33200"
     :username "teppo@example.com"
-    :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe"
-              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
+    :private {:password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
               :apikey "502cb9e58426c613c8b85abb"}
     :phone "0505503171"
     :email "teppo@example.com"
@@ -232,8 +216,13 @@
     :zip "55550"
     :city "Sipoo"
     :phone "0505503171"
+    :architect true
+    :degree "Tutkinto"
+    :graduatingYear "2000"
+    :companyName "Yritys Oy"
+    :companyId "1234567-1"
+    :fise "f"
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
-              :salt "$2a$10$sVFCAX/MB7wDKA2aNp1gre"
               :apikey "502cb9e58426c613c8b85abc"}}
    {:id "777777777777777777000020" ;; pena
     :username "pena"
@@ -248,7 +237,6 @@
     :city "Piippola"
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
-              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
               :apikey "502cb9e58426c613c8b85abd"}}
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
@@ -257,7 +245,6 @@
     :lastName "Dummy"
     :email  "dummy@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
-              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
               :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
     :role  "applicant"}
    {:id  "51112424c26b7342d92acf3d"
@@ -266,8 +253,7 @@
     :firstName "Duff"
     :lastName "Dummy2"
     :email  "dummy2@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
-              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"} ; pena
     :role  "applicant"}
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
@@ -275,8 +261,7 @@
     :firstName "Duff"
     :lastName "Dummy3"
     :email  "dummy3@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
-              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"} ; pena
     :role  "applicant"}
    ])
 

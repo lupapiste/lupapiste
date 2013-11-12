@@ -93,7 +93,7 @@
         self.operations(opearations);
       });
       return self;
-    }
+    };
 
     self.addressData.subscribe(function(a) {
       self.addressString(a ? a.street + " " + a.number : "");

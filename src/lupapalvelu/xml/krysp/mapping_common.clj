@@ -142,7 +142,9 @@
                              henkilo
                              yritys
                              {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}]}]}
+                             {:tag :koulutus}
+                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :valmistumisvuosi}]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}

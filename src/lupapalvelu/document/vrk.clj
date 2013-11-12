@@ -96,6 +96,10 @@
                                 :931 4000
                                 :941 50000
                                 :999 50000})
+
+
+(def ei-lammitysta "ei l\u00e4mmityst\u00e4")
+
 ;;
 ;; helpers
 ;;
@@ -146,7 +150,7 @@
       :result [:warn "vrk:BR106"]}]))
 
 (defvalidator-old "vrk:CR343"
-  "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
+  "Jos lammitystapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
   [{{schema-name :name} :schema-info data :data}]
   (when
     (and
@@ -184,36 +188,32 @@
      {:path [:verkostoliittymat :sahkoKytkin]
       :result [:warn "vrk:CR341"]}]))
 
-(defvalidator-old "vrk:CR336"
-  "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
-  [{{schema-name :name} :schema-info data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "eiLammitysta"))
-      (some-> data :lammitys :lammonlahde :value exists?))
-    [{:path [:lammitys :lammitystapa]
-      :result [:warn "vrk:CR336"]}
-     {:path [:lammitys :lammonlahde]
-      :result [:warn "vrk:CR336"]}]))
-
-(defvalidator-old "vrk:CR335"
-  "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
-  [{{schema-name :name} :schema-info data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value exists?)
-      (some-> data :lammitys :lammitystapa :value (not= "eiLammitysta"))
-      (some-> data :lammitys :lammonlahde :value exists? not))
-    [{:path [:lammitys :lammitystapa]
-      :result [:warn "vrk:CR335"]}
-     {:path [:lammitys :lammonlahde]
-      :result [:warn "vrk:CR335"]}]))
-
 ;;
 ;; new stuff
 ;;
+
+(defvalidator :vrk:CR335
+  {:doc "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
+   :schema "uusiRakennus"
+   :fields [lammitystapa [:lammitys :lammitystapa]
+            polttoaine   [:lammitys :lammonlahde]]
+   :facts {:ok   [["ei l\u00e4mmityst\u00e4" nil]
+                  ["ei l\u00e4mmityst\u00e4" ""]
+                  ["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
+           :fail [["suora s\u00e4hk\u00f6" ""]
+                  ["suora s\u00e4hk\u00f6" nil]]}}
+  (and lammitystapa (not= lammitystapa ei-lammitysta) (s/blank? polttoaine)))
+
+(defvalidator :vrk:CR336
+  {:doc "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
+   :schema "uusiRakennus"
+   :fields [lammitystapa [:lammitys :lammitystapa]
+            polttoaine   [:lammitys :lammonlahde]]
+   :facts {:ok   [["ei l\u00e4mmityst\u00e4" nil]
+                  ["ei l\u00e4mmityst\u00e4" ""]
+                  ["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
+           :fail [["ei l\u00e4mmityst\u00e4" "s\u00e4hk\u00f6"]]}}
+  (and (= lammitystapa ei-lammitysta) (exists? polttoaine)))
 
 (defvalidator :vrk:CR326
   {:doc    "Kokonaisalan oltava vahintaan kerrosala"
@@ -322,10 +322,11 @@
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              lammitystapa    [:lammitys :lammitystapa]]
    :facts   {:ok   [["032 luhtitalot" "ilmakeskus"]]
-             :fail [["032 luhtitalot" "eiLammitysta"]]}}
+             :fail [["032 luhtitalot" ei-lammitysta]
+                    ["032 luhtitalot" nil]]}}
   (and
     (<= 11 kayttotarkoitus 39)
-    (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))
+    (not (#{"vesikeskus" "ilmakeskus" "suora sahk\u00f6" "uuni"} lammitystapa))))
 
 (defvalidator :vrk:CR315
   {:doc     "Omakotitalossa pitaa olla huoneisto"
@@ -472,26 +473,26 @@
     (<= kayttotarkoitus 729)
     (not julkisivu)))
 
-(defvalidator :vrk:BR319:lammitustapa
+(defvalidator :vrk:BR319:lammitystapa
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
          Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
    :level   :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
-            lammitustapa    [:lammitys :lammitystapa]]
+            lammitystapa    [:lammitys :lammitystapa]]
    :facts  {:ok    [["032 luhtitalot"       "uuni"]
                     ["032 luhtitalot"       "ei tiedossa"]
-                    ["931 saunarakennukset" "eiLammitysta"]
+                    ["931 saunarakennukset" ei-lammitysta]
                     ["931 saunarakennukset" nil]
                     ["931 saunarakennukset" " "]]
             :fail  [["032 luhtitalot"       nil]
-                    ["032 luhtitalot"       "eiLammitysta"]]}}
+                    ["032 luhtitalot"       ei-lammitysta]]}}
   (and
     (<= kayttotarkoitus 729)
     (or
-      (not lammitustapa)
-      (= "eiLammitysta" lammitustapa))))
+      (not lammitystapa)
+      (= ei-lammitysta lammitystapa))))
 
 #_(defvalidator :vrk:BR203
   {:doc "Jos huoneiston jakokirjain on annettu taytyy olla myos porraskirjain tai huoneistonumero"
