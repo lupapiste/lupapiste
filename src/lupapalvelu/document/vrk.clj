@@ -322,10 +322,11 @@
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              lammitystapa    [:lammitys :lammitystapa]]
    :facts   {:ok   [["032 luhtitalot" "ilmakeskus"]]
-             :fail [["032 luhtitalot" ei-lammitysta]]}}
+             :fail [["032 luhtitalot" ei-lammitysta]
+                    ["032 luhtitalot" nil]]}}
   (and
     (<= 11 kayttotarkoitus 39)
-    (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))
+    (not (#{"vesikeskus" "ilmakeskus" "suora sahk\u00f6" "uuni"} lammitystapa))))
 
 (defvalidator :vrk:CR315
   {:doc     "Omakotitalossa pitaa olla huoneisto"
