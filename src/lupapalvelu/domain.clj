@@ -100,7 +100,7 @@
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
                          companyName companyId
-                         fise degree]} & {:keys [with-hetu]}]
+                         fise degree graduatingYear]} & {:keys [with-hetu]}]
   (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
     (->
       {:userId                        {:value id}
@@ -114,6 +114,7 @@
        :yritys {:yritysnimi           {:value companyName}
                 :liikeJaYhteisoTunnus {:value companyId}}
        :patevyys {:koulutus           {:value degree}
+                  :valmistumisvuosi   {:value graduatingYear}
                   :fise               {:value fise}
                   }}
       merge-hetu

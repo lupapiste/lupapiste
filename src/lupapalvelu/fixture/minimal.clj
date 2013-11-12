@@ -218,6 +218,7 @@
     :phone "0505503171"
     :architect true
     :degree "Tutkinto"
+    :graduatingYear "2000"
     :companyName "Yritys Oy"
     :companyId "1234567-1"
     :fise "f"
