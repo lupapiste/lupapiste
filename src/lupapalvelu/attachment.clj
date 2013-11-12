@@ -438,11 +438,10 @@
 (defcommand move-attachments-to-backing-system
   {;:parameters []
    :roles      [:authority]
-   :validators [attachment-is-not-locked (if-not-authority-states-must-match #{:sent :verdictGiven})]
+   :validators [#_attachment-is-not-locked (if-not-authority-states-must-match #{:verdictGiven})]
    ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?
-;   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
-;                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:sent :verdictGiven]
+;   :input-validators   ......
+;   :states     [:verdictGiven]                              ;; *** TODO: Laita tama takaisin! ***
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
