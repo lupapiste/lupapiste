@@ -66,7 +66,7 @@
   (against-background
     (sade.env/value :host) => "http://lupapiste.fi"
     (sade.env/value :oir :wanna-join-url) => "http://lupapiste.fi/yhteydenotto")
-  (let  [model (open-inforequest-invite-model {:data {:token-id "123"}})]
+  (let  [model (open-inforequest-invite-model {:data {:token-id "123"}} nil)]
     (:link-fi model) => "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi"
     (:info-fi model) => "http://lupapiste.fi/yhteydenotto"))
 
