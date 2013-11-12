@@ -30,7 +30,7 @@
   (let [title-postfix (when title-key (if (i18n/has-term? "fi" "email.title" title-key)
                                         (i18n/localize "fi" "email.title" title-key)
                                         (i18n/localize "fi" title-key)))]
-    (str "Lupapiste.fi: " title (when title " - ") (when title-key title-postfix))))
+    (str "Lupapiste.fi: " title (when (and title title-key)" - ") (when title-key title-postfix))))
 
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
