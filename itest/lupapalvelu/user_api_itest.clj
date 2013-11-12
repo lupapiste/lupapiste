@@ -120,6 +120,7 @@
                 :phone "0505503171"
                 :architect true
                 :degree "d"
+                :graduatingYear 2000
                 :fise "f"
                 :companyName "cn"
                 :companyId "cid"}]
