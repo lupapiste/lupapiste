@@ -27,11 +27,10 @@
   nil)
 
 (defn- get-email-subject [{title :title} & [title-key]]
-  (let [localized (when title-key (if (i18n/has-term? "fi" "email.title" title-key)
-                                    (i18n/localize "fi" "email.title" title-key)
-                                    (i18n/localize "fi" title-key)))
-        title-postfix (when title-key (str (when title " - ") localized))]
-    (str "Lupapiste.fi: " title title-postfix)))
+  (let [title-postfix (when title-key (if (i18n/has-term? "fi" "email.title" title-key)
+                                        (i18n/localize "fi" "email.title" title-key)
+                                        (i18n/localize "fi" title-key)))]
+    (str "Lupapiste.fi: " title (when title " - ") (when title-key title-postfix))))
 
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
