@@ -337,8 +337,9 @@
 ;; In case a document was added but forgot to write test above
 (validate-all-documents documents)
 
-(def application
-  {:permitType "R"
+(def application-rakennuslupa
+  {:id "LP-753-2013-00001"
+   :permitType "R"
    :municipality municipality
    :auth [{:lastName "Panaani"
            :firstName "Pena"
@@ -361,7 +362,6 @@
    :propertyId "21111111111111"
    :modified 1354532324691
    :address "Katutie 54"
-   :id "LP-753-2013-00001"
    :statements [{:given 1368080324142
                  :id "518b3ee60364ff9a63c6d6a1"
                  :person {:text "Paloviranomainen"
@@ -373,29 +373,31 @@
                  :text "Savupiippu pit\u00e4\u00e4 olla."}]})
 
 (def application-tyonjohtajan-nimeaminen
-  (merge application {:organization "753-R"
-                      :state "submitted"
-                      :operations [{:name "tyonjohtaja"
-                                    :id "5272668be8db5aaa01084601"
-                                    :created 1383229067483}]
-                      :documents [hakija-henkilo
-                                  tyonjohtaja
-                                  hankkeen-kuvaus-minimum]
-                      :linkPermitData [link-permit-data-kuntalupatunnus]
-                      :appsLinkingToUs [app-linking-to-us]}))
+  (merge application-rakennuslupa {:id "LP-753-2013-00002"
+                                   :organization "753-R"
+                                   :state "submitted"
+                                   :operations [{:name "tyonjohtaja"
+                                                 :id "5272668be8db5aaa01084601"
+                                                 :created 1383229067483}]
+                                   :documents [hakija-henkilo
+                                               tyonjohtaja
+                                               hankkeen-kuvaus-minimum]
+                                   :linkPermitData [link-permit-data-kuntalupatunnus]
+                                   :appsLinkingToUs [app-linking-to-us]}))
 
 (def application-suunnittelijan-nimeaminen
-  (merge application {:organization "753-R"
-                      :state "submitted"
-                      :propertyId "75341600550007"
-                      :operations [{:name "suunnittelija"
-                                    :id "527b3392e8dbbb95047a89de"
-                                    :created 1383805842761}]
-                      :documents [hakija-henkilo
-                                  suunnittelija1
-                                  hankkeen-kuvaus-minimum]
-                      :linkPermitData [link-permit-data-lupapistetunnus]
-                      :appsLinkingToUs [app-linking-to-us]}))
+  (merge application-rakennuslupa {:id "LP-753-2013-00003"
+                                   :organization "753-R"
+                                   :state "submitted"
+                                   :propertyId "75341600550007"
+                                   :operations [{:name "suunnittelija"
+                                                 :id "527b3392e8dbbb95047a89de"
+                                                 :created 1383805842761}]
+                                   :documents [hakija-henkilo
+                                               suunnittelija1
+                                               hankkeen-kuvaus-minimum]
+                                   :linkPermitData [link-permit-data-lupapistetunnus]
+                                   :appsLinkingToUs [app-linking-to-us]}))
 
 
 (defn- validate-minimal-person [person]
@@ -566,7 +568,7 @@
 (testable-privates lupapalvelu.document.canonical-common get-handler)
 
 (facts "Handler is sonja"
-  (let [handler (get-handler application)
+  (let [handler (get-handler application-rakennuslupa)
         name (get-in handler [:henkilo :nimi])]
     (fact "handler" handler => truthy)
     (fact "etunimi" (:etunimi name) => "Sonja")
@@ -575,8 +577,8 @@
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-operations)
 
 (facts "Toimenpiteet"
-  (let [documents (by-type (:documents application))
-        actions (get-operations documents application)]
+  (let [documents (by-type (:documents application-rakennuslupa))
+        actions (get-operations documents application-rakennuslupa)]
     ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)))
 
@@ -619,18 +621,18 @@
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "turve"}
                                            :muu-lammonlahde {:value nil}} }
-                               {:id "123" :created nil} application)]
+                               {:id "123" :created nil} application-rakennuslupa)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (facts "When muu-lammonlahde is specified, it is used"
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "other"}
                                            :muu-lammonlahde {:value "fuusioenergialla"}} }
-                               {:id "123" :created nil} application)]
+                               {:id "123" :created nil} application-rakennuslupa)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (fl/facts* "Canonical model is correct"
-  (let [canonical (application-to-canonical application "sv") => truthy
+  (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -766,11 +768,11 @@
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
 
 
-    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00001")
+    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00002")
     (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
 
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
-    (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")))
+    (fact "kayttotapaus" kayttotapaus => "Uuden ty\u00f6njohtajan nime\u00e4minen")))
 
 
 (fl/facts* "Canonical model for suunnittelijan nimeaminen is correct"
@@ -801,15 +803,15 @@
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
 
 
-    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00001")
+    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00003")
     (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
 
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
-    (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")))
+    (fact "kayttotapaus" kayttotapaus => "Uuden suunnittelijan nime\u00e4minen")))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
            (let [canonical (aloitusilmoitus-canonical
-                             (assoc application :state "verdictGiven")
+                             (assoc application-rakennuslupa :state "verdictGiven")
                              "sv"
                              1354532324658
                              {:rakennusnro "002" :jarjestysnumero 1}
@@ -866,4 +868,136 @@
                  katselmuksenLaji (:katselmuksenLaji Katselmus)
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
                  kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]))
+
+
+;Jatkolupa
+
+(def jatkolupa-application
+  {:schema-version 1,
+   :auth
+   [{:lastName "Panaani",
+     :firstName "Pena",
+     :username "pena",
+     :type "owner",
+     :role "owner",
+     :id "777777777777777777000020"}],
+   :submitted 1384167310181,
+   :state "submitted",
+   :permitSubtype nil,
+   :location {:x 411063.82824707, :y 6685145.8129883},
+   :attachments [],
+   :organization "753-R",
+   :title "It\u00e4inen Hangelbyntie 163",
+   :operations
+   [{:id "5280b764420622588b2f04fc",
+     :name "jatkoaika",
+     :created 1384167268234}],
+   :infoRequest false,
+   :openInfoRequest false,
+   :opened 1384167310181,
+   :created 1384167268234,
+   :propertyId "75340800010051",
+   :documents
+   [{:created 1384167268234,
+     :data
+     {:kuvaus
+      {:modified 1384167309006,
+       :value
+       "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
+     :id "5280b764420622588b2f04fd",
+     :schema-info
+     {:order 1,
+      :version 1,
+      :name "hankkeen-kuvaus-minimum",
+      :approvable true,
+      :op
+      {:id "5280b764420622588b2f04fc",
+       :name "jatkoaika",
+       :created 1384167268234},
+      :removable true}}
+    hakija-henkilo],
+   :_software_version "1.0.5",
+   :modified 1384167309006,
+   :allowedAttachmentTypes
+   [["hakija"
+     ["valtakirja"
+      "ote_kauppa_ja_yhdistysrekisterista"
+      "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]]
+    ["rakennuspaikan_hallinta"
+     ["jaljennos_myonnetyista_lainhuudoista"
+      "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta"
+      "rasitustodistus"
+      "todistus_erityisoikeuden_kirjaamisesta"
+      "jaljennos_vuokrasopimuksesta"
+      "jaljennos_perunkirjasta"]]
+    ["rakennuspaikka"
+     ["ote_alueen_peruskartasta"
+      "ote_asemakaavasta_jos_asemakaava_alueella"
+      "ote_kiinteistorekisteristerista"
+      "tonttikartta_tarvittaessa"
+      "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"
+      "kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma"]]
+    ["paapiirustus"
+     ["asemapiirros"
+    "pohjapiirros"
+    "leikkauspiirros"
+    "julkisivupiirros"]]
+    ["ennakkoluvat_ja_lausunnot"
+     ["naapurien_suostumukset"
+    "selvitys_naapurien_kuulemisesta"
+    "elyn_tai_kunnan_poikkeamapaatos"
+    "suunnittelutarveratkaisu"
+    "ymparistolupa"]]
+    ["muut"
+     ["selvitys_rakennuspaikan_terveellisyydesta"
+      "selvitys_rakennuspaikan_korkeusasemasta"
+      "selvitys_liittymisesta_ymparoivaan_rakennuskantaan"
+      "julkisivujen_varityssuunnitelma"
+      "selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta"
+      "piha_tai_istutussuunnitelma"
+      "selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta"
+      "selvitys_rakennuksen_kosteusteknisesta_toimivuudesta"
+      "selvitys_rakennuksen_aaniteknisesta_toimivuudesta"
+      "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"
+      "energiataloudellinen_selvitys"
+      "paloturvallisuussuunnitelma"
+      "liikkumis_ja_esteettomyysselvitys"
+      "kerrosalaselvitys"
+      "vaestonsuojasuunnitelma"
+      "rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo"
+      "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"
+      "selvitys_kiinteiston_jatehuollon_jarjestamisesta"
+      "rakennesuunnitelma"
+      "ilmanvaihtosuunnitelma"
+      "lammityslaitesuunnitelma"
+      "radontekninen_suunnitelma"
+      "kalliorakentamistekninen_suunnitelma"
+      "paloturvallisuusselvitys"
+      "suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta"
+      "merkki_ja_turvavalaistussuunnitelma"
+      "sammutusautomatiikkasuunnitelma"
+      "rakennusautomaatiosuunnitelma"
+      "valaistussuunnitelma"
+      "selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta"
+      "selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta"
+      "muu"]]],
+   :comments [],
+   :address "It\u00e4inen Hangelbyntie 163",
+   :permitType "R",
+   :id "LP-753-2013-00005",
+   :municipality "753"
+   :authority {:id "777777777777777777000023"
+               :username "sonja"
+               :firstName "Sonja"
+               :lastName "Sibbo"
+               :role "authority"}
+  :linkPermitData [{:id "LP-753-2013-00001", :type "lupapistetunnus"}]})
+
+(fl/facts* "Canonical model for jatkoaika is correct"
+  (let [canonical (application-to-canonical jatkolupa-application "sv")]
+    ;(clojure.pprint/pprint canonical)
+    ;TODO tests
+    ))
+
+
 

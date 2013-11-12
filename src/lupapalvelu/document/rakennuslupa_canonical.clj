@@ -247,7 +247,12 @@
       ;; The link permit data exists in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                  (get-viitelupatieto link-permit-data)))
+                  (get-viitelupatieto link-permit-data))
+        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
+                  (condp = (-> application :operations first :name)
+                    "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
+                    "jatkoaika" "Jatkoaikahakemus")))
       ;; The link permit data does not exist in the received application
       (-> canonical
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
@@ -255,7 +260,9 @@
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
                   toimenpiteet)
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-                  (get-statements (:statements application)))))))
+                  (get-statements (:statements application)))
+        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
+                  (get-kayttotapaus documents toimenpiteet))))))
 
 
 (defn aloitusilmoitus-canonical [application lang started building user]
@@ -287,3 +294,4 @@
                       :kayttotapaus "Aloitusilmoitus"
                       }}}}]
     canonical))
+
