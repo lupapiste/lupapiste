@@ -68,20 +68,14 @@
 ;; Neighbor
 ;;
 
-(defn- send-neighbor-invite! [to-address token neighbor-id application]
-  (let [host           (env/value :host)
-        neighbor-name  (get-in application [:neighbors (keyword neighbor-id) :neighbor :owner :name])
-        municipality   (:municipality application )
-        subject        (get-email-subject application "neighbor")
-        page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
-        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" neighbor-id "/" token))
-        msg            (email/apply-template "neighbor.md" {:name neighbor-name
-                                                      :address (:address application)
-                                                      :city-fi (i18n/localize :fi "municipality" municipality)
-                                                      :city-sv (i18n/localize :sv "municipality" municipality)
-                                                      :link-fi (link-fn :fi)
-                                                      :link-sv (link-fn :sv)})]
-    (send-mail-to-recipients! [to-address]  subject msg)))
+(defn- neighbor-invite-model [{{token :token neighbor-id :neighborId} :data {:keys [id address municipality neighbors]} :application}]
+  (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
+    {:name    (get-in neighbors [(keyword neighbor-id) :neighbor :owner :name])
+     :address address
+     :city-fi (i18n/localize :fi "municipality" municipality)
+     :city-sv (i18n/localize :sv "municipality" municipality)
+     :link-fi (link-fn :fi)
+     :link-sv (link-fn :sv)}))
 
 ;;
 ;; Open Inforequest
@@ -109,6 +103,7 @@
   (get-email-recipients-for-application application nil ["statementGiver"]))
 
 (defn- from-user [{user :user}] [(:email user)])
+(defn- from-data [{data :data}] [(:email data)])
 
 (def ^:private mail-config
   {:application-targeted-comment {:recipients-fn  from-user
@@ -120,12 +115,14 @@
                                   :tab            "/verdict"}
    :new-comment                  {:tab            "/conversation"
                                   :pred-fn        (fn [{user :user}] (user/authority? user))}
-   :invite                       {:recipients-fn  (fn [{data :data}] [(:email data)])}
+   :invite                       {:recipients-fn  from-data}
    :add-statement-person         {:recipients-fn  from-user
                                   :subject-key     "application.statements"
                                   :model-fn        statement-person-model}
    :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
                                   :subject-key     "statement-request"}
+   :neighbor                     {:recipients-fn  from-data
+                                  :model-fn       neighbor-invite-model}
    :invite-authority             {:subject-key    "authority-invite.title"}
    :reset-password               {:subject-key    "reset.email.title"}})
 
@@ -148,7 +145,6 @@
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
     (case template
-      :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application)
       :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application)))))
 
 (defn send-token! [template to token]
