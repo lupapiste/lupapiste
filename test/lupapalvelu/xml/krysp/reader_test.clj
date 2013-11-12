@@ -161,3 +161,14 @@
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
+
+(facts "Building from Sito"
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
+        buildings (->buildings xml)
+        building  (first buildings)]
+    (fact "xml is parsed" buildings => truthy)
+    (fact "xml has 2 buildings" (count buildings) => 2)
+    (fact "Kiinteistotunnus" (:propertyId building) => "63845900130022")
+    (fact "Rakennustunnus" (:buildingId building) => "001")
+    (fact "Kayttotarkoitus" (:usage building) => "011 yhden asunnon talot")
+    (fact "Alkuhetki year as created" (:created building) => "2013")))
