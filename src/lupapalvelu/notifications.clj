@@ -49,24 +49,21 @@
         (map #(-> % :person :email) statements))
       auth-user-emails)))
 
+;;
+;; Model creation functions
+;;
+
+;; Application (the default)
 (defn- create-app-model [application tab]
   {:link-fi (get-application-link application tab "fi")
    :link-sv (get-application-link application tab "sv")
    :state-fi (i18n/localize :fi (str (:state application)))
    :state-sv (i18n/localize :sv (str (:state application)))})
 
-;;
-;; Statement person
-;;
-
 (defn- statement-person-model [{{:keys [text organization]} :data}]
   {:text text
    :organization-fi (:fi (:name organization))
    :organization-sv (:sv (:name organization))})
-
-;;
-;; Neighbor
-;;
 
 (defn- neighbor-invite-model [{{token :token neighbor-id :neighborId} :data {:keys [id address municipality neighbors]} :application}]
   (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
@@ -77,33 +74,26 @@
      :link-fi (link-fn :fi)
      :link-sv (link-fn :sv)}))
 
-;;
-;; Open Inforequest
-;;
-
-(defn- get-message-for-open-inforequest-invite [token & [host]]
-  (let  [link-fn (fn [lang] (str (or host (env/value :host)) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
+(defn- open-inforequest-invite-model [{{token :token-id} :data}]
+  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
          info-fn (fn [lang] (env/value :oir :wanna-join-url))]
-    (email/apply-template "open-inforequest-invite.html"
-      {:link-fi (link-fn :fi)
-       :link-sv (link-fn :sv)
-       :info-fi (info-fn :fi)
-       :info-sv (info-fn :sv)})))
-
-(defn- send-open-inforequest-invite! [email token application-id]
-  (let [subject "Uusi neuvontapyynt\u00F6"
-        msg     (get-message-for-open-inforequest-invite token)]
-    (send-mail-to-recipients! [email] subject msg)))
+    {:link-fi (link-fn :fi)
+     :link-sv (link-fn :sv)
+     :info-fi (info-fn :fi)
+     :info-sv (info-fn :sv)}))
 
 ;;
-;; Configuration for generic notifications
+;; Recipient functions
 ;;
 
 (defn- default-recipients-fn [{application :application}]
   (get-email-recipients-for-application application nil ["statementGiver"]))
-
 (defn- from-user [{user :user}] [(:email user)])
 (defn- from-data [{data :data}] [(:email data)])
+
+;;
+;; Configuration for generic notifications
+;;
 
 (def ^:private mail-config
   {:application-targeted-comment {:recipients-fn  from-user
@@ -117,12 +107,16 @@
                                   :pred-fn        (fn [{user :user}] (user/authority? user))}
    :invite                       {:recipients-fn  from-data}
    :add-statement-person         {:recipients-fn  from-user
-                                  :subject-key     "application.statements"
-                                  :model-fn        statement-person-model}
+                                  :subject-key    "application.statements"
+                                  :model-fn       statement-person-model}
    :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
                                   :subject-key     "statement-request"}
    :neighbor                     {:recipients-fn  from-data
                                   :model-fn       neighbor-invite-model}
+   :open-inforequest-invite      {:recipients-fn  from-data
+                                  :subject-key    "applications.inforequest"
+                                  :template       "open-inforequest-invite.html"
+                                  :model-fn       open-inforequest-invite-model}
    :invite-authority             {:subject-key    "authority-invite.title"}
    :reset-password               {:subject-key    "reset.email.title"}})
 
@@ -144,8 +138,7 @@
             template-file  (get conf :template (str (name template) ".md"))
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
-    (case template
-      :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application)))))
+    (error "Mail template configuration not found" template)))
 
 (defn send-token! [template to token]
   (let [conf    (template mail-config)
