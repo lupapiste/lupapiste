@@ -146,7 +146,7 @@
       :result [:warn "vrk:BR106"]}]))
 
 (defvalidator-old "vrk:CR343"
-  "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
+  "Jos lammitystapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
   [{{schema-name :name} :schema-info data :data}]
   (when
     (and
@@ -472,14 +472,14 @@
     (<= kayttotarkoitus 729)
     (not julkisivu)))
 
-(defvalidator :vrk:BR319:lammitustapa
+(defvalidator :vrk:BR319:lammitystapa
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
          Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
    :level   :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
-            lammitustapa    [:lammitys :lammitystapa]]
+            lammitystapa    [:lammitys :lammitystapa]]
    :facts  {:ok    [["032 luhtitalot"       "uuni"]
                     ["032 luhtitalot"       "ei tiedossa"]
                     ["931 saunarakennukset" "eiLammitysta"]
@@ -490,8 +490,8 @@
   (and
     (<= kayttotarkoitus 729)
     (or
-      (not lammitustapa)
-      (= "eiLammitysta" lammitustapa))))
+      (not lammitystapa)
+      (= "eiLammitysta" lammitystapa))))
 
 #_(defvalidator :vrk:BR203
   {:doc "Jos huoneiston jakokirjain on annettu taytyy olla myos porraskirjain tai huoneistonumero"
