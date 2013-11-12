@@ -59,3 +59,8 @@ operations.suunnittelija.desc: Hankkeesi vaatii luvan. Sinun kannattaa myös tut
 
 linkPermit.remove.header: Viiteluvan poisto
 linkPermit.remove.message: Haluatko poistaa viiteluvan {0}?
+
+operations.jatkoaika: Jatkolupa
+operations.tree.Jatkoaika: Jatkoajan hakeminen
+operations.jatkoaika.desc: Jatkolupa
+jatkoaika._group_label: Jatkolupa
