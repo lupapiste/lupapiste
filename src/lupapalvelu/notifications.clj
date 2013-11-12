@@ -60,12 +60,12 @@
    :state-fi (i18n/localize :fi (str (:state application)))
    :state-sv (i18n/localize :sv (str (:state application)))})
 
-(defn- statement-person-model [{{:keys [text organization]} :data}]
+(defn- statement-person-model [{{:keys [text organization]} :data} _]
   {:text text
    :organization-fi (:fi (:name organization))
    :organization-sv (:sv (:name organization))})
 
-(defn- neighbor-invite-model [{{token :token neighbor-id :neighborId} :data {:keys [id address municipality neighbors]} :application}]
+(defn- neighbor-invite-model [{{token :token neighbor-id :neighborId} :data {:keys [id address municipality neighbors]} :application} _]
   (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
     {:name    (get-in neighbors [(keyword neighbor-id) :neighbor :owner :name])
      :address address
@@ -74,7 +74,7 @@
      :link-fi (link-fn :fi)
      :link-sv (link-fn :sv)}))
 
-(defn- open-inforequest-invite-model [{{token :token-id} :data}]
+(defn- open-inforequest-invite-model [{{token :token-id} :data} _]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
          info-fn (fn [lang] (env/value :oir :wanna-join-url))]
     {:link-fi (link-fn :fi)
@@ -133,7 +133,7 @@
             recipients     (recipients-fn command)
             subject        (get-email-subject application (get conf :subject-key (name template)))
             model          (if (:model-fn conf)
-                             ((:model-fn conf) command)
+                             ((:model-fn conf) command conf)
                              (create-app-model application (:tab conf)))
             template-file  (get conf :template (str (name template) ".md"))
             msg            (email/apply-template template-file model)]
