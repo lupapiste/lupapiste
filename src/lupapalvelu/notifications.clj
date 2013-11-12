@@ -27,7 +27,10 @@
   nil)
 
 (defn- get-email-subject [{title :title} & [title-key]]
-  (let [title-postfix (when title-key (str " - " (i18n/localize "fi" "email.title" title-key)))]
+  (let [localized (when title-key (if (i18n/has-term? "fi" "email.title" title-key)
+                                    (i18n/localize "fi" "email.title" title-key)
+                                    (i18n/localize "fi" title-key)))
+        title-postfix (when title-key (str (when title " - ") localized))]
     (str "Lupapiste.fi: " title title-postfix)))
 
 (defn- url-to [to]
@@ -57,8 +60,15 @@
 ;; Statement person
 ;;
 
+
+; WIP
+(defn- statement-person-model [{{:keys [text organization]} :data}]
+  {:text text
+   :organization-fi (:fi (:name organization))
+   :organization-sv (:sv (:name organization))})
+
 (defn- send-create-statement-person! [email text organization]
-  (let [subject (get-email-subject {:title "Lausunnot"})
+  (let [subject (get-email-subject nil "application.statements")
         msg   (email/apply-template "add-statement-person.md"
                                     {:text text
                                      :organization-fi (:fi (:name organization))
@@ -120,7 +130,8 @@
    :new-comment                  {:tab            "/conversation"
                                   :pred-fn        (fn [{user :user}] (user/authority? user))}
    :invite                       {:recipients-fn  (fn [{data :data}] [(:email data)])}
-   :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))}
+   :request-statement            {:subject-key     "statement-request"
+                                  :recipients-fn  (fn [{{users :users} :data}] (map :email users))}
    :invite-authority             {:subject-key    "authority-invite.title"}
    :reset-password               {:subject-key    "reset.email.title"}})
 
@@ -136,7 +147,9 @@
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (recipients-fn command)
             subject        (get-email-subject application (get conf :subject-key (name template)))
-            model          (create-app-model application (:tab conf))
+            model          (if (:model-fn conf)
+                             ((:model-fn conf) command)
+                             (create-app-model application (:tab conf)))
             template-file  (get conf :template (str (name template) ".md"))
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
