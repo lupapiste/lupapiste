@@ -8,57 +8,59 @@ Resource       ../../common_resource.robot
 
 ## For some strange reason, firstName and lastName fields are left blank.
 
-Mikko changes his name
+Mikko changes his name and experience
   Mikko logs in
   Click Element  user-name
-  Change name  Mikko  Intonen  Mika  Intola
-  
-Mikko changes his experience 
+  Wait for Page to Load  Mikko  Intonen
+  Change Textfield Value  firstName  Mikko  Mika
+  Change Textfield Value  lastName  Intonen  Intola
   Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
-  Click enabled by test id  save-my-userinfo
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
+  Save User Data
+  User should be logged in  Mika Intola
 
 Name should have changed in Swedish page too
   Click link  xpath=//*[@data-test-id='lang-sv']
+  Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
 
-Mika changes the name back to Mikko Intonen
-  Change name  Mika  Intola  Mikko  Intonen
-  
-Mikko changes his experience back
+Experience should have changed in Swedish page to
+  Wait Until  Textfield Value Should Be  architect.fise  fise
+  Textfield Value Should Be  architect.degree  Arkkitehti
+  Textfield Value Should Be  architect.graduatingYear  2001
+  Textfield Value Should Be  architect.fise  fise
+
+Mika changes the name and experice back
+  Change Textfield Value  firstName  Mika  Mikko
+  Change Textfield Value  lastName  Intola  Intonen
   Change Textfield Value  architect.degree  Arkkitehti  Tutkinto
   Change Textfield Value  architect.graduatingYear  2001  2000
   Change Textfield Value  architect.fise  fise  f
-  Click enabled by test id  save-my-userinfo
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
+  Save User Data
 
 Name should have changed in Finnish page too
   Click link  xpath=//*[@data-test-id='lang-fi']
+  Wait for Page to Load  Mikko  Intonen
   User should be logged in  Mikko Intonen
 
 Experience should have changed in Finnish back to original
+  Wait Until  Textfield Value Should Be  architect.fise  f
   Textfield Value Should Be  architect.degree  Tutkinto
   Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
 
 *** Keywords ***
 
-Change name
-  [Arguments]  ${oldFN}  ${oldLN}  ${newFN}  ${newLN}
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Wait Until  Textfield Value Should Be  firstName  ${oldFN}
-  Wait Until  Textfield Value Should Be  lastName   ${oldLN}
-  Input Text  firstName  ${newFN}
-  Input Text  lastName  ${newLN}
-  Focus  street
-  # Sanity checks
-  Textfield Value Should Be  firstName  ${newFN}
-  Textfield Value Should Be  lastName  ${newLN}
+Save User Data
   Click enabled by test id  save-my-userinfo
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
-  User should be logged in  ${newFN} ${newLN}
+
+Wait for Page to Load
+  [Arguments]  ${firstName}  ${lastName}
+  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Wait Until  Textfield Value Should Be  firstName  ${firstName}
+  Wait Until  Textfield Value Should Be  lastName   ${lastName}
 
 Change Textfield Value
   [Arguments]  ${field}  ${old}  ${new}
