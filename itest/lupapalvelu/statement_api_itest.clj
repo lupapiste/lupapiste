@@ -20,7 +20,7 @@
     ; Zero inbox
     (last-email) => truthy
 
-    (let [application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobuleverdi 1 A 1")
+    (let [application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobulevardi 1 A 1")
           application-before (query-application sonja application-id)
           resp (command sonja :request-for-statement :id application-id :personIds [statement-person-id]) => ok?
           application-after  (query-application sonja application-id)
@@ -28,7 +28,7 @@
           email (first emails)]
       (fact "Ronja receives email"
         (:to email) => (email-for "ronja")
-        (:subject email) => "Lupapiste.fi: Lausuntobuleverdi 1 A 1 - Lausuntopyynt\u00f6")
+        (:subject email) => "Lupapiste.fi: Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6")
       (fact "...but no-one else"
         (count emails) => 1)
       (fact "auth array has one entry more (ronja)"
