@@ -42,7 +42,7 @@
                                    :text text
                                    :email email
                                    :name (str (:firstName user) " " (:lastName user))}}})
-      (notifications/notify! :new-statement-person  {:user user :data {:text text :organization organization}})
+      (notifications/notify! :add-statement-person  {:user user :data {:text text :organization organization}})
       (ok :id statement-person-id))))
 
 (defcommand delete-statement-person

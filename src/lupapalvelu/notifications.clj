@@ -59,20 +59,10 @@
 ;; Statement person
 ;;
 
-
-; WIP
 (defn- statement-person-model [{{:keys [text organization]} :data}]
   {:text text
    :organization-fi (:fi (:name organization))
    :organization-sv (:sv (:name organization))})
-
-(defn- send-create-statement-person! [email text organization]
-  (let [subject (get-email-subject nil "application.statements")
-        msg   (email/apply-template "add-statement-person.md"
-                                    {:text text
-                                     :organization-fi (:fi (:name organization))
-                                     :organization-sv (:sv (:name organization))})]
-    (send-mail-to-recipients! [email] subject msg)))
 
 ;;
 ;; Neighbor
@@ -118,10 +108,12 @@
 (defn- default-recipients-fn [{application :application}]
   (get-email-recipients-for-application application nil ["statementGiver"]))
 
+(defn- from-user [{user :user}] [(:email user)])
+
 (def ^:private mail-config
-  {:application-targeted-comment {:subject-key    "new-comment"
-                                  :tab            "/conversation"
-                                  :recipients-fn  (fn [{user :user}] [(:email user)])}
+  {:application-targeted-comment {:recipients-fn  from-user
+                                  :subject-key    "new-comment"
+                                  :tab            "/conversation"}
    :application-state-change     {:subject-key    "state-change"
                                   :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
    :application-verdict          {:subject-key    "verdict"
@@ -129,8 +121,11 @@
    :new-comment                  {:tab            "/conversation"
                                   :pred-fn        (fn [{user :user}] (user/authority? user))}
    :invite                       {:recipients-fn  (fn [{data :data}] [(:email data)])}
-   :request-statement            {:subject-key     "statement-request"
-                                  :recipients-fn  (fn [{{users :users} :data}] (map :email users))}
+   :add-statement-person         {:recipients-fn  from-user
+                                  :subject-key     "application.statements"
+                                  :model-fn        statement-person-model}
+   :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
+                                  :subject-key     "statement-request"}
    :invite-authority             {:subject-key    "authority-invite.title"}
    :reset-password               {:subject-key    "reset.email.title"}})
 
@@ -153,7 +148,6 @@
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
     (case template
-      :new-statement-person (send-create-statement-person! (:email user) (:text data) (:organization data))
       :neighbor-invite (send-neighbor-invite! (:email data) (:token data) (:neighborId data) application)
       :open-inforequest-invite (send-open-inforequest-invite! (:email data) (:token-id data) (:id application)))))
 
