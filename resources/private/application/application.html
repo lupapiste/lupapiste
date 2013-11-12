@@ -370,15 +370,15 @@
                 data-test-id="add-attachment">
             </button>
             <button
+                data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
+                class="btn">
+            </button>
+            <button
                 data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
                            ltext: 'application.attachmentsMoveToBackingSystem',
                            visible: $root.authorization.ok('move-attachments-to-backing-system')"
-                class="btn btn-primary"
+                class="btn btn-primary modal"
                 data-test-id="send-unsent-attachments">
-            </button>
-            <button
-                data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
-                class="btn">
             </button>
           </div>
           <div class="process-nav">
