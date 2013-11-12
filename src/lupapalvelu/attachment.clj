@@ -436,7 +436,7 @@
     (fail :error.unknown)))
 
 (defcommand move-attachments-to-backing-system
-  {:parameters [id]
+  {:parameters [id lang]
    :roles      [:authority]
    :validators [#_attachment-is-not-locked (if-not-authority-states-must-match #{:verdictGiven})]
    ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?

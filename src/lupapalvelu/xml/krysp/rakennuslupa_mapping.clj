@@ -4,7 +4,9 @@
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical aloitusilmoitus-canonical]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
+                                                                 aloitusilmoitus-to-canonical
+                                                                 unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.ke6666 :as ke6666]
@@ -268,7 +270,7 @@
     (ke6666/generate application lang current-file)))
 
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
-  (let [canonical (aloitusilmoitus-canonical application lang started building-id user)
+  (let [canonical (aloitusilmoitus-to-canonical application lang started building-id user)
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     (validate xml-s)

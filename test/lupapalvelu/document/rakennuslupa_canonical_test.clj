@@ -809,24 +809,26 @@
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
     (fact "kayttotapaus" kayttotapaus => "Uuden suunnittelijan nime\u00e4minen")))
 
+(def ^:private authority-user-jussi {:id "777777777777777777000017"
+                                     :email "jussi.viranomainen@tampere.fi"
+                                     :enabled true
+                                     :role "authority"
+                                     :username "jussi"
+                                     :organizations ["837-YA"]
+                                     :firstName "Jussi"
+                                     :lastName "Viranomainen"
+                                     :street "Katuosoite 1 a 1"
+                                     :phone "1231234567"
+                                     :zip "33456"
+                                     :city "Tampere"})
+
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [canonical (aloitusilmoitus-canonical
+           (let [canonical (aloitusilmoitus-to-canonical
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "sv"
                              1354532324658
                              {:rakennusnro "002" :jarjestysnumero 1}
-                             {:id "777777777777777777000017"
-                              :email "jussi.viranomainen@tampere.fi"
-                              :enabled true
-                              :role "authority"
-                              :username "jussi"
-                              :organizations ["837-YA"]
-                              :firstName "Jussi"
-                              :lastName "Viranomainen"
-                              :street "Katuosoite 1 a 1"
-                              :phone "1231234567"
-                              :zip "33456"
-                              :city "Tampere"})
+                             authority-user-jussi)
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy

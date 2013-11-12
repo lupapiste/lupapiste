@@ -381,7 +381,7 @@
 
     self.approveApplication = function(model) {
       var applicationId = self.id();
-      ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
+      ajax.command("approve-application", {id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
         //FIXME parempi tapa ilmoittaa onnistumisesta
           notify.success("hakemus hyv\u00E4ksytty",model);
@@ -464,7 +464,7 @@
 
       var appId = self.id();
       ajax
-      .command("move-attachments-to-backing-system", {id: appId})
+      .command("move-attachments-to-backing-system", {id: appId, lang: loc.getCurrentLanguage()})
       .success(function() {
         console.log("sendUnsentAttachmentsToBackingSystem, SUCCESS, appId: ", appId);
         repository.load(appId);
