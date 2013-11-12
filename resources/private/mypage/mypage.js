@@ -32,6 +32,7 @@
     self.role = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable();
+    self.graduatingYear = ko.observable();
     self.fise = ko.observable();
     self.companyName = ko.observable();
     self.companyId = ko.observable();
@@ -55,6 +56,7 @@
         .role(u.role)
         .architect(u.architect)
         .degree(u.degree)
+        .graduatingYear(u.graduatingYear)
         .fise(u.fise)
         .companyName(u.companyName)
         .companyId(u.companyId)
@@ -82,7 +84,7 @@
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
-         "degree", "fise", 
+         "degree", "graduatingYear", "fise", 
          "companyName", "companyId"]);
 
     self.updateUserName = function() {

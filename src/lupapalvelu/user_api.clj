@@ -166,7 +166,7 @@
 ;;
 
 (def ^:private user-data-editable-fields [:firstName :lastName :street :city :zip :phone
-                                          :architect :degree :fise
+                                          :architect :degree :graduatingYear :fise
                                           :companyName :companyId])
 
 (defn- validate-update-user! [caller user-data]
