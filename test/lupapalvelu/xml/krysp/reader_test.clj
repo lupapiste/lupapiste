@@ -167,7 +167,7 @@
         buildings (->buildings xml)
         building  (first buildings)]
     (fact "xml is parsed" buildings => truthy)
-    (fact "xml has 1 buildings" (count buildings) => 2)
+    (fact "xml has 2 buildings" (count buildings) => 2)
     (fact "Kiinteistotunnus" (:propertyId building) => "63845900130022")
     (fact "Rakennustunnus" (:buildingId building) => "001")
     (fact "Kayttotarkoitus" (:usage building) => "011 yhden asunnon talot")
