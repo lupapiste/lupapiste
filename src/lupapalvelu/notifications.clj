@@ -54,7 +54,7 @@
 ;;
 
 ;; Application (the default)
-(defn- create-app-model [application tab]
+(defn- create-app-model [{application :application} {tab :tab}]
   {:link-fi (get-application-link application tab "fi")
    :link-sv (get-application-link application tab "sv")
    :state-fi (i18n/localize :fi (str (:state application)))
@@ -124,17 +124,17 @@
 ;; Public API
 ;;
 
-(defn notify! [template {:keys [user created application data] :as command}]
+(defn notify! [template {:keys [user created data] :as command}]
   (if-let [conf (template mail-config)]
     (when ((get conf :pred-fn (constantly true)) command)
       (let [application-fn (get conf :application-fn identity)
-            application    (application-fn application)
+            application    (application-fn (:application command))
+            command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (recipients-fn command)
             subject        (get-email-subject application (get conf :subject-key (name template)))
-            model          (if (:model-fn conf)
-                             ((:model-fn conf) command conf)
-                             (create-app-model application (:tab conf)))
+            model-fn       (get conf :model-fn create-app-model)
+            model          (model-fn command conf)
             template-file  (get conf :template (str (name template) ".md"))
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
