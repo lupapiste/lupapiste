@@ -7,7 +7,7 @@
             [sade.util :refer [fn-> fn->> future*]]
             [sade.strings :as ss]
             [sade.env :as env]
-            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
             [lupapalvelu.i18n :as i18n]
@@ -17,7 +17,8 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.statement :as statement])
+            [lupapalvelu.statement :as statement]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -392,7 +393,9 @@
 
 (defn if-not-authority-states-must-match [state-set]
   (fn [{user :user} {state :state}]
-    (when (and (not= (:role user) "authority") (state-set (keyword state)))
+    (when (and
+            (not= (:role user) "authority")
+            (state-set (keyword state) true ))
       (fail :error.non-authority-viewing-application-in-verdictgiven-state))))
 
 (defn attach-file!
@@ -435,83 +438,71 @@
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
 
+;(defn- get-attachments-wo-sent-timestamp [application]
+;  (filter
+;    #(and
+;       (:latestVersion %)
+;       (not (= "statement" (-> % :target :type)))
+;       (not (= "verdict" (-> % :target :type)))
+;       (not (-> % :latestVersion :sent)))
+;    (:attachments application)))
+
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
    :validators [(if-not-authority-states-must-match #{:verdictGiven})]
    ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?
 ;   :input-validators   ......
-;   :states     [:verdictGiven]                              ;; *** TODO: Laita tama takaisin! ***
+   :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (let [attachments-wo-sent-timestamp (get-attachments-wo-sent-timestamp application)]
+  (let [attachments-wo-sent-timestamp (filter
+                                        #(and
+                                           (:latestVersion %)
+                                           (not (= "statement" (-> % :target :type)))
+                                           (not (= "verdict" (-> % :target :type)))
+                                           (not (-> % :latestVersion :sent)))
+                                        (:attachments application))
+        #_(get-attachments-wo-sent-timestamp application)]
 
-;  (mongo/update
-;    :applications
-;    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-;    {$set {:modified created
-;           :attachments.$.state :requires_user_action}})
+    (if (pos? (count attachments-wo-sent-timestamp))
 
-;  result-count (mongo/update-by-query
-;                             :applications
-;                             {:_id application-id
-;                              :attachments {$elemMatch {:id attachment-id
-;                                                        :latestVersion.version.major (:major latest-version)
-;                                                        :latestVersion.version.minor (:minor latest-version)}}}
-;                             {$set {:modified now
-;                                    :attachments.$.modified now
-;                                    :attachments.$.state  :requires_authority_action
-;                                    :attachments.$.latestVersion version-model}
-;                              $push {:attachments.$.versions version-model}})
+      (let [organization (mongo/by-id :organizations (:organization application))]
 
-; (mongo/count :applications {:_id application-id :attachments.id attachment-id})
+        (try
+          (mapping-to-krysp/save-unsent-attachments-as-krysp
+            (-> application
+              (dissoc :attachments)
+              (assoc :attachments attachments-wo-sent-timestamp))
+            lang
+            organization
+            user)
 
-;(mongo/update
-;    :applications
-;    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-;    {$set {:modified created
-;           :attachments.$.state :ok}})
+          (let [ids (into [] (map :id attachments-wo-sent-timestamp))
 
-  ;;
-  ;; TODO: Laita latestVersionille uusi timestamp "sent"
-  ;;
+                ;; TODO: Miten tehdaan Sent-update mongoon yhdella update-komennolla?
+;                update-count (mongo/update-by-query
+;                               :applications
+;                               {:_id id
+;                                :attachments {$elemMatch {:id #_attachment-id {$in ids}}}}
+;                               {$set {:attachments.$.sent (now)}})
+                ]
 
-;  (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
-;    (mongo/update-by-id :submitted-applications (:id application)
-;      {$set {:schema-version 1 :documents (map drop-schema-data (:documents application))}}))
+            (doseq [attachment-id ids]
+              (let [update-count (mongo/update-by-query
+                                   :applications
+                                   {:_id id
+                                    :attachments {$elemMatch {:id attachment-id}}}
+                                   {$set {:attachments.$.latestVersion.sent (now)}})]
+                update-count
+                (ok))))
 
-  (let [result (mongo/select
-                 :applications
-                 {:_id id
-;                  :attachments.latestVersion {$exists true}
-                  :attachments.latestVersion.sent {$exists false}
-                  }
-;                 {:_id id
-;                  {$and [{:attachments.latestVersion {$exists true}}
-;                         {:attachments.latestVersion.sent {$exists false}}]}
-;                  }
-                 {:attachments.latestVersion 1}
-                 )
-        filtered (filter seq (-> result first :attachments))
-        latestVersions (map #(:latestVersion %) filtered)]
+          (catch Exception e
+            (errorf e "failed to save unsent attachments as krysp: application=%s" id)
+            (fail :error.sending-unsent-attachments-failed))))
 
-    (println "\n result:")
-    (clojure.pprint/pprint result)
-    (println "\n")
-
-    (println "\n filtered:")
-    (clojure.pprint/pprint filtered)
-    (println "\n")
-
-    (println "\n latestVersions:")
-    (clojure.pprint/pprint latestVersions)
-    (println "\n")
-
-    )
-
-  )
-
+      (ok))))
 
 
 ;;

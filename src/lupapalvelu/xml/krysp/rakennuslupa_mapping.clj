@@ -281,6 +281,32 @@
     )
   )
 
+(defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link user]
+  (let [file-name  (str output-dir "/" (:id application))
+        tempfile   (file (str file-name ".tmp"))
+        outfile    (file (str file-name ".xml"))
+        canonical-without-attachments (unsent-attachments-to-canonical application lang user)
+
+        attachments (get-attachments-as-canonical application begin-of-link)
+        canonical (assoc-in canonical-without-attachments
+                    [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
+                    attachments)
+
+        xml (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s (indent-str xml)]
+
+    (validate xml-s)
+
+    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
+    (with-open [out-file-stream (writer tempfile)]
+      (emit xml out-file-stream))
+
+    (write-attachments attachments output-dir)
+
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)
+    ))
+
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
