@@ -10,7 +10,6 @@
 
     (fact "new statement person receives email which contains the (html escaped) input text"
       (:to email) => (email-for "ronja")
-      email => has-html-and-plain?
       (:subject email) => "Lupapiste.fi: Lausunnot"
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))

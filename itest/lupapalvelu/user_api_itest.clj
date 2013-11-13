@@ -79,15 +79,14 @@
   (fact (command sipoo :update-user-organization :email "foo" :operation "remove") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = [])
 
+  (last-email) ; Inbox zero
   (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"}))
 
   (fact "invite new user Tonja to Sipoo"
-    (last-email) ; Inbox zero
 
     (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :operation "add") => ok?
 
     (let [email (last-email)]
-      email => has-html-and-plain?
       (:to email) => "tonja.sibbo@sipoo.fi"
       (:subject email) => "Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
@@ -267,7 +266,6 @@
         resp   (http/post (str (server-address) "/api/reset-password") params) => http200?
         email  (last-email)]
     (-> resp decode-response :body) => ok?
-    email => has-html-and-plain?
     (:to email) => (email-for "pena")
     (:subject email) => "Salasanan vaihto"
     (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))

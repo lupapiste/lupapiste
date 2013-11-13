@@ -41,7 +41,6 @@
         (count (:invites (query teppo :invites))) => 1
 
         (let [email (last-email)]
-          email => has-html-and-plain?
           email => (partial contains-application-link? id)
           (:to email) => "teppo@example.com"
           (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"))

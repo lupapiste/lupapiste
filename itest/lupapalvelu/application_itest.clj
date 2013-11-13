@@ -141,7 +141,6 @@
           application     (query-application user application-id)
           email           (last-email)]
       (:state application) => "submitted"
-      email => has-html-and-plain?
       (:to email) => (email-for-key user)
       (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Vireill\u00e4")
@@ -168,7 +167,6 @@
           (upload-attachment sonja (:id application) first-attachment true)
           (upload-attachment pena (:id application) first-attachment false))
 
-        email => has-html-and-plain?
         (:to email) => (email-for-key user)
         (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
         email => (partial contains-application-link-with-tab? application-id "verdict")))))
@@ -181,7 +179,6 @@
         resp  (command sonja :check-for-verdict :id application-id) => ok?
         email (last-email)]
 
-    email => has-html-and-plain?
     (:to email) => (email-for-key mikko)
     (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
     email => (partial contains-application-link-with-tab? application-id "verdict")))
@@ -200,7 +197,6 @@
     (fact "Sonja does not see the application" (query sonja :application :id application-id) => fail?)
 
     (let [email (last-email)]
-      email => has-html-and-plain?
       (:to email) => (email-for-key mikko)
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")

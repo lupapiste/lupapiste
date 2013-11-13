@@ -19,7 +19,6 @@
       (command sonja :add-comment :id id :text "comment1" :target "application") => ok?
       (let [email (last-email)]
         (:to email) => (email-for "pena")
-        email => has-html-and-plain?
         email => has-correct-link?))
 
     (fact "authority can comment with to"
@@ -35,7 +34,6 @@
             to2 (:to (last emails))]
         (count emails) => 2
         (doseq [email emails]
-          email => has-html-and-plain?
           email => has-correct-link?)
         (or
           (and (= to1 ronja-email) (= to2 pena-email))

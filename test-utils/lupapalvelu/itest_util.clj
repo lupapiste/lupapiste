@@ -233,6 +233,9 @@
 (defn last-email
   "Returns the last email (or nil) and clears the inbox"
   []
+  {:post [(or (nil? %)
+            (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
+            (println %))]}
   (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
     (assert ok)
     message))
@@ -243,9 +246,6 @@
   (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))
-
-(defn has-html-and-plain? [{body :body}]
-  (and (:html body) (:plain body)))
 
 (defn contains-application-link? [application-id {body :body}]
   (let [[href a-id a-id-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" (:plain body))]

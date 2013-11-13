@@ -76,7 +76,6 @@
         email                     (last-email)
         [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" (get-in email [:body :plain]))]
 
-    email => has-html-and-plain?
     (:to email) => neighbor-email-addr
     (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen"
     a-id => application-id
