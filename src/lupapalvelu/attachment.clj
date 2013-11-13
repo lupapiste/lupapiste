@@ -438,15 +438,6 @@
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
 
-;(defn- get-attachments-wo-sent-timestamp [application]
-;  (filter
-;    #(and
-;       (:latestVersion %)
-;       (not (= "statement" (-> % :target :type)))
-;       (not (= "verdict" (-> % :target :type)))
-;       (not (-> % :latestVersion :sent)))
-;    (:attachments application)))
-
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
@@ -463,8 +454,7 @@
                                            (not (= "statement" (-> % :target :type)))
                                            (not (= "verdict" (-> % :target :type)))
                                            (not (-> % :latestVersion :sent)))
-                                        (:attachments application))
-        #_(get-attachments-wo-sent-timestamp application)]
+                                        (:attachments application))]
 
     (if (pos? (count attachments-wo-sent-timestamp))
 
@@ -490,13 +480,13 @@
                 ]
 
             (doseq [attachment-id ids]
-              (let [update-count (mongo/update-by-query
-                                   :applications
-                                   {:_id id
-                                    :attachments {$elemMatch {:id attachment-id}}}
-                                   {$set {:attachments.$.latestVersion.sent (now)}})]
-                update-count
-                (ok))))
+              (mongo/update-by-query
+                :applications
+                {:_id id
+                 :attachments {$elemMatch {:id attachment-id}}}
+                {$set {:attachments.$.latestVersion.sent (now)}}))
+
+            (ok :updateCount (count ids)))
 
           (catch Exception e
             (errorf e "failed to save unsent attachments as krysp: application=%s" id)
