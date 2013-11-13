@@ -94,7 +94,8 @@
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images))
+(def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images "nls"))
+               "wms" (cache (* 3 60 60 24) (secure wfs/raster-images "wms"))
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
