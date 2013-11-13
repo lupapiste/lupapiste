@@ -79,9 +79,9 @@
   "Takes a service function as an argument and returns a proxy function that invokes the original
   function. Proxy function returns what ever the service function returns, excluding some unsafe
   stuff. At the moment strips the 'Set-Cookie' headers."
-  [f]
+  [f service]
   (fn [request]
-    (let [response (f request)]
+    (let [response (f request service)]
       (assoc response :headers (dissoc (:headers response) "set-cookie" "server")))))
 
 (defn- cache [max-age-in-s f]
