@@ -172,7 +172,8 @@
       return !_.isBlank(self.filename()) && self.attachmentType();
     });
 
-    self.availableAttachmentTypes = _.map(["cv", "examination", "proficiency"], function(type) {
+    // TODO: Get attachment-types from back
+    self.availableAttachmentTypes = _.map(["cv", "tutkintotodistus", "patevyystodistus"], function(type) {
       return {id: type, name: loc(["userinfo.architect.attachments.name", type])};
     });
 

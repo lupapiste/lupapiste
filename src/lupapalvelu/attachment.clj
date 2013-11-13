@@ -57,6 +57,7 @@
                                :elyn_tai_kunnan_poikkeamapaatos
                                :suunnittelutarveratkaisu
                                :ymparistolupa]
+   :osapuolet attachment-types-osapuoli
    :muut [:selvitys_rakennuspaikan_terveellisyydesta
           :selvitys_rakennuspaikan_korkeusasemasta
           :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
@@ -99,8 +100,12 @@
                     :asemapiirros
                     :rakennuspiirros
                     :suunnitelmakartta]
+   :osapuolet attachment-types-osapuoli
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
+
+(def attachment-types-osapuoli
+  [:cv :tutkintotodistus :patevyystodistus])
 
 ;;
 ;; Api
@@ -225,6 +230,7 @@
            :attachments.$.latestVersion.size size
            :attachments.$.latestVersion.created now}}))
 
+;; FIXME: This method has way too many positional parameters!
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."

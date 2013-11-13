@@ -20,7 +20,7 @@
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.attachment :refer [encode-filename]]))
+            [lupapalvelu.attachment :refer [encode-filename attachment-types-osapuoli]]))
 
 ;;
 ;; ==============================================================================
@@ -368,7 +368,7 @@
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
 
-    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
+    (when-not ((set attachment-types-osapuoli) attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
     (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
