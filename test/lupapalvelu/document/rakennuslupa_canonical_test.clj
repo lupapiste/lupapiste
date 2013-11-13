@@ -871,3 +871,45 @@
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
                  kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]))
 
+
+(fl/facts* "Canonical model for erityissuunnitelma is correct"
+           (let [canonical (unsent-attachments-to-canonical
+                             (assoc application-rakennuslupa :state "verdictGiven") ;; TODO: Lisataanko tahan liitteet?
+                             "sv"
+                             authority-user-jussi)
+
+                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+
+                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+                 mt (:MuuTunnus muuTunnustieto) => truthy
+
+                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+                 Osapuolet (:Osapuolet osapuolettieto) => truthy
+                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
+                 Osapuoli (:Osapuoli osapuolitieto) => truthy
+                 henkilo (:henkilo Osapuoli) => truthy
+                 nimi (:nimi henkilo) => truthy
+                 osoite (:osoite henkilo) => truthy]
+
+             (fact "tila" (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu")
+             (fact "tunnus" (:tunnus mt) => "LP-753-2013-00001")
+             (fact "sovellus" (:sovellus mt) => "Lupapiste")
+             (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")))
+
+             (facts "Osapuolet"
+               (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
+               (fact "etunimi" (:etunimi nimi) => "Jussi")
+               (fact "sukunimi" (:sukunimi nimi) => "Viranomainen")
+               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1")
+               (fact "puhelin" (:puhelin henkilo) => "1231234567"))
+
+
+
