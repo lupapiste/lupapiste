@@ -155,7 +155,7 @@
   (when
     (and
       (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
+      (some-> data :lammitys :lammitystapa :value (= "suora s\u00e4hk\u00f6"))
       (some-> data :lammitys :lammonlahde :value (not= "s\u00e4hk\u00f6")))
     [{:path [:lammitys :lammitystapa]
       :result [:warn "vrk:CR343"]}
@@ -181,7 +181,7 @@
   (when
     (and
       (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
+      (some-> data :lammitys :lammitystapa :value (= "suora s\u00e4hk\u00f6"))
       (some-> data :verkostoliittymat :sahkoKytkin :value not))
     [{:path [:lammitys :lammitystapa]
       :result [:warn "vrk:CR341"]}
@@ -321,12 +321,13 @@
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              lammitystapa    [:lammitys :lammitystapa]]
-   :facts   {:ok   [["032 luhtitalot" "ilmakeskus"]]
+   :facts   {:ok   [["032 luhtitalot" "ilmakeskus"]
+                    ["011 yhden asunnon talot" "suora s\u00e4hk\u00f6"]]
              :fail [["032 luhtitalot" ei-lammitysta]
                     ["032 luhtitalot" nil]]}}
   (and
     (<= 11 kayttotarkoitus 39)
-    (not (#{"vesikeskus" "ilmakeskus" "suora sahk\u00f6" "uuni"} lammitystapa))))
+    (not (#{"vesikeskus" "ilmakeskus" "suora s\u00e4hk\u00f6" "uuni"} lammitystapa))))
 
 (defvalidator :vrk:CR315
   {:doc     "Omakotitalossa pitaa olla huoneisto"
