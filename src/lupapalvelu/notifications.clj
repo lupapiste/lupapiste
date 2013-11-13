@@ -95,54 +95,57 @@
 ;; Configuration for generic notifications
 ;;
 
-(def ^:private mail-config
-  {:application-targeted-comment {:recipients-fn  from-user
-                                  :subject-key    "new-comment"
-                                  :tab            "/conversation"}
-   :application-state-change     {:subject-key    "state-change"
-                                  :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
-   :application-verdict          {:subject-key    "verdict"
-                                  :tab            "/verdict"}
-   :new-comment                  {:tab            "/conversation"
-                                  :pred-fn        (fn [{user :user}] (user/authority? user))}
-   :invite                       {:recipients-fn  from-data}
-   :add-statement-person         {:recipients-fn  from-user
-                                  :subject-key    "application.statements"
-                                  :model-fn       statement-person-model}
-   :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
-                                  :subject-key     "statement-request"}
-   :neighbor                     {:recipients-fn  from-data
-                                  :model-fn       neighbor-invite-model}
-   :open-inforequest-invite      {:recipients-fn  from-data
-                                  :subject-key    "applications.inforequest"
-                                  :template       "open-inforequest-invite.html"
-                                  :model-fn       open-inforequest-invite-model}
-   :invite-authority             {:subject-key    "authority-invite.title"}
-   :reset-password               {:subject-key    "reset.email.title"}})
+(defonce ^:private mail-config
+  (atom {:application-targeted-comment {:recipients-fn  from-user
+                                       :subject-key    "new-comment"
+                                       :tab            "/conversation"}
+        :application-state-change     {:subject-key    "state-change"
+                                       :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
+        :application-verdict          {:subject-key    "verdict"
+                                       :tab            "/verdict"}
+        :new-comment                  {:tab            "/conversation"
+                                       :pred-fn        (fn [{user :user}] (user/authority? user))}
+        :invite                       {:recipients-fn  from-data}
+        :add-statement-person         {:recipients-fn  from-user
+                                       :subject-key    "application.statements"
+                                       :model-fn       statement-person-model}
+        :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
+                                       :subject-key     "statement-request"}
+        :neighbor                     {:recipients-fn  from-data
+                                       :model-fn       neighbor-invite-model}
+        :open-inforequest-invite      {:recipients-fn  from-data
+                                       :subject-key    "applications.inforequest"
+                                       :template       "open-inforequest-invite.html"
+                                       :model-fn       open-inforequest-invite-model}
+        :invite-authority             {:subject-key    "authority-invite.title"}
+        :reset-password               {:subject-key    "reset.email.title"}}))
 
 ;;
 ;; Public API
 ;;
 
-(defn notify! [template {:keys [user created data] :as command}]
-  (if-let [conf (template mail-config)]
+(defn defemail [template-name m]
+  (swap! mail-config assoc template-name m))
+
+(defn notify! [template-name {:keys [user created data] :as command}]
+  (if-let [conf (template-name @mail-config)]
     (when ((get conf :pred-fn (constantly true)) command)
       (let [application-fn (get conf :application-fn identity)
             application    (application-fn (:application command))
             command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (recipients-fn command)
-            subject        (get-email-subject application (get conf :subject-key (name template)))
+            subject        (get-email-subject application (get conf :subject-key (name template-name)))
             model-fn       (get conf :model-fn create-app-model)
             model          (model-fn command conf)
-            template-file  (get conf :template (str (name template) ".md"))
+            template-file  (get conf :template (str (name template-name) ".md"))
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
-    (error "Mail template configuration not found" template)))
+    (error "Mail template configuration not found" template-name)))
 
-(defn send-token! [template to token]
-  (let [conf    (template mail-config)
-        template-file  (get conf :template (str (name template) ".md"))
+(defn send-token! [template-name to token]
+  (let [conf    (template-name @mail-config)
+        template-file  (get conf :template (str (name template-name) ".md"))
         link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
         msg (email/apply-template template-file {:link-fi link-fi :link-sv link-sv})]

@@ -4,6 +4,7 @@
             [sade.env :as env]
             [sade.email :as email]
             [sade.strings :refer [lower-case]]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.security :as security]))
