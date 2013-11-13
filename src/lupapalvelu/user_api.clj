@@ -7,7 +7,7 @@
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
             [sade.util :refer [future*]]
-            [sade.env :refer [in-dev dev-mode?]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
@@ -109,7 +109,7 @@
                    (when (:password user-data)
                      {:password (security/get-hash (:password user-data))})
                    (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                     {:apikey (if (and (dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
+                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
                                 (:apikey user-data)
                                 (security/random-password))}))))))
 
@@ -160,6 +160,16 @@
 ;; Updating user data:
 ;; ==============================================================================
 ;;
+
+;; Emails
+(def ^:private base-email-conf
+  {:recipients-fn notifications/from-data
+   :model-fn      (fn [{{token :token} :data} _]
+                    {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+                     :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
+
+(notifications/defemail :invite-authority (assoc base-email-conf :subject-key "authority-invite.title"))
+(notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
 
 ;;
 ;; General changes:
@@ -214,7 +224,7 @@
      (if (= operation "add")
        (let [token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
          (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
-         (notifications/send-token! :invite-authority email token)
+         (notifications/notify! :invite-authority {:data {:email email :token token}})
          (ok :operation "invited"))
        (fail :not-found :email email)))))
 
@@ -257,7 +267,7 @@
     (if (mongo/select-one :users {:email email :enabled true})
       (let [token (token/make-token :password-reset {:email email})]
         (infof "password reset request: email=%s, token=%s" email token)
-        (notifications/send-token! :reset-password email token)
+        (notifications/notify! :reset-password {:data {:email email :token token}})
         (ok))
       (do
         (warnf "password reset request: unknown email: email=%s" email)
@@ -412,7 +422,7 @@
 ;;
 
 ; FIXME: generalize
-(in-dev
+(env/in-dev
 
   (defquery activate-user-by-email
     {:parameters [:email]}

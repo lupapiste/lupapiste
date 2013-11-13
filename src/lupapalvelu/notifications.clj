@@ -89,7 +89,7 @@
 (defn- default-recipients-fn [{application :application}]
   (get-email-recipients-for-application application nil ["statementGiver"]))
 (defn from-user [{user :user}] [(:email user)])
-(defn- from-data [{data :data}] [(:email data)])
+(defn from-data [{data :data}] [(:email data)])
 
 ;;
 ;; Configuration for generic notifications
@@ -116,9 +116,7 @@
         :open-inforequest-invite      {:recipients-fn  from-data
                                        :subject-key    "applications.inforequest"
                                        :template       "open-inforequest-invite.html"
-                                       :model-fn       open-inforequest-invite-model}
-        :invite-authority             {:subject-key    "authority-invite.title"}
-        :reset-password               {:subject-key    "reset.email.title"}}))
+                                       :model-fn       open-inforequest-invite-model}}))
 
 ;;
 ;; Public API
@@ -142,11 +140,3 @@
             msg            (email/apply-template template-file model)]
         (send-mail-to-recipients! recipients subject msg)))
     (error "Mail template configuration not found" template-name)))
-
-(defn send-token! [template-name to token]
-  (let [conf    (template-name @mail-config)
-        template-file  (get conf :template (str (name template-name) ".md"))
-        link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
-        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
-        msg (email/apply-template template-file {:link-fi link-fi :link-sv link-sv})]
-    (send-mail-to-recipients! [to] (loc (:subject-key conf)) msg)))
