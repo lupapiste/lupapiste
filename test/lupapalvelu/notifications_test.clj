@@ -1,5 +1,5 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.notifications :refer :all]
+  (:require [lupapalvelu.notifications :refer [notify!]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.mongo :as mongo]
@@ -69,4 +69,7 @@
   (let  [model (open-inforequest-invite-model {:data {:token-id "123"}} nil)]
     (:link-fi model) => "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi"
     (:info-fi model) => "http://lupapiste.fi/yhteydenotto"))
+
+(fact "Unknown config"
+  (notify! :foo {}) => (throws AssertionError))
 

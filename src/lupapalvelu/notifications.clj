@@ -126,7 +126,8 @@
   (swap! mail-config assoc template-name m))
 
 (defn notify! [template-name {:keys [user created data] :as command}]
-  (if-let [conf (template-name @mail-config)]
+  {:pre [(template-name @mail-config)]}
+  (let [conf (template-name @mail-config)]
     (when ((get conf :pred-fn (constantly true)) command)
       (let [application-fn (get conf :application-fn identity)
             application    (application-fn (:application command))
@@ -138,5 +139,4 @@
             model          (model-fn command conf)
             template-file  (get conf :template (str (name template-name) ".md"))
             msg            (email/apply-template template-file model)]
-        (send-mail-to-recipients! recipients subject msg)))
-    (error "Mail template configuration not found" template-name)))
+        (send-mail-to-recipients! recipients subject msg)))))
