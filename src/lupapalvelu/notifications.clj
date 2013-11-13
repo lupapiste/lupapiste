@@ -88,7 +88,7 @@
 
 (defn- default-recipients-fn [{application :application}]
   (get-email-recipients-for-application application nil ["statementGiver"]))
-(defn- from-user [{user :user}] [(:email user)])
+(defn from-user [{user :user}] [(:email user)])
 (defn- from-data [{data :data}] [(:email data)])
 
 ;;

@@ -72,6 +72,11 @@
   (apply-remote-minimal)
 
   (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
+  (let [email (last-email)]
+    (:to email) => "foo"
+    (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi"
+    (get-in email [:body :plain]) => (contains #"/app/security/activate/[a-zA-Z]+"))
+
   (fact (-> (query "xyz" :user) :user :organizations) => [])
   (fact (command sipoo :update-user-organization :email "foo" :operation "add") => ok?)
 
@@ -79,7 +84,7 @@
   (fact (command sipoo :update-user-organization :email "foo" :operation "remove") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = [])
 
-  (last-email) ; Inbox zero
+
   (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"}))
 
   (fact "invite new user Tonja to Sipoo"
