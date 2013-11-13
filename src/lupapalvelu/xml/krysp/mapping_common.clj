@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.mapping-common
   (:require [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [sade.strings :refer :as ss]
+            [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [me.raynes.fs :as fs]
