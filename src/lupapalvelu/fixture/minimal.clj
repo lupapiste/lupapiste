@@ -41,8 +41,8 @@
     :organizations ["837-YA"]
     :firstName "Jussi"
     :lastName "Viranomainen"
-    :street "Katuosoite 1 a 1"
     :phone "1231234567"
+    :street "Katuosoite 1 a 1"
     :zip "33456"
     :city "Tampere"
     :private {:password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
@@ -57,6 +57,9 @@
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
+    :street "Katuosoite 1 a 1"
+    :zip "33456"
+    :city "Sipoo"
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9d1"}}
@@ -70,6 +73,9 @@
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"
+    :street "Katuosoite 1 a 1"
+    :zip "33456"
+    :city "Sipoo"
     :username "ronja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
