@@ -1,8 +1,11 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.notifications :refer :all]
+  (:require [lupapalvelu.notifications :refer [notify!]]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.mongo :as mongo]
             [sade.dummy-email-server :as dummy]))
+
+(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application open-inforequest-invite-model)
 
 (facts "email titles"
   (get-email-subject {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
@@ -10,14 +13,11 @@
 
 (fact "create application link"
   (fact "..for application"
-    (get-application-link {:id 1} "" "http://localhost:8080" "fi")
+    (get-application-link {:id 1} "" "fi" "http://localhost:8080")
       => "http://localhost:8080/app/fi/applicant?hashbang=!/application/1#!/application/1")
   (fact "..for inforequest"
-    (get-application-link {:id 1 :infoRequest true} "/comment" "http://localhost:8080" "fi")
+    (get-application-link {:id 1 :infoRequest true} "/comment" "fi" "http://localhost:8080" )
       => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
-
-(fact "Email for new comment contains link to application"
-      (first (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000")) => (contains "http://localhost:8000/app/fi/applicant?hashbang=!/application/123/conversation#!/application/123/conversation"))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
@@ -62,15 +62,14 @@
     (mongo/by-id :users "w2" {:email 1}) => {:email "w2@foo.com"}
     (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
 
-(fact "Email for application open is like"
-  (let [msg (get-message-for-application-state-change { :id 123 :state "open"} "http://localhost:8000")]
-    (first msg) => (contains "http://localhost:8000/app/sv/applicant?hashbang=!/application/123#!/application/123")
-    (first msg) => (contains "Valmisteilla")))
-
-(fact "Email for application submitted contains the state string."
-  (first (get-message-for-application-state-change { :state "submitted"} ..host..)) => (contains "Vireill\u00E4"))
-
 (fact "Email for sending an open inforequest is like"
-  (let  [html (first (get-message-for-open-inforequest-invite "http://lupapiste.fi" "123"))]
-    html => (contains "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi")))
+  (against-background
+    (sade.env/value :host) => "http://lupapiste.fi"
+    (sade.env/value :oir :wanna-join-url) => "http://lupapiste.fi/yhteydenotto")
+  (let  [model (open-inforequest-invite-model {:data {:token-id "123"}} nil)]
+    (:link-fi model) => "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi"
+    (:info-fi model) => "http://lupapiste.fi/yhteydenotto"))
+
+(fact "Unknown config"
+  (notify! :foo {}) => (throws AssertionError))
 

@@ -9,7 +9,7 @@
             [sade.env :as env]
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
-            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
+            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -412,6 +412,7 @@
       (fail! (:text validation-error))))
 
   (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+    ; FIXME try to combine mongo writes
     (executed "add-comment"
       (-> command
         (assoc :data {:id id

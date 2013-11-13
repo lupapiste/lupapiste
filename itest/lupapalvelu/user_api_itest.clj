@@ -70,14 +70,32 @@
 
 (facts update-user-organization
   (apply-remote-minimal)
+
   (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
+  (let [email (last-email)]
+    (:to email) => "foo"
+    (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi"
+    (get-in email [:body :plain]) => (contains #"/app/security/activate/[a-zA-Z0-9]+"))
+
   (fact (-> (query "xyz" :user) :user :organizations) => [])
   (fact (command sipoo :update-user-organization :email "foo" :operation "add") => ok?)
+
   (fact (-> (query "xyz" :user) :user :organizations) = ["753-R"])
   (fact (command sipoo :update-user-organization :email "foo" :operation "remove") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) = [])
 
-  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"})))
+
+  (fact (command sipoo :update-user-organization :email "foo" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+
+  (fact "invite new user Tonja to Sipoo"
+
+    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :operation "add") => ok?
+
+    (let [email (last-email)]
+      (:to email) => "tonja.sibbo@sipoo.fi"
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+
 
 (fact "changing user info"
   (apply-remote-minimal)
@@ -242,3 +260,17 @@
         ; Make sure we have required all the actions
         (require 'lupapalvelu.server)
         (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
+
+(facts* "reset password email"
+  (last-email) ; Inbox zero
+
+  (let [params {:form-params {:email (email-for "pena")}
+                :content-type :json
+                :follow-redirects false
+                :throw-exceptions false}
+        resp   (http/post (str (server-address) "/api/reset-password") params) => http200?
+        email  (last-email)]
+    (-> resp decode-response :body) => ok?
+    (:to email) => (email-for "pena")
+    (:subject email) => "Lupapiste.fi: Salasanan vaihto"
+    (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))

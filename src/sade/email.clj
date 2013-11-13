@@ -97,7 +97,12 @@
 (defmethod ->str :p       [element] (str \newline (->str* (:content element)) \newline))
 (defmethod ->str :ul      [element] (->str* (:content element)))
 (defmethod ->str :li      [element] (str \* \space (->str* (:content element)) \newline))
-(defmethod ->str :a       [element] (str (->str* (:content element)) \: \space (get-in element [:attrs :href]) \space))
+(defmethod ->str :a       [element] (let [linktext (->str* (:content element))
+                                          href (get-in element [:attrs :href])
+                                          separator (if (> (count href) 50) \newline \space)]
+                                      (if-not (= linktext href)
+                                        (str linktext \: separator href \space)
+                                        (str separator href \space))))
 (defmethod ->str :img     [element] "")
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] "\n---------\n")

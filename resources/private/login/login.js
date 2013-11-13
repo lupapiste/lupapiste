@@ -34,7 +34,8 @@
       var email = self.email();
       if (!_.isBlank(email)) {
         ajax
-          .command("reset-password", {"email": email})
+          .postJson("/api/reset-password", {"email": email})
+          .raw(false)
           .success(function() { self.sent(true).fail(null).email(""); })
           .error(function(e) { self.sent(false).fail(e.text); $("#reset input:first").focus(); })
           .call();
