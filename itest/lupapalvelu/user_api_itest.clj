@@ -93,7 +93,7 @@
 
     (let [email (last-email)]
       (:to email) => "tonja.sibbo@sipoo.fi"
-      (:subject email) => "Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 
@@ -272,5 +272,5 @@
         email  (last-email)]
     (-> resp decode-response :body) => ok?
     (:to email) => (email-for "pena")
-    (:subject email) => "Salasanan vaihto"
+    (:subject email) => "Lupapiste.fi: Salasanan vaihto"
     (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
