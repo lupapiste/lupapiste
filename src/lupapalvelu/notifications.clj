@@ -32,9 +32,6 @@
                                         (i18n/localize "fi" title-key)))]
     (str "Lupapiste.fi: " title (when (and title title-key)" - ") (when title-key title-postfix))))
 
-(defn- url-to [to]
-  (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
-
 ; emails are sent to everyone in auth array except statement persons
 (defn- get-email-recipients-for-application [{:keys [auth statements]} included-roles excluded-roles]
   (let [included-users   (if (seq included-roles)
@@ -97,8 +94,8 @@
 
 (defonce ^:private mail-config
   (atom {:application-targeted-comment {:recipients-fn  from-user
-                                       :subject-key    "new-comment"
-                                       :tab            "/conversation"}
+                                        :subject-key    "new-comment"
+                                        :tab            "/conversation"}
         :application-state-change     {:subject-key    "state-change"
                                        :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
         :application-verdict          {:subject-key    "verdict"
