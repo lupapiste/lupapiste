@@ -237,7 +237,6 @@
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
-                      :kayttotapaus (get-kayttotapaus documents toimenpiteet)
                       :asianTiedot (if link-permit-data
                                      (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
                                      (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
@@ -295,15 +294,6 @@
     canonical))
 
 (defn unsent-attachments-to-canonical [application lang user]
-
-  (println "\n unsent-attachments-as-canonical, application:")
-  (clojure.pprint/pprint application)
-  (println "\n")
-
-  (println "\n unsent-attachments-as-canonical, user:")
-  (clojure.pprint/pprint user)
-  (println "\n")
-
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
@@ -313,17 +303,17 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      ;; Mikä tulee kuntaRooliKoodiin?  "Rakennusvalvonnan asiamies"?
-                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Rakennusvalvonnan asiamies"
-                                                                              :henkilo {:nimi {:etunimi (:firstName user)
-                                                                                               :sukunimi (:lastName user)}
-                                                                                        :osoite {:osoitenimi {:teksti (:street user)}
-                                                                                                 :postitoimipaikannimi (:city user)
-                                                                                                 :postinumero (:zip user)}
-                                                                                         :sahkopostiosoite (:email user)
-                                                                                         :puhelin (:phone user)}}}}}
+                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli
+                                                                   {:kuntaRooliKoodi "ei tiedossa"
+                                                                    :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                     :sukunimi (:lastName user)}
+                                                                              :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                       :postitoimipaikannimi (:city user)
+                                                                                       :postinumero (:zip user)}
+                                                                              :sahkopostiosoite (:email user)
+                                                                              :puhelin (:phone user)}}}}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
-                      :kayttotapaus "Erityissuunnitelma"
+                      :kayttotapaus "Liitetiedoston lis\u00e4ys"
                       }}}}]
 
   canonical))

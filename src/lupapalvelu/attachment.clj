@@ -438,14 +438,14 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :validators [#_attachment-is-not-locked (if-not-authority-states-must-match #{:verdictGiven})]
+   :validators [(if-not-authority-states-must-match #{:verdictGiven})]
    ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?
 ;   :input-validators   ......
 ;   :states     [:verdictGiven]                              ;; *** TODO: Laita tama takaisin! ***
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (println "\n entered defcommand move-attachments-to-backing-system, app id: " id "\n")
+  (let [attachments-wo-sent-timestamp (get-attachments-wo-sent-timestamp application)]
 
 ;  (mongo/update
 ;    :applications

@@ -288,26 +288,6 @@ var attachment = (function() {
     iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
   }
 
-
-
-  // Tarvittaessa tahan voi tehda confirmation modaalin, kts. esim "deleteAttachment"
-//  function sendUnsentAttachmentsToBackingSystem(appId) {
-//    ajax
-//      .command("move-attachments-to-backing-system")
-//      .success(function() {
-//        console.log("sendUnsentAttachmentsToBackingSystem, SUCCESS, appId: ", appId);
-//        repository.load(appId);
-//      })
-//      .error(function() {
-//        console.log("sendUnsentAttachmentsToBackingSystem, ERROR, appId: ", appId);
-//        repository.load(appId);
-//      })
-//    .call();
-//  return false;
-//  }
-
-
-
   function regroupAttachmentTypeList(types) {
     return _.map(types, function(v) { return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })}; });
   }

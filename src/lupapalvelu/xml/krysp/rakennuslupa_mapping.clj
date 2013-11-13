@@ -196,7 +196,7 @@
     :muokkausHetki (to-xml-datetime (:modified attachment))
     :versionumero 1
     :tyyppi type
-    :fileId file-id})  ;;TODO: Kysy Terolta mika tama on
+    :fileId file-id})
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -217,11 +217,11 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [application begin-of-link ]
+(defn get-attachments-as-canonical [application begin-of-link]
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
                                     :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
-                                    :let [type (get-in attachment [:type :type-id] )
+                                    :let [type (get-in attachment [:type :type-id])
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
@@ -318,9 +318,11 @@
     (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
+
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)
-
     (write-application-pdf-versions output-dir application submitted-application lang)
+
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
+

@@ -458,19 +458,16 @@
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     };
 
- // Tarvittaessa tahan voi tehda confirmation modaalin, kts. esim attachment.js:n "deleteAttachment"
-    self.sendUnsentAttachmentsToBackingSystem = function(/*context*/) {
-//      attachment.sendUnsentAttachmentsToBackingSystem(context.application.id());
-
+    // TODO: Tarvittaessa liitteiden lahetykselle voi tehda confirmation modaalin,
+    //       kts. esim attachment.js:n "deleteAttachment"
+    self.sendUnsentAttachmentsToBackingSystem = function() {
       var appId = self.id();
       ajax
       .command("move-attachments-to-backing-system", {id: appId, lang: loc.getCurrentLanguage()})
       .success(function() {
-        console.log("sendUnsentAttachmentsToBackingSystem, SUCCESS, appId: ", appId);
         repository.load(appId);
       })
       .error(function() {
-        console.log("sendUnsentAttachmentsToBackingSystem, ERROR, appId: ", appId);
         repository.load(appId);
       })
     .call();
