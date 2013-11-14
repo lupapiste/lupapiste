@@ -217,8 +217,11 @@
     <div class="container">
       <div class="sidebar">
         <aside class="instructions">
+          <span class="icon drill-down-grey" onclick="helpClick()"> </span>
+          <div class="help-text">
             <h3 data-bind="ltext: 'help'">Ohje</h3>
             <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
+          </div>
         </aside>
       </div>
 
