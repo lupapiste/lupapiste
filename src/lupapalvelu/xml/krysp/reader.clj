@@ -81,7 +81,6 @@
             :yhteyshenkilo {:henkilotiedot {:etunimi  (get-text omistaja :henkilonnimi :etunimi)      ;; does-not-exist in test
                                             :sukunimi (get-text omistaja :henkilonnimi :sukunimi)     ;; does-not-exist in test
                             :yhteystiedot {:email     ...notfound...
-                                           :fax       ...notfound...
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
 
