@@ -20,8 +20,8 @@
     (fact "no zip" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :email "e") => ok?)
     (fact "no email" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
 
-(defn- create-app-with-neighbor []
-  (let [application-id (create-app-id pena)
+(defn- create-app-with-neighbor [& args]
+  (let [application-id (apply create-app-id pena args)
         resp (command pena :add-comment :id application-id :text "foo" :target "application")
         resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
@@ -66,17 +66,18 @@
     (fact (count neighbors) => 0)))
 
 (facts "neighbor invite email has correct link"
-  (let [[application neighbor-id] (create-app-with-neighbor)
+  (let [neighbor-email-addr       "abba@example.com"
+        [application neighbor-id] (create-app-with-neighbor :address "Naapurikuja 3")
         application-id            (:id application)
         _                         (command pena :neighbor-send-invite
                                                 :id application-id
                                                 :neighborId neighbor-id
-                                                :email "abba@example.com")
-        _                         (Thread/sleep 20) ; delivery time
-        email                     (query pena :last-email)
-        body                      (get-in email [:message :body :plain])
-        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+                                                :email neighbor-email-addr)
+        email                     (last-email)
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" (get-in email [:body :plain]))]
 
+    (:to email) => neighbor-email-addr
+    (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen"
     a-id => application-id
     n-id => neighbor-id
     token => #"[A-Za-z0-9]{48}"))

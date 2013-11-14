@@ -5,7 +5,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
-                                                                 aloitusilmoitus-to-canonical
+                                                                 katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
@@ -269,16 +269,34 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
-  (let [canonical (aloitusilmoitus-to-canonical application lang started building-id user)
+(defn save-katselmus-as-krysp [application
+                               lang
+                               output-dir
+                               started
+                               building-id
+                               user
+                               katselmuksen-nimi
+                               tyyppi
+                               osittainen
+                               pitaja
+                               lupaehtona
+                               huomautukset
+                               lasnaolijat
+                               poikkeamat]
+  (let [canonical (katselmus-canonical application lang started building-id user
+                                       katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
+                                       huomautukset lasnaolijat poikkeamat)
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     (validate xml-s)
-    ;(with-open [out-file (writer "/Users/terotu/aloitusilmoitus.xml" )]
-     ;   (emit xml out-file))
+    (with-open [out-file (writer "/Users/terotu/katselmus.xml" )]
+        (emit xml out-file))
     ;TODO sanoaman muodostus ja muut jutut kallin teon yhteydessa
     (println xml-s)
-    )
+    ))
+
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
+  (save-katselmus-as-krysp application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil)
   )
 
 (defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link user]

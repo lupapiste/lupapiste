@@ -146,6 +146,7 @@
 
 
 (def patevyys [{:name "koulutus" :type :string :required false}
+               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyysluokka" :type :select :required false
                 :body [{:name "AA"}
@@ -153,7 +154,6 @@
                        {:name "B"}
                        {:name "C"}
                        {:name "ei tiedossa"}]}
-               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}])
 
 (def designer-basic (body

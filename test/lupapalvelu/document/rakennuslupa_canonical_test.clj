@@ -823,13 +823,13 @@
                                      :city "Tampere"})
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [canonical (aloitusilmoitus-to-canonical
+           (let [canonical (katselmus-canonical
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "sv"
                              1354532324658
                              {:rakennusnro "002" :jarjestysnumero 1}
-                             authority-user-jussi)
-
+                             authority-user-jussi
+                             "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
                  kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
@@ -913,3 +913,188 @@
 
 
 
+;Jatkolupa
+
+(def jatkolupa-application
+  {:schema-version 1,
+   :auth
+   [{:lastName "Panaani",
+     :firstName "Pena",
+     :username "pena",
+     :type "owner",
+     :role "owner",
+     :id "777777777777777777000020"}],
+   :submitted 1384167310181,
+   :state "submitted",
+   :permitSubtype nil,
+   :location {:x 411063.82824707, :y 6685145.8129883},
+   :attachments [],
+   :organization "753-R",
+   :title "It\u00e4inen Hangelbyntie 163",
+   :operations
+   [{:id "5280b764420622588b2f04fc",
+     :name "jatkoaika",
+     :created 1384167268234}],
+   :infoRequest false,
+   :openInfoRequest false,
+   :opened 1384167310181,
+   :created 1384167268234,
+   :propertyId "75340800010051",
+   :documents
+   [{:created 1384167268234,
+     :data
+     {:kuvaus
+      {:modified 1384167309006,
+       :value
+       "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
+     :id "5280b764420622588b2f04fd",
+     :schema-info
+     {:order 1,
+      :version 1,
+      :name "hankkeen-kuvaus-minimum",
+      :approvable true,
+      :op
+      {:id "5280b764420622588b2f04fc",
+       :name "jatkoaika",
+       :created 1384167268234},
+      :removable true}}
+    hakija-henkilo],
+   :_software_version "1.0.5",
+   :modified 1384167309006,
+   :allowedAttachmentTypes
+   [["hakija"
+     ["valtakirja"
+      "ote_kauppa_ja_yhdistysrekisterista"
+      "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]]
+    ["rakennuspaikan_hallinta"
+     ["jaljennos_myonnetyista_lainhuudoista"
+      "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta"
+      "rasitustodistus"
+      "todistus_erityisoikeuden_kirjaamisesta"
+      "jaljennos_vuokrasopimuksesta"
+      "jaljennos_perunkirjasta"]]
+    ["rakennuspaikka"
+     ["ote_alueen_peruskartasta"
+      "ote_asemakaavasta_jos_asemakaava_alueella"
+      "ote_kiinteistorekisteristerista"
+      "tonttikartta_tarvittaessa"
+      "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"
+      "kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma"]]
+    ["paapiirustus"
+     ["asemapiirros"
+    "pohjapiirros"
+    "leikkauspiirros"
+    "julkisivupiirros"]]
+    ["ennakkoluvat_ja_lausunnot"
+     ["naapurien_suostumukset"
+    "selvitys_naapurien_kuulemisesta"
+    "elyn_tai_kunnan_poikkeamapaatos"
+    "suunnittelutarveratkaisu"
+    "ymparistolupa"]]
+    ["muut"
+     ["selvitys_rakennuspaikan_terveellisyydesta"
+      "selvitys_rakennuspaikan_korkeusasemasta"
+      "selvitys_liittymisesta_ymparoivaan_rakennuskantaan"
+      "julkisivujen_varityssuunnitelma"
+      "selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta"
+      "piha_tai_istutussuunnitelma"
+      "selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta"
+      "selvitys_rakennuksen_kosteusteknisesta_toimivuudesta"
+      "selvitys_rakennuksen_aaniteknisesta_toimivuudesta"
+      "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"
+      "energiataloudellinen_selvitys"
+      "paloturvallisuussuunnitelma"
+      "liikkumis_ja_esteettomyysselvitys"
+      "kerrosalaselvitys"
+      "vaestonsuojasuunnitelma"
+      "rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo"
+      "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"
+      "selvitys_kiinteiston_jatehuollon_jarjestamisesta"
+      "rakennesuunnitelma"
+      "ilmanvaihtosuunnitelma"
+      "lammityslaitesuunnitelma"
+      "radontekninen_suunnitelma"
+      "kalliorakentamistekninen_suunnitelma"
+      "paloturvallisuusselvitys"
+      "suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta"
+      "merkki_ja_turvavalaistussuunnitelma"
+      "sammutusautomatiikkasuunnitelma"
+      "rakennusautomaatiosuunnitelma"
+      "valaistussuunnitelma"
+      "selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta"
+      "selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta"
+      "muu"]]],
+   :comments [],
+   :address "It\u00e4inen Hangelbyntie 163",
+   :permitType "R",
+   :id "LP-753-2013-00005",
+   :municipality "753"
+   :authority {:id "777777777777777777000023"
+               :username "sonja"
+               :firstName "Sonja"
+               :lastName "Sibbo"
+               :role "authority"}
+  :linkPermitData [{:id "LP-753-2013-00001", :type "lupapistetunnus"}]})
+
+(fl/facts* "Canonical model for jatkoaika is correct"
+  (let [canonical (application-to-canonical jatkolupa-application "sv")]
+    ;(clojure.pprint/pprint canonical)
+    ;TODO tests
+    ))
+
+(fl/facts* "Canonical model for katselmus is correct"
+           (let [canonical (katselmus-canonical
+                             (assoc application-rakennuslupa :state "verdictGiven")
+                             "fi"
+                             1354532324658
+                             {:rakennusnro "002" :jarjestysnumero 1}
+                             authority-user-jussi
+                             "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
+Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
+
+                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+
+                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+                 mt (:MuuTunnus muuTunnustieto) => truthy
+
+                 tunnus (:tunnus mt) => "LP-753-2013-00001"
+                 sovellus (:sovellus mt) => "Lupapiste"
+
+                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+                 Osapuolet (:Osapuolet osapuolettieto) => truthy
+                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
+                 Osapuoli (:Osapuoli osapuolitieto) => truthy
+                 kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+                 henkilo (:henkilo Osapuoli) => truthy
+                 nimi (:nimi henkilo) => truthy
+                 etunimi (:etunimi nimi) => "Jussi"
+                 sukunimi (:sukunimi nimi) => "Viranomainen"
+                 osoite (:osoite henkilo) => truthy
+                 osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+                 puhelin (:puhelin henkilo) => "1231234567"
+
+                 katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+                 Katselmus (:Katselmus katselmustieto) => truthy
+                 rakennustunnus (:rakennustunnus Katselmus) => truthy
+                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 rakennusnumero (:rakennusnro rakennustunnus) => "002"
+                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"
+                 pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
+                 osittainen (:osittainen Katselmus) => "pidetty"
+                 pitaja (:pitaja Katselmus) => "Sonja Silja"
+                 huomautukset (-> Katselmus :huomautukset :huomautus :kuvaus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
+Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
+                 katselmuksenLaji (:katselmuksenLaji Katselmus) => "pohjakatselmus"
+                 lasnaolijat (:lasnaolijat Katselmus ) => "Tiivi Taavi, Hipsu ja Lala"
+                 poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
+                 tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "pohjakatselmus"
+                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"]))

@@ -290,16 +290,25 @@
   (logout!)
   (redirect-to-server-root))
 
-;; Saparate URL outside anti-csrf
+;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
   (if username
-    (execute-command "login" params)
+    (execute-command "login" params) ; Handles form POST (Nessus)
     (execute-command "login")))
+
+;; Reset password via saparate URL outside anti-csrf
+(defjson [:post "/api/reset-password"] []
+  (execute-command "reset-password"))
+
+;;
+;; Redirects
+;;
 
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))
 (defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
 (defpage [:get ["/app/:lang/" :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
+
 
 ;;
 ;; FROM SADE
@@ -453,7 +462,7 @@
         expired? (< expires now)]
     (if expired?
       (session/clear!)
-      (if (re-find #"^/api/(command|query)/" (:uri request))
+      (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
         (session/put! :expires (+ now (get-session-timeout request)))))
     (handler request)))
 
