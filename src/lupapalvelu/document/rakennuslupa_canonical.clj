@@ -264,11 +264,52 @@
         (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
                   (get-kayttotapaus documents toimenpiteet))))))
 
+(defn katselmusnimi-to-type [nimi tyyppi]
+  (if (= :tarkastus tyyppi)
+    "muu tarkastus"
+    (condp = nimi
+    "Aloitusilmoitus" "ei tiedossa"
+    "muu katselmus" "muu katselmus"
+    "aloituskokous" "aloituskokous"
+    "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
+    "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
+    "pohjakatselmus" "pohjakatselmus"
+    "rakennekatselmus" "rakennekatselmus"
+    "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+    "osittainen loppukatselmus" "osittainen loppukatselmus"
+    "loppukatselmus"
+    "ei tiedossa"))
+  )
 
-(defn aloitusilmoitus-canonical [application lang started building user]
+(defn katselmus-kayttotapaus [nimi tyyppi]
+  (if (= nimi "Aloitusilmoitus")
+    "Aloitusilmoitus"
+    (if (= tyyppi :katselmus)
+      "Uusi katselmus"
+      "Uusi tarkastus")))
+
+
+(defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
+        katselmus (merge {:pitoPvm (to-xml-date pitoPvm)
+                          :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
+                          :vaadittuLupaehtonaKytkin (true? lupaehtona)
+                          :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi}
+                         (when building {:rakennustunnus {:jarjestysnumero (:jarjestysnumero building)
+                                                          :kiinttun (:propertyId application)
+                                                          :rakennusnro  (:rakennusnro building)}})
+                         (when osittainen
+                           {:osittainen osittainen})
+                         (when pitaja
+                           {:pitaja pitaja})
+                         (when huomautukset
+                           {:huomautukset {:huomautus {:kuvaus huomautukset}}})
+                         (when lasnaolijat
+                           {:lasnaolijat lasnaolijat})
+                         (when poikkeamat
+                           {:poikkeamat poikkeamat}))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
@@ -283,15 +324,9 @@
                                                                                                  :postinumero (:zip user)}
                                                                                          :sahkopostiosoite (:email user)
                                                                                          :puhelin (:phone user)}}}}}
-                      :katselmustieto {:Katselmus (merge {:pitoPvm (to-xml-date started)
-                                                          :katselmuksenLaji "ei tiedossa"
-                                                          :vaadittuLupaehtonaKytkin false
-                                                          :tarkastuksenTaiKatselmuksenNimi "Aloitusilmoitus"}
-                                                         (when building {:rakennustunnus {:jarjestysnumero (:jarjestysnumero building)
-                                                                                          :kiinttun (:propertyId application)
-                                                                                          :rakennusnro  (:rakennusnro building)}}))}
+                      :katselmustieto {:Katselmus katselmus}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
-                      :kayttotapaus "Aloitusilmoitus"
+                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
                       }}}}]
     canonical))
 
