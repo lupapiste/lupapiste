@@ -29,17 +29,20 @@
         legacy       (:legacy organization)]
     (when-not (s/blank? legacy) legacy)))
 
-(defn municipalities-with-organization []
+(defn- municipalities-with-organization []
   (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
     (distinct
       (for [{id :id scopes :scope} id-and-scopes
             {:keys [municipality]} scopes] municipality))))
 
-(defn find-user-organizations [user]
+(defn- find-user-organizations [user]
   (mongo/select :organizations {:_id {$in (:organizations user)}}))
 
-(defn find-user-municipalities [user]
+(defn- find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+(defn- organization-attachments [{scope :scope}]
+  (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
 
 ;;
 ;; Actions
@@ -60,7 +63,7 @@
         organization (first orgs)
         ops (merge (zipmap (keys operations/operations) (repeat [])) (:operations-attachments organization))]
     (ok :organization (assoc organization :operations-attachments ops)
-        :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
+        :attachmentTypes (organization-attachments organization))))
 
 (defcommand update-organization
   {:description "Update organization details."
