@@ -86,8 +86,10 @@
 
 (defn- ->rakennuksen-omistaja [omistaja]
   (cond
-    (select omistaja [:henkilo]) nil ;  TODO
-    (select omistaja [:yritys]) nil ;  TODO
+    (select omistaja [:henkilo]) {:_selected "henkilo"
+                                  :henkilo   nil} ;  TODO
+    (select omistaja [:yritys]) {:_selected "yritys"
+                                 :yritys    nil} ;  TODO
     :default (->rakennuksen-omistaja-legacy-version omistaja)
     )
   )

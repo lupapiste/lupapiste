@@ -165,10 +165,15 @@
 (facts "Building from Sito"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
         buildings (->buildings xml)
-        building  (first buildings)]
+        building1  (first buildings)
+        building1-id (:buildingId building1)]
     (fact "xml is parsed" buildings => truthy)
     (fact "xml has 2 buildings" (count buildings) => 2)
-    (fact "Kiinteistotunnus" (:propertyId building) => "63845900130022")
-    (fact "Rakennustunnus" (:buildingId building) => "001")
-    (fact "Kayttotarkoitus" (:usage building) => "011 yhden asunnon talot")
-    (fact "Alkuhetki year as created" (:created building) => "2013")))
+    (fact "Kiinteistotunnus" (:propertyId building1) => "63845900130022")
+    (fact "Rakennustunnus" building1-id => "001")
+    (fact "Kayttotarkoitus" (:usage building1) => "011 yhden asunnon talot")
+    (fact "Alkuhetki year as created" (:created building1) => "2013")
+    (let [building (->rakennuksen-tiedot xml building1-id)
+          omistajat (:rakennuksenOmistajat building)]
+      ;(clojure.pprint/pprint building)
+      (fact "Has 2 owners" (count omistajat) => 2))))
