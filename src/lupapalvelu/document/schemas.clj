@@ -228,11 +228,10 @@
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
 
-(def muutostapa {:name "muutostapa" :type :select
+(def muutostapa {:name "muutostapa" :type :select :required true
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys"}
-                        {:name "muutos"}
-                        {:name "ei tiedossa"}]})
+                        {:name "muutos"}]})
 
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
