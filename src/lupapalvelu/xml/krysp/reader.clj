@@ -72,7 +72,7 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- ->rakennuksen-omistaja [omistaja]
+(defn- ->rakennuksen-omistaja-legacy-version [omistaja]
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)
             :osoite {:katu                            (get-text omistaja :osoitenimi :teksti)
@@ -84,6 +84,14 @@
                                            :fax       ...notfound...
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
+
+(defn- ->rakennuksen-omistaja [omistaja]
+  (cond
+    (select omistaja [:henkilo]) nil ;  TODO
+    (select omistaja [:yritys]) nil ;  TODO
+    :default (->rakennuksen-omistaja-legacy-version omistaja)
+    )
+  )
 
 (def cleanup (comp cr/strip-empty-maps cr/strip-nils))
 
