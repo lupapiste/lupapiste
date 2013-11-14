@@ -19,8 +19,7 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.attachment :refer [encode-filename]]))
+            [lupapalvelu.notifications :as notifications]))
 
 ;;
 ;; ==============================================================================
@@ -401,7 +400,7 @@
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
                "Content-Length" (str (:content-length attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment)))}}
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}
     {:status 404
      :body (str "can't file attachment: id=" attachment-id)}))
 

@@ -17,7 +17,8 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.statement :as statement])
+            [lupapalvelu.statement :as statement]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -32,63 +33,71 @@
 ;; Metadata
 ;;
 
-(def ^:private attachment-types-R
-  [:hakija [:valtakirja
-            :ote_kauppa_ja_yhdistysrekisterista
-            :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
-   :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
-                             :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
-                             :rasitustodistus
-                             :todistus_erityisoikeuden_kirjaamisesta
-                             :jaljennos_vuokrasopimuksesta
-                             :jaljennos_perunkirjasta]
-   :rakennuspaikka [:ote_alueen_peruskartasta
-                    :ote_asemakaavasta_jos_asemakaava_alueella
-                    :ote_kiinteistorekisteristerista
-                    :tonttikartta_tarvittaessa
-                    :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
-                    :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
-   :paapiirustus [:asemapiirros
-                  :pohjapiirros
-                  :leikkauspiirros
-                  :julkisivupiirros]
-   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
-                               :selvitys_naapurien_kuulemisesta
-                               :elyn_tai_kunnan_poikkeamapaatos
-                               :suunnittelutarveratkaisu
-                               :ymparistolupa]
-   :muut [:selvitys_rakennuspaikan_terveellisyydesta
-          :selvitys_rakennuspaikan_korkeusasemasta
-          :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
-          :julkisivujen_varityssuunnitelma
-          :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
-          :piha_tai_istutussuunnitelma
-          :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
-          :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
-          :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
-          :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
-          :energiataloudellinen_selvitys
-          :paloturvallisuussuunnitelma
-          :liikkumis_ja_esteettomyysselvitys
-          :kerrosalaselvitys
-          :vaestonsuojasuunnitelma
-          :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
-          :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
-          :selvitys_kiinteiston_jatehuollon_jarjestamisesta
-          :rakennesuunnitelma
-          :ilmanvaihtosuunnitelma
-          :lammityslaitesuunnitelma
-          :radontekninen_suunnitelma
-          :kalliorakentamistekninen_suunnitelma
-          :paloturvallisuusselvitys
-          :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
-          :merkki_ja_turvavalaistussuunnitelma
-          :sammutusautomatiikkasuunnitelma
-          :rakennusautomaatiosuunnitelma
-          :valaistussuunnitelma
-          :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-          :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
-          :muu]])
+(defn- attachment-types-R []
+  (let [attachment-tree [:hakija [:valtakirja
+                                  :ote_kauppa_ja_yhdistysrekisterista
+                                  :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
+                         :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
+                                                   :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
+                                                   :rasitustodistus
+                                                   :todistus_erityisoikeuden_kirjaamisesta
+                                                   :jaljennos_vuokrasopimuksesta
+                                                   :jaljennos_perunkirjasta]
+                         :rakennuspaikka [:ote_alueen_peruskartasta
+                                          :ote_asemakaavasta_jos_asemakaava_alueella
+                                          :ote_kiinteistorekisteristerista
+                                          :tonttikartta_tarvittaessa
+                                          :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                                          :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
+                         :paapiirustus [:asemapiirros
+                                        :pohjapiirros
+                                        :leikkauspiirros
+                                        :julkisivupiirros]
+                         :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
+                                                     :selvitys_naapurien_kuulemisesta
+                                                     :elyn_tai_kunnan_poikkeamapaatos
+                                                     :suunnittelutarveratkaisu
+                                                     :ymparistolupa]]
+
+        attachment-tree
+        (if (env/feature? :rakentamisen-aikaiset-erityissuunnitelmat)
+          (conj attachment-tree :rakentamisen_aikaiset [:erityissuunnitelma])
+          attachment-tree)
+
+        attachment-tree
+        (conj attachment-tree :muut [:selvitys_rakennuspaikan_terveellisyydesta
+                                     :selvitys_rakennuspaikan_korkeusasemasta
+                                     :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+                                     :julkisivujen_varityssuunnitelma
+                                     :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+                                     :piha_tai_istutussuunnitelma
+                                     :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
+                                     :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
+                                     :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
+                                     :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
+                                     :energiataloudellinen_selvitys
+                                     :paloturvallisuussuunnitelma
+                                     :liikkumis_ja_esteettomyysselvitys
+                                     :kerrosalaselvitys
+                                     :vaestonsuojasuunnitelma
+                                     :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
+                                     :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
+                                     :selvitys_kiinteiston_jatehuollon_jarjestamisesta
+                                     :rakennesuunnitelma
+                                     :ilmanvaihtosuunnitelma
+                                     :lammityslaitesuunnitelma
+                                     :radontekninen_suunnitelma
+                                     :kalliorakentamistekninen_suunnitelma
+                                     :paloturvallisuusselvitys
+                                     :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
+                                     :merkki_ja_turvavalaistussuunnitelma
+                                     :sammutusautomatiikkasuunnitelma
+                                     :rakennusautomaatiosuunnitelma
+                                     :valaistussuunnitelma
+                                     :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                                     :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
+                                     :muu])]
+    attachment-tree))
 
 (def attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
@@ -111,14 +120,14 @@
   [permit-type]
   (partition 2
     (condp = (keyword permit-type)
-      :R  attachment-types-R
+      :R  (attachment-types-R)
       :YA attachment-types-YA
-      :P attachment-types-R
+      :P (attachment-types-R)
       (fail! "unsupported permit-type"))))
 
 ;; TODO: return attachment type based on what types of operations the given organization is having.
 (defn organization-attachments [organization]
-  attachment-types-R)
+  (attachment-types-R))
 
 (defn make-attachment [now target locked op attachement-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
@@ -382,6 +391,13 @@
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
+(defn if-not-authority-states-must-match [state-set]
+  (fn [{user :user} {state :state}]
+    (when (and
+            (not= (:role user) "authority")
+            (state-set (keyword state)))
+      (fail :error.non-authority-viewing-application-in-verdictgiven-state))))
+
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
@@ -396,9 +412,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked (fn [{user :user} {state :state}]
-                                           (when (and (not= (:role user) "authority") (#{:sent :verdictGiven} (keyword state)))
-                                             (fail :error.non-authority-viewing-application-in-verdictgiven-state)))]
+   :validators [attachment-is-not-locked (if-not-authority-states-must-match #{:sent :verdictGiven})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
@@ -425,6 +439,57 @@
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
 
+
+(defn- get-data-argument-for-attachments-mongo-update [timestamp attachments]
+  (reduce
+    (fn [data-map attachment]
+      (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) timestamp}))
+    {}
+    attachments))
+
+(defcommand move-attachments-to-backing-system
+  {:parameters [id lang]
+   :roles      [:authority]
+   :validators [(if-not-authority-states-must-match #{:verdictGiven})]
+   :states     [:verdictGiven]
+   :description "Sends such attachments to backing system that are not yet sent."}
+  [{:keys [created user application] :as command}]
+
+  (let [attachments-wo-sent-timestamp (filter
+                                        #(and
+                                           (pos? (-> % :versions count))
+                                           (or
+                                             (not (:sent %))
+                                             (> (-> % :versions last :created) (:sent %)))
+                                           (not (= "statement" (-> % :target :type)))
+                                           (not (= "verdict" (-> % :target :type))))
+                                        (:attachments application))]
+    (if (pos? (count attachments-wo-sent-timestamp))
+
+      (let [organization (mongo/by-id :organizations (:organization application))]
+        (try
+          (mapping-to-krysp/save-unsent-attachments-as-krysp
+            (-> application
+              (dissoc :attachments)
+              (assoc :attachments attachments-wo-sent-timestamp))
+            lang
+            organization
+            user)
+
+          (ok :updateCount (mongo/update-by-query
+                             :applications
+                             {:_id id}
+                             {$set (get-data-argument-for-attachments-mongo-update
+                                     created
+                                     (:attachments application))}))
+
+          (catch Exception e
+            (errorf e "failed to save unsent attachments as krysp: application=%s" id)
+            (fail :error.sending-unsent-attachments-failed))))
+
+      (ok :updateCount 0))))
+
+
 ;;
 ;; Download
 ;;
@@ -443,17 +508,6 @@
     (when-let [application (get-application-no-access-checking (:application attachment))]
       (when (seq application) attachment))))
 
-(def windows-filename-max-length 255)
-
-(defn encode-filename
-  "Replaces all non-ascii chars and other that the allowed punctuation with dash.
-   UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
-  [unencoded-filename]
-  (when-let [de-accented (ss/de-accent unencoded-filename)]
-      (clojure.string/replace
-        (ss/last-n windows-filename-max-length de-accented)
-        #"[^a-zA-Z0-9\.\-_ ]" "-")))
-
 (defn output-attachment
   [attachment-id download? attachment-fn]
   (debugf "file download: attachment-id=%s" attachment-id)
@@ -465,7 +519,7 @@
       (if download?
         (assoc-in response
           [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))))
+          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
@@ -490,13 +544,13 @@
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
 (defn- append-stream [zip file-name in]
   (when in
-    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
 (defn- append-attachment [zip {:keys [filename fileId]}]

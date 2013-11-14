@@ -158,9 +158,10 @@
 
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)
-                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
-                                                                                          (assoc c :required false)
-                                                                                          c)) yritys-minimal)}
+                      {:name "yritys" :type :group
+                       :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
+                                                              (assoc c :required false)
+                                                              c)) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
@@ -227,11 +228,10 @@
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
 
-(def muutostapa {:name "muutostapa" :type :select
+(def muutostapa {:name "muutostapa" :type :select :required true
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys"}
-                        {:name "muutos"}
-                        {:name "ei tiedossa"}]})
+                        {:name "muutos"}]})
 
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
