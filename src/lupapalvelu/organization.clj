@@ -44,6 +44,12 @@
 (defn- organization-attachments [{scope :scope}]
   (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
 
+(defn- organization-operations [{scope :scope :as organization}]
+  (reduce
+    ; TODO merge-with tai jotain joka varmistaa etta (:operations-attachments organization) tulee mergetyksi vain olemassa oleviin
+    #(assoc %1 %2 (merge (zipmap (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations)) (repeat [])) (:operations-attachments organization))) {}
+    (map :permitType scope)))
+
 ;;
 ;; Actions
 ;;
@@ -61,7 +67,7 @@
   [{{:keys [organizations] :as user} :user}]
   (let [orgs (find-user-organizations user)
         organization (first orgs)
-        ops (merge (zipmap (keys operations/operations) (repeat [])) (:operations-attachments organization))]
+        ops (organization-operations organization)]
     (ok :organization (assoc organization :operations-attachments ops)
         :attachmentTypes (organization-attachments organization))))
 
