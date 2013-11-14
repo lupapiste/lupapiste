@@ -902,14 +902,14 @@
              (fact "tila" (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu")
              (fact "tunnus" (:tunnus mt) => "LP-753-2013-00001")
              (fact "sovellus" (:sovellus mt) => "Lupapiste")
-             (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")))
+             (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")
 
              (facts "Osapuolet"
                (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
                (fact "etunimi" (:etunimi nimi) => "Jussi")
                (fact "sukunimi" (:sukunimi nimi) => "Viranomainen")
                (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1")
-               (fact "puhelin" (:puhelin henkilo) => "1231234567"))
+               (fact "puhelin" (:puhelin henkilo) => "1231234567"))))
 
 
 
