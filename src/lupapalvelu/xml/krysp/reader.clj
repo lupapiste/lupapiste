@@ -63,7 +63,7 @@
    })
 
 (defn ->buildings [xml]
-  (-> xml (select [:rakval:Rakennus]) (->> (map (comp ->buildingIds cr/strip-keys xml->edn)))))
+  (-> xml cr/strip-xml-namespaces (select [:Rakennus]) (->> (map (comp ->buildingIds cr/strip-keys xml->edn)))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
