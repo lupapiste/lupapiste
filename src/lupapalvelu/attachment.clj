@@ -395,7 +395,7 @@
   (fn [{user :user} {state :state}]
     (when (and
             (not= (:role user) "authority")
-            (state-set (keyword state) true))
+            (state-set (keyword state)))
       (fail :error.non-authority-viewing-application-in-verdictgiven-state))))
 
 (defn attach-file!
