@@ -294,6 +294,7 @@ var attachment = (function() {
 
   return {
     initFileUpload: initFileUpload,
+//    sendUnsentAttachmentsToBackingSystem: sendUnsentAttachmentsToBackingSystem,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 

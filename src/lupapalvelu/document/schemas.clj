@@ -158,9 +158,10 @@
 
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)
-                      {:name "yritys" :type :group :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
-                                                                                          (assoc c :required false)
-                                                                                          c)) yritys-minimal)}
+                      {:name "yritys" :type :group
+                       :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
+                                                              (assoc c :required false)
+                                                              c)) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
