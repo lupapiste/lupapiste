@@ -32,6 +32,9 @@
 ;; Metadata
 ;;
 
+(def attachment-types-osapuoli
+  [:cv :tutkintotodistus :patevyystodistus])
+
 (def ^:private attachment-types-R
   [:hakija [:valtakirja
             :ote_kauppa_ja_yhdistysrekisterista
@@ -103,9 +106,6 @@
    :osapuolet attachment-types-osapuoli
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
-
-(def attachment-types-osapuoli
-  [:cv :tutkintotodistus :patevyystodistus])
 
 ;;
 ;; Api
@@ -234,7 +234,7 @@
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [application-id attachment-id attachment-type file-id filename content-type size created user target locked]
+  [{:keys [application-id attachment-id attachment-type file-id filename content-type size created user target locked]}]
   (let [attachment-id (cond
                         (s/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
@@ -392,12 +392,18 @@
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
    Returns attachment version."
-  [application-id file-name file-size content attachment-id attachment-type attachment-target locked user timestamp]
+  [options]
   (let [file-id (mongo/create-id)
+        application-id (:application-id options)
+        file-name (:file-name options)
+        content (:content options)
+        user (:user options)
         sanitazed-filename (mime/sanitize-filename file-name)
         content-type (mime/mime-type sanitazed-filename)]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (update-or-create-attachment application-id attachment-id attachment-type file-id sanitazed-filename content-type file-size timestamp user attachment-target locked)))
+    (update-or-create-attachment (merge options {:file-id file-id
+                                                 :sanitazed-filename sanitazed-filename
+                                                 :content-type content-type}))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
@@ -417,7 +423,16 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (if-let [attachment-version (attach-file! id filename size tempfile attachmentId attachmentType target locked user created)]
+  (if-let [attachment-version (attach-file! {:application-id id 
+                                             :filename filename
+                                             :size size
+                                             :content tempfile
+                                             :attachment-id attachmentId
+                                             :attachment-type attachmentType
+                                             :target target
+                                             :locked locked 
+                                             :user user 
+                                             :timestamp created})]
     (executed "add-comment"
       (-> command
         (assoc :data {:id id

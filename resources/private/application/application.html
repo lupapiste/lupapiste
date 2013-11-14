@@ -370,6 +370,11 @@
                 data-test-id="add-attachment">
             </button>
             <button
+                data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn'"
+                class="btn btn-primary
+                data-test-id="attachments-copy-own">
+            </button>
+            <button
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
                 class="btn">
             </button>

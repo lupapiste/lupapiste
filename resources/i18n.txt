@@ -2,3 +2,5 @@ attachmentType.osapuolet._group_label: Osapuolet
 attachmentType.osapuolet.cv: CV
 attachmentType.osapuolet.tutkintotodistus: Tutkintotodistus
 attachmentType.osapuolet.patevyystodistus: Pätevyystodistus
+
+application.attachmentsCopyOwn: Kopioi omat liitteet hakemukselle

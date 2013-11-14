@@ -20,7 +20,7 @@
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.attachment :refer [encode-filename attachment-types-osapuoli]]))
+            [lupapalvelu.attachment :refer [encode-filename attachment-types-osapuoli attach-file!]]))
 
 ;;
 ;; ==============================================================================
@@ -401,6 +401,30 @@
   (mongo/update-by-id :users (:id user) {$unset {(str "attachments." attachment-id) nil}})
   (user/refresh-user!)
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
+  (ok))
+
+(defcommand copy-user-attachments-to-application
+  {:parameters [application-id]}
+  [{user :user}]
+  (when-not user (throw+ {:status 401 :body "forbidden"}))
+  (for [attachment (vals (:attachments user))] 
+    (let [
+          user-id (:id user)
+          {:keys [attachment-type filename content-type size created]} attachment
+          attachment-id (str application-id "/" user-id "/" attachment-type)
+          attachment (mongo/download-find {:id (:attachment-id attachment) :metadata.user-id user-id})
+          ]
+      (attach-file! {:application-id application-id 
+                     :attachment-id attachment-id
+                     :attachment-type attachment-type
+                     :content ((:content attachment))
+                     :file-name filename
+                     :content-type content-type
+                     :file-size size
+                     :timestamp created
+                     :user user
+                     ;:attachment-target attachment-target
+                     :locked false})))
   (ok))
 
 ;;

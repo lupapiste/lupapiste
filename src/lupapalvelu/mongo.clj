@@ -118,6 +118,7 @@
   input)
 
 (defn upload [file-id filename content-type content & metadata]
+  (println (type content))
   (assert (and (string? file-id)
                (string? filename)
                (string? content-type)
