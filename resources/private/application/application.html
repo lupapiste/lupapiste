@@ -376,6 +376,7 @@
             <button
                 data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
                            ltext: 'application.attachmentsMoveToBackingSystem',
+                           disable: application.sendUnsentAttachmentsToBackingSystemDisabled,
                            visible: $root.authorization.ok('move-attachments-to-backing-system')"
                 class="btn btn-primary modal"
                 data-test-id="send-unsent-attachments">

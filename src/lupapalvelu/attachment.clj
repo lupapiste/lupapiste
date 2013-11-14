@@ -7,7 +7,7 @@
             [sade.util :refer [fn-> fn->> future*]]
             [sade.strings :as ss]
             [sade.env :as env]
-            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking application-query-for]]
             [lupapalvelu.i18n :as i18n]
@@ -395,7 +395,7 @@
   (fn [{user :user} {state :state}]
     (when (and
             (not= (:role user) "authority")
-            (state-set (keyword state) true ))
+            (state-set (keyword state) true))
       (fail :error.non-authority-viewing-application-in-verdictgiven-state))))
 
 (defn attach-file!
@@ -438,28 +438,34 @@
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
 
+
+(defn- get-data-argument-for-attachments-mongo-update [timestamp attachments]
+  (reduce
+    (fn [data-map attachment]
+      (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) timestamp}))
+    {}
+    attachments))
+
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
    :validators [(if-not-authority-states-must-match #{:verdictGiven})]
-   ;;  TODO: Pitaisiko validoida, onko lahettamattomia liitteita ylipaataan olemassa?
-;   :input-validators   ......
    :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
-  [{:keys [created user application] {:keys [text target locked]} :data :as command}]
+  [{:keys [created user application] :as command}]
 
   (let [attachments-wo-sent-timestamp (filter
                                         #(and
-                                           (:latestVersion %)
+                                           (pos? (-> % :versions count))
+                                           (or
+                                             (not (:sent %))
+                                             (> (-> % :versions last :created) (:sent %)))
                                            (not (= "statement" (-> % :target :type)))
-                                           (not (= "verdict" (-> % :target :type)))
-                                           (not (-> % :latestVersion :sent)))
+                                           (not (= "verdict" (-> % :target :type))))
                                         (:attachments application))]
-
     (if (pos? (count attachments-wo-sent-timestamp))
 
       (let [organization (mongo/by-id :organizations (:organization application))]
-
         (try
           (mapping-to-krysp/save-unsent-attachments-as-krysp
             (-> application
@@ -469,30 +475,18 @@
             organization
             user)
 
-          (let [ids (into [] (map :id attachments-wo-sent-timestamp))
-
-                ;; TODO: Miten tehdaan Sent-update mongoon yhdella update-komennolla?
-;                update-count (mongo/update-by-query
-;                               :applications
-;                               {:_id id
-;                                :attachments {$elemMatch {:id #_attachment-id {$in ids}}}}
-;                               {$set {:attachments.$.sent (now)}})
-                ]
-
-            (doseq [attachment-id ids]
-              (mongo/update-by-query
-                :applications
-                {:_id id
-                 :attachments {$elemMatch {:id attachment-id}}}
-                {$set {:attachments.$.latestVersion.sent (now)}}))
-
-            (ok :updateCount (count ids)))
+          (ok :updateCount (mongo/update-by-query
+                             :applications
+                             {:_id id}
+                             {$set (get-data-argument-for-attachments-mongo-update
+                                     created
+                                     (:attachments application))}))
 
           (catch Exception e
             (errorf e "failed to save unsent attachments as krysp: application=%s" id)
             (fail :error.sending-unsent-attachments-failed))))
 
-      (ok))))
+      (ok :updateCount 0))))
 
 
 ;;

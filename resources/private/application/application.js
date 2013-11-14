@@ -315,6 +315,7 @@
     self.partyDocumentIndicator = ko.observable(0);
     self.linkPermitData = ko.observable({});
     self.appsLinkingToUs = ko.observable({});
+    self.sendUnsentAttachmentsToBackingSystemDisabled = ko.observable(false);
 
     self.attachmentsRequiringAction = ko.observable();
     self.unseenStatements = ko.observable();
@@ -464,8 +465,8 @@
       var appId = self.id();
       ajax
       .command("move-attachments-to-backing-system", {id: appId, lang: loc.getCurrentLanguage()})
-      .success(function() {
-        repository.load(appId);
+      .success(function(data) {
+        if(data.updateCount > 0) { repository.load(appId); }
       })
       .error(function() {
         repository.load(appId);
@@ -642,6 +643,20 @@
       }));
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
+
+
+      // Setting disable value for the "Send unsent attachments" button:
+
+     var unsentAttachmentFound =
+        _.some(app.attachments, function(a) {
+          var lastVersion = _.last(a.versions);
+          return lastVersion &&
+                 (!a.sent || lastVersion.created > a.sent) &&
+                 (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
+        });
+
+      application.sendUnsentAttachmentsToBackingSystemDisabled(!unsentAttachmentFound);
+
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
