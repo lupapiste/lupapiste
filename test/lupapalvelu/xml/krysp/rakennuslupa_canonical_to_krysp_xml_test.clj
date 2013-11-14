@@ -7,7 +7,8 @@
                                                                       jatkolupa-application
                                                                       ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
-                                                                save-aloitusilmoitus-as-krysp]]
+                                                                save-aloitusilmoitus-as-krysp
+                                                                save-katselmus-as-krysp]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :refer :all :as validator]
@@ -58,6 +59,30 @@
        :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
                  :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
                  :apikey "5051ba0caa2480f374dcfefg"}})
+
+    #_(save-katselmus-as-krysp
+      (assoc application :state "verdictGiven")
+      "fi"
+      ""
+      (lupapalvelu.core/now)
+      {:jarjestysnumero 1 :rakennusnro "123"}
+      {:id "777777777777777777000017"
+       :email "jussi.viranomainen@tampere.fi"
+       :enabled true
+       :role "authority"
+       :username "jussi"
+       :organizations ["837-YA"]
+       :firstName "Jussi"
+       :lastName "Viranomainen"
+       :street "Katuosoite 1 a 1"
+       :phone "1231234567"
+       :zip "33456"
+       :city "Tampere"
+       :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
+                 :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
+                 :apikey "5051ba0caa2480f374dcfefg"}}
+      "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
+Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
 
 
 
