@@ -562,12 +562,8 @@
           "geometry": d.geometry()
         }});
 
-      var drawing = drawings[0].geometry;
-      // only one shape per application is currently supported
-
-      debugger;
       hub.send("oskari-show-shapes", {
-        drawing: drawing,
+        drawings: drawings,
         style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
         clear: true
       });
