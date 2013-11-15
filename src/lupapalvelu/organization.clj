@@ -41,10 +41,14 @@
 (defn- find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
 
-(defn- organization-attachments [{scope :scope}]
+(defn- organization-attachments
+  "Returns a map where key is permit type, value is a list of attachment types for the permit type"
+  [{scope :scope}]
   (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
 
-(defn- organization-operations [{scope :scope :as organization}]
+(defn- organization-operations
+  "Returns a map where key is permit type, value is a list of operations for the permit type"
+  [{scope :scope :as organization}]
   (reduce
     ; TODO merge-with tai jotain joka varmistaa etta (:operations-attachments organization) tulee mergetyksi vain olemassa oleviin
     #(assoc %1 %2 (merge (zipmap (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations)) (repeat [])) (:operations-attachments organization))) {}
