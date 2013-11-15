@@ -230,6 +230,7 @@
                                                             nil
                                                             v)) (:documents application)))
         toimenpiteet (get-operations documents application)
+        operation-name (-> application :operations first :name)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
@@ -237,32 +238,32 @@
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
-                      :kayttotapaus (get-kayttotapaus documents toimenpiteet)
+                      :kayttotapaus (condp = operation-name
+                                      "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                      "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
+                                      "jatkoaika" "Jatkoaikahakemus"
+                                      (get-kayttotapaus documents toimenpiteet))
                       :asianTiedot (if link-permit-data
                                      (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
                                      (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}
-                     }}}]
-    (if link-permit-data
-      ;; The link permit data exists in the received application
-      (-> canonical
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                  (get-viitelupatieto link-permit-data))
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
-                  (condp = (-> application :operations first :name)
-                    "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
-                    "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
-                    "jatkoaika" "Jatkoaikahakemus")))
-      ;; The link permit data does not exist in the received application
-      (-> canonical
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
-                  (get-bulding-places (:rakennuspaikka documents) application))
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
-                  toimenpiteet)
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-                  (get-statements (:statements application)))
-        (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
-                  (get-kayttotapaus documents toimenpiteet))))))
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}}}}
+        canonical (if link-permit-data
+                    (-> canonical
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
+                        (get-viitelupatieto link-permit-data)))
+                    canonical)
+        canonical (if-not (or (= operation-name "tyonjohtaja")
+                            (= operation-name "suunnittelija")
+                            (= operation-name "jatkoaika"))
+                    (-> canonical
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
+                        (get-bulding-places (:rakennuspaikka documents) application))
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+                        toimenpiteet)
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+                        (get-statements (:statements application))))
+                    canonical)]
+    canonical))
 
 (defn katselmusnimi-to-type [nimi tyyppi]
   (if (= :tarkastus tyyppi)
@@ -288,6 +289,9 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
+
+;; TODO: Voisiko tahan tehda YA-canonicalin tyyppisen config-systeemin? Ei tarvitsisi nain montaa parametria.
+;; TODO: Yhdistele taman namespacen canonical-funktiota.
 
 (defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
@@ -330,3 +334,27 @@
                       }}}}]
     canonical))
 
+(defn unsent-attachments-to-canonical [application lang user]
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
+        canonical {:Rakennusvalvonta
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :rakennusvalvontaAsiatieto
+                    {:RakennusvalvontaAsia
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli
+                                                                   {:kuntaRooliKoodi "ei tiedossa"
+                                                                    :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                     :sukunimi (:lastName user)}
+                                                                              :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                       :postitoimipaikannimi (:city user)
+                                                                                       :postinumero (:zip user)}
+                                                                              :sahkopostiosoite (:email user)
+                                                                              :puhelin (:phone user)}}}}}
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :kayttotapaus "Liitetiedoston lis\u00e4ys"
+                      }}}}]
+
+  canonical))

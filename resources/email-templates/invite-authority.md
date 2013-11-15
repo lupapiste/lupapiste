@@ -5,9 +5,3 @@ Sinut on kutsuttu viranomaiseksi Lupapiste.fi palveluun. Oheisen linkin kautta p
 Jatka klikkaamalla linkkiä: {{link-fi}}
 
 Tervetuloa.
-
----
-
-# Hej,
-
-{{link-sv}}
