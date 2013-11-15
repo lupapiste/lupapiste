@@ -1,9 +1,7 @@
 (ns lupapalvelu.token-test
-  (:use [midje.sweet]
-        [midje.util :only [testable-privates]])
-  (:require [lupapalvelu.token]))
-
-(testable-privates lupapalvelu.token make-token-id)
+  (:require [lupapalvelu.token :refer [make-token-id]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 (facts
   (make-token-id) => #"[a-zA-Z0-9]{48}"

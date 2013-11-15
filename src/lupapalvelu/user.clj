@@ -1,6 +1,7 @@
 (ns lupapalvelu.user
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
             [monger.operators :refer :all]
+            [monger.query :as query]
             [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
@@ -39,10 +40,9 @@
 ;; ==============================================================================
 ;;
 
-(defn user-query [& query]
-  (assert (seq query))
-  (let [query (apply hash-map query)
-        query (if-let [id (:id query)]
+(defn- user-query [query]
+  (assert (map? query))
+  (let [query (if-let [id (:id query)]
                 (-> query
                   (assoc :_id id)
                   (dissoc :id))
@@ -52,12 +52,62 @@
                 query)
         query (if-let [email (:email query)]
                 (assoc query :email (ss/lower-case email))
+                query)
+        query (if-let [organization (:organization query)]
+                (-> query
+                  (assoc :organizations organization)
+                  (dissoc :organization))
                 query)]
-    (assert (not (empty? query)))
     query))
 
-(defn find-user [& query]
-  (mongo/select-one :users (apply user-query query)))
+(defn find-user [query]
+  (mongo/select-one :users (user-query query)))
+
+(defn find-users [query]
+  (mongo/select :users (user-query query)))
+
+;;
+;; jQuery data-tables support:
+;;
+
+(defn- users-for-datatables-base-query [caller params]
+  (let [admin?               (= (-> caller :role keyword) :admin)
+        caller-organizations (set (:organizations caller))
+        organizations        (:organizations params)
+        organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
+        role                 (:filter-role params)
+        role                 (if admin? role :authority)
+        enabled              (if admin? (:filter-enabled params) true)]
+    (merge {}
+      (when organizations       {:organizations {$in organizations}})
+      (when role                {:role role})
+      (when-not (nil? enabled)  {:enabled enabled}))))
+
+(defn- users-for-datatables-query [base-query {:keys [filter-search]}]
+  (if (ss/blank? filter-search)
+    base-query
+    (let [searches (ss/split filter-search #"\s+")]
+      (assoc base-query $and (map (fn [t]
+                                    {$or (map hash-map
+                                           [:email :firstName :lastName]
+                                           (repeat t))})
+                               (map re-pattern searches))))))
+
+(defn users-for-datatables [caller params]
+  (let [base-query       (users-for-datatables-base-query caller params)
+        base-query-total (mongo/count :users base-query)
+        query            (users-for-datatables-query base-query params)
+        query-total      (mongo/count :users query)
+        users            (query/with-collection "users"
+                           (query/find query)
+                           (query/fields [:email :firstName :lastName :role :organizations :enabled])
+                           (query/skip (util/->int (:iDisplayStart params) 0))
+                           (query/limit (util/->int (:iDisplayLength params) 16)))]
+    {:rows     users
+     :total    base-query-total
+     :display  query-total
+     :echo     (str (util/->int (str (:sEcho params))))}))
+
 
 ;;
 ;; ==============================================================================
@@ -65,16 +115,19 @@
 ;; ==============================================================================
 ;;
 
-(def get-user-by-id (comp non-private (partial find-user :id)))
-(def get-user-by-email (comp non-private (partial find-user :email)))
+(defn get-user-by-id [id]
+  (non-private (find-user {:id id})))
+
+(defn get-user-by-email [email]
+  (non-private (find-user {:email email})))
 
 (defn get-user-with-password [username password]
-  (let [user (find-user :username username)]
-    (when (and (:enabled user) (security/check-password password (get-in user [:private :password])))
+  (let [user (find-user {:username username})]
+    (when (and user (:enabled user) (security/check-password password (get-in user [:private :password])))
       (non-private user))))
 
 (defn get-user-with-apikey [apikey]
-  (let [user (find-user :private.apikey apikey)]
+  (let [user (find-user {:private.apikey apikey})]
     (when (:enabled user)
       (non-private user))))
 
@@ -126,18 +179,13 @@
 ;; ==============================================================================
 ;;
 
-(defn create-apikey [email]
+(defn create-apikey
+  "Add or replcae users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
+  [email]
   (let [apikey (security/random-password)
-        result (mongo/update :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
-    (when result
-      apikey)))
-
-
-
-
-
-
-
+        n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
+    (when-not (= n 1) (fail! :unknown-user :email email))
+    apikey))
 
 ;;
 ;; ==============================================================================
@@ -145,81 +193,16 @@
 ;; ==============================================================================
 ;;
 
-(defn change-password [email password]
+(defn change-password
+  "Update users password. Returns nil. If user is not found, raises an exception."
+  [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt     salt
-                                                              :private.password hashed-password}})))
-
-
-
-
-
-
-;;
-;; ==============================================================================
-;; Creating users:
-;; ==============================================================================
-;;
-
-(def user-keys          [:id :role :firstName :lastName :personId :phone :city :street :zip :enabled :organizations])
-(def user-defaults      {:firstName "" :lastName "" :enabled false :role :dummy})
-(def known-user-roles   #{:admin :authority :authorityAdmin :applicant :dummy})
-
-(defn create-user-entity [{:keys [email password role] :as user-data}]
-  (when-let [missing (util/missing-keys user-data [:email :id])] (fail! :error.missing-required-key :missing missing))
-  (let [email    (ss/lower-case email)
-        private  (when password
-                   (let [salt (security/dispense-salt)]
-                     {:salt     salt
-                      :password (security/get-hash password salt)}))]
-    (merge
-      user-defaults
-      (select-keys user-data user-keys)
-      {:username email
-       :email    email
-       :private  private})))
-
-
-
-(defn- create-any-user [user-data]
-  (let [id           (mongo/create-id)
-        new-user     (create-user-entity (assoc user-data :id id))
-        old-user     (get-user-by-email (:email user-data))]
-    (info "register user:" (dissoc new-user :private))
-    (try
-      (if (= "dummy" (:role old-user))
-        (do
-          (info "rewriting over dummy user:" (:id old-user) (dissoc new-user :private :id))
-          (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
-        (do
-          (info "creating new user" (dissoc new-user :private))
-          (mongo/insert :users new-user)))
-      (get-user-by-email (:email new-user))
-      (catch com.mongodb.MongoException$DuplicateKey e
-        (warn e "Duplicate key detected when inserting new user")
-        (throw (IllegalArgumentException.
-                 (condp re-find (.getMessage e)
-                   #"E11000 duplicate key error index: lupapiste\.users\.\$personId_1"  "error.duplicate-person-id"
-                   #"E11000 duplicate key error index: lupapiste\.users\.\$email_1"     "error.duplicate-email"
-                   #"E11000 duplicate key error index: lupapiste\.users\.\$username_1"  "error.duplicate-email"
-                   (str "error.create-user"))))))))
-
-(defn create-authority [user]
-  (try
-    (create-any-user (merge user {:role :authority :enabled true}))
-    (catch IllegalArgumentException e
-      (when (= "error.duplicate-email" (.getMessage e))
-        (info "Adding user to organization: user:" (:email user) ", organizations:" (:organizations user))
-        (mongo/update :users {:email (:email user)} {$pushAll {:organizations (:organizations user)}})
-        {:ok true}))))
-
-(defn create-authority-admin [user]
-  (create-any-user (merge user {:role :authorityAdmin :enabled true})))
-
-(defn create-user [user]
-  ;; Applicant must activate account
-  (create-any-user (merge user {:role :applicant :enabled false})))
+    (when-not (= 1 (mongo/update-n :users
+                                   {:email (ss/lower-case email)}
+                                   {$set {:private.password hashed-password}}))
+      (fail! :unknown-user :email email))
+    nil))
 
 ;;
 ;; ==============================================================================
@@ -227,19 +210,14 @@
 ;; ==============================================================================
 ;;
 
-(defn update-user [email data]
+(defn update-user-by-email [email data]
   (mongo/update :users {:email (ss/lower-case email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]
     (when (every? #(not (= % new-organization)) old-orgs)
-      (update-user email {:organizations (merge old-orgs new-organization)}))))
+      (update-user-by-email email {:organizations (merge old-orgs new-organization)}))))
 
-(defn change-password [email password]
-  (let [salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)]
-    (mongo/update :users {:email (ss/lower-case email)} {$set {:private.salt  salt
-                                                            :private.password hashed-password}})))
 
 ;;
 ;; ==============================================================================
@@ -247,47 +225,11 @@
 ;; ==============================================================================
 ;;
 
-; TODO: replace dummy users with tokens
-; When (if?) dummy users are changed with tokens, this should be removed too:
-
-(defn get-or-create-user-by-email [email]
-  (let [email (ss/lower-case email)]
-    (or
-      (get-user-by-email email)
-      (create-any-user {:email email}))))
-
 (defn authority? [{role :role}]
   (= :authority (keyword role)))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
 
-(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
+(defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
-
-
-
-
-
-
-
-(defn with-user [email function]
-  (if (nil? email)
-    (fail :error.user-not-found)
-    (if-let [user (get-user-by-email email)]
-      (function user)
-      (do
-        (debugf "user '%s' not found with email" email)
-        (fail :error.user-not-found)))))
-
-
-
-
-
-
-
-
-
-
-
-

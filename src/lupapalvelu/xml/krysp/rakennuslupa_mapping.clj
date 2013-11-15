@@ -4,7 +4,9 @@
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
+                                                                 katselmus-canonical
+                                                                 unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.ke6666 :as ke6666]
@@ -33,13 +35,15 @@
                                            {:tag :jakokirjain}]}]})
 
 
+(def rakennustunnus [{:tag :jarjestysnumero}
+                     {:tag :kiinttun}
+                     {:tag :rakennusnro}])
+
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
                    {:tag :alkuHetki :ns "yht"}
                    mapping-common/sijantitieto
                    {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
-                                                          {:tag :kiinttun}
-                                                          {:tag :rakennusnro}]}
+                    :child [{:tag :rakennustunnus :child rakennustunnus}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}
@@ -111,6 +115,7 @@
                      :child [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                              {:tag :luvanTunnisteTiedot
                               :child [mapping-common/lupatunnus]}
+                             {:tag :viitelupatieto :child [mapping-common/lupatunnus]}
                              {:tag :osapuolettieto
                               :child [mapping-common/osapuolet]}
                              {:tag :rakennuspaikkatieto
@@ -142,6 +147,21 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
+                             {:tag :katselmustieto :child [{:tag :Katselmus :child [{:tag :rakennustunnus :child rakennustunnus}
+                                                                                    {:tag :tilanneKoodi}
+                                                                                    {:tag :pitoPvm}
+                                                                                    {:tag :osittainen}
+                                                                                    {:tag :pitaja}
+                                                                                    {:tag :katselmuksenLaji}
+                                                                                    {:tag :vaadittuLupaehtonaKytkin}
+                                                                                    {:tag :huomautukset :child [{:tag :huomautus :child [{:tag :kuvaus}
+                                                                                                                                         {:tag :maaraAika}
+                                                                                                                                         {:tag :toteamisHetki}
+                                                                                                                                         {:tag :toteaja}]}]}
+                                                                                    {:tag :katselmuspoytakirja}
+                                                                                    {:tag :tarkastuksenTaiKatselmuksenNimi}
+                                                                                    {:tag :lasnaolijat}
+                                                                                    {:tag :poikkeamat}]}]}
                              {:tag :lausuntotieto :child [mapping-common/lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
@@ -176,7 +196,7 @@
     :muokkausHetki (to-xml-datetime (:modified attachment))
     :versionumero 1
     :tyyppi type
-    :fileId file-id})  ;;TODO: Kysy Terolta mika tama on
+    :fileId file-id})
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -197,11 +217,11 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [application begin-of-link ]
+(defn get-attachments-as-canonical [application begin-of-link]
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
                                     :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
-                                    :let [type (get-in attachment [:type :type-id] )
+                                    :let [type (get-in attachment [:type :type-id])
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
@@ -249,6 +269,62 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
+(defn save-katselmus-as-krysp [application
+                               lang
+                               output-dir
+                               started
+                               building-id
+                               user
+                               katselmuksen-nimi
+                               tyyppi
+                               osittainen
+                               pitaja
+                               lupaehtona
+                               huomautukset
+                               lasnaolijat
+                               poikkeamat]
+  (let [canonical (katselmus-canonical application lang started building-id user
+                                       katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
+                                       huomautukset lasnaolijat poikkeamat)
+        xml (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s (indent-str xml)]
+    (validate xml-s)
+    (with-open [out-file (writer "/Users/terotu/katselmus.xml" )]
+        (emit xml out-file))
+    ;TODO sanoaman muodostus ja muut jutut kallin teon yhteydessa
+    (println xml-s)
+    ))
+
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
+  (save-katselmus-as-krysp application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil)
+  )
+
+(defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link user]
+  (let [file-name  (str output-dir "/" (:id application))
+        tempfile   (file (str file-name ".tmp"))
+        outfile    (file (str file-name ".xml"))
+        canonical-without-attachments (unsent-attachments-to-canonical application lang user)
+
+        attachments (get-attachments-as-canonical application begin-of-link)
+        canonical (assoc-in canonical-without-attachments
+                    [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
+                    attachments)
+
+        xml (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s (indent-str xml)]
+
+    (validate xml-s)
+
+    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
+    (with-open [out-file-stream (writer tempfile)]
+      (emit xml out-file-stream))
+
+    (write-attachments attachments output-dir)
+
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)
+    ))
+
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
@@ -286,9 +362,11 @@
     (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
+
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)
-
     (write-application-pdf-versions output-dir application submitted-application lang)
+
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
+

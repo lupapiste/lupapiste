@@ -4,6 +4,7 @@
             [clojure.string :as s]
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
+            [sade.common-reader :as cr]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
@@ -94,7 +95,7 @@
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (cond (-> toimenpide :manuaalinen_rakennusnro :value)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro :value)
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro :value)
                                                      :jarjestysnumero nil
                                                     :kiinttun (:propertyId application)}}
                                      (-> toimenpide :rakennusnro :value)
@@ -190,9 +191,6 @@
 
 
 
-
-
-
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
     {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
@@ -200,36 +198,163 @@
                                    "ruotsi"
                                    "suomi")}}))
 
-(defn- get-asian-tiedot [documents maisematyo_documents]
+(defn- get-asian-tiedot [documents maisematyo_documents add-poikkeaminen?]
   (let [asian-tiedot (:data (first documents))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
-                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc)) ":" (-> maisematyo_doc :data :kuvaus :value )))]
-    {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
-                   :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
+                               (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
+                                 ":" (-> maisematyo_doc :data :kuvaus :value)))
+        r {:Asiantiedot {:rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value)
+                                                        (apply str maisematyo_kuvaukset))}}]
+    (if add-poikkeaminen?
+      (assoc-in r [:Asiantiedot :vahainenPoikkeaminen] (or (-> asian-tiedot :poikkeamat :value) empty-tag))
+      r)))
 
 (defn- get-kayttotapaus [documents toimenpiteet]
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
 
+(defn- get-viitelupatieto [link-permit-data]
+  (when link-permit-data
+    (->
+      (if (= (:type link-permit-data) "lupapistetunnus")
+        (lupatunnus (:id link-permit-data))
+        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
+      (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia"))))
+
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+  (let [link-permit-data (first (:linkPermitData application))
+        documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
         toimenpiteet (get-operations documents application)
+        operation-name (-> application :operations first :name)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
-                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
-                      :lausuntotieto (get-statements (:statements application))
+                      :kayttotapaus (condp = operation-name
+                                      "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                      "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
+                                      "jatkoaika" "Jatkoaikahakemus"
+                                      (get-kayttotapaus documents toimenpiteet))
+                      :asianTiedot (if link-permit-data
+                                     (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
+                                     (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}}}}
+        canonical (if link-permit-data
+                    (-> canonical
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
+                        (get-viitelupatieto link-permit-data)))
+                    canonical)
+        canonical (if-not (or (= operation-name "tyonjohtaja")
+                            (= operation-name "suunnittelija")
+                            (= operation-name "jatkoaika"))
+                    (-> canonical
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
+                        (get-bulding-places (:rakennuspaikka documents) application))
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+                        toimenpiteet)
+                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+                        (get-statements (:statements application))))
+                    canonical)]
+    canonical))
+
+(defn katselmusnimi-to-type [nimi tyyppi]
+  (if (= :tarkastus tyyppi)
+    "muu tarkastus"
+    (condp = nimi
+    "Aloitusilmoitus" "ei tiedossa"
+    "muu katselmus" "muu katselmus"
+    "aloituskokous" "aloituskokous"
+    "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
+    "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
+    "pohjakatselmus" "pohjakatselmus"
+    "rakennekatselmus" "rakennekatselmus"
+    "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+    "osittainen loppukatselmus" "osittainen loppukatselmus"
+    "loppukatselmus"
+    "ei tiedossa"))
+  )
+
+(defn katselmus-kayttotapaus [nimi tyyppi]
+  (if (= nimi "Aloitusilmoitus")
+    "Aloitusilmoitus"
+    (if (= tyyppi :katselmus)
+      "Uusi katselmus"
+      "Uusi tarkastus")))
+
+
+;; TODO: Voisiko tahan tehda YA-canonicalin tyyppisen config-systeemin? Ei tarvitsisi nain montaa parametria.
+;; TODO: Yhdistele taman namespacen canonical-funktiota.
+
+(defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
+        katselmus (merge {:pitoPvm (to-xml-date pitoPvm)
+                          :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
+                          :vaadittuLupaehtonaKytkin (true? lupaehtona)
+                          :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi}
+                         (when building {:rakennustunnus {:jarjestysnumero (:jarjestysnumero building)
+                                                          :kiinttun (:propertyId application)
+                                                          :rakennusnro  (:rakennusnro building)}})
+                         (when osittainen
+                           {:osittainen osittainen})
+                         (when pitaja
+                           {:pitaja pitaja})
+                         (when huomautukset
+                           {:huomautukset {:huomautus {:kuvaus huomautukset}}})
+                         (when lasnaolijat
+                           {:lasnaolijat lasnaolijat})
+                         (when poikkeamat
+                           {:poikkeamat poikkeamat}))
+        canonical {:Rakennusvalvonta
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :rakennusvalvontaAsiatieto
+                    {:RakennusvalvontaAsia
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
+                                                                              :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                               :sukunimi (:lastName user)}
+                                                                                        :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                                 :postitoimipaikannimi (:city user)
+                                                                                                 :postinumero (:zip user)}
+                                                                                         :sahkopostiosoite (:email user)
+                                                                                         :puhelin (:phone user)}}}}}
+                      :katselmustieto {:Katselmus katselmus}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
-                      :kayttotapaus (get-kayttotapaus documents toimenpiteet)
-                      :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
-                     }}}]
-    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] toimenpiteet)))
+                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
+                      }}}}]
+    canonical))
+
+(defn unsent-attachments-to-canonical [application lang user]
+  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
+                                                            nil
+                                                            v)) (:documents application)))
+        canonical {:Rakennusvalvonta
+                   {:toimituksenTiedot (toimituksen-tiedot application lang)
+                    :rakennusvalvontaAsiatieto
+                    {:RakennusvalvontaAsia
+                     {:kasittelynTilatieto (get-state application)
+                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli
+                                                                   {:kuntaRooliKoodi "ei tiedossa"
+                                                                    :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                     :sukunimi (:lastName user)}
+                                                                              :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                       :postitoimipaikannimi (:city user)
+                                                                                       :postinumero (:zip user)}
+                                                                              :sahkopostiosoite (:email user)
+                                                                              :puhelin (:phone user)}}}}}
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :kayttotapaus "Liitetiedoston lis\u00e4ys"
+                      }}}}]
+
+  canonical))

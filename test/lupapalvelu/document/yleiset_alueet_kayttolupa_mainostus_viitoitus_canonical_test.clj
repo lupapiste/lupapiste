@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [sade.util :refer [contains-value?]]))
@@ -65,7 +66,7 @@
                                 (assoc-in tapahtuma-info [:data :_selected :value] "viitoitus-tapahtuma-valinta")])
                              :id "LP-753-2013-00005"))
 
-(def get-maksaja #'lupapalvelu.document.yleiset-alueet-canonical/get-maksaja)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-maksaja)
 
 (facts* "Mainostus-viitoituslupa canonical model is correct"
   (let [canonical (application-to-canonical mainostus-application "fi")

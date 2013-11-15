@@ -1,5 +1,5 @@
 (ns lupapalvelu.itest-util
-  (:require [lupapalvelu.fixture.minimal :refer [users]]
+  (:require [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.core :refer [fail!]]
             [clojure.walk :refer [keywordize-keys]]
             [swiss-arrows.core :refer [-<>>]]
@@ -9,11 +9,16 @@
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
             [cheshire.core :as json]
-            [sade.util :refer [fn-> fn->>]]))
+            [sade.util :refer [fn-> fn->>]])
+  (:import org.apache.http.client.CookieStore
+           org.apache.http.cookie.Cookie))
 
-(defn- find-user [username] (some #(when (= (:username %) username) %) users))
-(defn- id-for [username] (:id (find-user username)))
-(defn- apikey-for [username] (get-in (find-user username) [:private :apikey]))
+(defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
+(defn- id-for [username] (:id (find-user-from-minimal username)))
+(defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
+
+(defn email-for [username] (:email (find-user-from-minimal username)))
+(defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
@@ -27,6 +32,7 @@
 (def veikko-muni "837")
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
+(def ronja-id    (id-for "ronja"))
 ;TODO should get this through organization
 (def sonja-muni  "753")
 (def sipoo       (apikey-for "sipoo"))
@@ -84,7 +90,9 @@
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
-(defn create-app [apikey & args]
+(defn create-app
+  "Runs the create-application command, returns reply map. Use ok? to check it."
+  [apikey & args]
   (let [args (->> args
                (apply hash-map)
                (merge {:operation "asuinrakennus"
@@ -114,8 +122,10 @@
   (invalid-csrf-token? {:status 403 :body {:ok false :text "error.SOME_OTHER_REASON"}}) => false
   (invalid-csrf-token? {:status 200 :body {:ok true}}) => false)
 
-(defn unauthorized? [{:keys [ok text]}]
-  (and (= ok false) (= text "error.unauthorized")))
+(defn expected-failure? [expected-text {:keys [ok text]}]
+  (and (= ok false) (= text expected-text)))
+
+(def unauthorized? (partial expected-failure? "error.unauthorized"))
 
 (fact "unauthorized?"
   (unauthorized? {:ok false :text "error.unauthorized"}) => true
@@ -131,6 +141,8 @@
 
 (defn ok? [resp]
   (= (:ok resp) true))
+
+(def fail? (complement ok?))
 
 (fact "ok?"
   (ok? {:ok true}) => true
@@ -161,7 +173,9 @@
        (finally
          (set-anti-csrf! (not old-value#))))))
 
-(defn create-app-id [apikey & args]
+(defn create-app-id
+  "Verifies that an application was created and returns it's ID"
+  [apikey & args]
   (let [resp (apply create-app apikey args)
         id   (:id resp)]
     resp => ok?
@@ -203,7 +217,9 @@
     (assert ok)
     application))
 
-(defn create-and-submit-application [apikey & args]
+(defn create-and-submit-application
+  "Returns the application map"
+  [apikey & args]
   (let [id    (apply create-app-id apikey args)
         resp  (command apikey :submit-application :id id) => ok?]
     (query-application apikey id)))
@@ -213,6 +229,31 @@
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
           allowed? (-> actions action :ok)]
       (and ok allowed?))))
+
+(defn last-email
+  "Returns the last email (or nil) and clears the inbox"
+  []
+  {:post [(or (nil? %)
+            (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
+            (println %))]}
+  (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
+    (assert ok)
+    message))
+
+(defn sent-emails
+  "Returns a list of emails and clears the inbox"
+  []
+  (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
+    (assert ok)
+    messages))
+
+(defn contains-application-link? [application-id {body :body}]
+  (let [[href a-id a-id-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" (:plain body))]
+    (= application-id a-id a-id-again)))
+
+(defn contains-application-link-with-tab? [application-id tab {body :body}]
+  (let [[href a-id a-tab a-id-again a-tab-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/([a-z]+)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
+    (and (= application-id a-id a-id-again) (= tab a-tab a-tab-again))))
 
 ;;
 ;; Stuffin' data in
@@ -289,3 +330,14 @@
        :lastname "Banaani"}
     vetuma!
     :stamp))
+
+;;
+;; HTTP Client cookie store
+;;
+
+(defn ->cookie-store [store]
+  (proxy [org.apache.http.client.CookieStore] []
+    (getCookies []       (or (vals @store) []))
+    (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
+    (clear []            (reset! store {}))
+    (clearExpired [])))

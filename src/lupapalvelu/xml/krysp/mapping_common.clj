@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.mapping-common
   (:require [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.attachment :refer [encode-filename]]
+            [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [me.raynes.fs :as fs]
@@ -142,7 +142,9 @@
                              henkilo
                              yritys
                              {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}]}]}
+                             {:tag :koulutus}
+                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :valmistumisvuosi}]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -164,10 +166,12 @@
            {:tag :tila}
            {:tag :kasittelija :child [henkilo]}]})
 
-(def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :muuTunnustieto
+(def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :kuntalupatunnus}
+                                                    {:tag :muuTunnustieto
                                                      :child [{:tag :MuuTunnus :child [{:tag :tunnus}
                                                                                       {:tag :sovellus}]}]}
-                                                    {:tag :saapumisPvm}]})
+                                                    {:tag :saapumisPvm}
+                                                    {:tag :viittaus}]})
 
 (def toimituksenTiedot [{:tag :aineistonnimi :ns "yht"}
                         {:tag :aineistotoimittaja :ns "yht"}
@@ -202,7 +206,7 @@
 
 
 (defn get-file-name-on-server [file-id file-name]
-  (str file-id "_" (encode-filename file-name)))
+  (str file-id "_" (ss/encode-filename file-name)))
 
 (defn get-submitted-filename [application-id]
   (str application-id "_submitted_application.pdf"))

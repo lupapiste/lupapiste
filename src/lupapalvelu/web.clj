@@ -136,6 +136,9 @@
 (defjson "/api/query/:name" {name :name}
   (execute-query name (from-query)))
 
+(defjson [:post "/api/datatables/:name"] {name :name}
+  (execute-query name (:params (request/ring-request))))
+
 (defpage "/api/raw/:name" {name :name}
   (let [response (execute (enriched (action/make-raw name (from-query))))]
     (if-not (= (:ok response) false)
@@ -287,14 +290,25 @@
   (logout!)
   (redirect-to-server-root))
 
-;; Saparate URL outside anti-csrf
-(defjson [:post "/api/login"] []
-  (execute-command "login"))
+;; Login via saparate URL outside anti-csrf
+(defjson [:post "/api/login"] {username :username :as params}
+  (if username
+    (execute-command "login" params) ; Handles form POST (Nessus)
+    (execute-command "login")))
+
+;; Reset password via saparate URL outside anti-csrf
+(defjson [:post "/api/reset-password"] []
+  (execute-command "reset-password"))
+
+;;
+;; Redirects
+;;
 
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))
 (defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
 (defpage [:get ["/app/:lang/" :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
+
 
 ;;
 ;; FROM SADE
@@ -428,7 +442,7 @@
       (handler request)
       (let [cookie-name "anti-csrf-token"
             cookie-attrs (dissoc (env/value :cookie) :http-only)]
-        (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+        (if (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
                  (not (logged-in-with-apikey? request)))
           (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
           (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
@@ -448,7 +462,7 @@
         expired? (< expires now)]
     (if expired?
       (session/clear!)
-      (if (re-find #"^/api/(command|query)/" (:uri request))
+      (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
         (session/put! :expires (+ now (get-session-timeout request)))))
     (handler request)))
 

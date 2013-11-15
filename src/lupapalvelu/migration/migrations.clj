@@ -112,7 +112,7 @@
 
 (defmigration submitted-applications-kuntaroolikoodi-migraation
   (let [applications (mongo/select :submitted-applications)]
-    (dorun (map #(mongo/update :submitted-applications {:_id (:id %)} (kuntaroolikoodiUpdate %)) applications))))
+    (dorun (map #(mongo/update-by-id :submitted-applications (:id %) (kuntaroolikoodiUpdate %)) applications))))
 
 (defn- strip-fax [doc]
   (postwalk-map (partial map (fn [[k v]] (when (not= :fax k) [k v]))) doc))

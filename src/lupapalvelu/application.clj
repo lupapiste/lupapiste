@@ -12,8 +12,9 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys]]
+            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -23,6 +24,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
@@ -31,12 +33,6 @@
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as open-inforequest])
   (:import [java.net URL]))
-
-;; Notificator
-
-(defn notify [notification]
-  (fn [command status]
-    (notifications/notify! notification command)))
 
 ;; Validators
 
@@ -126,15 +122,43 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
+(defn- enrich-with-link-permit-data [app]
+  (let [app-id (:id app)
+        resp (mongo/select :app-links {:link {$in [app-id]}})]
+    (if (seq resp)
+      ;; Link permit data was found
+      (let [convert-fn (fn [link-data]
+                         (let [link-array (:link link-data)
+                               app-index (.indexOf link-array app-id)
+                               link-permit-id (link-array (if (= 0 app-index) 1 0))
+                               link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+                           (if (= (:type ((keyword app-id) link-data)) "application")
+                             {:id link-permit-id :type link-permit-type}
+                             {:id link-permit-id})))
+            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
+            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
+
+        (-> app
+          (assoc :linkPermitData (if (seq our-link-permits)
+                                   (into [] (map convert-fn our-link-permits))
+                                   nil))
+          (assoc :appsLinkingToUs (if (seq apps-linking-to-us)
+                                    (into [] (map convert-fn apps-linking-to-us))
+                                    nil))))
+      ;; No link permit data found
+      (-> app
+        (assoc :linkPermitData nil)
+        (assoc :appsLinkingToUs nil)))))
+
 ;;
 ;; Query application:
 ;;
 
 (defn- app-post-processor [user]
-  (comp without-system-keys (partial with-meta-fields user)))
-
-(defquery applications {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
+  (comp
+    without-system-keys
+    (partial with-meta-fields user)
+    enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
@@ -214,13 +238,14 @@
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
    :roles      [:applicant :authority]
-   :on-success (notify "invite")
+   :notified   true
+   :on-success (notify :invite)
    :verified   true}
   [{:keys [created user application]}]
   (let [email (ss/lower-case email)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
-      (let [invited (user/get-or-create-user-by-email email)
+      (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
                      :text         text
@@ -247,6 +272,7 @@
    :verified   true}
   [{user :user application :application :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
+    ; FIXME combine mongo writes
     (executed "set-user-to-document"
       (-> command
         (assoc-in [:data :documentId] (:documentId my-invite))
@@ -279,54 +305,43 @@
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority]
-                                           :validators  [not-open-inforequest-user-validator]})
+(defcommand can-target-comment-to-authority
+  {:roles [:authority]
+   :validators  [not-open-inforequest-user-validator]
+   :description "Dummy command for UI logic"})
 
 (defcommand add-comment
-  {:parameters [:id :text :target]
+  {:parameters [id text target]
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to]
-   :on-success  (notify "new-comment")}
-  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data :keys [user created] :as command}]
-  (with-application command
-    (fn [{:keys [id state] :as application}]
-      (let [to-user   (and to (or (user/get-user-by-id to)
-                                  (fail! :to-is-not-id-of-any-user-in-system)))
-            from-user (user/summary user)]
-        (update-application command
-          {$set  {:modified created}
-           $push {:comments {:text    text
-                             :target  target
-                             :created created
-                             :to      (user/summary to-user)
-                             :user    from-user}}})
+   :notified   true
+   :on-success [(notify :new-comment)
+                (fn [{data :data :as command} _]
+                  (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
+                    ;; LUPA-407
+                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))] }
+  [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
+  (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
+    (update-application command
+      (util/deep-merge
+        {$set  {:modified created}
+         $push {:comments {:text    text
+                           :target  target
+                           :created created
+                           :to      (user/summary to-user)
+                           :user    (user/summary user)}}}
 
-        (condp = (keyword state)
-
+        (case (keyword (:state application))
           ;; LUPA-XYZ (was: open-application)
-          :draft  (when (not (blank? text))
-                    (update-application command
-                      {$set {:modified created
-                             :state    :open
-                             :opened   created}}))
+          :draft  (when-not (blank? text) {$set {:state :open, :opened created}})
 
           ;; LUPA-371, LUPA-745
-          :info (when (and mark-answered (user/authority? user))
-                  (update-application command
-                    {$set {:state    :answered
-                           :modified created}}))
+          :info (when (and mark-answered (user/authority? user)) {$set {:state :answered}})
 
           ;; LUPA-371 (was: mark-inforequest-answered)
-          :answered (when (user/applicant? user)
-                      (update-application command
-                        {$set {:state :info
-                               :modified created}}))
+          :answered (when (user/applicant? user) {$set {:state :info}})
 
-          nil)
-
-        ;; LUPA-407
-        (when to-user
-          (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) (env/value :host)))))))
+          nil)))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -350,7 +365,9 @@
         model        (if-not (blank? path)
                        (assoc-in {} (map keyword (split path #"\.")) person)
                        person)
-        updates      (tools/path-vals model)]
+        updates      (tools/path-vals model)
+        ; Path should exist in schema!
+        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
@@ -387,7 +404,8 @@
 (defcommand cancel-application
   {:parameters [:id]
    :roles      [:applicant]
-   :on-success (notify "state-change")
+   :notified   true
+   :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
@@ -397,7 +415,8 @@
 (defcommand request-for-complement
   {:parameters [:id]
    :roles      [:authority]
-   :on-success (notify "state-change")
+   :notified   true
+   :on-success (notify :application-state-change)
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
@@ -407,7 +426,8 @@
 (defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
-   :on-success (notify "state-change")
+   :notified   true
+   :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [command]
   (with-application command
@@ -415,12 +435,20 @@
       (let [application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
             organization (mongo/by-id :organizations (:organization application))]
+        ; FIXME combine mongo writes
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
+        (try
+            (mapping-to-krysp/save-application-as-krysp
+              (enrich-with-link-permit-data application)
+              lang
+              submitted-application
+              organization)
+
           (mongo/update
             :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
             {$set {:state :sent}})
+
           (catch org.xml.sax.SAXParseException e
             (info e "Invalid KRYSM XML message")
             (fail (.getMessage e))))))))
@@ -429,7 +457,8 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :on-success (notify "state-change")
+   :notified   true
+   :on-success (notify :application-state-change)
    :validators [validate-owner-or-writer]}
   [{:keys [created] :as command}]
   (with-application command
@@ -441,9 +470,8 @@
                :opened    (or opened created)
                :submitted created}})
       (try
-        (mongo/insert
-          :submitted-applications
-          (assoc (dissoc application :id) :_id id))
+        (mongo/insert :submitted-applications
+          (-> (enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
         (catch com.mongodb.MongoException$DuplicateKey e
           ; This is ok. Only the first submit is saved.
             )))))
@@ -504,9 +532,7 @@
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (tools/timestamped (domain/->henkilo user :with-hetu true) created))
-            hakija (assoc-in hakija [:data :yritys]  (tools/timestamped (domain/->yritys user) created))]
+                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
         (conj new-docs hakija)))))
 
 (defn- ->location [x y]
@@ -533,6 +559,7 @@
 (defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
+   :notified   true ; OIR
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
@@ -646,6 +673,73 @@
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
+(defquery app-matches-for-link-permits
+  {:parameters [id]
+   :verified   true
+   :roles      [:applicant :authority]}
+  [{{:keys [propertyId]} :application user :user :as command}]
+  (let [results (mongo/select :applications
+                  {:auth.id (:id user)}
+                  {:_id 1 :permitType 1 :address 1 :propertyId 1})
+
+        filtered-results (filter #(not (= id (:id %))) results)
+
+        enriched-results (map (fn [r]
+                                (assoc r :text
+                                  (str
+                                    (:address r) ", "
+                                    (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
+                                    (:id r))))
+                           filtered-results)
+
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (into [] (filter same-property-id-fn enriched-results))
+        without-same-property-id (into [] (filter (comp not same-property-id-fn) enriched-results))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+
+        final-results (map (fn [r]
+                             (-> r
+                               (dissoc :address)
+                               (dissoc :permitType)
+                               (dissoc :propertyId)))
+                        organized-results)]
+
+    (ok :app-links final-results)))
+
+(defn- make-mongo-id-for-link-permit [app-id link-permit-id]
+  (if (<= (compare app-id link-permit-id) 0)
+    (str app-id "|" link-permit-id)
+    (str link-permit-id "|" app-id)))
+
+(defcommand add-link-permit
+  {:parameters [id linkPermitId propertyId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+  [{application :application}]
+  (let [db-id (make-mongo-id-for-link-permit id linkPermitId)]
+    (mongo/update-by-id :app-links db-id
+      {:_id db-id
+       :link [id linkPermitId]
+       (keyword id) {:type "application"
+                     :apptype (-> application :operations first :name)
+                     :propertyId propertyId}
+       (keyword linkPermitId) {:type "linkpermit"
+                               :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
+                                                 "lupapistetunnus"
+                                                 "kuntalupatunnus")}}
+      :upsert true)))
+
+(defcommand remove-link-permit-by-app-id
+  {:parameters [id linkPermitId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]}
+  [{application :application}]
+  (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
+    (ok)
+    (fail :error.unknown)))
+
+
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
   (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
     (if (= (:new-application-enabled org) true)
@@ -680,7 +774,8 @@
   {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
-   :on-success (notify "verdict")
+   :notified   true
+   :on-success (notify :application-verdict)
    :roles      [:authority]}
   [{:keys [created] :as command}]
   (update-application command
@@ -738,7 +833,8 @@
    :parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
-   :on-success  (notify     "verdict")}
+   :notified   true
+   :on-success  (notify     :application-verdict)}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (do
@@ -839,8 +935,6 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
-  (println user)
-  (println params)
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
@@ -859,7 +953,7 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
-(defcommand "applications-for-datatables"
+(defquery "applications-for-datatables"
   {:parameters [:params]
    :verified true}
   [{user :user {params :params} :data}]
