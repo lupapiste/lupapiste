@@ -586,7 +586,7 @@
           op            (make-op operation created)
           state         (cond
                           info-request?              :info
-                          (user/authority? user) :open
+                          (user/authority? user)     :open
                           :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
@@ -641,9 +641,15 @@
   [{:keys [created #_user application] :as command}]
 
   (println "\n entered defcommand create-change-permit")
-
+  ;;
   ;; TODO: Luo uusi application ottamalla vanha ja karsimalla siitä Id:t ja osa timestampeista.
   ;;       Osan timestampeista voit korvata saadulla "created"-paramterilla.
+
+  (println "\n create-change-permit, application:")
+  (clojure.pprint/pprint application)
+  (println "\n")
+
+
 
   )
 
