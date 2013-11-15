@@ -404,17 +404,17 @@
   (ok))
 
 (defcommand copy-user-attachments-to-application
-  {:parameters [application-id]}
+  {:parameters [application-id]
+   :authenticated true}
   [{user :user}]
-  (when-not user (throw+ {:status 401 :body "forbidden"}))
-  (for [attachment (vals (:attachments user))] 
+  (doseq [attachment (vals (:attachments user))]
     (let [
           user-id (:id user)
           {:keys [attachment-type filename content-type size created]} attachment
           attachment-id (str application-id "/" user-id "/" attachment-type)
           attachment (mongo/download-find {:id (:attachment-id attachment) :metadata.user-id user-id})
           ]
-      (attach-file! {:application-id application-id 
+      (attach-file! {:application-id application-id
                      :attachment-id attachment-id
                      :attachment-type attachment-type
                      :content ((:content attachment))
