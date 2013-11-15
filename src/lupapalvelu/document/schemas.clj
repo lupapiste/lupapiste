@@ -148,6 +148,7 @@
 (def patevyys [{:name "koulutus" :type :string :required false}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
+               {:name "patevyys" :type :string :required false}
                {:name "patevyysluokka" :type :select :required false
                 :body [{:name "AA"}
                        {:name "A"}

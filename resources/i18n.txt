@@ -1,3 +1,5 @@
+paasuunnittelija.patevyys.patevyys: Pätevyys
+
 attachmentType.osapuolet._group_label: Osapuolet
 attachmentType.osapuolet.cv: CV
 attachmentType.osapuolet.tutkintotodistus: Tutkintotodistus
