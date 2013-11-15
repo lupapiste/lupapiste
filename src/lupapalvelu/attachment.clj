@@ -399,11 +399,12 @@
         content (:content options)
         user (:user options)
         sanitazed-filename (mime/sanitize-filename file-name)
-        content-type (mime/mime-type sanitazed-filename)]
+        content-type (mime/mime-type sanitazed-filename)
+        options (merge options {:file-id file-id
+                                :sanitazed-filename sanitazed-filename
+                                :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (update-or-create-attachment (merge options {:file-id file-id
-                                                 :sanitazed-filename sanitazed-filename
-                                                 :content-type content-type}))))
+    (update-or-create-attachment options)))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
