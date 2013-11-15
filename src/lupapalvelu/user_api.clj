@@ -7,7 +7,7 @@
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
             [sade.util :refer [future*]]
-            [sade.env :refer [in-dev dev-mode?]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
@@ -19,8 +19,7 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.attachment :refer [encode-filename]]))
+            [lupapalvelu.notifications :as notifications]))
 
 ;;
 ;; ==============================================================================
@@ -109,7 +108,7 @@
                    (when (:password user-data)
                      {:password (security/get-hash (:password user-data))})
                    (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                     {:apikey (if (and (dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
+                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
                                 (:apikey user-data)
                                 (security/random-password))}))))))
 
@@ -161,6 +160,16 @@
 ;; ==============================================================================
 ;;
 
+;; Emails
+(def ^:private base-email-conf
+  {:recipients-fn notifications/from-data
+   :model-fn      (fn [{{token :token} :data} _]
+                    {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+                     :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
+
+(notifications/defemail :invite-authority (assoc base-email-conf :subject-key "authority-invite.title"))
+(notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
+
 ;;
 ;; General changes:
 ;;
@@ -202,20 +211,21 @@
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
 (defcommand update-user-organization
-  {:parameters       [:email :operation]
+  {:parameters       [email operation]
    :roles            [:authorityAdmin]
    :input-validators [valid-organization-operation?]}
-  [{{:keys [email operation]} :data caller :user}]
+  [{caller :user}]
   (let [email        (ss/lower-case email)
        organization  (first (:organizations caller))]
-   (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
-    (ok :operation operation)
-    (if (= operation "add")
-      (let [token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
-        (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
-        (notifications/send-invite-new-authority! email token)
-        (ok :operation "invited"))
-      (fail :not-found :email email)))))
+    (debug "update user" email)
+    (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
+     (ok :operation operation)
+     (if (= operation "add")
+       (let [token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
+         (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
+         (notifications/notify! :invite-authority {:data {:email email :token token}})
+         (ok :operation "invited"))
+       (fail :not-found :email email)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
@@ -232,10 +242,10 @@
 ;; TODO: Remove this, change all password changes to use 'reset-password'.
 ;; Note: When this is removed, remove user/change-password too.
 (defcommand change-passwd
-  {:parameters [:oldPassword :newPassword]
+  {:parameters [oldPassword newPassword]
    :authenticated true
    :verified true}
-  [{{:keys [oldPassword newPassword]} :data {user-id :id :as user} :user}]
+  [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
       (do
@@ -247,16 +257,16 @@
         (fail :mypage.old-password-does-not-match)))))
 
 (defcommand reset-password
-  {:parameters    [:email]
+  {:parameters    [email]
    :notified      true
    :authenticated false}
-  [{data :data}]
-  (let [email (ss/lower-case (:email data))]
+  [_]
+  (let [email (ss/lower-case email)]
     (infof "Password resert request: email=%s" email)
     (if (mongo/select-one :users {:email email :enabled true})
       (let [token (token/make-token :password-reset {:email email})]
         (infof "password reset request: email=%s, token=%s" email token)
-        (notifications/send-password-reset-email! email token)
+        (notifications/notify! :reset-password {:data {:email email :token token}})
         (ok))
       (do
         (warnf "password reset request: unknown email: email=%s" email)
@@ -273,9 +283,9 @@
 ;;
 
 (defcommand set-user-enabled
-  {:parameters    [:email :enabled]
+  {:parameters    [email enabled]
    :roles         [:admin]}
-  [{{:keys [email enabled]} :data}]
+  [_]
   (let [email (ss/lower-case email)
        enabled (contains? #{true "true"} enabled)]
    (infof "%s user: email=%s" (if enabled "enable" "disable") email)
@@ -291,8 +301,9 @@
 
 ;; TODO: count error trys!
 (defcommand login
-  {:parameters [:username :password] :verified false}
-  [{{:keys [username password]} :data}]
+  {:parameters [username password]
+   :verified false}
+  [_]
   (if-let [user (user/get-user-with-password username password)]
     (do
       (info "login successful, username:" username)
@@ -326,11 +337,11 @@
 ;;
 
 (defcommand register-user
-  {:parameters [:stamp :email :password :street :zip :city :phone]
+  {:parameters [stamp email password street zip city phone]
    :verified   true}
-  [{{:keys [stamp] :as data} :data}]
+  [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
-        email (-> data :email ss/lower-case ss/trim)]
+        email (-> email ss/lower-case ss/trim)]
     (when-not vetuma-data (fail! :error.create-user))
     (when-not (.contains email "@") (fail! :error.email))
     (try
@@ -389,7 +400,7 @@
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
                "Content-Length" (str (:content-length attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment)))}}
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}
     {:status 404
      :body (str "can't file attachment: id=" attachment-id)}))
 
@@ -410,7 +421,7 @@
 ;;
 
 ; FIXME: generalize
-(in-dev
+(env/in-dev
 
   (defquery activate-user-by-email
     {:parameters [:email]}

@@ -7,6 +7,7 @@
             [lupapalvelu.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.logging :as log]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]))
 
 ;;
@@ -30,6 +31,12 @@
 ;;
 ;; some utils
 ;;
+
+;; Notificator
+
+(defn notify [notification]
+  (fn [command status]
+    (notifications/notify! notification command)))
 
 (defn with-application [command function]
   (if-let [id (-> command :data :id)]

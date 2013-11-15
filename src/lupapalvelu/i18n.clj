@@ -44,6 +44,9 @@
       (errorf "unknown localization term '%s'" term)
       "")))
 
+(defn has-term? [lang & terms]
+  (not (nil? (get (get-terms (keyword lang)) (s/join \. terms)))))
+
 (defn localize [lang & terms]
   (let [term (s/join \. terms)]
     (if-let [result (get (get-terms (keyword lang)) term)]

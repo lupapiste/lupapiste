@@ -1,0 +1,7 @@
+email.title.account-activation: Käyttäjätunnuksen aktivointi
+
+attachmentType.rakentamisen_aikaiset._group_label: Rakentamisen aikaiset
+attachmentType.rakentamisen_aikaiset.erityissuunnitelma: Erityissuunnitelma
+application.attachmentsMoveToBackingSystem: Siirrä liitteet taustajärjestelmään
+
+error.sending-unsent-attachments-failed: Liitteiden lähetys epäonnistui
