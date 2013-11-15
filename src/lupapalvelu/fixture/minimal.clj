@@ -187,7 +187,7 @@
     :role "authorityAdmin"
     :zip "010203"
     :organizations ["837-YA"]
-    :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe"}} ;; tampere
+    :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}} ;; tampere
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
