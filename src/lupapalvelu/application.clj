@@ -630,28 +630,68 @@
       (ok :id id))))
 
 
+(defn- remove-document-ids-for-muutoslupa [application]
+  ;; TODO
+
+  application
+  )
+
 (defcommand create-change-permit
   {:parameters [id]
-   :roles      [:authority]
-;   :states     [:verdictGiven]                               ;;*** TODO: Laita tama paalle ***
+   :roles      [:applicant :authority]
+;   :states     [:verdictGiven]         ;;*** TODO: Laita tama paalle ***
 ;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
 ;                      (partial property-id-parameters [:propertyId])
 ;                      operation-validator]
+  :validators [(permit/validate-permit-type-is permit/R)]
   }
-  [{:keys [created #_user application] :as command}]
+  [{:keys [created user application] :as command}]
 
   (println "\n entered defcommand create-change-permit")
   ;;
-  ;; TODO: Luo uusi application ottamalla vanha ja karsimalla siitä Id:t ja osa timestampeista.
+  ;; TODO: Luo uusi application ottamalla vanha
+  ;;       ja karsimalla siitä:
+  ;;           - ID:t
+  ;;           - attachmentsit
+  ;;           - lausunnot
+  ;;           - commentsit
+  ;;           - osa timestampeista.
   ;;       Osan timestampeista voit korvata saadulla "created"-paramterilla.
+  ;;
+  ;; Documenttien timestamppeja ei tarvinne muuttaa, koska tietoja ei muuteta kopioinnissa?
 
   (println "\n create-change-permit, application:")
   (clojure.pprint/pprint application)
   (println "\n")
 
+  (let [muutoslupa-app-id (make-application-id (:municipality application))
+        _  (println "\n create-change-permit, muutoslupa-app-id:" muutoslupa-app-id)
+        muutoslupa-app (-> application
+                         (remove-document-ids-for-muutoslupa)   ;; TODO: Miten tama toteutetaan?
+                         (assoc :id              muutoslupa-app-id)
+                         (assoc :created         created)
+                         (assoc :opened          created)
+                         (assoc :state           (cond
+                                                   (user/authority? user)     :open
+                                                   :else                      :draft))
+;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
+                         (assoc :permitSubtype   :muutoslupa)
+
+                         ;; *** TODO: Voiko schema-versio vaihtua? ***
+;                         (assoc :schema-version  (schemas/get-latest-schema-version))
+                         (dissoc :attachments :statements :comments)
+                         )
+        ]
 
 
-  )
+    (println "\n create-change-permit, muutoslupa-app:")
+    (clojure.pprint/pprint muutoslupa-app)
+    (println "\n")
+
+;    (mongo/insert :applications application)  ;; TODO: Ota tama kayttoon
+
+    (ok :id muutoslupa-app-id)
+    ))
 
 
 (defcommand add-operation

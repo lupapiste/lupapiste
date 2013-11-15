@@ -480,12 +480,33 @@
 
       console.log("entered self.createChangePermit");
 
+// Create.js:sta mallia:
+//
+//      ajax.command("create-application", {
+//        infoRequest: infoRequest,
+//        operation: self.operation(),
+//        y: self.y(),
+//        x: self.x(),
+//        address: self.addressString(),
+//        propertyId: util.prop.toDbFormat(self.propertyId()),
+//        messages: isBlank(self.message()) ? [] : [self.message()],
+//        municipality: self.municipality().id
+//      })
+//      .processing(self.processing)
+//      .pending(self.pending)
+//      .success(function(data) {
+//        setTimeout(self.clear, 0);
+//        window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
+//      })
+//      .call();
+
       var appId = self.id();
         ajax
         .command("create-change-permit", {id: appId/*, lang: loc.getCurrentLanguage()*/})
         .success(function(data) {
-          console.log("self.createChangePermit, SUCCESS");
-//          if(data.updateCount > 0) { repository.load(appId); }
+          console.log("self.createChangePermit, SUCCESS, data: ", data);
+//          window.location.hash = "!/application/" + data.id;  // ** Siirry uuteen luotuun muutoslupa-hakemukseen ***
+//          repository.load(appId);
         })
         .error(function() {
           console.log("self.createChangePermit, ERROR");
