@@ -474,6 +474,29 @@
     .call();
     };
 
+
+
+    self.createChangePermit = function() {
+
+      console.log("entered self.createChangePermit");
+
+      var appId = self.id();
+        ajax
+        .command("create-change-permit", {id: appId/*, lang: loc.getCurrentLanguage()*/})
+        .success(function(data) {
+          console.log("self.createChangePermit, SUCCESS");
+//          if(data.updateCount > 0) { repository.load(appId); }
+        })
+        .error(function() {
+          console.log("self.createChangePermit, ERROR");
+//          repository.load(appId);
+        })
+      .call();
+    };
+
+
+
+
     self.changeTab = function(model,event) {
       var $target = $(event.target);
       while ($target.is("span")) {

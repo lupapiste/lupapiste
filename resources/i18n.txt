@@ -5,3 +5,5 @@ attachmentType.rakentamisen_aikaiset.erityissuunnitelma: Erityissuunnitelma
 application.attachmentsMoveToBackingSystem: Siirrä liitteet taustajärjestelmään
 
 error.sending-unsent-attachments-failed: Liitteiden lähetys epäonnistui
+
+application.createChangePermit: Hae muutoslupaa

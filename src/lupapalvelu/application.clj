@@ -555,6 +555,7 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
@@ -569,6 +570,7 @@
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest organization))]
+
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
@@ -578,6 +580,7 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled organization)
         (fail! :error.new-applications-disabled)))
+
     (let [id            (make-application-id municipality)
           owner         (user/user-in-role user :owner :type :owner)
           op            (make-op operation created)
@@ -593,7 +596,7 @@
                          :opened           (when (#{:open :info} state) created)
                          :modified         created
                          :permitType       permit-type
-                         :permitSubtype (first (permit/permit-subtypes permit-type))
+                         :permitSubtype    (first (permit/permit-subtypes permit-type))
                          :infoRequest      info-request?
                          :openInfoRequest  open-inforequest?
                          :operations       [op]
@@ -625,6 +628,25 @@
         (autofill-rakennuspaikka application created)
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
+
+
+(defcommand create-change-permit
+  {:parameters [id]
+   :roles      [:authority]
+;   :states     [:verdictGiven]                               ;;*** TODO: Laita tama paalle ***
+;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+;                      (partial property-id-parameters [:propertyId])
+;                      operation-validator]
+  }
+  [{:keys [created #_user application] :as command}]
+
+  (println "\n entered defcommand create-change-permit")
+
+  ;; TODO: Luo uusi application ottamalla vanha ja karsimalla siitä Id:t ja osa timestampeista.
+  ;;       Osan timestampeista voit korvata saadulla "created"-paramterilla.
+
+  )
+
 
 (defcommand add-operation
   {:parameters [id operation]
