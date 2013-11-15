@@ -232,7 +232,7 @@
                  :basic-auth (:raster auth)
                  :as :stream})
       ;; TODO: get GeoServer URL from conf
-      "wms" (http/get "http://194.100.38.36:8080/geoserver/lupapiste/wms"
+      "wms" (http/get "http://geoserver-qa.lupapiste.fi:8080/geoserver/lupapiste/wms"
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :as :stream}))))
