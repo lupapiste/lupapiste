@@ -96,7 +96,7 @@
 
   true)
 
-(defn- create-new-user-entity [caller user-data]
+(defn- create-new-user-entity [user-data]
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
       (select-keys [:email :username :role :firstName :lastName :personId :phone :city :street :zip :enabled :organization])
@@ -119,7 +119,7 @@
    role, throws exception."
   [caller user-data]
   (validate-create-new-user! caller user-data)
-  (let [new-user  (create-new-user-entity caller user-data)
+  (let [new-user  (create-new-user-entity user-data)
         new-user  (assoc new-user :id (mongo/create-id))
         email     (:email new-user)
         {old-id :id old-role :role}  (user/get-user-by-email (:email new-user))]
@@ -222,8 +222,10 @@
     (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
      (ok :operation operation)
      (if (= operation "add")
-       (let [token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
+       (let [_ (create-new-user caller {:email email :role :authority :organization organization :enabled false})
+             token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
          (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
+
          (notifications/notify! :invite-authority {:data {:email email :token token}})
          (ok :operation "invited"))
        (fail :not-found :email email)))))
@@ -232,7 +234,7 @@
   (infof "invitation for new authority: email=%s: processing..." email)
   (let [caller (user/get-user-by-email caller-email)]
     (when-not caller (fail! :not-found :desc (format "can't process invitation token for email %s, authority admin (%s) no longer exists" email caller-email)))
-    (create-new-user caller {:email email :role :authority :organization organization :password password :enabled true})
+
     (infof "invitation was accepted: email=%s, organization=%s" email organization)
     (ok)))
 

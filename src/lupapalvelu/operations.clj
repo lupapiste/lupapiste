@@ -357,7 +357,7 @@
 
      :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["hakija" ]
+                                   :required ["maksaja" ]
                                    :attachments []}
      :suunnittelija               {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
