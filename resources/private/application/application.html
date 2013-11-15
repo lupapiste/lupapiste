@@ -218,8 +218,8 @@
       <div class="sidebar">
         <aside class="instructions">
           <h3 data-bind="ltext: 'help'">Ohje</h3>
-          <span class="icon drill-down-grey" onclick="help.helpClick()"> </span>
-          <div class="help-text expand">
+          <span class="icon drill-down-grey" onclick="expand.click(this)"> </span>
+          <div class="expanded-content expand">
             <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
           </div>
         </aside>
