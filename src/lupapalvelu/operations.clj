@@ -159,14 +159,14 @@
                                       ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                       :required (conj yleiset-alueet-common-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
-                                      :attachments attachment/attachment-types-YA})
+                                      :attachments []})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
                                        ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                        :required (conj yleiset-alueet-common-schemas
                                                    "sijoituslupa-sijoituksen-tarkoitus")
-                                       :attachments attachment/attachment-types-YA})
+                                       :attachments []})
 
 (def ya-operations
   {:ya-kaivuulupa   {:schema "tyomaastaVastaava"
@@ -176,7 +176,7 @@
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
                      ;; HUOM: Krysp_itesti (YA) olettaa attachmentsiin on annettu jotain
-                     :attachments attachment/attachment-types-YA}
+                     :attachments []}
 
    :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat                              ya-kayttolupa-general
    :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot                         ya-kayttolupa-general
@@ -189,7 +189,7 @@
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type "YA"
                                            :required yleiset-alueet-common-schemas
-                                           :attachments attachment/attachment-types-YA}
+                                           :attachments []}
 
    :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen   ya-sijoituslupa-general
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-sijoituslupa-general
@@ -198,7 +198,7 @@
 ;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
 ;                                           :permit-type "YA"
 ;                                           :required yleiset-alueet-common-schemas
-;                                           :attachments attachment/attachment-types-YA}
+;                                           :attachments []}
 })
 
 (def operations

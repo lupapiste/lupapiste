@@ -271,22 +271,6 @@
     :role  "applicant"}
    ])
 
-(def ^:private ya-attachments-reorganized
-  (->>
-    (partition 2 attachment/attachment-types-YA)
-    (reduce
-      (fn [r [k v]] (conj r (into [] (interleave (repeat k) v))))
-      [])
-    (flatten)
-    (partition 2)
-    (map vec)
-    (into [])))
-
-(def ya-operations-attachments-all (reduce
-                                     (fn [r k] (assoc r k ya-attachments-reorganized))
-                                     {}
-                                     (keys operations/ya-operations)))
-
 (def organizations [{:id "186-R"
                      :inforequest-enabled true
                      :new-application-enabled true
@@ -337,7 +321,7 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments ya-operations-attachments-all}
+                     :operations-attachments []}
 
                     {:id "837-R"
                      :inforequest-enabled true
@@ -370,7 +354,7 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments ya-operations-attachments-all}
+                      :operations-attachments []}
 
                     {:id "638-R"
                      :inforequest-enabled true
