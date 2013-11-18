@@ -29,17 +29,32 @@
         legacy       (:legacy organization)]
     (when-not (s/blank? legacy) legacy)))
 
-(defn municipalities-with-organization []
+(defn- municipalities-with-organization []
   (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
     (distinct
       (for [{id :id scopes :scope} id-and-scopes
             {:keys [municipality]} scopes] municipality))))
 
-(defn find-user-organizations [user]
+(defn- find-user-organizations [user]
   (mongo/select :organizations {:_id {$in (:organizations user)}}))
 
-(defn find-user-municipalities [user]
+(defn- find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+(defn- organization-attachments
+  "Returns a map where key is permit type, value is a list of attachment types for the permit type"
+  [{scope :scope}]
+  (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
+
+(defn- organization-operations
+  "Returns a map where key is permit type, value is a list of operations for the permit type"
+  [{scope :scope :as organization}]
+  (reduce
+    #(assoc %1 %2 (let [operation-names (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations))
+                        empty-operation-attachments (zipmap operation-names (repeat []))
+                        saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)]
+                    (merge empty-operation-attachments saved-operation-attachments))) {}
+    (map :permitType scope)))
 
 ;;
 ;; Actions
@@ -58,9 +73,9 @@
   [{{:keys [organizations] :as user} :user}]
   (let [orgs (find-user-organizations user)
         organization (first orgs)
-        ops (merge (zipmap (keys operations/operations) (repeat [])) (:operations-attachments organization))]
+        ops (organization-operations organization)]
     (ok :organization (assoc organization :operations-attachments ops)
-        :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
+        :attachmentTypes (organization-attachments organization))))
 
 (defcommand update-organization
   {:description "Update organization details."

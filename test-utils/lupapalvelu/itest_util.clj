@@ -36,6 +36,7 @@
 ;TODO should get this through organization
 (def sonja-muni  "753")
 (def sipoo       (apikey-for "sipoo"))
+(def tampere-ya  (apikey-for "tampere-ya"))
 (def dummy       (apikey-for "dummy"))
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))

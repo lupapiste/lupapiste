@@ -217,8 +217,11 @@
     <div class="container">
       <div class="sidebar">
         <aside class="instructions">
-            <h3 data-bind="ltext: 'help'">Ohje</h3>
+          <h3 data-bind="ltext: 'help'">Ohje</h3>
+          <span class="icon drill-down-grey" onclick="expand.click(this)"> </span>
+          <div class="expanded-content expand">
             <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
+          </div>
         </aside>
       </div>
 
@@ -372,6 +375,14 @@
             <button
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
                 class="btn">
+            </button>
+            <button
+                data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
+                           ltext: 'application.attachmentsMoveToBackingSystem',
+                           disable: application.sendUnsentAttachmentsToBackingSystemDisabled,
+                           visible: $root.authorization.ok('move-attachments-to-backing-system')"
+                class="btn btn-primary modal"
+                data-test-id="send-unsent-attachments">
             </button>
           </div>
           <div class="process-nav">
