@@ -315,7 +315,13 @@
     self.partyDocumentIndicator = ko.observable(0);
     self.linkPermitData = ko.observable({});
     self.appsLinkingToUs = ko.observable({});
-    self.sendUnsentAttachmentsToBackingSystemDisabled = ko.observable(false);
+    self.unsentAttachmentsNotFound = ko.observable(false);
+    self.pending = ko.observable(false);
+    self.processing = ko.observable(false);
+    self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
+      console.log("sendUnsentAttachmentsButtonDisabled, self.pending: ", self.pending(), ", self.processing: ", self.processing(), ", self.unsentAttachmentsNotFound: ", self.unsentAttachmentsNotFound());
+      return self.pending() || self.processing() || self.unsentAttachmentsNotFound();
+    });
 
     self.attachmentsRequiringAction = ko.observable();
     self.unseenStatements = ko.observable();
@@ -471,6 +477,8 @@
       .error(function() {
         repository.load(appId);
       })
+      .processing(self.processing)
+      .pending(self.pending)
     .call();
     };
 
@@ -698,8 +706,7 @@
                  (!a.sent || lastVersion.created > a.sent) &&
                  (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
         });
-
-      application.sendUnsentAttachmentsToBackingSystemDisabled(!unsentAttachmentFound);
+      application.unsentAttachmentsNotFound(!unsentAttachmentFound);
 
 
       // authorities
