@@ -463,27 +463,23 @@
     (if (pos? (count attachments-wo-sent-timestamp))
 
       (let [organization (mongo/by-id :organizations (:organization application))]
-        (try
-          (mapping-to-krysp/save-unsent-attachments-as-krysp
-            (-> application
-              (dissoc :attachments)
-              (assoc :attachments attachments-wo-sent-timestamp))
-            lang
-            organization
-            user)
+        (mapping-to-krysp/save-unsent-attachments-as-krysp
+          (-> application
+            (dissoc :attachments)
+            (assoc :attachments attachments-wo-sent-timestamp))
+          lang
+          organization
+          user)
 
-          (ok :updateCount (mongo/update-by-query
-                             :applications
-                             {:_id id}
-                             {$set (get-data-argument-for-attachments-mongo-update
-                                     created
-                                     (:attachments application))}))
+        (mongo/update-by-query
+          :applications
+          {:_id id}
+          {$set (get-data-argument-for-attachments-mongo-update
+                  created
+                  (:attachments application))})
+        (ok))
 
-          (catch Exception e
-            (errorf e "failed to save unsent attachments as krysp: application=%s" id)
-            (fail :error.sending-unsent-attachments-failed))))
-
-      (ok :updateCount 0))))
+      (fail :error.sending-unsent-attachments-failed))))
 
 
 ;;

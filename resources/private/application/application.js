@@ -472,9 +472,6 @@
       ajax
       .command("move-attachments-to-backing-system", {id: appId, lang: loc.getCurrentLanguage()})
       .success(function(data) {
-        if(data.updateCount > 0) { repository.load(appId); }
-      })
-      .error(function() {
         repository.load(appId);
       })
       .processing(self.processing)
