@@ -150,6 +150,8 @@ div.oskariTabs div.tabsHeader {
   display: none;
   height: 0;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 div.oskariTabs div.tabsContent {
@@ -167,16 +169,62 @@ div.oskariTabs div.tabsContent {
 div.oskariTabs div.tab-content {
   padding: 0;
 }
-
 .oskari-grid {
-  thead {
-    tr {
-      th {
-        
-      }
-    }
-  }
-  tbody {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgb(79,79,79);
+}
+.oskari-grid thead {
+  background-color: rgb(79,79,79);
+  width: 100%;
+}
+.oskari-grid thead tr th {
+  padding: 4px;  
+}
+.oskari-grid thead tr th a {
+  text-decoration: none;
+  color: white; 
+  font-weight: normal;
+  font-size: 17px;
+}
 
-  }
+.oskari-grid tbody tr:nth-child(even) {
+  background-color: rgb(229,229,229);
+}
+
+.oskari-grid tbody tr {
+  border-bottom: 1px solid rgb(209,209,209);  
+}
+
+.oskari-grid tbody tr td {
+  padding: 4px;  
+}
+.oskari-grid tbody tr td a { 
+  text-decoration: none;
+}
+
+[type=button] {
+  background: rgb(209,209,209);
+  cursor: pointer;
+  display:inline-block;
+  font-family:inherit;
+  font-size: 1em;
+  line-height: 23px;
+  font-weight: 400;
+  width: 120px;
+  margin:0 0 8px;
+  padding:.25em 1.125em;
+  text-decoration:none;
+  border: none;
+  color: rgb(48,48,48);
+  position: relative;
+  font: 14px Calibri;
+}
+
+[type=button].primary {
+  background: rgb(4,199,20);
+  color: white;
+  text-transform:uppercase;
 }
