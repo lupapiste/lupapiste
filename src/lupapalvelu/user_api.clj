@@ -20,7 +20,7 @@
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.attachment :refer [encode-filename attachment-types-osapuoli attach-file!]]))
+            [lupapalvelu.attachment :as attachment]))
 
 ;;
 ;; ==============================================================================
@@ -354,10 +354,10 @@
   [{user :user}]
   (ok :attachments (:attachments user)))
 
-(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
   (let [user              (user/current-user)
         filename          (mime/sanitize-filename filename)
-        attachment-type   (keyword attachment-type)
+        attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
@@ -367,8 +367,9 @@
                            :created          (now)}]
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
-
-    (when-not ((set attachment-types-osapuoli) attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
+    (clojure.pprint/pprint (:type-id attachment-type))
+    (clojure.pprint/pprint (set attachment/attachment-types-osapuoli))
+    (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! "unknown attachment type" :attachment-type attachmentType))
     (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
@@ -389,7 +390,7 @@
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
                "Content-Length" (str (:content-length attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment)))}}
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (attachment/encode-filename (:file-name attachment)))}}
     {:status 404
      :body (str "can't file attachment: id=" attachment-id)}))
 
@@ -404,17 +405,18 @@
   (ok))
 
 (defcommand copy-user-attachments-to-application
-  {:parameters [application-id]
+  {:parameters [id]
    :authenticated true}
   [{user :user}]
   (doseq [attachment (vals (:attachments user))]
     (let [
+          application-id id
           user-id (:id user)
           {:keys [attachment-type filename content-type size created]} attachment
-          attachment-id (str application-id "/" user-id "/" attachment-type)
+          attachment-id (str application-id "." user-id "." attachment-type)
           attachment (mongo/download-find {:id (:attachment-id attachment) :metadata.user-id user-id})
           ]
-      (attach-file! {:application-id application-id
+      (attachment/attach-file! {:application-id application-id
                      :attachment-id attachment-id
                      :attachment-type attachment-type
                      :content ((:content attachment))

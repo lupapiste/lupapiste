@@ -425,7 +425,7 @@
       (fail! (:text validation-error))))
 
   (if-let [attachment-version (attach-file! {:application-id id 
-                                             :filename filename
+                                             :file-name filename
                                              :size size
                                              :content tempfile
                                              :attachment-id attachmentId

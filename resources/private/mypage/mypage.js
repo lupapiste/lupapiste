@@ -173,8 +173,8 @@
     });
 
     // TODO: Get attachment-types from back
-    self.availableAttachmentTypes = _.map(["cv", "tutkintotodistus", "patevyystodistus"], function(type) {
-      return {id: type, name: loc(["userinfo.architect.attachments.name", type])};
+    self.availableAttachmentTypes = _.map(["osapuolet.cv", "osapuolet.tutkintotodistus", "osapuolet.patevyystodistus"], function(type) {
+      return {id: type, name: loc(["attachmentType", type])};
     });
 
     self.init = function() {

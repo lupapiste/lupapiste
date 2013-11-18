@@ -454,15 +454,12 @@
       attachment.initFileUpload(currentId, null, null, true);
     };
 
-    self.copyOwnAttachments = function() {
+    self.copyOwnAttachments = function(model) {
       var applicationId = self.id();
-      ajax.command("copy-user-attachments-to-application", { "application-id": applicationId })
+      ajax.command("copy-user-attachments-to-application", { "id": applicationId })
         .success(function() {
-        //FIXME parempi tapa ilmoittaa onnistumisesta?!?
-          notify.success("Omat liitteet on kopioitu hakemukselle",model);
           repository.load(applicationId);
-        })//FIXME parempi/tyylikaampi virheilmoitus?!?
-        .error(function(resp) {alert(resp.text);})
+        })
         .call();
       return false;
     }
