@@ -412,9 +412,9 @@
     (let [
           application-id id
           user-id (:id user)
-          {:keys [attachment-type filename content-type size created]} attachment
-          attachment-id (str application-id "." user-id "." attachment-type)
-          attachment (mongo/download-find {:id (:attachment-id attachment) :metadata.user-id user-id})
+          {:keys [attachment-type attachment-id filename content-type size created]} attachment
+          attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+          attachment-id (str application-id "." user-id "." attachment-id)
           ]
       (attachment/attach-file! {:application-id application-id
                      :attachment-id attachment-id
