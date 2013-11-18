@@ -92,16 +92,16 @@
 (facts create-new-user-entity
 
   (facts "emails are converted to lowercase"
-    (fact (create-new-user-entity {:role "x"} {:email "foo"})         => (contains {:email "foo"}))
-    (fact (create-new-user-entity {:role "x"} {:email "Foo@Bar.COM"}) => (contains {:email "foo@bar.com"})))
+    (fact (create-new-user-entity {:email "foo"})         => (contains {:email "foo"}))
+    (fact (create-new-user-entity {:email "Foo@Bar.COM"}) => (contains {:email "foo@bar.com"})))
 
   (facts "default values"
-    (fact (create-new-user-entity {:role "x"} {:email "Foo"}) => (contains {:email "foo"
+    (fact (create-new-user-entity {:email "Foo"}) => (contains {:email "foo"
                                                                             :username "foo"
                                                                             :firstName ""
                                                                             :lastName  ""
                                                                             :enabled   false}))
-    (fact (create-new-user-entity {:role "x"} {:email "Foo" :username "bar"}) => (contains {:email "foo"
+    (fact (create-new-user-entity {:email "Foo" :username "bar"}) => (contains {:email "foo"
                                                                                             :username "bar"
                                                                                             :firstName ""
                                                                                             :lastName  ""
@@ -110,17 +110,17 @@
 
 
   (fact "password (if provided) is put under :private"
-    (fact (create-new-user-entity {:role "x"} {:email "email"}) => (contains {:private {}}))
-    (fact (create-new-user-entity {:role "x"} {:email "email" :password "foo"}) => (contains {:private {:password "bar"}})
+    (fact (create-new-user-entity {:email "email"}) => (contains {:private {}}))
+    (fact (create-new-user-entity {:email "email" :password "foo"}) => (contains {:private {:password "bar"}})
       (provided (security/get-hash "foo") => "bar")))
 
   (fact "does not contain extra fields"
-    (-> (create-new-user-entity {:role "x"} {:email "email" :foo "bar"}) :foo) => nil)
+    (-> (create-new-user-entity {:email "email" :foo "bar"}) :foo) => nil)
 
   (facts "apikey is created"
-    (fact (-> (create-new-user-entity {:role ..anything..} {:email ..anything.. :apikey "true"}) :private :apikey) => string?)
-    (fact (-> (create-new-user-entity {:role ..anything..} {:email ..anything.. :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:role ..anything..} {:email ..anything.. :apikey "foo"}) :private :apikey) => "foo")))
+    (fact (-> (create-new-user-entity  {:email ..anything.. :apikey "true"}) :private :apikey) => string?)
+    (fact (-> (create-new-user-entity {:email ..anything.. :apikey "false"}) :private) => {})
+    (fact (-> (create-new-user-entity {:email ..anything.. :apikey "foo"}) :private :apikey) => "foo")))
 
 ;;
 ;; ==============================================================================

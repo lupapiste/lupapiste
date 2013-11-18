@@ -376,7 +376,7 @@
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
                                    :organization "753-R"
                                    :state "submitted"
-                                   :operations [{:name "tyonjohtaja"
+                                   :operations [{:name "tyonjohtajan-nimeaminen"
                                                  :id "5272668be8db5aaa01084601"
                                                  :created 1383229067483}]
                                    :documents [hakija-henkilo
@@ -390,7 +390,7 @@
                                    :organization "753-R"
                                    :state "submitted"
                                    :propertyId "75341600550007"
-                                   :operations [{:name "suunnittelija"
+                                   :operations [{:name "suunnittelijan-nimeaminen"
                                                  :id "527b3392e8dbbb95047a89de"
                                                  :created 1383805842761}]
                                    :documents [hakija-henkilo
