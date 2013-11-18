@@ -212,9 +212,9 @@
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
 (defcommand update-user-organization
-  {:parameters       [email operation]
+  {:parameters       [email operation firstname lastname]
    :roles            [:authorityAdmin]
-   :input-validators [valid-organization-operation?]}
+   :input-validators [valid-organization-operation? (partial non-blank-parameters [:email :firstname :lastname])]}
   [{caller :user}]
   (let [email        (ss/lower-case email)
        organization  (first (:organizations caller))]
@@ -222,7 +222,7 @@
     (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
      (ok :operation operation)
      (if (= operation "add")
-       (let [new-user (create-new-user caller {:email email :role :authority :organization organization :enabled true})
+       (let [new-user (create-new-user caller {:email email :role :authority :organization organization :enabled true :firstName firstname :lastName lastname})
              token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
          (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
 
