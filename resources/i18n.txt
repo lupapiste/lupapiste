@@ -1,0 +1,2 @@
+auth-admin.add-dialog.firstName: Etunimi
+auth-admin.add-dialog.lastName: Sukunimi
