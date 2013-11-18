@@ -172,8 +172,7 @@
       return !_.isBlank(self.filename()) && self.attachmentType();
     });
 
-    // TODO: Get attachment-types from back
-    self.availableAttachmentTypes = _.map(["osapuolet.cv", "osapuolet.tutkintotodistus", "osapuolet.patevyystodistus"], function(type) {
+    self.availableAttachmentTypes = _.map(LUPAPISTE.config.userAttachmentTypes, function(type) {
       return {id: type, name: loc(["attachmentType", type])};
     });
 
@@ -243,7 +242,10 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) { uploadModel.done(); },
+            done: function(e, data) { 
+              uploadModel.done(); 
+              LUPAPISTE.ModalDialog.close();
+            },
             fail: uploadModel.error
           });
 

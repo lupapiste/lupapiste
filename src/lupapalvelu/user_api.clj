@@ -367,11 +367,11 @@
                            :created          (now)}]
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
-    (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! "unknown attachment type" :attachment-type attachmentType))
-    (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
+    (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
+    (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
-    (mongo/update-by-id :users (:id user) {$set {(str "attachments." attachment-id) file-info}})
+    (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
     (user/refresh-user!)
 
     (->> (assoc file-info :ok true)
@@ -397,16 +397,18 @@
    :authenticated true}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
-  (mongo/update-by-id :users (:id user) {$unset {(str "attachments." attachment-id) nil}})
+  (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
   (user/refresh-user!)
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
-   :authenticated true}
+   :authenticated true
+   :roles [:applicant]
+   :validators [(fn [command application] (not (-> command :user :architect)))]}
   [{user :user}]
-  (doseq [attachment (vals (:attachments user))]
+  (doseq [attachment (:attachments user)]
     (let [
           application-id id
           user-id (:id user)
@@ -414,7 +416,7 @@
           attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
           attachment-id (str application-id "." user-id "." attachment-id)
           ]
-      (if (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
+      (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
         (attachment/attach-file! {:application-id application-id
                        :attachment-id attachment-id
                        :attachment-type attachment-type
