@@ -37,9 +37,10 @@ body {
 .oskari-flyouttoolbar {
   height: 57px;
   width: 100%;
-  background-color: rgb(79,79,79);
-  color: white;
+  background-color: rgb(255,255,255);
+  color: black;
   text-transform: uppercase;
+  border-bottom: 1px solid rgb(149,149,149);
 }
 
 .oskari-flyoutheading {
@@ -48,6 +49,10 @@ body {
   border-bottom: 1px solid rgb(245,126,35);
   height: 14px;
   width: 100%;
+}
+
+.oskari-flyoutcontentcontainer {
+  background-color: white;
 }
 
 .layer-icon, .icon-info {
@@ -139,4 +144,39 @@ div.divmanazerpopup.oskari-measurement [type=button]:HOVER {
   background: rgb(206,206,206);
   -webkit-box-shadow:0 1px 2px rgb(226,226,226);
   box-shadow:0 1px 2px rgb(226,226,226);
+}
+
+div.oskariTabs div.tabsHeader {
+  display: none;
+  height: 0;
+  overflow: hidden;
+}
+
+div.oskariTabs div.tabsContent {
+  border: none;
+  color: #000000;
+  height: 100%;
+  font: 15px Calibri;
+}
+
+.oskari-flyoutcontent {
+  margin: 0;
+  padding: 8px;
+}
+
+div.oskariTabs div.tab-content {
+  padding: 0;
+}
+
+.oskari-grid {
+  thead {
+    tr {
+      th {
+        
+      }
+    }
+  }
+  tbody {
+
+  }
 }
