@@ -161,7 +161,9 @@
     enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
-  (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
+  (mongo/select :users
+    {:organizations (:organization app) :role "authority" :enabled true}
+    {:firstName 1 :lastName 1}))
 
 (defquery application
   {:authenticated true
