@@ -72,6 +72,22 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
+(defn- ->henkilo [xml-without-ns]
+  (let [henkilo (select xml-without-ns [:henkilo])
+        turvakielto (select xml-without-ns [])]
+    {:_selected "henkilo"
+     :henkilo   {:henkilotiedot {:etunimi  (get-text henkilo :nimi :etunimi)
+                                 :sukunimi (get-text henkilo :nimi :sukunimi)
+                                 :hetu     (get-text henkilo :henkilotunnus)
+                                 :turvakieltoKytkin (get-text xml-without-ns :turvakieltoKytkin)}
+                 :yhteystiedot  {:email     (get-text henkilo :sahkopostiosoite)
+                                 :puhelin   (get-text henkilo :puhelin)}
+                 :osoite        {:katu         (get-text henkilo :osoite :osoitenimi :teksti)
+                                 :postinumero  (get-text henkilo :osoite :postinumero)
+                                 :postitoimipaikannimi  (get-text henkilo :osoite :postitoimipaikannimi)}}
+     :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
+     :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
+
 (defn- ->rakennuksen-omistaja-legacy-version [omistaja]
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)
@@ -86,10 +102,9 @@
 
 (defn- ->rakennuksen-omistaja [omistaja]
   (cond
-    (select omistaja [:henkilo]) {:_selected "henkilo"
-                                  :henkilo   nil} ;  TODO
-    (select omistaja [:yritys]) {:_selected "yritys"
-                                 :yritys    nil} ;  TODO
+    (seq (select omistaja [:henkilo])) (->henkilo omistaja)
+    (seq (select omistaja [:yritys])) {:_selected "yritys"
+                                       :yritys    nil} ;  TODO
     :default (->rakennuksen-omistaja-legacy-version omistaja)
     )
   )

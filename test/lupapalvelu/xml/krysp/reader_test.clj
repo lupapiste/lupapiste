@@ -1,7 +1,10 @@
 (ns lupapalvelu.xml.krysp.reader-test
-  (:use [midje.sweet]
-        [lupapalvelu.xml.krysp.reader])
-  (:require [clj-time.coerce :as coerce]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.xml.krysp.reader :refer :all]
+            [clj-time.coerce :as coerce]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]))
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
@@ -162,18 +165,61 @@
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
-(facts "Building from Sito"
+(facts "KRYSP yhteiset 2.1.0"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
         buildings (->buildings xml)
-        building1  (first buildings)
-        building1-id (:buildingId building1)]
+        building1-id (:buildingId (first buildings))
+        building2-id (:buildingId (last buildings))
+        schema       (schemas/get-schema (schemas/get-latest-schema-version) "purku")]
     (fact "xml is parsed" buildings => truthy)
     (fact "xml has 2 buildings" (count buildings) => 2)
-    (fact "Kiinteistotunnus" (:propertyId building1) => "63845900130022")
+    (fact "Kiinteistotunnus" (:propertyId (first buildings)) => "63845900130022")
     (fact "Rakennustunnus" building1-id => "001")
-    (fact "Kayttotarkoitus" (:usage building1) => "011 yhden asunnon talot")
-    (fact "Alkuhetki year as created" (:created building1) => "2013")
-    (let [building (->rakennuksen-tiedot xml building1-id)
-          omistajat (:rakennuksenOmistajat building)]
-      ;(clojure.pprint/pprint building)
-      (fact "Has 2 owners" (count omistajat) => 2))))
+    (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
+    (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
+    (let [building1  (->rakennuksen-tiedot xml building1-id)
+          omistajat1 (:rakennuksenOmistajat building1)]
+
+      (fact "Reader produces valid document"
+        (model/validate {:data (tools/wrapped building1)} schema) =not=> model/has-errors?)
+
+      (fact "Has 2 owners" (count omistajat1) => 2)
+
+      (let [owner1 (:0 omistajat1)
+            owner2 (:1 omistajat1)]
+        (get-in owner1 [:_selected]) => "henkilo"
+        (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Lauri"
+        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
+        (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 18"
+        (get-in owner1 [:henkilo :osoite :postinumero]) => "06500"
+        (get-in owner1 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
+
+        (get-in owner1 [:_selected]) => "henkilo"
+        (get-in owner2 [:henkilo :henkilotiedot :etunimi]) => "Pauliina"
+        (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner2 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 19"
+        (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
+        (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
+        (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
+
+    (let [building2  (->rakennuksen-tiedot xml building2-id)
+          omistajat2 (:rakennuksenOmistajat building2)]
+
+      (fact "Reader produces valid document"
+        (model/validate {:data (tools/wrapped building2)} schema) =not=> model/has-errors?)
+
+      (fact "Has 2 owners" (count omistajat2) => 2)
+
+      (let [owner1 (:0 omistajat2)
+            owner2 (:1 omistajat2)]
+        (get-in owner1 [:_selected]) => "henkilo"
+        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner1 [:omistajalaji]) => nil
+        (get-in owner1 [:muu-omistajalaji]) => ", wut?"
+
+        ;(clojure.pprint/pprint owner2)
+
+        (get-in owner2 [:_selected]) => "yritys"
+        )
+      )))
