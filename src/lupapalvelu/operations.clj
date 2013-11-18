@@ -156,14 +156,12 @@
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
-                                      ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                       :required (conj yleiset-alueet-common-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
                                       :attachments []})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
-                                       ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                        :required (conj yleiset-alueet-common-schemas
                                                    "sijoituslupa-sijoituksen-tarkoitus")
                                        :attachments []})
@@ -171,11 +169,10 @@
 (def ya-operations
   {:ya-kaivuulupa   {:schema "tyomaastaVastaava"
                      :permit-type "YA"
-                     :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
+                     :schema-data [[["_selected" :value] "yritys"]]
                      :required (conj yleiset-alueet-common-schemas
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
-                     ;; HUOM: Krysp_itesti (YA) olettaa attachmentsiin on annettu jotain
                      :attachments []}
 
    :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat                              ya-kayttolupa-general
