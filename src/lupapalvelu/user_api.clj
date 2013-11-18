@@ -222,8 +222,8 @@
     (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
      (ok :operation operation)
      (if (= operation "add")
-       (let [_ (create-new-user caller {:email email :role :authority :organization organization :enabled false})
-             token (token/make-token :authority-invitation {:email email :organization organization :caller-email (:email caller)})]
+       (let [new-user (create-new-user caller {:email email :role :authority :organization organization :enabled true})
+             token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
          (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
 
          (notifications/notify! :invite-authority {:data {:email email :token token}})
@@ -234,7 +234,7 @@
   (infof "invitation for new authority: email=%s: processing..." email)
   (let [caller (user/get-user-by-email caller-email)]
     (when-not caller (fail! :not-found :desc (format "can't process invitation token for email %s, authority admin (%s) no longer exists" email caller-email)))
-
+    (user/change-password email password)
     (infof "invitation was accepted: email=%s, organization=%s" email organization)
     (ok)))
 
