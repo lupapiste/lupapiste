@@ -238,11 +238,13 @@
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
-                      :kayttotapaus (condp = operation-name
-                                      "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
-                                      "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
-                                      "jatkoaika" "Jatkoaikahakemus"
-                                      (get-kayttotapaus documents toimenpiteet))
+                      :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
+                                      "Rakentamisen aikainen muutos"
+                                      (condp = operation-name
+                                        "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                        "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
+                                        "jatkoaika" "Jatkoaikahakemus"
+                                        (get-kayttotapaus documents toimenpiteet)))
                       :asianTiedot (if link-permit-data
                                      (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
                                      (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
