@@ -105,9 +105,9 @@
                     "BBOX"   "358400,6758400,409600,6809600"}
                    {"LAYERS" "lupapiste:Hameenlinna_Kantakartta"
                     "BBOX"   "358400,6758400,409600,6809600"}
-                   {"LAYERS" "lupapiste:Asemakaavayhdistelma_Velkua"
+                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
                     "BBOX"   "208384,6715136,208640,6715392"}
-                   {"LAYERS" "lupapiste:Asemakaavayhdistelma_Naantali"
+                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
                     "BBOX"   "226816,6713856,227328,6714368"}]]
       (let [request {:query-params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}
