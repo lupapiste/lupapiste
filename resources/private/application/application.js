@@ -509,7 +509,7 @@
         .command("create-change-permit", {id: appId/*, lang: loc.getCurrentLanguage()*/})
         .success(function(data) {
           console.log("self.createChangePermit, SUCCESS, data: ", data);
-//          window.location.hash = "!/application/" + data.id;  // ** Siirry uuteen luotuun muutoslupa-hakemukseen ***
+          window.location.hash = "#!/application/" + data.id;
 //          repository.load(appId);
         })
         .error(function() {

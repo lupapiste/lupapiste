@@ -632,16 +632,10 @@
       (ok :id id))))
 
 
-(defn- remove-document-ids-for-muutoslupa [application]
-  ;; TODO
-
-  application
-  )
-
 (defcommand create-change-permit
   {:parameters [id]
    :roles      [:applicant :authority]
-;   :states     [:verdictGiven]         ;;*** TODO: Laita tama paalle ***
+   :states     [:verdictGiven]
 ;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
 ;                      (partial property-id-parameters [:propertyId])
 ;                      operation-validator]
@@ -649,27 +643,29 @@
   }
   [{:keys [created user application] :as command}]
 
-  (println "\n entered defcommand create-change-permit")
+;  (println "\n entered defcommand create-change-permit")
+
   ;;
   ;; TODO: Luo uusi application ottamalla vanha
   ;;       ja karsimalla siitä:
-  ;;           - ID:t
   ;;           - attachmentsit
   ;;           - lausunnot
   ;;           - commentsit
   ;;           - osa timestampeista.
-  ;;       Osan timestampeista voit korvata saadulla "created"-paramterilla.
+  ;;       Luo dokumenteille uudet ID:t.
+  ;;       Osan timestampeista voit korvata saadulla "created"-parametrilla.
   ;;
   ;; Documenttien timestamppeja ei tarvinne muuttaa, koska tietoja ei muuteta kopioinnissa?
 
-  (println "\n create-change-permit, application:")
-  (clojure.pprint/pprint application)
-  (println "\n")
+;  (println "\n create-change-permit, application:")
+;  (clojure.pprint/pprint application)
+;  (println "\n")
 
   (let [muutoslupa-app-id (make-application-id (:municipality application))
-        _  (println "\n create-change-permit, muutoslupa-app-id:" muutoslupa-app-id)
+;        _  (println "\n create-change-permit, muutoslupa-app-id:" muutoslupa-app-id)
         muutoslupa-app (-> application
-                         (remove-document-ids-for-muutoslupa)   ;; TODO: Miten tama toteutetaan?
+                         (assoc :documents       (into []
+                                                   (map #(assoc % :id (mongo/create-id)) (:documents application))))
                          (assoc :id              muutoslupa-app-id)
                          (assoc :created         created)
                          (assoc :opened          created)
@@ -686,11 +682,11 @@
         ]
 
 
-    (println "\n create-change-permit, muutoslupa-app:")
-    (clojure.pprint/pprint muutoslupa-app)
-    (println "\n")
+;    (println "\n create-change-permit, muutoslupa-app:")
+;    (clojure.pprint/pprint muutoslupa-app)
+;    (println "\n")
 
-;    (mongo/insert :applications application)  ;; TODO: Ota tama kayttoon
+    (mongo/insert :applications muutoslupa-app)
 
     (ok :id muutoslupa-app-id)
     ))
