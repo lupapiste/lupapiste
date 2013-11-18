@@ -749,30 +749,20 @@
    :roles      [:applicant :authority]}
   [{{:keys [propertyId]} :application user :user :as command}]
   (let [results (mongo/select :applications
-                  {:auth.id (:id user)}
+                  (merge (domain/application-query-for user) {:_id {$ne id}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
-
-        filtered-results (filter #(not (= id (:id %))) results)
-
         enriched-results (map (fn [r]
                                 (assoc r :text
                                   (str
                                     (:address r) ", "
                                     (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
                                     (:id r))))
-                           filtered-results)
-
+                           results)
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (into [] (filter same-property-id-fn enriched-results))
         without-same-property-id (into [] (filter (comp not same-property-id-fn) enriched-results))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
-
-        final-results (map (fn [r]
-                             (-> r
-                               (dissoc :address)
-                               (dissoc :permitType)
-                               (dissoc :propertyId)))
-                        organized-results)]
+        final-results (map #(select-keys % [:id :text]) organized-results)]
 
     (ok :app-links final-results)))
 
