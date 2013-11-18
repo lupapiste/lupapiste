@@ -367,8 +367,6 @@
                            :created          (now)}]
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
-    (clojure.pprint/pprint (:type-id attachment-type))
-    (clojure.pprint/pprint (set attachment/attachment-types-osapuoli))
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! "unknown attachment type" :attachment-type attachmentType))
     (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
 
@@ -416,17 +414,18 @@
           attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
           attachment-id (str application-id "." user-id "." attachment-id)
           ]
-      (attachment/attach-file! {:application-id application-id
-                     :attachment-id attachment-id
-                     :attachment-type attachment-type
-                     :content ((:content attachment))
-                     :file-name filename
-                     :content-type content-type
-                     :file-size size
-                     :timestamp created
-                     :user user
-                     ;:attachment-target attachment-target
-                     :locked false})))
+      (if (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
+        (attachment/attach-file! {:application-id application-id
+                       :attachment-id attachment-id
+                       :attachment-type attachment-type
+                       :content ((:content attachment))
+                       :file-name filename
+                       :content-type content-type
+                       :file-size size
+                       :timestamp created
+                       :user user
+                       ;:attachment-target attachment-target
+                       :locked false}))))
   (ok))
 
 ;;
