@@ -188,7 +188,7 @@
       (let [owner1 (:0 omistajat1)
             owner2 (:1 omistajat1)]
         (get-in owner1 [:_selected]) => "henkilo"
-        (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Lauri"
+        (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Antero"
         (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
         (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
         (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 18"
@@ -221,5 +221,7 @@
         ;(clojure.pprint/pprint owner2)
 
         (get-in owner2 [:_selected]) => "yritys"
+        (get-in owner2 [:omistajalaji]) => "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"
+        (get-in owner2 [:muu-omistajalaji]) => nil
         )
       )))

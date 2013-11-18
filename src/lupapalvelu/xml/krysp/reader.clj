@@ -73,8 +73,7 @@
 (def ...notimplemented... nil)
 
 (defn- ->henkilo [xml-without-ns]
-  (let [henkilo (select xml-without-ns [:henkilo])
-        turvakielto (select xml-without-ns [])]
+  (let [henkilo (select1 xml-without-ns [:henkilo])]
     {:_selected "henkilo"
      :henkilo   {:henkilotiedot {:etunimi  (get-text henkilo :nimi :etunimi)
                                  :sukunimi (get-text henkilo :nimi :sukunimi)
@@ -85,6 +84,13 @@
                  :osoite        {:katu         (get-text henkilo :osoite :osoitenimi :teksti)
                                  :postinumero  (get-text henkilo :osoite :postinumero)
                                  :postitoimipaikannimi  (get-text henkilo :osoite :postitoimipaikannimi)}}
+     :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
+     :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
+
+(defn- ->yritys [xml-without-ns]
+  (let [yritys (select1 xml-without-ns [:yritys])]
+    {:_selected "yritys"
+     :yritys {} ; TODO
      :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
      :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
 
@@ -103,11 +109,8 @@
 (defn- ->rakennuksen-omistaja [omistaja]
   (cond
     (seq (select omistaja [:henkilo])) (->henkilo omistaja)
-    (seq (select omistaja [:yritys])) {:_selected "yritys"
-                                       :yritys    nil} ;  TODO
-    :default (->rakennuksen-omistaja-legacy-version omistaja)
-    )
-  )
+    (seq (select omistaja [:yritys])) (->yritys omistaja)
+    :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
 (def cleanup (comp cr/strip-empty-maps cr/strip-nils))
 
