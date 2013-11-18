@@ -319,7 +319,6 @@
     self.pending = ko.observable(false);
     self.processing = ko.observable(false);
     self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
-      console.log("sendUnsentAttachmentsButtonDisabled, self.pending: ", self.pending(), ", self.processing: ", self.processing(), ", self.unsentAttachmentsNotFound: ", self.unsentAttachmentsNotFound());
       return self.pending() || self.processing() || self.unsentAttachmentsNotFound();
     });
 
