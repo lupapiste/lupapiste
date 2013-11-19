@@ -509,8 +509,8 @@
         .command("create-change-permit", {id: appId/*, lang: loc.getCurrentLanguage()*/})
         .success(function(data) {
           console.log("self.createChangePermit, SUCCESS, data: ", data);
+          repository.load(data.id);
           window.location.hash = "#!/application/" + data.id;
-//          repository.load(appId);
         })
         .error(function() {
           console.log("self.createChangePermit, ERROR");
