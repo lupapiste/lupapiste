@@ -91,11 +91,11 @@
   (let [yritys (select1 xml-without-ns [:yritys])]
     {:_selected "yritys"
      :yritys {:yritysnimi                             (get-text yritys :nimi)
-              :liikeJaYhteisoTunnus                   (get-text yritys :tunnus)
-            :osoite {:katu                            (get-text yritys :postiosoite :osoitenimi :teksti)
-                     :postinumero                     (get-text yritys :postiosoite :postinumero)
-                     :postitoimipaikannimi            (get-text yritys :postiosoite :postitoimipaikannimi)}
-            :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}
+              :liikeJaYhteisoTunnus                   (get-text yritys :liikeJaYhteisotunnus)
+              :osoite {:katu                          (get-text yritys :postiosoite :osoitenimi :teksti)
+                       :postinumero                   (get-text yritys :postiosoite :postinumero)
+                       :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
+              :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}
      :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
      :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
 
