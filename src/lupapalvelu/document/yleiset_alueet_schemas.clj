@@ -6,10 +6,27 @@
 ;; Kaivulupa
 ;;
 
+(def sijoituksen-tarkoitus-dropdown
+  [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
+   :body [{:name "jakokaappi-(tele/sahko)"}
+          {:name "jate--tai-sadevesi"}
+          {:name "kaivo-(kaukolampo)"}
+          {:name "kaivo-(tele/sahko)"}
+          {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
+          {:name "katuvalo"}
+          {:name "kaukolampo"}
+          {:name "liikennevalo"}
+          {:name "sahko"}
+          {:name "tele"}
+          {:name "vesijohto"}]}
+   {:name "muu-sijoituksen-tarkoitus" :type :string :size "l"}])
+
 (def hankkeen-kuvaus-kaivulupa
   (body
+    sijoituksen-tarkoitus-dropdown
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -53,6 +70,25 @@
            :repeating false
            :order 63}
     :body tyo-aika}])
+
+
+;;
+;; Kayttolupa
+;;
+
+(def hankkeen-kuvaus-kayttolupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
+
+(defschemas
+  1
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+           :type :group
+           :removable false
+           :repeating false
+           :order 60}
+    :body hankkeen-kuvaus-kayttolupa}])
 
 
 ;;
@@ -112,20 +148,8 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
-      :body [{:name "sahko"}
-             {:name "tele"}
-             {:name "kaivo-(tele/sahko)"}
-             {:name "jakokaappi-(tele/sahko)"}
-             {:name "kaukolampo"}
-             {:name "kaivo-(kaukolampo)"}
-             {:name "liikennevalo"}
-             {:name "katuvalo"}
-             {:name "jate--tai-sadevesi"}
-             {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
-             {:name "vesijohto"}]}
-     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l"}          ;; lupakohtainenLisatietotieto
-     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}])) ;; lupakohtainenLisatietotieto
+    sijoituksen-tarkoitus-dropdown                                                          ;; lupakohtainenLisatietotieto
+    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
 
 (defschemas
   1
