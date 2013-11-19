@@ -1,6 +1,11 @@
 body {
   background: rgb(246,246,246);
-  
+  font: 15px Calibri;
+}
+
+h3 {
+  font-weight: normal;
+  text-transform: uppercase;
 }
 
 #maptools {
@@ -32,6 +37,10 @@ body {
   margin: 0px;
   padding: 0px;
   border: 1px solid rgb(79,79,79);
+}
+
+.oskari-flyouttools {
+  margin-right: 8px;
 }
 
 .oskari-flyouttoolbar {
@@ -196,6 +205,12 @@ div.oskariTabs div.tab-content {
 
 .oskari-grid tbody tr {
   border-bottom: 1px solid rgb(209,209,209);  
+  border-left: 1px solid rgb(79,79,79); 
+  border-right: 1px solid rgb(79,79,79); 
+}
+
+.oskari-grid tbody tr:last-child {
+  border-bottom: 1px solid rgb(79,79,79);  
 }
 
 .oskari-grid tbody tr td {
@@ -203,6 +218,19 @@ div.oskariTabs div.tab-content {
 }
 .oskari-grid tbody tr td a { 
   text-decoration: none;
+}
+
+input[type="text"], textarea {
+  width: 80%;
+  font-family:inherit;
+  margin-bottom: 4px;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+  box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+input[type="text"] {
+    height: 24px;
 }
 
 [type=button] {
@@ -221,10 +249,17 @@ div.oskariTabs div.tab-content {
   color: rgb(48,48,48);
   position: relative;
   font: 14px Calibri;
+  float: right;
+  margin-top: 8px;
 }
 
 [type=button].primary {
   background: rgb(4,199,20);
   color: white;
   text-transform:uppercase;
+  float:left;
+}
+
+div.divmanazerpopup {
+  font: Calibri;
 }
