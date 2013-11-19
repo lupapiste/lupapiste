@@ -197,10 +197,24 @@
       (redirect uri)
       (redirect (str (host) "/app/fi/welcome#!/register2")))))
 
+(def ^:private error-status-codes
+  ; From Vetuma_palvelun_kutsurajapinnan_maarittely_v3_0.pdf
+  {"REJECTED" "Kutsun palveleminen ep\u00e4onnistui, koska se k\u00e4ytt\u00e4j\u00e4n valitsema vuorovaikutteinen taustapalvelu johon Vetuma-palvelu ohjasi k\u00e4ytt\u00e4j\u00e4n toimintoa suorittamaan hylk\u00e4si toiminnon suorittaminen."
+   "ERROR" "Kutsu oli virheellinen."
+   "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
+
 (defpage [:any "/api/vetuma/:status"] {status :status}
-  (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
-        return-uri (get-in data [:paths (keyword status)])
-        return-uri (or return-uri "/")]
+  (let [data         (mongo/select-one :vetuma {:sessionid (session-id)})
+        params       (:form-params (request/ring-request))
+        status-param (get params "STATUS")
+        return-uri   (get-in data [:paths (keyword status)])
+        return-uri   (or return-uri "/")]
+
+    (case status
+      "cancel" (info "Vetuma cancel")
+      "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params))
+      (error "Unknown status:" status))
+
     (redirect return-uri)))
 
 (defpage "/api/vetuma/user" []
