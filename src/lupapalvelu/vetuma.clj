@@ -59,7 +59,9 @@
 (defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
 (defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
-(defn- logged [m] (info (str m)) m)
+(defn- logged [m]
+  (info (-> m (dissoc "ERRURL") (dissoc :errurl) str))
+  m)
 
 (defn apply-template
   "changes all variables in braces {} with keywords with same name.
