@@ -1,21 +1,16 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:require [taoensso.timbre :as timbre :refer [debug]]
+  (:require [taoensso.timbre :as timbre :refer [debug warn]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
-            [sade.xml :refer :all]
-            [lupapalvelu.document.schemas :as schema]
-            [lupapalvelu.xml.krysp.verdict :as verdict]
-            [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
-            [sade.http :as http]
+            [net.cgrand.enlive-html :as enlive]
             [ring.util.codec :as codec]
-            [sade.common-reader :as cr]))
-
-;;
-;; Test urls
-;;
-
-(def logica-test-legacy "http://212.213.116.162/geos_facta/wfs")
+            [sade.xml :refer :all]
+            [sade.http :as http]
+            [sade.common-reader :as cr]
+            [sade.strings :as ss]
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
 ;; Read the Krysp from Legacy
@@ -24,9 +19,14 @@
 (defn legacy-is-alive?
   "checks if the legacy system is Web Feature Service -enabled. kindof."
   [url]
-  (try
-    (-> url (http/get {:query-params {:request "GetCapabilities"} :throw-exceptions false}) :status (= 200))
-    (catch Exception e false)))
+  (when-not (s/blank? url)
+    (try
+     (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
+       (or
+         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml version=\"1.0\""))
+         (warn "Response not OK or did not contain XML. Response was: " resp)))
+     (catch Exception e
+       (warn (str "Could not connect to legacy: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
 (def building-type "typeName=rakval%3AValmisRakennus")
