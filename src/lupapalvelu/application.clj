@@ -832,8 +832,8 @@
                                    pk))
                                (:poytakirjat paatos))))
                          (:paatokset verdict))))
-        verdicts)))
-  (fail! :error.no-legacy-available))
+        verdicts))
+    (fail! :error.no-legacy-available)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
