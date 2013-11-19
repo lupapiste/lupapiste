@@ -400,7 +400,7 @@
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
                "Content-Length" (str (:content-length attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment)))}}
     {:status 404
      :body (str "can't file attachment: id=" attachment-id)}))
 
@@ -433,7 +433,7 @@
                        :attachment-id attachment-id
                        :attachment-type attachment-type
                        :content ((:content attachment))
-                       :file-name filename
+                       :filename filename
                        :content-type content-type
                        :file-size size
                        :timestamp created

@@ -414,10 +414,10 @@
   [options]
   (let [file-id (mongo/create-id)
         application-id (:application-id options)
-        file-name (:file-name options)
+        filename (:filename options)
         content (:content options)
         user (:user options)
-        sanitazed-filename (mime/sanitize-filename file-name)
+        sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)
         options (merge options {:file-id file-id
                                 :sanitazed-filename sanitazed-filename
@@ -442,7 +442,7 @@
       (fail! (:text validation-error))))
 
   (if-let [attachment-version (attach-file! {:application-id id 
-                                             :file-name filename
+                                             :filename filename
                                              :size size
                                              :content tempfile
                                              :attachment-id attachmentId
@@ -544,7 +544,7 @@
       (if download?
         (assoc-in response
           [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
+          (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment))))
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
@@ -567,15 +567,15 @@
   [{{:keys [attachment-id]} :data user :user}]
   (output-attachment-if-logged-in attachment-id true user))
 
-(defn- append-gridfs-file [zip file-name file-id]
+(defn- append-gridfs-file [zip filename file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" filename))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
-(defn- append-stream [zip file-name in]
+(defn- append-stream [zip filename in]
   (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename filename)))
     (io/copy in zip)))
 
 (defn- append-attachment [zip {:keys [filename fileId]}]

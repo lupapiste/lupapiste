@@ -806,7 +806,7 @@
                                (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
                                  (do
                                    (debug "Download" url)
-                                   (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                   (let [filename       (-> url (URL.) (.getPath) (ss/suffix "/"))
                                         resp            (http/get url :as :stream :throw-exceptions false)
                                         content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                         urlhash         (digest/sha1 url)
@@ -819,7 +819,7 @@
                                      ; any old attachment, a new version will be added
                                      (if (= 200 (:status resp))
                                        (attachment/attach-file! {:application-id id 
-                                                                 :file-name file-name
+                                                                 :filename filename
                                                                  :size content-length
                                                                  :content (:body resp) 
                                                                  :attachment-id attachment-id
