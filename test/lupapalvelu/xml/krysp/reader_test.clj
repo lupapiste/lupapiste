@@ -218,10 +218,15 @@
         (get-in owner1 [:omistajalaji]) => nil
         (get-in owner1 [:muu-omistajalaji]) => ", wut?"
 
-        ;(clojure.pprint/pprint owner2)
-
         (get-in owner2 [:_selected]) => "yritys"
         (get-in owner2 [:omistajalaji]) => "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"
         (get-in owner2 [:muu-omistajalaji]) => nil
-        )
-      )))
+        (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :etunimi]) => "Paavo"
+        (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :puhelin]) => "01"
+        (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
+        (get-in owner2 [:yritys :yritysnimi]) => "Pekkalan Putki Oy"
+        (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
+        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 18"
+        (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
+        (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
