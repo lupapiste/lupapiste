@@ -42,7 +42,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       if (page.length === 0) {
         // Something is seriously wrong, even startPage was not found
-        error("Unknown page", pageId);
+        error("Unknown page " + pageId + " and failed to default to " + self.startPage);
         return;
       }
 
