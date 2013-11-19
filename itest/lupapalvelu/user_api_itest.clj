@@ -184,12 +184,12 @@
     ; Sonja can not delete attachment
 
     (command sonja "remove-user-attachment" :attachment-id attachment-id)
-    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) =not=> nil?
+    (get (:attachments (query pena "user-attachments")) 0) =not=> nil?
 
     ; Pena can delete attachment
 
     (command pena "remove-user-attachment" :attachment-id attachment-id) => ok?
-    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))
+    (:attachments (query pena "user-attachments")) => empty?))
 
 ;;
 ;; ==============================================================================
