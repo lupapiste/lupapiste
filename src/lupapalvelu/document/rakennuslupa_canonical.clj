@@ -346,17 +346,8 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli
-                                                                   {:kuntaRooliKoodi "ei tiedossa"
-                                                                    :henkilo {:nimi {:etunimi (:firstName user)
-                                                                                     :sukunimi (:lastName user)}
-                                                                              :osoite {:osoitenimi {:teksti (:street user)}
-                                                                                       :postitoimipaikannimi (:city user)
-                                                                                       :postinumero (:zip user)}
-                                                                              :sahkopostiosoite (:email user)
-                                                                              :puhelin (:phone user)}}}}}
+                      :osapuolettieto {:Osapuolet {:osapuolitieto (get-parties documents)}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"
                       }}}}]
-
-  canonical))
+    canonical))
