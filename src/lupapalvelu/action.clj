@@ -148,7 +148,7 @@
 (defn invalid-state-in-application [command application]
   (when-let [valid-states (:states (meta-data command))]
     (let [state (:state application)]
-      (when-not (.contains valid-states (keyword state))
+      (when-not (contains? valid-states (keyword state))
         (fail :error.command-illegal-state)))))
 
 (defn validators-fail [command application]
