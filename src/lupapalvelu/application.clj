@@ -819,7 +819,7 @@
                                      ; any old attachment, a new version will be added
                                      (if (= 200 (:status resp))
                                        (attachment/attach-file! {:application-id id 
-                                                                 :filename file-name
+                                                                 :file-name file-name
                                                                  :size content-length
                                                                  :content (:body resp) 
                                                                  :attachment-id attachment-id
