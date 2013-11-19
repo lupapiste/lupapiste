@@ -5,6 +5,7 @@
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
+            [sade.strings :as ss]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -56,7 +57,7 @@
         (if (fn? src)
           (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-            (if (.contains src ".min.")
+            (if (ss/contains src ".min.")
               (IOUtils/copy in (write-header kind out src))
               (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
