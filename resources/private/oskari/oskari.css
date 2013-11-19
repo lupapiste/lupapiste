@@ -1,6 +1,11 @@
 body {
   background: rgb(246,246,246);
-  
+  font: 15px Calibri;
+}
+
+h3 {
+  font-weight: normal;
+  text-transform: uppercase;
 }
 
 #maptools {
@@ -32,6 +37,10 @@ body {
   margin: 0px;
   padding: 0px;
   border: 1px solid rgb(79,79,79);
+}
+
+.oskari-flyouttools {
+  margin-right: 8px;
 }
 
 .oskari-flyouttoolbar {
@@ -205,6 +214,10 @@ div.oskariTabs div.tab-content {
   text-decoration: none;
 }
 
+input[type="text"], textarea {
+  width: 80%;
+}
+
 [type=button] {
   background: rgb(209,209,209);
   cursor: pointer;
@@ -221,10 +234,17 @@ div.oskariTabs div.tab-content {
   color: rgb(48,48,48);
   position: relative;
   font: 14px Calibri;
+  float: right;
+  margin-top: 8px;
 }
 
 [type=button].primary {
   background: rgb(4,199,20);
   color: white;
   text-transform:uppercase;
+  float:left;
+}
+
+div.divmanazerpopup {
+  font: Calibri;
 }
