@@ -614,7 +614,7 @@
 
           <div data-bind="with: application" class="application-neighbors">
 
-            <h1 data-bind="ltext: 'application.neighbors'">Naapurit</h1>
+            <h1 data-bind="html: loc('application.' + $root.application.permitType() + '.neighbors')">Naapurit</h1>
             <p data-bind="html: loc('help.' + $root.application.permitType() + '.neighborsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
