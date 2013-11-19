@@ -647,7 +647,7 @@
 
   ;;
   ;; TODO: Luo uusi application ottamalla vanha
-  ;;       ja karsimalla siitä:
+  ;;       ja karsimalla siita:
   ;;           - attachmentsit
   ;;           - lausunnot
   ;;           - commentsit
