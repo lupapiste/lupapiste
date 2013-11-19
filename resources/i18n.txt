@@ -1,1 +1,0 @@
-attachmentType.yleiset-alueet.poikkileikkaus: Poikkileikkaus
