@@ -90,7 +90,12 @@
 (defn- ->yritys [xml-without-ns]
   (let [yritys (select1 xml-without-ns [:yritys])]
     {:_selected "yritys"
-     :yritys {} ; TODO
+     :yritys {:yritysnimi                             (get-text yritys :nimi)
+              :liikeJaYhteisoTunnus                   (get-text yritys :tunnus)
+            :osoite {:katu                            (get-text yritys :postiosoite :osoitenimi :teksti)
+                     :postinumero                     (get-text yritys :postiosoite :postinumero)
+                     :postitoimipaikannimi            (get-text yritys :postiosoite :postitoimipaikannimi)}
+            :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}
      :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
      :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
 
@@ -108,8 +113,8 @@
 
 (defn- ->rakennuksen-omistaja [omistaja]
   (cond
-    (seq (select omistaja [:henkilo])) (->henkilo omistaja)
     (seq (select omistaja [:yritys])) (->yritys omistaja)
+    (seq (select omistaja [:henkilo])) (->henkilo omistaja)
     :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
 (def cleanup (comp cr/strip-empty-maps cr/strip-nils))
