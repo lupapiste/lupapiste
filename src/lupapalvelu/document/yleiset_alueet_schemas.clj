@@ -25,7 +25,8 @@
   (body
     sijoituksen-tarkoitus-dropdown
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
+    {:name "varattava-pinta-ala" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}))
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name

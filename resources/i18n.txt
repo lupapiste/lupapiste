@@ -16,3 +16,5 @@ yleiset-alueet-hankkeen-kuvaus-kayttolupa._group_label: Hankkeen kuvaus
 yleiset-alueet-hankkeen-kuvaus-kayttolupa.kayttotarkoitus: Alueen käyttötarkoitus
 yleiset-alueet-hankkeen-kuvaus-kayttolupa.sijoitusLuvanTunniste: Sijoitusluvan tai -sopimuksen tunniste
 attachmentType.yleiset-alueet.poikkileikkaus: Poikkileikkaus
+
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.varattava-pinta-ala: Varattava pinta-ala

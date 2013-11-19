@@ -24,7 +24,8 @@
                                        :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
                                        :sijoituksen-tarkoitus {:value "other"},
                                        ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
-                                       :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}}})
+                                       :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
+                                       :varattava-pinta-ala {:value "333"}}})
 
 (def ^:private tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
