@@ -205,6 +205,12 @@ div.oskariTabs div.tab-content {
 
 .oskari-grid tbody tr {
   border-bottom: 1px solid rgb(209,209,209);  
+  border-left: 1px solid rgb(79,79,79); 
+  border-right: 1px solid rgb(79,79,79); 
+}
+
+.oskari-grid tbody tr:last-child {
+  border-bottom: 1px solid rgb(79,79,79);  
 }
 
 .oskari-grid tbody tr td {
@@ -216,6 +222,15 @@ div.oskariTabs div.tab-content {
 
 input[type="text"], textarea {
   width: 80%;
+  font-family:inherit;
+  margin-bottom: 4px;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+  box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+input[type="text"] {
+    height: 24px;
 }
 
 [type=button] {
