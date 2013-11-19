@@ -43,10 +43,10 @@
     {:permit-type permit/R
      :tree ["Rakentaminen ja purkaminen"
             (let [treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-                             (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+                             (conj treepart ["Tyonjohtaja" :tyonjohtajan-nimeaminen])
                              treepart)
                   treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
-                             (conj treepart ["Suunnittelija" :suunnittelija])
+                             (conj treepart ["Suunnittelija" :suunnittelijan-nimeaminen])
                              treepart)
                   treepart (if (env/feature? :jatkoaika)
                              (conj treepart ["Jatkoaika" :jatkoaika])
@@ -350,16 +350,16 @@
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []}
 
-     :tyonjohtaja                 {:schema "tyonjohtaja"
+     :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["hankkeen-kuvaus-minimum"]
+                                   :required ["tyonjohtaja"]
                                    :attachments []}
 
      :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["hakija" ]
+                                   :required ["maksaja" ]
                                    :attachments []}
-     :suunnittelija               {:schema "hankkeen-kuvaus-minimum"
+     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
                                    :required ["suunnittelija"]
                                    :attachments []}
