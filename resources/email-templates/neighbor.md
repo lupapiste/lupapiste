@@ -10,5 +10,4 @@ Rakennuspaikan rajanaapurina Teille ilmoitetaan, että osoitteessa {{address}}, 
 
 Som rågranne till en byggplats meddelas Ni om att man på adressen {{address}}, {{city-sv}} har anhängigt en ansökan om tillstånd för byggande. Närmare uppgifter om projektet fås via bifogade länk. Hörande av granne undertecknas elektroniskt med hjälp av nätbankskoder eller mobil-ID. Ha dina nätbankskoder till hands ifall de behövs.
 
-
 {{link-sv}}

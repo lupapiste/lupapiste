@@ -17,7 +17,7 @@ Email is sent to Loppi rakennusvalvonta
   Execute Javascript  window.location = "/api/last-email";
   Wait until  Element should be visible  //*[@id='subject']
   ${subject}=  Execute Javascript  return document.getElementById("subject").innerHTML
-  Should Be Equal  ${subject}  Uusi neuvontapyyntö
+  Should Be Equal  ${subject}  Lupapiste.fi: Ojatie 1, Loppi - Neuvontapyyntö
 
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()

@@ -315,6 +315,7 @@
     self.partyDocumentIndicator = ko.observable(0);
     self.linkPermitData = ko.observable({});
     self.appsLinkingToUs = ko.observable({});
+    self.sendUnsentAttachmentsToBackingSystemDisabled = ko.observable(false);
 
     self.attachmentsRequiringAction = ko.observable();
     self.unseenStatements = ko.observable();
@@ -381,7 +382,7 @@
 
     self.approveApplication = function(model) {
       var applicationId = self.id();
-      ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
+      ajax.command("approve-application", {id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
         //FIXME parempi tapa ilmoittaa onnistumisesta
           notify.success("hakemus hyv\u00E4ksytty",model);
@@ -466,6 +467,21 @@
 
     self.newOtherAttachment = function() {
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
+    };
+
+    // TODO: Tarvittaessa liitteiden lahetykselle voi tehda confirmation modaalin,
+    //       kts. esim attachment.js:n "deleteAttachment"
+    self.sendUnsentAttachmentsToBackingSystem = function() {
+      var appId = self.id();
+      ajax
+      .command("move-attachments-to-backing-system", {id: appId, lang: loc.getCurrentLanguage()})
+      .success(function(data) {
+        if(data.updateCount > 0) { repository.load(appId); }
+      })
+      .error(function() {
+        repository.load(appId);
+      })
+    .call();
     };
 
     self.changeTab = function(model,event) {
@@ -637,6 +653,20 @@
       }));
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
+
+
+      // Setting disable value for the "Send unsent attachments" button:
+
+     var unsentAttachmentFound =
+        _.some(app.attachments, function(a) {
+          var lastVersion = _.last(a.versions);
+          return lastVersion &&
+                 (!a.sent || lastVersion.created > a.sent) &&
+                 (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
+        });
+
+      application.sendUnsentAttachmentsToBackingSystemDisabled(!unsentAttachmentFound);
+
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);

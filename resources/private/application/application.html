@@ -378,6 +378,14 @@
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
                 class="btn">
             </button>
+            <button
+                data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
+                           ltext: 'application.attachmentsMoveToBackingSystem',
+                           disable: application.sendUnsentAttachmentsToBackingSystemDisabled,
+                           visible: $root.authorization.ok('move-attachments-to-backing-system')"
+                class="btn btn-primary modal"
+                data-test-id="send-unsent-attachments">
+            </button>
           </div>
           <div class="process-nav">
             <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="conversation"><span data-bind="ltext: 'application.next-tab'"></span><span class="icon drill-right-orange inline-right"></span></a>
