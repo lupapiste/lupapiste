@@ -25,13 +25,13 @@ Name should have changed in Swedish page too
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
 
-Experience should have changed in Swedish page to
+Experience should have changed in Swedish page too
   Wait Until  Textfield Value Should Be  architect.fise  fise
   Textfield Value Should Be  architect.degree  Arkkitehti
   Textfield Value Should Be  architect.graduatingYear  2001
   Textfield Value Should Be  architect.fise  fise
 
-Mika changes the name and experice back
+Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
   Change Textfield Value  architect.degree  Arkkitehti  Tutkinto

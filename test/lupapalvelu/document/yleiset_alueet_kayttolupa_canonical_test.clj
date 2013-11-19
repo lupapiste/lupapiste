@@ -8,27 +8,27 @@
             [sade.util :refer [contains-value?]]))
 
 
-(def operation {:id "52380c6894a74fc25bb4ba46",
-                :created 1379404904514,
-                :name "ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat"})
+(def ^:private operation {:id "52380c6894a74fc25bb4ba46",
+                          :created 1379404904514,
+                          :name "ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat"})
 
-(def tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
+(def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
+                                :created 1379404904514,
+                                :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa",
+                                              :removable false,
+                                              :repeating false,
+                                              :version 1,
+                                              :type "group",
+                                              :order 60},
+                                :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
+                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}}})
 
-(def documents [hakija
-                tyoaika-kayttolupa
-                maksaja
-                hankkeen-kuvaus])
+(def ^:private tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
 
-;(def allowedAttachmentTypes [["yleiset-alueet"
-;                              ["aiemmin-hankittu-sijoituspaatos"
-;                               "tilapainen-liikennejarjestelysuunnitelma"
-;                               "tyyppiratkaisu"
-;                               "tieto-kaivupaikkaan-liittyvista-johtotiedoista"
-;                               "liitoslausunto"
-;                               "asemapiirros"
-;                               "rakennuspiirros"
-;                               "suunnitelmakartta"]]
-;                             ["muut" ["muu"]]])
+(def ^:private documents [hakija
+                          tyoaika-kayttolupa
+                          maksaja
+                          hankkeen-kuvaus])
 
 (def kayttolupa-application {:schema-version 1,
                              :id "LP-753-2013-00002",

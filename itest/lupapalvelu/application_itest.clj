@@ -100,10 +100,10 @@
     authority-before-assignation => nil
     authority-in-the-end => nil))
 
-(fact "Applicaton shape is saved"
+(fact* "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
-        application-id (create-app-id pena)
-        resp  (command pena :save-application-shape :id application-id :shape shape)
+        application-id (create-app-id pena) => truthy
+        resp  (command pena :save-application-shape :id application-id :shape shape) => ok?
         app   (query-application pena application-id)]
     (first (:shapes app)) => shape))
 
@@ -171,17 +171,17 @@
         (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
         email => (partial contains-application-link-with-tab? application-id "verdict")))))
 
-(fact* "Applicant receives email after verdict has been fetched from KRYPS backend"
+(fact "Applicant receives email after verdict has been fetched from KRYPS backend"
   (last-email) ; Inbox zero
 
   (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
-        application-id (:id application)
-        resp  (command sonja :check-for-verdict :id application-id) => ok?
-        email (last-email)]
-
-    (:to email) => (email-for-key mikko)
-    (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
-    email => (partial contains-application-link-with-tab? application-id "verdict")))
+        application-id (:id application)]
+    (:organization application) => "753-R"
+    (command sonja :check-for-verdict :id application-id) => ok?
+    (let [email (last-email)]
+      (:to email) => (email-for-key mikko)
+      (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
+      email => (partial contains-application-link-with-tab? application-id "verdict"))))
 
 (facts* "cancel application"
   (last-email) ; Inbox zero

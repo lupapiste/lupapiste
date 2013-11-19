@@ -1,7 +1,6 @@
 (ns sade.strings-test
-  (:use sade.strings
-        clojure.test
-        midje.sweet))
+  (:require [sade.strings :refer :all]
+            [midje.sweet :refer [facts fact => truthy falsey]]))
 
 (facts "Test last-n"
   (fact "Nil-safe"

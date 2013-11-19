@@ -157,7 +157,7 @@
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
                                       :required (conj yleiset-alueet-common-schemas
-                                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+                                                  "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                                       :attachments []})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
