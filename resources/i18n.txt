@@ -1,0 +1,17 @@
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.jakokaappi-(tele/sahko): Jakokaappi (tele/sahkö)
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.jate--tai-sadevesi: Jäte- tai sadevesi
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.kaivo-(kaukolampo): Kaivo (kaukolämpö)
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.kaivo-(tele/sahko): Kaivo (tele/sähkö)
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.kaivo-(vesi,-jate--tai-sadevesi): Kaivo (vesi, jäte- tai sadevesi)
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.katuvalo: Katuvalo
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.kaukolampo: Kaukolämpö
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.liikennevalo: Liikennevalo
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.sahko: Sähkö
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.tele: Tele
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus.vesijohto: Vesijohto
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoituksen-tarkoitus._group_label: Sijoituksen tarkoitus
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.muu-sijoituksen-tarkoitus: Muu sijoituksen tarkoitus
+
+yleiset-alueet-hankkeen-kuvaus-kayttolupa._group_label: Hankkeen kuvaus
+yleiset-alueet-hankkeen-kuvaus-kayttolupa.kayttotarkoitus: Alueen käyttötarkoitus
+yleiset-alueet-hankkeen-kuvaus-kayttolupa.sijoitusLuvanTunniste: Sijoitusluvan tai -sopimuksen tunniste

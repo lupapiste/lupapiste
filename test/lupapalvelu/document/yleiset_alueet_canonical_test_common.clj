@@ -24,17 +24,6 @@
                        :email "sonja.sibbo@sipoo.fi"})
 
 
-(def hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
-                     :created 1379404904514,
-                     :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
-                                   :removable false,
-                                   :repeating false,
-                                   :version 1,
-                                   :type "group",
-                                   :order 60},
-                     :data {:kayttotarkoitus {:modified 1379404910788, :value "Hankkeen kuvaus."},
-                            :sijoitusLuvanTunniste {:modified 1379404913757, :value "LP-753-2013-00001"}}})
-
 ;; Document: Hakija
 
 (def nimi {:etunimi {:modified 1372341939920, :value "Pena"},
