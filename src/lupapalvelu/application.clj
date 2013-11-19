@@ -639,67 +639,6 @@
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id id))))
 
-
-(defcommand create-change-permit
-  {:parameters [id]
-   :roles      [:applicant :authority]
-   :states     [:verdictGiven]
-;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-;                      (partial property-id-parameters [:propertyId])
-;                      operation-validator]
-  :validators [(permit/validate-permit-type-is permit/R)]
-  }
-  [{:keys [created user application] :as command}]
-
-;  (println "\n entered defcommand create-change-permit")
-
-  ;;
-  ;; TODO: Luo uusi application ottamalla vanha
-  ;;       ja karsimalla siita:
-  ;;           - attachmentsit
-  ;;           - lausunnot
-  ;;           - commentsit
-  ;;           - osa timestampeista.
-  ;;       Luo dokumenteille uudet ID:t.
-  ;;       Osan timestampeista voit korvata saadulla "created"-parametrilla.
-  ;;
-  ;; Documenttien timestamppeja ei tarvinne muuttaa, koska tietoja ei muuteta kopioinnissa?
-
-;  (println "\n create-change-permit, application:")
-;  (clojure.pprint/pprint application)
-;  (println "\n")
-
-  (let [muutoslupa-app-id (make-application-id (:municipality application))
-;        _  (println "\n create-change-permit, muutoslupa-app-id:" muutoslupa-app-id)
-        muutoslupa-app (-> application
-                         (assoc :documents       (into []
-                                                   (map #(assoc % :id (mongo/create-id)) (:documents application))))
-                         (assoc :id              muutoslupa-app-id)
-                         (assoc :created         created)
-                         (assoc :opened          created)
-                         (assoc :state           (cond
-                                                   (user/authority? user)     :open
-                                                   :else                      :draft))
-;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
-                         (assoc :permitSubtype   :muutoslupa)
-
-                         ;; *** TODO: Voiko schema-versio vaihtua? ***
-;                         (assoc :schema-version  (schemas/get-latest-schema-version))
-                         (dissoc :attachments :statements :comments)
-                         )
-        ]
-
-
-;    (println "\n create-change-permit, muutoslupa-app:")
-;    (clojure.pprint/pprint muutoslupa-app)
-;    (println "\n")
-
-    (mongo/insert :applications muutoslupa-app)
-
-    (ok :id muutoslupa-app-id)
-    ))
-
-
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
@@ -747,6 +686,10 @@
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
+;;
+;; Link permits
+;;
+
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :verified   true
@@ -775,24 +718,28 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defcommand add-link-permit
-  {:parameters [id linkPermitId propertyId]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]
-   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
-  [{application :application}]
-  (let [db-id (make-mongo-id-for-link-permit id linkPermitId)]
+(defn- do-add-link-permit [application linkPermitId]
+  (let [id (:id application)
+        db-id (make-mongo-id-for-link-permit id linkPermitId)]
     (mongo/update-by-id :app-links db-id
       {:_id db-id
        :link [id linkPermitId]
        (keyword id) {:type "application"
                      :apptype (-> application :operations first :name)
-                     :propertyId propertyId}
+                     :propertyId (:propertyId application)}
        (keyword linkPermitId) {:type "linkpermit"
                                :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
                                                  "lupapistetunnus"
                                                  "kuntalupatunnus")}}
       :upsert true)))
+
+(defcommand add-link-permit
+  {:parameters ["id" linkPermitId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+  [{application :application}]
+  (do-add-link-permit application linkPermitId))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
@@ -802,6 +749,56 @@
   (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
     (ok)
     (fail :error.unknown)))
+
+
+;;
+;; Change permit
+;;
+
+(defcommand create-change-permit
+  {:parameters ["id"]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven]
+;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+;                      (partial property-id-parameters [:propertyId])
+;                      operation-validator]
+  :validators [(permit/validate-permit-type-is permit/R)]
+  }
+  [{:keys [created user application] :as command}]
+
+  ;;
+  ;; TODO: Luo uusi application ottamalla vanha
+  ;;       ja karsimalla siita:
+  ;;           - attachmentsit
+  ;;           - lausunnot
+  ;;           - commentsit
+  ;;           - osa timestampeista.
+  ;;       Luo dokumenteille uudet ID:t.
+  ;;       Osan timestampeista voit korvata saadulla "created"-parametrilla.
+  ;;
+  ;; Documenttien timestamppeja ei tarvinne muuttaa, koska tietoja ei muuteta kopioinnissa?
+  ;;
+
+  (let [muutoslupa-app-id (make-application-id (:municipality application))
+        muutoslupa-app (-> application
+                         (assoc :documents       (into []
+                                                   (map #(assoc % :id (mongo/create-id)) (:documents application))))
+                         (assoc :id              muutoslupa-app-id)
+                         (assoc :created         created)
+                         (assoc :opened          created)
+                         (assoc :state           (cond
+                                                   (user/authority? user)     :open
+                                                   :else                      :draft))
+;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
+                         (assoc :permitSubtype   :muutoslupa)
+
+                         ;; *** TODO: Voiko schema-versio vaihtua? ***
+;                         (assoc :schema-version  (schemas/get-latest-schema-version))
+                         (dissoc :attachments :statements :comments))]
+    (do-add-link-permit muutoslupa-app (:id application))
+    (mongo/insert :applications (enrich-with-link-permit-data muutoslupa-app))
+    (ok :id muutoslupa-app-id)))
+
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
