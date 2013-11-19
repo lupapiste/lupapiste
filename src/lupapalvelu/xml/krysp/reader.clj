@@ -1,21 +1,16 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:require [taoensso.timbre :as timbre :refer [debug]]
+  (:require [taoensso.timbre :as timbre :refer [debug warn]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
-            [sade.xml :refer :all]
-            [lupapalvelu.document.schemas :as schema]
-            [lupapalvelu.xml.krysp.verdict :as verdict]
-            [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
-            [sade.http :as http]
+            [net.cgrand.enlive-html :as enlive]
             [ring.util.codec :as codec]
-            [sade.common-reader :as cr]))
-
-;;
-;; Test urls
-;;
-
-(def logica-test-legacy "http://212.213.116.162/geos_facta/wfs")
+            [sade.xml :refer :all]
+            [sade.http :as http]
+            [sade.common-reader :as cr]
+            [sade.strings :as ss]
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
 ;; Read the Krysp from Legacy
@@ -24,9 +19,14 @@
 (defn legacy-is-alive?
   "checks if the legacy system is Web Feature Service -enabled. kindof."
   [url]
-  (try
-    (-> url (http/get {:query-params {:request "GetCapabilities"} :throw-exceptions false}) :status (= 200))
-    (catch Exception e false)))
+  (when-not (s/blank? url)
+    (try
+     (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
+       (or
+         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml version=\"1.0\""))
+         (warn "Response not OK or did not contain XML. Response was: " resp)))
+     (catch Exception e
+       (warn (str "Could not connect to legacy: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
 (def building-type "typeName=rakval%3AValmisRakennus")
@@ -72,7 +72,34 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- ->rakennuksen-omistaja [omistaja]
+(defn- ->henkilo [xml-without-ns]
+  (let [henkilo (select1 xml-without-ns [:henkilo])]
+    {:_selected "henkilo"
+     :henkilo   {:henkilotiedot {:etunimi  (get-text henkilo :nimi :etunimi)
+                                 :sukunimi (get-text henkilo :nimi :sukunimi)
+                                 :hetu     (get-text henkilo :henkilotunnus)
+                                 :turvakieltoKytkin (get-text xml-without-ns :turvakieltoKytkin)}
+                 :yhteystiedot  {:email     (get-text henkilo :sahkopostiosoite)
+                                 :puhelin   (get-text henkilo :puhelin)}
+                 :osoite        {:katu         (get-text henkilo :osoite :osoitenimi :teksti)
+                                 :postinumero  (get-text henkilo :osoite :postinumero)
+                                 :postitoimipaikannimi  (get-text henkilo :osoite :postitoimipaikannimi)}}
+     :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
+     :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
+
+(defn- ->yritys [xml-without-ns]
+  (let [yritys (select1 xml-without-ns [:yritys])]
+    {:_selected "yritys"
+     :yritys {:yritysnimi                             (get-text yritys :nimi)
+              :liikeJaYhteisoTunnus                   (get-text yritys :liikeJaYhteisotunnus)
+              :osoite {:katu                          (get-text yritys :postiosoite :osoitenimi :teksti)
+                       :postinumero                   (get-text yritys :postiosoite :postinumero)
+                       :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
+              :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}
+     :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
+     :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
+
+(defn- ->rakennuksen-omistaja-legacy-version [omistaja]
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)
             :osoite {:katu                            (get-text omistaja :osoitenimi :teksti)
@@ -81,9 +108,14 @@
             :yhteyshenkilo {:henkilotiedot {:etunimi  (get-text omistaja :henkilonnimi :etunimi)      ;; does-not-exist in test
                                             :sukunimi (get-text omistaja :henkilonnimi :sukunimi)     ;; does-not-exist in test
                             :yhteystiedot {:email     ...notfound...
-                                           :fax       ...notfound...
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
+
+(defn- ->rakennuksen-omistaja [omistaja]
+  (cond
+    (seq (select omistaja [:yritys])) (->yritys omistaja)
+    (seq (select omistaja [:henkilo])) (->henkilo omistaja)
+    :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
 (def cleanup (comp cr/strip-empty-maps cr/strip-nils))
 
