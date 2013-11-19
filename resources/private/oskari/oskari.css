@@ -205,6 +205,12 @@ div.oskariTabs div.tab-content {
 
 .oskari-grid tbody tr {
   border-bottom: 1px solid rgb(209,209,209);  
+  border-left: 1px solid rgb(79,79,79); 
+  border-right: 1px solid rgb(79,79,79); 
+}
+
+.oskari-grid tbody tr:last-child {
+  border-bottom: 1px solid rgb(79,79,79);  
 }
 
 .oskari-grid tbody tr td {
