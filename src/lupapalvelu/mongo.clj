@@ -137,7 +137,7 @@
       {:content (fn [] (.getInputStream attachment))
        :content-type (.getContentType attachment)
        :content-length (.getLength attachment)
-       :filename (.getFilename attachment)
+       :file-name (.getFilename attachment)
        :metadata metadata
        :application (:application metadata)})))
 

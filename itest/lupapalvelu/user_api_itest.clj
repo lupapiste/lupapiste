@@ -160,17 +160,17 @@
   ; Initially pena does not have attachments?
   ;
 
-  (fact "Initially pena does not have attachments?" (:attachments (query pena "user-attachments")) => nil?)
+  (fact "Initially pena does not have attachments?" 
+        (:attachments (query pena "user-attachments")) => nil?)
 
   ;
-  ; Pena uploads an examination:
+  ; Pena uploads a tutkintotodistus:
   ;
 
-  (let [attachment-id (:attachment-id (upload-user-attachment pena "examination" true))]
+  (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))]
 
     ; Now Pena has attachment
-
-    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => (contains {:attachment-id attachment-id :attachment-type "examination"})
+    (get (:attachments (query pena "user-attachments")) 0) => (contains {:attachment-id attachment-id :attachment-type {:type-group "osapuolet", :type-id "tutkintotodistus"}})
 
     ; Attachment is in GridFS
 

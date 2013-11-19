@@ -373,7 +373,7 @@
         attachment-id     (mongo/create-id)
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
-                           :filename         filename
+                           :file-name         filename
                            :content-type     content-type
                            :size             size
                            :created          (now)}]
