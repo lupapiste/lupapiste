@@ -134,4 +134,4 @@
            (let [request {:params (merge base-params layer)
                           :headers {"accept-encoding" "gzip, deflate"}}]
              (println "Checking" (get layer "LAYERS"))
-             (wfs/raster-images request) => http200?))))
+             (wfs/raster-images request "wms") => http200?))))
