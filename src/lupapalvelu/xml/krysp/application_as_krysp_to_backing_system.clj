@@ -6,6 +6,32 @@
             [sade.env :as env]
             [me.raynes.fs :as fs]))
 
+
+(defn- get-sftp-directory [permit-type]
+  (condp = permit-type
+    :YA "/yleiset_alueet"
+    :R  "/rakennus"
+    :P  "/poikkeusasiat"))
+
+(defn- get-output-directory [permit-type organization]
+  (let [sftp-user ((condp = permit-type
+                     :YA :yleiset-alueet-ftp-user
+                     :R  :rakennus-ftp-user
+                     :P  :poikkari-ftp-user)
+                    organization)]
+    (str
+      (env/value :outgoing-directory)
+      "/"
+      sftp-user
+      (get-sftp-directory permit-type))))
+
+(defn- get-begin-of-link [permit-type]
+  (str
+    (env/value :fileserver-address)
+    (get-sftp-directory permit-type)
+    "/"))
+
+
 (defn save-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
 
@@ -14,18 +40,13 @@
                    :YA ya-mapping/save-application-as-krysp
                    :R  rl-mapping/save-application-as-krysp
                    :P   p-mapping/save-application-as-krysp)
-        sftp-user ((condp = permit-type
-                     :YA :yleiset-alueet-ftp-user
-                     :R  :rakennus-ftp-user
-                     :P  :poikkari-ftp-user)
-                    organization)
-        sftp-directory (condp = permit-type
-                         :YA "/yleiset_alueet"
-                         :R  "/rakennus"
-                         :P  "/poikkeusasiat")
-        dynamic-part-of-outgoing-directory (str sftp-user sftp-directory)
-        output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
-        fileserver-address (env/value :fileserver-address)
-        begin-of-link (str fileserver-address sftp-directory "/")]
-
+        output-dir (get-output-directory permit-type organization)
+        begin-of-link  (get-begin-of-link permit-type)]
     (krysp-fn application lang submitted-application output-dir begin-of-link)))
+
+
+(defn save-unsent-attachments-as-krysp [application lang organization user]
+  (let [permit-type (keyword (permit/permit-type application))
+        output-dir (get-output-directory permit-type organization)
+        begin-of-link  (get-begin-of-link permit-type)]
+    (rl-mapping/save-unsent-attachments-as-krysp application lang output-dir begin-of-link user)))

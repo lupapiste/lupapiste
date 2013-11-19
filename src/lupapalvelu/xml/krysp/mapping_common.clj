@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.mapping-common
   (:require [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
-            [lupapalvelu.attachment :refer [encode-filename]]
+            [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [me.raynes.fs :as fs]
@@ -142,7 +142,9 @@
                              henkilo
                              yritys
                              {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}]}]}
+                             {:tag :koulutus}
+                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :valmistumisvuosi}]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -204,7 +206,7 @@
 
 
 (defn get-file-name-on-server [file-id file-name]
-  (str file-id "_" (encode-filename file-name)))
+  (str file-id "_" (ss/encode-filename file-name)))
 
 (defn get-submitted-filename [application-id]
   (str application-id "_submitted_application.pdf"))

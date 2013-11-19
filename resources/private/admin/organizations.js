@@ -85,12 +85,36 @@
 
   var editOrganizationModel = new EditOrganizationModel();
 
+  function LoginAsModel() {
+    var self = this;
+    self.password = ko.observable("");
+    self.organizationId = null;
+
+    self.open = function(organization) {
+      self.organizationId = organization.id;
+      self.password("");
+      LUPAPISTE.ModalDialog.open("#dialog-login-as");
+    };
+
+    self.login = function() {
+      ajax
+        .command("impersonate-authority", {organizationId: self.organizationId, password: self.password()})
+        .success(function(d) {
+          window.location.href = "/app/fi/authority";
+        })
+        .call();
+      return false;
+    };
+  }
+  var loginAsModel = new LoginAsModel();
+
   hub.onPageChange("organizations", organizationsModel.load);
 
   $(function() {
     $("#organizations").applyBindings({
       "organizationsModel": organizationsModel,
-      "editOrganizationModel": editOrganizationModel
+      "editOrganizationModel": editOrganizationModel,
+      "loginAsModel": loginAsModel
     });
   });
 

@@ -38,11 +38,19 @@
                     ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
                     ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
                     ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-                  ["Rakennuksen purkaminen" :purkaminen]]]
+                  ["Rakennuksen purkaminen" :purkaminen]]
+        ]
     {:permit-type permit/R
      :tree ["Rakentaminen ja purkaminen"
-            (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-              (conj treepart ["Tyonjohtaja" :tyonjohtaja])
+            (let [treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
+                             (conj treepart ["Tyonjohtaja" :tyonjohtajan-nimeaminen])
+                             treepart)
+                  treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
+                             (conj treepart ["Suunnittelija" :suunnittelijan-nimeaminen])
+                             treepart)
+                  treepart (if (env/feature? :jatkoaika)
+                             (conj treepart ["Jatkoaika" :jatkoaika])
+                             treepart)]
               treepart)]}))
 
 (def ^:private operation-tree-for-environment-R
@@ -342,9 +350,18 @@
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []}
 
-     :tyonjohtaja                 {:schema "hankkeen-kuvaus-minimum"
+     :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["tyonjohtaja" ]
+                                   :required ["tyonjohtaja"]
+                                   :attachments []}
+
+     :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["maksaja" ]
+                                   :attachments []}
+     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["suunnittelija"]
                                    :attachments []}
      }
     ya-operations))

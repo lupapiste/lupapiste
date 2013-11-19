@@ -48,6 +48,23 @@
 (defn decimal-number? [s]
   (or (numeric? s) (if (and (string? s) (re-matches #"^\d+\.\d+$" s)) true false)))
 
-(defn ^String lower-case [^CharSequence x] (when x (s/lower-case x)))
+(defn lower-case ^String [^CharSequence x] (when x (s/lower-case x)))
 
-(defn ^String trim [^CharSequence x] (when x (s/trim x)))
+(defn trim ^String [^CharSequence x] (when x (s/trim x)))
+
+(defn split ^String [^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))
+
+; alias common clojure.string stuff, so that you dont need to require both namespaces:
+
+(def blank? s/blank?)
+
+(def windows-filename-max-length 255)
+
+(defn encode-filename
+  "Replaces all non-ascii chars and other that the allowed punctuation with dash.
+   UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
+  [unencoded-filename]
+  (when-let [de-accented (de-accent unencoded-filename)]
+    (s/replace
+      (last-n windows-filename-max-length de-accented)
+      #"[^a-zA-Z0-9\.\-_ ]" "-")))
