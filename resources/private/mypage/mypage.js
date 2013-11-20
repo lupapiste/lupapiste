@@ -172,8 +172,8 @@
       return !_.isBlank(self.filename()) && self.attachmentType();
     });
 
-    self.availableAttachmentTypes = _.map(["cv", "examination", "proficiency"], function(type) {
-      return {id: type, name: loc(["userinfo.architect.attachments.name", type])};
+    self.availableAttachmentTypes = _.map(LUPAPISTE.config.userAttachmentTypes, function(type) {
+      return {id: type, name: loc(["attachmentType", type])};
     });
 
     self.init = function() {
@@ -242,7 +242,10 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) { uploadModel.done(); },
+            done: function(e, data) { 
+              uploadModel.done(); 
+              LUPAPISTE.ModalDialog.close();
+            },
             fail: uploadModel.error
           });
 
