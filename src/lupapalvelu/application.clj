@@ -867,7 +867,7 @@
                                  (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
                                    (do
                                      (debug "Download" url)
-                                     (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                     (let [filename       (-> url (URL.) (.getPath) (ss/suffix "/"))
                                           resp            (http/get url :as :stream :throw-exceptions false)
                                           content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                           urlhash         (digest/sha1 url)
@@ -879,7 +879,16 @@
                                        ; If the attachment-id, i.e., hash of the URL matches
                                        ; any old attachment, a new version will be added
                                        (if (= 200 (:status resp))
-                                         (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                         (attachment/attach-file! {:application-id id 
+                                                                 :filename filename
+                                                                 :size content-length
+                                                                 :content (:body resp) 
+                                                                 :attachment-id attachment-id
+                                                                 :attachment-type attachment-type
+                                                                 :target target
+                                                                 :locked locked 
+                                                                 :user user 
+                                                                 :timestamp attachment-time})
                                          (error (str (:status resp) " - unable to download " url ": " resp)))
                                        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
                                    pk))

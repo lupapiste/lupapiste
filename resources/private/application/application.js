@@ -460,6 +460,16 @@
       attachment.initFileUpload(currentId, null, null, true);
     };
 
+    self.copyOwnAttachments = function(model) {
+      var applicationId = self.id();
+      ajax.command("copy-user-attachments-to-application", { "id": applicationId })
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .call();
+      return false;
+    }
+
     self.newOtherAttachment = function() {
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     };
@@ -611,10 +621,12 @@
       var drawings = _.map(application.drawings(), function(d) {
         return {
           "id": d.id(),
-          "name": d.name(),
-          "desc": d.desc(),
-          "category": d.category(),
-          "geometry": d.geometry()
+          "name": d.name? d.name() :"",
+          "desc": d.desc ? d.desc() : "",
+          "category": d.category ? d.category() : "",
+          "geometry": d.geometry ? d.geometry() : "",
+          "area": d.area? d.area() : "",
+          "height": d.height? d.height():""
         }});
 
       hub.send("oskari-show-shapes", {
