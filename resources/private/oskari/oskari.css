@@ -263,3 +263,8 @@ input[type="text"] {
 div.divmanazerpopup {
   font: Calibri;
 }
+
+div.layerselection2 .layer.selected div.layer-tools div.left-tools div.layer-opacity input.opacity {
+
+width: 32px;
+}
