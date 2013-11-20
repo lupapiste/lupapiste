@@ -482,8 +482,6 @@
 
     self.createChangePermit = function() {
 
-      console.log("entered self.createChangePermit");
-
 // Create.js:sta mallia:
 //
 //      ajax.command("create-application", {
@@ -508,18 +506,11 @@
         ajax
         .command("create-change-permit", {id: appId/*, lang: loc.getCurrentLanguage()*/})
         .success(function(data) {
-          console.log("self.createChangePermit, SUCCESS, data: ", data);
           repository.load(data.id);
           window.location.hash = "#!/application/" + data.id;
         })
-        .error(function() {
-          console.log("self.createChangePermit, ERROR");
-//          repository.load(appId);
-        })
       .call();
     };
-
-
 
 
     self.changeTab = function(model,event) {
