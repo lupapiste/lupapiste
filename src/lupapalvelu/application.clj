@@ -614,7 +614,9 @@
                          :title            address
                          :auth             [owner]
                          :comments         (map make-comment messages)
-                         :schema-version   (schemas/get-latest-schema-version)}
+                         :schema-version   (schemas/get-latest-schema-version)
+                         :verdicts         []
+                         :tasks            []}
           application   (merge application
                           (if info-request?
                             {:attachments            []
