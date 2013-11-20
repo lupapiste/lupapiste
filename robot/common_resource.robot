@@ -275,7 +275,6 @@ Create application
   Click by test id  create-application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
-  Run Keyword If  "${permitType}" == "YA"  Wait Until  Element Should Not Be Visible  xpath=//span[@data-test-id='application-pdf-btn']
 
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
@@ -299,7 +298,6 @@ Prepare new request
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//*[@class="attachments-list"]/span[text()="Asemapiirros"]
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
