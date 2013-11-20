@@ -544,7 +544,7 @@
       (if download?
         (assoc-in response
           [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment))))
+          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
