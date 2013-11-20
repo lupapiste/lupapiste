@@ -158,7 +158,7 @@
                                       :permit-type "YA"
                                       ; :schema-data [[["_selected" :value] "yritys"]]   ;;TODO: Miksei tama vaikuta Maksajaan?
                                       :required (conj yleiset-alueet-common-schemas
-                                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+                                                  "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                                       :attachments attachment/attachment-types-YA})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"

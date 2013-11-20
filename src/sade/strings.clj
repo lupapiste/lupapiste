@@ -7,11 +7,15 @@
   (when s
     (apply str (take-last n s))))
 
+(defn contains [^String s ^CharSequence needle]
+  (when (and s needle)
+    (.contains s needle)))
+
 (defn suffix
   "Returns a substring from the end of last occurance of separator till the end of s"
   [^String s ^String separator]
   (when s
-    (if (and separator (not (.isEmpty separator)) (.contains s separator))
+    (if (and separator (not (.isEmpty separator)) (contains s separator))
       (.substring s (+ (.lastIndexOf s separator) (.length separator)))
       s)))
 

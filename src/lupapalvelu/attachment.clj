@@ -108,7 +108,8 @@
                     :liitoslausunto
                     :asemapiirros
                     :rakennuspiirros
-                    :suunnitelmakartta]
+                    :suunnitelmakartta
+                    :poikkileikkaus]
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 
