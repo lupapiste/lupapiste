@@ -53,19 +53,6 @@
     (info "blank parameters:" (s/join ", " missing))
     (fail :error.missing-parameters :parameters (vec missing))))
 
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-applicant-document app))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
-
-(defn get-application-operation [app]
-  (first (:operations app)))
-
 (defn update-application
   "get current application from command (or fail) and run changes into it."
   ([command changes]

@@ -12,7 +12,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters get-application-operation get-applicant-name without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
@@ -30,8 +30,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.neighbors :as neighbors]
-            [lupapalvelu.open-inforequest :as open-inforequest])
+            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.application-meta-fields :as meta-fields])
   (:import [java.net URL]))
 
 ;; Validators
@@ -63,93 +63,6 @@
   (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
-(defn count-unseen-comment [user app]
-  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [comment]
-                     (and (> (:created comment) last-seen)
-                          (not= (get-in comment [:user :id]) (:id user))
-                          (not (blank? (:text comment)))))
-                   (:comments app)))))
-
-(defn count-unseen-statements [user app]
-  (if-not (:infoRequest app)
-    (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [statement]
-                       (and (> (or (:given statement) 0) last-seen)
-                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
-                     (:statements app))))
-    0))
-
-(defn count-unseen-verdicts [user app]
-  (if (and (= (:role user) "applicant") (not (:infoRequest app)))
-    (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
-    0))
-
-(defn count-attachments-requiring-action [user app]
-  (if-not (:infoRequest app)
-    (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
-      (case (keyword (:role user))
-        :applicant (count-attachments "requires_user_action")
-        :authority (count-attachments "requires_authority_action")
-        0))
-    0))
-
-(defn count-document-modifications-per-doc [user app]
-  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
-    (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
-    {}))
-
-
-(defn count-document-modifications [user app]
-  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
-    (reduce + 0 (vals (:documentModificationsPerDoc app)))
-    0))
-
-(defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
-
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :neighbors :fn neighbors/normalize-neighbors}
-                  {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
-                  {:field :documentModifications :fn count-document-modifications}
-                  {:field :unseenComments :fn count-unseen-comment}
-                  {:field :unseenStatements :fn count-unseen-statements}
-                  {:field :unseenVerdicts :fn count-unseen-verdicts}
-                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
-                  {:field :indicators :fn indicator-sum}])
-
-(defn with-meta-fields [user app]
-  (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
-
-(defn- enrich-with-link-permit-data [app]
-  (let [app-id (:id app)
-        resp (mongo/select :app-links {:link {$in [app-id]}})]
-    (if (seq resp)
-      ;; Link permit data was found
-      (let [convert-fn (fn [link-data]
-                         (let [link-array (:link link-data)
-                               app-index (.indexOf link-array app-id)
-                               link-permit-id (link-array (if (= 0 app-index) 1 0))
-                               link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
-                           (if (= (:type ((keyword app-id) link-data)) "application")
-                             {:id link-permit-id :type link-permit-type}
-                             {:id link-permit-id})))
-            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
-            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
-
-        (-> app
-          (assoc :linkPermitData (if (seq our-link-permits)
-                                   (into [] (map convert-fn our-link-permits))
-                                   nil))
-          (assoc :appsLinkingToUs (if (seq apps-linking-to-us)
-                                    (into [] (map convert-fn apps-linking-to-us))
-                                    nil))))
-      ;; No link permit data found
-      (-> app
-        (assoc :linkPermitData nil)
-        (assoc :appsLinkingToUs nil)))))
-
 ;;
 ;; Query application:
 ;;
@@ -157,8 +70,8 @@
 (defn- app-post-processor [user]
   (comp
     without-system-keys
-    (partial with-meta-fields user)
-    enrich-with-link-permit-data))
+    (partial meta-fields/with-meta-fields user)
+    meta-fields/enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
@@ -440,7 +353,7 @@
           (executed "assign-to-me" command))
         (try
             (mapping-to-krysp/save-application-as-krysp
-              (enrich-with-link-permit-data application)
+              (meta-fields/enrich-with-link-permit-data application)
               lang
               submitted-application
               organization)
@@ -471,7 +384,7 @@
                :submitted created}})
       (try
         (mongo/insert :submitted-applications
-          (-> (enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
+          (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
         (catch com.mongodb.MongoException$DuplicateKey e
           ; This is ok. Only the first submit is saved.
             )))))
@@ -892,7 +805,7 @@
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   (juxt :address :municipality)
-                  get-application-operation
+                  meta-fields/get-application-operation
                   :applicant
                   :submitted
                   :indicators
@@ -953,7 +866,7 @@
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row (partial with-meta-fields user)) apps)
+        rows        (map (comp make-row (partial meta-fields/with-meta-fields user)) apps)
         echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
