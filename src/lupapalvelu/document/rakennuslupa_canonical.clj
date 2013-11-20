@@ -336,17 +336,21 @@
                       }}}}]
     canonical))
 
-(defn unsent-attachments-to-canonical [application lang user]
+(defn unsent-attachments-to-canonical [application lang]
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
+        hakija-info (first (filter
+                             #(= (-> % :Osapuoli :VRKrooliKoodi) "hakija")
+                             (get-parties documents)))
+        hakija-info (assoc-in hakija-info [:Osapuoli :kuntaRooliKoodi] "ei tiedossa")
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto {:Osapuolet {:osapuolitieto (get-parties documents)}}
+                      :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"
                       }}}}]

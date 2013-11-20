@@ -874,9 +874,8 @@
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
            (let [canonical (unsent-attachments-to-canonical
-                             (assoc application-rakennuslupa :state "verdictGiven") ;; TODO: Lisataanko tahan liitteet?
-                             "sv"
-                             authority-user-jussi)
+                             (assoc application-rakennuslupa :state "verdictGiven")
+                             "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -906,10 +905,10 @@
 
              (facts "Osapuolet"
                (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
-               (fact "etunimi" (:etunimi nimi) => "Jussi")
-               (fact "sukunimi" (:sukunimi nimi) => "Viranomainen")
-               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1")
-               (fact "puhelin" (:puhelin henkilo) => "1231234567"))))
+               (fact "etunimi" (:etunimi nimi) => "Pena")
+               (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
+               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
+               (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
 
 
 
