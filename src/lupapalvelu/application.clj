@@ -493,6 +493,14 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
+(defcommand save-application-drawings
+  {:parameters [:id drawings]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :submitted :complement-needed :info]}
+  [command]
+  (update-application command
+    {$set {:drawings drawings}}))
+
 (defn make-attachments [created operation organization-id & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
@@ -791,40 +799,41 @@
                          })}}))
 
 (defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
-  (let [legacy   (organization/get-legacy organization)
-        xml      (krysp/application-xml legacy id)
-        verdicts (krysp/->verdicts xml)]
-    (map
-      (fn [verdict]
-        (assoc verdict
-          :timestamp timestamp
-          :paatokset (map
-                       (fn [paatos]
-                         (assoc paatos :poytakirjat
-                           (map
-                             (fn [pk]
-                               (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                 (do
-                                   (debug "Download" url)
-                                   (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                        resp            (http/get url :as :stream :throw-exceptions false)
-                                        content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                        urlhash         (digest/sha1 url)
-                                        attachment-id   urlhash
-                                        attachment-type {:type-group "muut" :type-id "muu"}
-                                        target          {:type "verdict" :id urlhash}
-                                        locked          true
-                                        attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                     ; If the attachment-id, i.e., hash of the URL matches
-                                     ; any old attachment, a new version will be added
-                                     (if (= 200 (:status resp))
-                                       (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
-                                       (error (str (:status resp) " - unable to download " url ": " resp)))
-                                     (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
-                                 pk))
-                             (:poytakirjat paatos))))
-                       (:paatokset verdict))))
-      verdicts)))
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [xml      (krysp/application-xml legacy id)
+          verdicts (krysp/->verdicts xml)]
+      (map
+        (fn [verdict]
+          (assoc verdict
+            :timestamp timestamp
+            :paatokset (map
+                         (fn [paatos]
+                           (assoc paatos :poytakirjat
+                             (map
+                               (fn [pk]
+                                 (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                   (do
+                                     (debug "Download" url)
+                                     (let [file-name       (-> url (URL.) (.getPath) (ss/suffix "/"))
+                                          resp            (http/get url :as :stream :throw-exceptions false)
+                                          content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                          urlhash         (digest/sha1 url)
+                                          attachment-id   urlhash
+                                          attachment-type {:type-group "muut" :type-id "muu"}
+                                          target          {:type "verdict" :id urlhash}
+                                          locked          true
+                                          attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                       ; If the attachment-id, i.e., hash of the URL matches
+                                       ; any old attachment, a new version will be added
+                                       (if (= 200 (:status resp))
+                                         (attachment/attach-file! id file-name content-length (:body resp) attachment-id attachment-type target locked user attachment-time)
+                                         (error (str (:status resp) " - unable to download " url ": " resp)))
+                                       (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+                                   pk))
+                               (:poytakirjat paatos))))
+                         (:paatokset verdict))))
+        verdicts))
+    (fail! :error.no-legacy-available)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
@@ -855,29 +864,25 @@
 (defcommand "merge-details-from-krysp"
   {:parameters [:id :documentId :buildingId]
    :roles      [:applicant :authority]}
-  [{{:keys [id documentId buildingId]} :data created :created :as command}]
-  (with-application command
-    (fn [{:keys [organization propertyId] :as application}]
-      (if-let [legacy (organization/get-legacy organization)]
-        (let [document     (domain/get-document-by-id application documentId)
-              kryspxml     (krysp/building-xml legacy propertyId)
-              updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
-          (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-          (commands/persist-model-updates id document updates created :source "krysp")
-          (ok))
-        (fail :no-legacy-available)))))
+  [{{:keys [id documentId buildingId]} :data created :created {:keys [organization propertyId] :as application} :application :as command}]
+  (if-let [legacy (organization/get-legacy organization)]
+    (let [document     (domain/get-document-by-id application documentId)
+          kryspxml     (krysp/building-xml legacy propertyId)
+          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
+      (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
+      (commands/persist-model-updates id document updates created :source "krysp")
+      (ok))
+    (fail :error.no-legacy-available)))
 
 (defcommand get-building-info-from-legacy
   {:parameters [id]
    :roles      [:applicant :authority]}
-  [command]
-  (with-application command
-    (fn [{:keys [organization propertyId] :as application}]
-      (if-let [legacy   (organization/get-legacy organization)]
-        (let [kryspxml  (krysp/building-xml legacy propertyId)
-              buildings (krysp/->buildings kryspxml)]
-          (ok :data buildings))
-        (fail :no-legacy-available)))))
+  [{{:keys [organization propertyId] :as application} :application}]
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [kryspxml  (krysp/building-xml legacy propertyId)
+          buildings (krysp/->buildings kryspxml)]
+      (ok :data buildings))
+    (fail :error.no-legacy-available)))
 
 ;;
 ;; Service point for jQuery dataTables:

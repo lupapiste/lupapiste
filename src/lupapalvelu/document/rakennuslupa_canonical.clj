@@ -239,8 +239,8 @@
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
                       :kayttotapaus (condp = operation-name
-                                      "tyonjohtaja" "Uuden ty\u00f6njohtajan nime\u00e4minen"
-                                      "suunnittelija" "Uuden suunnittelijan nime\u00e4minen"
+                                      "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                      "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                       "jatkoaika" "Jatkoaikahakemus"
                                       (get-kayttotapaus documents toimenpiteet))
                       :asianTiedot (if link-permit-data
@@ -252,8 +252,8 @@
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
                         (get-viitelupatieto link-permit-data)))
                     canonical)
-        canonical (if-not (or (= operation-name "tyonjohtaja")
-                            (= operation-name "suunnittelija")
+        canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
+                            (= operation-name "suunnittelijan-nimeaminen")
                             (= operation-name "jatkoaika"))
                     (-> canonical
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
