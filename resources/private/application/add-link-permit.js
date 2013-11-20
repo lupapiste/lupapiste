@@ -121,6 +121,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   //
 
   self.followAppLink = function(linkId) {
+    repository.load(linkId);                              // TODO: Onko tama tarpeen?
     window.location.hash = "#!/application/" + linkId;
     return false;
   };

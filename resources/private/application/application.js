@@ -315,7 +315,12 @@
     self.partyDocumentIndicator = ko.observable(0);
     self.linkPermitData = ko.observable({});
     self.appsLinkingToUs = ko.observable({});
-    self.sendUnsentAttachmentsToBackingSystemDisabled = ko.observable(false);
+    self.unsentAttachmentsNotFound = ko.observable(false);
+    self.pending = ko.observable(false);
+    self.processing = ko.observable(false);
+    self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
+      return self.pending() || self.processing() || self.unsentAttachmentsNotFound();
+    });
 
     self.attachmentsRequiringAction = ko.observable();
     self.unseenStatements = ko.observable();
@@ -476,13 +481,47 @@
       ajax
       .command("move-attachments-to-backing-system", {id: appId, lang: loc.getCurrentLanguage()})
       .success(function(data) {
-        if(data.updateCount > 0) { repository.load(appId); }
-      })
-      .error(function() {
         repository.load(appId);
       })
+      .processing(self.processing)
+      .pending(self.pending)
     .call();
     };
+
+
+
+    self.createChangePermit = function() {
+
+// Create.js:sta mallia:
+//
+//      ajax.command("create-application", {
+//        infoRequest: infoRequest,
+//        operation: self.operation(),
+//        y: self.y(),
+//        x: self.x(),
+//        address: self.addressString(),
+//        propertyId: util.prop.toDbFormat(self.propertyId()),
+//        messages: isBlank(self.message()) ? [] : [self.message()],
+//        municipality: self.municipality().id
+//      })
+//      .processing(self.processing)
+//      .pending(self.pending)
+//      .success(function(data) {
+//        setTimeout(self.clear, 0);
+//        window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
+//      })
+//      .call();
+
+      var appId = self.id();
+        ajax
+        .command("create-change-permit", {id: appId/*, lang: loc.getCurrentLanguage()*/})
+        .success(function(data) {
+          repository.load(data.id);
+          window.location.hash = "#!/application/" + data.id;
+        })
+      .call();
+    };
+
 
     self.changeTab = function(model,event) {
       var $target = $(event.target);
@@ -674,8 +713,7 @@
                  (!a.sent || lastVersion.created > a.sent) &&
                  (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
         });
-
-      application.sendUnsentAttachmentsToBackingSystemDisabled(!unsentAttachmentFound);
+      application.unsentAttachmentsNotFound(!unsentAttachmentFound);
 
 
       // authorities
