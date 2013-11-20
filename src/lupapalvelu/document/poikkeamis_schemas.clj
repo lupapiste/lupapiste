@@ -5,7 +5,9 @@
 
 (def rakennushanke {:info {:name "rakennushanke"
                            :order 50
-                           :removable false}
+                           :removable true
+                           :deny-removing-last-document true
+                           :repeating true}
                     :body [{:name "kaytettykerrosala" :type :group
                             :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select
