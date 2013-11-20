@@ -373,7 +373,7 @@
         attachment-id     (mongo/create-id)
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
-                           :file-name         filename
+                           :file-name        filename
                            :content-type     content-type
                            :size             size
                            :created          (now)}]
@@ -424,7 +424,7 @@
     (let [
           application-id id
           user-id (:id user)
-          {:keys [attachment-type attachment-id filename content-type size created]} attachment
+          {:keys [attachment-type attachment-id file-name content-type size created]} attachment
           attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
           attachment-id (str application-id "." user-id "." attachment-id)
           ]
@@ -433,7 +433,7 @@
                        :attachment-id attachment-id
                        :attachment-type attachment-type
                        :content ((:content attachment))
-                       :filename filename
+                       :filename file-name
                        :content-type content-type
                        :file-size size
                        :timestamp created

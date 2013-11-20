@@ -450,7 +450,7 @@
                                              :target target
                                              :locked locked 
                                              :user user 
-                                             :timestamp created})]
+                                             :created created})]
     ; FIXME try to combine mongo writes
     (executed "add-comment"
       (-> command
