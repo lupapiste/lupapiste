@@ -171,43 +171,55 @@
         </div>
 
         <!-- Tabs: -->
-        <div class="tabs-container">
+        <div class="tabs-container" data-bind="with: application">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="click: $root.application.changeTab"
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="info" data-test-id="application-open-info-tab">
                   <span data-bind="ltext: 'application.tabInfo'"></span>
-                  <span data-bind="if: $root.application.nonpartyDocumentIndicator">
-                    <span data-bind="text: $root.application.nonpartyDocumentIndicator"
+                  <span data-bind="if: nonpartyDocumentIndicator">
+                    <span data-bind="text: nonpartyDocumentIndicator"
                         id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="parties" data-test-id="application-open-parties-tab">
                   <span data-bind="ltext: 'application.tabParties'"></span>
-                  <span data-bind="if: $root.application.partyDocumentIndicator">
-                    <span data-bind="text: $root.application.partyDocumentIndicator"
+                  <span data-bind="if: partyDocumentIndicator">
+                    <span data-bind="text: partyDocumentIndicator"
                           id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
-                <span data-bind="if: $root.application.attachmentsRequiringAction">
-                  <span data-bind="text: $root.application.attachmentsRequiringAction"
+                <span data-bind="if: attachmentsRequiringAction">
+                  <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="statement" data-test-id="application-open-statement-tab">
                   <span data-bind="ltext: 'application.tabStatement'"></span>
-                  <span data-bind="if: $root.application.unseenStatements">
-                    <span data-bind="text: $root.application.unseenStatements"
+                  <span data-bind="if: unseenStatements">
+                    <span data-bind="text: unseenStatements"
                           id="applicationUnseenStatements" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
                    <span data-bind="ltext: 'application.tabVerdict'"></span>
-                <span data-bind="if: $root.application.unseenVerdicts">
-                  <span data-bind="text: $root.application.unseenVerdicts"
+                <span data-bind="if: unseenVerdicts">
+                  <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li data-bind="if: _.contains(['verdictGiven'], state()) && features.enabled('rakentamisen-aikaiset-tabi')"><a data-bind="click: changeTab"
+                   href="#" data-target="tasks" data-test-id="application-open-statement-tab">
+                  <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
+                  <span data-bind="if: $data.tasksRequiringAction">
+                    <span data-bind="text: tasksRequiringAction"
+                          id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
                   <span data-bind="ltext: 'application.tabConversation'"></span>
-                  <span data-bind="if: $root.application.unseenComments">
-                    <span data-bind="text: $root.application.unseenComments"
+                  <span data-bind="if: unseenComments">
+                    <span data-bind="text: unseenComments"
                           id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
