@@ -35,11 +35,15 @@ var LUPAPISTE = LUPAPISTE || {};
 
       var page = $("#" + pageId);
       if (page.length === 0) {
-        error("Unknown page", pageId);
-        // firefox bug: does not compute with hashbangs (LUPA-80)
-        pageId = allowAnonymous ? "login" : "404";
+        pageId = self.startPage;
         pagePath = [];
         page = $("#" + pageId);
+      }
+
+      if (page.length === 0) {
+        // Something is seriously wrong, even startPage was not found
+        error("Unknown page " + pageId + " and failed to default to " + self.startPage);
+        return;
       }
 
       page.addClass("visible");

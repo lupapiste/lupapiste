@@ -150,7 +150,10 @@
                         :tyoaika true
                         :hankkeen-kuvaus true}
 
-        configs-per-permit-name {:Tyolupa      (assoc default-config :johtoselvitysviitetieto true)
+        configs-per-permit-name {:Tyolupa      (-> default-config
+                                                 (merge {:sijoitus-lisatiedot true
+                                                         :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
+                                                         :johtoselvitysviitetieto true}))
 
                                  :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
 
@@ -199,17 +202,21 @@
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
-        hankkeen-kuvaus-key (if (= permit-name-key :Sijoituslupa)
-                              :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+        hankkeen-kuvaus-key (case permit-name-key
+                              :Sijoituslupa :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+                              :Kayttolupa :yleiset-alueet-hankkeen-kuvaus-kayttolupa
                               :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (-> documents-by-type hankkeen-kuvaus-key first :data))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
         lupakohtainenLisatietotieto (if (:sijoitus-lisatiedot config)
-                                      (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                        [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                         {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])
+                                      (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
+                                        (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)]
+                                          {:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)})
+                                        (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
+                                          [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
+                                           {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
                                       (when (:mainostus-viitoitus-lisatiedot config)
                                         (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
         sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)

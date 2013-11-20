@@ -8,33 +8,36 @@
             [sade.util :refer [contains-value?]]))
 
 
-(def operation {:id "523fea5694a7732d5096f25d",
-                :created 1379920470831,
-                :name "ya-kayttolupa-mainostus-ja-viitoitus"})
+(def ^:private operation {:id "523fea5694a7732d5096f25d",
+                          :created 1379920470831,
+                          :name "ya-kayttolupa-mainostus-ja-viitoitus"})
 
-(def tapahtuma-info {:id "523fea5694a7732d5096f25e",
-                     :created 1379920470831,
-                     :schema-info {:order 64,
-                                   :type "group",
-                                   :version 1,
-                                   :repeating false,
-                                   :removable false,
-                                   :op operation,
-                                   :name "mainosten-tai-viitoitusten-sijoittaminen"},
-                     :data {:_selected {:modified 1379920742979, :value "mainostus-tapahtuma-valinta"},
-                            :mainostus-tapahtuma-valinta {:mainostus-alkaa-pvm {:modified 1379920583686, :value "24.09.2013"},
-                                                          :mainostus-paattyy-pvm {:modified 1379920596987, :value "29.09.2013"},
-                                                          :tapahtuma-aika-alkaa-pvm {:modified 1379920586788, :value "27.09.2013"},
-                                                          :tapahtuma-aika-paattyy-pvm {:modified 1379920589017, :value "29.09.2013"},
-                                                          :tapahtuman-nimi {:modified 1379920525351,
-                                                                            :value "Mainostettavan tapahtuman nimi"},
-                                                          :tapahtumapaikka {:modified 1379920556532, :value "Sipoon urheilukentt\u00e4"}
-                                                          :haetaan-kausilupaa {:modified 1379933391241, :value true}},
-                            :viitoitus-tapahtuma-valinta {:tapahtuma-aika-alkaa-pvm {:modified 1379920629190, :value "27.09.2013"},
-                                                          :tapahtuma-aika-paattyy-pvm {:modified 1379920630934, :value "29.09.2013"},
-                                                          :tapahtuman-nimi {:modified 1379920534147,
-                                                                            :value "Viitoitettavan tapahtuman nimi"},
-                                                          :tapahtumapaikka {:modified 1379920624162, :value "Sipoon urheilukentt\u00e4"}}}})
+(def ^:private tapahtuma-info
+  {:id "523fea5694a7732d5096f25e",
+   :created 1379920470831,
+   :schema-info {:order 64,
+                 :type "group",
+                 :version 1,
+                 :repeating false,
+                 :removable false,
+                 :op operation,
+                 :name "mainosten-tai-viitoitusten-sijoittaminen"},
+   :data {:_selected {:value "mainostus-tapahtuma-valinta"},
+          :mainostus-tapahtuma-valinta {:mainostus-alkaa-pvm {:value "24.09.2013"},
+                                        :mainostus-paattyy-pvm {:value "29.09.2013"},
+                                        :tapahtuma-aika-alkaa-pvm {:value "27.09.2013"},
+                                        :tapahtuma-aika-paattyy-pvm {:value "29.09.2013"},
+                                        :tapahtuman-nimi {:value "Mainostettavan tapahtuman nimi"},
+                                        :tapahtumapaikka {:value "Sipoon urheilukentt\u00e4"}
+                                        :haetaan-kausilupaa {:value true}},
+          :viitoitus-tapahtuma-valinta {:tapahtuma-aika-alkaa-pvm {:value "27.09.2013"},
+                                        :tapahtuma-aika-paattyy-pvm {:value "29.09.2013"},
+                                        :tapahtuman-nimi {:value "Viitoitettavan tapahtuman nimi"},
+                                        :tapahtumapaikka {:value "Sipoon urheilukentt\u00e4"}}}})
+
+(def ^:private documents [hakija
+                          maksaja
+                          tapahtuma-info])
 
 (def mainostus-application
   {:schema-version 1,
@@ -55,7 +58,7 @@
    :attachments [],
    :operations [operation],
    :propertyId "75341600550007",
-   :documents [hakija maksaja tapahtuma-info],
+   :documents documents,
    :municipality municipality,
    :statements statements})
 

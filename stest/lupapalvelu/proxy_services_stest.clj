@@ -99,18 +99,21 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "lupapiste:Asemakaava"}
-                   {"LAYERS" "lupapiste:Kantakartta"}
-                   {"LAYERS" "lupapiste:Peruskartat"}
-                   {"LAYERS" "lupapiste:ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "lupapiste:ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
-      (let [request {:params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}]
+    (doseq [layer [{"LAYERS" "lupapiste:Mikkeli_Asemakaavat"
+                    "BBOX"   "512000,6837760,514560,6840320"}
+                   {"LAYERS" "lupapiste:Hameenlinna_Asemakaava"
+                    "BBOX"   "358400,6758400,409600,6809600"}
+                   {"LAYERS" "lupapiste:Hameenlinna_Kantakartta"
+                    "BBOX"   "358400,6758400,409600,6809600"}
+                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
+                    "BBOX"   "208384,6715136,208640,6715392"}
+                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
+                    "BBOX"   "226816,6713856,227328,6714368"}]]
+      (let [request {:query-params (merge base-params layer)
+                     :headers {"accept-encoding" "gzip, deflate"}
+                     :as :stream}]
         (println "Checking" (get layer "LAYERS"))
-        (http/get (env/value :maps :geoserver)
-          {:query-params (:params request)
-           :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-           :as :stream}) => http200?))))
+        (http/get (env/value :maps :geoserver) request) => http200?))))
 
 (facts "raster-images"
        (let [base-params {"FORMAT" "image/png"
@@ -131,4 +134,4 @@
            (let [request {:params (merge base-params layer)
                           :headers {"accept-encoding" "gzip, deflate"}}]
              (println "Checking" (get layer "LAYERS"))
-             (wfs/raster-images request) => http200?))))
+             (wfs/raster-images request "wms") => http200?))))

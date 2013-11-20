@@ -115,7 +115,8 @@
                     :liitoslausunto
                     :asemapiirros
                     :rakennuspiirros
-                    :suunnitelmakartta]
+                    :suunnitelmakartta
+                    :poikkileikkaus]
    :osapuolet attachment-types-osapuoli
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
@@ -133,10 +134,6 @@
       :YA attachment-types-YA
       :P (attachment-types-R)
       (fail! "unsupported permit-type"))))
-
-;; TODO: return attachment type based on what types of operations the given organization is having.
-(defn organization-attachments [organization]
-  (attachment-types-R))
 
 (defn make-attachment [now target locked op attachement-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
@@ -567,15 +564,15 @@
   [{{:keys [attachment-id]} :data user :user}]
   (output-attachment-if-logged-in attachment-id true user))
 
-(defn- append-gridfs-file [zip filename file-id]
+(defn- append-gridfs-file [zip file-name file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" filename))))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
-(defn- append-stream [zip filename in]
+(defn- append-stream [zip file-name in]
   (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename filename)))
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
 (defn- append-attachment [zip {:keys [filename fileId]}]
