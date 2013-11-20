@@ -209,7 +209,7 @@
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['verdictGiven'], state()) && features.enabled('rakentamisen-aikaiset-tabi')"><a data-bind="click: changeTab"
-                   href="#" data-target="tasks" data-test-id="application-open-statement-tab">
+                   href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
                     <span data-bind="text: tasksRequiringAction"
@@ -687,6 +687,10 @@
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
 
           </div>
+        </div>
+
+        <div id="application-tasks-tab" data-bind="with: $root.comment" class="tab-content" >
+        <h1>Tasks</h1>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
