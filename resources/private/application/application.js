@@ -455,6 +455,16 @@
       attachment.initFileUpload(currentId, null, null, true);
     };
 
+    self.copyOwnAttachments = function(model) {
+      var applicationId = self.id();
+      ajax.command("copy-user-attachments-to-application", { "id": applicationId })
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .call();
+      return false;
+    }
+
     self.newOtherAttachment = function() {
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     };
