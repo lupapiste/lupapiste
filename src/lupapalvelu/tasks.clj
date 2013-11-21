@@ -68,9 +68,9 @@
         (map
           #(->task "task-lupamaarays" (:sisalto %) {} (assoc meta :created (get % :maaraysaika created)) source)
           (get-in paatos [:lupamaaraykset :maaraykset]))
-        (when-not [(s/blank? (get-in verdict [:lupamaaraykset :vaaditutTyonjohtajat]))]
+        (when-not (s/blank? (get-in paatos [:lupamaaraykset :vaaditutTyonjohtajat]))
           (map #(->task "task-vaadittu-tyonjohtaja" % {} meta source)
-            (s/split (get-in paatos [:lupamaaraykset :vaaditutTyonjohtajat]) #","))))))
+            (s/split (get-in paatos [:lupamaaraykset :vaaditutTyonjohtajat]) #"(,\s*|\s+ja\s+|\s+och\s+)"))))))
    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
