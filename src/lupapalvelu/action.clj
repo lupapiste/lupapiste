@@ -256,7 +256,7 @@
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))
         (when execute? (log/log-event :error command))
-        (fail (s/replace (.getMessage e) #"<|>" {"<" "&lt;" ">" "&gt;"}))))))
+        (fail :error.unknown)))))
 
 (defmacro logged [command & body]
   `(let [response# (do ~@body)]
