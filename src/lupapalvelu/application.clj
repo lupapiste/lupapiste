@@ -404,7 +404,7 @@
 ;;
 
 (defcommand cancel-application
-  {:parameters [:id]
+  {:parameters [id]
    :roles      [:applicant]
    :notified   true
    :on-success (notify :application-state-change)
@@ -412,7 +412,9 @@
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
-           :state     :canceled}}))
+           :state     :canceled}})
+  (mongo/remove-many :app-links {:link {$in [id]}})
+  (ok))
 
 (defcommand request-for-complement
   {:parameters [:id]
@@ -766,19 +768,6 @@
   }
   [{:keys [created user application] :as command}]
 
-  ;;
-  ;; TODO: Luo uusi application ottamalla vanha
-  ;;       ja karsimalla siita:
-  ;;           - attachmentsit
-  ;;           - lausunnot
-  ;;           - commentsit
-  ;;           - osa timestampeista.
-  ;;       Luo dokumenteille uudet ID:t.
-  ;;       Osan timestampeista voit korvata saadulla "created"-parametrilla.
-  ;;
-  ;; Documenttien timestamppeja ei tarvinne muuttaa, koska tietoja ei muuteta kopioinnissa?
-  ;;
-
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (-> application
                          (assoc :documents       (into []
@@ -791,10 +780,8 @@
                                                    :else                      :draft))
 ;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
                          (assoc :permitSubtype   :muutoslupa)
-
-                         ;; *** TODO: Voiko schema-versio vaihtua? ***
-;                         (assoc :schema-version  (schemas/get-latest-schema-version))
-                         (dissoc :attachments :statements :comments))]
+                         (dissoc :attachments :statements :verdicts :comments
+                                 :_statements-seen-by :_verdicts-seen-by))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications (enrich-with-link-permit-data muutoslupa-app))
     (ok :id muutoslupa-app-id)))
@@ -879,15 +866,15 @@
                                        ; If the attachment-id, i.e., hash of the URL matches
                                        ; any old attachment, a new version will be added
                                        (if (= 200 (:status resp))
-                                         (attachment/attach-file! {:application-id id 
+                                         (attachment/attach-file! {:application-id id
                                                                  :filename filename
                                                                  :size content-length
-                                                                 :content (:body resp) 
+                                                                 :content (:body resp)
                                                                  :attachment-id attachment-id
                                                                  :attachment-type attachment-type
                                                                  :target target
-                                                                 :locked locked 
-                                                                 :user user 
+                                                                 :locked locked
+                                                                 :user user
                                                                  :timestamp attachment-time})
                                          (error (str (:status resp) " - unable to download " url ": " resp)))
                                        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
