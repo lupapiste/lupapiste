@@ -52,7 +52,7 @@
    :taskname task-name
    :status :open
    :data (when data (-> data tools/wrapped (tools/timestamped created)))
-   :assignee assignee
+   :assignee (select-keys assignee [:id :firstName :lastName])
    :duedate nil
    :created created})
 
