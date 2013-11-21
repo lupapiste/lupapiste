@@ -404,7 +404,7 @@
 ;;
 
 (defcommand cancel-application
-  {:parameters [:id]
+  {:parameters [id]
    :roles      [:applicant]
    :notified   true
    :on-success (notify :application-state-change)
@@ -412,7 +412,9 @@
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
-           :state     :canceled}}))
+           :state     :canceled}})
+  (mongo/remove-many :app-links {:link {$in [id]}})
+  (ok))
 
 (defcommand request-for-complement
   {:parameters [:id]
