@@ -791,10 +791,7 @@
                                                    :else                      :draft))
 ;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
                          (assoc :permitSubtype   :muutoslupa)
-
-                         ;; *** TODO: Voiko schema-versio vaihtua? ***
-;                         (assoc :schema-version  (schemas/get-latest-schema-version))
-                         (dissoc :attachments :statements :comments))]
+                         (dissoc :attachments :statements :verdicts :comments))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications (enrich-with-link-permit-data muutoslupa-app))
     (ok :id muutoslupa-app-id)))
