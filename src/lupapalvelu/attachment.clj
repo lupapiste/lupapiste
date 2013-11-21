@@ -397,12 +397,11 @@
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
-(defn if-not-authority-states-must-match [state-set]
-  (fn [{user :user} {state :state}]
-    (when (and
-            (not= (:role user) "authority")
-            (state-set (keyword state)))
-      (fail :error.non-authority-viewing-application-in-verdictgiven-state))))
+(defn if-not-authority-states-must-match [state-set {user :user} {state :state}]
+  (when (and
+          (not= (:role user) "authority")
+          (state-set (keyword state)))
+    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
@@ -425,7 +424,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked (if-not-authority-states-must-match #{:sent :verdictGiven})]
+   :validators [attachment-is-not-locked (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
@@ -472,7 +471,7 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :validators [(if-not-authority-states-must-match #{:verdictGiven})]
+   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})]
    :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created user application] :as command}]
@@ -489,27 +488,23 @@
     (if (pos? (count attachments-wo-sent-timestamp))
 
       (let [organization (mongo/by-id :organizations (:organization application))]
-        (try
-          (mapping-to-krysp/save-unsent-attachments-as-krysp
-            (-> application
-              (dissoc :attachments)
-              (assoc :attachments attachments-wo-sent-timestamp))
-            lang
-            organization
-            user)
+        (mapping-to-krysp/save-unsent-attachments-as-krysp
+          (-> application
+            (dissoc :attachments)
+            (assoc :attachments attachments-wo-sent-timestamp))
+          lang
+          organization
+          user)
 
-          (ok :updateCount (mongo/update-by-query
-                             :applications
-                             {:_id id}
-                             {$set (get-data-argument-for-attachments-mongo-update
-                                     created
-                                     (:attachments application))}))
+        (mongo/update-by-query
+          :applications
+          {:_id id}
+          {$set (get-data-argument-for-attachments-mongo-update
+                  created
+                  (:attachments application))})
+        (ok))
 
-          (catch Exception e
-            (errorf e "failed to save unsent attachments as krysp: application=%s" id)
-            (fail :error.sending-unsent-attachments-failed))))
-
-      (ok :updateCount 0))))
+      (fail :error.sending-unsent-attachments-failed))))
 
 
 ;;
