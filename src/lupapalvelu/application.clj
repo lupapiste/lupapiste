@@ -766,19 +766,6 @@
   }
   [{:keys [created user application] :as command}]
 
-  ;;
-  ;; TODO: Luo uusi application ottamalla vanha
-  ;;       ja karsimalla siita:
-  ;;           - attachmentsit
-  ;;           - lausunnot
-  ;;           - commentsit
-  ;;           - osa timestampeista.
-  ;;       Luo dokumenteille uudet ID:t.
-  ;;       Osan timestampeista voit korvata saadulla "created"-parametrilla.
-  ;;
-  ;; Documenttien timestamppeja ei tarvinne muuttaa, koska tietoja ei muuteta kopioinnissa?
-  ;;
-
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (-> application
                          (assoc :documents       (into []
@@ -876,15 +863,15 @@
                                        ; If the attachment-id, i.e., hash of the URL matches
                                        ; any old attachment, a new version will be added
                                        (if (= 200 (:status resp))
-                                         (attachment/attach-file! {:application-id id 
+                                         (attachment/attach-file! {:application-id id
                                                                  :filename filename
                                                                  :size content-length
-                                                                 :content (:body resp) 
+                                                                 :content (:body resp)
                                                                  :attachment-id attachment-id
                                                                  :attachment-type attachment-type
                                                                  :target target
-                                                                 :locked locked 
-                                                                 :user user 
+                                                                 :locked locked
+                                                                 :user user
                                                                  :timestamp attachment-time})
                                          (error (str (:status resp) " - unable to download " url ": " resp)))
                                        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
