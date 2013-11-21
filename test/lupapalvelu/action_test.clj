@@ -61,7 +61,7 @@
 (facts "Test general validation in command execution"
   (fact (execute {:action "test-command"}) =>        {:ok false :text "too busy"}
         (provided (returns)                =>        {:ok false :text "too busy"}))
-  (fact (execute {:action "test-command"}) =>        {:ok false :text "This was expected."}
+  (fact (execute {:action "test-command"}) =>        {:ok false :text "error.unknown"}
         (provided (returns)                =throws=> (Exception. "This was expected.")))
   (fact (execute {:action "test-command"}) =>        {:ok true}
         (provided (returns)                =>        nil)))
@@ -153,9 +153,9 @@
   (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh"))}})
   (execute {:action "failing"}) => {:ok false :text "kosh"})
 
-(fact "throwing exception also is returned"
+(fact "exception details are not returned"
   (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh")))}})
-  (execute {:action "failing"}) => {:ok false :text "kosh"})
+  (execute {:action "failing"}) => {:ok false :text "error.unknown"})
 
 ;; FIXME: these should fail!
 ;(fact (executed "ping" {:action "ping"}) => {:ok true :text "pong"})
