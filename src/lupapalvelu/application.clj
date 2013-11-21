@@ -778,7 +778,8 @@
                                                    :else                      :draft))
 ;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
                          (assoc :permitSubtype   :muutoslupa)
-                         (dissoc :attachments :statements :verdicts :comments))]
+                         (dissoc :attachments :statements :verdicts :comments
+                                 :_statements-seen-by :_verdicts-seen-by))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications (enrich-with-link-permit-data muutoslupa-app))
     (ok :id muutoslupa-app-id)))
