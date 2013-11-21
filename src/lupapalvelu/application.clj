@@ -74,7 +74,9 @@
     meta-fields/enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
-  (mongo/select :users {:organizations (:organization app) :role "authority" :enabled true} {:firstName 1 :lastName 1}))
+  (mongo/select :users
+    {:organizations (:organization app) :role "authority" :enabled true}
+    {:firstName 1 :lastName 1}))
 
 (defquery application
   {:authenticated true
@@ -315,7 +317,7 @@
 ;;
 
 (defcommand cancel-application
-  {:parameters [:id]
+  {:parameters [id]
    :roles      [:applicant]
    :notified   true
    :on-success (notify :application-state-change)
@@ -323,7 +325,9 @@
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
-           :state     :canceled}}))
+           :state     :canceled}})
+  (mongo/remove-many :app-links {:link {$in [id]}})
+  (ok))
 
 (defcommand request-for-complement
   {:parameters [:id]
@@ -476,6 +480,7 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
@@ -490,6 +495,7 @@
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest organization))]
+
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
@@ -499,12 +505,13 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled organization)
         (fail! :error.new-applications-disabled)))
+
     (let [id            (make-application-id municipality)
           owner         (user/user-in-role user :owner :type :owner)
           op            (make-op operation created)
           state         (cond
                           info-request?              :info
-                          (user/authority? user) :open
+                          (user/authority? user)     :open
                           :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
@@ -514,7 +521,7 @@
                          :opened           (when (#{:open :info} state) created)
                          :modified         created
                          :permitType       permit-type
-                         :permitSubtype (first (permit/permit-subtypes permit-type))
+                         :permitSubtype    (first (permit/permit-subtypes permit-type))
                          :infoRequest      info-request?
                          :openInfoRequest  open-inforequest?
                          :operations       [op]
@@ -596,36 +603,30 @@
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
+;;
+;; Link permits
+;;
+
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :verified   true
    :roles      [:applicant :authority]}
   [{{:keys [propertyId]} :application user :user :as command}]
   (let [results (mongo/select :applications
-                  {:auth.id (:id user)}
+                  (merge (domain/application-query-for user) {:_id {$ne id}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
-
-        filtered-results (filter #(not (= id (:id %))) results)
-
         enriched-results (map (fn [r]
                                 (assoc r :text
                                   (str
                                     (:address r) ", "
                                     (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
                                     (:id r))))
-                           filtered-results)
-
+                           results)
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (into [] (filter same-property-id-fn enriched-results))
         without-same-property-id (into [] (filter (comp not same-property-id-fn) enriched-results))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
-
-        final-results (map (fn [r]
-                             (-> r
-                               (dissoc :address)
-                               (dissoc :permitType)
-                               (dissoc :propertyId)))
-                        organized-results)]
+        final-results (map #(select-keys % [:id :text]) organized-results)]
 
     (ok :app-links final-results)))
 
@@ -634,24 +635,28 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defcommand add-link-permit
-  {:parameters [id linkPermitId propertyId]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]
-   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
-  [{application :application}]
-  (let [db-id (make-mongo-id-for-link-permit id linkPermitId)]
+(defn- do-add-link-permit [application linkPermitId]
+  (let [id (:id application)
+        db-id (make-mongo-id-for-link-permit id linkPermitId)]
     (mongo/update-by-id :app-links db-id
       {:_id db-id
        :link [id linkPermitId]
        (keyword id) {:type "application"
                      :apptype (-> application :operations first :name)
-                     :propertyId propertyId}
+                     :propertyId (:propertyId application)}
        (keyword linkPermitId) {:type "linkpermit"
                                :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
                                                  "lupapistetunnus"
                                                  "kuntalupatunnus")}}
       :upsert true)))
+
+(defcommand add-link-permit
+  {:parameters ["id" linkPermitId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+  [{application :application}]
+  (do-add-link-permit application linkPermitId))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
@@ -661,6 +666,41 @@
   (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
     (ok)
     (fail :error.unknown)))
+
+
+;;
+;; Change permit
+;;
+
+(defcommand create-change-permit
+  {:parameters ["id"]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven]
+;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+;                      (partial property-id-parameters [:propertyId])
+;                      operation-validator]
+  :validators [(permit/validate-permit-type-is permit/R)]
+  }
+  [{:keys [created user application] :as command}]
+
+  (let [muutoslupa-app-id (make-application-id (:municipality application))
+        muutoslupa-app (-> application
+                         (assoc :documents       (into []
+                                                   (map #(assoc % :id (mongo/create-id)) (:documents application))))
+                         (assoc :id              muutoslupa-app-id)
+                         (assoc :created         created)
+                         (assoc :opened          created)
+                         (assoc :state           (cond
+                                                   (user/authority? user)     :open
+                                                   :else                      :draft))
+;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
+                         (assoc :permitSubtype   :muutoslupa)
+                         (dissoc :attachments :statements :verdicts :comments
+                                 :_statements-seen-by :_verdicts-seen-by))]
+    (do-add-link-permit muutoslupa-app (:id application))
+    (mongo/insert :applications (enrich-with-link-permit-data muutoslupa-app))
+    (ok :id muutoslupa-app-id)))
+
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
@@ -741,15 +781,15 @@
                                        ; If the attachment-id, i.e., hash of the URL matches
                                        ; any old attachment, a new version will be added
                                        (if (= 200 (:status resp))
-                                         (attachment/attach-file! {:application-id id 
+                                         (attachment/attach-file! {:application-id id
                                                                  :filename filename
                                                                  :size content-length
-                                                                 :content (:body resp) 
+                                                                 :content (:body resp)
                                                                  :attachment-id attachment-id
                                                                  :attachment-type attachment-type
                                                                  :target target
-                                                                 :locked locked 
-                                                                 :user user 
+                                                                 :locked locked
+                                                                 :user user
                                                                  :timestamp attachment-time})
                                          (error (str (:status resp) " - unable to download " url ": " resp)))
                                        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))

@@ -179,9 +179,10 @@
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
 (defn- get-simple-osoite [osoite]
-  {:osoitenimi {:teksti (-> osoite :katu :value)}
-   :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)
-   :postinumero (-> osoite :postinumero :value)})
+  (when (-> osoite :katu :value)  ;; required field in krysp (i.e. "osoitenimi")
+    {:osoitenimi {:teksti (-> osoite :katu :value)}
+     :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)
+     :postinumero (-> osoite :postinumero :value)}))
 
 (defn- get-name [henkilotiedot]
   {:nimi {:etunimi (-> henkilotiedot :etunimi :value)
@@ -205,16 +206,18 @@
 (defn- get-henkilo-data [henkilo]
   (let [henkilotiedot (:henkilotiedot henkilo)
         yhteystiedot (:yhteystiedot henkilo)]
-    (merge (get-name henkilotiedot)
+    (merge
+      (get-name henkilotiedot)
       {:henkilotunnus (-> henkilotiedot :hetu :value)
        :osoite (get-simple-osoite (:osoite henkilo))}
-     (get-yhteystiedot-data yhteystiedot))))
+      (get-yhteystiedot-data yhteystiedot))))
 
 (defn- get-yhteyshenkilo-data [henkilo]
   (let [henkilotiedot (:henkilotiedot henkilo)
         yhteystiedot (:yhteystiedot henkilo)]
-    (merge (get-name henkilotiedot)
-     (get-yhteystiedot-data yhteystiedot))))
+    (merge
+      (get-name henkilotiedot)
+      (get-yhteystiedot-data yhteystiedot))))
 
 
 (def ^:private default-role "ei tiedossa")
