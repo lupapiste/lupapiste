@@ -9,7 +9,7 @@
             [sade.util :refer [fn->] :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [fail fail!]]
-            [clj-time.core :refer [plus seconds date-time]]
+            [clj-time.core :as time]
             [clj-time.coerce :refer [to-date from-long]]
             [lupapalvelu.security :as security]
             ))
@@ -120,7 +120,7 @@
 (def allowed-failed-logins 3)
 
 (defn logins-lock-expires-date []
-  (to-date (plus (from-long (now)) (seconds (* -1 mongo/logins-lock-expires-seconds)))))
+  (to-date (time/minus (time/now) (time/seconds mongo/logins-lock-expires-seconds))))
 
 (defn throttle-login? [username] 
   (mongo/any? :logins {:_id (ss/lower-case username) 
