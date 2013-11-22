@@ -8,8 +8,11 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.core :refer [fail fail!]]
+            [clj-time.core :refer [plus seconds date-time]]
+            [clj-time.coerce :refer [to-date from-long]]
             [lupapalvelu.security :as security]
-            [lupapalvelu.core :refer [fail fail!]]))
+            ))
 
 ;;
 ;; ==============================================================================
@@ -108,6 +111,31 @@
      :display  query-total
      :echo     (str (util/->int (str (:sEcho params))))}))
 
+;;
+;; ==============================================================================
+;; Login throttle
+;; ==============================================================================
+;;
+
+(def allowed-failed-logins 3)
+
+(defn logins-lock-expires-date []
+  (to-date (plus (from-long (now)) (seconds (* -1 mongo/logins-lock-expires-seconds)))))
+
+(defn throttle-login? [username] 
+  (mongo/any? :logins {:_id (ss/lower-case username) 
+                       :failed-logins {$gte allowed-failed-logins}
+                       :locked {$gt (logins-lock-expires-date)}}))
+
+(defn login-failed [username]
+  (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
+  (mongo/update :logins {:_id (ss/lower-case username) :failed-logins {$lt allowed-failed-logins}} 
+                {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
+                :multi false
+                :upsert true))
+
+(defn clear-logins [username]
+  (mongo/remove :logins (ss/lower-case username)))
 
 ;;
 ;; ==============================================================================
@@ -197,10 +225,12 @@
   "Update users password. Returns nil. If user is not found, raises an exception."
   [email password]
   (let [salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)]
-    (when-not (= 1 (mongo/update-n :users
-                                   {:email (ss/lower-case email)}
-                                   {$set {:private.password hashed-password}}))
+        hashed-password   (security/get-hash password salt)
+        updated-user      (mongo/update-one-and-return :users
+                            {:email (ss/lower-case email)}
+                            {$set {:private.password hashed-password}})]
+    (if updated-user
+      (clear-logins (:username updated-user))
       (fail! :unknown-user :email email))
     nil))
 

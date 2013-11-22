@@ -302,24 +302,29 @@
 ;; ==============================================================================
 ;;
 
-;; TODO: count error trys!
+
 (defcommand login
   {:parameters [username password]
    :verified false}
   [_]
-  (if-let [user (user/get-user-with-password username password)]
-    (do
-      (info "login successful, username:" username)
-      (session/put! :user user)
-      (if-let [application-page (user/applicationpage-for (:role user))]
-        (ok :user user :applicationpage application-page)
-        (do
-          (error "Unknown user role:" (:role user))
-          (fail :error.login))))
-    (do
-      (info "login failed, username:" username)
-      (fail :error.login))))
-
+  (if (user/throttle-login? username) 
+    (do 
+      (info "login throttled, username:" username)
+      (fail :error.login-trottle))
+    (if-let [user (user/get-user-with-password username password)]
+      (do
+        (info "login successful, username:" username)
+        (user/clear-logins username)
+        (session/put! :user user)
+        (if-let [application-page (user/applicationpage-for (:role user))]
+          (ok :user user :applicationpage application-page)
+          (do
+            (error "Unknown user role:" (:role user))
+            (fail :error.login))))
+      (do
+        (info "login failed, username:" username)
+        (user/login-failed username)
+        (fail :error.login)))))
 
 (defcommand impersonate-authority
   {:parameters [organizationId password]

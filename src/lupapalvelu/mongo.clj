@@ -251,6 +251,8 @@
       (reset! connected false))
     (debug "Not connected")))
 
+(def logins-lock-expires-seconds 120)
+
 (defn ensure-indexes []
   (debug "ensure-indexes")
   (mc/ensure-index :users {:username 1} {:unique true})
@@ -270,7 +272,8 @@
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1}))
+  (mc/ensure-index :app-links {:link 1})
+  (mc/ensure-index "logins" {:locked 1} {:expireAfterSeconds logins-lock-expires-seconds}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

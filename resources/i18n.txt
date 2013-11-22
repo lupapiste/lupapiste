@@ -1,0 +1,1 @@
+error.login-trottle: Tunnus on lukittu väliaikaisesti virheellisten kirjautumisyrityksten vuoksi.
