@@ -588,11 +588,11 @@ var docgen = (function () {
             select.appendChild(option);
           });
         })
-        .error(function (error) {
-          var text = error.text;
+        .error(function (e) {
+          var error = e.text ? e.text : "error.unknown";
           var option = document.createElement("option");
           option.value = name;
-          option.appendChild(document.createTextNode(loc("error." + text)));
+          option.appendChild(document.createTextNode(loc(error)));
           option.selected = "selected";
           select.appendChild(option);
           select.setAttribute("disabled", true);

@@ -624,6 +624,14 @@
             :type :party}
      :body suunnittelija}
 
+    {:info {:name "tyonjohtaja"
+            :order 5
+            :removable true
+            :repeating true
+            :approvable true
+            :type :party}
+     :body tyonjohtaja}
+
     {:info {:name "maksaja"
             :repeating true
             :order 6
@@ -633,14 +641,6 @@
      :body (body
              party
              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
-
-    {:info {:name "tyonjohtaja"
-            :order 7
-            :removable true
-            :repeating true
-            :approvable true
-            :type :party}
-     :body tyonjohtaja}
 
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}
