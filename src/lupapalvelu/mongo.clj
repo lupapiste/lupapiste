@@ -15,6 +15,8 @@
            [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
+(def logins-lock-expires-seconds (* 3 60 60))
+
 ;;
 ;; Utils
 ;;
@@ -250,8 +252,6 @@
       (m/disconnect!)
       (reset! connected false))
     (debug "Not connected")))
-
-(def logins-lock-expires-seconds 120)
 
 (defn ensure-indexes []
   (debug "ensure-indexes")
