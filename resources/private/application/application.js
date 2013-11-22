@@ -114,6 +114,7 @@
   function ApplicationModel() {
     var self = this;
     self.id = ko.observable();
+    self.auth = ko.observable();
     self.infoRequest = ko.observable();
     self.openInfoRequest = ko.observable();
     self.state = ko.observable();
@@ -153,20 +154,14 @@
     self.invites = ko.observableArray();
 
     self.roles = ko.computed(function() {
-      var value = [];
-
-      if (self.data() !== undefined) {
-        var auth = ko.utils.unwrapObservable(self.data().auth());
         var withRoles = function(r, i) {
           var a = r[i.id()] || (i.roles = [], i);
           a.roles.push(i.role());
           r[i.id()] = a;
           return r;
         };
-        var pimped = _.reduce(auth, withRoles, {});
-        value = _.values(pimped);
-      }
-      return value;
+      var pimped = _.reduce(self.auth(), withRoles, {});
+      return _.values(pimped);
     });
 
     self.openOskariMap = function() {
@@ -510,6 +505,7 @@
         delete application.shapes;
       }
 
+      // Update observebles
       ko.mapping.fromJS(app, {}, application);
 
       // Invite
