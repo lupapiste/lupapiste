@@ -125,7 +125,6 @@
     self.propertyId = ko.observable();
     self.title = ko.observable();
     self.created = ko.observable();
-    self.documents = ko.observable();
     self.attachments = ko.observableArray();
     self.hasAttachment = ko.observable(false);
     self.address = ko.observable();
@@ -154,12 +153,12 @@
     self.invites = ko.observableArray();
 
     self.roles = ko.computed(function() {
-        var withRoles = function(r, i) {
-          var a = r[i.id()] || (i.roles = [], i);
-          a.roles.push(i.role());
-          r[i.id()] = a;
-          return r;
-        };
+      var withRoles = function(r, i) {
+        var a = r[i.id()] || (i.roles = [], i);
+        a.roles.push(i.role());
+        r[i.id()] = a;
+        return r;
+      };
       var pimped = _.reduce(self.auth(), withRoles, {});
       return _.values(pimped);
     });
@@ -495,10 +494,6 @@
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       var app = applicationDetails.application;
-      var documents = app.documents;
-
-      // Performance improvement: documents should not be mapped with ko.mapping
-      delete app.documents;
 
       // Delete shapes
       if(application.shapes) {
@@ -543,7 +538,7 @@
 
       // Setting disable value for the "Send unsent attachments" button:
 
-     var unsentAttachmentFound =
+      var unsentAttachmentFound =
         _.some(app.attachments, function(a) {
           var lastVersion = _.last(a.versions);
           return lastVersion &&
@@ -582,8 +577,8 @@
       }
 
       // Documents
-      var nonpartyDocs = _.filter(documents, function(doc) {return doc.schema.info.type !== "party"; });
-      var partyDocs = _.filter(documents, function(doc) {return doc.schema.info.type === "party"; });
+      var nonpartyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; });
+      var partyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; });
       docgen.displayDocuments("#applicationDocgen", app, nonpartyDocs, authorizationModel);
       docgen.displayDocuments("#partiesDocgen",     app, partyDocs, authorizationModel);
 
