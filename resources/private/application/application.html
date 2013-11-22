@@ -36,7 +36,7 @@
           </div>
 
           <!-- Submitted: -->
-          <div data-bind="with: $root.application.data">
+          <div>
             <p data-bind="ltext: 'application.submissionDate'"></p>
             <span data-bind="if: $data.submitted">
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>

@@ -117,6 +117,7 @@
     self.infoRequest = ko.observable();
     self.openInfoRequest = ko.observable();
     self.state = ko.observable();
+    self.submitted = ko.observable();
     self.location = ko.observable();
     self.municipality = ko.observable();
     self.permitType = ko.observable();
