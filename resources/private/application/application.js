@@ -13,32 +13,6 @@
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
 
-  var removeApplicationModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("areyousure"),
-        loc("areyousure.message"),
-        {title: loc("yes"), fn: self.ok},
-        {title: loc("no")}
-      );
-      return self;
-    };
-    self.ok = function() {
-      ajax
-        .command("cancel-application", {id: self.applicationId})
-        .success(function() {
-          window.location.hash = "!/applications";
-        })
-        .call();
-      return false;
-    };
-  }();
-
   var removeAuthModel = new function() {
     var self = this;
 
@@ -314,7 +288,18 @@
     };
 
     self.cancelApplication = function() {
-      removeApplicationModel.init(self.id());
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.message"),
+        {title: loc("yes"),
+         fn: function() {
+          ajax
+            .command("cancel-application", {id: self.id()})
+            .success(function() {window.location.hash = "!/applications";})
+            .call();
+          return false;}},
+        {title: loc("no")}
+      );
       return false;
     };
 
@@ -340,7 +325,7 @@
         })
         .call();
       return false;
-    }
+    };
 
     self.newOtherAttachment = function() {
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
@@ -851,7 +836,6 @@
       authorization: authorizationModel,
       accordian: accordian,
       addPartyModel: addPartyModel,
-      removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
