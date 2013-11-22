@@ -15,6 +15,8 @@
 
     (-> tasks first :id) => truthy
     (-> tasks first :duedate) => nil
+    (-> tasks first :source :type) => "verdict"
+
     (fact "created timestamp is set" (-> tasks first :created) => 1312341259733)
 
     (fact "Assignee is set"

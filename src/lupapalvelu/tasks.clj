@@ -49,6 +49,7 @@
          (or (map? data) (nil? data))]}
   {:schema-info {:name schema-name :version task-schemas-version}
    :id (mongo/create-id)
+   :source source
    :taskname task-name
    :status :open
    :data (when data (-> data tools/wrapped (tools/timestamped created)))
@@ -59,7 +60,7 @@
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
   (map-indexed
    (fn [idx {lupamaaraykset :lupamaaraykset}]
-     (let [source {:type :verdict :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
+     (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
        (concat
         (map
           #(->task "task-katselmus" (or (:tarkastuksenTaiKatselmuksenNimi %) (:katselmuksenLaji %))
