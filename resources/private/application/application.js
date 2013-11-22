@@ -83,30 +83,6 @@
 
   }();
 
-  var submitApplicationModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("application.submit.areyousure.title"),
-        loc("application.submit.areyousure.message"),
-        {title: loc("yes"), fn: self.ok},
-        {title: loc("no")}
-      );
-      return self;
-    };
-
-    self.ok = function() {
-      ajax.command("submit-application", {id: self.applicationId})
-        .success(function() { repository.load(self.applicationId); })
-        .call();
-      return false;
-    };
-  }();
-
   var addPartyModel = new function() {
     var self = this;
 
@@ -205,7 +181,18 @@
     };
 
     self.submitApplication = function() {
-      submitApplicationModel.init(self.id());
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.submit.areyousure.title"),
+        loc("application.submit.areyousure.message"),
+        {title: loc("yes"),
+         fn: function() {
+          ajax.command("submit-application", {id: self.id()})
+            .success(function() { repository.load(self.id()); })
+            .call();
+          return false;
+        }},
+        {title: loc("no")}
+      );
       return false;
     };
 
