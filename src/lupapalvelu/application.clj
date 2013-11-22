@@ -27,6 +27,7 @@
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
@@ -810,12 +811,14 @@
    :on-success  (notify     :application-verdict)}
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
-    (do
-      (update-application command
-        {$set {:verdicts verdicts-with-attachments
-               :modified created
-               :state    :verdictGiven}})
-      (ok :verdictCount (count verdicts-with-attachments)))
+    (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+          tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
+          updates {$set (merge {:verdicts verdicts-with-attachments
+                                :modified created
+                                :state    :verdictGiven}
+                          (when-not has-old-verdict-tasks {:tasks tasks}))}]
+      (update-application command updates)
+      (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
     (fail :info.no-verdicts-found-from-backend)))
 
 ;;
