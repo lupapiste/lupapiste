@@ -58,19 +58,17 @@
 
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
   (map-indexed
-   (fn [idx paatos]
+   (fn [idx {lupamaaraykset :lupamaaraykset}]
      (let [source {:type :verdict :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
        (concat
         (map
-          #(->task "task-katselmus" (:tarkastuksenTaiKatselmuksenNimi %)
+          #(->task "task-katselmus" (or (:tarkastuksenTaiKatselmuksenNimi %) (:katselmuksenLaji %))
              {:katselmuksenLaji (:katselmuksenLaji %) :vaadittuLupaehtona true} meta source)
-          (get-in paatos [:lupamaaraykset :vaaditutKatselmukset]))
-        (map
-          #(->task "task-lupamaarays" (:sisalto %) {} (assoc meta :created (get % :maaraysaika created)) source)
-          (get-in paatos [:lupamaaraykset :maaraykset]))
-        (when-not (s/blank? (get-in paatos [:lupamaaraykset :vaaditutTyonjohtajat]))
+          (:vaaditutKatselmukset lupamaaraykset))
+        (map #(->task "task-lupamaarays" (:sisalto %) {} meta source) (:maaraykset lupamaaraykset ))
+        (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
           (map #(->task "task-vaadittu-tyonjohtaja" % {} meta source)
-            (s/split (get-in paatos [:lupamaaraykset :vaaditutTyonjohtajat]) #"(,\s*|\s+ja\s+|\s+och\s+)"))))))
+            (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*|\s+ja\s+|\s+och\s+)"))))))
    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
