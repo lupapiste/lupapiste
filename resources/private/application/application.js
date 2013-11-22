@@ -133,7 +133,8 @@
     self.operationsCount = ko.observable();
     self.applicant = ko.observable();
     self.assignee = ko.observable();
-    self.neighbors = ko.observable();
+    self.neighbors = ko.observable([]);
+    self.statements = ko.observable([]);
     self.nonpartyDocumentIndicator = ko.observable(0);
     self.partyDocumentIndicator = ko.observable(0);
     self.linkPermitData = ko.observable({});
@@ -149,11 +150,7 @@
     self.unseenStatements = ko.observable();
     self.unseenVerdicts = ko.observable();
     self.unseenComments = ko.observable();
-        // new stuff
     self.invites = ko.observableArray();
-
-    // all data in here
-    self.data = ko.observable();
 
     self.roles = ko.computed(function() {
       var value = [];
@@ -513,7 +510,6 @@
         delete application.shapes;
       }
 
-      application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
       // Invite

@@ -583,10 +583,10 @@
 
         <div id="application-statement-tab" class="tab-content">
 
-          <div data-bind="with: $root.application.data" class="application-statements">
+          <div data-bind="with: application" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.statementsDesc')" class="tab-info"></p>
+            <p data-bind="html: loc('help.' + permitType() + '.statementsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
