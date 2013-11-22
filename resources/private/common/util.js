@@ -85,6 +85,10 @@ var util = (function() {
 
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
 
+  function isNum(s) {
+    return s && s.match(/^\s*\d+\s*$/) !== null;
+  }
+
   return {
     zeropad: zeropad,
     fluentify: fluentify,
@@ -98,7 +102,8 @@ var util = (function() {
       toDbFormat: propertyIdToDbFormat
     },
     nop: nop,
-    constantly: function(value) { return function() { return value; }; }
+    constantly: function(value) { return function() { return value; }; },
+    isNum: isNum
   };
 
 })();

@@ -97,7 +97,7 @@
 
    :application  {:depends [:common :repository :tree]
                   :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "application.js" "add-operation.js"]
+                       "add-operation.js" "stamp-model.js" "application.js" ]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html"]}
 
@@ -142,7 +142,7 @@
 
    :users        {:js ["users.js"]
                   :html ["users.html"]}
-   
+
    :admins       {:depends [:users]}
 
    ;; Single Page Apps and standalone components:
