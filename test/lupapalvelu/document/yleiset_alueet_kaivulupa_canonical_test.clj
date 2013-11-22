@@ -80,8 +80,8 @@
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
 
-        osapuolet-vec (-> Tyolupa :osapuolitieto) => truthy
-        vastuuhenkilot-vec (-> Tyolupa :vastuuhenkilotieto) => truthy
+        osapuolet-vec (:osapuolitieto Tyolupa) => truthy
+        vastuuhenkilot-vec (:vastuuhenkilotieto Tyolupa) => truthy
 
         ;; maksajan henkilotieto-osa
         rooliKoodi-maksajan-vastuuhenkilo "maksajan vastuuhenkil\u00f6"
