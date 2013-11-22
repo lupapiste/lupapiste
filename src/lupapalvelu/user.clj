@@ -119,7 +119,7 @@
 
 (def allowed-failed-logins 3)
 
-(defn logins-lock-expires-date []
+(defn- logins-lock-expires-date []
   (to-date (time/minus (time/now) (time/seconds mongo/logins-lock-expires-seconds))))
 
 (defn throttle-login? [username] 
@@ -129,7 +129,7 @@
 
 (defn login-failed [username]
   (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
-  (mongo/update :logins {:_id (ss/lower-case username) :failed-logins {$lt allowed-failed-logins}} 
+  (mongo/update :logins {:_id (ss/lower-case username)} 
                 {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
                 :multi false
                 :upsert true))

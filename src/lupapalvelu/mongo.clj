@@ -273,7 +273,7 @@
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
   (mc/ensure-index :app-links {:link 1})
-  (mc/ensure-index "logins" {:locked 1} {:expireAfterSeconds logins-lock-expires-seconds}))
+  (mc/ensure-index :logins {:locked 1} {:expireAfterSeconds logins-lock-expires-seconds}))
 
 (defn clear! []
   (if-let [mode (db-mode)]
