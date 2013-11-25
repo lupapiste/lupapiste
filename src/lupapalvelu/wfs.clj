@@ -99,7 +99,7 @@
   (format "<gml:LineString><gml:posList srsDimension='2'>%s</gml:posList></gml:LineString>" (s/join " " c)))
 
 (defn polygon [c]
-	(format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
+  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
 (defn property-name [n]
   (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
@@ -263,36 +263,36 @@
 
 (defn property-info-by-point [x y]
   (post ktjkii
-        (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-               (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-               (property-name "ktjkiiwfs:kiinteistotunnus")
-               (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-               (filter
-                 (intersects
-                   (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
-                   (point x y))))))
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (point x y))))))
 
 (defn property-info-by-line [l]
   (post ktjkii
-        (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-               (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-               (property-name "ktjkiiwfs:kiinteistotunnus")
-               (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-               (filter
-                 (intersects
-                   (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
-                   (line l))))))
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (line l))))))
 
 (defn property-info-by-polygon [p]
   (post ktjkii
-        (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-               (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-               (property-name "ktjkiiwfs:kiinteistotunnus")
-               (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-               (filter
-                 (intersects
-                   (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
-                   (polygon p))))))
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (polygon p))))))
 ;;
 ;; Raster images:
 ;;
