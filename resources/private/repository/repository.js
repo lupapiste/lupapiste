@@ -36,8 +36,7 @@ var repository = (function() {
       function setSchema(doc) {
         var schemaInfo = doc["schema-info"];
         var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
-        schemaInfo.order = schema.info.order;
-        schema.info = schemaInfo;
+        schema.info = _.pick(schema.info, ["name", "version", "order", "i18nprefix", "i18npath"]);
         doc.schema = schema;
       };
 

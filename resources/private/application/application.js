@@ -137,17 +137,38 @@
     self.statements = ko.observable([]);
     self.tasks = ko.observable([]);
     self.taskGroups = ko.computed(function() {
-      var tasks = ko.toJS(self.tasks);
-      var schemaOrder = _.reduce(tasks, function(m, task){
+      var tasks = ko.toJS(self.tasks) || [];
+      var attachments = ko.toJS(self.attachments) || [];
+      var schemaInfos = _.reduce(tasks, function(m, task){
         var info = task.schema.info;
-        m[info.name] = info.order;
+        m[info.name] = info;
         return m;
       },{});
 
       var groups = _.groupBy(tasks, function(task) {return task.schema.info.name;});
       return _(groups)
         .keys()
-        .map(function(n){return {name:loc(n+"._group_label"),order:schemaOrder[n], tasks:groups[n]};})
+        .map(function(n) {
+          return {
+            name: loc(n+"._group_label"),
+            order: schemaInfos[n].order,
+            tasks: _.map(groups[n], function(task) {
+              task.displayName = task.taskname;
+              var prefix = task.schema.info.i18nprefix;
+              var path = task.schema.info.i18npath;
+              if (path && path.length) {
+                if (path[path.length - 1] !== "value") path.push("value");
+                var displayNameData = util.getIn(task.data || {}, path);
+                if (displayNameData) {
+                  var key = prefix ? prefix + "." + displayNameData : displayNameData;
+                  task.displayName = loc(key);
+                }
+              }
+              task.attachments = _(attachments).filter(function(a) {
+                return a.target && a.target.type === "task" && a.target.id === task.id && a.latestVersion;
+              }).map(function(a) {return _.pick(a, ["latestVersion"]);}).valueOf();
+              return task;
+            })};})
         .sortBy("order")
         .valueOf();
     });

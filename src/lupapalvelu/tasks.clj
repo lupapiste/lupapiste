@@ -9,7 +9,7 @@
 
 (schemas/defschemas
   task-schemas-version
-  [{:info {:name "task-katselmus" :order 1}
+  [{:info {:name "task-katselmus" :order 1 :i18nprefix "verdict.katselmus" :i18npath ["katselmuksenLaji"]}
    :body (schemas/body
            [{:name "katselmuksenLaji"
              :type :select
@@ -24,19 +24,21 @@
                     {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
                     {:name "osittainen loppukatselmus"}
                     {:name "loppukatselmus"}
-                    {:name "ei tiedossa"}]}]
-           schemas/rakennuksen-valitsin
-           [{:name "pitoPvm" :type :date}
-            {:name "tilanneKoodi" :type :string}
-            {:name "pitaja" :type :string}
+                    {:name "ei tiedossa"}]}
             {:name "vaadittuLupaehtona" :type :boolean}
-            {:name "huomautukset" :type :group :repeating true
-             :body [{:name "kuvaus" :required true}
-                    {:name "maaraAika" :type :date}
-                    {:name "toteamisHetki" :type :date}
-                    {:name "toteaja" :type :string}]}
-            {:name "lasnaolijat" :type :text}
-            {:name "poikkeamat" :type :text}])}
+            {:name "katselmus"
+             :type :group
+             :body (schemas/body schemas/rakennuksen-valitsin
+                     [{:name "pitoPvm" :type :date}
+                      {:name "tilanneKoodi" :type :string}
+                      {:name "pitaja" :type :string}
+                      {:name "huomautukset" :type :group :repeating true
+                       :body [{:name "kuvaus" :required true}
+                              {:name "maaraAika" :type :date}
+                              {:name "toteamisHetki" :type :date}
+                              {:name "toteaja" :type :string}]}
+                      {:name "lasnaolijat" :type :text}
+                      {:name "poikkeamat" :type :text}])}])}
    {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
     :body []} ; TODO -- link to document or application?
    {:info {:name "task-lupamaarays" :order 20}

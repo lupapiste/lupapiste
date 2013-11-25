@@ -89,6 +89,20 @@ var util = (function() {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
+  function getIn(m, keyArray) {
+    if (m && keyArray && keyArray.length > 0) {
+      var key = keyArray[0];
+      if (m.hasOwnProperty(key)) {
+        var val = m[key];
+        if (keyArray.length === 1) {
+          return val;
+        }
+        return getIn(val, keyArray.splice(1, keyArray.length - 1));
+      }
+    }
+    return undefined;
+  }
+
   return {
     zeropad: zeropad,
     fluentify: fluentify,
@@ -103,7 +117,8 @@ var util = (function() {
     },
     nop: nop,
     constantly: function(value) { return function() { return value; }; },
-    isNum: isNum
+    isNum: isNum,
+    getIn: getIn
   };
 
 })();
