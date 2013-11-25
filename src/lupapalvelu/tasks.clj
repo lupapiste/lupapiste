@@ -9,7 +9,7 @@
 
 (schemas/defschemas
   task-schemas-version
-  [{:info {:name "task-katselmus"}
+  [{:info {:name "task-katselmus" :order 1}
    :body (schemas/body
            [{:name "katselmuksenLaji"
              :type :select
@@ -37,10 +37,10 @@
                     {:name "toteaja" :type :string}]}
             {:name "lasnaolijat" :type :text}
             {:name "poikkeamat" :type :text}])}
-   {:info {:name "task-lupamaarays"}
-    :body []} ; TODO
-   {:info {:name "task-vaadittu-tyonjohtaja"}
+   {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
     :body []} ; TODO -- link to document or application?
+   {:info {:name "task-lupamaarays" :order 20}
+    :body []} ; TODO
    ])
 
 (defn- ->task [schema-name task-name data {:keys [created assignee] :as meta} source]
