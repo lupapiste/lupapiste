@@ -15,8 +15,6 @@
            [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
-(def logins-lock-expires-seconds (* 3 60 60))
-
 ;;
 ;; Utils
 ;;
@@ -272,8 +270,7 @@
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1})
-  (mc/ensure-index :logins {:locked 1} {:expireAfterSeconds logins-lock-expires-seconds}))
+  (mc/ensure-index :app-links {:link 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

@@ -7,6 +7,7 @@
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
+            [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [fail fail!]]
             [clj-time.core :as time]
@@ -117,14 +118,12 @@
 ;; ==============================================================================
 ;;
 
-(def allowed-failed-logins 3)
-
 (defn- logins-lock-expires-date []
-  (to-date (time/minus (time/now) (time/seconds mongo/logins-lock-expires-seconds))))
+  (to-date (time/minus (time/now) (time/seconds (env/value :login :throttle-expires)))))
 
 (defn throttle-login? [username] 
   (mongo/any? :logins {:_id (ss/lower-case username) 
-                       :failed-logins {$gte allowed-failed-logins}
+                       :failed-logins {$gte (env/value :login :allowed-failures)}
                        :locked {$gt (logins-lock-expires-date)}}))
 
 (defn login-failed [username]
