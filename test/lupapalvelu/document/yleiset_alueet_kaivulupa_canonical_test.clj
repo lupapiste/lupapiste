@@ -7,27 +7,33 @@
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [sade.util :refer [contains-value?]]))
 
-;; NOTE: Rakennuslupa-canonical-testista poiketen applicationin "auth"-kohta ei ole kaytossa.
 
-;; TODO: Pitaisiko "location"-kohta poistaa? Tekeeko silla mitaan?
+(def ^:private operation {:id "51cc1cab23e74941fee4f495",
+                          :created 1372331179008,
+                          :name "ya-kaivuulupa"})
 
-;; TODO: Jossain itesteissa pitaisi testata seuraavat applicationin kohdat:
-;;        - operations
-;;        - allowedAttachmentTypes
-;;        - organization ?
+(def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
+                                :created 1379404904514,
+                                :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
+                                              :removable false,
+                                              :repeating false,
+                                              :version 1,
+                                              :type "group",
+                                              :order 60},
+                                :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
+                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
+                                       :sijoituksen-tarkoitus {:value "other"},
+                                       ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
+                                       :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
+                                       :varattava-pinta-ala {:value "333"}}})
 
+(def ^:private tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
-(def operation {:id "51cc1cab23e74941fee4f495",
-                :created 1372331179008,
-                :name "ya-kaivuulupa"})
-
-(def tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
-
-(def documents [hakija
-                tyomaasta-vastaava-kaivulupa
-                maksaja
-                hankkeen-kuvaus
-                tyoaika])
+(def ^:private documents [hakija
+                          tyomaasta-vastaava-kaivulupa
+                          maksaja
+                          hankkeen-kuvaus
+                          tyoaika])
 
 (def kaivulupa-application {:id "LP-753-2013-00001",
                             :permitType "YA",
@@ -48,8 +54,8 @@
                             :statements statements})
 
 
-(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-maksaja)
-(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-tyomaasta-vastaava)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical
+  get-maksaja get-tyomaasta-vastaava get-sijoituksen-tarkoitus)
 
 (facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical kaivulupa-application "fi")
@@ -74,8 +80,8 @@
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
 
-        osapuolet-vec (-> Tyolupa :osapuolitieto) => truthy
-        vastuuhenkilot-vec (-> Tyolupa :vastuuhenkilotieto) => truthy
+        osapuolet-vec (:osapuolitieto Tyolupa) => truthy
+        vastuuhenkilot-vec (:vastuuhenkilotieto Tyolupa) => truthy
 
         ;; maksajan henkilotieto-osa
         rooliKoodi-maksajan-vastuuhenkilo "maksajan vastuuhenkil\u00f6"
@@ -123,10 +129,20 @@
         hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
         hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
-        hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy]
+        hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
+
+        ;; Lisatiedot
+        sijoituksen-tark (-> Tyolupa :lupakohtainenLisatietotieto :LupakohtainenLisatieto :arvo) => truthy
+
+        ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
+        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
+                                        (assoc-in (:data hankkeen-kuvaus)
+                                          [:sijoituksen-tarkoitus :value]
+                                          "liikennevalo")) => truthy]
 
 ;      (println "\n canonical: ")
 ;      (clojure.pprint/pprint canonical)
+;      (println "\n")
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
@@ -240,4 +256,6 @@
       ;; Hankkeen kuvaus
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
-      (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
+      (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
+      (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :sijoituksen-tarkoitus :value))
+      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")))

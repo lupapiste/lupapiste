@@ -238,11 +238,13 @@
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
                       :osapuolettieto (osapuolet documents)
-                      :kayttotapaus (condp = operation-name
-                                      "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
-                                      "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
-                                      "jatkoaika" "Jatkoaikahakemus"
-                                      (get-kayttotapaus documents toimenpiteet))
+                      :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
+                                      "Rakentamisen aikainen muutos"
+                                      (condp = operation-name
+                                        "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                        "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
+                                        "jatkoaika" "Jatkoaikahakemus"
+                                        (get-kayttotapaus documents toimenpiteet)))
                       :asianTiedot (if link-permit-data
                                      (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
                                      (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
@@ -334,27 +336,21 @@
                       }}}}]
     canonical))
 
-(defn unsent-attachments-to-canonical [application lang user]
+(defn unsent-attachments-to-canonical [application lang]
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
+        hakija-info (-> (filter #(= (-> % :Osapuoli :VRKrooliKoodi) "hakija") (get-parties documents))
+                      first
+                      (assoc-in [:Osapuoli :kuntaRooliKoodi] "ei tiedossa"))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli
-                                                                   {:kuntaRooliKoodi "ei tiedossa"
-                                                                    :henkilo {:nimi {:etunimi (:firstName user)
-                                                                                     :sukunimi (:lastName user)}
-                                                                              :osoite {:osoitenimi {:teksti (:street user)}
-                                                                                       :postitoimipaikannimi (:city user)
-                                                                                       :postinumero (:zip user)}
-                                                                              :sahkopostiosoite (:email user)
-                                                                              :puhelin (:phone user)}}}}}
+                      :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"
                       }}}}]
-
-  canonical))
+    canonical))

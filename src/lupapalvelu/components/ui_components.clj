@@ -5,7 +5,8 @@
             [lupapalvelu.mime :as mime]
             [sade.env :as env]
             [sade.util :as util]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [lupapalvelu.attachment :refer [attachment-types-osapuoli]]))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
@@ -16,7 +17,8 @@
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
-                 :wannaJoinUrl      (env/value :oir :wanna-join-url)}]
+                 :wannaJoinUrl      (env/value :oir :wanna-join-url)
+                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn loc->js []

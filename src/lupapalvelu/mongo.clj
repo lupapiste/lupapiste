@@ -118,12 +118,12 @@
   input)
 
 (defn upload [file-id filename content-type content & metadata]
-  (assert (and (string? file-id)
-               (string? filename)
-               (string? content-type)
-               (or (instance? java.io.File content) (instance? java.io.InputStream content))
-               (sequential? metadata)
-               (even? (clojure.core/count metadata))))
+  (assert (string? file-id))
+  (assert (string? filename))
+  (assert (string? content-type))
+  (assert (or (instance? java.io.File content) (instance? java.io.InputStream content)))
+  (assert (sequential? metadata))
+  (assert (even? (clojure.core/count metadata)))
   (gfs/store-file
     (gfs/make-input-file content)
     (set-file-id file-id)

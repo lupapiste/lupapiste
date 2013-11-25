@@ -102,9 +102,11 @@
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <span data-bind="text: $data.id, attr: {'data-test-link-permit': $data.id}"
-                    data-test-id="test-application-link-permit">
-              </span>
+              <a data-bind="text: $data.id,
+                            click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                            attr: {'data-test-app-linking-to-us': $data.id}"
+                 data-test-id="test-application-link-permit"
+                 href="#" class="link-permit-item"></a>
               <a data-bind="ltext: 'application.linkPermitRemoveSelected',
                             click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
                  href="#" class="remove-link-permit"></a>
@@ -156,6 +158,9 @@
             <span data-bind="ltext: 'application.addLinkPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
+          <button data-bind="click: createChangePermit,    visible: $root.authorization.ok('create-change-permit'),     enable: $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
+            <span data-bind="ltext: 'application.createChangePermit'"></span>
+            <span class="icon add-grey left-align"></span>
           <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
@@ -373,16 +378,22 @@
                 data-test-id="add-attachment">
             </button>
             <button
+                data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+                class="btn btn-primary"
+                data-test-id="attachments-copy-own">
+            </button>
+            <button
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
                 class="btn">
             </button>
             <button
                 data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
-                           ltext: 'application.attachmentsMoveToBackingSystem',
-                           disable: application.sendUnsentAttachmentsToBackingSystemDisabled,
+                           disable: application.sendUnsentAttachmentsButtonDisabled,
                            visible: $root.authorization.ok('move-attachments-to-backing-system')"
                 class="btn btn-primary modal"
                 data-test-id="send-unsent-attachments">
+                <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
+                <em data-bind="visible: application.pending" class="button-loader"></em>
             </button>
           </div>
           <div class="process-nav">
@@ -608,7 +619,7 @@
 
           <div data-bind="with: application" class="application-neighbors">
 
-            <h1 data-bind="ltext: 'application.neighbors'">Naapurit</h1>
+            <h1 data-bind="html: loc('application.' + $root.application.permitType() + '.neighbors')">Naapurit</h1>
             <p data-bind="html: loc('help.' + $root.application.permitType() + '.neighborsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>

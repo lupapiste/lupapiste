@@ -380,6 +380,7 @@
                                                  :id "5272668be8db5aaa01084601"
                                                  :created 1383229067483}]
                                    :documents [hakija-henkilo
+                                               maksaja-henkilo
                                                tyonjohtaja
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-kuntalupatunnus]
@@ -394,6 +395,7 @@
                                                  :id "527b3392e8dbbb95047a89de"
                                                  :created 1383805842761}]
                                    :documents [hakija-henkilo
+                                               maksaja-henkilo
                                                suunnittelija1
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-lupapistetunnus]
@@ -748,12 +750,29 @@
                                         :muuTunnustieto
                                         :MuuTunnus) => truthy
 
+
+        osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
+
+        ;; henkilotyyppinen maksaja
+        rooliKoodi-laskun-maksaja "Rakennusvalvonta-asian laskun maksaja"
+        maksaja-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-laskun-maksaja)
+        maksaja-Osapuoli (:Osapuoli (first (filter maksaja-filter-fn osapuolet-vec)))
+        maksaja-Osapuoli-henkilo (:henkilo maksaja-Osapuoli)
+        maksaja-Osapuoli-yritys (:yritys maksaja-Osapuoli)
+
         kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
         Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
         vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
         rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
 
         viitelupatieto-LupaTunnus_2 (:LupaTunnus (get-viitelupatieto link-permit-data-lupapistetunnus))]
+
+    (facts "Maksaja is correct"
+      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-Osapuoli) => "Rakennusvalvonta-asian laskun maksaja")
+      (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-Osapuoli) => "maksaja")
+      (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-Osapuoli) => true)
+      (validate-person maksaja-Osapuoli-henkilo)
+      (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
     (facts "\"kuntalupatunnus\" type of link permit data"
       (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => falsey)
@@ -785,6 +804,15 @@
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
         viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
 
+        osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
+
+        ;; henkilotyyppinen maksaja
+        rooliKoodi-laskun-maksaja "Rakennusvalvonta-asian laskun maksaja"
+        maksaja-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-laskun-maksaja)
+        maksaja-Osapuoli (:Osapuoli (first (filter maksaja-filter-fn osapuolet-vec)))
+        maksaja-Osapuoli-henkilo (:henkilo maksaja-Osapuoli)
+        maksaja-Osapuoli-yritys (:yritys maksaja-Osapuoli)
+
         luvanTunnisteTiedot-MuuTunnus (-> rakennusvalvontaasia
                                         :luvanTunnisteTiedot
                                         :LupaTunnus
@@ -795,6 +823,13 @@
         Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
         vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
         rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy]
+
+    (facts "Maksaja is correct"
+      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-Osapuoli) => "Rakennusvalvonta-asian laskun maksaja")
+      (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-Osapuoli) => "maksaja")
+      (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-Osapuoli) => true)
+      (validate-person maksaja-Osapuoli-henkilo)
+      (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
     (facts "\"lupapistetunnus\" type of link permit data"
       (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
@@ -874,9 +909,8 @@
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
            (let [canonical (unsent-attachments-to-canonical
-                             (assoc application-rakennuslupa :state "verdictGiven") ;; TODO: Lisataanko tahan liitteet?
-                             "sv"
-                             authority-user-jussi)
+                             (assoc application-rakennuslupa :state "verdictGiven")
+                             "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -906,10 +940,10 @@
 
              (facts "Osapuolet"
                (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
-               (fact "etunimi" (:etunimi nimi) => "Jussi")
-               (fact "sukunimi" (:sukunimi nimi) => "Viranomainen")
-               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1")
-               (fact "puhelin" (:puhelin henkilo) => "1231234567"))))
+               (fact "etunimi" (:etunimi nimi) => "Pena")
+               (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
+               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
+               (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
 
 
 

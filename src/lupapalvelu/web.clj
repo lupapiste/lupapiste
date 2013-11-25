@@ -480,7 +480,7 @@
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"}]
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
       (when (= r "GetCapabilities")
-        (resp/status 200 "OK")))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml")))))))
 
 (env/in-dev
   (defjson [:any "/dev/spy"] []
