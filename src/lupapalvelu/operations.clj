@@ -349,16 +349,17 @@
 
      :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
-                                   :required ["tyonjohtaja"]
+                                   :required ["tyonjohtaja" "maksaja"]
+                                   :attachments []}
+
+     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["suunnittelija" "maksaja"]
                                    :attachments []}
 
      :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type "R"
                                    :required ["maksaja"]
-                                   :attachments []}
-     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
-                                   :permit-type "R"
-                                   :required ["suunnittelija"]
                                    :attachments []}
      }
     ya-operations))
