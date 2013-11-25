@@ -2,3 +2,4 @@ suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyyys_ala
 suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyyys_ylakouluun: Etäisyys yläkouluun
 rakennushanke._append_label: Lisää toimenpide
 
+error.login-trottle: Tunnus on lukittu väliaikaisesti virheellisten kirjautumisyrityksten vuoksi.

@@ -23,6 +23,17 @@ Login fails with invalid password
 Login fails with invalid username and password
   Login fails  invalid  whatever
 
+Username is locked after 3 failures
+  Login fails  invalid  whatever
+  Page Should Not Contain  Tunnus on lukittu
+  Login fails  invalid  whatever
+  Wait Until  Page Should Contain  Tunnus on lukittu
+  
+Username lock expires after 5 seconds
+  Sleep  5
+  Login fails  invalid  whatever
+  Page Should Not Contain  Tunnus on lukittu
+
 Login fails with empty username
   Login fails  ${EMPTY}  ${PASSWORD}
 
