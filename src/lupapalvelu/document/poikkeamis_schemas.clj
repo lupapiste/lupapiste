@@ -91,7 +91,7 @@
                                           {:name "ei tiedossa"}]}]}
                            {:name "toimenpiteet"
                             :type :group
-                            :repeating true
+                            :repeating false
                             :approvable true
                             :body [{:name "kayttotarkoitus" :type :select
                                     :body [{:name yhden-asunnon-talot}
