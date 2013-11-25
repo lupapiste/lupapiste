@@ -112,11 +112,15 @@
                                 (:apikey user-data)
                                 (security/random-password))}))))))
 
+;;
+;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
+;;       activation/send-activation-mail-for -funktiosta kutsuviin funktioihin.
+;;
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
    role, throws exception."
-  [caller user-data]
+  [caller user-data & {:keys [send-email] :or {send-email true}}]
   (validate-create-new-user! caller user-data)
   (let [new-user  (create-new-user-entity user-data)
         new-user  (assoc new-user :id (mongo/create-id))
@@ -127,12 +131,15 @@
         nil     (do
                   (info "creating new user" (dissoc new-user :private))
                   (mongo/insert :users new-user)
-                  (activation/send-activation-mail-for new-user))
+                  ;; Emailin lahetys
+                  (when send-email
+                    (activation/send-activation-mail-for new-user)))
         "dummy" (do
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
         (fail! :user-exists))
       (user/get-user-by-email email)
+
       (catch com.mongodb.MongoException$DuplicateKey e
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
           (do
@@ -210,21 +217,29 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
+;;
+;; TODO: Poista "update-user-organization":lta "firstName lastName"-checkki removen tapauksessa.
+;;       ja korjaa sitten authority-admin/admin.js:sta vastaava kutsu.
+;;
 (defcommand update-user-organization
   {:parameters       [email operation firstName lastName]
    :roles            [:authorityAdmin]
    :input-validators [valid-organization-operation? (partial non-blank-parameters [:email :firstName :lastName])]}
   [{caller :user}]
   (let [email        (ss/lower-case email)
-       organization  (first (:organizations caller))]
+        organization (first (:organizations caller))]
     (debug "update user" email)
     (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
      (ok :operation operation)
      (if (= operation "add")
-       (let [new-user (create-new-user caller {:email email :role :authority :organization organization :enabled true :firstName firstName :lastName lastName})
+       (let [new-user (create-new-user
+                        caller
+                        {:email email :role :authority :organization organization :enabled true :firstName firstName :lastName lastName}
+                        :send-email false)
              token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
          (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
 
+         ;; Emailin lahetys
          (notifications/notify! :invite-authority {:data {:email email :token token}})
          (ok :operation "invited"))
        (fail :not-found :email email)))))
