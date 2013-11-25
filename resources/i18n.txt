@@ -1,0 +1,4 @@
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyyys_alakouluun: Etäisyys alakouluun
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyyys_ylakouluun: Etäisyys yläkouluun
+rakennushanke._append_label: Lisää toimenpide
+
