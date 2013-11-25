@@ -198,7 +198,8 @@
                      {:name "viemarijohto" :type :checkbox}]}
 
              {:name "vaikutukset_yhdyskuntakehykselle":type :group :layout :vertical
-              :body [{:name "etaisyyys_kouluun" :type :string :subtype :number :unit "km" :size "s"}
+              :body [{:name "etaisyyys_alakouluun" :type :string :subtype :number :unit "km" :size "s"}
+                     {:name "etaisyyys_ylakouluun" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "turvallinen_polkupyoratie_kouluun" :type :checkbox}
                      {:name "etaisyys_kauppaan" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyys_paivakotiin" :type :string :subtype :number :unit "km" :size "s"}
