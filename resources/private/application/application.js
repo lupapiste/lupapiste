@@ -135,6 +135,22 @@
     self.assignee = ko.observable();
     self.neighbors = ko.observable([]);
     self.statements = ko.observable([]);
+    self.tasks = ko.observable([]);
+    self.taskGroups = ko.computed(function() {
+      var tasks = ko.toJS(self.tasks);
+      var schemaOrder = _.reduce(tasks, function(m, task){
+        var info = task.schema.info;
+        m[info.name] = info.order;
+        return m;
+      },{});
+
+      var groups = _.groupBy(tasks, function(task) {return task.schema.info.name;});
+      return _(groups)
+        .keys()
+        .map(function(n){return {name:loc(n+"._group_label"),order:schemaOrder[n], tasks:groups[n]};})
+        .sortBy("order")
+        .valueOf();
+    });
     self.nonpartyDocumentIndicator = ko.observable(0);
     self.partyDocumentIndicator = ko.observable(0);
     self.linkPermitData = ko.observable({});

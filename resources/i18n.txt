@@ -1,1 +1,4 @@
 application.tabConstructionTimeTasks: Rakentaminen
+task-katselmus._group_label: Kokoukset, katselmukset ja tarkastukset
+task-lupamaarays._group_label: Muut lupamääräykset
+task-vaadittu-tyonjohtaja._group_label: Työnjohtajat
