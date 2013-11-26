@@ -72,6 +72,26 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
+(defn- str-or-nil [& v]
+  (if (some nil? v)
+    nil
+    (reduce str v)))
+
+(defn- get-updated-if [current to-add]
+  (if to-add
+    (str current " " to-add)
+    current))
+
+(defn get-osoite [osoite]
+  (let [osoite (get-text osoite :osoitenimi :teksti)
+        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :osoitenumero)))
+        osoite (get-updated-if osoite (str-or-nil " - " (get-text osoite :osoitenumero2)))
+        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :jakokirjain)))
+        osoite (get-updated-if osoite (str-or-nil " - " (get-text osoite :jakokirjain2)))
+        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :porras)))
+        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :huoneisto)))]
+    osoite))
+
 (defn- ->henkilo [xml-without-ns]
   (let [henkilo (select1 xml-without-ns [:henkilo])]
     {:_selected "henkilo"
@@ -81,7 +101,7 @@
                                  :turvakieltoKytkin (get-text xml-without-ns :turvakieltoKytkin)}
                  :yhteystiedot  {:email     (get-text henkilo :sahkopostiosoite)
                                  :puhelin   (get-text henkilo :puhelin)}
-                 :osoite        {:katu         (get-text henkilo :osoite :osoitenimi :teksti)
+                 :osoite        {:katu         (get-osoite (select1 henkilo :osoite))
                                  :postinumero  (get-text henkilo :osoite :postinumero)
                                  :postitoimipaikannimi  (get-text henkilo :osoite :postitoimipaikannimi)}}
      :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
@@ -92,7 +112,7 @@
     {:_selected "yritys"
      :yritys {:yritysnimi                             (get-text yritys :nimi)
               :liikeJaYhteisoTunnus                   (get-text yritys :liikeJaYhteisotunnus)
-              :osoite {:katu                          (get-text yritys :postiosoite :osoitenimi :teksti)
+              :osoite {:katu                          (get-osoite (select1 yritys :postiosoite))
                        :postinumero                   (get-text yritys :postiosoite :postinumero)
                        :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
               :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}
