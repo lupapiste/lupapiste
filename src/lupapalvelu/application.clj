@@ -616,19 +616,20 @@
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
-        enriched-results (map (fn [r]
-                                (assoc r :text
-                                  (str
-                                    (:address r) ", "
-                                    (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
-                                    (:id r))))
+        enriched-results (map
+                           (fn [r]
+                             (assoc r :text
+                               (str
+                                 (:address r) ", "
+                                 (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
+                                 (:id r))))
                            results)
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (into [] (filter same-property-id-fn enriched-results))
-        without-same-property-id (into [] (filter (comp not same-property-id-fn) enriched-results))
+        without-same-property-id (sort-by :text #(compare %1 %2)
+                                   (into [] (filter (comp not same-property-id-fn) enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
         final-results (map #(select-keys % [:id :text]) organized-results)]
-
     (ok :app-links final-results)))
 
 (defn- make-mongo-id-for-link-permit [app-id link-permit-id]
@@ -724,7 +725,9 @@
                                :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                                :documents (make-documents user created op application)
                                :modified created}
-           $pushAll {:attachments (make-attachments created op (:organization application))}})))
+           $pushAll {:attachments (make-attachments created op (:organization application))}})
+    (try (autofill-rakennuspaikka application (now))
+      (catch Exception e (error e "KTJ data was not updated")))))
 
 ;;
 ;; Verdicts

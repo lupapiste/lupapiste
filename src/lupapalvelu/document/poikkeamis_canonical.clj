@@ -6,7 +6,8 @@
   {:Popast
    {:toimituksenTiedot (toimituksen-tiedot application lang)}})
 
-(defn get-toimenpide [toimenpide common]
+(defn get-toimenpide [{toimenpide :toimenpiteet} common]
+  ;(clojure.pprint/pprint toimenpide)
   (merge common {:kuvausKoodi (-> toimenpide :Toimenpide :value)
                  :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)
                                                   :asuinhuoneitojenLkm (-> toimenpide :huoneistoja :value)
@@ -15,12 +16,16 @@
                                                   :kerrosalatieto {:kerrosala {:pintaAla (-> toimenpide :kerrosala :value)
                                                                                :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)}}}}}))
 
-(defn get-toimenpiteet [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as d}]
+(defn get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
   (let [kaytettykerrosala-canonical (when (not (s/blank? (-> kaytettykerrosala :pintaAla :value)))
                                       {:kerrosalatieto {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla :value)
                                                                     :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi :value)}}})]
-    (for [[_ toimenpide] toimenpiteet]
-      {:Toimenpide (get-toimenpide toimenpide kaytettykerrosala-canonical)})))
+      {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))
+
+
+(defn get-toimenpiteet [toimenpiteet]
+  (map get-toimenpidefull toimenpiteet))
+
 
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain]
   (let [root (root-element application lang)
@@ -42,9 +47,7 @@
        :luvanTunnistetiedot (lupatunnus (:id application))
        :osapuolettieto (osapuolet documents)
        :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
-       :toimenpidetieto (get-toimenpiteet (let [rakennushanke (:rakennushanke documents)
-                                                _ (assert (= 1 (count rakennushanke)))]
-                                            (first rakennushanke)))
+       :toimenpidetieto (get-toimenpiteet (:rakennushanke documents))
        :lausuntotieto (get-statements (:statements application))
        :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
                                                      "ruotsi"
