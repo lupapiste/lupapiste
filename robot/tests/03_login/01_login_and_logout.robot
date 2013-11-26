@@ -25,7 +25,7 @@ Login fails with invalid username and password
 
 Username is locked after 3 failures
   Login fails  invalid  whatever
-  Page Should Not Contain  Tunnus on lukittu
+  Wait Until  Page Should Contain  Tunnus tai salasana on väärin
   Login fails  invalid  whatever
   Wait Until  Page Should Contain  Tunnus on lukittu
   
