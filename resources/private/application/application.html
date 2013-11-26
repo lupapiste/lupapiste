@@ -711,7 +711,7 @@
               <td>state</td>
               <td>displayName</td>
               <td>attachments</td>
-              <td>created</td>
+              <td>closed</td>
               <td>assignee</td>
             </tr>
           </thead>
@@ -720,8 +720,8 @@
               <td data-bind="text:status"></td>
               <td data-bind="text:displayName"></td>
               <td data-bind="foreanch: attachments"><span data-bind="with: $data.latestVersion"><span data-bind="text: filename"></span></span></td>
-              <td data-bind="dateString:created"></td>
-              <td data-bind="fullName:assignee"></td>
+              <td data-bind="dateString:$data.closed"></td>
+              <td data-bind="fullName:$data.assignee"></td>
             </tr>
           </tbody>
         </table>

@@ -57,7 +57,8 @@
    :data (when data (-> data tools/wrapped (tools/timestamped created)))
    :assignee (select-keys assignee [:id :firstName :lastName])
    :duedate nil
-   :created created})
+   :created created
+   :closed nil})
 
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
   (map-indexed
