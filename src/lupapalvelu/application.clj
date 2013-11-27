@@ -815,7 +815,7 @@
   [{:keys [user created application] :as command}]
   (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
     (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-          tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
+          tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
           updates {$set (merge {:verdicts verdicts-with-attachments
                                 :modified created
                                 :state    :verdictGiven}
