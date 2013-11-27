@@ -1,5 +1,5 @@
-#Kiitos rekisteröitymisestä, {{name}}.
+#Kiitos rekister&ouml;itymisest&auml;, {{name}}.
 
-Tervetuloa Lupapisteen käyttäjäksi. Aktivoi käyttäjätunnuksesi tästä linkistä: {{link}}
+Tervetuloa Lupapisteen k&auml;ytt&auml;j&auml;ksi. Aktivoi k&auml;ytt&auml;j&auml;tunnuksesi t&auml;st&auml; linkist&auml;: {{link}}
 
-Jos et ole rekisteröitynyt Lupapisteeseen, voit jättää tämän sähköpostin huomiotta.
+Jos et ole rekister&ouml;itynyt Lupapisteeseen, voit j&auml;tt&auml;&auml; t&auml;m&auml;n s&auml;hk&ouml;postin huomiotta.

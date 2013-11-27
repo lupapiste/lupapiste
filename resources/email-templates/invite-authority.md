@@ -1,7 +1,7 @@
 # Hei,
 
-Sinut on kutsuttu viranomaiseksi Lupapiste.fi palveluun. Oheisen linkin kautta pääset valitsemaan itsellsesi salasanan palveluun.
+Sinut on kutsuttu viranomaiseksi Lupapiste.fi palveluun. Oheisen linkin kautta p&auml;&auml;set valitsemaan itsellsesi salasanan palveluun.
 
-Jatka klikkaamalla linkkiä: {{link-fi}}
+Jatka klikkaamalla linkki&auml;: {{link-fi}}
 
 Tervetuloa.
