@@ -8,7 +8,6 @@
 
 (def sijoituksen-tarkoitus-dropdown
   [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
-    :required true
     :body [{:name "jakokaappi-(tele/sahko)"}
            {:name "jate--tai-sadevesi"}
            {:name "kaivo-(kaukolampo)"}
@@ -25,8 +24,8 @@
 (def hankkeen-kuvaus-kaivulupa
   (body
     sijoituksen-tarkoitus-dropdown
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                                    ;; sijoituslupaviitetietoType
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
     {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
 
 (def tyomaasta-vastaava
@@ -41,8 +40,8 @@
 
 (def tyo-aika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date :required true}                 ;; alkuPvm / loppuPvm
-    {:name "tyoaika-paattyy-pvm" :type :date :required true}))
+    {:name "tyoaika-alkaa-pvm" :type :date}                 ;; alkuPvm / loppuPvm
+    {:name "tyoaika-paattyy-pvm" :type :date}))
 
 
 (defschemas
@@ -79,8 +78,8 @@
 
 (def hankkeen-kuvaus-kayttolupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                       ;; sijoituslupaviitetietoType
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
 
 (defschemas
   1
@@ -98,10 +97,10 @@
 
 (def tapahtuman-tiedot
   (body
-    {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width :required true}  ;; lupakohtainenLisatietoType
-    {:name "tapahtumapaikka" :type :string :size "l" :required true}                        ;; lupaAsianKuvaus
-    {:name "tapahtuma-aika-alkaa-pvm" :type :date :required true}                           ;; alkuPvm
-    {:name "tapahtuma-aika-paattyy-pvm" :type :date :required true}))                       ;; loppuPvm
+    {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}  ;; lupakohtainenLisatietoType
+    {:name "tapahtumapaikka" :type :string :size "l"}                        ;; lupaAsianKuvaus
+    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                           ;; alkuPvm
+    {:name "tapahtuma-aika-paattyy-pvm" :type :date}))                       ;; loppuPvm
 
 #_(def tapahtumien-syotto                                                       ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
@@ -113,9 +112,9 @@
 (def mainostus-tapahtuma
   (body
     tapahtuman-tiedot
-    [{:name "mainostus-alkaa-pvm" :type :date :required true}                   ;; toimintajaksotietoType
-     {:name "mainostus-paattyy-pvm" :type :date :required true}]
-    {:name "haetaan-kausilupaa" :type :checkbox}                                ;; lupakohtainenLisatietoType
+    [{:name "mainostus-alkaa-pvm" :type :date}                   ;; toimintajaksotietoType
+     {:name "mainostus-paattyy-pvm" :type :date}]
+    {:name "haetaan-kausilupaa" :type :checkbox}                 ;; lupakohtainenLisatietoType
     #_tapahtumien-syotto))
 
 (def viitoitus-tapahtuma
@@ -144,8 +143,8 @@
 
 (def hankkeen-kuvaus-sijoituslupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                                     ;; sijoituslupaviitetietoType?
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType?
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
