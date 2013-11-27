@@ -2,7 +2,9 @@ application.tabConstructionTimeTasks: Rakentaminen
 task-katselmus._group_label: Kokoukset, katselmukset ja tarkastukset
 task-lupamaarays._group_label: Muut lupamääräykset
 task-vaadittu-tyonjohtaja._group_label: Työnjohtajat
-
 application.taskState: Tila
 application.taskDisplayName: Vaatimus
 application.taskClosed: Päivämäärä
+task.new.title: Viranomaisen vastuulla
+task.missing.title: Hakijan vastuulla
+task.ok.title: Valmis
