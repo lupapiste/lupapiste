@@ -191,14 +191,14 @@
         (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Antero"
         (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
         (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
-        (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 18"
+        (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 1"
         (get-in owner1 [:henkilo :osoite :postinumero]) => "06500"
         (get-in owner1 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
 
         (get-in owner1 [:_selected]) => "henkilo"
         (get-in owner2 [:henkilo :henkilotiedot :etunimi]) => "Pauliina"
         (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
-        (get-in owner2 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 19"
+        (get-in owner2 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 1"
         (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
         (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
         (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
@@ -227,6 +227,6 @@
         (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
         (get-in owner2 [:yritys :yritysnimi]) => "Pekkalan Putki Oy"
         (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
-        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 18"
+        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 1—2 d—e A 1"
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
