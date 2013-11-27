@@ -5,6 +5,4 @@ task-vaadittu-tyonjohtaja._group_label: Työnjohtajat
 
 application.taskState: Tila
 application.taskDisplayName: Vaatimus
-application.taskAttachments: Liitteet
 application.taskClosed: Päivämäärä
-application.taskAssignee: Tekijä

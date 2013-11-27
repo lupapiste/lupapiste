@@ -708,18 +708,14 @@
             <tr>
               <td data-bind="ltext: 'application.taskState'"></td>
               <td data-bind="ltext: 'application.taskDisplayName'"></td>
-              <td data-bind="ltext: 'application.taskAttachments'"></td>
               <td data-bind="ltext: 'application.taskClosed'"></td>
-              <td data-bind="ltext: 'application.taskAssignee'"></td>
             </tr>
           </thead>
           <tbody data-bind="foreach: tasks">
             <tr data-bind="attr: {'data-test-id': id}">
               <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(statusName + '.title')}"></span></td>
               <td data-bind="text:displayName"></td>
-              <td data-bind="foreanch: attachments"><span data-bind="with: $data.latestVersion"><span data-bind="text: filename"></span></span></td>
               <td data-bind="dateString:$data.closed"></td>
-              <td data-bind="fullName:$data.assignee"></td>
             </tr>
           </tbody>
         </table>
