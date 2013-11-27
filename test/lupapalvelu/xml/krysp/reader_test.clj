@@ -227,6 +227,6 @@
         (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
         (get-in owner2 [:yritys :yritysnimi]) => "Pekkalan Putki Oy"
         (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
-        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 1—2 d—e A 1"
+        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 1\u20132 d\u2013e A 1"
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))

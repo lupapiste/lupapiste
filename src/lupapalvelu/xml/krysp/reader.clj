@@ -85,9 +85,9 @@
 (defn get-osoite [osoite]
   (-> (get-text osoite :osoitenimi :teksti)
     (get-updated-if (str-or-nil " " (get-text osoite :osoitenumero)))
-    (get-updated-if (str-or-nil "—" (get-text osoite :osoitenumero2)))
+    (get-updated-if (str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
     (get-updated-if (str-or-nil " " (get-text osoite :jakokirjain)))
-    (get-updated-if (str-or-nil "—" (get-text osoite :jakokirjain2)))
+    (get-updated-if (str-or-nil "\u2013" (get-text osoite :jakokirjain2)))
     (get-updated-if (str-or-nil " " (get-text osoite :porras)))
     (get-updated-if (str-or-nil " " (get-text osoite :huoneisto)))))
 
