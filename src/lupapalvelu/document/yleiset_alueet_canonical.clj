@@ -113,29 +113,31 @@
               :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}})
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
-  {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta"
-   :arvo (-> data :lisatietoja-sijoituskohteesta :value)})
+  (when-let [arvo (-> data :lisatietoja-sijoituskohteesta :value)]
+    {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta"
+     :arvo arvo}))
 
 (defn- get-sijoituksen-tarkoitus [data]
-  {:selitysteksti "Sijoituksen tarkoitus"
-   :arvo (if (= "other" (:sijoituksen-tarkoitus data))
-           (-> data :muu-sijoituksen-tarkoitus :value)
-           (-> data :sijoituksen-tarkoitus :value))})
+  (if (= "other" (:sijoituksen-tarkoitus data))
+    (when-let [arvo (-> data :muu-sijoituksen-tarkoitus :value)]
+      {:selitysteksti "Sijoituksen tarkoitus"
+       :arvo arvo})
+    (when-let [arvo (-> data :sijoituksen-tarkoitus :value)]
+      {:selitysteksti "Sijoituksen tarkoitus"
+       :arvo arvo})))
 
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
   {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm :value))
                    :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-paattyy-pvm :value))}})
 
 (defn- get-mainostus-viitoitus-lisatiedot [mainostus-viitoitus-tapahtuma]
-  (let [lisatiedot [{:LupakohtainenLisatieto {:selitysteksti "Tapahtuman nimi"
-                                             :arvo (-> mainostus-viitoitus-tapahtuma :tapahtuman-nimi :value)}}
-                   {:LupakohtainenLisatieto {:selitysteksti "Tapahtumapaikka"
-                                             :arvo (-> mainostus-viitoitus-tapahtuma :tapahtumapaikka :value)}}]]
-    (if (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa)
-      (conj lisatiedot
-        {:LupakohtainenLisatieto {:selitysteksti "Haetaan kausilupaa"
-                                  :arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)}})
-      lisatiedot)))
+  (let [lisatiedot [(when-let [arvo (-> mainostus-viitoitus-tapahtuma :tapahtuman-nimi :value)]
+                      {:LupakohtainenLisatieto {:selitysteksti "Tapahtuman nimi" :arvo arvo}})
+                    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :tapahtumapaikka :value)]
+                      {:LupakohtainenLisatieto {:selitysteksti "Tapahtumapaikka" :arvo arvo}})
+                    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)]
+                      {:LupakohtainenLisatieto {:selitysteksti "Haetaan kausilupaa" :arvo arvo}})]]
+    lisatiedot))
 
 (defn- permits [application]
   ;;
@@ -210,15 +212,25 @@
                           (-> documents-by-type hankkeen-kuvaus-key first :data))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
+
         lupakohtainenLisatietotieto (if (:sijoitus-lisatiedot config)
                                       (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
-                                        (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)]
-                                          {:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)})
-                                        (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                          [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                           {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
+                                        (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)
+                                              sij-tark (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)]
+                                          (when sij-tark {:LupakohtainenLisatieto sij-tark}))
+                                        (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)
+                                              sij-tark (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)
+                                              lisatiedot (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)]
+                                          (into []
+                                            (filter #(seq %)
+                                              [(when sij-tark {:LupakohtainenLisatieto sij-tark})
+                                               (when lisatiedot {:LupakohtainenLisatieto lisatiedot})]))))
+
                                       (when (:mainostus-viitoitus-lisatiedot config)
-                                        (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))
+                                        (into []
+                                          (filter #(seq %)
+                                            (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
+
         sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
