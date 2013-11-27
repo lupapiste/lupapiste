@@ -809,7 +809,9 @@
                                :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                                :documents (make-documents user created op application)
                                :modified created}
-           $pushAll {:attachments (make-attachments created op (:organization application))}})))
+           $pushAll {:attachments (make-attachments created op (:organization application))}})
+    (try (autofill-rakennuspaikka application (now))
+      (catch Exception e (error e "KTJ data was not updated")))))
 
 ;;
 ;; Verdicts
