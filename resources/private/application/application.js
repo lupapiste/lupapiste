@@ -145,7 +145,6 @@
     self.tasks = ko.observable([]);
     self.taskGroups = ko.computed(function() {
       var tasks = ko.toJS(self.tasks) || [];
-      var attachments = ko.toJS(self.attachments) || [];
       var schemaInfos = _.reduce(tasks, function(m, task){
         var info = task.schema.info;
         m[info.name] = info;
@@ -171,10 +170,6 @@
                   task.displayName = loc(key);
                 }
               }
-
-              task.attachments = _(attachments).filter(function(a) {
-                return a.target && a.target.type === "task" && a.target.id === task.id && a.latestVersion;
-              }).map(function(a) {return _.pick(a, ["latestVersion"]);}).valueOf();
 
               task.statusName = self.statuses[task.state] || "unknown";
 
