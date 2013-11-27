@@ -13,35 +13,6 @@
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
 
-  var removeAuthModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-    self.username = null;
-
-    self.init = function(applicationId, username) {
-      self.applicationId = applicationId;
-      self.username = username;
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("areyousure"),
-        loc("areyousure.message"),
-        {title: loc("yes"), fn: self.ok},
-        {title: loc("no")}
-      );
-      return self;
-    };
-
-    self.ok = function() {
-      ajax.command("remove-auth", { id : self.applicationId, email : self.username})
-        .success(function() {
-          notify.success("oikeus poistettu", self.username);
-          repository.load(self.applicationId);
-        })
-        .call();
-      return false;
-    };
-  }();
-
   var requestForStatementModel = new function() {
     var self = this;
     self.data = ko.observableArray();
@@ -91,9 +62,11 @@
 
     self.documentName = ko.observable();
 
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
+    self.init = function(model) {
+      self.applicationId = model.application.id();
+      ajax.query("party-document-names", {id: self.applicationId})
+        .success(function(d) {self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));})
+        .call();
 
       LUPAPISTE.ModalDialog.open("#dialog-add-party");
       return false;
@@ -291,7 +264,21 @@
     };
 
     self.removeAuth = function(model) {
-      removeAuthModel.init(self.id(), model.username());
+      var username = model.username();
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.message"),
+        {title: loc("yes"),
+         fn:  function() {
+           ajax.command("remove-auth", { id: self.id(), email: username})
+             .success(function() {
+               repository.load(self.id());
+             })
+             .call();
+           return false;
+        }},
+        {title: loc("no")}
+      );
       return false;
     };
 
@@ -301,11 +288,6 @@
 
     self.addOperation = function() {
       window.location.hash = "#!/add-operation/" + self.id();
-      return false;
-    };
-
-    self.addParty = function() {
-      addPartyModel.init(self.id());
       return false;
     };
 
@@ -327,11 +309,6 @@
 
     self.exportPdf = function() {
       window.open("/api/raw/pdf-export?id=" + self.id() + "&lang=" + loc.currentLanguage, "_blank");
-      return false;
-    };
-
-    self.stampAttachments = function() {
-      stampModel.init(self);
       return false;
     };
 
@@ -364,10 +341,8 @@
       })
       .processing(self.processing)
       .pending(self.pending)
-    .call();
+      .call();
     };
-
-
 
     self.createChangePermit = function() {
 
@@ -401,7 +376,6 @@
       .call();
     };
 
-
     self.changeTab = function(model,event) {
       var $target = $(event.target);
       while ($target.is("span")) {
@@ -410,7 +384,8 @@
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
-     self.nextTab = function(model,event) {
+
+    self.nextTab = function(model,event) {
       var $target = $(event.target);
       while ($target.is("span")) {
         $target = $target.parent();
