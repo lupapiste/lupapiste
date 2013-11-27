@@ -78,19 +78,18 @@
     (reduce str v)))
 
 (defn- get-updated-if [current to-add]
-  (if to-add
-    (str current " " to-add)
+   (if to-add
+    (str current to-add)
     current))
 
 (defn get-osoite [osoite]
-  (let [osoite (get-text osoite :osoitenimi :teksti)
-        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :osoitenumero)))
-        osoite (get-updated-if osoite (str-or-nil " - " (get-text osoite :osoitenumero2)))
-        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :jakokirjain)))
-        osoite (get-updated-if osoite (str-or-nil " - " (get-text osoite :jakokirjain2)))
-        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :porras)))
-        osoite (get-updated-if osoite (str-or-nil " " (get-text osoite :huoneisto)))]
-    osoite))
+  (-> (get-text osoite :osoitenimi :teksti)
+    (get-updated-if (str-or-nil " " (get-text osoite :osoitenumero)))
+    (get-updated-if (str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
+    (get-updated-if (str-or-nil " " (get-text osoite :jakokirjain)))
+    (get-updated-if (str-or-nil "\u2013" (get-text osoite :jakokirjain2)))
+    (get-updated-if (str-or-nil " " (get-text osoite :porras)))
+    (get-updated-if (str-or-nil " " (get-text osoite :huoneisto)))))
 
 (defn- ->henkilo [xml-without-ns]
   (let [henkilo (select1 xml-without-ns [:henkilo])]

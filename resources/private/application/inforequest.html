@@ -40,7 +40,7 @@
             <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
           <!-- Created: -->
-          <div data-bind="with: $root.application.data">
+          <div>
             <p data-bind="ltext: 'inforequest.created'"></p>
             <span data-bind="if: $data.created">
               <span class="application_summary_text" data-bind="dateString: created"></span>
@@ -103,15 +103,15 @@
       </div>
 
       <div class="content">
-      
+
         <div data-bind="visible: currentUser.get().oir">
           <h2 data-test-id="wanna-join">
             <span data-bind="ltext: 'oir.wanna-join.message'"></span>
             <a data-bind="attr: {href: LUPAPISTE.config.wannaJoinUrl}, ltext: 'oir.wanna-join.link'" href="#" target="_blank"></a>
           </h2>
         </div>
-      
-      
+
+
         <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'"></h3>
         <div data-bind="if: attachments().length">
           <table class="table" data-test-id="inforequest-attachments-table">
