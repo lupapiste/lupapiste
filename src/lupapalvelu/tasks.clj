@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.user :as user]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
 
@@ -10,35 +11,34 @@
 (schemas/defschemas
   task-schemas-version
   [{:info {:name "task-katselmus" :order 1 :i18nprefix "verdict.katselmus" :i18npath ["katselmuksenLaji"]}
-   :body (schemas/body
-           [{:name "katselmuksenLaji"
-             :type :select
-             :required true
-             :body [{:name "muu katselmus"}
-                    {:name "muu tarkastus"}
-                    {:name "aloituskokous"}
-                    {:name "rakennuksen paikan merkitseminen"}
-                    {:name "rakennuksen paikan tarkastaminen"}
-                    {:name "pohjakatselmus"}
-                    {:name "rakennekatselmus"}
-                    {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
-                    {:name "osittainen loppukatselmus"}
-                    {:name "loppukatselmus"}
-                    {:name "ei tiedossa"}]}
-            {:name "vaadittuLupaehtona" :type :boolean}
-            {:name "katselmus"
-             :type :group
-             :body (schemas/body schemas/rakennuksen-valitsin
-                     [{:name "pitoPvm" :type :date}
-                      {:name "tilanneKoodi" :type :string}
-                      {:name "pitaja" :type :string}
-                      {:name "huomautukset" :type :group :repeating true
-                       :body [{:name "kuvaus" :required true}
-                              {:name "maaraAika" :type :date}
-                              {:name "toteamisHetki" :type :date}
-                              {:name "toteaja" :type :string}]}
-                      {:name "lasnaolijat" :type :text}
-                      {:name "poikkeamat" :type :text}])}])}
+   :body [{:name "katselmuksenLaji"
+           :type :select
+           :required true
+           :body [{:name "muu katselmus"}
+                  {:name "muu tarkastus"}
+                  {:name "aloituskokous"}
+                  {:name "rakennuksen paikan merkitseminen"}
+                  {:name "rakennuksen paikan tarkastaminen"}
+                  {:name "pohjakatselmus"}
+                  {:name "rakennekatselmus"}
+                  {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
+                  {:name "osittainen loppukatselmus"}
+                  {:name "loppukatselmus"}
+                  {:name "ei tiedossa"}]}
+          {:name "vaadittuLupaehtona" :type :boolean}
+          {:name "katselmus" ; repeating?
+           :type :group
+           :body (schemas/body schemas/rakennuksen-valitsin
+                   [{:name "pitoPvm" :type :date}
+                    {:name "tilanneKoodi" :type :string}
+                    {:name "pitaja" :type :string}
+                    {:name "huomautukset" :type :group :repeating true
+                     :body [{:name "kuvaus" :required true}
+                            {:name "maaraAika" :type :date}
+                            {:name "toteamisHetki" :type :date}
+                            {:name "toteaja" :type :string}]}
+                    {:name "lasnaolijat" :type :text}
+                    {:name "poikkeamat" :type :text}])}]}
    {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
     :body []} ; TODO -- link to document or application?
    {:info {:name "task-lupamaarays" :order 20}
@@ -53,22 +53,25 @@
    :id (mongo/create-id)
    :source source
    :taskname task-name
-   :status :open
+   :state (if (user/applicant? assignee) :requires_user_action :requires_authority_action)
    :data (when data (-> data tools/wrapped (tools/timestamped created)))
    :assignee (select-keys assignee [:id :firstName :lastName])
    :duedate nil
    :created created
    :closed nil})
 
+(defn- katselmus->task [meta source katselmus]
+  (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
+        data {:katselmuksenLaji (:katselmuksenLaji katselmus)
+              :vaadittuLupaehtona true}]
+    (->task "task-katselmus" task-name data meta source)))
+
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
   (map-indexed
    (fn [idx {lupamaaraykset :lupamaaraykset}]
      (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
        (concat
-        (map
-          #(->task "task-katselmus" (or (:tarkastuksenTaiKatselmuksenNimi %) (:katselmuksenLaji %))
-             {:katselmuksenLaji (:katselmuksenLaji %) :vaadittuLupaehtona true} meta source)
-          (:vaaditutKatselmukset lupamaaraykset))
+        (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
         (map #(->task "task-lupamaarays" (:sisalto %) {} meta source)
           (filter #(not (s/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
@@ -77,6 +80,7 @@
    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
-  (let [meta {:created timestamp
-              :assignee (first (domain/get-auths-by-role application :owner))}]
+  (let [owner (first (domain/get-auths-by-role application :owner))
+        meta {:created timestamp
+              :assignee (user/get-user-by-id (:id owner))}]
     (flatten (map #(verdict->tasks % meta) (:verdicts application)))))

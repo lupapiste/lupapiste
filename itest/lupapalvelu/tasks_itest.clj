@@ -26,6 +26,8 @@
   (fact "id is set" (-> tasks first :id) => truthy)
   (fact "duedate is not set" (-> tasks first :duedate) => nil)
   (fact "source is verdict" (-> tasks first :source :type) => "verdict")
+  (fact "not closed" (-> tasks first :closed) => nil)
+  (fact "requires user action" (-> tasks first :state) => "requires_user_action")
 
   (fact "created timestamp is set" (-> tasks first :created) => truthy)
 
