@@ -701,23 +701,21 @@
         </div>
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
-        <h1>TODO tarvitaanko tabille otsikko</h1>
         <div>
-
         <table data-bind="foreach: taskGroups">
           <thead>
             <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
             <tr>
-              <td>state</td>
-              <td>displayName</td>
-              <td>attachments</td>
-              <td>closed</td>
-              <td>assignee</td>
+              <td data-bind="ltext: 'application.taskState'"></td>
+              <td data-bind="ltext: 'application.taskDisplayName'"></td>
+              <td data-bind="ltext: 'application.taskAttachments'"></td>
+              <td data-bind="ltext: 'application.taskClosed'"></td>
+              <td data-bind="ltext: 'application.taskAssignee'"></td>
             </tr>
           </thead>
           <tbody data-bind="foreach: tasks">
             <tr data-bind="attr: {'data-test-id': id}">
-              <td data-bind="text:status"></td>
+              <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(statusName + '.title')}"></span></td>
               <td data-bind="text:displayName"></td>
               <td data-bind="foreanch: attachments"><span data-bind="with: $data.latestVersion"><span data-bind="text: filename"></span></span></td>
               <td data-bind="dateString:$data.closed"></td>

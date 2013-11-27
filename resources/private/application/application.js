@@ -113,6 +113,13 @@
 
   function ApplicationModel() {
     var self = this;
+
+    self.statuses = {
+      requires_user_action: "missing",
+      requires_authority_action: "new",
+      ok: "ok"
+    };
+
     self.id = ko.observable();
     self.auth = ko.observable();
     self.infoRequest = ko.observable();
@@ -164,9 +171,13 @@
                   task.displayName = loc(key);
                 }
               }
+
               task.attachments = _(attachments).filter(function(a) {
                 return a.target && a.target.type === "task" && a.target.id === task.id && a.latestVersion;
               }).map(function(a) {return _.pick(a, ["latestVersion"]);}).valueOf();
+
+              task.statusName = self.statuses[task.state] || "unknown";
+
               return task;
             })};})
         .sortBy("order")
@@ -555,16 +566,10 @@
 
       // Attachments:
 
-      var statuses = {
-        requires_user_action: "missing",
-        requires_authority_action: "new",
-        ok: "ok"
-      };
-
       application.hasAttachment(false);
 
       attachments(_.map(app.attachments || [], function(a) {
-        a.statusName = statuses[a.state] || "unknown";
+        a.statusName = application.statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
         if (a.versions && a.versions.length) { application.hasAttachment(true); }
         return a;
