@@ -36,7 +36,7 @@
           </div>
 
           <!-- Submitted: -->
-          <div data-bind="with: $root.application.data">
+          <div>
             <p data-bind="ltext: 'application.submissionDate'"></p>
             <span data-bind="if: $data.submitted">
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
@@ -176,43 +176,55 @@
         </div>
 
         <!-- Tabs: -->
-        <div class="tabs-container">
+        <div class="tabs-container" data-bind="with: application">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="click: $root.application.changeTab"
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="info" data-test-id="application-open-info-tab">
                   <span data-bind="ltext: 'application.tabInfo'"></span>
-                  <span data-bind="if: $root.application.nonpartyDocumentIndicator">
-                    <span data-bind="text: $root.application.nonpartyDocumentIndicator"
+                  <span data-bind="if: nonpartyDocumentIndicator">
+                    <span data-bind="text: nonpartyDocumentIndicator"
                         id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="parties" data-test-id="application-open-parties-tab">
                   <span data-bind="ltext: 'application.tabParties'"></span>
-                  <span data-bind="if: $root.application.partyDocumentIndicator">
-                    <span data-bind="text: $root.application.partyDocumentIndicator"
+                  <span data-bind="if: partyDocumentIndicator">
+                    <span data-bind="text: partyDocumentIndicator"
                           id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
-                <span data-bind="if: $root.application.attachmentsRequiringAction">
-                  <span data-bind="text: $root.application.attachmentsRequiringAction"
+                <span data-bind="if: attachmentsRequiringAction">
+                  <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="statement" data-test-id="application-open-statement-tab">
                   <span data-bind="ltext: 'application.tabStatement'"></span>
-                  <span data-bind="if: $root.application.unseenStatements">
-                    <span data-bind="text: $root.application.unseenStatements"
+                  <span data-bind="if: unseenStatements">
+                    <span data-bind="text: unseenStatements"
                           id="applicationUnseenStatements" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
                    <span data-bind="ltext: 'application.tabVerdict'"></span>
-                <span data-bind="if: $root.application.unseenVerdicts">
-                  <span data-bind="text: $root.application.unseenVerdicts"
+                <span data-bind="if: unseenVerdicts">
+                  <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li data-bind="if: _.contains(['verdictGiven'], state()) && features.enabled('rakentamisen-aikaiset-tabi')"><a data-bind="click: changeTab"
+                   href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
+                  <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
+                  <span data-bind="if: $data.tasksRequiringAction">
+                    <span data-bind="text: tasksRequiringAction"
+                          id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
                   <span data-bind="ltext: 'application.tabConversation'"></span>
-                  <span data-bind="if: $root.application.unseenComments">
-                    <span data-bind="text: $root.application.unseenComments"
+                  <span data-bind="if: unseenComments">
+                    <span data-bind="text: unseenComments"
                           id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
@@ -571,10 +583,10 @@
 
         <div id="application-statement-tab" class="tab-content">
 
-          <div data-bind="with: $root.application.data" class="application-statements">
+          <div data-bind="with: application" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.statementsDesc')" class="tab-info"></p>
+            <p data-bind="html: loc('help.' + permitType() + '.statementsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -686,6 +698,28 @@
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
 
           </div>
+        </div>
+
+        <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
+        <div>
+        <table data-bind="foreach: taskGroups">
+          <thead>
+            <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
+            <tr>
+              <td data-bind="ltext: 'application.taskState'"></td>
+              <td data-bind="ltext: 'application.taskDisplayName'"></td>
+              <td data-bind="ltext: 'application.taskClosed'"></td>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: tasks">
+            <tr data-bind="attr: {'data-test-type': schema.info.name}">
+              <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+              <td data-bind="text:displayName"></td>
+              <td data-bind="dateString:$data.closed"></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
