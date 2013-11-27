@@ -23,7 +23,24 @@ Sonja prepares the application
 
 Rakentaminen tab opens
   Open tab  tasks
-  [Teardown]  Logout
 
+Rakentaminen tab contains 9 tasks
+  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr  9
+
+Katselmukset
+  Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
+  Task count is  task-katselmus  3
+
+Työnjohtajat
+  Wait until  Page should contain  Työnjohtajat
+  Task count is  task-vaadittu-tyonjohtaja  3
+
+Muut lupamaaraykset
+  Wait until  Page should contain  Muut lupamääräykset
+  Task count is  task-lupamaarays  3
 
 *** Keywords ***
+
+Task count is
+  [Arguments]  ${type}  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
