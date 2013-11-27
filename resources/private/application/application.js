@@ -172,6 +172,8 @@
         });
       application.unsentAttachmentsNotFound(!unsentAttachmentFound);
 
+      // Statements
+      requestForStatementModel.setApplicationId(app.id);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
