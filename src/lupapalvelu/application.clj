@@ -678,13 +678,8 @@
   {:parameters ["id"]
    :roles      [:applicant :authority]
    :states     [:verdictGiven]
-;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-;                      (partial property-id-parameters [:propertyId])
-;                      operation-validator]
-  :validators [(permit/validate-permit-type-is permit/R)]
-  }
+  :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
-
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (-> application
                          (assoc :documents       (into []
