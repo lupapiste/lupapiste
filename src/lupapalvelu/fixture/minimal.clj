@@ -271,6 +271,7 @@
     :role  "applicant"}
    ])
 
+
 (def organizations [{:id "186-R"
                      :inforequest-enabled true
                      :new-application-enabled true
@@ -321,7 +322,18 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments []}
+                     :operations-attachments {:ya-kaivuulupa [[:muut :muu]]
+                                              :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat [[:muut :muu]]
+                                              :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot [[:muut :muu]]
+                                              :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot [[:muut :muu]]
+                                              :ya-kayttolupa-kadulta-tapahtuvat-nostot [[:muut :muu]]
+                                              :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi [[:muut :muu]]
+                                              :ya-kayttolupa-rakennustelineet-kadulla [[:muut :muu]]
+                                              :ya-kayttolupa-muu-kayttolupa [[:muut :muu]]
+                                              :ya-kayttolupa-mainostus-ja-viitoitus [[:muut :muu]]
+                                              :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen [[:muut :muu]]
+                                              :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen [[:muut :muu]]
+                                              :ya-sijoituslupa-muu-sijoituslupa [[:muut :muu]]}}
 
                     {:id "837-R"
                      :inforequest-enabled true
@@ -354,7 +366,18 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments []}
+                      :operations-attachments {:ya-kaivuulupa [[:muut :muu]]
+                                               :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat [[:muut :muu]]
+                                               :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot [[:muut :muu]]
+                                               :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot [[:muut :muu]]
+                                               :ya-kayttolupa-kadulta-tapahtuvat-nostot [[:muut :muu]]
+                                               :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi [[:muut :muu]]
+                                               :ya-kayttolupa-rakennustelineet-kadulla [[:muut :muu]]
+                                               :ya-kayttolupa-muu-kayttolupa [[:muut :muu]]
+                                               :ya-kayttolupa-mainostus-ja-viitoitus [[:muut :muu]]
+                                               :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen [[:muut :muu]]
+                                               :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen [[:muut :muu]]
+                                               :ya-sijoituslupa-muu-sijoituslupa [[:muut :muu]]}}
 
                     {:id "638-R"
                      :inforequest-enabled true
