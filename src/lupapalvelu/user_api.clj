@@ -130,14 +130,15 @@
       (condp = old-role
         nil     (do
                   (info "creating new user" (dissoc new-user :private))
-                  (mongo/insert :users new-user)
-                  ;; Emailin lahetys
-                  (when send-email
-                    (activation/send-activation-mail-for new-user)))
+                  (mongo/insert :users new-user))
         "dummy" (do
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
         (fail! :user-exists))
+
+      (when (and send-email (not= "dummy" (name (:role new-user))))
+        (activation/send-activation-mail-for new-user))
+
       (user/get-user-by-email email)
 
       (catch com.mongodb.MongoException$DuplicateKey e
@@ -217,10 +218,6 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
-;;
-;; TODO: Poista "update-user-organization":lta "firstName lastName"-checkki removen tapauksessa.
-;;       ja korjaa sitten authority-admin/admin.js:sta vastaava kutsu.
-;;
 (defcommand update-user-organization
   {:parameters       [email operation firstName lastName]
    :roles            [:authorityAdmin]
@@ -237,9 +234,8 @@
                         {:email email :role :authority :organization organization :enabled true :firstName firstName :lastName lastName}
                         :send-email false)
              token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
-         (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
 
-         ;; Emailin lahetys
+         (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
          (notifications/notify! :invite-authority {:data {:email email :token token}})
          (ok :operation "invited"))
        (fail :not-found :email email)))))
