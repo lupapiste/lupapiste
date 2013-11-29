@@ -132,7 +132,8 @@
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
 
         ;; Lisatiedot
-        sijoituksen-tark (-> Tyolupa :lupakohtainenLisatietotieto :LupakohtainenLisatieto :arvo) => truthy
+        lupakohtainenLisatietotieto (-> Tyolupa :lupakohtainenLisatietotieto) => truthy
+        sijoituksen-tark (-> lupakohtainenLisatietotieto first :LupakohtainenLisatieto :arvo) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
         sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
