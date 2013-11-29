@@ -123,7 +123,7 @@
                                   (conj sc "tyonjohtaja")
                                   sc)))
 
-(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka" "lisatiedot" "paasuunnittelija"])
+(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka" "lisatiedot"])
 
 
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])

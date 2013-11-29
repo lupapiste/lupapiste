@@ -80,9 +80,7 @@ Mikko decides to go to the desert, put on his ipod, and listen some some British
 
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
-  Wait until  Element should be visible  xpath=//section[@id='applications']//td[text()='invite-app']
-  Click element  xpath=//section[@id='applications']//td[text()='invite-app']
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-416-25-25
+  Open application  invite-app  753-416-25-25
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   [Teardown]  logout
 
