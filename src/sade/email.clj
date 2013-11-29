@@ -59,9 +59,11 @@
 (defn send-email-message
   "Sends email message using a template."
   [to subject msg]
-  (assert (and to subject msg) "missing argument")
-  (let [[plain html] msg]
-    (send-mail to subject :plain plain :html html)))
+  {:pre [subject msg]}
+  (if to
+    (let [[plain html] msg]
+      (send-mail to subject :plain plain :html html))
+    (error "Email could not be sent because of missing To field. Subject being: " subject)))
 
 ;;
 ;; templating:

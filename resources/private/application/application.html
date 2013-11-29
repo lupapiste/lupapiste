@@ -165,7 +165,7 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
+          <button data-bind="click: $root.stampModel.init, visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
@@ -292,7 +292,7 @@
           </div>
 
           <button
-              data-bind="click: application.addParty, ltext: 'application.addParty', visible: authorization.ok('create-doc')"
+              data-bind="click: addPartyModel.init, ltext: 'application.addParty', visible: authorization.ok('create-doc')"
               class="btn btn-primary modal"
               data-test-id="add-party">
           </button>

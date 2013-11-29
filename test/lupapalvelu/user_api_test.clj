@@ -130,7 +130,7 @@
 
 (facts create-new-user
 
-  (fact "register new user, user did not exists before"
+  (fact "register new applicant user, user did not exists before"
     (create-new-user nil {:email "email" :role "applicant"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [nil ..result..]
@@ -139,16 +139,25 @@
       (mongo/update-by-id :users anything anything) => anything :times 0
       (activation/send-activation-mail-for (contains {:email "email" :id ..id..})) => nil))
 
-  (fact "create new user, user exists before"
+  (fact "create new applicant user, user exists before as dummy user"
+    (create-new-user nil {:email "email" :role "applicant"}) => ..result..
+    (provided
+      (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
+      (mongo/create-id) => ..id..
+      (mongo/insert :users anything) => anything :times 0
+      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil
+      (activation/send-activation-mail-for (contains {:email "email" :id ..id..})) => nil))
+
+  (fact "create new authorityAdmin user, user exists before as dummy user"
     (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
       (mongo/create-id) => ..id..
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil
-      (activation/send-activation-mail-for anything) => anything :times 0))
+      (activation/send-activation-mail-for (contains {:email "email" :id ..id..})) => nil))
 
-  (fact "create new user, user exists before, but role is not 'dummy'"
+  (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
     (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => (fails-with :user-exists)
     (provided
       (user/get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1

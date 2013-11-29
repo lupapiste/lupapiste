@@ -40,7 +40,7 @@
         (:autopaikkojaUlkopuolella lupamaaraykset) => 3
         (:kerrosala lupamaaraykset) => "100"
         (:kokonaisala lupamaaraykset) => "110"
-        (:vaaditutTyonjohtajat lupamaaraykset) => "vastaava ylijohtaja, vastaava varajohtaja ja altavastaava johtaja"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "vastaava ylijohtaja, vastaava varajohtaja, altavastaava johtaja"
         (let [katselmukset (:vaaditutKatselmukset lupamaaraykset)
               maaraykset   (:maaraykset lupamaaraykset)]
           (facts "katselmukset"

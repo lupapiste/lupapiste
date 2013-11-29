@@ -76,7 +76,7 @@
           (filter #(not (s/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
           (map #(->task "task-vaadittu-tyonjohtaja" % {} meta source)
-            (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*|\s+ja\s+|\s+och\s+)"))))))
+            (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))))
    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]

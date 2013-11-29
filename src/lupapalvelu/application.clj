@@ -678,13 +678,8 @@
   {:parameters ["id"]
    :roles      [:applicant :authority]
    :states     [:verdictGiven]
-;   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-;                      (partial property-id-parameters [:propertyId])
-;                      operation-validator]
-  :validators [(permit/validate-permit-type-is permit/R)]
-  }
+  :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
-
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (-> application
                          (assoc :documents       (into []
@@ -692,12 +687,13 @@
                          (assoc :id              muutoslupa-app-id)
                          (assoc :created         created)
                          (assoc :opened          created)
+                         (assoc :modified        created)
                          (assoc :state           (cond
                                                    (user/authority? user)     :open
                                                    :else                      :draft))
 ;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
                          (assoc :permitSubtype   :muutoslupa)
-                         (dissoc :attachments :statements :verdicts :comments
+                         (dissoc :attachments :statements :verdicts :comments :submitted
                                  :_statements-seen-by :_verdicts-seen-by))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications (meta-fields/enrich-with-link-permit-data muutoslupa-app))

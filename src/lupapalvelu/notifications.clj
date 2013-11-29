@@ -43,7 +43,7 @@
     (if (some #(= "statementGiver" %) excluded-roles)
       (set/difference
         (set auth-user-emails)
-        (map #(-> % :person :email) statements))
+        (set (map #(-> % :person :email) statements)))
       auth-user-emails)))
 
 ;;
