@@ -200,10 +200,10 @@
              {:name "vaikutukset_yhdyskuntakehykselle":type :group :layout :vertical
               :body [{:name "etaisyyys_alakouluun" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyyys_ylakouluun" :type :string :subtype :number :unit "km" :size "s"}
-                     {:name "turvallinen_polkupyoratie_kouluun" :type :checkbox}
                      {:name "etaisyys_kauppaan" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyys_paivakotiin" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyys_kuntakeskuksen_palveluihin" :type :string :subtype :number :unit "km" :size "s"}
+                     {:name "turvallinen_polkupyoratie_kouluun" :type :checkbox}
                      {:name "muita_vaikutuksia" :type :text :max-len 4000 :layout :full-width}]}
 
              {:name "maisema":type :group :layout :vertical
