@@ -51,25 +51,9 @@
     });
   }
 
-  function AttachmentsModel(attachmentTarget) {
-    var self = this;
-
-    self.attachments = ko.observableArray([]);
-
-    self.refresh = function(application) {
-      self.attachments(_.filter(application.attachments,function(attachment) {
-        return _.isEqual(attachment.target, attachmentTarget);
-      }));
-    };
-
-    self.newAttachment = function() {
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, attachmentTarget, true);
-    };
-  }
-
   var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
-  var attachmentsModel = new AttachmentsModel({type: "verdict"});
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "verdict"});
 
   repository.loaded(["verdict"], function(application) {
     if (applicationId === application.id) {
