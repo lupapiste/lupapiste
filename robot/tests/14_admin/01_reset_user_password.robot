@@ -18,8 +18,7 @@ Solita admin search Ronja and resets her password
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
   Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='resetPassword']
   Click element                             xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='resetPassword']
-  Wait until     Element should be visible  xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element                             xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Confirm  dynamic-yes-no-confirm-dialog
   
 Ronja receives an email
   Go to          ${SERVER}/api/last-email
