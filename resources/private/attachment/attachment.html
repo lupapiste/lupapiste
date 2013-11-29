@@ -16,11 +16,11 @@
           style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
         <a class="btn attachment-back inline-block" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment"> <span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a>
         <div data-bind="with: $root.approve" class="inline-block">
-          <button id="test-attachment-approve" data-bind="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
+          <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
           <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
         </div>
 
-        <div class="form-entry">
+        <div class="form-entry change-type">
           <label for="attachment-type-select" class="form-label">
            <span data-bind="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
