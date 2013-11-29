@@ -36,13 +36,19 @@ var taskPageController = (function() {
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"});
 
   function deleteTask() {
-    ajax
-      .query("ping", {id: currentApplicationId, taskId: currentTaskId})
-      .success(function() {
-        // We're assuming that the application reloads when hash changes back to application
-        window.location.hash = "!/application/" + currentApplicationId + "/tasks";
-      })
-      .call();
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("task.delete.confirm"),
+          {title: loc("yes"), fn: function() {
+            ajax
+            .query("ping", {id: currentApplicationId, taskId: currentTaskId})
+            .success(function() {
+              repository.load(currentApplicationId);
+              window.location.hash = "!/application/" + currentApplicationId + "/tasks";
+            })
+            .call();}},
+            {title: loc("no")}
+        );
     return false;
   }
 
@@ -57,15 +63,7 @@ console.log("Refresh application", application.id, taskId);
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
     t.displayName = taskUtil.longDisplayName(t, application);
     t.applicationId = currentApplicationId;
-    t.deleteTask = function() {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("task.delete.confirm"),
-      {title: loc("yes"), fn: deleteTask},
-      {title: loc("no")}
-    );
-    return false;
-    };
+    t.deleteTask = deleteTask;
     task(t);
   }
 
@@ -76,12 +74,13 @@ console.log("Refresh application", application.id, taskId);
   });
 
   hub.onPageChange("task", function(e) {
-    currentApplicationId = e.pagePath[0];
+    var applicationId = e.pagePath[0];
     currentTaskId = e.pagePath[1];
     // Reload application only if needed
-    if (!application || currentApplicationId !== application.id) {
-      repository.load(currentApplicationId);
+    if (currentApplicationId !== applicationId) {
+      repository.load(applicationId);
     }
+    currentApplicationId = applicationId;
   });
 
   $(function() {
