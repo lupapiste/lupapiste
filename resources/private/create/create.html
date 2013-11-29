@@ -151,10 +151,9 @@
 
       <div class="organization-attachments" data-bind="visible: attachmentsForOp">
         <div data-bind="ltext: 'organization.attachments'"></div>
-        <div class="attachments-list" data-bind="foreach: attachmentsForOp">
-          <span data-bind="visible: $index">, </span>
-          <span data-bind="text: loc(['attachmentType', group, id])"></span>
-        </div>
+        <ul class="attachments-list" data-bind="foreach: attachmentsForOp">
+          <li data-bind="text: loc(['attachmentType', group, id])" class="mandatory-attachments"></li>
+        </ul>
       </div>
 
       <div class="create-buttons">
