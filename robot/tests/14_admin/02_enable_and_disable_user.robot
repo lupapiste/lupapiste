@@ -18,8 +18,7 @@ Solita admin search Ronja and disables her access
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
   Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
   Click element                             xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
-  Wait until     Element should be visible  xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element                             xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Confirm        dynamic-yes-no-confirm-dialog
   Logout
   
 Ronja tries to login but can't
@@ -34,8 +33,7 @@ Solita admin enables Ronjas account
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
   Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='enable']
   Click element                             xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='enable']
-  Wait until     Element should be visible  xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element                             xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Confirm        dynamic-yes-no-confirm-dialog
   Logout
 
 Ronja can login again
