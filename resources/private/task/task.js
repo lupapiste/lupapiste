@@ -1,41 +1,45 @@
 var taskPageController = (function() {
   "use strict";
 
-  var applicationId = null;
+  var currentApplicationId = null;
   var application = null;
-  var taskId = null;
+  var currentTaskId = null;
   var task = ko.observable();
 
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"});
 
-  function refreshTask() {
-    var t = _.find(application.tasks, function(task) {return task.id === taskId;});
 
+  function refresh(app, taskId) {
+    if (typeof app === "function") {
+      application = ko.toJS(app);
+    } else {
+      application = app;
+    }
+    console.log("Set application", application.id, taskId);
+    currentApplicationId = application.id;
+    currentTaskId = taskId;
+
+    authorizationModel.refresh(application);
+    attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
+
+    var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
     task(t);
   }
 
-  function setApplication(app) {
-    application = app;
-    authorizationModel.refresh(application);
-    attachmentsModel.refresh(application, {type: "task", id: taskId});
-    refreshTask();
-  }
-
   repository.loaded(["task"], function(app) {
-    if (applicationId === app.id) {
-      setApplication(app);
+    if (currentApplicationId === app.id) {
+      refresh(app, currentTaskId);
     }
   });
 
   hub.onPageChange("task", function(e) {
-    applicationId = e.pagePath[0];
-    taskId = e.pagePath[1];
+    currentApplicationId = e.pagePath[0];
+    currentTaskId = e.pagePath[1];
     // Reload application only if needed
-    if (!application || applicationId !== application.id) {
-      repository.load(applicationId);
-    } else {
-      refreshTask();
+    if (!application || currentApplicationId !== application.id) {
+console.log("Load application");
+      repository.load(currentApplicationId);
     }
   });
 
@@ -49,7 +53,7 @@ var taskPageController = (function() {
   });
 
   return {
-    setApplication: setApplication
+    setApplicationModelAndTaskId: refresh
   };
 
 })();
