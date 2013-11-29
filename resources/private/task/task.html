@@ -3,6 +3,14 @@
 <body>
   <section class="page container" id="task" data-bind="with: task">
   <h1 data-bind="text:displayName">Task</h1>
+  <div class="clear-fix">
+    <button class="btn" data-bind="ltext:'task.delete', click: deleteTask"></button>
+    <a class="btn attachment-back"
+       style="float:right"
+       data-bind="attr: {href: '#!/application/' + applicationId + '/tasks' }"
+       data-test-id="back-to-application-from-task"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a> <!-- TODO change key -->
+  </div>
+
   </section>
 </body>
 </html>

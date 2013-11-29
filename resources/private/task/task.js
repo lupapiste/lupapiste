@@ -29,20 +29,13 @@ var taskPageController = (function() {
   "use strict";
 
   var currentApplicationId = null;
-  var application = null;
   var currentTaskId = null;
   var task = ko.observable();
 
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"});
 
-
-  function refresh(app, taskId) {
-    if (typeof app === "function") {
-      application = ko.toJS(app);
-    } else {
-      application = app;
-    }
+  function refresh(application, taskId) {
 console.log("Refresh application", application.id, taskId);
     currentApplicationId = application.id;
     currentTaskId = taskId;
@@ -53,6 +46,25 @@ console.log("Refresh application", application.id, taskId);
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
     t.displayName = taskUtil.longDisplayName(t, application);
     t.applicationId = currentApplicationId;
+    t.deleteTask = function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("areyousure"),
+      loc("task.delete.confirm"),
+      {title: loc("yes"),
+       fn: function() {
+console.log(t);
+        ajax
+          .query("ping", {id: currentApplicationId, taskId: currentTaskId})
+          .success(function() {
+            repository.load(currentApplicationId);
+            window.location.hash = "!/application/" + currentApplicationId + "/tasks";
+          })
+          .call();
+        return false;}},
+      {title: loc("no")}
+    );
+    return false;
+    };
     task(t);
   }
 
@@ -70,7 +82,6 @@ console.log("Refresh application", application.id, taskId);
       repository.load(currentApplicationId);
     }
   });
-
 
   $(function() {
     $("#task").applyBindings({
