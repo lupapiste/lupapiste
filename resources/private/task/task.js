@@ -1,3 +1,30 @@
+var taskUtil = (function() {
+
+  function shortDisplayName(task) {
+    var displayName = task.taskname;
+    var prefix = task.schema.info.i18nprefix;
+    var path = task.schema.info.i18npath;
+    if (path && path.length) {
+      if (path[path.length - 1] !== "value") path.push("value");
+      var displayNameData = util.getIn(task.data || {}, path);
+      if (displayNameData) {
+        var key = prefix ? prefix + "." + displayNameData : displayNameData;
+        displayName = loc(key);
+      }
+    }
+    return displayName;
+  }
+
+  function longDisplayName(task, application) {
+    return application.address + ": " + shortDisplayName(task);
+  }
+
+  return {
+    shortDisplayName: shortDisplayName,
+    longDisplayName: longDisplayName
+  };
+})();
+
 var taskPageController = (function() {
   "use strict";
 
@@ -16,7 +43,7 @@ var taskPageController = (function() {
     } else {
       application = app;
     }
-    console.log("Set application", application.id, taskId);
+console.log("Refresh application", application.id, taskId);
     currentApplicationId = application.id;
     currentTaskId = taskId;
 
@@ -24,6 +51,8 @@ var taskPageController = (function() {
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
+    t.displayName = taskUtil.longDisplayName(t, application);
+    t.applicationId = currentApplicationId;
     task(t);
   }
 
@@ -38,7 +67,6 @@ var taskPageController = (function() {
     currentTaskId = e.pagePath[1];
     // Reload application only if needed
     if (!application || currentApplicationId !== application.id) {
-console.log("Load application");
       repository.load(currentApplicationId);
     }
   });
