@@ -95,7 +95,15 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :application  {:depends [:common :repository :tree]
+   :attachment   {:depends [:common :repository]
+                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
+                  :html ["attachment.html" "upload.html"]}
+
+   :task         {:depends [:common :attachment]
+                  :js ["task.js"]
+                  :html ["task.html"]}
+
+   :application  {:depends [:common :repository :tree :task]
                   :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "application-model.js" "application.js" ]
@@ -106,15 +114,11 @@
                   :html ["applications.html"]
                   :js ["applications.js"]}
 
-   :attachment   {:depends [:common :repository]
-                  :js ["attachment.js" "attachmentTypeSelect.js"]
-                  :html ["attachment.html" "upload.html"]}
-
    :statement    {:depends [:common :repository]
                   :js ["statement.js"]
                   :html ["statement.html"]}
 
-   :verdict      {:depends [:common :repository]
+   :verdict      {:depends [:common :repository :attachment]
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
