@@ -134,6 +134,9 @@
         delete application.shapes;
       }
 
+      // Plain data
+      application._js = app;
+
       // Update observebles
       ko.mapping.fromJS(app, {}, application);
 
