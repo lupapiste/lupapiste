@@ -132,6 +132,10 @@ var docgen = (function () {
       return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     }
 
+    function getCollection() {
+      return (options && options.collection) ? options.collection : "documents"
+    }
+
     function makeLabel(type, pathStr, groupLabel) {
       var label = document.createElement("label");
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
@@ -213,7 +217,7 @@ var docgen = (function () {
       var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
-      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join(".") };
+      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: getCollection() };
 
       if (_.isEmpty(model) || !features.enabled('docIndicators')) {
         return approvalContainer$[0];
@@ -555,7 +559,7 @@ var docgen = (function () {
 
           var buildingId = target.value;
           ajax
-            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
+            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: getCollection() })
             .success(function () {
               save(event);
               repository.load(self.appId);
@@ -620,7 +624,7 @@ var docgen = (function () {
         var target = event.target;
         var userId = target.value;
         ajax
-          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs })
+          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: getCollection() })
           .success(function () {
             save(event, function () { repository.load(self.appId); });
           })
@@ -696,7 +700,7 @@ var docgen = (function () {
 
     function removeData(id, doc, path) {
       ajax
-        .command("remove-document-data", { doc: doc, id: id, path: path })
+        .command("remove-document-data", { doc: doc, id: id, path: path, collection: getCollection() })
         .success(function (e) {
           repository.load(id);
         })
@@ -830,7 +834,7 @@ var docgen = (function () {
     function saveForReal(path, value, callback) {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
-        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
+        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
       // elements: [key status message]. Here we use just the status.
         .success(function (e) {
@@ -868,7 +872,7 @@ var docgen = (function () {
     function validate() {
       if (!options || options.validate) {
         ajax
-          .query("validate-doc", { id: self.appId, doc: self.docId })
+          .query("validate-doc", { id: self.appId, doc: self.docId, collection: getCollection() })
           .success(function (e) { showValidationResults(e.results); })
           .call();
       }
@@ -944,7 +948,7 @@ var docgen = (function () {
       }
 
       function onRemovalConfirmed() {
-        ajax.command("remove-doc", { id: self.appId, docId: self.docId })
+        ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: getCollection() })
           .success(function () {
             n$.slideUp(function () { n$.remove(); });
             // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
@@ -1047,7 +1051,7 @@ var docgen = (function () {
         $(btn).click(function () {
           var self = this;
           ajax
-            .command("create-doc", { schemaName: schema.info.name, id: application.id })
+            .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: getCollection() })
             .success(function (data) {
               var newDocId = data.doc;
               var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;
