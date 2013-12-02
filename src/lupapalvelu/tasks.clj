@@ -26,19 +26,19 @@
                   {:name "loppukatselmus"}
                   {:name "ei tiedossa"}]}
           {:name "vaadittuLupaehtona" :type :checkbox}
-          {:name "katselmus" ; repeating?
+          {:name "katselmus"
            :type :group
-           :body (schemas/body schemas/rakennuksen-valitsin
-                   [{:name "pitoPvm" :type :date}
-                    {:name "tilanneKoodi" :type :string}
-                    {:name "pitaja" :type :string}
-                    {:name "huomautukset" :type :group :repeating true
-                     :body [{:name "kuvaus" :required true :type :text}
-                            {:name "maaraAika" :type :date}
-                            {:name "toteamisHetki" :type :date}
-                            {:name "toteaja" :type :string}]}
-                    {:name "lasnaolijat" :type :text}
-                    {:name "poikkeamat" :type :text}])}]}
+           :repeating true
+           :body [{:name :rakennus :type :group :body schemas/rakennuksen-valitsin}
+                  {:name "pitoPvm" :type :date}
+                  {:name "pitaja" :type :string}
+                  {:name "huomautukset" :type :group
+                   :body [{:name "kuvaus" :required true :type :text}
+                          {:name "maaraAika" :type :date}
+                          {:name "toteamisHetki" :type :date}
+                          {:name "toteaja" :type :string}]}
+                  {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
+                  {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}]}
    {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
     :body []} ; TODO -- link to document or application?
    {:info {:name "task-lupamaarays" :order 20}
