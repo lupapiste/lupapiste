@@ -61,8 +61,9 @@ console.log("Refresh application", application.id, taskId);
     currentApplicationId = application.id;
     currentTaskId = taskId;
 
-    authorizationModel.refresh(currentApplicationId);
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
+
+    var taskContentContainer = $("#taskDocgen").empty();
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
     if (!t) {
@@ -74,8 +75,11 @@ console.log("Refresh application", application.id, taskId);
       t.applicationId = currentApplicationId;
       t.deleteTask = deleteTask;
       task(t);
-    }
 
+      authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
+        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks"});
+      });
+    }
   }
 
   repository.loaded(["task"], function(app) {

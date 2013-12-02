@@ -25,7 +25,7 @@
                   {:name "osittainen loppukatselmus"}
                   {:name "loppukatselmus"}
                   {:name "ei tiedossa"}]}
-          {:name "vaadittuLupaehtona" :type :boolean}
+          {:name "vaadittuLupaehtona" :type :checkbox}
           {:name "katselmus" ; repeating?
            :type :group
            :body (schemas/body schemas/rakennuksen-valitsin
@@ -33,7 +33,7 @@
                     {:name "tilanneKoodi" :type :string}
                     {:name "pitaja" :type :string}
                     {:name "huomautukset" :type :group :repeating true
-                     :body [{:name "kuvaus" :required true}
+                     :body [{:name "kuvaus" :required true :type :text}
                             {:name "maaraAika" :type :date}
                             {:name "toteamisHetki" :type :date}
                             {:name "toteaja" :type :string}]}
