@@ -62,10 +62,9 @@ var taskPageController = (function() {
 
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
-    var taskContentContainer = $("#taskDocgen").empty();
-
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
     if (!t) {
+      $("#taskDocgen").empty();
       task(null);
       error("Task not found", currentApplicationId, currentTaskId);
       notify.error(loc("error.dialog.title"), loc("error.task-not-found"));

@@ -1,12 +1,19 @@
-LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget) {
+LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType) {
   var self = this;
   self.target = attachmentTarget;
+  self.attachmentType = attachmentType ? attachmentType : "muut.muu";
 
+  self.applicationId = null;
   self.attachments = ko.observableArray([]);
 
   self.refresh = function(application, target) {
     if (target) {
       self.target = target;
+    }
+
+    self.applicationId = application.id;
+    if (typeof application.id === "function") {
+      self.applicationId = application.id();
     }
 
     var attachments = application.attachments;
@@ -20,6 +27,7 @@ LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget) {
   };
 
   self.newAttachment = function() {
-    attachment.initFileUpload(applicationId, null, "muut.muu", false, self.target, true);
+    attachment.initFileUpload(self.applicationId, null, self.attachmentType, false, self.target, true);
+    LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 };
