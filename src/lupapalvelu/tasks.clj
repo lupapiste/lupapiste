@@ -11,40 +11,40 @@
 (schemas/defschemas
   task-schemas-version
   [{:info {:name "task-katselmus" :order 1 :i18nprefix "verdict.katselmus" :i18npath ["katselmuksenLaji"]}
-   :body [{:name "katselmuksenLaji"
-           :type :select
-           :required true
-           :body [{:name "muu katselmus"}
-                  {:name "muu tarkastus"}
-                  {:name "aloituskokous"}
-                  {:name "rakennuksen paikan merkitseminen"}
-                  {:name "rakennuksen paikan tarkastaminen"}
-                  {:name "pohjakatselmus"}
-                  {:name "rakennekatselmus"}
-                  {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
-                  {:name "osittainen loppukatselmus"}
-                  {:name "loppukatselmus"}
-                  {:name "ei tiedossa"}]}
-          {:name "vaadittuLupaehtona" :type :checkbox}
-          {:name "rakennus"
-           :type :group
-           :repeating true
-           :body [{:name :rakennus :type :group :body schemas/rakennuksen-valitsin}
-                  {:name "tila" :type :group
-                   :body [{:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}
-                          {:name "kayttoonottava" :type :checkbox}]}]}
-          {:name "katselmus" :type :group
-           :body
-           [{:name "pitoPvm" :type :date}
-           {:name "pitaja" :type :string}
-           {:name "huomautukset" :type :group
-            :body [{:name "kuvaus" :required true :type :text}
-                   {:name "maaraAika" :type :date}
-                   {:name "toteamisHetki" :type :date}
-                   {:name "toteaja" :type :string}]}
-           {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-           {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-           {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
+    :body [{:name "katselmuksenLaji"
+            :type :select
+            :required true
+            :body [{:name "muu katselmus"}
+                   {:name "muu tarkastus"}
+                   {:name "aloituskokous"}
+                   {:name "rakennuksen paikan merkitseminen"}
+                   {:name "rakennuksen paikan tarkastaminen"}
+                   {:name "pohjakatselmus"}
+                   {:name "rakennekatselmus"}
+                   {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
+                   {:name "osittainen loppukatselmus"}
+                   {:name "loppukatselmus"}
+                   {:name "ei tiedossa"}]}
+           {:name "vaadittuLupaehtona" :type :checkbox}
+           {:name "rakennus"
+            :type :group
+            :repeating true
+            :body [{:name "rakennus" :type :group :body schemas/rakennuksen-valitsin}
+                   {:name "tila" :type :group
+                    :body [{:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}
+                           {:name "kayttoonottava" :type :checkbox}]}]}
+           {:name "katselmus" :type :group
+            :body
+            [{:name "pitoPvm" :type :date}
+            {:name "pitaja" :type :string}
+            {:name "huomautukset" :type :group
+             :body [{:name "kuvaus" :required true :type :text}
+                    {:name "maaraAika" :type :date}
+                    {:name "toteamisHetki" :type :date}
+                    {:name "toteaja" :type :string}]}
+            {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
+            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
+            {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
    {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
     :body []} ; TODO -- link to document or application?
    {:info {:name "task-lupamaarays" :order 20}

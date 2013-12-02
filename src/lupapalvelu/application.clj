@@ -272,8 +272,7 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
-        schema-name  (get-in document [:schema-info :name])
-        schema       (schemas/get-schema (:schema-version application) schema-name)
+        schema       (schemas/get-schema (:schema-info document))
         subject      (user/get-user-by-id userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
@@ -287,7 +286,7 @@
         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
-        (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
+        (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) documentId)
     (commands/persist-model-updates id "documents" document updates created))) ; TODO support for collection parameter
 
 ;;
@@ -835,10 +834,13 @@
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [legacy (organization/get-legacy organization)]
     (let [document     (commands/by-id application collection documentId)
+          schema       (schemas/get-schema (:schema-info document))
           kryspxml     (krysp/building-xml legacy propertyId)
-          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
+          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates id collection document updates created :source "krysp")
+      (when (seq updates)
+        (commands/persist-model-updates id collection document updates created :source "krysp"))
       (ok))
     (fail :error.no-legacy-available)))
 
