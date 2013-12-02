@@ -31,6 +31,7 @@
 ;; Object types (URL encoded)
 (def building-type "typeName=rakval%3AValmisRakennus")
 (def case-type     "typeName=rakval%3ARakennusvalvontaAsia")
+(def ya-type       "typeName= ")
 
 ;; For building filters
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
@@ -44,13 +45,21 @@
 (defn wfs-krysp-url [server object-type filter]
   (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
 
+(defn wfs-krysp-url-with-service [server object-type filter]
+  (str (wfs-krysp-url server object-type filter) "service=WFS"))
+
 (defn building-xml [server id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
     (debug "Get building: " url)
     (cr/get-xml url)))
 
 (defn application-xml [server id]
-  (let [url (wfs-krysp-url server case-type (property-equals asian-lp-lupatunnus id))]
+  (let [url (wfs-krysp-url-with-service server case-type (property-equals asian-lp-lupatunnus id))]
+    (debug "Get application: " url)
+    (cr/get-xml url)))
+
+(defn ya-application-xml [server id]
+  (let [url (wfs-krysp-url-with-service server case-type (property-equals asian-lp-lupatunnus id))]
     (debug "Get application: " url)
     (cr/get-xml url)))
 
