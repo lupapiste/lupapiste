@@ -135,7 +135,7 @@
         "dummy" (do
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
-        (fail! :user-exists))
+        (fail! :error.duplicate-email))
 
       (when (and send-email (not= "dummy" (name (:role new-user))))
         (activation/send-activation-mail-for new-user))
@@ -318,8 +318,8 @@
   {:parameters [username password]
    :verified false}
   [_]
-  (if (user/throttle-login? username) 
-    (do 
+  (if (user/throttle-login? username)
+    (do
       (info "login throttled, username:" username)
       (fail :error.login-trottle))
     (if-let [user (user/get-user-with-password username password)]
