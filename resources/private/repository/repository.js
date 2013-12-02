@@ -3,7 +3,7 @@ var repository = (function() {
 
   var loadingSchemas = ajax
     .query("schemas")
-    .error(function(e) { error("can't load schemas"); })
+    .error(function(e) { error("can't load schemas", e); })
     .call();
 
   function findSchema(schemas, name, version) {
@@ -33,13 +33,16 @@ var repository = (function() {
           loading = loadingResponse[0],
           application = loading.application;
 
+      function setSchema(doc) {
+        var schemaInfo = doc["schema-info"],
+            schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
+        schema.info = schemaInfo;
+        doc.schema = schema;
+      };
+
       if (application) {
-        _.each(application.documents || [], function(doc) {
-          var schemaInfo = doc["schema-info"],
-              schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
-          schema.info = schemaInfo;
-          doc.schema = schema;
-        });
+        _.each(application.documents || [], setSchema);
+        _.each(application.tasks || [], setSchema);
         hub.send("application-loaded", {applicationDetails: loading});
       };
     });

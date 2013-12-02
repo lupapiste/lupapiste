@@ -104,8 +104,6 @@ Tab should be visible
 Logout
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Wait until  Title Should Be  Lupapiste
-  Wait until page contains element  xpath=//div[@id='login-form']//input[@id='login-username']
 
 #
 # Login stuff

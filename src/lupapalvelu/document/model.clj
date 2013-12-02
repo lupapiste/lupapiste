@@ -290,14 +290,14 @@
                     (let [k (keyword name)
                           current-path (conj path k)
                           v (get-in data current-path)]
-                    (if ((set (map keyword blacklist)) (keyword blacklist-item))
-                      [k nil]
-                      (when v
-                        (if (not= (keyword type) :group)
-                          [k v]
-                          [k (if repeating
-                               (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
-                               (strip body current-path))])))))
+                      (if ((set (map keyword blacklist)) (keyword blacklist-item))
+                        [k nil]
+                        (when v
+                          (if (not= (keyword type) :group)
+                            [k v]
+                            [k (if repeating
+                                 (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
+                                 (strip body current-path))])))))
                   schema-body)))]
       (let [path (into [] initial-path)
             schema (get-document-schema document)
