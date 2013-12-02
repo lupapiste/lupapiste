@@ -1,3 +1,5 @@
 task.delete: Poista
 task.delete.confirm: Haluatko varmasti poistaa vaatimuksen?
 error.task-not-found: Vaatimusta ei löydy
+rakennusnro: Rakennusnumero
+manuaalinen_rakennusnro: Rakennusnumero jos rakennusta ei löydy valikosta

@@ -47,7 +47,7 @@ var docgen = (function () {
       }
     };
 
-    self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
+    self.sizeClasses = { "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
 
     // Context help
     self.addFocus = function (e) {
@@ -143,14 +143,23 @@ var docgen = (function () {
     }
 
     // Element constructors
-    function makeLabel(type, pathStr, groupLabel) {
+    function makeLabel(schema, type, pathStr, groupLabel) {
       var label = document.createElement("label");
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
+
       var locKey = locKeyFromPath(path);
+      if (schema.i18nkey) {
+        locKey = schema.i18nkey;
+      }
+
+      var className = "form-label form-label-" + type;
+      if (schema.labelclass) {
+        className = className + " " + schema.labelclass;
+      }
 
       label.id = pathStrToLabelID(pathStr);
       label.htmlFor = pathStrToID(pathStr);
-      label.className = "form-label form-label-" + type;
+      label.className = className;
       label.innerHTML = loc(locKey);
       return label;
     }
@@ -295,7 +304,7 @@ var docgen = (function () {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
       var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
-      var label = makeLabel("checkbox", myPath);
+      var label = makeLabel(subSchema, "checkbox", myPath);
       input.onmouseover = self.showHelp;
       input.onmouseout = self.hideHelp;
       label.onmouseover = self.showHelp;
@@ -318,7 +327,7 @@ var docgen = (function () {
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
       setMaxLen(input, subSchema);
 
-      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
+      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
 
       if (subSchema.subtype === "maaraala-tunnus" ) {
           var kiitunAndInput = document.createElement("span");
@@ -398,7 +407,7 @@ var docgen = (function () {
       input.className = "form-input textarea";
       input.value = getModelValue(model, subSchema.name);
 
-      span.appendChild(makeLabel("text", myPath));
+      span.appendChild(makeLabel(subSchema, "text", myPath));
       span.appendChild(input);
       return span;
     }
@@ -410,7 +419,7 @@ var docgen = (function () {
 
       var span = makeEntrySpan(subSchema, myPath);
 
-      span.appendChild(makeLabel("date", myPath));
+      span.appendChild(makeLabel(subSchema, "date", myPath));
 
       // date
       var input = $("<input>", {
@@ -488,7 +497,7 @@ var docgen = (function () {
         select.appendChild(option);
       }
 
-      span.appendChild(makeLabel("select", myPath, true));
+      span.appendChild(makeLabel(subSchema, "select", myPath, true));
       span.appendChild(select);
       return span;
     }
@@ -499,7 +508,7 @@ var docgen = (function () {
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
-      var label = makeLabel("group", myPath, true);
+      var label = makeLabel(subSchema, "group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
@@ -538,7 +547,7 @@ var docgen = (function () {
         input.checked = o.name === myModel;
 
         span.appendChild(input);
-        span.appendChild(makeLabel("radio", pathForId));
+        span.appendChild(makeLabel(subSchema, "radio", pathForId));
       });
 
       partsDiv.appendChild(span);
@@ -551,6 +560,7 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
+      span.className = "form-entry really-long";
 
       select.id = pathStrToID(myPath);
 
@@ -610,7 +620,7 @@ var docgen = (function () {
         })
         .call();
 
-      span.appendChild(makeLabel("select", "", "buildingSelector", true));
+      span.appendChild(makeLabel(subSchema, "select", myPath));
       span.appendChild(select);
       return span;
     }
