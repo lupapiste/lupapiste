@@ -753,7 +753,16 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
+(defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
+
+(defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [xml      (krysp/application-xml legacy id)
+          verdicts (krysp/->verdicts xml)]
+      )
+    (fail! :error.no-legacy-available)))
+
+(defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/application-xml legacy id)
           verdicts (krysp/->verdicts xml)]
