@@ -132,10 +132,17 @@ var docgen = (function () {
       return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     }
 
+    // Option utils
+
     function getCollection() {
-      return (options && options.collection) ? options.collection : "documents"
+      return (options && options.collection) ? options.collection : "documents";
     }
 
+    function getUpdateCommand() {
+      return (options && options.updateCommand) ? options.updateCommand : "update-doc";
+    }
+
+    // Element constructors
     function makeLabel(type, pathStr, groupLabel) {
       var label = document.createElement("label");
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
@@ -834,7 +841,7 @@ var docgen = (function () {
     function saveForReal(path, value, callback) {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
-        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: getCollection() })
+        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
       // elements: [key status message]. Here we use just the status.
         .success(function (e) {
@@ -879,7 +886,7 @@ var docgen = (function () {
     }
 
     function disableBasedOnOptions() {
-      if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
+      if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
         $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();

@@ -77,7 +77,7 @@ console.log("Refresh application", application.id, taskId);
       task(t);
 
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
-        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks"});
+        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task"});
       });
     }
   }
