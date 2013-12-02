@@ -57,7 +57,6 @@ var taskPageController = (function() {
    * @param {String} taskId       Current task ID
    */
   function refresh(application, taskId) {
-console.log("Refresh application", application.id, taskId);
     currentApplicationId = application.id;
     currentTaskId = taskId;
 
