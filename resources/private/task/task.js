@@ -52,19 +52,30 @@ var taskPageController = (function() {
     return false;
   }
 
+  /**
+   * @param {Object} application  Keys: id, tasks, attachment
+   * @param {String} taskId       Current task ID
+   */
   function refresh(application, taskId) {
 console.log("Refresh application", application.id, taskId);
     currentApplicationId = application.id;
     currentTaskId = taskId;
 
-    authorizationModel.refresh(application);
+    authorizationModel.refresh(currentApplicationId);
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
-    t.displayName = taskUtil.longDisplayName(t, application);
-    t.applicationId = currentApplicationId;
-    t.deleteTask = deleteTask;
-    task(t);
+    if (!t) {
+      task(null);
+      error("Task not found", currentApplicationId, currentTaskId);
+      notify.error(loc("error.dialog.title"), loc("error.task-not-found"));
+    } else {
+      t.displayName = taskUtil.longDisplayName(t, application);
+      t.applicationId = currentApplicationId;
+      t.deleteTask = deleteTask;
+      task(t);
+    }
+
   }
 
   repository.loaded(["task"], function(app) {

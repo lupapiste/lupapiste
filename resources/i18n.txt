@@ -1,2 +1,3 @@
 task.delete: Poista
 task.delete.confirm: Haluatko varmasti poistaa vaatimuksen?
+error.task-not-found: Vaatimusta ei löydy
