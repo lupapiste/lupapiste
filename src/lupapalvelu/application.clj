@@ -120,6 +120,7 @@
                                                                (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
            (commands/persist-model-updates
              (:id application)
+             "documents"
              rakennuspaikka
              updates
              time))))))
@@ -287,7 +288,7 @@
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s" model schema-name documentId)
-    (commands/persist-model-updates id document updates created)))
+    (commands/persist-model-updates id "documents" document updates created))) ; TODO support for collection parameter
 
 ;;
 ;; Assign
@@ -828,15 +829,16 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defcommand "merge-details-from-krysp"
-  {:parameters [:id :documentId :buildingId]
+  {:parameters [id documentId buildingId collection]
+   :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]}
-  [{{:keys [id documentId buildingId]} :data created :created {:keys [organization propertyId] :as application} :application :as command}]
+  [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [legacy (organization/get-legacy organization)]
-    (let [document     (domain/get-document-by-id application documentId)
+    (let [document     (commands/by-id application collection documentId)
           kryspxml     (krysp/building-xml legacy propertyId)
           updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates id document updates created :source "krysp")
+      (commands/persist-model-updates id collection document updates created :source "krysp")
       (ok))
     (fail :error.no-legacy-available)))
 
