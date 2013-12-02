@@ -1,0 +1,8 @@
+add.authorityAdmin: Lisää pääkäyttäjä
+admin.add-dialog.title: Lisää kunnan pääkäyttäjä
+admin.add-dialog.organization: Organisaation koodi
+admin.add-dialog.continue: Jatka...
+admin.add-dialog.searching: Odota, käyttäjän tietoja haetaan...
+admin.add-dialog.userAdded: Kunnan pääkäyttäjä lisätty onnistuneesti.
+admin.add-dialog.activationLinks: Uuden käyttäjän aktivoivat linkit suomeksi ja ruotsiksi:
+error.invalid-role: Luotavalla käyttäjällä tuntematon rooli

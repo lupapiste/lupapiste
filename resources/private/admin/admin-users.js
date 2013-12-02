@@ -28,9 +28,92 @@
                .call();
            }}]
   };
-  
+
   hub.onPageChange("users", function() {
     if (!usersList) usersList = users.create($("#users .fancy-users-table"), usersTableConfig);
+  });
+
+
+  //
+  // For adding authotity admins
+  //
+
+  function AuthorityAdminUsers() {
+    var self = this;
+
+    self.organization = ko.observable();
+    self.phase = ko.observable(0);
+//    self.email = ko.observable();
+    self.organization = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.userDetailsOk = ko.computed(function() {
+        var firstNameOk = self.firstName();
+        var lastNameOk = self.lastName();
+        var organizationOk = self.organization();
+        return /*/.+@.+/.test(self.email())*/organizationOk && firstNameOk && lastNameOk;});
+
+    self.searching = ko.observable();
+    self.userAdded = ko.observable();
+
+//    self.createdPw = ko.observable();
+    self.linkFi = ko.observable();
+    self.linkSv = ko.observable();
+
+    self.clean = function() {
+      return self
+        .phase(1)
+        .organization("")
+//        .email("")
+        .firstName("")
+        .lastName("")
+        .searching(false)
+        .userAdded(false)
+//        .createdPw("")
+        .linkFi("")
+        .linkSv("");
+    };
+
+    self.dialog = function() {
+      if (!self._dialog) {
+        self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
+        self._dialog.createMask();
+      }
+      return self._dialog;
+    };
+
+    self.addAdmin = function() {
+      self.clean().dialog().open("#add-authority-admin-user-to-organization-dialog");
+    };
+
+    self.next = function() {
+      self.searching(true).phase(2);
+      ajax
+        .command("update-user-organization",
+                 {operation: "add",
+                  organization: self.organization(),
+                  email: "lupapiste@" + self.organization() + ".fi",    //self.email(),
+                  firstName: self.firstName(),
+                  lastName: self.lastName()})
+        .pending(self.searching)
+        .success(function(r) {
+//          console.log("update-user-organization Success, response: ", r);
+//          self.createdPw(r["created-pw"]);
+          self.linkFi(r["link-fi"]);
+          self.linkSv(r["link-sv"]);
+          self.userAdded(true);
+          usersList.redraw();
+        })
+        .call();
+    };
+  }
+
+  var authorityAdminUsers = new AuthorityAdminUsers();
+
+  $(function() {
+    $("#addAuthAdmin").applyBindings({
+      authorityAdminUsers: authorityAdminUsers
+    });
   });
 
 })();
