@@ -51,8 +51,8 @@
                 <p>
                   <div data-bind="ltext: 'admin.add-dialog.activationLinks'"></div>
                   <div data-bind="text: createdUserUsername"></div>
-                  <div data-bind="text: createdUserlinkFi"></div>
-                  <div data-bind="text: createdUserlinkSv"></div>
+                  <a href="#" data-bind="text: createdUserlinkFi, attr: {href: createdUserlinkFi}"></a><br/>
+                  <a href="#" data-bind="text: createdUserlinkSv, attr: {href: createdUserlinkSv}"></a>
                 </p>
               </div>
               <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close"></button>
