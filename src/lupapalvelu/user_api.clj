@@ -122,10 +122,13 @@
    role, throws exception."
   [caller user-data & {:keys [send-email] :or {send-email true}}]
   (validate-create-new-user! caller user-data)
-  (let [new-user  (create-new-user-entity user-data)
-        new-user  (assoc new-user :id (mongo/create-id))
+  (let [user-entry  (create-new-user-entity user-data)
+        old-user  (user/get-user-by-email (:email user-entry))
+        new-user  (if old-user
+                    (assoc user-entry :id (:id old-user))
+                    (assoc user-entry :id (mongo/create-id)))
         email     (:email new-user)
-        {old-id :id old-role :role}  (user/get-user-by-email (:email new-user))]
+        {old-id :id old-role :role}  old-user]
     (try
       (condp = old-role
         nil     (do
