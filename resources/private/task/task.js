@@ -33,7 +33,7 @@ var taskPageController = (function() {
   var task = ko.observable();
 
   var authorizationModel = authorization.create();
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"});
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu");
 
   function deleteTask() {
     LUPAPISTE.ModalDialog.showDynamicYesNo(

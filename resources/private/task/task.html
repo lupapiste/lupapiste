@@ -12,48 +12,9 @@
   </div>
 
   <div id="taskDocgen" class="docgen-content" style="width:48%;float:left"></div>
+
   <div id="taskAttachments" style="width:48%;float:right">
-    <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
-      <div class="statement-attachments">
-        <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
-        <div data-bind="if: attachments().length">
-          <table class="table" data-test-id="inforequest-attachments-table">
-            <thead>
-              <tr>
-                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: attachments">
-              <tr data-bind="with: $data.latestVersion">
-                <td>
-                  <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
-                  <i data-bind="ltext: contentType"></i>
-                  <i data-bind="size: size"></i>
-                </td>
-                <td>
-                  <span data-bind="dateString: $parent.modified"></span>
-                  <span data-bind="fullName: user"></span>
-                </td>
-                <td>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div data-bind="ifnot: attachments().length">
-          <i data-bind="ltext: 'application.verdict.no-attachments'" data-test-id="verdict-no-attachments"></i>
-        </div>
-
-        <button
-          class="btn"
-          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: newAttachment"
-          data-test-id="add-task-attachment">
-        </button>
-      </div>
-    </div>
+    <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}"></div>
   </div>
 
   </section>

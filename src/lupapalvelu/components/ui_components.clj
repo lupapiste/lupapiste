@@ -97,7 +97,7 @@
 
    :attachment   {:depends [:common :repository]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
-                  :html ["attachment.html" "upload.html"]}
+                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
    :task         {:depends [:common :attachment]
                   :js ["task.js"]

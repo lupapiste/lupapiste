@@ -1,7 +1,7 @@
 LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType) {
   var self = this;
   self.target = attachmentTarget;
-  self.attachmentType = attachmentType ? attachmentType : "muut.muu";
+  self.attachmentType = attachmentType;
 
   self.applicationId = null;
   self.attachments = ko.observableArray([]);

@@ -53,7 +53,7 @@
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "verdict"});
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "verdict"}, "muut.muu");
 
   repository.loaded(["verdict"], function(application) {
     if (applicationId === application.id) {
