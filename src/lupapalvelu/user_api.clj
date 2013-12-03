@@ -439,7 +439,8 @@
   {:parameters [id]
    :authenticated true
    :roles [:applicant]
-   :validators [(fn [command application] (not (-> command :user :architect)))]}
+   :validators [(fn [command application] (not (-> command :user :architect)))]
+   :feature [:architect-info]}
   [{user :user}]
   (doseq [attachment (:attachments user)]
     (let [
