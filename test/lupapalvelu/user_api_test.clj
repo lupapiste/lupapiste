@@ -158,7 +158,7 @@
       (activation/send-activation-mail-for (contains {:email "email" :id ..id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
-    (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => (fails-with :user-exists)
+    (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
     (provided
       (user/get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
       (mongo/create-id) => ..id..

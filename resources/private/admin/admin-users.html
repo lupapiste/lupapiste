@@ -50,8 +50,9 @@
                 <h2 data-bind="ltext: 'admin.add-dialog.userAdded'"></h2>
                 <p>
                   <div data-bind="ltext: 'admin.add-dialog.activationLinks'"></div>
-                  <div data-bind="text: linkFi"></div>
-                  <div data-bind="text: linkSv"></div>
+                  <div data-bind="text: createdUserUsername"></div>
+                  <div data-bind="text: createdUserlinkFi"></div>
+                  <div data-bind="text: createdUserlinkSv"></div>
                 </p>
               </div>
               <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close"></button>

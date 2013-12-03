@@ -75,6 +75,9 @@
     (when (and (= user-role :authority) (not authorityAdmin?))
       (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
 
+    (when (and (= user-role :authorityAdmin) (not (:organization user-data)))
+      (fail! :missing-required-key :desc "new authorityAdmin user must have organization" :missing :organization))
+
     (when (and (= user-role :authority) (not (:organization user-data)))
       (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
 
@@ -98,8 +101,8 @@
 (defn- create-new-user-entity [user-data]
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
-      (select-keys [:email :username :role :password :apikey :firstName :lastName
-                    :personId :phone :city :street :zip :enabled :organization])
+      (select-keys [:email :username :role :firstName :lastName :personId
+                    :phone :city :street :zip :enabled :organization])
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
@@ -111,8 +114,7 @@
                    (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
                      {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
                                 (:apikey user-data)
-                                (security/random-password))})))
-      (dissoc :password :apikey))))
+                                (security/random-password))}))))))
 
 ;;
 ;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
@@ -153,10 +155,17 @@
             (fail! :cant-insert)))))))
 
 (defcommand create-user
-  {:parameters [:email :role]
+  {:parameters [:email :role :organization]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
-  (ok :id (create-new-user caller user-data)))
+  (let [user (create-new-user caller user-data :send-email false)
+        id (:id user)
+        token (token/make-token :password-reset {:email (:email user)})]
+    (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
+    (ok :id id
+        :user user
+        :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+        :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
 
 (defn get-or-create-user-by-email [email]
   (let [email (ss/lower-case email)]
@@ -222,41 +231,29 @@
 
 
 (defcommand update-user-organization
-  {:parameters       [operation organization email firstName lastName]
-   :roles            [:admin :authorityAdmin]
-   :input-validators [valid-organization-operation? (partial non-blank-parameters [:organization :email :firstName :lastName])]}
+  {:parameters       [operation email firstName lastName]
+   :roles            [:authorityAdmin]
+   :input-validators [valid-organization-operation? (partial non-blank-parameters [:email :firstName :lastName])]}
   [{caller :user}]
-  (let [caller-role      (keyword (:role caller))
-        admin-caller?           (= caller-role :admin)
-        authorityAdmin-caller?  (= caller-role :authorityAdmin)
-        email        (ss/lower-case email)
-        new-organization (if admin-caller? organization (first (:organizations caller)))
-        update-count (mongo/update-n
-                       :users
-                       {:email email}
-                       {({"add" $push "remove" $pull} operation) {:organizations new-organization}})]
+  (let [email            (ss/lower-case email)
+        new-organization (first (:organizations caller))
+        update-count     (mongo/update-n :users {:email email}
+                           {({"add" $push "remove" $pull} operation) {:organizations new-organization}})]
     (debug "update user" email)
     (if (= 1 update-count)
+      ;; When updated the organizations of the user
       (ok :operation operation)
+      ;; When no existing user found with the email
       (if (= operation "add")
-        (let [new-role (if admin-caller? :authorityAdmin :authority)
-              new-user (create-new-user
+        (let [new-user (create-new-user
                          caller
-                         {:email email :role new-role :organization new-organization :enabled true :firstName firstName :lastName lastName}
-                         :send-email false)]
-
-          (if admin-caller?
-            (let [token (token/make-token :password-reset {:email email})]
-              (infof "invitation for new authority admin user: email=%s, organization=%s" email new-organization)
-              (ok :operation "created"
-                  :link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-                  :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)
-                ))
-            (let [token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
-              (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email new-organization token)
-              (notifications/notify! :invite-authority {:data {:email email :token token}})
-              (ok :operation "invited"))))
-
+                         {:email email :role :authority :organization new-organization :enabled true
+                          :firstName firstName :lastName lastName}
+                         :send-email false)
+              token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
+            (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email new-organization token)
+            (notifications/notify! :invite-authority {:data {:email email :token token}})
+            (ok :operation "invited"))
         (fail :not-found :email email)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]

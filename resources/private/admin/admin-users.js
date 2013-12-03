@@ -55,8 +55,9 @@
     self.searching = ko.observable();
     self.userAdded = ko.observable();
 
-    self.linkFi = ko.observable();
-    self.linkSv = ko.observable();
+    self.createdUserlinkFi = ko.observable();
+    self.createdUserlinkSv = ko.observable();
+    self.createdUserUsername = ko.observable();
 
     self.clean = function() {
       return self
@@ -66,8 +67,9 @@
         .lastName("")
         .searching(false)
         .userAdded(false)
-        .linkFi("")
-        .linkSv("");
+        .createdUserlinkFi("")
+        .createdUserlinkSv("")
+        .createdUserUsername("");
     };
 
     self.dialog = function() {
@@ -85,16 +87,18 @@
     self.next = function() {
       self.searching(true).phase(2);
       ajax
-        .command("update-user-organization",
-                 {operation: "add",
+        .command("create-user",
+                 {email: "lupapiste@" + self.organization() + ".fi",
+                  role: "authorityAdmin",
                   organization: self.organization(),
-                  email: "lupapiste@" + self.organization() + ".fi",
+                  enabled: "true",
                   firstName: self.firstName(),
                   lastName: self.lastName()})
         .pending(self.searching)
         .success(function(r) {
-          self.linkFi(r["link-fi"]);
-          self.linkSv(r["link-sv"]);
+          self.createdUserUsername(r.user.username);
+          self.createdUserlinkFi(r.linkFi);
+          self.createdUserlinkSv(r.linkSv);
           self.userAdded(true);
           usersList.redraw();
         })

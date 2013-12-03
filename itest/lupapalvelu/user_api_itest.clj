@@ -78,20 +78,20 @@
     (get-in email [:body :plain]) => (contains #"/app/security/activate/[a-zA-Z0-9]+"))
 
   (fact (-> (query "xyz" :user) :user :organizations) => [])
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :organization "753-R" :operation "add") => ok?)
+  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
-  (fact (-> (query "xyz" :user) :user :organizations) = ["753-R"])
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :organization "753-R" :operation "remove") => ok?)
-  (fact (-> (query "xyz" :user) :user :organizations) = [])
+  (fact (-> (query "xyz" :user) :user :organizations) => ["753-R"])
+  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "remove") => ok?)
+  (fact (-> (query "xyz" :user) :user :organizations) => [])
 
 
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :organization "753-R" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
 
-  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :operation "add") => (contains {:ok false :parameters ["lastName" "organization"], :text "error.missing-parameters"}))
+  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :operation "add") => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
 
   (fact "invite new user Tonja to Sipoo"
 
-    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :organization "753-R" :operation "add") => ok?
+    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add") => ok?
 
     (let [email (last-email)]
       (:to email) => "tonja.sibbo@sipoo.fi"
