@@ -159,10 +159,9 @@
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)
-        id (:id user)
         token (token/make-token :password-reset {:email (:email user)})]
     (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
-    (ok :id id
+    (ok :id (:id user)
         :user user
         :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
         :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
