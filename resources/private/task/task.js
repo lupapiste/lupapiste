@@ -35,17 +35,19 @@ var taskPageController = (function() {
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu");
 
+  function returnToApplication() {
+    repository.load(currentApplicationId);
+    window.location.hash = "!/application/" + currentApplicationId + "/tasks";
+  }
+
   function deleteTask() {
     LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("areyousure"),
         loc("task.delete.confirm"),
           {title: loc("yes"), fn: function() {
             ajax
-            .query("ping", {id: currentApplicationId, taskId: currentTaskId})
-            .success(function() {
-              repository.load(currentApplicationId);
-              window.location.hash = "!/application/" + currentApplicationId + "/tasks";
-            })
+            .command("delete-task", {id: currentApplicationId, taskId: currentTaskId})
+            .success(returnToApplication)
             .call();}},
             {title: loc("no")}
         );
@@ -72,6 +74,7 @@ var taskPageController = (function() {
       t.displayName = taskUtil.longDisplayName(t, application);
       t.applicationId = currentApplicationId;
       t.deleteTask = deleteTask;
+      t.returnToApplication = returnToApplication;
       task(t);
 
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
