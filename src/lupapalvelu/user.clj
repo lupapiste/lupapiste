@@ -180,7 +180,7 @@
 ;;
 
 (defn create-apikey
-  "Add or replcae users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
+  "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
         n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]

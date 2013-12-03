@@ -43,7 +43,6 @@
 
     self.organization = ko.observable();
     self.phase = ko.observable(0);
-//    self.email = ko.observable();
     self.organization = ko.observable();
     self.firstName = ko.observable();
     self.lastName = ko.observable();
@@ -51,12 +50,11 @@
         var firstNameOk = self.firstName();
         var lastNameOk = self.lastName();
         var organizationOk = self.organization();
-        return /*/.+@.+/.test(self.email())*/organizationOk && firstNameOk && lastNameOk;});
+        return organizationOk && firstNameOk && lastNameOk;});
 
     self.searching = ko.observable();
     self.userAdded = ko.observable();
 
-//    self.createdPw = ko.observable();
     self.linkFi = ko.observable();
     self.linkSv = ko.observable();
 
@@ -64,12 +62,10 @@
       return self
         .phase(1)
         .organization("")
-//        .email("")
         .firstName("")
         .lastName("")
         .searching(false)
         .userAdded(false)
-//        .createdPw("")
         .linkFi("")
         .linkSv("");
     };
@@ -92,13 +88,11 @@
         .command("update-user-organization",
                  {operation: "add",
                   organization: self.organization(),
-                  email: "lupapiste@" + self.organization() + ".fi",    //self.email(),
+                  email: "lupapiste@" + self.organization() + ".fi",
                   firstName: self.firstName(),
                   lastName: self.lastName()})
         .pending(self.searching)
         .success(function(r) {
-//          console.log("update-user-organization Success, response: ", r);
-//          self.createdPw(r["created-pw"]);
           self.linkFi(r["link-fi"]);
           self.linkSv(r["link-sv"]);
           self.userAdded(true);

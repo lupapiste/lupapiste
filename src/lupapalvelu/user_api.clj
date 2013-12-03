@@ -227,7 +227,6 @@
    :input-validators [valid-organization-operation? (partial non-blank-parameters [:organization :email :firstName :lastName])]}
   [{caller :user}]
   (let [caller-role      (keyword (:role caller))
-;        _ (println "\n update-user-organization, caller-role:" caller-role, ", organization: " organization)
         admin-caller?           (= caller-role :admin)
         authorityAdmin-caller?  (= caller-role :authorityAdmin)
         email        (ss/lower-case email)
@@ -240,21 +239,16 @@
     (if (= 1 update-count)
       (ok :operation operation)
       (if (= operation "add")
-        (let [;_ (println "\n update-user-organization, \"add\" called")
-              new-role (if admin-caller? :authorityAdmin :authority)
+        (let [new-role (if admin-caller? :authorityAdmin :authority)
               new-user (create-new-user
                          caller
                          {:email email :role new-role :organization new-organization :enabled true :firstName firstName :lastName lastName}
-                         #_(merge
-                           {:email email :role new-role :organization new-organization :enabled true :firstName firstName :lastName lastName}
-                           (when admin-caller? {:password (security/random-password)}))
                          :send-email false)]
 
           (if admin-caller?
             (let [token (token/make-token :password-reset {:email email})]
               (infof "invitation for new authority admin user: email=%s, organization=%s" email new-organization)
               (ok :operation "created"
-;                  :created-pw (-> new-user :private :password)
                   :link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
                   :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)
                 ))
