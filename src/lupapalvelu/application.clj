@@ -757,7 +757,7 @@
 
 (defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
-    (let [xml      (krysp/application-xml legacy id)
+    (let [xml      (krysp/ya-application-xml legacy id)
           verdicts (krysp/->verdicts xml)]
       )
     (fail! :error.no-legacy-available)))

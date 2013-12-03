@@ -31,7 +31,7 @@
 ;; Object types (URL encoded)
 (def building-type "typeName=rakval%3AValmisRakennus")
 (def case-type     "typeName=rakval%3ARakennusvalvontaAsia")
-(def ya-type       "typeName= ")
+(def ya-type       "typeName=yak%3AYleisetAlueet")
 
 ;; For building filters
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
@@ -59,7 +59,7 @@
     (cr/get-xml url)))
 
 (defn ya-application-xml [server id]
-  (let [url (wfs-krysp-url-with-service server case-type (property-equals asian-lp-lupatunnus id))]
+  (let [url (wfs-krysp-url-with-service server ya-type (property-equals asian-lp-lupatunnus id))]
     (debug "Get application: " url)
     (cr/get-xml url)))
 
