@@ -52,9 +52,10 @@
 (facts create-user
   (apply-remote-minimal)
   (fact (command pena :create-user :email "x" :role "dummy" :password "foobarbozbiz") => fail?)
-  (fact (command admin :create-user :email "x" :role "dummy" :password "foobarbozbiz") => ok?)
+  (fact (command admin :create-user :email "x" :role "authorityAdmin" :enabled true
+          :organization "753-R" :password "foobarbozbiz") => ok?)
   ; Check that user was created
-  (fact (-> (query admin :users :email "x") :users first) => (contains {:role "dummy" :email "x" :enabled false})))
+  (fact (-> (query admin :users :email "x") :users first) => (contains {:role "authorityAdmin" :email "x" :enabled true})))
 
 ;;
 ;; ==============================================================================
@@ -64,26 +65,29 @@
 
 (facts update-user
   (apply-remote-minimal)
-  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
+  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :organization "753-R" :apikey "xyz") => ok?)
   (fact (command "xyz" :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query "xyz" :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
 (facts update-user-organization
   (apply-remote-minimal)
 
-  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :apikey "xyz") => ok?)
-  (let [email (last-email)]
+  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :organization "555-R" :apikey "xyz") => ok?)
+  #_(let [email (last-email)]
     (:to email) => "foo"
     (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi"
     (get-in email [:body :plain]) => (contains #"/app/security/activate/[a-zA-Z0-9]+"))
 
-  (fact (-> (query "xyz" :user) :user :organizations) => [])
+  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
-  (fact (-> (query "xyz" :user) :user :organizations) => ["753-R"])
+  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R" "753-R"])
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "remove") => ok?)
-  (fact (-> (query "xyz" :user) :user :organizations) => [])
+  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
 
+  ;;
+  ;; TODO: Lisaa testi, joka testaa etta samaa organisaatiota ei lisata uudestaan.
+  ;;
 
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
 
