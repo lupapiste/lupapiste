@@ -3,3 +3,27 @@ task.delete.confirm: Haluatko varmasti poistaa vaatimuksen?
 error.task-not-found: Vaatimusta ei löydy
 rakennusnro: Rakennusnumero
 manuaalinen_rakennusnro: Rakennusnumero jos rakennusta ei löydy valikosta
+no-attachments: Halutessasi voit liittää tiedostoja, kuten kuvia, piirroksia ja dokumentteja.
+
+task-katselmus.katselmuksenLaji._group_label: Katselmuksen laji
+vaadittuLupaehtona: Vaadittu lupaehtona
+task-katselmus.rakennus._group_label: Katselmoitava rakennus
+task-katselmus.rakennus.rakennus._group_label: Rakennus
+task-katselmus.rakennus.tila._group_label: Rakennuksen katselmus
+task-katselmus.rakennus.tila.tila._group_label: Tila
+task-katselmus.rakennus.tila.kayttoonottava: Rakennus otettu käyttöön
+task-katselmus.rakennus._append_label: + Lisää rakennus
+
+task-katselmus.katselmus._group_label: Katselmuksen tiedot
+task-katselmus.katselmus.pitoPvm: Pitopäivä
+task-katselmus.katselmus.pitaja: Katselmuksen pitäjä
+task-katselmus.katselmus.huomautukset._group_label: Huomautukset
+task-katselmus.katselmus.huomautukset.kuvaus: Huomautettavaa
+task-katselmus.katselmus.huomautukset.maaraAika: Määräaika
+task-katselmus.katselmus.huomautukset.toteamisHetki: Toteamishetki
+task-katselmus.katselmus.huomautukset.toteaja: Toteaja
+task-katselmus.katselmus.lasnaolijat: Läsnaolijat
+task-katselmus.katselmus.poikkeamat: Poikkeamat
+task-katselmus.katselmus.tila._group_label: Koko katselmuksen tila
+task-katselmus.katselmus.tila.osittainen: Osittainen
+task-katselmus.katselmus.tila.lopullinen: Lopullinen

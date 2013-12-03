@@ -25,7 +25,7 @@
                    {:name "osittainen loppukatselmus"}
                    {:name "loppukatselmus"}
                    {:name "ei tiedossa"}]}
-           {:name "vaadittuLupaehtona" :type :checkbox}
+           {:name "vaadittuLupaehtona" :type :checkbox :i18nkey "vaadittuLupaehtona"}
            {:name "rakennus"
             :type :group
             :repeating true
