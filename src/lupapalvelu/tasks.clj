@@ -1,5 +1,5 @@
 (ns lupapalvelu.tasks
-  (:require [clojure.string :as s]
+  (:require [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
@@ -7,6 +7,8 @@
             [lupapalvelu.document.tools :as tools]))
 
 (def task-schemas-version 1)
+
+(def task-name-max-len 80)
 
 (schemas/defschemas
   task-schemas-version
@@ -39,17 +41,18 @@
             {:name "pitaja" :type :string}
             {:name "huomautukset" :type :group
              :body [{:name "kuvaus" :required true :type :text}
-                    {:name "maaraAika" :type :date}
+                    {:name "toteaja" :type :string}
                     {:name "toteamisHetki" :type :date}
-                    {:name "toteaja" :type :string}]}
+                    {:name "maaraAika" :type :date}]}
             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
             {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
    {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
-    :body []} ; TODO -- link to document or application?
+    :body [{:name "osapuolena" :type :checkbox}
+           {:name "asiointitunnus" :type :string :max-len 17}]}
    {:info {:name "task-lupamaarays" :order 20}
-    :body []} ; TODO
-   ])
+    :body [{:name "maarays" :type :text :readonly true :layout :full-width}
+           {:name "kuvaus"  :type :text :max-len 4000  :layout :full-width}]}])
 
 (defn- ->task [schema-name task-name data {:keys [created assignee] :as meta} source]
   {:pre [schema-name
@@ -58,7 +61,10 @@
   {:schema-info {:name schema-name :version task-schemas-version}
    :id (mongo/create-id)
    :source source
-   :taskname task-name
+   :taskname (when task-name
+               (if (> task-name-max-len (.length task-name))
+                 (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
+                 task-name))
    :state (if (user/applicant? assignee) :requires_user_action :requires_authority_action)
    :data (when data (-> data tools/wrapped (tools/timestamped created)))
    :assignee (select-keys assignee [:id :firstName :lastName])
@@ -78,8 +84,8 @@
      (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
        (concat
         (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
-        (map #(->task "task-lupamaarays" (:sisalto %) {} meta source)
-          (filter #(not (s/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
+        (map #(->task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
+          (filter #(not (ss/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
           (map #(->task "task-vaadittu-tyonjohtaja" % {} meta source)
             (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))))
