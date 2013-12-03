@@ -32,7 +32,7 @@
   (fact (validate-create-new-user! {:role "admin"} {:role "applicant" :email "x"}) => forbidden)
 
   (fact "only known roles are accepted"
-    (validate-create-new-user! {:role "admin"} {:role "x" :email "x"}) => (fails-with :invalid-role))
+    (validate-create-new-user! {:role "admin"} {:role "x" :email "x"}) => (fails-with :error.invalid-role))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authorityAdmin" :email "x"}) => forbidden)
@@ -54,7 +54,7 @@
   (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "dummy" :email "x" :organization "o"}) => forbidden)
 
   (fact "not even admin can create another admin"
-    (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (fails-with :invalid-role))
+    (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (fails-with :error.invalid-role))
 
   (fact "authorityAdmin can create authority users to her own organization only"
     (fact (validate-create-new-user! {:role "authorityAdmin"}                      {:role "authority" :organization "x" :email "x"}) => forbidden)
