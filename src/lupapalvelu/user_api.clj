@@ -240,7 +240,7 @@
   (let [email            (ss/lower-case email)
         new-organization (first (:organizations caller))
         update-count     (mongo/update-n :users {:email email}
-                           {({"add" $push "remove" $pull} operation) {:organizations new-organization}})]
+                           {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
     (debug "update user" email)
     (if (= 1 update-count)
       ;; When updated the organizations of the user

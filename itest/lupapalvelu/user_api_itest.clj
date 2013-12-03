@@ -82,12 +82,11 @@
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
   (fact (-> (query "xyz" :user) :user :organizations) => ["555-R" "753-R"])
+  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
+
+  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R" "753-R"])
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "remove") => ok?)
   (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
-
-  ;;
-  ;; TODO: Lisaa testi, joka testaa etta samaa organisaatiota ei lisata uudestaan.
-  ;;
 
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
 
