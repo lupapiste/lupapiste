@@ -143,25 +143,22 @@
     (create-new-user nil {:email "email" :role "applicant"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
-      (mongo/create-id) => ..id..
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil
-      (activation/send-activation-mail-for (contains {:email "email" :id ..id..})) => nil))
+      (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before as dummy user"
     (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
-      (mongo/create-id) => ..id..
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil
-      (activation/send-activation-mail-for (contains {:email "email" :id ..id..})) => nil))
+      (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
     (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
     (provided
       (user/get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
-      (mongo/create-id) => ..id..
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => anything :times 0
       (activation/send-activation-mail-for anything) => anything :times 0)))
