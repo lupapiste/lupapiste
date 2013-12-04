@@ -203,23 +203,6 @@
             :puhelin (-> yhteystiedot :puhelin :value)
             :sahkopostiosoite (-> yhteystiedot :email :value)})))
 
-(defn- get-henkilo-data [henkilo]
-  (let [henkilotiedot (:henkilotiedot henkilo)
-        yhteystiedot (:yhteystiedot henkilo)]
-    (merge
-      (get-name henkilotiedot)
-      {:henkilotunnus (-> henkilotiedot :hetu :value)
-       :osoite (get-simple-osoite (:osoite henkilo))}
-      (get-yhteystiedot-data yhteystiedot))))
-
-(defn- get-yhteyshenkilo-data [henkilo]
-  (let [henkilotiedot (:henkilotiedot henkilo)
-        yhteystiedot (:yhteystiedot henkilo)]
-    (merge
-      (get-name henkilotiedot)
-      (get-yhteystiedot-data yhteystiedot))))
-
-
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
@@ -236,24 +219,28 @@
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
 (defn get-osapuoli-data [osapuoli party-type]
-  (let [henkilo        (if (= (-> osapuoli :_selected :value) "yritys")
+  (let [yritys-type-osapuoli? (= (-> osapuoli :_selected :value) "yritys")
+        henkilo        (if yritys-type-osapuoli?
                          (get-in osapuoli [:yritys :yhteyshenkilo])
-                         (:henkilo osapuoli))
-        kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
-        omistajalaji   (muu-select-map
-                         :muu (-> osapuoli :muu-omistajalaji :value)
-                         :omistajalaji (-> osapuoli :omistajalaji :value))
-        role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
-                        :kuntaRooliKoodi kuntaRoolicode
-                        :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin :value))}
-        codes          (if omistajalaji
-                         (merge role-codes {:omistajalaji omistajalaji})
-                         role-codes)]
-    (if (= (-> osapuoli :_selected :value) "yritys")
-      (merge codes
-             {:yritys  (get-yritys-data (:yritys osapuoli))}
-             {:henkilo (get-yhteyshenkilo-data henkilo)})
-      (merge codes {:henkilo (get-henkilo-data henkilo)}))))
+                         (:henkilo osapuoli))]
+    (when (-> henkilo :henkilotiedot :sukunimi :value)
+      (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
+            omistajalaji   (muu-select-map
+                             :muu (-> osapuoli :muu-omistajalaji :value)
+                             :omistajalaji (-> osapuoli :omistajalaji :value))]
+        (merge
+          {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
+           :kuntaRooliKoodi kuntaRoolicode
+           :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin :value))
+           :henkilo (merge
+                      (get-name (:henkilotiedot henkilo))
+                      (get-yhteystiedot-data (:yhteystiedot henkilo))
+                      (when-not yritys-type-osapuoli?
+                        {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu :value)
+                         :osoite (get-simple-osoite (:osoite henkilo))}))}
+          (when yritys-type-osapuoli?
+            {:yritys  (get-yritys-data (:yritys osapuoli))})
+          (when omistajalaji {:omistajalaji omistajalaji}))))))
 
 (defn get-parties-by-type [documents tag-name party-type doc-transformer]
   (for [doc (documents party-type)
@@ -261,37 +248,40 @@
         :when (seq osapuoli)]
     {tag-name (doc-transformer osapuoli party-type)}))
 
-
 (defn get-parties [documents]
-  (into
-    (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
-    (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))
+  (filter #(seq (:Osapuoli %))
+    (into
+      (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
+      (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
-  (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
-        codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
-               :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
-        patevyys (:patevyys suunnittelija)
-        osoite (get-simple-osoite (:osoite suunnittelija))
-        henkilo (merge (get-name (:henkilotiedot suunnittelija))
-                       {:osoite osoite}
-                       {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
-                       (get-yhteystiedot-data (:yhteystiedot suunnittelija)))
-        base-data (merge codes {:koulutus (-> patevyys :koulutus :value)
-                                :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
-                                :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
-                                :kokemusvuodet (-> patevyys :kokemus :value)
-                                :henkilo henkilo})]
-    (if (-> suunnittelija :yritys :yritysnimi :value s/blank? not)
-      (assoc base-data :yritys (assoc
-                                 (get-simple-yritys (:yritys suunnittelija))
-                                 :postiosoite osoite))
-      base-data)))
+  (when (-> suunnittelija :henkilotiedot :sukunimi :value)
+    (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
+          codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
+                 :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
+          patevyys (:patevyys suunnittelija)
+          osoite (get-simple-osoite (:osoite suunnittelija))
+          henkilo (merge (get-name (:henkilotiedot suunnittelija))
+                    {:osoite osoite}
+                    {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
+                    (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
+      (merge codes
+        {:koulutus (-> patevyys :koulutus :value)
+         :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
+         :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+         :kokemusvuodet (-> patevyys :kokemus :value)}
+        (when (-> henkilo :nimi :sukunimi)
+          {:henkilo henkilo})
+        (when (-> suunnittelija :yritys :yritysnimi :value s/blank? not)
+          {:yritys (merge
+                     (get-simple-yritys (:yritys suunnittelija))
+                     {:postiosoite osoite})})))))
 
 (defn- get-designers [documents]
-  (into
-    (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
-    (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data)))
+  (filter #(seq (:Suunnittelija %))
+    (into
+      (get-parties-by-type documents :Suunnittelija :paasuunnittelija get-suunnittelija-data)
+      (get-parties-by-type documents :Suunnittelija :suunnittelija get-suunnittelija-data))))
 
 (defn- concat-tyotehtavat-to-string [selections]
   (let [joined (clojure.string/join ","
@@ -309,14 +299,14 @@
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))
         patevyys (:patevyys tyonjohtaja)]
-    (conj foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
-                    :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                    :koulutus (-> patevyys :koulutus :value)
-                    :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
-                    :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
-                    :kokemusvuodet (-> patevyys :kokemusvuodet :value)
-                    :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
-                    :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))
+    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
+                     :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+                     :koulutus (-> patevyys :koulutus :value)
+                     :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
+                     :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                     :kokemusvuodet (-> patevyys :kokemusvuodet :value)
+                     :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
+                     :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))

@@ -65,7 +65,7 @@
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
     (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
-      (fail! :invalid-role :desc "new user has unsupported role" :user-role user-role))
+      (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)
       (fail! :error.unauthorized :desc "applicants are born via registration"))
@@ -75,6 +75,9 @@
 
     (when (and (= user-role :authority) (not authorityAdmin?))
       (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
+
+    (when (and (= user-role :authorityAdmin) (not (:organization user-data)))
+      (fail! :missing-required-key :desc "new authorityAdmin user must have organization" :missing :organization))
 
     (when (and (= user-role :authority) (not (:organization user-data)))
       (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
@@ -99,7 +102,8 @@
 (defn- create-new-user-entity [user-data]
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId :phone :city :street :zip :enabled :organization])
+      (select-keys [:email :username :role :firstName :lastName :personId
+                    :phone :city :street :zip :enabled :organization])
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
@@ -123,10 +127,13 @@
    role, throws exception."
   [caller user-data & {:keys [send-email] :or {send-email true}}]
   (validate-create-new-user! caller user-data)
-  (let [new-user  (create-new-user-entity user-data)
-        new-user  (assoc new-user :id (mongo/create-id))
+  (let [user-entry  (create-new-user-entity user-data)
+        old-user  (user/get-user-by-email (:email user-entry))
+        new-user  (if old-user
+                    (assoc user-entry :id (:id old-user))
+                    (assoc user-entry :id (mongo/create-id)))
         email     (:email new-user)
-        {old-id :id old-role :role}  (user/get-user-by-email (:email new-user))]
+        {old-id :id old-role :role}  old-user]
     (try
       (condp = old-role
         nil     (do
@@ -152,10 +159,16 @@
             (fail! :cant-insert)))))))
 
 (defcommand create-user
-  {:parameters [:email :role]
+  {:parameters [:email :role :organization]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
-  (ok :id (create-new-user caller user-data)))
+  (let [user (create-new-user caller user-data :send-email false)
+        token (token/make-token :password-reset {:email (:email user)})]
+    (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
+    (ok :id (:id user)
+        :user user
+        :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+        :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
 
 (defn get-or-create-user-by-email [email]
   (let [email (ss/lower-case email)]
@@ -219,27 +232,32 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
+(defn- create-authority-user-with-organization [caller new-organization email firstName lastName]
+  (let [new-user (create-new-user
+                   caller
+                   {:email email :role :authority :organization new-organization :enabled true
+                    :firstName firstName :lastName lastName}
+                   :send-email false)
+        token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
+    (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email new-organization token)
+    (notifications/notify! :invite-authority {:data {:email email :token token}})
+    (ok :operation "invited")))
+
 (defcommand update-user-organization
-  {:parameters       [email operation firstName lastName]
+  {:parameters       [operation email firstName lastName]
    :roles            [:authorityAdmin]
    :input-validators [valid-organization-operation? (partial non-blank-parameters [:email :firstName :lastName])]}
   [{caller :user}]
-  (let [email        (ss/lower-case email)
-        organization (first (:organizations caller))]
+  (let [email            (ss/lower-case email)
+        new-organization (first (:organizations caller))
+        update-count     (mongo/update-n :users {:email email}
+                           {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
     (debug "update user" email)
-    (if (= 1 (mongo/update-n :users {:email email} {({"add" $push "remove" $pull} operation) {:organizations organization}}))
-     (ok :operation operation)
-     (if (= operation "add")
-       (let [new-user (create-new-user
-                        caller
-                        {:email email :role :authority :organization organization :enabled true :firstName firstName :lastName lastName}
-                        :send-email false)
-             token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
-
-         (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email organization token)
-         (notifications/notify! :invite-authority {:data {:email email :token token}})
-         (ok :operation "invited"))
-       (fail :not-found :email email)))))
+    (if (pos? update-count)
+      (ok :operation operation)
+      (if (= operation "add")
+        (create-authority-user-with-organization caller new-organization email firstName lastName)
+        (fail :not-found :email email)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
@@ -276,8 +294,8 @@
    :authenticated false}
   [_]
   (let [email (ss/lower-case email)]
-    (infof "Password resert request: email=%s" email)
-    (if (mongo/select-one :users {:email email :enabled true})
+    (infof "Password reset request: email=%s" email)
+    (if (mongo/select-one :users {:email email})
       (let [token (token/make-token :password-reset {:email email})]
         (infof "password reset request: email=%s, token=%s" email token)
         (notifications/notify! :reset-password {:data {:email email :token token}})
@@ -436,7 +454,9 @@
   {:parameters [id]
    :authenticated true
    :roles [:applicant]
-   :validators [(fn [command application] (not (-> command :user :architect)))]}
+   :states     [:draft :open :submitted :complement-needed]
+   :validators [(fn [command application] (not (-> command :user :architect)))]
+   :feature [:architect-info]}
   [{user :user}]
   (doseq [attachment (:attachments user)]
     (let [
@@ -454,7 +474,7 @@
                        :filename file-name
                        :content-type content-type
                        :file-size size
-                       :timestamp created
+                       :created created
                        :user user
                        ;:attachment-target attachment-target
                        :locked false}))))
