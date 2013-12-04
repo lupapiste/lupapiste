@@ -76,7 +76,7 @@
 
    :user-menu     {:html ["nav.html"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :screenmessages]
+   :authenticated {:depends [:init :jquery :knockout :moment :i18n :selectm :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -160,12 +160,12 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant    {:depends [:common :authenticated :map :applications :application :attachment
+   :applicant    {:depends [:common :authenticated :map :applications :application
                             :statement :docgen :create :mypage :user-menu :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :authenticated :map :applications :application :attachment
+   :authority    {:depends [:common :authenticated :map :applications :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
