@@ -782,15 +782,15 @@
                                        ; any old attachment, a new version will be added
                                        (if (= 200 (:status resp))
                                          (attachment/attach-file! {:application-id id
-                                                                 :filename filename
-                                                                 :size content-length
-                                                                 :content (:body resp)
-                                                                 :attachment-id attachment-id
-                                                                 :attachment-type attachment-type
-                                                                 :target target
-                                                                 :locked locked
-                                                                 :user user
-                                                                 :timestamp attachment-time})
+                                                                   :filename filename
+                                                                   :size content-length
+                                                                   :content (:body resp)
+                                                                   :attachment-id attachment-id
+                                                                   :attachment-type attachment-type
+                                                                   :target target
+                                                                   :locked locked
+                                                                   :user user
+                                                                   :created attachment-time})
                                          (error (str (:status resp) " - unable to download " url ": " resp)))
                                        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
                                    pk))
