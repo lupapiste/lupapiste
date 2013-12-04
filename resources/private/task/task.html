@@ -10,11 +10,11 @@
     <button class="btn" data-bind="ltext:'task.delete', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right"></button>
   </div>
 
-  <div id="taskDocgen" class="docgen-content" style="width:48%;float:left"></div>
-
-  <div id="taskAttachments" style="width:48%;float:right">
+  <div id="taskAttachments" >
     <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}"></div>
   </div>
+
+  <div id="taskDocgen" class="docgen-content" ></div>
 
   </section>
 </body>

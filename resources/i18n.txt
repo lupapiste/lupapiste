@@ -28,7 +28,7 @@ task-katselmus.katselmus.tila._group_label: Koko katselmuksen tila
 task-katselmus.katselmus.tila.osittainen: Osittainen
 task-katselmus.katselmus.tila.lopullinen: Lopullinen
 
-task-vaadittu-tyonjohtaja.osapuolena: Osapuolena tällä hakemuksella
+task-vaadittu-tyonjohtaja.osapuolena: Ilmoitettu hakemuksen yhteydessä
 task-vaadittu-tyonjohtaja.asiointitunnus: Erillisen ilmoituksen asiointitunnus
 
 task-lupamaarays.maarays: Määräys

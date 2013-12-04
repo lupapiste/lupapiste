@@ -41,9 +41,10 @@
             {:name "pitaja" :type :string}
             {:name "huomautukset" :type :group
              :body [{:name "kuvaus" :required true :type :text}
+                    {:name "maaraAika" :type :date}
                     {:name "toteaja" :type :string}
                     {:name "toteamisHetki" :type :date}
-                    {:name "maaraAika" :type :date}]}
+                    ]}
             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
             {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
