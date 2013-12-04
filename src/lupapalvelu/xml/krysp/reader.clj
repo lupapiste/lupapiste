@@ -36,6 +36,7 @@
 ;; For building filters
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 (def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def yleisten-alueiden-lp-lupatunnus "yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
 
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
@@ -46,7 +47,7 @@
   (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
 
 (defn wfs-krysp-url-with-service [server object-type filter]
-  (str (wfs-krysp-url server object-type filter) "service=WFS"))
+  (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
 (defn building-xml [server id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
@@ -59,7 +60,7 @@
     (cr/get-xml url)))
 
 (defn ya-application-xml [server id]
-  (let [url (wfs-krysp-url-with-service server ya-type (property-equals asian-lp-lupatunnus id))]
+  (let [url (wfs-krysp-url-with-service server ya-type (property-equals yleisten-alueiden-lp-lupatunnus id))]
     (debug "Get application: " url)
     (cr/get-xml url)))
 
