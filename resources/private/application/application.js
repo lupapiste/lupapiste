@@ -18,11 +18,14 @@
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-  var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
   function getAttachmentsByGroup(source) {
-    var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
+    var attachments = _.map(source, function(a) {
+      a.latestVersion = _.last(a.versions || []);
+      a.statusName = application.statuses[a.state] || "unknown";
+      return a;
+    });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
@@ -127,9 +130,12 @@
       var app = applicationDetails.application;
 
       // Delete shapes
-      if(application.shapes) {
+      if (application.shapes) {
         delete application.shapes;
       }
+
+      // Plain data
+      application._js = app;
 
       // Update observebles
       ko.mapping.fromJS(app, {}, application);
@@ -148,18 +154,7 @@
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       // Attachments:
-
-      application.hasAttachment(false);
-
-      attachments(_.map(app.attachments || [], function(a) {
-        a.statusName = application.statuses[a.state] || "unknown";
-        a.latestVersion = _.last(a.versions);
-        if (a.versions && a.versions.length) { application.hasAttachment(true); }
-        return a;
-      }));
-
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
-
 
       // Setting disable value for the "Send unsent attachments" button:
 
@@ -334,7 +329,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","statement","neighbors","task"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -431,7 +426,6 @@
       application: application,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
-      attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
       comment: commentModel,
       invite: inviteModel,
