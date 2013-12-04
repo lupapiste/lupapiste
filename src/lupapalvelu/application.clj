@@ -686,13 +686,14 @@
                                                    (map #(assoc % :id (mongo/create-id)) (:documents application))))
                          (assoc :id              muutoslupa-app-id)
                          (assoc :created         created)
+                         (assoc :opened          created)
                          (assoc :modified        created)
                          (assoc :state           (cond
                                                    (user/authority? user)     :open
                                                    :else                      :draft))
 ;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
                          (assoc :permitSubtype   :muutoslupa)
-                         (dissoc :attachments :statements :verdicts :comments :submitted :opened
+                         (dissoc :attachments :statements :verdicts :comments :submitted
                                  :_statements-seen-by :_verdicts-seen-by))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications (meta-fields/enrich-with-link-permit-data muutoslupa-app))
