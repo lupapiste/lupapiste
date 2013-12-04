@@ -26,7 +26,7 @@ Rakentaminen tab opens
   Open tab  tasks
 
 Rakentaminen tab contains 9 tasks
-  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr  9
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  9
 
 Katselmukset
   Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
@@ -51,7 +51,7 @@ Add attachment to Aloituskokous
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
 Return to listing
-  Click enabled by test id  back-to-application-from-task
+  Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
   Tab should be visible  tasks
 
 Delete Muu tarkastus
@@ -73,4 +73,4 @@ Open task
   [Arguments]  ${name}
   Click Element  //div[@id='application-tasks-tab']//table//td[text()='${name}']
   Wait Until  Element should be visible  taskAttachments
-  Element should be visible  taskDocgen
+  Wait until  Element should be visible  taskDocgen
