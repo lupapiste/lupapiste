@@ -32,18 +32,19 @@
   (fact (validate-create-new-user! {:role "admin"} {:role "applicant" :email "x"}) => forbidden)
 
   (fact "only known roles are accepted"
-    (validate-create-new-user! {:role "admin"} {:role "x" :email "x"}) => (fails-with :invalid-role))
+    (validate-create-new-user! {:role "admin"} {:role "x" :email "x"}) => (fails-with :error.invalid-role))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authorityAdmin"} {:role "authorityAdmin" :email "x"}) => forbidden)
-  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => truthy)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => (fails-with :missing-required-key))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "o"}) => truthy)
   (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "q"}) => forbidden)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authority" :email "x"}) => forbidden)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "o"}) => truthy)
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "applicant" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "applicant" :email "x"}) => forbidden)
@@ -54,7 +55,7 @@
   (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "dummy" :email "x" :organization "o"}) => forbidden)
 
   (fact "not even admin can create another admin"
-    (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (fails-with :invalid-role))
+    (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (fails-with :error.invalid-role))
 
   (fact "authorityAdmin can create authority users to her own organization only"
     (fact (validate-create-new-user! {:role "authorityAdmin"}                      {:role "authority" :organization "x" :email "x"}) => forbidden)
@@ -72,7 +73,7 @@
     (provided (security/valid-password? "z") => true))
 
   (fact "only admin can create enabled users"
-    (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :email "x" :enabled "true"}) => truthy)
+    (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :enabled "true"}) => truthy)
     (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "false"}) => truthy)
     (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "true"}) => forbidden))
 
@@ -97,15 +98,15 @@
 
   (facts "default values"
     (fact (create-new-user-entity {:email "Foo"}) => (contains {:email "foo"
-                                                                            :username "foo"
-                                                                            :firstName ""
-                                                                            :lastName  ""
-                                                                            :enabled   false}))
+                                                                :username "foo"
+                                                                :firstName ""
+                                                                :lastName  ""
+                                                                :enabled   false}))
     (fact (create-new-user-entity {:email "Foo" :username "bar"}) => (contains {:email "foo"
-                                                                                            :username "bar"
-                                                                                            :firstName ""
-                                                                                            :lastName  ""
-                                                                                            :enabled   false})))
+                                                                                :username "bar"
+                                                                                :firstName ""
+                                                                                :lastName  ""
+                                                                                :enabled   false})))
 
 
 
@@ -148,7 +149,7 @@
       (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before as dummy user"
-    (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => ..result..
+    (create-new-user {:role "admin"} {:email "email" :organization "x" :role "authorityAdmin"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
       (mongo/insert :users anything) => anything :times 0
@@ -156,7 +157,7 @@
       (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
-    (create-new-user {:role "admin"} {:email "email" :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
+    (create-new-user {:role "admin"} {:email "email" :organization "x" :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
     (provided
       (user/get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
       (mongo/insert :users anything) => anything :times 0
