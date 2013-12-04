@@ -474,7 +474,7 @@
                        :filename file-name
                        :content-type content-type
                        :file-size size
-                       :timestamp created
+                       :created created
                        :user user
                        ;:attachment-target attachment-target
                        :locked false}))))
