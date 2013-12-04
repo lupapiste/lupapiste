@@ -294,10 +294,7 @@
   [_]
   (let [email (ss/lower-case email)]
     (infof "Password reset request: email=%s" email)
-    ;;
-    ;; TODO: Jos kayttajaa ei ole enabloitu, tama commandi voisi tehda sen nyt ja tassa.
-    ;;
-    (if (mongo/select-one :users {:email email :enabled true})
+    (if (mongo/select-one :users {:email email})
       (let [token (token/make-token :password-reset {:email email})]
         (infof "password reset request: email=%s, token=%s" email token)
         (notifications/notify! :reset-password {:data {:email email :token token}})

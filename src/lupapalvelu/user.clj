@@ -197,10 +197,13 @@
   "Update users password. Returns nil. If user is not found, raises an exception."
   [email password]
   (let [salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)]
-    (when-not (= 1 (mongo/update-n :users
-                                   {:email (ss/lower-case email)}
-                                   {$set {:private.password hashed-password}}))
+        hashed-password   (security/get-hash password salt)
+        email             (ss/lower-case email)]
+    (if (= 1 (mongo/update-n :users
+                                   {:email email}
+                                   {$set {:private.password hashed-password
+                                          :enabled true}}))
+      (mongo/remove-many :activation {:email email})
       (fail! :unknown-user :email email))
     nil))
 
