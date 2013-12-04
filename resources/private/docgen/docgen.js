@@ -47,7 +47,7 @@ var docgen = (function () {
       }
     };
 
-    self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
+    self.sizeClasses = { "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
 
     // Context help
     self.addFocus = function (e) {
@@ -132,14 +132,34 @@ var docgen = (function () {
       return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     }
 
-    function makeLabel(type, pathStr, groupLabel) {
+    // Option utils
+
+    function getCollection() {
+      return (options && options.collection) ? options.collection : "documents";
+    }
+
+    function getUpdateCommand() {
+      return (options && options.updateCommand) ? options.updateCommand : "update-doc";
+    }
+
+    // Element constructors
+    function makeLabel(schema, type, pathStr, groupLabel) {
       var label = document.createElement("label");
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
+
       var locKey = locKeyFromPath(path);
+      if (schema.i18nkey) {
+        locKey = schema.i18nkey;
+      }
+
+      var className = "form-label form-label-" + type;
+      if (schema.labelclass) {
+        className = className + " " + schema.labelclass;
+      }
 
       label.id = pathStrToLabelID(pathStr);
       label.htmlFor = pathStrToID(pathStr);
-      label.className = "form-label form-label-" + type;
+      label.className = className;
       label.innerHTML = loc(locKey);
       return label;
     }
@@ -213,7 +233,7 @@ var docgen = (function () {
       var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
-      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join(".") };
+      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: getCollection() };
 
       if (_.isEmpty(model) || !features.enabled('docIndicators')) {
         return approvalContainer$[0];
@@ -284,7 +304,7 @@ var docgen = (function () {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
       var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
-      var label = makeLabel("checkbox", myPath);
+      var label = makeLabel(subSchema, "checkbox", myPath);
       input.onmouseover = self.showHelp;
       input.onmouseout = self.hideHelp;
       label.onmouseover = self.showHelp;
@@ -307,7 +327,7 @@ var docgen = (function () {
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
       setMaxLen(input, subSchema);
 
-      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
+      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
 
       if (subSchema.subtype === "maaraala-tunnus" ) {
           var kiitunAndInput = document.createElement("span");
@@ -387,7 +407,7 @@ var docgen = (function () {
       input.className = "form-input textarea";
       input.value = getModelValue(model, subSchema.name);
 
-      span.appendChild(makeLabel("text", myPath));
+      span.appendChild(makeLabel(subSchema, "text", myPath));
       span.appendChild(input);
       return span;
     }
@@ -399,7 +419,7 @@ var docgen = (function () {
 
       var span = makeEntrySpan(subSchema, myPath);
 
-      span.appendChild(makeLabel("date", myPath));
+      span.appendChild(makeLabel(subSchema, "date", myPath));
 
       // date
       var input = $("<input>", {
@@ -477,7 +497,7 @@ var docgen = (function () {
         select.appendChild(option);
       }
 
-      span.appendChild(makeLabel("select", myPath, true));
+      span.appendChild(makeLabel(subSchema, "select", myPath, true));
       span.appendChild(select);
       return span;
     }
@@ -488,7 +508,7 @@ var docgen = (function () {
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
-      var label = makeLabel("group", myPath, true);
+      var label = makeLabel(subSchema, "group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
@@ -527,7 +547,7 @@ var docgen = (function () {
         input.checked = o.name === myModel;
 
         span.appendChild(input);
-        span.appendChild(makeLabel("radio", pathForId));
+        span.appendChild(makeLabel(subSchema, "radio", pathForId));
       });
 
       partsDiv.appendChild(span);
@@ -540,6 +560,7 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
+      span.className = "form-entry really-long";
 
       select.id = pathStrToID(myPath);
 
@@ -555,7 +576,7 @@ var docgen = (function () {
 
           var buildingId = target.value;
           ajax
-            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
+            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: getCollection() })
             .success(function () {
               save(event);
               repository.load(self.appId);
@@ -599,7 +620,7 @@ var docgen = (function () {
         })
         .call();
 
-      span.appendChild(makeLabel("select", "", "buildingSelector", true));
+      span.appendChild(makeLabel(subSchema, "select", myPath));
       span.appendChild(select);
       return span;
     }
@@ -620,7 +641,7 @@ var docgen = (function () {
         var target = event.target;
         var userId = target.value;
         ajax
-          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs })
+          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: getCollection() })
           .success(function () {
             save(event, function () { repository.load(self.appId); });
           })
@@ -696,7 +717,7 @@ var docgen = (function () {
 
     function removeData(id, doc, path) {
       ajax
-        .command("remove-document-data", { doc: doc, id: id, path: path })
+        .command("remove-document-data", { doc: doc, id: id, path: path, collection: getCollection() })
         .success(function (e) {
           repository.load(id);
         })
@@ -830,7 +851,7 @@ var docgen = (function () {
     function saveForReal(path, value, callback) {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
-        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
+        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
       // elements: [key status message]. Here we use just the status.
         .success(function (e) {
@@ -868,14 +889,14 @@ var docgen = (function () {
     function validate() {
       if (!options || options.validate) {
         ajax
-          .query("validate-doc", { id: self.appId, doc: self.docId })
+          .query("validate-doc", { id: self.appId, doc: self.docId, collection: getCollection() })
           .success(function (e) { showValidationResults(e.results); })
           .call();
       }
     }
 
     function disableBasedOnOptions() {
-      if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
+      if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
         $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
@@ -944,7 +965,7 @@ var docgen = (function () {
       }
 
       function onRemovalConfirmed() {
-        ajax.command("remove-doc", { id: self.appId, docId: self.docId })
+        ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: getCollection() })
           .success(function () {
             n$.slideUp(function () { n$.remove(); });
             // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
@@ -1047,7 +1068,7 @@ var docgen = (function () {
         $(btn).click(function () {
           var self = this;
           ajax
-            .command("create-doc", { schemaName: schema.info.name, id: application.id })
+            .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: getCollection() })
             .success(function (data) {
               var newDocId = data.doc;
               var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;

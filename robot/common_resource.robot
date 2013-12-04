@@ -397,7 +397,7 @@ Request should not be visible
 Add comment
   [Arguments]  ${message}
   Open tab  conversation
-  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//table[@data-test-id='comments-table']//span[text()='${message}']
 

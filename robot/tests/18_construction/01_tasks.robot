@@ -3,6 +3,7 @@
 Documentation   Application gets tasks based on verdict
 Suite teardown  Logout
 Resource        ../../common_resource.robot
+Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -25,7 +26,7 @@ Rakentaminen tab opens
   Open tab  tasks
 
 Rakentaminen tab contains 9 tasks
-  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr  9
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  9
 
 Katselmukset
   Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
@@ -39,8 +40,37 @@ Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
 
+Add attachment to Aloituskokous
+  Open task  Aloituskokous
+  Click enabled by test id  add-targetted-attachment
+  Select Frame     uploadFrame
+  Wait until       Element should be visible  test-save-new-attachment
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${TXT_TESTFILE_PATH}
+  Click element    test-save-new-attachment
+  Unselect Frame
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+
+Return to listing
+  Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
+  Tab should be visible  tasks
+
+Delete Muu tarkastus
+  Open task  Muu tarkastus
+  Click enabled by test id  delete-task
+  Confirm  dynamic-yes-no-confirm-dialog
+
+Listing contains one less task
+  Tab should be visible  tasks
+  Task count is  task-katselmus  2
+
 *** Keywords ***
 
 Task count is
   [Arguments]  ${type}  ${amount}
   Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
+
+Open task
+  [Arguments]  ${name}
+  Click Element  //div[@id='application-tasks-tab']//table//td[text()='${name}']
+  Wait Until  Element should be visible  taskAttachments
+  Wait until  Element should be visible  taskDocgen

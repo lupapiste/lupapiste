@@ -43,14 +43,18 @@
   (when (and s postfix)
     (.endsWith (.toLowerCase s) (.toLowerCase postfix))))
 
-;; Commons-lang3 wrapper
+;; Commons-lang3 wrappers
 (defn numeric?
-  "http://commons.apache.org/proper/commons-lang/javadocs/api-3.1/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
+  "http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
   [s] (and (string? s) (StringUtils/isNumeric s)))
 
+(defn substring [^String s  ^Integer start ^Integer end]
+  (StringUtils/substring s start end))
 
 (defn decimal-number? [s]
   (or (numeric? s) (if (and (string? s) (re-matches #"^\d+\.\d+$" s)) true false)))
+
+;; Nil-safe wrappers to clojure.string
 
 (defn lower-case ^String [^CharSequence x] (when x (s/lower-case x)))
 
@@ -61,6 +65,8 @@
 ; alias common clojure.string stuff, so that you dont need to require both namespaces:
 
 (def blank? s/blank?)
+
+;; File name handling
 
 (def windows-filename-max-length 255)
 

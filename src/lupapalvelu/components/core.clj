@@ -16,6 +16,7 @@
   [found depends]
   (filter (comp not (set found)) depends))
 
+;; FIXME LUPA-1164
 (defn get-dependencies
   "Return a lazy-seq of all dependencies of component 'c'. The returned seq contains the keywords of dependencies
    with the root dependency first."
