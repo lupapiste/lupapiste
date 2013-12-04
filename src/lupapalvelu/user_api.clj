@@ -439,6 +439,7 @@
   {:parameters [id]
    :authenticated true
    :roles [:applicant]
+   :states     [:draft :open :submitted :complement-needed]
    :validators [(fn [command application] (not (-> command :user :architect)))]
    :feature [:architect-info]}
   [{user :user}]
