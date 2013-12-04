@@ -92,7 +92,7 @@
    :attr {:xsi:schemaLocation
           "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
            http://www.paikkatietopalvelu.fi/gml/yhteiset
-           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
+           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
            http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
            http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
           :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
