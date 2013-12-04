@@ -4,11 +4,10 @@
   <section class="page container" id="task" data-bind="with: task">
   <h1 data-bind="text: displayName">Task</h1>
   <div class="clear-fix">
-    <button class="btn" data-bind="ltext:'task.delete', click: deleteTask, visible: $root.authorization.ok('delete-task')"></button>
     <a class="btn attachment-back"
-       style="float:right"
        data-bind="click: returnToApplication"
        data-test-id="back-to-application-from-task"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a> <!-- TODO change key -->
+    <button class="btn" data-bind="ltext:'task.delete', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right"></button>
   </div>
 
   <div id="taskDocgen" class="docgen-content" style="width:48%;float:left"></div>
