@@ -7,7 +7,7 @@
     <a class="btn attachment-back"
        data-bind="click: returnToApplication"
        data-test-id="back-to-application-from-task"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a> <!-- TODO change key -->
-    <button class="btn" data-bind="ltext:'task.delete', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right"></button>
+    <button class="btn" data-bind="ltext:'task.delete', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right" data-test-id="delete-task"></button>
   </div>
 
   <div id="taskAttachments" >
