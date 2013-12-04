@@ -45,7 +45,7 @@
   (facts "maaraykset"
     (count maaraykset) => 3
     (map :taskname maaraykset) => ["Maarays 1" "Maarays 2" "tee joku muukin tarkastus"]
-    (map :data maaraykset) => (partial every? empty?))
+    (map #(get-in % [:data :maarays :value]) maaraykset) => (partial every? truthy))
 
   (facts "tyonjohtajat"
     (count tyonjohtajat) => 3

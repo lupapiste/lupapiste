@@ -1,5 +1,6 @@
 (ns lupapalvelu.tasks
-  (:require [sade.strings :as ss]
+  (:require [clojure.string :as s]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
@@ -63,7 +64,7 @@
    :id (mongo/create-id)
    :source source
    :taskname (when task-name
-               (if (> task-name-max-len (.length task-name))
+               (if (> (.length task-name) task-name-max-len)
                  (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
                  task-name))
    :state (if (user/applicant? assignee) :requires_user_action :requires_authority_action)
@@ -86,7 +87,7 @@
        (concat
         (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
         (map #(->task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
-          (filter #(not (ss/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
+          (filter #(not (s/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
           (map #(->task "task-vaadittu-tyonjohtaja" % {} meta source)
             (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))))
