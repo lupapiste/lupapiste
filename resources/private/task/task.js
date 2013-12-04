@@ -33,7 +33,7 @@ var taskPageController = (function() {
   var task = ko.observable();
 
   var authorizationModel = authorization.create();
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu");
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function returnToApplication() {
     repository.load(currentApplicationId);

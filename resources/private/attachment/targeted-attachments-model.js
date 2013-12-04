@@ -1,7 +1,8 @@
-LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType) {
+LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType, typeSelector) {
   var self = this;
   self.target = attachmentTarget;
   self.attachmentType = attachmentType;
+  self.typeSelector = typeSelector;
 
   self.applicationId = null;
   self.attachments = ko.observableArray([]);
@@ -27,7 +28,7 @@ LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType) 
   };
 
   self.newAttachment = function() {
-    attachment.initFileUpload(self.applicationId, null, self.attachmentType, false, self.target, true);
+    attachment.initFileUpload(self.applicationId, null, self.attachmentType, self.typeSelector, self.target, true);
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 };
