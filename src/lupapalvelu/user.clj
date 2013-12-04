@@ -180,7 +180,7 @@
 ;;
 
 (defn create-apikey
-  "Add or replcae users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
+  "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
         n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
@@ -197,10 +197,13 @@
   "Update users password. Returns nil. If user is not found, raises an exception."
   [email password]
   (let [salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)]
-    (when-not (= 1 (mongo/update-n :users
-                                   {:email (ss/lower-case email)}
-                                   {$set {:private.password hashed-password}}))
+        hashed-password   (security/get-hash password salt)
+        email             (ss/lower-case email)]
+    (if (= 1 (mongo/update-n :users
+                                   {:email email}
+                                   {$set {:private.password hashed-password
+                                          :enabled true}}))
+      (mongo/remove-many :activation {:email email})
       (fail! :unknown-user :email email))
     nil))
 
