@@ -41,16 +41,17 @@
   function AuthorityAdminUsers() {
     var self = this;
 
-    self.organization = ko.observable();
+    self.organizationCode = ko.observable();
+    self.username = ko.observable();
     self.phase = ko.observable(0);
-    self.organization = ko.observable();
     self.firstName = ko.observable();
     self.lastName = ko.observable();
     self.userDetailsOk = ko.computed(function() {
         var firstNameOk = self.firstName();
         var lastNameOk = self.lastName();
-        var organizationOk = self.organization();
-        return organizationOk && firstNameOk && lastNameOk;});
+        var organizationCodeOk = self.organizationCode();
+        var usernameOk = self.username();
+        return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;});
 
     self.searching = ko.observable();
     self.userAdded = ko.observable();
@@ -62,7 +63,8 @@
     self.clean = function() {
       return self
         .phase(1)
-        .organization("")
+        .organizationCode("")
+        .username("")
         .firstName("")
         .lastName("")
         .searching(false)
@@ -88,9 +90,9 @@
       self.searching(true).phase(2);
       ajax
         .command("create-user",
-                 {email: "lupapiste@" + self.organization() + ".fi",
+                 {email: self.username(),
                   role: "authorityAdmin",
-                  organization: self.organization(),
+                  organization: self.organizationCode(),
                   enabled: "true",
                   firstName: self.firstName(),
                   lastName: self.lastName()})

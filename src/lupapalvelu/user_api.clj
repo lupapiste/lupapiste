@@ -231,6 +231,16 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
+(defn- create-authority-user-with-organization [caller new-organization email firstName lastName]
+  (let [new-user (create-new-user
+                   caller
+                   {:email email :role :authority :organization new-organization :enabled true
+                    :firstName firstName :lastName lastName}
+                   :send-email false)
+        token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
+    (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email new-organization token)
+    (notifications/notify! :invite-authority {:data {:email email :token token}})
+    (ok :operation "invited")))
 
 (defcommand update-user-organization
   {:parameters       [operation email firstName lastName]
@@ -242,20 +252,10 @@
         update-count     (mongo/update-n :users {:email email}
                            {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
     (debug "update user" email)
-    (if (= 1 update-count)
-      ;; When updated the organizations of the user
+    (if (pos? update-count)
       (ok :operation operation)
-      ;; When no existing user found with the email
       (if (= operation "add")
-        (let [new-user (create-new-user
-                         caller
-                         {:email email :role :authority :organization new-organization :enabled true
-                          :firstName firstName :lastName lastName}
-                         :send-email false)
-              token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
-            (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email new-organization token)
-            (notifications/notify! :invite-authority {:data {:email email :token token}})
-            (ok :operation "invited"))
+        (create-authority-user-with-organization caller new-organization email firstName lastName)
         (fail :not-found :email email)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
