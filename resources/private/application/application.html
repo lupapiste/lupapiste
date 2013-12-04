@@ -496,7 +496,7 @@
 
                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                         <li data-bind='if: $data.katselmuksenLaji'>
-                          <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
+                          <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
                           <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                             (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                           </span>
