@@ -517,27 +517,36 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (user/summary user)} :text)
-          application   {:id               id
-                         :created          created
-                         :opened           (when (#{:open :info} state) created)
-                         :modified         created
-                         :permitType       permit-type
-                         :permitSubtype    (first (permit/permit-subtypes permit-type))
-                         :infoRequest      info-request?
-                         :openInfoRequest  open-inforequest?
-                         :operations       [op]
-                         :state            state
-                         :municipality     municipality
-                         :location         (->location x y)
-                         :organization     organization-id
-                         :address          address
-                         :propertyId       propertyId
-                         :title            address
-                         :auth             [owner]
-                         :comments         (map make-comment messages)
-                         :schema-version   (schemas/get-latest-schema-version)
-                         :verdicts         []
-                         :tasks            []}
+          application   {:id                  id
+                         :created             created
+                         :opened              (when (#{:open :info} state) created)
+                         :modified            created
+                         :submitted           nil
+                         :permitType          permit-type
+                         :permitSubtype       (first (permit/permit-subtypes permit-type))
+                         :infoRequest         info-request?
+                         :openInfoRequest     open-inforequest?
+                         :operations          [op]
+                         :state               state
+                         :municipality        municipality
+                         :location            (->location x y)
+                         :organization        organization-id
+                         :address             address
+                         :propertyId          propertyId
+                         :title               address
+                         :auth                [owner]
+                         :comments            (map make-comment messages)
+                         :schema-version      (schemas/get-latest-schema-version)
+                         :verdicts            []
+                         :tasks               []
+;                         :_verdicts-seen-by   nil
+;                         :_statements-seen-by nil
+;                         :_comments-seen-by   nil
+                         :statements          []
+                         :authority           nil
+                         :linkPermitData      nil
+                         :appsLinkingToUs     nil
+                         :neighbors           nil}
           application   (merge application
                           (if info-request?
                             {:attachments            []
