@@ -342,34 +342,31 @@
            :state :complement-needed}}))
 
 (defcommand approve-application
-  {:parameters [:id lang]
+  {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [application-id (:id application)
-            submitted-application (mongo/by-id :submitted-applications (:id application))
-            organization (mongo/by-id :organizations (:organization application))]
-        ; FIXME combine mongo writes
-        (if (nil? (:authority application))
-          (executed "assign-to-me" command))
+  [{:keys [application created] :as command}]
+  (let [submitted-application (mongo/by-id :submitted-applications id)
+        organization (mongo/by-id :organizations (:organization application))]
+    (if (nil? (:authority application))
+      (executed "assign-to-me" command))
         (try
-            (mapping-to-krysp/save-application-as-krysp
-              (meta-fields/enrich-with-link-permit-data application)
-              lang
-              submitted-application
-              organization)
+          (mapping-to-krysp/save-application-as-krysp
+            (meta-fields/enrich-with-link-permit-data application)
+            lang
+            submitted-application
+            organization)
 
           (mongo/update
-            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
-            {$set {:state :sent}})
+            :applications {:_id id :state {$in ["submitted" "complement-needed"]}}
+            {$set {:sent created
+                   :state :sent}})
 
           (catch org.xml.sax.SAXParseException e
             (info e "Invalid KRYSM XML message")
-            (fail (.getMessage e))))))))
+            (fail (.getMessage e))))))
 
 (defcommand submit-application
   {:parameters [:id]
@@ -522,6 +519,7 @@
                          :opened              (when (#{:open :info} state) created)
                          :modified            created
                          :submitted           nil
+                         :sent                nil
                          :permitType          permit-type
                          :permitSubtype       (first (permit/permit-subtypes permit-type))
                          :infoRequest         info-request?
@@ -705,6 +703,7 @@
                          (assoc :verdicts            [])
                          (assoc :comments            [])
                          (assoc :submitted           nil)
+                         (assoc :sent                nil)
                          (assoc :neighbors           {})
                          (assoc :_statements-seen-by {})
                          (assoc :_verdicts-seen-by   {})
