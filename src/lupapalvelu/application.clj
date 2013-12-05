@@ -700,10 +700,15 @@
                          (assoc :state           (cond
                                                    (user/authority? user)     :open
                                                    :else                      :draft))
-;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
                          (assoc :permitSubtype   :muutoslupa)
-                         (dissoc :attachments :statements :verdicts :comments :submitted
-                                 :_statements-seen-by :_verdicts-seen-by))]
+                         (assoc :attachments     [])
+                         (assoc :statements      [])
+                         (assoc :verdicts        [])
+                         (assoc :comments        [])
+                         (assoc :submitted       nil)
+                         (assoc :linkPermitData  nil)
+                         (assoc :appsLinkingToUs nil)
+                         (dissoc :_statements-seen-by :_verdicts-seen-by :_comments-seen-by))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications (meta-fields/enrich-with-link-permit-data muutoslupa-app))
     (ok :id muutoslupa-app-id)))
