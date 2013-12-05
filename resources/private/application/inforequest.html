@@ -82,6 +82,10 @@
           <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
+          <div class="muncipality-info">
+            <h2 data-bind="ltext: 'application.muncipality'"></h2>
+            <p data-bind="text: loc(['municipality', municipality()])"></p>
+          </div>
           <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
             <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
             <span class="icon send left-align"></span>
