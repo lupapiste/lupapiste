@@ -250,7 +250,7 @@
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="applicationDocgen">
+            <div id="applicationDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -286,7 +286,7 @@
 
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="partiesDocgen">
+            <div id="partiesDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -496,7 +496,7 @@
 
                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                         <li data-bind='if: $data.katselmuksenLaji'>
-                          <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
+                          <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
                           <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                             (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                           </span>
@@ -712,10 +712,10 @@
             </tr>
           </thead>
           <tbody data-bind="foreach: tasks">
-            <tr data-bind="attr: {'data-test-type': schema.info.name}">
+            <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
               <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-              <td data-bind="text:displayName"></td>
-              <td data-bind="dateString:$data.closed"></td>
+              <td data-bind="text: displayName"></td>
+              <td data-bind="dateString: $data.closed"></td>
             </tr>
           </tbody>
         </table>

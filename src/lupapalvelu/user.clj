@@ -12,8 +12,7 @@
             [lupapalvelu.core :refer [fail fail!]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date from-long]]
-            [lupapalvelu.security :as security]
-            ))
+            [lupapalvelu.security :as security]))
 
 ;;
 ;; ==============================================================================
@@ -207,7 +206,7 @@
 ;;
 
 (defn create-apikey
-  "Add or replcae users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
+  "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
         n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
@@ -225,11 +224,15 @@
   [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)
+        email             (ss/lower-case email)        
         updated-user      (mongo/update-one-and-return :users
-                            {:email (ss/lower-case email)}
-                            {$set {:private.password hashed-password}})]
+                            {:email email}
+                            {$set {:private.password hashed-password
+                                   :enabled true}})]
     (if updated-user
-      (clear-logins (:username updated-user))
+      (do
+        (mongo/remove-many :activation {:email email})
+        (clear-logins (:username updated-user)))
       (fail! :unknown-user :email email))
     nil))
 

@@ -119,7 +119,7 @@ var attachment = (function() {
       var version = model.latestVersion();
       if (!version) { return false; }
       var contentType = version.contentType;
-      return contentType && contentType.indexOf('image/') === 0;
+      return contentType && contentType.indexOf("image/") === 0;
     },
 
     isPdf: function() {
@@ -196,7 +196,7 @@ var attachment = (function() {
       return;
     }
 
-    $('#file-preview-iframe').attr('src','');
+    $("#file-preview-iframe").attr("src","");
 
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
@@ -283,7 +283,7 @@ var attachment = (function() {
 
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
     uploadingApplicationId = applicationId;
-    var iframeId = 'uploadFrame';
+    var iframeId = "uploadFrame";
     var iframe = document.getElementById(iframeId);
     iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
   }

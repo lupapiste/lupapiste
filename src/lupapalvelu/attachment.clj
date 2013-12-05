@@ -437,15 +437,15 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (if-let [attachment-version (attach-file! {:application-id id 
+  (if-let [attachment-version (attach-file! {:application-id id
                                              :filename filename
                                              :size size
                                              :content tempfile
                                              :attachment-id attachmentId
                                              :attachment-type attachmentType
                                              :target target
-                                             :locked locked 
-                                             :user user 
+                                             :locked locked
+                                             :user user
                                              :created created})]
     ; FIXME try to combine mongo writes
     (executed "add-comment"
@@ -699,7 +699,7 @@
 (defcommand stamp-attachments
   {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
-   :states     [:verdictGiven]
+   :states     [:open :submitted :complement-needed :verdictGiven]
    :description "Stamps all attachments of given application"}
   [{data :data :as command}]
   (with-application command
