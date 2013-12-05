@@ -161,20 +161,14 @@
   (mongo/drop-collection :vetuma))
 
 
-(def ^:private keys-and-default-values
-  [[:submitted           nil]
-   [:authority           nil]
-   [:neighbors           {}]
-   [:verdicts            []]
-   [:tasks               []]
-   [:statements          []]])
-
-(defmigration set-missing-default-values-for-keys-in-applications-LUPA-1172
-  (doseq [collection [:applications :submitted-applications]
-          key-default keys-and-default-values]
-    (mongo/update-by-query
-      collection
-      {(first key-default) {$exists false}}
-      {$set {(first key-default) (second key-default)}})))
+(defn abc [] ;defmigration set-missing-default-values-for-keys-in-applications-LUPA-1172
+  (let [missing-keys-in-mongo [:submitted :authority :neighbors :verdicts :tasks :statements]
+        keys-and-default-values (map identity
+                                  (select-keys
+                                    (lupapalvelu.domain/application-skeleton)
+                                    missing-keys-in-mongo))]
+    (doseq [collection [:applications :submitted-applications]
+            [k d] keys-and-default-values]
+      (mongo/update-by-query collection {k {$exists false}} {$set {k d}}))))
 
 
