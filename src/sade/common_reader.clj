@@ -139,4 +139,14 @@
           xml (parse raw)]
       xml)))
 
+(defn get-xml-with-post
+  ([url options]
+    (get-xml-with-post url options nil))
+  ([url options credentials]
+    (let [raw (:body (if credentials
+                       (http/post url options credentials)
+                       (http/post url options)))
+          xml (parse raw)]
+      xml)))
+
 

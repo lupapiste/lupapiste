@@ -758,7 +758,8 @@
 (defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/ya-application-xml legacy id)
-          verdicts (krysp/->verdicts xml)]
+          verdicts (krysp/->ya-verdicts xml)
+          _ (clojure.pprint/pprint verdicts)]
       verdicts)
     (fail! :error.no-legacy-available)))
 
