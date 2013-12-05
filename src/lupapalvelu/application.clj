@@ -350,7 +350,7 @@
   [{:keys [application created] :as command}]
   (let [submitted-application (mongo/by-id :submitted-applications id)
         organization (mongo/by-id :organizations (:organization application))]
-    (if (nil? (:authority application))
+    (if (empty? (:authority application))
       (executed "assign-to-me" command))
         (try
           (mapping-to-krysp/save-application-as-krysp
@@ -514,40 +514,31 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (user/summary user)} :text)
-          application   {:id                  id
-                         :created             created
-                         :opened              (when (#{:open :info} state) created)
-                         :modified            created
-                         :submitted           nil
-                         :sent                nil
-                         :permitType          permit-type
-                         :permitSubtype       (first (permit/permit-subtypes permit-type))
-                         :infoRequest         info-request?
-                         :openInfoRequest     open-inforequest?
-                         :operations          [op]
-                         :state               state
-                         :municipality        municipality
-                         :location            (->location x y)
-                         :organization        organization-id
-                         :address             address
-                         :propertyId          propertyId
-                         :title               address
-                         :auth                [owner]
-                         :comments            (map make-comment messages)
-                         :schema-version      (schemas/get-latest-schema-version)
-                         :verdicts            []
-                         :tasks               []
-                         :statements          []
-                         :authority           nil
-                         :_statements-seen-by {}
-                         :_verdicts-seen-by   {}
-                         :_comments-seen-by   {}
-                         :neighbors           {}}
+
+          application   (merge (domain/application-skeleton)
+                          {:id                  id
+                           :created             created
+                           :opened              (when (#{:open :info} state) created)
+                           :modified            created
+                           :permitType          permit-type
+                           :permitSubtype       (first (permit/permit-subtypes permit-type))
+                           :infoRequest         info-request?
+                           :openInfoRequest     open-inforequest?
+                           :operations          [op]
+                           :state               state
+                           :municipality        municipality
+                           :location            (->location x y)
+                           :organization        organization-id
+                           :address             address
+                           :propertyId          propertyId
+                           :title               address
+                           :auth                [owner]
+                           :comments            (map make-comment messages)
+                           :schema-version      (schemas/get-latest-schema-version)})
+
           application   (merge application
                           (if info-request?
-                            {:attachments            []
-                             :allowedAttachmentTypes [[:muut [:muu]]]
-                             :documents              []}
+                            {:allowedAttachmentTypes [[:muut [:muu]]]}
                             {:attachments            (make-attachments created op organization-id)
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
@@ -686,28 +677,22 @@
   :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
-        muutoslupa-app (-> application
-                         (assoc :documents           (into [] (map
-                                                                #(assoc % :id (mongo/create-id))
-                                                                (:documents application))))
-                         (assoc :id                  muutoslupa-app-id)
-                         (assoc :created             created)
-                         (assoc :opened              created)
-                         (assoc :modified            created)
-                         (assoc :state               (cond
-                                                       (user/authority? user)  :open
-                                                       :else                   :draft))
-                         (assoc :permitSubtype       :muutoslupa)
-                         (assoc :attachments         [])
-                         (assoc :statements          [])
-                         (assoc :verdicts            [])
-                         (assoc :comments            [])
-                         (assoc :submitted           nil)
-                         (assoc :sent                nil)
-                         (assoc :neighbors           {})
-                         (assoc :_statements-seen-by {})
-                         (assoc :_verdicts-seen-by   {})
-                         (assoc :_comments-seen-by   {}))]
+        muutoslupa-app (merge application
+                         {:id                  muutoslupa-app-id
+                          :created             created
+                          :opened              created
+                          :modified            created
+                          :documents           (into [] (map
+                                                          #(assoc % :id (mongo/create-id))
+                                                          (:documents application)))
+                          :state               (cond
+                                                 (user/authority? user)  :open
+                                                 :else                   :draft)
+                          :permitSubtype       :muutoslupa}
+                         (select-keys
+                           (domain/application-skeleton)
+                           [:attachments :statements :verdicts :comments :submitted :sent :neighbors
+                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications muutoslupa-app)
     (ok :id muutoslupa-app-id)))
