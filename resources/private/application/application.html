@@ -99,6 +99,7 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
+          <!-- ko if: linkPermitData -->
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
@@ -112,8 +113,10 @@
                  href="#" class="remove-link-permit"></a>
             </span>
           </div>
+          <!-- /ko -->
 
           <!-- Applications linking to us: -->
+          <!-- ko if: appsLinkingToUs -->
           <div data-bind="with: appsLinkingToUs">
             <p data-bind="ltext: 'application.appsLinkingToUs'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
@@ -124,6 +127,7 @@
                  href="#" class="remove-link-permit"></a>
             </span>
           </div>
+          <!-- /ko -->
 
         </div>
 

@@ -15,7 +15,7 @@
   (let [application-id (create-app-id pena :municipality sonja-muni)]
     (command pena :add-comment :id application-id :text "foo" :target "application") => ok?
     (fact "no name" (command sonja "neighbor-add" :id application-id :propertyId "p" :street "s" :city "c" :zip "z" :email "e") => ok?)
-    (fact "no streen" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
+    (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
     (fact "no city" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"  :zip "z" :email "e") => ok?)
     (fact "no zip" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :email "e") => ok?)
     (fact "no email" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
