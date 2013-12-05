@@ -157,3 +157,24 @@
 
 (defmigration vetuma-token-cleanup-LUPA-976
   (mongo/drop-collection :vetuma))
+
+
+(def ^:private keys-and-default-values
+  [[:submitted           nil]
+   [:authority           nil]
+   [:linkPermitData      nil]
+   [:appsLinkingToUs     nil]
+   [:neighbors           nil]
+   [:verdicts            []]
+   [:tasks               []]
+   [:statements          []]])
+
+;; TODO: Tee tasta koodista yleiskayttoinen funktio tahan namespaceen
+(defmigration set-missing-default-values-for-keys-in-applications
+  (doseq [collection [:applications :submitted-applications]]
+    (for [key-default keys-and-default-values]
+      (mongo/update-by-query
+        collection
+        {(first key-default) {$exists false}}
+        {$set {(first key-default) (second key-default)}}))))
+
