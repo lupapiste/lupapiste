@@ -699,7 +699,7 @@
 (defcommand stamp-attachments
   {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
-   :states     [:submitted :complement-needed :verdictGiven]
+   :states     [:open :submitted :complement-needed :verdictGiven]
    :description "Stamps all attachments of given application"}
   [{data :data :as command}]
   (with-application command
