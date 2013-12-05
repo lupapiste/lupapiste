@@ -42,10 +42,12 @@
                                                                               (= created (:created d))
                                                                               (= target-document-name (get-in d [:schema-info :name])))
                                                                             d)) documents)
-                                         updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                            :removable (= "R" (:permitType application))})))
+                                         updated (when document-to-update
+                                                   (assoc document-to-update :schema-info
+                                                     (merge (:schema-info document-to-update)
+                                                       {:op o
+                                                        :removable (= "R" (:permitType application))})))
                                          ]
-
                                      updated)))
         unmatched-operations (filter
                                (fn [{id :id :as op}]
@@ -148,10 +150,10 @@
             (mongo/update-by-id collection (:id app)
               {$set {:documents (map
                                   (fn [doc] (-> doc
-                                                 strip-fax
-                                                 cleanup-uusirakennus
-                                                 fix-hakija
-                                                 strip-nils))
+                                                strip-fax
+                                                cleanup-uusirakennus
+                                                fix-hakija
+                                                strip-nils))
                                   (:documents app))}}))
           applications)))))
 
