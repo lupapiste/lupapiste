@@ -24,7 +24,7 @@
       ;; Luonnollinen henkilo (LU)
       :etunimet (get-text henkilo-xml (path :henkilonTiedot :etunimet))
       :sukunimi (get-text henkilo-xml (path :henkilonTiedot :sukunimi))
-      :ulkomaalainen (get-text henkilo-xml (path :henkilonTiedot :ulkomaalainen))
+      :ulkomaalainen (get-boolean henkilo-xml (path :henkilonTiedot :ulkomaalainen))
       :syntymapvm (get-text henkilo-xml (path :henkilonTiedot :syntymapvm))
       ;; Juridinen henkilo (JU) or Tuntematon henkilo (TU) or Valtio (VA)
       :nimi (get-text henkilo-xml (path :henkilonTiedot :nimi))

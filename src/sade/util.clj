@@ -110,20 +110,11 @@
          ()
          required-keys)))
 
-;; FIXME: This doesn't work with e.g. booleans
-(defn not-empty-or-falsey? [v]
-  (not (empty? v)))
+(defn empty-or-nil? [x]
+  (if (and (or (coll? x) (seq? x) (string? x))) (empty? x) (nil? x)))
 
-(defn assoc-when
-  [m & kvs]
-  (with-local-vars [result {}]
-    (doseq [kv (partition 2 kvs)]
-      (let [k (first kv)
-            v (second kv)]
-        (when (not-empty-or-falsey? v) (var-set result (assoc @result k v)))))
-    @result))
-;; Or purely functional form - with risk of stack overflow 
-;  ([m k v]
-;    (if (empty? v) m (assoc m k v)))
-;  ([m k v & kvs]
-;    (apply assoc-when (assoc-when m k v) kvs)))
+;; FIXME: This doesn't work with e.g. booleans
+(defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
+
+(defn assoc-when [m & kvs]
+  (into {} (filter #(->> (val %) (not-empty-or-nil?)) (apply hash-map kvs))))

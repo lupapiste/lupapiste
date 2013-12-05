@@ -46,7 +46,7 @@
               <y:etunimet>Jaakko Jaakkima Jorma</y:etunimet>
               <y:sukunimi>Pakkanen</y:sukunimi>
               <y:syntymapvm>1979-12-12</y:syntymapvm>
-              <y:ulkomaalainen>false</y:ulkomaalainen>
+              <y:ulkomaalainen>true</y:ulkomaalainen>
             </y:henkilonTiedot>
             <muti:Osoite>
               <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>

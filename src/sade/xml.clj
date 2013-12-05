@@ -22,6 +22,9 @@
 
 (defn get-text [xml & selector] (-> xml (select1 (-> selector vector flatten)) text))
 
+(defn get-boolean [xml & selector] 
+  (let [b (apply get-text xml selector)] (when (not (nil? b)) (Boolean. b))))
+
 (defn extract [xml m] (into {} (for [[k v] m] [k (->> v butlast (apply select1 xml) ((last v)))])))
 (defn children [xml] (:content xml))
 (defn convert [xml m] (map #(extract % m) (when (-> xml nil? not) (-> xml vector flatten))))
