@@ -539,9 +539,6 @@
                          :schema-version      (schemas/get-latest-schema-version)
                          :verdicts            []
                          :tasks               []
-;                         :_verdicts-seen-by   nil
-;                         :_statements-seen-by nil
-;                         :_comments-seen-by   nil
                          :statements          []
                          :authority           nil
                          :linkPermitData      nil
