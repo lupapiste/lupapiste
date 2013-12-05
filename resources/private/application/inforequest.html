@@ -111,8 +111,8 @@
           </h2>
         </div>
 
-
-        <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'"></h3>
+        <p data-bind="lhtml: 'inforequest.desc'" class="tab-info"></p>
+        <h2 data-bind="ltext: 'inforequest.attachments'"></h2>
         <div data-bind="if: application.hasAttachment">
           <table class="table" data-test-id="inforequest-attachments-table">
             <tbody>
@@ -154,8 +154,8 @@
           data-test-id="add-inforequest-attachment"
           data-window-id="upload-dialog"></button>
 
-        <div>
-          <h3  data-bind="ltext: 'inforequest.comments'"></h3>
+        <div class="inforequest-conversation">
+          <h2  data-bind="ltext: 'inforequest.comments'"></h2>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
         </div>
 
