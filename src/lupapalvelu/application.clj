@@ -541,9 +541,10 @@
                          :tasks               []
                          :statements          []
                          :authority           nil
-                         :linkPermitData      nil
-                         :appsLinkingToUs     nil
-                         :neighbors           nil}
+                         :_statements-seen-by {}
+                         :_verdicts-seen-by   {}
+                         :_comments-seen-by   {}
+                         :neighbors           {}}
           application   (merge application
                           (if info-request?
                             {:attachments            []
@@ -688,26 +689,28 @@
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (-> application
-                         (assoc :documents       (into []
-                                                   (map #(assoc % :id (mongo/create-id)) (:documents application))))
-                         (assoc :id              muutoslupa-app-id)
-                         (assoc :created         created)
-                         (assoc :opened          created)
-                         (assoc :modified        created)
-                         (assoc :state           (cond
-                                                   (user/authority? user)     :open
-                                                   :else                      :draft))
-                         (assoc :permitSubtype   :muutoslupa)
-                         (assoc :attachments     [])
-                         (assoc :statements      [])
-                         (assoc :verdicts        [])
-                         (assoc :comments        [])
-                         (assoc :submitted       nil)
-                         (assoc :linkPermitData  nil)
-                         (assoc :appsLinkingToUs nil)
-                         (dissoc :_statements-seen-by :_verdicts-seen-by :_comments-seen-by))]
+                         (assoc :documents           (into [] (map
+                                                                #(assoc % :id (mongo/create-id))
+                                                                (:documents application))))
+                         (assoc :id                  muutoslupa-app-id)
+                         (assoc :created             created)
+                         (assoc :opened              created)
+                         (assoc :modified            created)
+                         (assoc :state               (cond
+                                                       (user/authority? user)  :open
+                                                       :else                   :draft))
+                         (assoc :permitSubtype       :muutoslupa)
+                         (assoc :attachments         [])
+                         (assoc :statements          [])
+                         (assoc :verdicts            [])
+                         (assoc :comments            [])
+                         (assoc :submitted           nil)
+                         (assoc :neighbors           {})
+                         (assoc :_statements-seen-by {})
+                         (assoc :_verdicts-seen-by   {})
+                         (assoc :_comments-seen-by   {}))]
     (do-add-link-permit muutoslupa-app (:id application))
-    (mongo/insert :applications (meta-fields/enrich-with-link-permit-data muutoslupa-app))
+    (mongo/insert :applications muutoslupa-app)
     (ok :id muutoslupa-app-id)))
 
 

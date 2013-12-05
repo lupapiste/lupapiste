@@ -164,9 +164,7 @@
 (def ^:private keys-and-default-values
   [[:submitted           nil]
    [:authority           nil]
-   [:linkPermitData      nil]
-   [:appsLinkingToUs     nil]
-   [:neighbors           nil]
+   [:neighbors           {}]
    [:verdicts            []]
    [:tasks               []]
    [:statements          []]])
