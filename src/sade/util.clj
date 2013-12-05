@@ -110,8 +110,9 @@
          ()
          required-keys)))
 
+;; FIXME: This doesn't work with e.g. booleans
 (defn not-empty-or-falsey? [v]
-  (if (coll? v) (not (empty? v)) v))
+  (not (empty? v)))
 
 (defn assoc-when
   [m & kvs]
