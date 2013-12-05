@@ -109,3 +109,20 @@
          (fn [missing k] (if (nil? (get src-map k)) (cons k missing) missing))
          ()
          required-keys)))
+
+(defn not-empty-or-falsey? [v]
+  (if (coll? v) (not (empty? v)) v))
+
+(defn assoc-when
+  [m & kvs]
+  (with-local-vars [result {}]
+    (doseq [kv (partition 2 kvs)]
+      (let [k (first kv)
+            v (second kv)]
+        (when (not-empty-or-falsey? v) (var-set result (assoc @result k v)))))
+    @result))
+;; Or purely functional form - with risk of stack overflow 
+;  ([m k v]
+;    (if (empty? v) m (assoc m k v)))
+;  ([m k v & kvs]
+;    (apply assoc-when (assoc-when m k v) kvs)))
