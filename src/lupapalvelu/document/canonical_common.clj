@@ -130,10 +130,11 @@
    :kielitieto lang})
 
 (defn- get-handler [application]
-  (if-let [handler (:authority application)]
-    {:henkilo {:nimi {:etunimi  (:firstName handler)
-                      :sukunimi (:lastName handler)}}}
-    empty-tag))
+  (let [handler (:authority application)]
+    (if (seq handler)
+      {:henkilo {:nimi {:etunimi  (:firstName handler)
+                        :sukunimi (:lastName handler)}}}
+      empty-tag)))
 
 
 (defn get-state [application]

@@ -151,3 +151,42 @@
 
 (defn set-software-version [m]
   (assoc m :_software_version "1.0.5"))
+
+;;
+;; Application skeleton with default values
+;;
+
+(defn application-skeleton []
+  {:_statements-seen-by      {}
+   :_verdicts-seen-by        {}
+   :_comments-seen-by        {}
+   :address                  ""
+   :allowedAttachmentTypes   []
+   :attachments              []
+   :auth                     []
+   :authority                {}
+   :comments                 []
+   :created                  nil
+   :documents                []
+   :infoRequest              false
+   :location                 {}
+   :modified                 nil
+   :municipality             ""
+   :neighbors                {}
+   :opened                   nil
+   :openInfoRequest          false
+   :operations               []
+   :organization             ""
+   :propertyId               ""
+   :permitSubtype            ""
+   :permitType               ""
+   :schema-version           nil
+   :sent                     nil
+   :state                    ""
+   :statements               []
+   :submitted                nil
+   :tasks                    []
+   :title                    ""
+   :verdicts                 []})
+
+
