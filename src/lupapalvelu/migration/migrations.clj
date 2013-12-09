@@ -161,7 +161,7 @@
   (mongo/drop-collection :vetuma))
 
 
-(defn abc [] ;defmigration set-missing-default-values-for-keys-in-applications-LUPA-1172
+(defmigration set-missing-default-values-for-keys-in-applications-LUPA-1172
   (let [missing-keys-in-mongo [:submitted :authority :neighbors :verdicts :tasks :statements]
         keys-and-default-values (map identity
                                   (select-keys
