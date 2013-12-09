@@ -1,6 +1,7 @@
 (ns lupapalvelu.mml.yhteystiedot
   (:require [sade.common-reader :as cr]
             [sade.xml :refer :all]
+            [sade.common-reader :refer :all]
             [sade.util :refer [assoc-when]]
             [sade.env :as env]
             [net.cgrand.enlive-html :as enlive]
@@ -19,13 +20,13 @@
       :lukuuntoiminnanlaji (get-in henkilo-xml [:attrs :lukuuntoiminnanlaji])
       :henkilolaji (get-text henkilo-xml (path :henkilonTiedot :henkilolaji))
       ;; Kuolinpesa (KP)
-      :kuolinpvm (get-text henkilo-xml (path :henkilonTiedot :kuolinpvm))
+      :kuolinpvm (get-date henkilo-xml (path :henkilonTiedot :kuolinpvm))
       :yhteyshenkilo (->henkilo (select1 henkilo-xml :Kuolinpesa :Yhteyshenkilo))
       ;; Luonnollinen henkilo (LU)
       :etunimet (get-text henkilo-xml (path :henkilonTiedot :etunimet))
       :sukunimi (get-text henkilo-xml (path :henkilonTiedot :sukunimi))
       :ulkomaalainen (get-boolean henkilo-xml (path :henkilonTiedot :ulkomaalainen))
-      :syntymapvm (get-text henkilo-xml (path :henkilonTiedot :syntymapvm))
+      :syntymapvm (get-date henkilo-xml (path :henkilonTiedot :syntymapvm))
       ;; Juridinen henkilo (JU) or Tuntematon henkilo (TU) or Valtio (VA)
       :nimi (get-text henkilo-xml (path :henkilonTiedot :nimi))
       :ytunnus (get-text henkilo-xml (path :henkilonTiedot :ytunnus))
