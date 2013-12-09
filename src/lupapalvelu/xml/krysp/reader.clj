@@ -263,32 +263,26 @@
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
+(defn ->ya-verdict [paatos-xml-without-ns]
+  {:lupamaaraykset {:maaraykset {:takuuAikaPaivat (get-text paatos-xml-without-ns :takuuAikaPaivat)}}
+   :paivamaarat    {:paatosdokumentinPvm (get-text paatos-xml-without-ns :paatosdokumentinPvm)}
+   :poytakirjat    {}})
+
+
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])})
 
-(defn ->verdicts [xml]
+(defn ->verdicts [xml for-elem ->function]
   (map
     (fn [asia]
       (let [verdict-model (->kuntalupatunnus asia)
             verdicts      (->> (select asia [:paatostieto :Paatos])
-                           (map ->verdict)
+                           (map ->function)
                            (cleanup)
                            (filter seq))]
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))
-    (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
+    (select (cr/strip-xml-namespaces xml) for-elem)))
 
-(defn ->ya-verdicts [xml]
-  (map
-    (fn [asia]
-      (let [verdict-model (->kuntalupatunnus asia)
-            verdicts      (->> (select asia [:paatostieto :Paatos])
-
-                           (cleanup)
-                           (filter seq))]
-        (if (seq verdicts)
-          (assoc verdict-model :paatokset verdicts)
-          verdict-model)))
-    (select (cr/strip-xml-namespaces xml) :yleinenAlueAsiatieto)))
 
