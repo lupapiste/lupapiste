@@ -14,6 +14,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
             [lupapalvelu.user-api]
+            [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
             [lupapalvelu.statement-api]
             [lupapalvelu.tasks-api]
