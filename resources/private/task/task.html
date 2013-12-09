@@ -7,8 +7,8 @@
     <a class="btn attachment-back"
        data-bind="click: returnToApplication"
        data-test-id="back-to-application-from-task"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a> <!-- TODO change key -->
-    <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: approvable" class="btn btn-primary"></button>
-    <button data-test-id="reject-task" data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: rejectable" class="btn btn-decline"></button>
+    <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="btn btn-primary"></button>
+    <button data-test-id="reject-task" data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="btn btn-decline"></button>
     <button class="btn" data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right" data-test-id="delete-task"></button>
   </div>
 
