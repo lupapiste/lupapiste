@@ -34,14 +34,5 @@
       (mongo/remove :activation (:_id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
 
-(defn activate-account-by-email [email]
-  (let [act     (mongo/select-one :activation {:email (lower-case email)})
-        userid  (:user-id act)
-        updated-user (mongo/update-one-and-return :users {:_id userid} {$set {:enabled true}})]
-    (when updated-user
-      (user/clear-logins (:username updated-user))
-      (mongo/remove :activation (:_id act))
-      (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
-
 (defn activations []
   (mongo/select :activation))
