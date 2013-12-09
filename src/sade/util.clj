@@ -111,6 +111,7 @@
          required-keys)))
 
 (defn sequable? [x] 
+  "Returns true if x can be converted to sequence."
   (or (seq? x)
       (instance? clojure.lang.Seqable x)
       (instance? Iterable x)
@@ -120,9 +121,11 @@
       (-> x .getClass .isArray)))
 
 (defn empty-or-nil? [x]
+  "Returns true if x is either nil or empty if it's sequable."
   (or (nil? x) (and (sequable? x) (empty? x))))
 
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
 
 (defn assoc-when [m & kvs]
-  (into {} (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
+  "Assocs entries with not-empty-or-nil values into m."
+  (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))

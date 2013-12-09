@@ -111,4 +111,6 @@
 
 (facts assoc-when
        (assoc-when {} :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
-       => {:a :a, :e [:e], :f {:f :f}})
+       => {:a :a, :e [:e], :f {:f :f}}
+       (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
+       => {:a :a, :b :b, :c :c})
