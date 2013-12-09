@@ -96,7 +96,7 @@
 
 (defn- get-handler [application]
   (let [handler (:authority application)]
-    (if-not (empty? handler)
+    (if (seq handler)
       {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
                                        :sukunimi (:lastName handler)}}}}
       empty-tag)))

@@ -157,8 +157,7 @@
 ;;
 
 (defn application-skeleton []
-  {;:id                       nil
-   :_statements-seen-by      {}
+  {:_statements-seen-by      {}
    :_verdicts-seen-by        {}
    :_comments-seen-by        {}
    :address                  ""

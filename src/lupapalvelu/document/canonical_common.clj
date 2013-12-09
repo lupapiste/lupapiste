@@ -131,7 +131,7 @@
 
 (defn- get-handler [application]
   (let [handler (:authority application)]
-    (if-not (empty? handler)
+    (if (seq handler)
       {:henkilo {:nimi {:etunimi  (:firstName handler)
                         :sukunimi (:lastName handler)}}}
       empty-tag)))
