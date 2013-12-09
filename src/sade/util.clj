@@ -110,11 +110,19 @@
          ()
          required-keys)))
 
-(defn empty-or-nil? [x]
-  (if (and (or (coll? x) (seq? x) (string? x))) (empty? x) (nil? x)))
+(defn sequable? [x] 
+  (or (seq? x)
+      (instance? clojure.lang.Seqable x)
+      (instance? Iterable x)
+      (instance? java.util.Map x)
+      (string? x)
+      (nil? x)
+      (-> x .getClass .isArray)))
 
-;; FIXME: This doesn't work with e.g. booleans
+(defn empty-or-nil? [x]
+  (or (nil? x) (and (sequable? x) (empty? x))))
+
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
 
 (defn assoc-when [m & kvs]
-  (into {} (filter #(->> (val %) (not-empty-or-nil?)) (apply hash-map kvs))))
+  (into {} (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
