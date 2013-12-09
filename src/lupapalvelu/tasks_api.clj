@@ -54,6 +54,6 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles       [:authority]}
   [command]
-  (task-state-in [:ok] command)
+  (task-state-in [:ok :sent] command)
   ; TODO form KRYSP message
   (set-state command taskId :sent))

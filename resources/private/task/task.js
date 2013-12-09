@@ -69,6 +69,15 @@ var taskPageController = (function() {
     return false;
   }
 
+  function sendTask() {
+    ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId})
+      .pending(pending)
+      .processing(processing)
+      .success(reload)
+      .error(reload)
+      .call();
+  }
+
   /**
    * @param {Object} application  Keys: id, tasks, attachment
    * @param {String} taskId       Current task ID
@@ -95,15 +104,8 @@ var taskPageController = (function() {
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
         t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
         t.rejectable = authorizationModel.ok("reject-task") && (t.state === "requires_authority_action" || t.state === "ok");
-        t.sendTask = function(){
-
-          ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId})
-            .pending(pending)
-            .processing(processing)
-            .success(reload)
-            .error(reload)
-            .call();
-        };
+        t.sendable = authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok");
+        t.sendTask = sendTask;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
         task(t);
         docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task"});
