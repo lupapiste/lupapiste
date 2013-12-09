@@ -489,13 +489,6 @@
 ; FIXME: generalize
 (env/in-dev
 
-  (defquery activate-user-by-email
-    {:parameters [:email]}
-    [{{:keys [email]} :data}]
-    (if-let [user (activation/activate-account-by-email email)]
-      (ok)
-      (fail :cant_activate_user_by_email)))
-
   (defquery activations {} [query]
     (ok :activations (activation/activations))))
 
