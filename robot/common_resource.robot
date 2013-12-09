@@ -283,6 +283,7 @@ Create inforequest
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
+  Confirm  dynamic-ok-confirm-dialog
   Wait Until  Element should be visible  inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 

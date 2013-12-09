@@ -80,7 +80,7 @@
     application-id => truthy
     application => truthy
     (success resp) => true
-    authority-before-assignation => nil
+    (empty? authority-before-assignation) => true
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
       sonja =not=> (allowed? sonja :submit-application :id application-id))))
@@ -97,8 +97,8 @@
         resp (command sonja :assign-application :id application-id :assigneeId nil)
         assigned-app (query-application sonja application-id)
         authority-in-the-end (:authority assigned-app)]
-    authority-before-assignation => nil
-    authority-in-the-end => nil))
+    (empty? authority-before-assignation) => true
+    (empty? authority-in-the-end) => true))
 
 (fact* "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
