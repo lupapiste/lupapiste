@@ -373,6 +373,7 @@
                      :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                               :url "http://www.kuopio.fi"}]
                      :yleiset-alueet-ftp-user "ya_kuopio"
+                     :legacy local-legacy
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
