@@ -1,5 +1,0 @@
-create.prompt.title: Neuvontapyyntö lähetetty
-create.prompt.text: Neuvontapyyntösi on lähetetty. Voit täydentää neuvontapyyntöä liitetiedostoilla ja kysyä lisäkysymyksiä viranomaiselta milloin tahansa.
-inforequest.desc: Neuvontapyyntösi on nyt viranomaisen nähtävissä. Jos haluat kysyä lisää aiheeseen liittyviä kysymyksiä, voit kirjoittaa keskusteluun uusia viestejä.
-task.approve: Vaatimus OK
-task.reject: Tarkennettavaa
