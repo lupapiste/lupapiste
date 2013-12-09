@@ -2,11 +2,13 @@
 <html >
 <body>
   <section class="page container" id="task" data-bind="with: task">
-  <h1 data-bind="text: displayName">Task</h1>
+  <h1><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span><span data-bind="text: displayName"></span></h1>
   <div class="clear-fix">
     <a class="btn attachment-back"
        data-bind="click: returnToApplication"
        data-test-id="back-to-application-from-task"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a> <!-- TODO change key -->
+    <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: approvable" class="btn btn-primary"></button>
+    <button data-test-id="reject-task" data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: rejectable" class="btn btn-decline"></button>
     <button class="btn" data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right" data-test-id="delete-task"></button>
   </div>
 
