@@ -76,7 +76,7 @@
 
    :user-menu     {:html ["nav.html"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :screenmessages]
+   :authenticated {:depends [:init :jquery :knockout :moment :i18n :selectm :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -95,7 +95,15 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :application  {:depends [:common :repository :tree]
+   :attachment   {:depends [:common :repository]
+                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
+                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
+
+   :task         {:depends [:common :attachment]
+                  :js ["task.js"]
+                  :html ["task.html"]}
+
+   :application  {:depends [:common :repository :tree :task]
                   :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "application-model.js" "application.js" ]
@@ -106,15 +114,11 @@
                   :html ["applications.html"]
                   :js ["applications.js"]}
 
-   :attachment   {:depends [:common :repository]
-                  :js ["attachment.js" "attachmentTypeSelect.js"]
-                  :html ["attachment.html" "upload.html"]}
-
    :statement    {:depends [:common :repository]
                   :js ["statement.js"]
                   :html ["statement.html"]}
 
-   :verdict      {:depends [:common :repository]
+   :verdict      {:depends [:common :repository :attachment]
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
@@ -156,12 +160,12 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant    {:depends [:common :authenticated :map :applications :application :attachment
+   :applicant    {:depends [:common :authenticated :map :applications :application
                             :statement :docgen :create :mypage :user-menu :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :authenticated :map :applications :application :attachment
+   :authority    {:depends [:common :authenticated :map :applications :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
