@@ -31,12 +31,18 @@ var taskPageController = (function() {
   var currentApplicationId = null;
   var currentTaskId = null;
   var task = ko.observable();
+  var processing = ko.observable(false);
+  var pending = ko.observable(false);
 
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
-  function returnToApplication() {
+  function reload() {
     repository.load(currentApplicationId);
+  }
+
+  function returnToApplication() {
+    reload();
     window.location.hash = "!/application/" + currentApplicationId + "/tasks";
   }
 
@@ -57,12 +63,8 @@ var taskPageController = (function() {
   function runTaskCommand(cmd) {
     var id = currentApplicationId;
     ajax.command(cmd, { id: id, taskId: currentTaskId})
-      .success(function() {
-        repository.load(id);
-      })
-      .error(function() {
-        repository.load(id);
-      })
+      .success(reload)
+      .error(reload)
       .call();
     return false;
   }
@@ -93,6 +95,15 @@ var taskPageController = (function() {
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
         t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
         t.rejectable = authorizationModel.ok("reject-task") && (t.state === "requires_authority_action" || t.state === "ok");
+        t.sendTask = function(){
+
+          ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId})
+            .pending(pending)
+            .processing(processing)
+            .success(reload)
+            .error(reload)
+            .call();
+        };
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
         task(t);
         docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task"});
@@ -119,6 +130,8 @@ var taskPageController = (function() {
   $(function() {
     $("#task").applyBindings({
       task: task,
+      pending: pending,
+      processing: processing,
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel
     });

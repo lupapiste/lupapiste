@@ -8,8 +8,12 @@
        data-bind="click: returnToApplication"
        data-test-id="back-to-application-from-task"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a> <!-- TODO change key -->
     <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="btn btn-primary"></button>
-    <button data-test-id="reject-task" data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="btn btn-decline"></button>
-    <button class="btn" data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')" style="float:right" data-test-id="delete-task"></button>
+    <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="btn btn-decline"></button>
+    <button data-test-id="send-task"    data-bind="click: sendTask, visible: $root.authorization.ok('send-task'), enable: $root.authorization.ok('send-task') && state === 'ok' && !$root.processing()" class="btn btn-primary">
+      <em data-bind="visible: $root.pending" class="button-loader"></em>
+      <span data-bind="ltext: 'task.send'"></span>
+    </button>
+    <button data-test-id="delete-task"  data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')" class="btn" style="float:right"></button>
   </div>
 
   <div id="taskAttachments" >
