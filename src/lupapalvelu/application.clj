@@ -350,23 +350,23 @@
   [{:keys [application created] :as command}]
   (let [submitted-application (mongo/by-id :submitted-applications id)
         organization (mongo/by-id :organizations (:organization application))]
-    (if (empty? (:authority application))
-      (executed "assign-to-me" command))
-        (try
-          (mapping-to-krysp/save-application-as-krysp
-            (meta-fields/enrich-with-link-permit-data application)
-            lang
-            submitted-application
-            organization)
+    (when (empty? (:authority application))
+      (executed "assign-to-me" command)) ;; FIXME combine mongo writes
+    (try
+      (mapping-to-krysp/save-application-as-krysp
+        (meta-fields/enrich-with-link-permit-data application)
+        lang
+        submitted-application
+        organization)
 
-          (mongo/update
-            :applications {:_id id :state {$in ["submitted" "complement-needed"]}}
-            {$set {:sent created
-                   :state :sent}})
+      (mongo/update
+        :applications {:_id id :state {$in ["submitted" "complement-needed"]}}
+        {$set {:sent created
+               :state :sent}})
 
-          (catch org.xml.sax.SAXParseException e
-            (info e "Invalid KRYSM XML message")
-            (fail (.getMessage e))))))
+      (catch org.xml.sax.SAXParseException e
+        (info e "Invalid KRYSM XML message")
+        (fail (.getMessage e))))))
 
 (defcommand submit-application
   {:parameters [:id]
