@@ -50,6 +50,17 @@ Add attachment to Aloituskokous
   Unselect Frame
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
+Aloituskokous requires action
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_authority_action"]  1
+
+Reject Aloituskokous
+  Click enabled by test id  reject-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
+
+Approve Aloituskokous
+  Click enabled by test id  approve-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
+
 Return to listing
   Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
   Tab should be visible  tasks

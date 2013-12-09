@@ -1,5 +1,5 @@
-// FIXME: SELF
 var locationSearch = (function() {
+  "use strict";
 
   var serchPointByAddress = function(requestContext, address, onSuccess, onFail) {
     ajax
@@ -8,7 +8,6 @@ var locationSearch = (function() {
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
-    return self;
   };
 
   var searchPointByPropertyId = function(requestContext, propertyId, onSuccess, onFail) {
@@ -18,7 +17,6 @@ var locationSearch = (function() {
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
-    return self;
   };
 
   var searchPropertyId = function(requestContext, x, y, onSuccess, onFail) {
@@ -29,7 +27,6 @@ var locationSearch = (function() {
       .success(requestContext.onResponse(onSuccess))
       .fail(requestContext.onResponse(onFail))
       .call();
-    return self;
   };
 
   var searchAddress = function(requestContext, x, y, onSuccess) {
@@ -39,7 +36,6 @@ var locationSearch = (function() {
       .param("y", y)
       .success(requestContext.onResponse(onSuccess))
       .call();
-    return self;
   };
 
   return {
