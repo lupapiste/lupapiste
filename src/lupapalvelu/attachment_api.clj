@@ -8,7 +8,7 @@
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :refer [output-attachment get-attachment-as update-version-content set-attachment-version if-not-authority-states-must-match]]
+            [lupapalvelu.attachment :refer [parse-attachment-type allowed-attachment-type-for? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version if-not-authority-states-must-match]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.i18n :as i18n]
@@ -18,6 +18,11 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
+
+
+;;
+;; KRYSP
+;;
 
 (defn- get-data-argument-for-attachments-mongo-update [timestamp attachments]
   (reduce
@@ -59,6 +64,97 @@
         (ok))
 
       (fail :error.sending-unsent-attachments-failed))))
+
+;;
+;; Types
+;;
+
+(defquery attachment-types
+  {:parameters [:id]
+   :roles      [:applicant :authority]}
+  [{application :application}]
+  (ok :attachmentTypes (:allowedAttachmentTypes application)))
+
+(defcommand set-attachment-type
+  {:parameters [id attachmentId attachmentType]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :open :submitted :complement-needed]}
+  [{:keys [application]}]
+  (let [attachment-type (parse-attachment-type attachmentType)]
+    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
+      (do
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :attachments {$elemMatch {:id attachmentId}}}
+          {$set {:attachments.$.type attachment-type}})
+        (ok))
+      (do
+        (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+        (fail :error.attachmentTypeNotAllowed)))))
+
+;;
+;; States
+;;
+
+(defcommand approve-attachment
+  {:description "Authority can approve attachment, moves to ok"
+   :parameters  [id attachmentId]
+   :roles       [:authority]
+   :states      [:draft :info :open :complement-needed :submitted]}
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified created
+           :attachments.$.state :ok}}))
+
+(defcommand reject-attachment
+  {:description "Authority can reject attachment, requires user action."
+   :parameters  [id attachmentId]
+   :roles       [:authority]
+   :states      [:draft :info :open :complement-needed :submitted]}
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified created
+           :attachments.$.state :requires_user_action}}))
+
+;;
+;; Create
+;;
+
+(defcommand create-attachments
+  {:description "Authority can set a placeholder for an attachment"
+   :parameters  [:id :attachmentTypes]
+   :roles       [:authority]
+   :states      [:draft :info :open :complement-needed :submitted]}
+  [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
+  (if-let [attachment-ids (create-attachments application-id attachment-types created)]
+    (ok :applicationId application-id :attachmentIds attachment-ids)
+    (fail :error.attachment-placeholder)))
+
+;;
+;; Delete
+;;
+
+(defcommand delete-attachment
+  {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+   :parameters  [id attachmentId]
+   :states      [:draft :info :open :submitted :complement-needed]}
+  [{:keys [application]}]
+  (delete-attachment application attachmentId)
+  (ok))
+
+(defcommand delete-attachment-version
+  {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
+   :parameters  [:id attachmentId fileId]
+   :states      [:draft :info :open :submitted :complement-needed]}
+  [{:keys [application]}]
+  (if (file-id-in-application? application attachmentId fileId)
+    (delete-attachment-version application attachmentId fileId)
+    (fail :file_not_linked_to_the_document)))
 
 ;;
 ;; Download

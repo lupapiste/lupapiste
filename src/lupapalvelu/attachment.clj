@@ -250,7 +250,7 @@
     (let [[type-group type-id] (->> match (drop 1) (map keyword))]
       {:type-group type-group :type-id type-id})))
 
-(defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
+(defn allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
@@ -342,83 +342,7 @@
 ;; Actions
 ;;
 
-(defn- to-key-types-vec [r [k v]]
-  (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
-(defquery attachment-types
-  {:parameters [:id]
-   :roles      [:applicant :authority]}
-  [{application :application}]
-  (ok :attachmentTypes (:allowedAttachmentTypes application)))
-
-(defcommand set-attachment-type
-  {:parameters [id attachmentId attachmentType]
-   :roles      [:applicant :authority]
-   :states     [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
-  (let [attachment-type (parse-attachment-type attachmentType)]
-    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
-      (do
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :attachments {$elemMatch {:id attachmentId}}}
-          {$set {:attachments.$.type attachment-type}})
-        (ok))
-      (do
-        (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
-        (fail :error.attachmentTypeNotAllowed)))))
-
-(defcommand approve-attachment
-  {:description "Authority can approve attachment, moves to ok"
-   :parameters  [id attachmentId]
-   :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted]}
-  [{:keys [created]}]
-  (mongo/update
-    :applications
-    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified created
-           :attachments.$.state :ok}}))
-
-(defcommand reject-attachment
-  {:description "Authority can reject attachment, requires user action."
-   :parameters  [id attachmentId]
-   :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted]}
-  [{:keys [created]}]
-  (mongo/update
-    :applications
-    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified created
-           :attachments.$.state :requires_user_action}}))
-
-(defcommand create-attachments
-  {:description "Authority can set a placeholder for an attachment"
-   :parameters  [:id :attachmentTypes]
-   :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted]}
-  [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (create-attachments application-id attachment-types created)]
-    (ok :applicationId application-id :attachmentIds attachment-ids)
-    (fail :error.attachment-placeholder)))
-
-(defcommand delete-attachment
-  {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-   :parameters  [id attachmentId]
-   :states      [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
-  (delete-attachment application attachmentId)
-  (ok))
-
-(defcommand delete-attachment-version
-  {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-   :parameters  [:id attachmentId fileId]
-   :states      [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
-  (if (file-id-in-application? application attachmentId fileId)
-    (delete-attachment-version application attachmentId fileId)
-    (fail :file_not_linked_to_the_document)))
 
 (defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
