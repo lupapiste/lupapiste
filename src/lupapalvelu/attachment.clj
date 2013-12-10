@@ -343,7 +343,7 @@
         (fail :error.attachmentTypeNotAllowed)))))
 
 (defcommand approve-attachment
-  {:description "Authority can approve attachement, moves to ok"
+  {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
@@ -355,7 +355,7 @@
            :attachments.$.state :ok}}))
 
 (defcommand reject-attachment
-  {:description "Authority can reject attachement, requires user action."
+  {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}

@@ -24,7 +24,7 @@
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
-      a.statusName = application.statuses[a.state] || "unknown";
+      a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
       return a;
     });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });

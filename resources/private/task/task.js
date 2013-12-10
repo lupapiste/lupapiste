@@ -54,6 +54,19 @@ var taskPageController = (function() {
     return false;
   }
 
+  function runTaskCommand(cmd) {
+    var id = currentApplicationId;
+    ajax.command(cmd, { id: id, taskId: currentTaskId})
+      .success(function() {
+        repository.load(id);
+      })
+      .error(function() {
+        repository.load(id);
+      })
+      .call();
+    return false;
+  }
+
   /**
    * @param {Object} application  Keys: id, tasks, attachment
    * @param {String} taskId       Current task ID
@@ -75,9 +88,13 @@ var taskPageController = (function() {
       t.applicationId = currentApplicationId;
       t.deleteTask = deleteTask;
       t.returnToApplication = returnToApplication;
-      task(t);
-
+      t.approve = _.partial(runTaskCommand, "approve-task");
+      t.reject = _.partial(runTaskCommand, "reject-task");
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
+        t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
+        t.rejectable = authorizationModel.ok("reject-task") && (t.state === "requires_authority_action" || t.state === "ok");
+        t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
+        task(t);
         docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task"});
       });
     }

@@ -1,7 +1,3 @@
-create.prompt.title: Neuvontapyyntö lähetetty
-create.prompt.text: Neuvontapyyntösi on lähetetty. Voit täydentää neuvontapyyntöä liitetiedostoilla ja kysyä lisäkysymyksiä viranomaiselta milloin tahansa. 
-inforequest.desc: Neuvontapyyntösi on nyt viranomaisen nähtävissä. Jos haluat kysyä lisää aiheeseen liittyviä kysymyksiä, voit kirjoittaa keskusteluun uusia viestejä.
-
 application.informBuildingReady: Ilmoita rakennushankkeesi valmistuneeksi
 buildingReady.dialog.continue: Jatka
 buildingReady.dialog.header: Ilmoita rakennushankkeesi valmistuneeksi
