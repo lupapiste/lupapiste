@@ -280,7 +280,7 @@
     "rakennekatselmus" "rakennekatselmus"
     "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
     "osittainen loppukatselmus" "osittainen loppukatselmus"
-    "loppukatselmus"
+    "loppukatselmus" ; XXX tarkoituksella ei defaulttia?
     "ei tiedossa"))
   )
 

@@ -5,6 +5,7 @@
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
                                                                  katselmus-canonical
@@ -298,8 +299,26 @@
     ))
 
 (defn save-katselmus-as-krysp [application katselmus user lang output-dir begin-of-link]
-  ; TODO (save-katselmus-xml)
-  (debug "save-katselmus-as-krysp")
+  (let [data (tools/unwrapped (:data katselmus))
+        {:keys [katselmuksenLaji vaadittuLupaehtona]} data
+        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
+        huomautukset (-> data :huomautukset :kuvaus)
+        building {:rakennusnro (-> data :rakennus vals first :rakennus :rakennusnro) ; TODO manuaalinen rak.nro?
+                  :jarjestysnumero 0} ; TODO
+        ]
+    (save-katselmus-xml application lang output-dir
+                               pitoPvm
+                               building
+                               user
+                               katselmuksenLaji
+                               :katselmus
+                               tila
+                               pitaja
+                               vaadittuLupaehtona
+                               huomautukset
+                               lasnaolijat
+                               poikkeamat
+     ))
   )
 
 (permit/register-mapper permit/R :review-krysp-mapper save-katselmus-as-krysp)
