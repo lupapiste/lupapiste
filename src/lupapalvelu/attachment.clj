@@ -476,7 +476,7 @@
                 (permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
-  [{:keys [created user application] :as command}]
+  [{:keys [created application] :as command}]
 
   (let [attachments-wo-sent-timestamp (filter
                                         #(and
@@ -495,8 +495,7 @@
             (dissoc :attachments)
             (assoc :attachments attachments-wo-sent-timestamp))
           lang
-          organization
-          user)
+          organization)
 
         (mongo/update-by-query
           :applications
