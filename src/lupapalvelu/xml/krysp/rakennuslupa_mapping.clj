@@ -3,6 +3,7 @@
             [clojure.data.xml :refer :all]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
                                                                  katselmus-canonical
@@ -269,7 +270,7 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn save-katselmus-as-krysp [application
+(defn save-katselmus-xml [application
                                lang
                                output-dir
                                started
@@ -289,14 +290,18 @@
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     (validate xml-s)
-    (with-open [out-file (writer "/Users/terotu/katselmus.xml" )]
+    (with-open [out-file (writer (str "target/" (:id application) "-katselmus.xml") )]
         (emit xml out-file))
     ;TODO sanoaman muodostus ja muut jutut kallin teon yhteydessa
     (println xml-s)
     ))
 
+(defn save-katselmus-as-krysp [application katselmus]
+  ; TODO (save-katselmus-xml)
+  )
+
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
-  (save-katselmus-as-krysp application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil)
+  (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil)
   )
 
 (defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link]
@@ -370,3 +375,4 @@
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
 
+(permit/register-mapper permit/R :app-krysp-mapper save-application-as-krysp)

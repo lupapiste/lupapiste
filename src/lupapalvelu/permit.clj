@@ -1,16 +1,19 @@
 (ns lupapalvelu.permit
   (:require [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [fail]]
-            [taoensso.timbre :as timbre :refer [errorf]]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
-            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
-            [lupapalvelu.xml.krysp.poikkeamis-mapping :as p-mapping]))
+            [taoensso.timbre :as timbre :refer [errorf]]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
 
 (def poikkeamislupa :poikkeamislupa)
 (def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
+
+(defn register-mapper [permit-type mapper-key mapper-fn]
+  {:pre [(contains? (permit-types) permit-type)
+         (keyword? mapper-key)
+         (fn? mapper-fn)]}
+  (swap! permit-type-defs assoc-in [permit-type mapper-key] mapper-fn))
 
 ;;
 ;; Enum
@@ -25,13 +28,12 @@
   {:subtypes         []
    :sftp-user-key    :rakennus-ftp-user
    :sftp-directory   "/rakennus"
-   :app-krysp-mapper rl-mapping/save-application-as-krysp})
+   })
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes         []
    :sftp-user-key    :yleiset-alueet-ftp-user
-   :sftp-directory   "/yleiset_alueet"
-   :app-krysp-mapper ya-mapping/save-application-as-krysp})
+   :sftp-directory   "/yleiset_alueet"})
 
 (defpermit Y  "Ymparistoluvat"
   {:subtypes       []
@@ -42,8 +44,7 @@
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-user-key    :poikkari-ftp-user
-   :sftp-directory   "/poikkeusasiat"
-   :app-krysp-mapper p-mapping/save-application-as-krysp})
+   :sftp-directory   "/poikkeusasiat"})
 
 ;;
 ;; Helpers
