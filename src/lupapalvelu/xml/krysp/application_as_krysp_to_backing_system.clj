@@ -45,8 +45,10 @@
     (krysp-fn application lang submitted-application output-dir begin-of-link)))
 
 
-(defn save-unsent-attachments-as-krysp [application lang organization user]
+(defn save-unsent-attachments-as-krysp [application lang organization]
   (let [permit-type (keyword (permit/permit-type application))
         output-dir (get-output-directory permit-type organization)
         begin-of-link  (get-begin-of-link permit-type)]
-    (rl-mapping/save-unsent-attachments-as-krysp application lang output-dir begin-of-link user)))
+    (assert (= :R permit-type)
+      (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
+    (rl-mapping/save-unsent-attachments-as-krysp application lang output-dir begin-of-link)))

@@ -18,6 +18,7 @@
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.statement :as statement]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -343,7 +344,7 @@
         (fail :error.attachmentTypeNotAllowed)))))
 
 (defcommand approve-attachment
-  {:description "Authority can approve attachement, moves to ok"
+  {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
@@ -355,7 +356,7 @@
            :attachments.$.state :ok}}))
 
 (defcommand reject-attachment
-  {:description "Authority can reject attachement, requires user action."
+  {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
@@ -471,10 +472,11 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})]
+   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})
+                (permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
-  [{:keys [created user application] :as command}]
+  [{:keys [created application] :as command}]
 
   (let [attachments-wo-sent-timestamp (filter
                                         #(and
@@ -493,8 +495,7 @@
             (dissoc :attachments)
             (assoc :attachments attachments-wo-sent-timestamp))
           lang
-          organization
-          user)
+          organization)
 
         (mongo/update-by-query
           :applications

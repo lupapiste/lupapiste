@@ -286,7 +286,7 @@
         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
-        (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) documentId)
+    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) documentId)
     (commands/persist-model-updates id "documents" document updates created))) ; TODO support for collection parameter
 
 ;;
@@ -751,10 +751,19 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
+(defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
+
+(defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [xml      (krysp/ya-application-xml legacy id)
+          verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
+      verdicts)
+    (fail! :error.no-legacy-available)))
+
+(defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/application-xml legacy id)
-          verdicts (krysp/->verdicts xml)]
+          verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
       (map
         (fn [verdict]
           (assoc verdict
