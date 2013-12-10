@@ -342,34 +342,31 @@
            :state :complement-needed}}))
 
 (defcommand approve-application
-  {:parameters [:id lang]
+  {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [application-id (:id application)
-            submitted-application (mongo/by-id :submitted-applications (:id application))
-            organization (mongo/by-id :organizations (:organization application))]
-        ; FIXME combine mongo writes
-        (if (nil? (:authority application))
-          (executed "assign-to-me" command))
+  [{:keys [application created] :as command}]
+  (let [submitted-application (mongo/by-id :submitted-applications id)
+        organization (mongo/by-id :organizations (:organization application))]
+    (if (empty? (:authority application))
+      (executed "assign-to-me" command))
         (try
-            (mapping-to-krysp/save-application-as-krysp
-              (meta-fields/enrich-with-link-permit-data application)
-              lang
-              submitted-application
-              organization)
+          (mapping-to-krysp/save-application-as-krysp
+            (meta-fields/enrich-with-link-permit-data application)
+            lang
+            submitted-application
+            organization)
 
           (mongo/update
-            :applications {:_id (:id application) :state {$in ["submitted" "complement-needed"]}}
-            {$set {:state :sent}})
+            :applications {:_id id :state {$in ["submitted" "complement-needed"]}}
+            {$set {:sent created
+                   :state :sent}})
 
           (catch org.xml.sax.SAXParseException e
             (info e "Invalid KRYSM XML message")
-            (fail (.getMessage e))))))))
+            (fail (.getMessage e))))))
 
 (defcommand submit-application
   {:parameters [:id]
@@ -517,32 +514,31 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (user/summary user)} :text)
-          application   {:id               id
-                         :created          created
-                         :opened           (when (#{:open :info} state) created)
-                         :modified         created
-                         :permitType       permit-type
-                         :permitSubtype    (first (permit/permit-subtypes permit-type))
-                         :infoRequest      info-request?
-                         :openInfoRequest  open-inforequest?
-                         :operations       [op]
-                         :state            state
-                         :municipality     municipality
-                         :location         (->location x y)
-                         :organization     organization-id
-                         :address          address
-                         :propertyId       propertyId
-                         :title            address
-                         :auth             [owner]
-                         :comments         (map make-comment messages)
-                         :schema-version   (schemas/get-latest-schema-version)
-                         :verdicts         []
-                         :tasks            []}
+
+          application   (merge (domain/application-skeleton)
+                          {:id                  id
+                           :created             created
+                           :opened              (when (#{:open :info} state) created)
+                           :modified            created
+                           :permitType          permit-type
+                           :permitSubtype       (first (permit/permit-subtypes permit-type))
+                           :infoRequest         info-request?
+                           :openInfoRequest     open-inforequest?
+                           :operations          [op]
+                           :state               state
+                           :municipality        municipality
+                           :location            (->location x y)
+                           :organization        organization-id
+                           :address             address
+                           :propertyId          propertyId
+                           :title               address
+                           :auth                [owner]
+                           :comments            (map make-comment messages)
+                           :schema-version      (schemas/get-latest-schema-version)})
+
           application   (merge application
                           (if info-request?
-                            {:attachments            []
-                             :allowedAttachmentTypes [[:muut [:muu]]]
-                             :documents              []}
+                            {:allowedAttachmentTypes [[:muut [:muu]]]}
                             {:attachments            (make-attachments created op organization-id)
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
@@ -681,22 +677,24 @@
   :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
-        muutoslupa-app (-> application
-                         (assoc :documents       (into []
-                                                   (map #(assoc % :id (mongo/create-id)) (:documents application))))
-                         (assoc :id              muutoslupa-app-id)
-                         (assoc :created         created)
-                         (assoc :opened          created)
-                         (assoc :modified        created)
-                         (assoc :state           (cond
-                                                   (user/authority? user)     :open
-                                                   :else                      :draft))
-;                         (assoc :permitSubtype   (first (permit/permit-subtypes (:permitType application))))
-                         (assoc :permitSubtype   :muutoslupa)
-                         (dissoc :attachments :statements :verdicts :comments :submitted
-                                 :_statements-seen-by :_verdicts-seen-by))]
+        muutoslupa-app (merge application
+                         {:id                  muutoslupa-app-id
+                          :created             created
+                          :opened              created
+                          :modified            created
+                          :documents           (into [] (map
+                                                          #(assoc % :id (mongo/create-id))
+                                                          (:documents application)))
+                          :state               (cond
+                                                 (user/authority? user)  :open
+                                                 :else                   :draft)
+                          :permitSubtype       :muutoslupa}
+                         (select-keys
+                           (domain/application-skeleton)
+                           [:attachments :statements :verdicts :comments :submitted :sent :neighbors
+                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
-    (mongo/insert :applications (meta-fields/enrich-with-link-permit-data muutoslupa-app))
+    (mongo/insert :applications muutoslupa-app)
     (ok :id muutoslupa-app-id)))
 
 
@@ -753,10 +751,19 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn- get-verdicts-with-attachments [{:keys [id organization]} user timestamp]
+(defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
+
+(defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [xml      (krysp/ya-application-xml legacy id)
+          verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
+      verdicts)
+    (fail! :error.no-legacy-available)))
+
+(defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/application-xml legacy id)
-          verdicts (krysp/->verdicts xml)]
+          verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
       (map
         (fn [verdict]
           (assoc verdict

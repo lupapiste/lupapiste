@@ -99,6 +99,7 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
+          <!-- ko if: linkPermitData -->
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
@@ -112,8 +113,10 @@
                  href="#" class="remove-link-permit"></a>
             </span>
           </div>
+          <!-- /ko -->
 
           <!-- Applications linking to us: -->
+          <!-- ko if: appsLinkingToUs -->
           <div data-bind="with: appsLinkingToUs">
             <p data-bind="ltext: 'application.appsLinkingToUs'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
@@ -124,6 +127,7 @@
                  href="#" class="remove-link-permit"></a>
             </span>
           </div>
+          <!-- /ko -->
 
         </div>
 
@@ -464,6 +468,10 @@
                       <label data-bind="ltext: 'verdict.julkipano'"></label>
                       <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
                     </div>
+                    <div data-bind="if: paivamaarat.paatosdokumentinPvm" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
+                    </div>
                     <!-- /ko --> <!-- /paivamaarat -->
 
                     <!--  ko if:  $data.lupamaaraykset -->
@@ -490,6 +498,8 @@
                       <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
+                    <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
@@ -713,7 +723,7 @@
           </thead>
           <tbody data-bind="foreach: tasks">
             <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
-              <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+              <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
               <td data-bind="text: displayName"></td>
               <td data-bind="dateString: $data.closed"></td>
             </tr>

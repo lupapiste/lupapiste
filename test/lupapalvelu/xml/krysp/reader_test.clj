@@ -17,7 +17,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml)]
+      cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
@@ -98,7 +98,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
-        cases (->verdicts xml)]
+        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -148,18 +148,18 @@
 
 (facts "case not found"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
-        cases (->verdicts xml)]
+        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil)]
+  (let [cases (->verdicts nil :RakennusvalvontaAsia ->verdict)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
-        cases (->verdicts xml)]
+        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -230,3 +230,36 @@
         (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 1\u20132 d\u2013e A 1"
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
+
+
+;YA verdict
+
+(facts "KRYSP ya-verdict"
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
+      cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "xml has 1 cases" (count cases) => 1)
+    (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+
+    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "422")
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:takuuaikaPaivat lupamaaraykset) => "760"
+        )
+
+      (facts "paivamaarat data is correct"
+        paivamaarat    => truthy
+        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2013-11-04")
+        )
+
+      (facts "p\u00f6yt\u00e4kirjat data is correct"
+        poytakirjat    => truthy
+        (count poytakirjat) => 0))))
+

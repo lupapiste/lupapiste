@@ -95,10 +95,11 @@
     {:laskuviite (-> maksaja-doc :laskuviite :value)}))
 
 (defn- get-handler [application]
-  (if-let [handler (:authority application)]
-    {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                     :sukunimi (:lastName handler)}}}}
-    empty-tag))
+  (let [handler (:authority application)]
+    (if (seq handler)
+      {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
+                                       :sukunimi (:lastName handler)}}}}
+      empty-tag)))
 
 (defn- get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))

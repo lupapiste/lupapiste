@@ -299,11 +299,11 @@
   (save-katselmus-as-krysp application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil)
   )
 
-(defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link user]
+(defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link]
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
-        canonical-without-attachments (unsent-attachments-to-canonical application lang user)
+        canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
         attachments (get-attachments-as-canonical application begin-of-link)
         canonical (assoc-in canonical-without-attachments

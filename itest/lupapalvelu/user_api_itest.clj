@@ -73,10 +73,6 @@
   (apply-remote-minimal)
 
   (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :organization "555-R" :apikey "xyz") => ok?)
-  #_(let [email (last-email)]
-    (:to email) => "foo"
-    (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi"
-    (get-in email [:body :plain]) => (contains #"/app/security/activate/[a-zA-Z0-9]+"))
 
   (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
@@ -165,7 +161,7 @@
   ; Initially pena does not have attachments?
   ;
 
-  (fact "Initially pena does not have attachments?" 
+  (fact "Initially pena does not have attachments?"
         (:attachments (query pena "user-attachments")) => nil?)
 
   ;
