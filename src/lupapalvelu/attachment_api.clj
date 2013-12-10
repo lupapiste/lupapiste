@@ -150,7 +150,7 @@
   (-<> application-id
        (mongo/by-id :applications <> [:organization])
        (:organization)
-       (organization/get-organization <> [:name])
+       (mongo/by-id :organizations <> [:name])
        (loc-organization-name <>)))
 
 (defn- key-by [f coll]
