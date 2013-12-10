@@ -264,7 +264,7 @@
                      (map ->paatospoytakirja poytakirjat))})
 
 (defn ->ya-verdict [paatos-xml-without-ns]
-  {:lupamaaraykset {:maaraykset {:takuuAikaPaivat (get-text paatos-xml-without-ns :takuuAikaPaivat)}}
+  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)}
    :paivamaarat    {:paatosdokumentinPvm (get-text paatos-xml-without-ns :paatosdokumentinPvm)}
    :poytakirjat    {}})
 

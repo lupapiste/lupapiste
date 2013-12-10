@@ -468,6 +468,10 @@
                       <label data-bind="ltext: 'verdict.julkipano'"></label>
                       <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
                     </div>
+                    <div data-bind="if: paivamaarat.paatosdokumentinPvm" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
+                    </div>
                     <!-- /ko --> <!-- /paivamaarat -->
 
                     <!--  ko if:  $data.lupamaaraykset -->
@@ -494,6 +498,8 @@
                       <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
+                    <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
