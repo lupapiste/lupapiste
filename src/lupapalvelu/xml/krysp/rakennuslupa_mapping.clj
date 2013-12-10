@@ -303,7 +303,7 @@
   (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
-        canonical-without-attachments (unsent-attachments-to-canonical application lang user)
+        canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
         attachments (get-attachments-as-canonical application begin-of-link)
         canonical (assoc-in canonical-without-attachments
