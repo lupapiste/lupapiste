@@ -72,7 +72,6 @@ var attachment = (function() {
       var id = self.application.id;
       ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
-          notify.success("liite hyl\u00E4tty",model);
           repository.load(id);
         })
         .error(function() {
@@ -86,7 +85,6 @@ var attachment = (function() {
       var id = self.application.id;
       ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
-          notify.success("liite hyv\u00E4ksytty",model);
           repository.load(id);
         })
         .error(function() {

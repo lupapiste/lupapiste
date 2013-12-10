@@ -62,7 +62,7 @@
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses :expanded-content]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
-                       "authorization.js" "vetuma.js"]
+                       "statuses.js" "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
                   :html ["404.html" "footer.html"]}
 
@@ -182,9 +182,9 @@
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
              :js ["admin.js"
-                  "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
+                  "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
-                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html" "activations.html" "screenmessages-list.html"]}
+                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html" "screenmessages-list.html"]}
 
    :login-frame {:depends [:login]
                  :html    ["login-frame.html"]
