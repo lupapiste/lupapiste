@@ -1,14 +1,18 @@
 (ns lupapalvelu.tasks-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+            [monger.operators :refer :all]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
 
-(defn- task-state-in [states {{task-id :taskId} :data {tasks :tasks} :application}]
-  (if-let [task (some #(when (= (:id %) task-id) %) tasks)]
+(defn- get-task [tasks task-id]
+  (some #(when (= (:id %) task-id) %) tasks))
+
+(defn- assert-task-state-in [states {{task-id :taskId} :data {tasks :tasks} :application}]
+  (if-let [task (get-task tasks task-id)]
     (when-not ((set states) (keyword (:state task)))
       (fail! :error.command-illegal-state))
     (fail! :error.task-not-found)))
@@ -25,7 +29,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles      [:authority]}
   [{created :created :as command}]
-  (task-state-in [:requires_user_action :requires_authority_action :ok] command)
+  (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
@@ -36,7 +40,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles       [:authority]}
   [command]
-  (task-state-in [:requires_user_action :requires_authority_action] command)
+  (assert-task-state-in [:requires_user_action :requires_authority_action] command)
   (set-state command taskId :ok))
 
 (defcommand reject-task
@@ -45,7 +49,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles       [:authority]}
   [command]
-  (task-state-in [:ok :requires_user_action :requires_authority_action] command)
+  (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
 
 (defcommand send-task
@@ -53,7 +57,9 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles       [:authority]}
-  [command]
-  (task-state-in [:ok :sent] command)
-  ; TODO form KRYSP message
-  (set-state command taskId :sent))
+  [{application :application :as command}]
+  (assert-task-state-in [:ok :sent] command)
+  (let [task (get-task {:tasks application} taskId)]
+    (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.task-not-found)) ; TODO change key
+    (mapping-to-krysp/save-review-as-krysp application task)
+    (set-state command taskId :sent)))
