@@ -295,7 +295,7 @@
 ;; TODO: Voisiko tahan tehda YA-canonicalin tyyppisen config-systeemin? Ei tarvitsisi nain montaa parametria.
 ;; TODO: Yhdistele taman namespacen canonical-funktiota.
 ;                                                   paatokselta (refaktoroidaan building selector)
-;                                                            kirjautunut käyttäjä
+;                                                            kirjautunut kayttaja
 ;                                                                 lisaa skeemaan (muu-muu)
 ;                                                                                          lopullinen-tila
 (defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
