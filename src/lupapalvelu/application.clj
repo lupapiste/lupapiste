@@ -12,7 +12,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed with-application update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
@@ -128,14 +128,12 @@
 (defquery party-document-names
   {:parameters [:id]
    :authenticated true}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [documents (:documents application)
-            initialOp (:name (first (:operations application)))
-            original-schema-names (:required ((keyword initialOp) operations/operations))
-            original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
-        (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
+  [{application :application}]
+  (let [documents (:documents application)
+        initialOp (:name (first (:operations application)))
+        original-schema-names (:required ((keyword initialOp) operations/operations))
+        original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
+    (ok :partyDocumentNames (conj original-party-documents "hakija"))))
 
 ;;
 ;; Invites
@@ -158,7 +156,7 @@
    :notified   true
    :on-success (notify :invite)
    :verified   true}
-  [{:keys [created user application]}]
+  [{:keys [created user application] :as command}]
   (let [email (ss/lower-case email)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
@@ -177,10 +175,8 @@
             auth    (assoc writer :invite invite)]
         (if (domain/has-auth? application (:id invited))
           (fail :invite.already-has-auth)
-          (mongo/update
-            :applications
-            {:_id id
-             :auth {$not {$elemMatch {:invite.user.username email}}}}
+          (update-application command
+            {:auth {$not {$elemMatch {:invite.user.username email}}}}
             {$push {:auth auth}}))))))
 
 (defcommand approve-invite
@@ -195,18 +191,18 @@
         (assoc-in [:data :documentId] (:documentId my-invite))
         (assoc-in [:data :path]       (:path my-invite))
         (assoc-in [:data :userId]     (:id user))))
-    (mongo/update :applications
-      {:_id id :auth {$elemMatch {:invite.user.id (:id user)}}}
+    (update-application command
+      {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:auth.$ (user/user-in-role user :writer)}})))
 
 (defcommand remove-invite
   {:parameters [id email]
    :roles      [:applicant :authority]
    :validators [validate-owner-or-writer]}
-  [_]
+  [command]
   (let [email (ss/lower-case email)]
     (with-user-by-email email
-      (mongo/update-by-id :applications id
+      (update-application command
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
@@ -349,7 +345,7 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created] :as command}]
   (let [submitted-application (mongo/by-id :submitted-applications id)
-        organization (mongo/by-id :organizations (:organization application))]
+        organization (organization/get-organization (:organization application))]
     (when (empty? (:authority application))
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
@@ -359,8 +355,8 @@
         submitted-application
         organization)
 
-      (mongo/update
-        :applications {:_id id :state {$in ["submitted" "complement-needed"]}}
+      (update-application command
+        {:state {$in ["submitted" "complement-needed"]}}
         {$set {:sent created
                :state :sent}})
 
@@ -369,27 +365,17 @@
         (fail (.getMessage e))))))
 
 (defcommand submit-application
-  {:parameters [:id]
+  {:parameters [id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
    :notified   true
    :on-success (notify :application-state-change)
    :validators [validate-owner-or-writer]}
-  [{:keys [created] :as command}]
-  (with-application command
-    (fn [{:keys [id opened] :as application}]
-      (mongo/update
-        :applications
-        {:_id id}
-        {$set {:state     :submitted
-               :opened    (or opened created)
-               :submitted created}})
-      (try
-        (mongo/insert :submitted-applications
-          (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
-        (catch com.mongodb.MongoException$DuplicateKey e
-          ; This is ok. Only the first submit is saved.
-            )))))
+  [{:keys [application created] :as command}]
+  (update-application command
+    {$set {:state     :submitted
+           :opened    (or (:opened application) created)
+           :submitted created}}))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -559,27 +545,26 @@
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
-  [{:keys [created] :as command}]
-  (with-application command
-    (fn [application]
-      (let [op-id      (mongo/create-id)
-            op         (make-op operation created)
-            new-docs   (make-documents nil created op application)]
-        (mongo/update-by-id :applications id {$push {:operations op}
-                                              $pushAll {:documents new-docs
-                                                        :attachments (make-attachments created op (:organization application))}
-                                              $set {:modified created}})))))
+  [{:keys [application created] :as command}]
+  (let [op-id      (mongo/create-id)
+        op         (make-op operation created)
+        new-docs   (make-documents nil created op application)]
+    (update-application command {$push {:operations op}
+                                 $pushAll {:documents new-docs
+                                           :attachments (make-attachments created op (:organization application))}
+                                 $set {:modified created}})))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :validators [permit/validate-permit-has-subtypes]}
-  [{:keys [application created]}]
+  [{:keys [application created] :as command}]
   (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
     validation-errors
-    (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype
-                                                :modified      created}})))
+    (update-application command
+      {$set {:permitSubtype permitSubtype
+             :modified      created}})))
 
 (defcommand change-location
   {:parameters [id x y address propertyId]
@@ -588,14 +573,15 @@
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
-  [{:keys [created application]}]
+  [{:keys [created application] :as command}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (do
-      (mongo/update-by-id :applications id {$set {:location      (->location x y)
-                                                  :address       (trim address)
-                                                  :propertyId    propertyId
-                                                  :title         (trim address)
-                                                  :modified      created}})
+      (update-application command
+        {$set {:location      (->location x y)
+               :address       (trim address)
+               :propertyId    propertyId
+               :title         (trim address)
+               :modified      created}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
         (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
@@ -713,13 +699,13 @@
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]
-    (mongo/update-by-id :applications id
-                        {$set {:infoRequest false
-                               :state :open
-                               :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                               :documents (make-documents user created op application)
-                               :modified created}
-           $pushAll {:attachments (make-attachments created op (:organization application))}})
+    (update-application command
+      {$set {:infoRequest false
+             :state :open
+             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
+             :documents (make-documents user created op application)
+             :modified created}
+       $pushAll {:attachments (make-attachments created op (:organization application))}})
     (try (autofill-rakennuspaikka application (now))
       (catch Exception e (error e "KTJ data was not updated")))))
 

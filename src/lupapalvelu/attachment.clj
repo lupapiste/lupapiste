@@ -8,7 +8,7 @@
             [sade.strings :as ss]
             [sade.env :as env]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw with-application executed]]
+            [lupapalvelu.action :refer [defquery defcommand defraw executed]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -321,8 +321,8 @@
 (defquery attachment-types
   {:parameters [:id]
    :roles      [:applicant :authority]}
-  [command]
-  (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
+  [{application :application}]
+  (ok :attachmentTypes (:allowedAttachmentTypes application)))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
@@ -697,21 +697,19 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id :files :xMargin :yMargin]
+  {:parameters [:id files xMargin yMargin]
    :roles      [:authority]
    :states     [:open :submitted :complement-needed :verdictGiven]
    :description "Stamps all attachments of given application"}
-  [{data :data :as command}]
-  (with-application command
-    (fn [application]
-      (ok :job (make-stamp-job
-                 (key-by :attachment-id (map ->file-info (filter (comp (set (:files data)) :id) (:attachments application))))
-                 {:application-id (:id application)
-                  :user (:user command)
-                  :created (:created command)
-                  :x-margin (->long (:xMargin data))
-                  :y-margin (->long (:yMargin data))
-                  :transparency (->long (or (:transparency data) 0))})))))
+  [{application :application {transparency :transparency} :data :as command}]
+  (ok :job (make-stamp-job
+             (key-by :attachment-id (map ->file-info (filter (comp (set files) :id) (:attachments application))))
+             {:application-id (:id application)
+              :user (:user command)
+              :created (:created command)
+              :x-margin (->long xMargin)
+              :y-margin (->long yMargin)
+              :transparency (->long (or transparency 0))})))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
