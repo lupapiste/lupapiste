@@ -31,18 +31,44 @@
 ;; Object types (URL encoded)
 (def building-type "typeName=rakval%3AValmisRakennus")
 (def case-type     "typeName=rakval%3ARakennusvalvontaAsia")
+(def ya-type       "typeName=yak%3AYleisetAlueet")
 
 ;; For building filters
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 (def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def yleisten-alueiden-lp-lupatunnus "yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
 
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
+(defn post-body-for-ya-application [application-id]
+  {:body (str "<wfs:GetFeature
+      service=\"WFS\"
+        version=\"1.0.0\"
+        outputFormat=\"GML2\"
+        xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
+        xmlns:wfs=\"http://www.opengis.net/wfs\"
+        xmlns:ogc=\"http://www.opengis.net/ogc\"
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+        xsi:schemaLocation=\"http://www.opengis.net/wfs
+        http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd\">
+        <wfs:Query typeName=\"yak:YleisetAlueet\">
+          <ogc:Filter>
+            <ogc:PropertyIsEqualTo>
+              <ogc:PropertyName>yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
+              <ogc:Literal>" application-id "</ogc:Literal>
+            </ogc:PropertyIsEqualTo>
+          </ogc:Filter>
+         </wfs:Query>
+       </wfs:GetFeature>")})
+
 (defn wfs-krysp-url [server object-type filter]
   (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
+
+(defn wfs-krysp-url-with-service [server object-type filter]
+  (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
 (defn building-xml [server id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
@@ -50,9 +76,14 @@
     (cr/get-xml url)))
 
 (defn application-xml [server id]
-  (let [url (wfs-krysp-url server case-type (property-equals asian-lp-lupatunnus id))]
+  (let [url (wfs-krysp-url-with-service server case-type (property-equals asian-lp-lupatunnus id))]
     (debug "Get application: " url)
     (cr/get-xml url)))
+
+(defn ya-application-xml [server id]
+  (let [options (post-body-for-ya-application id)]
+    (debug "Get application: " server " with post body: " options )
+    (cr/get-xml-with-post server options)))
 
 
 (defn- ->buildingIds [m]
@@ -232,16 +263,26 @@
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
-(defn ->verdicts [xml]
+(defn ->ya-verdict [paatos-xml-without-ns]
+  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)}
+   :paivamaarat    {:paatosdokumentinPvm (get-text paatos-xml-without-ns :paatosdokumentinPvm)}
+   :poytakirjat    {}})
+
+
+(defn- ->kuntalupatunnus [asia]
+  {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])})
+
+(defn ->verdicts [xml for-elem ->function]
   (map
     (fn [asia]
-      (let [verdict-model {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])}
+      (let [verdict-model (->kuntalupatunnus asia)
             verdicts      (->> (select asia [:paatostieto :Paatos])
-                           (map ->verdict)
+                           (map ->function)
                            (cleanup)
                            (filter seq))]
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))
-    (select (cr/strip-xml-namespaces xml) :RakennusvalvontaAsia)))
+    (select (cr/strip-xml-namespaces xml) for-elem)))
+
 
