@@ -1,9 +1,11 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
-  (:require [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+  (:require [sade.env :as env]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [sade.env :as env]
-            [me.raynes.fs :as fs]))
+            ;; Make sure all the mappers are registered
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.xml.krysp.poikkeamis-mapping]
+            [lupapalvelu.xml.krysp.yleiset-alueet-mapping]))
 
 (defn- get-output-directory [permit-type organization]
   (let [sftp-user-key (permit/get-sftp-user-key permit-type)]
@@ -20,15 +22,13 @@
         begin-of-link  (get-begin-of-link permit-type)]
     (krysp-fn application lang submitted-application output-dir begin-of-link)))
 
-(defn save-review-as-krysp [application task]
+(defn save-review-as-krysp [application task user lang]
   (let [permit-type (permit/permit-type application)
         organization (organization/get-organization (:organization application))
-        krysp-fn   (permit/get-application-mapper permit-type)
+        krysp-fn   (permit/get-review-mapper permit-type)
         output-dir (get-output-directory permit-type organization)
         begin-of-link  (get-begin-of-link permit-type)]
-    ;(krysp-fn application lang submitted-application output-dir begin-of-link)
-    )
-  )
+    (krysp-fn application task user lang output-dir begin-of-link)))
 
 (defn save-unsent-attachments-as-krysp [application lang organization]
   (let [permit-type (permit/permit-type application)

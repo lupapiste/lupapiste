@@ -70,7 +70,7 @@ var taskPageController = (function() {
   }
 
   function sendTask() {
-    ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId})
+    ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
       .success(reload)

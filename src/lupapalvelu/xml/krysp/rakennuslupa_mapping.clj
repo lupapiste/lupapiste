@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+  (:require [taoensso.timbre :as timbre :refer [debug]]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [clojure.data.xml :refer :all]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -296,9 +297,12 @@
     (println xml-s)
     ))
 
-(defn save-katselmus-as-krysp [application katselmus]
+(defn save-katselmus-as-krysp [application katselmus user lang output-dir begin-of-link]
   ; TODO (save-katselmus-xml)
+  (debug "save-katselmus-as-krysp")
   )
+
+(permit/register-mapper permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
   (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil)

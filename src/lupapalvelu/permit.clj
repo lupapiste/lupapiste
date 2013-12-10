@@ -27,8 +27,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-user-key    :rakennus-ftp-user
-   :sftp-directory   "/rakennus"
-   })
+   :sftp-directory   "/rakennus"})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes         []
@@ -38,8 +37,7 @@
 (defpermit Y  "Ymparistoluvat"
   {:subtypes       []
    :sftp-user-key  nil
-   :sftp-directory nil
-   :app-krysp-mapper nil}) ;; TODO
+   :sftp-directory nil}) ;; TODO
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
@@ -65,6 +63,9 @@
 
 (defn get-application-mapper [permit-type]
   (get-metadata permit-type :app-krysp-mapper))
+
+(defn get-review-mapper [permit-type]
+  (get-metadata permit-type :review-krysp-mapper))
 
 (defn permit-type
   "gets the permit-type of application"

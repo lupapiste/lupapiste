@@ -54,12 +54,12 @@
 
 (defcommand send-task
   {:description "Authority can send task info to municipality backend system."
-   :parameters  [id taskId]
-   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :parameters  [id taskId lang]
+   :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :roles       [:authority]}
-  [{application :application :as command}]
+  [{application :application user :user :as command}]
   (assert-task-state-in [:ok :sent] command)
-  (let [task (get-task {:tasks application} taskId)]
-    (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.task-not-found)) ; TODO change key
-    (mapping-to-krysp/save-review-as-krysp application task)
+  (let [task (get-task (:tasks application) taskId)]
+    (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
+    (mapping-to-krysp/save-review-as-krysp application task user lang)
     (set-state command taskId :sent)))
