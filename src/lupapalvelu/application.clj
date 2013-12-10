@@ -375,7 +375,14 @@
   (update-application command
     {$set {:state     :submitted
            :opened    (or (:opened application) created)
-           :submitted created}}))
+           :submitted created}})
+
+  (try
+    (mongo/insert :submitted-applications
+      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
+    (catch com.mongodb.MongoException$DuplicateKey e
+      ; This is ok. Only the first submit is saved.
+      )))
 
 (defcommand refresh-ktj
   {:parameters [:id]
