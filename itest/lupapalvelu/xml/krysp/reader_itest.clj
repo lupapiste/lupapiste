@@ -117,3 +117,9 @@
   (let [xml (application-xml local-legacy id)]
     xml => truthy
     (->verdicts xml :RakennusvalvontaAsia ->verdict)))
+
+(fact "converting ya-verdict krysp to lupapiste domain model"
+  (let [xml (ya-application-xml local-legacy id)]
+    xml => truthy
+    (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)))
+

@@ -265,8 +265,8 @@
 
 (defn ->ya-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)}
-   :paivamaarat    {:paatosdokumentinPvm (get-text paatos-xml-without-ns :paatosdokumentinPvm)}
-   :poytakirjat    {}})
+   :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
+   :poytakirjat    []})
 
 
 (defn- ->kuntalupatunnus [asia]
