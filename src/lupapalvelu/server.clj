@@ -10,7 +10,6 @@
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
-            [lupapalvelu.application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
             [lupapalvelu.user-api]
