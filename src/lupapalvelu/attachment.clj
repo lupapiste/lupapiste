@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [sade.util :refer [fn-> fn->>]]
             [sade.env :as env]
+            [sade.strings :as ss]
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw executed]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
@@ -12,7 +13,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.statement :as statement])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -306,6 +306,38 @@
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
 
+
+(defn get-attachment-as
+  "Returns the attachment if user has access to application, otherwise nil."
+  [user file-id]
+  (when-let [attachment (mongo/download file-id)]
+    (when-let [application (get-application-as (:application attachment) user)]
+      (when (seq application) attachment))))
+
+(defn get-attachment
+  "Returns the attachment without access checking, otherwise nil."
+  [file-id]
+  (when-let [attachment (mongo/download file-id)]
+    (when-let [application (get-application-no-access-checking (:application attachment))]
+      (when (seq application) attachment))))
+
+(defn output-attachment
+  [attachment-id download? attachment-fn]
+  (debugf "file download: attachment-id=%s" attachment-id)
+  (if-let [attachment (attachment-fn attachment-id)]
+    (let [response {:status 200
+                    :body ((:content attachment))
+                    :headers {"Content-Type" (:content-type attachment)
+                              "Content-Length" (str (:content-length attachment))}}]
+      (if download?
+        (assoc-in response
+          [:headers "Content-Disposition"]
+          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
+        response))
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
+
 ;;
 ;; Actions
 ;;
@@ -455,105 +487,4 @@
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
 
-;;
-;; Download
-;;
-
-(defn get-attachment-as
-  "Returns the attachment if user has access to application, otherwise nil."
-  [user file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment) user)]
-      (when (seq application) attachment))))
-
-(defn get-attachment
-  "Returns the attachment without access checking, otherwise nil."
-  [file-id]
-  (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-no-access-checking (:application attachment))]
-      (when (seq application) attachment))))
-
-(defn output-attachment
-  [attachment-id download? attachment-fn]
-  (debugf "file download: attachment-id=%s" attachment-id)
-  (if-let [attachment (attachment-fn attachment-id)]
-    (let [response {:status 200
-                    :body ((:content attachment))
-                    :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))}}]
-      (if download?
-        (assoc-in response
-          [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
-        response))
-    {:status 404
-     :headers {"Content-Type" "text/plain"}
-     :body "404"}))
-
-(defn- output-attachment-if-logged-in [attachment-id download? user]
-  (if user
-    (output-attachment attachment-id download? (partial get-attachment-as user))
-    {:status 401
-     :headers {"Content-Type" "text/plain"}
-     :body "401 Unauthorized"}))
-
-(defraw "view-attachment"
-  {:parameters [:attachment-id]}
-  [{{:keys [attachment-id]} :data user :user}]
-  (output-attachment-if-logged-in attachment-id false user))
-
-(defraw "download-attachment"
-  {:parameters [:attachment-id]}
-  [{{:keys [attachment-id]} :data user :user}]
-  (output-attachment-if-logged-in attachment-id true user))
-
-(defn- append-gridfs-file [zip file-name file-id]
-  (when file-id
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
-    (with-open [in ((:content (mongo/download file-id)))]
-      (io/copy in zip))))
-
-(defn- append-stream [zip file-name in]
-  (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)))
-
-(defn- append-attachment [zip {:keys [filename fileId]}]
-  (append-gridfs-file zip filename fileId))
-
-(defn- get-all-attachments [application lang]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
-    (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        ; Add all attachments:
-        (doseq [attachment (:attachments application)]
-          (append-attachment zip (-> attachment :versions last)))
-        ; Add submitted PDF, if exists:
-        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
-        ; Add current PDF:
-        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
-        (.finish zip)))
-    temp-file))
-
-(defn- temp-file-input-stream [^File file]
-  (let [i (io/input-stream file)]
-    (proxy [FilterInputStream] [i]
-      (close []
-        (proxy-super close)
-        (when (= (io/delete-file file :could-not) :could-not)
-          (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
-(defraw "download-all-attachments"
-  {:parameters [:id]}
-  [{:keys [application lang]}]
-  (if application
-    {:status 200
-       :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (temp-file-input-stream (get-all-attachments application lang))}
-    {:status 404
-     :headers {"Content-Type" "text/plain"}
-     :body "404"}))
 
