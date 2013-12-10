@@ -20,7 +20,7 @@
         begin-of-link  (get-begin-of-link permit-type)]
     (krysp-fn application lang submitted-application output-dir begin-of-link)))
 
-(defn save-review-as-krysp [application task-id]
+(defn save-review-as-krysp [application task]
   (let [permit-type (permit/permit-type application)
         organization (organization/get-organization (:organization application))
         krysp-fn   (permit/get-application-mapper permit-type)
