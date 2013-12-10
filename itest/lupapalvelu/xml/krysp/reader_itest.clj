@@ -116,4 +116,4 @@
 (fact "converting verdict krysp to lupapiste domain model"
   (let [xml (application-xml local-legacy id)]
     xml => truthy
-    (->verdicts xml)))
+    (->verdicts xml :RakennusvalvontaAsia ->verdict)))
