@@ -18,6 +18,7 @@
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.statement :as statement]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -471,7 +472,8 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})]
+   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})
+                (permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created user application] :as command}]
