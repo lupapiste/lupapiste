@@ -286,7 +286,7 @@
         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
     (when-not document (fail! :error.document-not-found))
     (when-not schema (fail! :error.schema-not-found))
-        (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) documentId)
+    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) documentId)
     (commands/persist-model-updates id "documents" document updates created))) ; TODO support for collection parameter
 
 ;;
