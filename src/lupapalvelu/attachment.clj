@@ -1,21 +1,14 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [clojure.java.io :as io]
-            [clojure.string :as s]
             [monger.operators :refer :all]
             [sade.util :refer [fn-> fn->>]]
             [sade.env :as env]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw executed]]
+            [lupapalvelu.core :refer [fail fail!]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.mime :as mime]
-            [lupapalvelu.statement :as statement])
-  (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+            [lupapalvelu.mime :as mime]))
 
 ;;
 ;; Constants
@@ -240,7 +233,7 @@
    Otherwise a new attachment is created."
   [{:keys [application-id attachment-id attachment-type file-id filename content-type size created user target locked]}]
   (let [attachment-id (cond
-                        (s/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
+                        (ss/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
                         :else (create-attachment application-id attachment-type created target locked attachment-id))]
     (set-attachment-version application-id attachment-id file-id filename content-type size created user false)))
@@ -338,22 +331,6 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-;;
-;; Actions
-;;
-
-
-
-(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (get-attachment-info application attachmentId) :locked (= true))
-    (fail :error.attachment-is-locked)))
-
-(defn if-not-authority-states-must-match [state-set {user :user} {state :state}]
-  (when (and
-          (not= (:role user) "authority")
-          (state-set (keyword state)))
-    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
-
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
@@ -371,44 +348,4 @@
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
     (update-or-create-attachment options)))
-
-(defcommand upload-attachment
-  {:parameters [id attachmentId attachmentType filename tempfile size]
-   :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
-   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
-                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
-   :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user application] {:keys [text target locked]} :data :as command}]
-
-  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
-
-  (when (= (:type target) "statement")
-    (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
-      (fail! (:text validation-error))))
-
-  (if-let [attachment-version (attach-file! {:application-id id
-                                             :filename filename
-                                             :size size
-                                             :content tempfile
-                                             :attachment-id attachmentId
-                                             :attachment-type attachmentType
-                                             :target target
-                                             :locked locked
-                                             :user user
-                                             :created created})]
-    ; FIXME try to combine mongo writes
-    (executed "add-comment"
-      (-> command
-        (assoc :data {:id id
-                      :text text,
-                      :type :system
-                      :target {:type :attachment
-                               :id (:id attachment-version)
-                               :version (:version attachment-version)
-                               :filename (:filename attachment-version)
-                               :fileId (:fileId attachment-version)}})))
-    (fail :error.unknown)))
-
 

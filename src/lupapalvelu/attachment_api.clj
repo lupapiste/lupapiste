@@ -6,19 +6,33 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application executed]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :refer [parse-attachment-type allowed-attachment-type-for? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version if-not-authority-states-must-match]]
+            [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.statement :as statement]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
+
+;; Validators
+
+(defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+  (when (-> (get-attachment-info application attachmentId) :locked (= true))
+    (fail :error.attachment-is-locked)))
+
+(defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
+  (when (and
+          (not= (:role user) "authority")
+          (state-set (keyword state)))
+    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
 ;;
 ;; KRYSP
@@ -140,7 +154,7 @@
 ;;
 
 (defcommand delete-attachment
-  {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+  {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
    :states      [:draft :info :open :submitted :complement-needed]}
   [{:keys [application]}]
@@ -159,7 +173,6 @@
 ;;
 ;; Download
 ;;
-
 
 (defn- output-attachment-if-logged-in [attachment-id download? user]
   (if user
@@ -227,6 +240,51 @@
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
+
+;;
+;; Upload
+;;
+
+
+(defcommand upload-attachment
+  {:parameters [id attachmentId attachmentType filename tempfile size]
+   :roles      [:applicant :authority]
+   :validators [attachment-is-not-locked
+                (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
+   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
+   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
+   :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
+  [{:keys [created user application] {:keys [text target locked]} :data :as command}]
+
+  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
+
+  (when (= (:type target) "statement")
+    (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
+      (fail! (:text validation-error))))
+
+  (if-let [attachment-version (attach-file! {:application-id id
+                                             :filename filename
+                                             :size size
+                                             :content tempfile
+                                             :attachment-id attachmentId
+                                             :attachment-type attachmentType
+                                             :target target
+                                             :locked locked
+                                             :user user
+                                             :created created})]
+    ; FIXME try to combine mongo writes
+    (executed "add-comment"
+      (-> command
+        (assoc :data {:id id
+                      :text text,
+                      :type :system
+                      :target {:type :attachment
+                               :id (:id attachment-version)
+                               :version (:version attachment-version)
+                               :filename (:filename attachment-version)
+                               :fileId (:fileId attachment-version)}})))
+    (fail :error.unknown)))
 
 
 ;;
@@ -337,3 +395,4 @@
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
+
