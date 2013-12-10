@@ -106,9 +106,9 @@
    :application  {:depends [:common :repository :tree :task]
                   :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
-                       "application-model.js" "application.js" ]
+                       "application-model.js" "application.js" "building-ready.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html"]}
+                         "change-location.html" "building-ready.html"]}
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]

@@ -272,7 +272,7 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (let [document     (domain/get-document-by-id application documentId)
-        schema       (schemas/get-schema (:schema-info document))
+        schema       (schemas/get-schema (:schema-info document)) ;; HUOM: Approve-invite feilannut tahan schema-name:lla
         subject      (user/get-user-by-id userId)
         with-hetu    (and
                        (domain/has-hetu? (:body schema) [path])
@@ -696,6 +696,30 @@
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications muutoslupa-app)
     (ok :id muutoslupa-app-id)))
+
+
+;;
+;; Inform building ready
+;;
+
+(defcommand inform-building-ready
+  {:parameters ["id" buildingEndDate]
+   :roles      [:applicant :authority]                                     ;; TODO: Nama Ok?
+   :states     [:draft :open :complement-needed :submitted :verdictGiven]  ;; TODO: Nama Ok?  Vain :verdictGiven?
+;   :on-success (notify :application-state-change)
+   :input-validators [(partial non-blank-parameters [:buildingEndDate])]}
+  [{application :application}]
+
+  (println "\n Entered inform-building-ready, buildingEndDate: " buildingEndDate "\n")
+  ;(do-add-link-permit application linkPermitId)
+
+  ;; TODO: Mita tallennetaan mongoon? Ja mille avaimelle?
+
+  ;; TODO: Mita menee parametreina?
+;  (mapping-to-krysp/save-application-as-krysp)
+
+  )
+
 
 
 

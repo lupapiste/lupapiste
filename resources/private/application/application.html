@@ -705,25 +705,42 @@
         </div>
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
-        <div>
-        <table data-bind="foreach: taskGroups">
-          <thead>
-            <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
-            <tr>
-              <td data-bind="ltext: 'application.taskState'"></td>
-              <td data-bind="ltext: 'application.taskDisplayName'"></td>
-              <td data-bind="ltext: 'application.taskClosed'"></td>
-            </tr>
-          </thead>
-          <tbody data-bind="foreach: tasks">
-            <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
-              <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-              <td data-bind="text: displayName"></td>
-              <td data-bind="dateString: $data.closed"></td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
+          <div>
+            <table data-bind="foreach: taskGroups">
+              <thead>
+                <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
+                <tr>
+                  <td data-bind="ltext: 'application.taskState'"></td>
+                  <td data-bind="ltext: 'application.taskDisplayName'"></td>
+                  <td data-bind="ltext: 'application.taskClosed'"></td>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: tasks">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                  <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+                  <td data-bind="text: displayName"></td>
+                  <td data-bind="dateString: $data.closed"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+<!--           <button class="btn btn-primary modal" -->
+          <button class="btn btn-primary modal"
+                  data-bind="click: $root.buildingReadyModel.openBuildingReadyDialog,
+                             ltext: 'application.informBuildingReady',
+                             visible: $root.authorization.ok('inform-building-ready'),
+                             enable: $root.authorization.ok('inform-building-ready')"
+                  data-test-id="application-inform-building-ready-btn">
+          </button>
+
+<!--           <button class="btn btn-primary modal" -->
+<!--                   data-bind="click: $root.neighbor.manage, -->
+<!--                              ltext: 'neighbors.manage', -->
+<!--                              visible: $root.authorization.ok('neighbor-add')" -->
+<!--                   data-test-id="manage-neighbors"> -->
+<!--           </button> -->
+
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
