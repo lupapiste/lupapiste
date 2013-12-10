@@ -368,7 +368,7 @@
                     {:id "297-YA"
                      :inforequest-enabled true
                      :new-application-enabled true
-                     :name {:fi "Kuopio yleisten alueiden käyttö"}
+                     :name {:fi "Kuopio yleisten alueiden kaytto"}
                      :scope [{:municipality "297" :permitType "YA"}]
                      :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                               :url "http://www.kuopio.fi"}]

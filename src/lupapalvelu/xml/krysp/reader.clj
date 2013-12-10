@@ -45,24 +45,24 @@
 
 (defn post-body-for-ya-application [application-id]
   {:body (str "<wfs:GetFeature
-   	 service=\"WFS\"
-   	   version=\"1.0.0\"
-   	   outputFormat=\"GML2\"
-   	   xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
-   	   xmlns:wfs=\"http://www.opengis.net/wfs\"
-   	   xmlns:ogc=\"http://www.opengis.net/ogc\"
-   	   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-   	   xsi:schemaLocation=\"http://www.opengis.net/wfs
-   	   http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd\">
-   	   <wfs:Query typeName=\"yak:YleisetAlueet\">
-   	     <ogc:Filter>
-   	       <ogc:PropertyIsEqualTo>
-   	         <ogc:PropertyName>yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
-   	         <ogc:Literal>" application-id "</ogc:Literal>
-   	       </ogc:PropertyIsEqualTo>
-   	     </ogc:Filter>
-   	    </wfs:Query>
-   	  </wfs:GetFeature>")})
+      service=\"WFS\"
+        version=\"1.0.0\"
+        outputFormat=\"GML2\"
+        xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
+        xmlns:wfs=\"http://www.opengis.net/wfs\"
+        xmlns:ogc=\"http://www.opengis.net/ogc\"
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+        xsi:schemaLocation=\"http://www.opengis.net/wfs
+        http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd\">
+        <wfs:Query typeName=\"yak:YleisetAlueet\">
+          <ogc:Filter>
+            <ogc:PropertyIsEqualTo>
+              <ogc:PropertyName>yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
+              <ogc:Literal>" application-id "</ogc:Literal>
+            </ogc:PropertyIsEqualTo>
+          </ogc:Filter>
+         </wfs:Query>
+       </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
   (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
