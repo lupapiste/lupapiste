@@ -302,7 +302,7 @@
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
-        katselmus (merge {:pitoPvm (to-xml-date pitoPvm)
+        katselmus (merge {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                           :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
                           :vaadittuLupaehtonaKytkin (true? lupaehtona)
                           :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi}
