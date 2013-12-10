@@ -15,6 +15,7 @@
             [lupapalvelu.document.commands]
             [lupapalvelu.user-api]
             [lupapalvelu.operations]
+            [lupapalvelu.attachment-api]
             [lupapalvelu.statement-api]
             [lupapalvelu.tasks-api]
             [lupapalvelu.proxy-services]

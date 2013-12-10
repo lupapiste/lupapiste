@@ -17,9 +17,7 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.statement :as statement]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
+            [lupapalvelu.statement :as statement])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -460,53 +458,6 @@
                                :filename (:filename attachment-version)
                                :fileId (:fileId attachment-version)}})))
     (fail :error.unknown)))
-
-
-(defn- get-data-argument-for-attachments-mongo-update [timestamp attachments]
-  (reduce
-    (fn [data-map attachment]
-      (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) timestamp}))
-    {}
-    attachments))
-
-(defcommand move-attachments-to-backing-system
-  {:parameters [id lang]
-   :roles      [:authority]
-   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})
-                (permit/validate-permit-type-is permit/R)]
-   :states     [:verdictGiven]
-   :description "Sends such attachments to backing system that are not yet sent."}
-  [{:keys [created application] :as command}]
-
-  (let [attachments-wo-sent-timestamp (filter
-                                        #(and
-                                           (pos? (-> % :versions count))
-                                           (or
-                                             (not (:sent %))
-                                             (> (-> % :versions last :created) (:sent %)))
-                                           (not (= "statement" (-> % :target :type)))
-                                           (not (= "verdict" (-> % :target :type))))
-                                        (:attachments application))]
-    (if (pos? (count attachments-wo-sent-timestamp))
-
-      (let [organization (mongo/by-id :organizations (:organization application))]
-        (mapping-to-krysp/save-unsent-attachments-as-krysp
-          (-> application
-            (dissoc :attachments)
-            (assoc :attachments attachments-wo-sent-timestamp))
-          lang
-          organization)
-
-        (mongo/update-by-query
-          :applications
-          {:_id id}
-          {$set (get-data-argument-for-attachments-mongo-update
-                  created
-                  (:attachments application))})
-        (ok))
-
-      (fail :error.sending-unsent-attachments-failed))))
-
 
 ;;
 ;; Download
