@@ -6,3 +6,4 @@ buildingReady.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi v
 buildingReady.readyDate: Valmistumispäivämäärä:
 task.send: Siirrä taustajärjestelmään
 error.invalid-task-type: Toiminto ei ole käytössä tämän tyyppiselle vaatimukselle
+closed: Valmistunut
