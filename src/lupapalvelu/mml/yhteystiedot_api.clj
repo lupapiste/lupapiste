@@ -4,7 +4,6 @@
             [lupapalvelu.action :refer [defquery]]))
 
 (defquery owners
-  {:parameters [id]
-   :verified   true
+  {:parameters [propertyId]
    :roles      [:authority]}
-  (ok (get-owners id)))
+  (ok :owners (get-owners propertyId)))

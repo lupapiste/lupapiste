@@ -43,6 +43,50 @@
 
     </div>
 
+    <div id="dialog-select-owners" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'neighbor.owners.title'"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        <div>
+          <h2 data-bind="visible: status() > statusSearchPropertyId">
+            <span data-bind="ltext: 'neighbors.edit.propertyId'"></span>:
+            <span data-bind="text: propertyId"></span>
+          </h2>
+          <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
+          <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
+        </div>
+        <table class="property-owners">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'neighbors.owner'"></th>
+              <th data-bind="ltext: 'neighbors.owner.type'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: owners">
+            <tr>
+              <td data-bind="with: owner">
+                <!-- ko if: nameOfDeceased -->
+                <span data-bind="text nameOfDeceased"></span> 
+                -<span data-bind="ltext: loc('neighbors.owner.type.KP'])"></span>
+                <!-- /ko -->
+                <span data-bind="text: name" class="owner-name"></span>
+                <!-- ko if: bic -->
+                (<span data-bind="text: bic"></span>) 
+                <!-- /ko -->
+                <span data-bind="text: address.street" class="owner-street"></span>
+                <span data-bind="text: address.zip" class="owner-zip"></span>
+                <span data-bind="text: address.city" class="owner-city"></span>
+              </td>
+              <td data-bind="ltext: loc(['neighbors.owner.type', owner.type])">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div id="dialog-edit-neighbor" class="window autosized">
       <div class="dialog-header">
         <p data-bind="ltext: 'neighbors.edit.title'"></p>
@@ -52,27 +96,26 @@
 
         <div>
           <span data-bind="text: loc(['neighbors.edit.status', status()])"></span>
-          <img data-bind="visible: status() === statusSearch" src="/img/ajax-loader-16.gif" alt=""/>
         </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="value: propertyId, enable: status() > statusSearch, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
+          <input data-bind="value: propertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
 
           <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
-          <input data-bind="value: name, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.name" data-test-id="neighbors.edit.name"/>
+          <input data-bind="value: name, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.name" data-test-id="neighbors.edit.name"/>
 
           <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
-          <input data-bind="value: street, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.street" />
+          <input data-bind="value: street, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.street" />
 
           <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors.owner.address.zip">
           </label>
-          <input data-bind="value: zip, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
+          <input data-bind="value: zip, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
 
           <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors.owner.address.city"></label>
-          <input data-bind="value: city, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.city" />
+          <input data-bind="value: city, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.city" />
 
           <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
-          <input data-bind="value: email, enable: status() > statusSearch, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
+          <input data-bind="value: email, enable: status() > statusInit, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
         </form>
 
         <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.edit.ok"></button>

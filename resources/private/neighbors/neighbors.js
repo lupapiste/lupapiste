@@ -19,6 +19,7 @@
   var applicationId;
   var model = new Model();
   var editModel = new EditModel();
+  var ownersModel = new OwnersModel();
 
   function Model() {
     var self = this;
@@ -40,9 +41,9 @@
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
 
-    self.edit   = function(neighbor) { editModel.init(neighbor).edit().open(); };
-    self.add    = function()         { editModel.init().edit().open(); };
-    self.click  = function(x, y)     { editModel.init().search(x, y).open(); };
+    self.edit   = function(neighbor) { editModel.init(neighbor).edit().openEdit(); };
+    self.add    = function()         { editModel.init().edit().openEdit(); };
+    self.click  = function(x, y)     { ownersModel.init().search(x, y).openOwners(); };
     self.done = function() { window.location.hash = "!/application/" + applicationId + "/statement"; };
     self.remove = function(neighbor) {
       self.neighborId(neighbor.neighborId);
@@ -63,15 +64,88 @@
       return self;
     };
   }
+  
+  function OwnersModel() {
+      function getPersonName(person) {
+          if (person.sukunimi && person.etunimet) {
+              return person.sukunimi + ", " + person.etunimet;
+          } else {
+              return person.nimi;
+          }
+      }
+      function toNeighbor(owner) {
+          var type = owner.henkilolaji,
+              nameOfDeceased = null;
+          
+          if (owner.yhteyshenkilo) {
+              nameOfDeceased = getPersonName(owner);
+              owner = owner.yhteyshenkilo;
+              type = "KPY";
+          }
+          return {
+              propertyId: self.propertyId(),
+              owner: {
+                  type: type,
+                  name: getPersonName(owner),
+                  nameOfDeceased: nameOfDeceased,
+                  bic: owner.ytunnus || null,
+                  address: {
+                      street: owner.jakeluosoite || null,
+                      city: owner.paikkakunta || null,
+                      zip: owner.postinumero || null
+                  }
+              }
+          };
+      }
+      
+      var self = this;
+
+      self.status = ko.observable();
+      self.statusInit             = 0;
+      self.statusSearchPropertyId = 1;
+      self.statusSearchOwners     = 2;
+      self.statusSelectOwners     = 3;
+      self.statusSearchFailed     = 4;
+      
+      self.owners = ko.observableArray();
+      self.propertyId = ko.observable();
+
+      self.init = function() { return self.status(self.statusInit).propertyId(null).owners([]); };
+
+      self.isSearching = function() { return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; }
+
+      self.search = function(x, y) { return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y); };
+
+      self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound); return self; };
+      
+      self.propertyIdFound = function(propertyId) {
+          return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+      };
+      
+      self.searchOwners = function(propertyId) {
+          locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, console.log);
+      };
+      self.ownersFound = function(data) {
+          console.log(data);
+          self.owners(_.map(data.owners, toNeighbor));
+          return self.status(self.statusSelectOwners);
+      }
+      
+      self.propertyIfNotFound = function() { return self.status(self.statusSearchFailed); };
+      self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; };
+
+      self.openOwners = function() { LUPAPISTE.ModalDialog.open("#dialog-select-owners"); return self; };
+      
+      self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
+      self.requestContext = new RequestContext();
+  }
 
   function EditModel() {
     var self = this;
 
     self.status = ko.observable();
     self.statusInit         = 0;
-    self.statusSearch       = 1;
     self.statusEdit         = 2;
-    self.statusSearchFailed = 3;
 
     self.init = function(data) {
       var data = data || {},
@@ -92,12 +166,6 @@
     };
 
     self.edit = function() { return self.status(self.statusEdit); };
-    self.search = function(x, y) { return self.status(self.statusSearch).beginUpdateRequest().searchPropertyId(x, y); };
-    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound); return self; };
-    self.propertyIdFound = function(propertyId) { return self.propertyId(propertyId).status(self.statusEdit).focusName(); };
-    self.propertyIfNotFound = function() { return self.status(self.statusSearchFailed); };
-    self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; };
     self.focusName = function() { $("#neighbors-edit-name").focus(); return self; };
 
     self.id = ko.observable();
@@ -122,7 +190,7 @@
     var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email"];
     function paramValue(paramName) { return self[paramName](); }
 
-    self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
+    self.openEdit = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
     self.save = function() {
       ajax
         .command(self.neighborId() ? "neighbor-update" : "neighbor-add", _.zipObject(paramNames, _.map(paramNames, paramValue)))
@@ -134,7 +202,6 @@
 
     // self.neighbors.push(makeNew(propertyId));
 
-    self.requestContext = new RequestContext();
   }
 
   hub.onPageChange("neighbors", function(e) {
@@ -149,6 +216,7 @@
   $(function() {
     $("#neighbors-content").applyBindings(model);
     $("#dialog-edit-neighbor").applyBindings(editModel).find("form").placeholderize();
+    $("#dialog-select-owners").applyBindings(ownersModel);
   });
 
 })();
