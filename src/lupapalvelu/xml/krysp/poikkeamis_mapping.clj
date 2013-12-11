@@ -4,13 +4,14 @@
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]
             [sade.util :refer :all]
+            [lupapalvelu.core :as core]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
-            [lupapalvelu.ke6666 :as ke6666]
-            [lupapalvelu.core :as core]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.ke6666 :as ke6666]))
 
 
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
@@ -118,3 +119,5 @@
 
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
+
+(permit/register-mapper permit/P :app-krysp-mapper save-application-as-krysp)

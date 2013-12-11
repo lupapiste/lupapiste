@@ -1,0 +1,2 @@
+task.send: Siirrä taustajärjestelmään
+error.invalid-task-type: Toiminto ei ole käytössä tämän tyyppiselle vaatimukselle
