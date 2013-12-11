@@ -918,7 +918,7 @@
       "applications" {:infoRequest false}
       "inforequests" {:infoRequest true}
       "both"         nil)
-    (condp = filter-state                       ;; TODO: Tanne closed-tila ?
+    (condp = filter-state
       "all"       {:state {$ne "canceled"}}
       "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
       "canceled"  {:state "canceled"})
