@@ -732,11 +732,18 @@
           </div>
 
           <button class="btn btn-primary"
-                  data-test-id="application-inform-building-ready-btn"
-                  data-bind="click: $root.buildingReadyModel.openBuildingReadyDialog,
-                             ltext: 'application.informBuildingReady',
-                             visible: $root.authorization.ok('inform-building-ready') && !closed(),
-                             enable: $root.authorization.ok('inform-building-ready')"></button>
+                  data-test-id="application-inform-construction-started-btn"
+                  data-bind="click: $root.constructionStartedModel.openConstructionStartedDialog,
+                             ltext: 'application.button.informConstructionStarted',
+                             visible: $root.authorization.ok('inform-construction-started'),
+                             enable: $root.authorization.ok('inform-construction-started')"></button>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-construction-ready-btn"
+                  data-bind="click: $root.constructionReadyModel.openConstructionReadyDialog,
+                             ltext: 'application.button.informConstructionReady',
+                             visible: $root.authorization.ok('inform-construction-ready'),
+                             enable: $root.authorization.ok('inform-construction-ready')"></button>
 
         </div>
 

@@ -1,9 +1,17 @@
-application.informBuildingReady: Ilmoita hankkeesi valmistuneeksi
-buildingReady.dialog.continue: Jatka
-buildingReady.dialog.header: Ilmoita hankkeesi valmistuneeksi
-buildingReady.dialog.helpParagraph: Valitse alta hankkeesi valmistumispäivämäärä ja valitse sitten Jatka.
-buildingReady.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi valmistuneeksi {0}?
-buildingReady.readyDate: Valmistumispäivämäärä:
+application.button.informConstructionStarted: Ilmoita hankkeesi alkaneeksi
+constructionStarted.dialog.continue: Jatka
+constructionStarted.dialog.header: Ilmoita hankkeesi alkaneeksi
+constructionStarted.dialog.helpParagraph: Valitse alta hankkeesi alkamispäivämäärä ja valitse sitten Jatka.
+constructionStarted.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi alkaneeksi {0}?
+constructionStarted.startedDate: Alkamispäivämäärä:
+application.button.informConstructionReady: Ilmoita hankkeesi valmistuneeksi
+
+constructionReady.dialog.continue: Jatka
+constructionReady.dialog.header: Ilmoita hankkeesi valmistuneeksi
+constructionReady.dialog.helpParagraph: Valitse alta hankkeesi valmistumispäivämäärä ja valitse sitten Jatka.
+constructionReady.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi valmistuneeksi {0}?
+constructionReady.readyDate: Valmistumispäivämäärä:
+closed: Valmistunut
+
 task.send: Siirrä taustajärjestelmään
 error.invalid-task-type: Toiminto ei ole käytössä tämän tyyppiselle vaatimukselle
-closed: Valmistunut

@@ -170,11 +170,6 @@
                                                 ;:tag :tunniste
                                                 }]}]}]}]}]})
 
-(defn- get-building-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (:verdictGiven application)
-                                    :loppuHetki (to-xml-datetime (:closed application))}}
-   :valmistumisIlmoitusPvm (to-xml-date (now))})
-
 (defn- get-Liite [title link attachment type file-id]
    {:kuvaus title
     :linkkiliitteeseen link
