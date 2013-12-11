@@ -206,12 +206,13 @@
    :verified   true}
   [{user :user application :application created :created :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-      ; FIXME combine mongo writes
-      (set-user-to-document id document (:id user) (:path my-invite) user created))
     (update-application command
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:auth.$ (user/user-in-role user :writer)}})))
+      {$set  {:auth.$ (user/user-in-role user :writer)}})
+    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
+      ; It's not possible to combine Mongo writes here,
+      ; because only the last $elemMatch counts.
+      (set-user-to-document id document (:id user) (:path my-invite) user created))))
 
 (defcommand remove-invite
   {:parameters [id email]
