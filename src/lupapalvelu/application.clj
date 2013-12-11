@@ -64,6 +64,27 @@
   (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
+;; Helpers
+
+(defn- set-user-to-document [application-id document user-id path current-user timestamp]
+  {:pre [document]}
+  (let [schema       (schemas/get-schema (:schema-info document))
+         subject      (user/get-user-by-id user-id)
+         with-hetu    (and
+                        (domain/has-hetu? (:body schema) [path])
+                        (user/same-user? current-user subject))
+         person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+         model        (if-not (blank? path)
+                        (assoc-in {} (map keyword (split path #"\.")) person)
+                        person)
+         updates      (tools/path-vals model)
+         ; Path should exist in schema!
+         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
+     (when-not schema (fail! :error.schema-not-found))
+     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+     (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
+  )
+
 ;;
 ;; Query application:
 ;;
@@ -183,17 +204,15 @@
   {:parameters [id]
    :roles      [:applicant]
    :verified   true}
-  [{user :user application :application :as command}]
+  [{user :user application :application created :created :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-    ; FIXME combine mongo writes
-    (executed "set-user-to-document"
-      (-> command
-        (assoc-in [:data :documentId] (:documentId my-invite))
-        (assoc-in [:data :path]       (:path my-invite))
-        (assoc-in [:data :userId]     (:id user))))
     (update-application command
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:auth.$ (user/user-in-role user :writer)}})))
+      {$set  {:auth.$ (user/user-in-role user :writer)}})
+    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
+      ; It's not possible to combine Mongo writes here,
+      ; because only the last $elemMatch counts.
+      (set-user-to-document id document (:id user) (:path my-invite) user created))))
 
 (defcommand remove-invite
   {:parameters [id email]
@@ -267,23 +286,9 @@
   {:parameters [id documentId userId path]
    :authenticated true}
   [{:keys [user created application] :as command}]
-  (let [document     (domain/get-document-by-id application documentId)
-        schema       (schemas/get-schema (:schema-info document))
-        subject      (user/get-user-by-id userId)
-        with-hetu    (and
-                       (domain/has-hetu? (:body schema) [path])
-                       (user/same-user? user subject))
-        person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
-        model        (if-not (blank? path)
-                       (assoc-in {} (map keyword (split path #"\.")) person)
-                       person)
-        updates      (tools/path-vals model)
-        ; Path should exist in schema!
-        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
-    (when-not document (fail! :error.document-not-found))
-    (when-not schema (fail! :error.schema-not-found))
-    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) documentId)
-    (commands/persist-model-updates id "documents" document updates created))) ; TODO support for collection parameter
+  (if-let [document (domain/get-document-by-id application documentId)]
+    (set-user-to-document id document userId path user created)
+    (fail :error.document-not-found)))
 
 ;;
 ;; Assign
