@@ -207,14 +207,15 @@
                            begin-of-link
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
-        canonical (katselmus-canonical application lang started building-id user
-                                       katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
-                                       huomautukset lasnaolijat poikkeamat)
+        canonical-without-attachments (katselmus-canonical application lang started building-id user
+                                        katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
+                                        huomautukset lasnaolijat poikkeamat)
+        canonical (assoc-in canonical-without-attachments
+                    [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
+                    attachments)
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
     ;TODO
-    (println (clojure.data.xml/indent-str xml))
-    (println attachments)
     (mapping-common/write-to-disk application attachments nil xml output-dir)))
 
 (defn save-katselmus-as-krysp [application katselmus user lang output-dir begin-of-link]
@@ -238,8 +239,7 @@
                                lasnaolijat
                                poikkeamat
                                begin-of-link
-                               {:type "task" :id (:id katselmus)}))
-  )
+                               {:type "task" :id (:id katselmus)})))
 
 (permit/register-mapper permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
