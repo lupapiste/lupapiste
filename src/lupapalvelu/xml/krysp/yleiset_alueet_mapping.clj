@@ -1,12 +1,13 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [me.raynes.fs :as fs]
-            [lupapalvelu.mongo :as mongo]  ;; used in "write-attachments"
+            [lupapalvelu.core :as core]
+            [lupapalvelu.mongo :as mongo]
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]
             [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.canonical-common :refer [to-xml-date to-xml-datetime ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]))
@@ -148,10 +149,15 @@
                               :child [{:tag :LupakohtainenLisatieto
                                        :child [{:tag :selitysteksti :ns "yht"}
                                                {:tag :arvo :ns "yht"}]}]}
+                             {:tag :kayttojaksotieto
+                              :child [{:tag :Kayttojakso
+                                       :child [{:tag :alkuHetki :ns "yht"}
+                                               {:tag :loppuHetki :ns "yht"}]}]}
                              {:tag :toimintajaksotieto
                               :child [{:tag :Toimintajakso
                                        :child [{:tag :alkuHetki :ns "yht"}
                                                {:tag :loppuHetki :ns "yht"}]}]}
+                             {:tag :valmistumisilmoitusPvm}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
@@ -162,6 +168,11 @@
                                        :child [{:tag :vaadittuKytkin
                                                 ;:tag :tunniste
                                                 }]}]}]}]}]})
+
+(defn- get-building-ready-info [application]
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (:verdictGiven application)
+                                    :loppuHetki (to-xml-datetime (:closed application))}}
+   :valmistumisIlmoitusPvm (to-xml-date (core/now))})
 
 (defn- get-Liite [title link attachment type file-id]
    {:kuvaus title
@@ -307,5 +318,4 @@
 
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
-
 

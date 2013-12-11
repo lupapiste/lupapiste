@@ -39,7 +39,7 @@
         krysp-fn (condp = permit-type
                    :YA ya-mapping/save-application-as-krysp
                    :R  rl-mapping/save-application-as-krysp
-                   :P   p-mapping/save-application-as-krysp)
+                   :P  p-mapping/save-application-as-krysp)
         output-dir (get-output-directory permit-type organization)
         begin-of-link  (get-begin-of-link permit-type)]
     (krysp-fn application lang submitted-application output-dir begin-of-link)))

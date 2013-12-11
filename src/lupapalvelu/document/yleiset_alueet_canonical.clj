@@ -139,6 +139,16 @@
     (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
+;;
+;; ***  TODO: Kumpi alkuHetkeen: aplicationin :verdictGiven vai :constructions-started?  ***
+;;            Kaytetaanko meilla ylipaataan :constructions-startedia?
+;;
+(defn- get-building-ready-info [application]
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (:verdictGiven application)  ;; TODO: Mika alkuHetkeksi?
+                                    :loppuHetki (to-xml-datetime (:closed application))}}
+   :valmistumisIlmoitusPvm (to-xml-date (now))})
+
+
 (defn- permits [application]
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
@@ -236,25 +246,24 @@
                                                         ;:tunniste "..."
                                                         }})
 
-        body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
-                               :luvanTunnisteTiedot (lupatunnus (:id application))
-                               :alkuPvm alku-pvm
-                               :loppuPvm loppu-pvm
-                               :sijaintitieto (get-sijaintitieto application)
-                               :osapuolitieto osapuolitieto
-                               :vastuuhenkilotieto vastuuhenkilotieto
-                               :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
-                               :lausuntotieto (get-statements (:statements application))
-                               :lupaAsianKuvaus lupaAsianKuvaus
-                               :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-                               :sijoituslupaviitetieto sijoituslupaviitetieto
-                               :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
-                               :johtoselvitysviitetieto johtoselvitysviitetieto}}
-
-        body (if (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
-               (assoc-in body [permit-name-key :toimintajaksotieto]
-                 (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
-               body)]
+        body (merge {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
+                                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                                      :alkuPvm alku-pvm
+                                      :loppuPvm loppu-pvm
+                                      :sijaintitieto (get-sijaintitieto application)
+                                      :osapuolitieto osapuolitieto
+                                      :vastuuhenkilotieto vastuuhenkilotieto
+                                      :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
+                                      :lausuntotieto (get-statements (:statements application))
+                                      :lupaAsianKuvaus lupaAsianKuvaus
+                                      :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
+                                      :sijoituslupaviitetieto sijoituslupaviitetieto
+                                      :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
+                                      :johtoselvitysviitetieto johtoselvitysviitetieto}}
+               (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
+                 {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
+               (when (:closed application)
+                 (get-building-ready-info application)))]
 
     (cr/strip-nils body)))
 

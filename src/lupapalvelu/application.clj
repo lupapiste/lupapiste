@@ -313,10 +313,6 @@
                             {$unset {:authority ""}}))
       (fail "error.user.not.found" :id assigneeId))))
 
-;;
-;;
-;;
-
 (defcommand cancel-application
   {:parameters [id]
    :roles      [:applicant]
@@ -703,23 +699,21 @@
 ;;
 
 (defcommand inform-building-ready
-  {:parameters ["id" buildingEndDate]
-   :roles      [:applicant :authority]                                     ;; TODO: Nama Ok?
-   :states     [:draft :open :complement-needed :submitted :verdictGiven]  ;; TODO: Nama Ok?  Vain :verdictGiven?
-;   :on-success (notify :application-state-change)
-   :input-validators [(partial non-blank-parameters [:buildingEndDate])]}
-  [{application :application}]
+  {:parameters ["id" readyTimestamp]
+   ;; TODO: Nama Ok?
+   :roles      [:applicant :authority]
+   ;; TODO: Nama Ok?  Vain :constructions-started?
+   :states     [;:draft :open :complement-needed :submitted
+                :verdictGiven :constructions-started]
+   :on-success (notify :application-state-change)
+   :validators [(permit/validate-permit-type-is permit/YA)]
+   :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
+  [{:keys [created application] :as command}]
 
-  (println "\n Entered inform-building-ready, buildingEndDate: " buildingEndDate "\n")
-  ;(do-add-link-permit application linkPermitId)
+  (println "\n Entered inform-building-ready, readyTimestamp: " readyTimestamp "\n")
 
-  ;; TODO: Mita tallennetaan mongoon? Ja mille avaimelle?
-
-  ;; TODO: Mita menee parametreina?
-;  (mapping-to-krysp/save-application-as-krysp)
-
-  )
-
+  (update-application command {$set {:closed readyTimestamp}})
+  (mapping-to-krysp/save-application-as-krysp application))
 
 
 

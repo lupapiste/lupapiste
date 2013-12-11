@@ -731,21 +731,17 @@
             </table>
           </div>
 
+<!-- ***** TODO: Disabloi tama nappi, jos valmistumisilmoitus on jo tehty ***** -->
+<!-- state != closed  TAI  !closed -->
+
 <!--           <button class="btn btn-primary modal" -->
-          <button class="btn btn-primary modal"
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-building-ready-btn"
                   data-bind="click: $root.buildingReadyModel.openBuildingReadyDialog,
                              ltext: 'application.informBuildingReady',
                              visible: $root.authorization.ok('inform-building-ready'),
-                             enable: $root.authorization.ok('inform-building-ready')"
-                  data-test-id="application-inform-building-ready-btn">
+                             enable: $root.authorization.ok('inform-building-ready')">
           </button>
-
-<!--           <button class="btn btn-primary modal" -->
-<!--                   data-bind="click: $root.neighbor.manage, -->
-<!--                              ltext: 'neighbors.manage', -->
-<!--                              visible: $root.authorization.ok('neighbor-add')" -->
-<!--                   data-test-id="manage-neighbors"> -->
-<!--           </button> -->
 
         </div>
 
