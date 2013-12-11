@@ -93,16 +93,12 @@
   {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
+  [{:keys [application] :as command}]
   (let [attachment-type (parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
-      (do
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :attachments {$elemMatch {:id attachmentId}}}
-          {$set {:attachments.$.type attachment-type}})
-        (ok))
+      (update-application command
+        {:attachments {$elemMatch {:id attachmentId}}}
+        {$set {:attachments.$.type attachment-type}})
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
@@ -116,10 +112,9 @@
    :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{:keys [created]}]
-  (mongo/update
-    :applications
-    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+  [{:keys [created] :as command}]
+  (update-application command
+    {:attachments {$elemMatch {:id attachmentId}}}
     {$set {:modified created
            :attachments.$.state :ok}}))
 
@@ -128,10 +123,9 @@
    :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{:keys [created]}]
-  (mongo/update
-    :applications
-    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+  [{:keys [created] :as command}]
+  (update-application command
+    {:attachments {$elemMatch {:id attachmentId}}}
     {$set {:modified created
            :attachments.$.state :requires_user_action}}))
 
