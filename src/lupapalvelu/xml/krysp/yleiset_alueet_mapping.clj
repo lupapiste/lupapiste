@@ -1,15 +1,15 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
-  (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [me.raynes.fs :as fs]
-            [lupapalvelu.core :as core]
-            [lupapalvelu.mongo :as mongo]
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
-            [clojure.walk :refer [prewalk]]
+  (:require [me.raynes.fs :as fs]
             [sade.util :refer :all]
+            [lupapalvelu.core :refer [now]]
+            [lupapalvelu.mongo :as mongo]
+            [clojure.data.xml :as xml]
+            [clojure.java.io :as io]
+            [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-date to-xml-datetime ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]))
 
@@ -19,14 +19,14 @@
 ;; Added tag :Kayntiosoite after :kayntiosoitetieto
 ;; Added tag :Postiosoite after :postiosoitetieto
 (def ^:private yritys-child-modified
-  (prewalk
+  (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
               (assoc
                 (assoc m :tag :kayntiosoitetieto)
                 :child
                 [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
               m))
-    (prewalk
+    (walk/prewalk
       (fn [m] (if (= (:tag m) :postiosoite)
                 (assoc
                   (assoc m :tag :postiosoitetieto)
@@ -173,7 +173,7 @@
 (defn- get-building-ready-info [application]
   {:kayttojaksotieto {:Kayttojakso {:alkuHetki (:verdictGiven application)
                                     :loppuHetki (to-xml-datetime (:closed application))}}
-   :valmistumisIlmoitusPvm (to-xml-date (core/now))})
+   :valmistumisIlmoitusPvm (to-xml-date (now))})
 
 (defn- get-Liite [title link attachment type file-id]
    {:kuvaus title
@@ -223,11 +223,11 @@
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
           attachment-file-name (str output-dir "/" (mapping-common/get-file-name-on-server file-id (:file-name attachment-file)))
-          attachment-file (file attachment-file-name)
+          attachment-file (io/file attachment-file-name)
           ]
-      (with-open [out (output-stream attachment-file)
+      (with-open [out (io/output-stream attachment-file)
                   in (content)]
-        (copy in out)))))
+        (io/copy in out)))))
 
 (defn- write-statement-attachments [attachments output-dir]
   (let [f (for [fi attachments]
@@ -260,8 +260,8 @@
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [lupa-name-key ((-> application :operations first :name keyword) ya-operation-type-to-schema-name-key)
         file-name  (str output-dir "/" (:id application))
-        tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))
+        tempfile   (io/file (str file-name ".tmp"))
+        outfile    (io/file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
         attachments (get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
@@ -277,7 +277,7 @@
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))
-        xml-s (indent-str xml)]
+        xml-s (xml/indent-str xml)]
 
 
 ;    (println "\n lupa-name-key: ")
@@ -311,8 +311,8 @@
 
     (validate xml-s)
     (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below
-    (with-open [out-file-stream (writer tempfile)]
-      (emit xml out-file-stream))
+    (with-open [out-file-stream (io/writer tempfile)]
+      (xml/emit xml out-file-stream))
 
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)

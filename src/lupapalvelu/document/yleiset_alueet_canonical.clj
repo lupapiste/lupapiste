@@ -103,7 +103,7 @@
 
 (defn- get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-                    :hakemuksenTila ((keyword (:state application)) application-state-to-krysp-state)
+                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})

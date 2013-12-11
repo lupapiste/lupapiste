@@ -698,12 +698,9 @@
 
 (defcommand inform-building-ready
   {:parameters ["id" readyTimestamp lang]
-   :roles      [:applicant :authority]                               ;;TODO: Nama Ok?
-   :states     [:verdictGiven :constructions-started]                ;;TODO: Tahan vain :constructions-started?
-   :on-success [;(notify :application-state-change)                   ;;TODO: Lisaa tama?
-                (fn [{data :data :as command} _]
-                  (update-application command {$set {:closed (:readyTimestamp data)}}))]
-
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionsStarted]      ;;TODO: Tahan vain :constructionsStarted?
+   :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
   [{:keys [created application] :as command}]
@@ -713,8 +710,10 @@
       application
       lang
       application
-      organization))
-  (ok))
+      organization)
+    (update-application command {$set {:closed readyTimestamp
+                                       :state  :closed}})
+    (ok)))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
@@ -919,7 +918,7 @@
       "applications" {:infoRequest false}
       "inforequests" {:infoRequest true}
       "both"         nil)
-    (condp = filter-state
+    (condp = filter-state                       ;; TODO: Tanne closed-tila ?
       "all"       {:state {$ne "canceled"}}
       "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
       "canceled"  {:state "canceled"})
