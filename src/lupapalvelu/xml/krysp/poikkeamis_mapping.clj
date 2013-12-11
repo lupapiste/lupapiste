@@ -83,10 +83,7 @@
               ) canonical statement-attachments)))
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-  (let [file-name  (str output-dir "/" (:id application))
-        tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))
-        subtype    (keyword (:permitSubtype application))
+  (let [subtype    (keyword (:permitSubtype application))
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)
                       [:Popast :poikkeamisasiatieto :Poikkeamisasia]
@@ -104,20 +101,8 @@
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
                     attachments)
-        xml (element-to-xml canonical poikkeamis_to_krysp)
-        xml-s (indent-str xml)]
+        xml (element-to-xml canonical poikkeamis_to_krysp)]
 
-    ;(clojure.pprint/pprint (:attachments application))
-    ;(clojure.pprint/pprint canonical)
-    ;(println xml-s)
-    (validate xml-s)
-    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
-    (with-open [out-file-stream (writer tempfile)]
-      (emit xml out-file-stream))
-    (mapping-common/write-attachments attachments output-dir)
-    (mapping-common/write-statement-attachments statement-attachments output-dir)
-
-    (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile)))
+    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
 (permit/register-mapper permit/P :app-krysp-mapper save-application-as-krysp)

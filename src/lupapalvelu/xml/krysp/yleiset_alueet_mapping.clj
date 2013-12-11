@@ -2,15 +2,12 @@
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [me.raynes.fs :as fs]
             [lupapalvelu.mongo :as mongo]  ;; used in "write-attachments"
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
             [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -164,65 +161,6 @@
                                                 ;:tag :tunniste
                                                 }]}]}]}]}]})
 
-(defn- get-Liite [title link attachment type file-id]
-   {:kuvaus title
-    :linkkiliitteeseen link
-    :muokkausHetki (to-xml-datetime (:modified attachment))
-    :versionumero 1
-    :tyyppi type
-    :fileId file-id})
-
-(defn- get-liite-for-lausunto [attachment application begin-of-link]
-  (let [type "Lausunto"
-        title (str (:title application) ": " type "-" (:id attachment))
-        file-id (get-in attachment [:latestVersion :fileId])
-        attachment-file-name (mapping-common/get-file-name-on-server
-                               file-id
-                               (get-in attachment [:latestVersion :filename]))
-        link (str begin-of-link attachment-file-name)]
-    {:Liite (get-Liite title link attachment type file-id)}))
-
-(defn- get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
-  (let [statement-attachments-by-id (group-by
-                                      (fn-> :target :id keyword)
-                                      (filter
-                                        (fn-> :target :type (= "statement"))
-                                        (:attachments application)))
-        canonical-attachments (for [id allowed-statement-ids]
-                                {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
-                                                (get-liite-for-lausunto attachment application begin-of-link))})]
-    (not-empty canonical-attachments)))
-
-
-(defn- get-attachments-as-canonical [application begin-of-link]
-  (let [attachments (:attachments application)
-        canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
-                                    :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-Liite title link attachment type file-id)})]
-    (not-empty canonical-attachments)))
-
-(defn- write-attachments [attachments output-dir]
-  (doseq [attachment attachments]
-    (let [file-id (get-in attachment [:Liite :fileId])
-          attachment-file (mongo/download file-id)
-          content (:content attachment-file)
-          attachment-file-name (str output-dir "/" (mapping-common/get-file-name-on-server file-id (:file-name attachment-file)))
-          attachment-file (file attachment-file-name)
-          ]
-      (with-open [out (output-stream attachment-file)
-                  in (content)]
-        (copy in out)))))
-
-(defn- write-statement-attachments [attachments output-dir]
-  (let [f (for [fi attachments]
-            (vals fi))
-        files (reduce concat (reduce concat f))]
-    (write-attachments files output-dir)))
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
   ;; if we have no statement-attachments to add return the canonical map itself
@@ -248,15 +186,12 @@
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [lupa-name-key ((-> application :operations first :name keyword) ya-operation-type-to-schema-name-key)
-        file-name  (str output-dir "/" (:id application))
-        tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
-        attachments (get-attachments-as-canonical application begin-of-link)
+        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
-        statement-attachments (get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         canonical-with-statement-attachments (add-statement-attachments
                                                lupa-name-key
                                                canonical-without-attachments
@@ -265,48 +200,11 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
-        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))
-        xml-s (indent-str xml)]
+        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
+    (println attachments)
+    (println statement-attachments)
 
-;    (println "\n lupa-name-key: ")
-;    (clojure.pprint/pprint lupa-name-key)
-;    (println "\n")
-
-;    (println "output-dir: " output-dir)
-
-;    (clojure.pprint/pprint (:attachments application))
-;    (clojure.pprint/pprint canonical-with-statement-attachments)
-;    (println xml-s)
-
-;    (println "\n attachments: ")
-;    (clojure.pprint/pprint attachments)
-;    (println "\n")
-
-;    (println "\n statement-attachments: ")
-;    (clojure.pprint/pprint statement-attachments)
-;    (println "\n")
-
-;    (println "\n canonical-with-statement-attachments: ")
-;    (clojure.pprint/pprint canonical-with-statement-attachments)
-
-;    (println "\n save-application-as-krysp, canonical: ")
-;    (clojure.pprint/pprint canonical)
-
-;    (println "\n canonical-with-statement-attachments's liitetieto: "
-;      (:liitetieto canonical-with-statement-attachments))
-
-;    (println "\n")
-
-    (validate xml-s)
-    (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below
-    (with-open [out-file-stream (writer tempfile)]
-      (emit xml out-file-stream))
-
-    (write-attachments attachments output-dir)
-    (write-statement-attachments statement-attachments output-dir)
-
-    (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile)))
+    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
 (permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)
