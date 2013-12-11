@@ -699,7 +699,7 @@
 (defcommand inform-building-ready
   {:parameters ["id" readyTimestamp lang]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven :constructionsStarted]      ;;TODO: Tahan vain :constructionsStarted?
+   :states     [:constructionsStarted]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
