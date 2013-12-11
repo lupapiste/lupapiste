@@ -1,18 +1,9 @@
 (ns lupapalvelu.xml.krysp.poikkeamis-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [me.raynes.fs :as fs]
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
-            [sade.util :refer :all]
-            [lupapalvelu.core :as core]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]
-            [lupapalvelu.ke6666 :as ke6666]))
-
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})

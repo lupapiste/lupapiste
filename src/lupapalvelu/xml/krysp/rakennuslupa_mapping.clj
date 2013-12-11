@@ -1,9 +1,8 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
   (:require [taoensso.timbre :as timbre :refer [debug]]
+            [clojure.java.io :as io]
+            [lupapalvelu.core :refer [now]]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [clojure.data.xml :refer :all]
-            [sade.util :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
@@ -11,12 +10,7 @@
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]
-            [lupapalvelu.ke6666 :as ke6666]
-            [lupapalvelu.core :as core]
-            [clojure.java.io :refer :all]
-            [me.raynes.fs :as fs]
-            ))
+            [lupapalvelu.ke6666 :as ke6666]))
 
 ;RakVal
 
@@ -191,8 +185,8 @@
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
-        submitted-file (file (str output-dir "/" (mapping-common/get-submitted-filename id)))
-        current-file (file (str output-dir "/"  (mapping-common/get-current-filename id)))]
+        submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
+        current-file (io/file (str output-dir "/"  (mapping-common/get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
@@ -219,7 +213,7 @@
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
     ;TODO
-    (println (indent-str xml))
+    (println (clojure.data.xml/indent-str xml))
     (println attachments)
     (mapping-common/write-to-disk application attachments nil xml output-dir)))
 
@@ -281,7 +275,7 @@
                                           {:Liite
                                            {:kuvaus "Application when sent from Lupapiste"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
-                                            :muokkausHetki (to-xml-datetime (core/now))
+                                            :muokkausHetki (to-xml-datetime (now))
                                             :versionumero 1
                                             :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
         canonical-with-statement-attachments  (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments)
