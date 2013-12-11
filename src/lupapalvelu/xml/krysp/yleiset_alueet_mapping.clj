@@ -4,8 +4,13 @@
             [lupapalvelu.mongo :as mongo]  ;; used in "write-attachments"
             [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
+            [lupapalvelu.core :refer [now]]
+            [lupapalvelu.mongo :as mongo]
+            [clojure.data.xml :as xml]
+            [clojure.java.io :as io]
+            [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.canonical-common :refer [to-xml-date to-xml-datetime ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
@@ -15,14 +20,14 @@
 ;; Added tag :Kayntiosoite after :kayntiosoitetieto
 ;; Added tag :Postiosoite after :postiosoitetieto
 (def ^:private yritys-child-modified
-  (prewalk
+  (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
               (assoc
                 (assoc m :tag :kayntiosoitetieto)
                 :child
                 [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
               m))
-    (prewalk
+    (walk/prewalk
       (fn [m] (if (= (:tag m) :postiosoite)
                 (assoc
                   (assoc m :tag :postiosoitetieto)
@@ -146,10 +151,15 @@
                               :child [{:tag :LupakohtainenLisatieto
                                        :child [{:tag :selitysteksti :ns "yht"}
                                                {:tag :arvo :ns "yht"}]}]}
+                             {:tag :kayttojaksotieto
+                              :child [{:tag :Kayttojakso
+                                       :child [{:tag :alkuHetki :ns "yht"}
+                                               {:tag :loppuHetki :ns "yht"}]}]}
                              {:tag :toimintajaksotieto
                               :child [{:tag :Toimintajakso
                                        :child [{:tag :alkuHetki :ns "yht"}
                                                {:tag :loppuHetki :ns "yht"}]}]}
+                             {:tag :valmistumisilmoitusPvm}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
@@ -160,6 +170,11 @@
                                        :child [{:tag :vaadittuKytkin
                                                 ;:tag :tunniste
                                                 }]}]}]}]}]})
+
+(defn- get-building-ready-info [application]
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (:verdictGiven application)
+                                    :loppuHetki (to-xml-datetime (:closed application))}}
+   :valmistumisIlmoitusPvm (to-xml-date (now))})
 
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
