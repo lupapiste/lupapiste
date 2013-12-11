@@ -4,7 +4,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand executed]]
+            [lupapalvelu.action :refer [defquery defcommand update-application executed]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]
@@ -84,16 +84,15 @@
                                          :given     nil
                                          :status    nil})
             statements    (map ->statement persons)]
-        (mongo/update-by-id :applications id {$pushAll {:statements statements
-                                                        :auth unique-writers}})
+        (update-application command {$pushAll {:statements statements :auth unique-writers}})
         (notifications/notify! :request-statement (assoc command :data {:users users}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
    :states     [:draft :info :open :submitted :complement-needed]
    :roles      [:authority]}
-  [_]
-  (mongo/update-by-id :applications id {$pull {:statements {:id statementId}}}))
+  [command]
+  (update-application command {$pull {:statements {:id statementId}}}))
 
 (defcommand give-statement
   {:parameters  [id statementId status text]
@@ -102,10 +101,8 @@
    :roles       [:authority]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{:keys [application] :as command}]
-  (mongo/update
-    :applications
-    {:_id id
-     :statements {$elemMatch {:id statementId}}}
+  (update-application command
+    {:statements {$elemMatch {:id statementId}}}
     {$set {:statements.$.status status
            :statements.$.given (now)
            :statements.$.text text}})
