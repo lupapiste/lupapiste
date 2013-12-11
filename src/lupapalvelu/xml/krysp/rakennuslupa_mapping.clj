@@ -237,6 +237,7 @@
                                huomautukset
                                lasnaolijat
                                poikkeamat
+                               begin-of-link
                                {:type "task" :id (:id katselmus)}))
   )
 
