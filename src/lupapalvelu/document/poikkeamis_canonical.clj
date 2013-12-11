@@ -27,7 +27,7 @@
   (map get-toimenpidefull toimenpiteet))
 
 
-(defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain]
+(defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain kayttotapaus]
   (let [root (root-element application lang)
         documents (by-type
                     (clojure.walk/postwalk
@@ -53,17 +53,17 @@
                                                      "ruotsi"
                                                      "suomi")
                                     :suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}
-       :kayttotapaus "Uusi hakemus"
+       :kayttotapaus kayttotapaus
        :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat :value)
                                    kuvaus-avain (-> hanke :kuvaus :value)}}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
 (defmethod poikkeus-application-to-canonical "poikkeamislupa" [application lang]
-  (common-poikkeamis-asia application [:Popast :poikkeamisasiatieto :Poikkeamisasia] lang :poikkeamisasianKuvaus ))
+  (common-poikkeamis-asia application [:Popast :poikkeamisasiatieto :Poikkeamisasia] lang :poikkeamisasianKuvaus "Uusi poikkeamisasia"))
 
 (defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
-  (common-poikkeamis-asia application [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia] lang :suunnittelutarveasianKuvaus))
+  (common-poikkeamis-asia application [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia] lang :suunnittelutarveasianKuvaus "Uusi suunnittelutarveratkaisu"))
 
 
 
