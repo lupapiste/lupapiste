@@ -708,7 +708,7 @@
    :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
   [{:keys [created application] :as command}]
   (let [application (assoc application :closed readyTimestamp)
-        organization (mongo/by-id :organizations (:organization application))]
+        organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp
       application
       lang
