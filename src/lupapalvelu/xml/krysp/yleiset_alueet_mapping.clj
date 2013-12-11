@@ -1,13 +1,7 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [me.raynes.fs :as fs]
-            [lupapalvelu.mongo :as mongo]  ;; used in "write-attachments"
-            [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
             [lupapalvelu.core :refer [now]]
-            [lupapalvelu.mongo :as mongo]
-            [clojure.data.xml :as xml]
-            [clojure.java.io :as io]
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-date to-xml-datetime ya-operation-type-to-schema-name-key]]
@@ -216,9 +210,6 @@
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
-
-    (println attachments)
-    (println statement-attachments)
 
     (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
