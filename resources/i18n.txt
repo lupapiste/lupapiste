@@ -1,3 +1,2 @@
 task.send: Siirrä taustajärjestelmään
-verdict.paatosdokumentinPvm: Päätöksen päiväys
-verdict.takuuaikaPaivat: Takuuaika päivissä
+
