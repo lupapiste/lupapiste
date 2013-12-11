@@ -273,19 +273,19 @@
     (ke6666/generate application lang current-file)))
 
 (defn save-katselmus-xml [application
-                               lang
-                               output-dir
-                               started
-                               building-id
-                               user
-                               katselmuksen-nimi
-                               tyyppi
-                               osittainen
-                               pitaja
-                               lupaehtona
-                               huomautukset
-                               lasnaolijat
-                               poikkeamat]
+                          lang
+                          output-dir
+                          started
+                          building-id
+                          user
+                          katselmuksen-nimi
+                          tyyppi
+                          osittainen
+                          pitaja
+                          lupaehtona
+                          huomautukset
+                          lasnaolijat
+                          poikkeamat]
   (let [canonical (katselmus-canonical application lang started building-id user
                                        katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
                                        huomautukset lasnaolijat poikkeamat)
