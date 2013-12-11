@@ -1,8 +1,8 @@
-application.informBuildingReady: Ilmoita rakennushankkeesi valmistuneeksi
+application.informBuildingReady: Ilmoita hankkeesi valmistuneeksi
 buildingReady.dialog.continue: Jatka
-buildingReady.dialog.header: Ilmoita rakennushankkeesi valmistuneeksi
-buildingReady.dialog.message: Haluatko varmasti ilmoittaa rakennushankkeesi valmistuneeksi {0}?
-buildingReady.dialog.helpParagraph: Valitse rakennushankkeesi valmistumispäivämäärä.
-buildingReady.readyDate: Valmistumispäivämäärä
+buildingReady.dialog.header: Ilmoita hankkeesi valmistuneeksi
+buildingReady.dialog.helpParagraph: Valitse alta hankkeesi valmistumispäivämäärä ja valitse sitten Jatka.
+buildingReady.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi valmistuneeksi {0}?
+buildingReady.readyDate: Valmistumispäivämäärä:
 verdict.paatosdokumentinPvm: Päätöksen päiväys
 verdict.takuuaikaPaivat: Takuuaika päivissä

@@ -699,22 +699,24 @@
 ;;
 
 (defcommand inform-building-ready
-  {:parameters ["id" readyTimestamp]
-   ;; TODO: Nama Ok?
-   :roles      [:applicant :authority]
-   ;; TODO: Nama Ok?  Vain :constructions-started?
-   :states     [;:draft :open :complement-needed :submitted
-                :verdictGiven :constructions-started]
-   :on-success (notify :application-state-change)
+  {:parameters ["id" readyTimestamp lang]
+   :roles      [:applicant :authority]                               ;;TODO: Nama Ok?
+   :states     [:verdictGiven :constructions-started]                ;;TODO: Tahan vain :constructions-started?
+   :on-success [;(notify :application-state-change)                   ;;TODO: Lisaa tama?
+                (fn [{data :data :as command} _]
+                  (update-application command {$set {:closed (:readyTimestamp data)}}))]
+
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
   [{:keys [created application] :as command}]
-
-  (println "\n Entered inform-building-ready, readyTimestamp: " readyTimestamp "\n")
-
-  (update-application command {$set {:closed readyTimestamp}})
-  (mapping-to-krysp/save-application-as-krysp application))
-
+  (let [application (assoc application :closed readyTimestamp)
+        organization (mongo/by-id :organizations (:organization application))]
+    (mapping-to-krysp/save-application-as-krysp
+      application
+      lang
+      application
+      organization))
+  (ok))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
