@@ -4,5 +4,5 @@ buildingReady.dialog.header: Ilmoita hankkeesi valmistuneeksi
 buildingReady.dialog.helpParagraph: Valitse alta hankkeesi valmistumispäivämäärä ja valitse sitten Jatka.
 buildingReady.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi valmistuneeksi {0}?
 buildingReady.readyDate: Valmistumispäivämäärä:
-verdict.paatosdokumentinPvm: Päätöksen päiväys
-verdict.takuuaikaPaivat: Takuuaika päivissä
+task.send: Siirrä taustajärjestelmään
+error.invalid-task-type: Toiminto ei ole käytössä tämän tyyppiselle vaatimukselle

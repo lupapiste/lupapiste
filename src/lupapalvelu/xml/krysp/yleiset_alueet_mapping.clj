@@ -7,6 +7,7 @@
             [clojure.java.io :refer :all]
             [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-date to-xml-datetime ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
@@ -319,3 +320,4 @@
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
 
+(permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)
