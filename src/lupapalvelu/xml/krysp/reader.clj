@@ -250,6 +250,7 @@
     (cr/convert-keys-to-timestamps [:muokkausHetki])))
 
 (defn ->paatospoytakirja [paatos-xml-without-ns]
+  (clojure.pprint/pprint paatos-xml-without-ns)
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
@@ -264,9 +265,11 @@
                      (map ->paatospoytakirja poytakirjat))})
 
 (defn ->ya-verdict [paatos-xml-without-ns]
-  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)}
+  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
+                    }
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
-   :poytakirjat    []})
+   :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:Liite]))]
+                     (map ->paatospoytakirja poytakirjat))})
 
 
 (defn- ->kuntalupatunnus [asia]
