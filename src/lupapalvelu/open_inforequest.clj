@@ -30,7 +30,6 @@
 (notifications/defemail :open-inforequest-commented (assoc base-email-conf :template "new-comment.md"))
 
 (defn notify-on-comment [{application :application} _]
-  (info "notify-on-comment" (:id application) (:openInfoRequest application))
   (when (:openInfoRequest application)
     (if-let [token (mongo/select-one :open-inforequest-token {:application-id (:id application)})]
       (notifications/notify! :open-inforequest-commented {:data {:email (:email token) :token-id (:id token)} :application application})
