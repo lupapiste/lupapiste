@@ -697,23 +697,16 @@
 ;;
 
 (defcommand inform-construction-started
-  {:parameters ["id" startedTimestamp lang]
+  {:parameters ["id" startedTimestamp]
    :roles      [:applicant :authority]
    :states     [:submitted]                                   ;; TODO: Mitka tilat tahan?
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestamp])]}
   [{:keys [created application] :as command}]
-  (let [application (assoc application :started startedTimestamp)
-        organization (organization/get-organization (:organization application))]
-    (mapping-to-krysp/save-application-as-krysp
-      application
-      lang
-      application
-      organization)
-    (update-application command {$set {:started startedTimestamp
+  (update-application command {$set {:started startedTimestamp
                                        :state  :constructionsStarted}})
-    (ok)))
+  (ok))
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestamp lang]
