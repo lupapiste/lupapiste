@@ -547,7 +547,7 @@
         suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
 
         ;end of abstarctPoikkeamistype
-        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"
+        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
 
         asianTiedot (:asianTiedot Poikkeamisasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
@@ -742,7 +742,7 @@
         suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
 
         ;end of abstarctPoikkeamistype
-        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi hakemus"
+        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
 
         asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
