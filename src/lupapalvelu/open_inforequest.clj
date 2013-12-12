@@ -11,6 +11,22 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
 
+
+
+(defn- open-inforequest-invite-model [{{token :token-id} :data} _]
+  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
+         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
+    {:link-fi (link-fn :fi)
+     :link-sv (link-fn :sv)
+     :info-fi (info-fn :fi)
+     :info-sv (info-fn :sv)}))
+
+(notifications/defemail :open-inforequest-invite
+  {:recipients-fn  notifications/from-data
+   :subject-key    "applications.inforequest"
+   :template       "open-inforequest-invite.html"
+   :model-fn       open-inforequest-invite-model})
+
 (defn new-open-inforequest! [{application-id :id organization-id :organization :as application}]
   (assert application-id)
   (assert organization-id)
