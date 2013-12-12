@@ -698,14 +698,14 @@
 ;;
 
 (defcommand inform-construction-started
-  {:parameters ["id" readyTimestampStr]
+  {:parameters ["id" startedTimestampStr]
    :roles      [:applicant :authority]
    :states     [:verdictGiven]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
+   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [timestamp (util/to-xml-millis-from-string readyTimestampStr)]
+  (let [timestamp (util/to-xml-millis-from-string startedTimestampStr)]
     (update-application command {$set {:started timestamp
                                        :state  :constructionsStarted}}))
   (ok))
