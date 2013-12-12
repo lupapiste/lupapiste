@@ -41,10 +41,18 @@
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
 
-    self.edit   = function(neighbor) { editModel.init(neighbor).edit().openEdit(); };
-    self.add    = function()         { editModel.init().edit().openEdit(); };
-    self.click  = function(x, y)     { ownersModel.init().search(x, y).openOwners(); };
-    self.done = function() { window.location.hash = "!/application/" + applicationId + "/statement"; };
+    self.edit   = function(neighbor) { 
+        editModel.init(neighbor).edit().openEdit(); 
+    };
+    self.add    = function() { 
+        editModel.init().edit().openEdit(); 
+    };
+    self.click  = function(x, y) { 
+        ownersModel.init().search(x, y).openOwners(); 
+    };
+    self.done = function() { 
+        window.location.hash = "!/application/" + applicationId + "/statement"; 
+    };
     self.remove = function(neighbor) {
       self.neighborId(neighbor.neighborId);
       LUPAPISTE.ModalDialog.showDynamicYesNo(
@@ -66,6 +74,84 @@
   }
   
   function OwnersModel() {
+      
+      var self = this;
+
+      self.status = ko.observable();
+      self.statusInit             = 0;
+      self.statusSearchPropertyId = 1;
+      self.statusSearchOwners     = 2;
+      self.statusSelectOwners     = 3;
+      self.statusSearchFailed     = 4;
+      
+      self.owners = ko.observableArray();
+      self.propertyId = ko.observable();
+
+      self.init = function() { 
+          return self.status(self.statusInit).propertyId(null).owners([]); 
+      };
+      self.isSearching = function() { 
+          return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; 
+      };
+      self.isPropertyIdAvailable = function() { 
+          return self.status() > self.statusSearchPropertyId && self.status() < self.statusSearchFailed; 
+      };
+      self.search = function(x, y) { 
+          return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y); 
+      };
+
+      self.searchPropertyId = function(x, y) { 
+          locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound); 
+          return self; 
+      };
+      
+      self.propertyIdFound = function(propertyId) {
+          return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+      };
+      
+      self.searchOwners = function(propertyId) {
+          locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, console.log);
+      };
+      self.ownersFound = function(data) {
+          console.log(data);
+          self.owners(_.map(data.owners, toNeighbor));
+          return self.status(self.statusSelectOwners);
+      }
+      
+      self.propertyIfNotFound = function() { 
+          return self.status(self.statusSearchFailed); 
+      };
+      self.cancelSearch = function() { 
+          self.status(self.statusEdit).requestContext.begin(); 
+          return self; 
+      };
+
+      self.openOwners = function() { 
+          LUPAPISTE.ModalDialog.open("#dialog-select-owners"); 
+          return self; 
+      };
+
+      self.select = function(neighbor) {
+          console.log(neighbor);
+          ajax
+            .command("neighbor-add", neighbor)
+            .complete(_.partial(repository.load, applicationId, 
+                    function(v) {
+                        self.owners.remove(neighbor);
+                        if (self.owners().length === 0) { 
+                            LUPAPISTE.ModalDialog.close(); 
+                        }
+                    }))
+            .call();
+          return self;
+      };
+      self.beginUpdateRequest = function() { 
+          self.requestContext.begin(); 
+          return self; 
+      };
+      self.requestContext = new RequestContext();
+      
+      // Helper functions
       function getPersonName(person) {
           if (person.sukunimi && person.etunimet) {
               return person.sukunimi + ", " + person.etunimet;
@@ -83,61 +169,17 @@
               type = "KPY";
           }
           return {
+              id: applicationId,
               propertyId: self.propertyId(),
-              owner: {
-                  type: type,
-                  name: getPersonName(owner),
-                  nameOfDeceased: nameOfDeceased,
-                  bic: owner.ytunnus || null,
-                  address: {
-                      street: owner.jakeluosoite || null,
-                      city: owner.paikkakunta || null,
-                      zip: owner.postinumero || null
-                  }
-              }
+              type: type,
+              name: getPersonName(owner),
+              nameOfDeceased: nameOfDeceased,
+              businessID: owner.ytunnus || null,
+              street: owner.jakeluosoite || null,
+              city: owner.paikkakunta || null,
+              zip: owner.postinumero || null
           };
       }
-      
-      var self = this;
-
-      self.status = ko.observable();
-      self.statusInit             = 0;
-      self.statusSearchPropertyId = 1;
-      self.statusSearchOwners     = 2;
-      self.statusSelectOwners     = 3;
-      self.statusSearchFailed     = 4;
-      
-      self.owners = ko.observableArray();
-      self.propertyId = ko.observable();
-
-      self.init = function() { return self.status(self.statusInit).propertyId(null).owners([]); };
-
-      self.isSearching = function() { return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; }
-
-      self.search = function(x, y) { return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y); };
-
-      self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound); return self; };
-      
-      self.propertyIdFound = function(propertyId) {
-          return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
-      };
-      
-      self.searchOwners = function(propertyId) {
-          locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, console.log);
-      };
-      self.ownersFound = function(data) {
-          console.log(data);
-          self.owners(_.map(data.owners, toNeighbor));
-          return self.status(self.statusSelectOwners);
-      }
-      
-      self.propertyIfNotFound = function() { return self.status(self.statusSearchFailed); };
-      self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; };
-
-      self.openOwners = function() { LUPAPISTE.ModalDialog.open("#dialog-select-owners"); return self; };
-      
-      self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-      self.requestContext = new RequestContext();
   }
 
   function EditModel() {

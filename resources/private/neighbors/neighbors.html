@@ -50,36 +50,45 @@
       </div>
       <div class="dialog-content">
         <div>
-          <h2 data-bind="visible: status() > statusSearchPropertyId">
+          <h2 data-bind="visible: isPropertyIdAvailable()">
             <span data-bind="ltext: 'neighbors.edit.propertyId'"></span>:
             <span data-bind="text: propertyId"></span>
           </h2>
           <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
           <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
         </div>
-        <table class="property-owners">
+        <table class="property-owners scrolling-content">
           <thead>
             <tr>
               <th data-bind="ltext: 'neighbors.owner'"></th>
+              <th data-bind="ltext: 'neighbors.owner.address'"></th>
               <th data-bind="ltext: 'neighbors.owner.type'"></th>
+              <th data-bind="ltext: 'neighbors.actions'"></th>
             </tr>
           </thead>
           <tbody data-bind="foreach: owners">
             <tr>
-              <td data-bind="with: owner">
+              <td>
                 <!-- ko if: nameOfDeceased -->
-                <span data-bind="text nameOfDeceased"></span> 
-                -<span data-bind="ltext: loc('neighbors.owner.type.KP'])"></span>
+                <span data-bind="text nameOfDeceased" class="owner-nameOfDeceased"></span> 
+                -<span data-bind="text: loc('neighbors.owner.type.KP'])"></span>
                 <!-- /ko -->
+
                 <span data-bind="text: name" class="owner-name"></span>
-                <!-- ko if: bic -->
-                (<span data-bind="text: bic"></span>) 
+
+                <!-- ko if: businessID -->
+                (<span data-bind="text: businessID" class="owner-businessID"></span>) 
                 <!-- /ko -->
-                <span data-bind="text: address.street" class="owner-street"></span>
-                <span data-bind="text: address.zip" class="owner-zip"></span>
-                <span data-bind="text: address.city" class="owner-city"></span>
               </td>
-              <td data-bind="ltext: loc(['neighbors.owner.type', owner.type])">
+              <td>
+                <span data-bind="text: street" class="owner-street"></span>
+                <span data-bind="text: zip" class="owner-zip"></span>
+                <span data-bind="text: city" class="owner-city"></span>
+              </td>
+              <td data-bind="text: loc(['neighbors.owner.type', type])">
+              </td>
+              <td>
+                <a data-bind="click: $root.select, clickBubble: false, ltext: 'neighbors.actions.select'" data-test-id="manage-neighbors-select" href="#"></a>
               </td>
             </tr>
           </tbody>

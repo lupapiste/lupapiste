@@ -1,2 +1,17 @@
 verdict.paatosdokumentinPvm: Päätöksen päiväys
 verdict.takuuaikaPaivat: Takuuaika päivissä
+
+neighbors.actions.select: valitse
+neighbor.owners.title: Naapurien valinta
+neighbors.owners.status.0: Alustetaan hakua
+neighbors.owners.status.1: Haetaan kiinteistötunnusta
+neighbors.owners.status.2: Haetaan omistajatietoja
+neighbors.owners.status.3: Valitse naapurit
+neighbors.owners.status.4: Omistajien haku ei onnistunut. Yritä myöhemmin uudestaan.
+
+neighbors.owner.type: Henkilölaji
+neighbors.owner.type.TU: Tuntematon henkilö
+neighbors.owner.type.JU: Juridinen henkilö
+neighbors.owner.type.LU: Luonnollinen henkilö
+neighbors.owner.type.KP: Kuolinpesä
+neighbors.owner.type.KPY: Kuolinpesän yhteyshenkilö
