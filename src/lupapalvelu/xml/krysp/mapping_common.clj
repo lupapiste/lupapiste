@@ -5,7 +5,6 @@
             [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
 
