@@ -7,6 +7,7 @@
             [lupapalvelu.core :refer [now fail!]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
@@ -29,10 +30,11 @@
 (notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "open-inforequest-invite.html"))
 (notifications/defemail :open-inforequest-commented (assoc base-email-conf :template "new-comment.md"))
 
-(defn notify-on-comment [{application :application} _]
+(defn notify-on-comment [{application :application user :user} _]
   (when (:openInfoRequest application)
     (if-let [token (mongo/select-one :open-inforequest-token {:application-id (:id application)})]
-      (notifications/notify! :open-inforequest-commented {:data {:email (:email token) :token-id (:id token)} :application application})
+      (when (not= (:email user) (:email token))
+        (notifications/notify! :open-inforequest-commented {:data {:email (:email token) :token-id (:id token)} :application application}))
       (error "Open inforequest token not found! Application ID=" (:id application)))))
 
 (defn new-open-inforequest! [{application-id :id organization-id :organization :as application}]
