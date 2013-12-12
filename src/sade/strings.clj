@@ -43,6 +43,15 @@
   (when (and s postfix)
     (.endsWith (.toLowerCase s) (.toLowerCase postfix))))
 
+(defn unescape-html
+  "Change HTML character entities into special characters. Like hiccup.util/escape-html but backwards."
+  [^String s]
+  (.. s
+    (replace "&amp;"  "&")
+    (replace "&lt;"   "<")
+    (replace "&gt;"   ">")
+    (replace "&quot;" "\"")))
+
 ;; Commons-lang3 wrapper
 (defn numeric?
   "http://commons.apache.org/proper/commons-lang/javadocs/api-3.1/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
