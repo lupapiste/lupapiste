@@ -85,10 +85,11 @@
       self.statusSearchFailed     = 4;
       
       self.owners = ko.observableArray();
+      self.selectedOwners = ko.observableArray([]);
       self.propertyId = ko.observable();
 
       self.init = function() { 
-          return self.status(self.statusInit).propertyId(null).owners([]); 
+          return self.status(self.statusInit).propertyId(null).owners([]).selectedOwners([]); 
       };
       self.isSearching = function() { 
           return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; 
@@ -131,6 +132,11 @@
           return self; 
       };
 
+      self.addSelectedOwners = function() {
+          var neighbors = _.map(self.selectedOwners(), function(indx) { return self.owners()[indx]; });
+          console.log(neighbors);
+      }
+      
       self.select = function(neighbor) {
           console.log(neighbor);
           ajax

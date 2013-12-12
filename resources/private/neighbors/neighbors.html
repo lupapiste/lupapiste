@@ -60,6 +60,7 @@
         <table class="property-owners scrolling-content">
           <thead>
             <tr>
+              <th>&nbsp;</th>
               <th data-bind="ltext: 'neighbors.owner'"></th>
               <th data-bind="ltext: 'neighbors.owner.address'"></th>
               <th data-bind="ltext: 'neighbors.owner.type'"></th>
@@ -68,6 +69,9 @@
           </thead>
           <tbody data-bind="foreach: owners">
             <tr>
+              <td>
+                <input class="form-input" type="checkbox" data-test-id="select-owner" data-bind="value: $index, checked: $root.selectedOwners, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'select-owner-' + $index()}" />
+              </td>
               <td>
                 <!-- ko if: nameOfDeceased -->
                 <span data-bind="text nameOfDeceased" class="owner-nameOfDeceased"></span> 
@@ -93,6 +97,7 @@
             </tr>
           </tbody>
         </table>
+        <button data-bind="click: $root.addSelectedOwners, enable: status() === statusSelectOwners, ltext: 'neighbors.select.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.select.ok"></button>
       </div>
     </div>
 
