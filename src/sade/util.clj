@@ -1,5 +1,7 @@
 (ns sade.util
-  (:use [sade.strings :only [numeric? decimal-number?]]))
+  (:require [sade.strings :refer [numeric? decimal-number?]]
+            [clj-time.format :as timeformat]
+            [clj-time.coerce :as tc]))
 
 ; from clojure.contrib/core
 
@@ -109,3 +111,31 @@
          (fn [missing k] (if (nil? (get src-map k)) (cons k missing) missing))
          ()
          required-keys)))
+
+
+
+(defn to-xml-date [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") dt))))
+
+(defn to-xml-datetime [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") dt))))
+
+(defn to-xml-date-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
+
+(defn to-xml-datetime-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
+
+(defn to-xml-millis-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (tc/to-long d))))
+

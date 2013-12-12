@@ -264,9 +264,11 @@
                      (map ->paatospoytakirja poytakirjat))})
 
 (defn ->ya-verdict [paatos-xml-without-ns]
-  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)}
+  (println {:poytakirjat    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
+  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
+                    };todo maaraykset
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
-   :poytakirjat    []})
+   :poytakirjat     (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
 
 
 (defn- ->kuntalupatunnus [asia]
@@ -280,6 +282,7 @@
                            (map ->function)
                            (cleanup)
                            (filter seq))]
+
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))

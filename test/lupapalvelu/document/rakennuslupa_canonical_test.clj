@@ -5,7 +5,7 @@
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [lupapalvelu.factlet :as fl]
-            [sade.util :refer [contains-value?]]
+            [sade.util :refer :all]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
             [midje.sweet :refer :all]

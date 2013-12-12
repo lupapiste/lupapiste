@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.poikkeamis-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+            [sade.util :refer :all]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 

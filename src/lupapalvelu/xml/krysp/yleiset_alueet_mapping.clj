@@ -4,7 +4,7 @@
             [lupapalvelu.core :refer [now]]
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.canonical-common :refer [to-xml-date to-xml-datetime ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
@@ -164,12 +164,6 @@
                                        :child [{:tag :vaadittuKytkin
                                                 ;:tag :tunniste
                                                 }]}]}]}]}]})
-
-(defn- get-building-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (:verdictGiven application)
-                                    :loppuHetki (to-xml-datetime (:closed application))}}
-   :valmistumisIlmoitusPvm (to-xml-date (now))})
-
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
   ;; if we have no statement-attachments to add return the canonical map itself
