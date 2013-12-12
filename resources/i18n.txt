@@ -1,0 +1,3 @@
+operations.tree.jatkoaika: Jatkoajan hakeminen
+operations.ya-jatkoaika: Jatkolupa
+operations.ya-jatkoaika.desc: Jatkoluvalla voit hakea jatkoaikaa aikaisemmalle luvallesi. Jos et ole hakenut aikaisempaa lupaa Lupapisteessä, tarvitset jatkolupaa varten vanhan lupasi tunnuksen.
