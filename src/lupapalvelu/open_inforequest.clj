@@ -1,5 +1,5 @@
 (ns lupapalvelu.open-inforequest
-  (:require [taoensso.timbre :as timbre :refer [infof info]]
+  (:require [taoensso.timbre :as timbre :refer [infof info error]]
             [monger.operators :refer :all]
             [noir.session :as session]
             [noir.response :as resp]
@@ -7,9 +7,35 @@
             [lupapalvelu.core :refer [now fail!]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
+
+
+
+(defn- base-email-model [{{token :token-id} :data} _]
+  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
+         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
+    {:link-fi (link-fn :fi)
+     :link-sv (link-fn :sv)
+     :info-fi (info-fn :fi)
+     :info-sv (info-fn :sv)}))
+
+(def ^:private base-email-conf
+  {:recipients-fn  notifications/from-data
+   :subject-key    "applications.inforequest"
+   :model-fn       base-email-model})
+
+(notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "open-inforequest-invite.html"))
+(notifications/defemail :open-inforequest-commented (assoc base-email-conf :template "new-comment.md"))
+
+(defn notify-on-comment [{application :application user :user} _]
+  (when (:openInfoRequest application)
+    (if-let [token (mongo/select-one :open-inforequest-token {:application-id (:id application)})]
+      (when (not= (:email user) (:email token))
+        (notifications/notify! :open-inforequest-commented {:data {:email (:email token) :token-id (:id token)} :application application}))
+      (error "Open inforequest token not found! Application ID=" (:id application)))))
 
 (defn new-open-inforequest! [{application-id :id organization-id :organization :as application}]
   (assert application-id)

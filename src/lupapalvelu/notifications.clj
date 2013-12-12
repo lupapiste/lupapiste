@@ -71,14 +71,6 @@
      :link-fi (link-fn :fi)
      :link-sv (link-fn :sv)}))
 
-(defn- open-inforequest-invite-model [{{token :token-id} :data} _]
-  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
-         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
-    {:link-fi (link-fn :fi)
-     :link-sv (link-fn :sv)
-     :info-fi (info-fn :fi)
-     :info-sv (info-fn :sv)}))
-
 ;;
 ;; Recipient functions
 ;;
@@ -109,11 +101,7 @@
          :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
                                         :subject-key    "statement-request"}
          :neighbor                     {:recipients-fn  from-data
-                                        :model-fn       neighbor-invite-model}
-         :open-inforequest-invite      {:recipients-fn  from-data
-                                        :subject-key    "applications.inforequest"
-                                        :template       "open-inforequest-invite.html"
-                                        :model-fn       open-inforequest-invite-model}}))
+                                        :model-fn       neighbor-invite-model}}))
 
 ;;
 ;; Public API
