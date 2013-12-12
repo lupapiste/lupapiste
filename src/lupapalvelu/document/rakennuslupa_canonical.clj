@@ -5,6 +5,7 @@
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
             [sade.common-reader :as cr]
+            [sade.util :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]

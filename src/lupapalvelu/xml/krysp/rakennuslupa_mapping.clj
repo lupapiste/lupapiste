@@ -5,7 +5,7 @@
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+            [sade.util :refer :all]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
