@@ -250,7 +250,6 @@
     (cr/convert-keys-to-timestamps [:muokkausHetki])))
 
 (defn ->paatospoytakirja [paatos-xml-without-ns]
-  (clojure.pprint/pprint paatos-xml-without-ns)
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
@@ -265,11 +264,11 @@
                      (map ->paatospoytakirja poytakirjat))})
 
 (defn ->ya-verdict [paatos-xml-without-ns]
+  (println {:poytakirjat    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                    }
+                    };todo maaraykset
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
-   :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:Liite]))]
-                     (map ->paatospoytakirja poytakirjat))})
+   :poytakirjat     (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
 
 
 (defn- ->kuntalupatunnus [asia]
@@ -283,6 +282,7 @@
                            (map ->function)
                            (cleanup)
                            (filter seq))]
+
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))

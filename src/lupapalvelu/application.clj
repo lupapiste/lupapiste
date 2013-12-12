@@ -751,59 +751,63 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
+(defn verdict-attachments [id user timestamp verdict]
+  (assoc verdict
+         :timestamp timestamp
+         :paatokset (map
+                      (fn [paatos]
+                        (assoc paatos :poytakirjat
+                               (map
+                                 (fn [pk]
+                                   (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                     (do
+                                       (debug "Download" url)
+                                       (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+
+                                             resp            (http/get url :as :stream :throw-exceptions false)
+                                             headerFilename  (when (get (:headers resp) "content-disposition")
+                                                               (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
+
+                                             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                             urlhash         (digest/sha1 url)
+                                             attachment-id   urlhash
+                                             attachment-type {:type-group "muut" :type-id "muu"}
+                                             target          {:type "verdict" :id urlhash}
+                                             locked          true
+                                             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                         ; If the attachment-id, i.e., hash of the URL matches
+                                         ; any old attachment, a new version will be added
+                                         (if (= 200 (:status resp))
+                                           (attachment/attach-file! {:application-id id
+                                                                     :filename (or headerFilename filename)
+                                                                     :size content-length
+                                                                     :content (:body resp)
+                                                                     :attachment-id attachment-id
+                                                                     :attachment-type attachment-type
+                                                                     :target target
+                                                                     :locked locked
+                                                                     :user user
+                                                                     :created attachment-time})
+                                           (error (str (:status resp) " - unable to download " url ": " resp)))
+                                         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+                                     pk))
+                                 (:poytakirjat paatos))))
+                      (:paatokset verdict))))
+
 (defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
 
 (defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/ya-application-xml legacy id)
           verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
-      verdicts)
+      (map (partial verdict-attachments id user timestamp) verdicts))
     (fail! :error.no-legacy-available)))
 
 (defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/application-xml legacy id)
           verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
-      (map
-        (fn [verdict]
-          (assoc verdict
-            :timestamp timestamp
-            :paatokset (map
-                         (fn [paatos]
-                           (assoc paatos :poytakirjat
-                             (map
-                               (fn [pk]
-                                 (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                   (do
-                                     (debug "Download" url)
-                                     (let [filename       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                          resp            (http/get url :as :stream :throw-exceptions false)
-                                          content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                          urlhash         (digest/sha1 url)
-                                          attachment-id   urlhash
-                                          attachment-type {:type-group "muut" :type-id "muu"}
-                                          target          {:type "verdict" :id urlhash}
-                                          locked          true
-                                          attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                       ; If the attachment-id, i.e., hash of the URL matches
-                                       ; any old attachment, a new version will be added
-                                       (if (= 200 (:status resp))
-                                         (attachment/attach-file! {:application-id id
-                                                                   :filename filename
-                                                                   :size content-length
-                                                                   :content (:body resp)
-                                                                   :attachment-id attachment-id
-                                                                   :attachment-type attachment-type
-                                                                   :target target
-                                                                   :locked locked
-                                                                   :user user
-                                                                   :created attachment-time})
-                                         (error (str (:status resp) " - unable to download " url ": " resp)))
-                                       (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
-                                   pk))
-                               (:poytakirjat paatos))))
-                         (:paatokset verdict))))
-        verdicts))
+      (map (partial verdict-attachments id user timestamp) verdicts))
     (fail! :error.no-legacy-available)))
 
 (defcommand check-for-verdict
