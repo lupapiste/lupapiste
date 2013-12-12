@@ -699,7 +699,7 @@
 (defcommand inform-construction-started
   {:parameters ["id" startedTimestamp]
    :roles      [:applicant :authority]
-   :states     [:submitted]                                   ;; TODO: Mitka tilat tahan?
+   :states     [:verdictGiven]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestamp])]}
