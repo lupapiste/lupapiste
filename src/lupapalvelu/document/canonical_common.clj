@@ -19,7 +19,8 @@
    :submitted "vireill\u00e4"
    :complement-needed "vireill\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
-   :constructions-started "rakennusty\u00f6t aloitettu"})
+   :constructionsStarted "rakennusty\u00f6t aloitettu"
+   :closed "valmis"})
 
 (def state-timestamps
   {:draft :created
@@ -30,7 +31,8 @@
    ; Enables XML to be formed from sent applications
    :sent :opened
    :verdictGiven :opened
-   :constructions-started :opened})
+   :constructionsStarted :opened
+   :closed :closed})
 
 (defn to-xml-date [^Long timestamp]
   (when timestamp
