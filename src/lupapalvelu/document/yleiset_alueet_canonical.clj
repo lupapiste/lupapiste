@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.core :refer [now]]
             [lupapalvelu.document.canonical-common :refer :all]
-            [sade.util :as util]
+            [sade.util :refer :all]
             [clojure.walk :as walk]
             [sade.common-reader :as cr]))
 

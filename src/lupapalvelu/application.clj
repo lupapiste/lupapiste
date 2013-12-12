@@ -251,7 +251,8 @@
                 (fn [{data :data :as command} _]
                   (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
                     ;; LUPA-407
-                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))] }
+                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
+                open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
@@ -697,34 +698,36 @@
 ;;
 
 (defcommand inform-construction-started
-  {:parameters ["id" startedTimestamp]
+  {:parameters ["id" readyTimestampStr]
    :roles      [:applicant :authority]
    :states     [:verdictGiven]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:startedTimestamp])]}
+   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (update-application command {$set {:started startedTimestamp
-                                       :state  :constructionsStarted}})
+  (let [timestamp (util/to-xml-millis-from-string readyTimestampStr)]
+    (update-application command {$set {:started timestamp
+                                       :state  :constructionsStarted}}))
   (ok))
 
 (defcommand inform-construction-ready
-  {:parameters ["id" readyTimestamp lang]
+  {:parameters ["id" readyTimestampStr lang]
    :roles      [:applicant :authority]
    :states     [:constructionsStarted]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
+   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [application (assoc application :closed readyTimestamp)
+  (let [timestamp (util/to-xml-millis-from-string readyTimestampStr)
+        application (assoc application :closed timestamp)
         organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp
       application
       lang
       application
       organization)
-    (update-application command {$set {:closed readyTimestamp
-                                       :state  :closed}})
+    (update-application command {$set {:closed timestamp
+                                       :state :closed}})
     (ok)))
 
 
@@ -780,59 +783,63 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
+(defn verdict-attachments [id user timestamp verdict]
+  (assoc verdict
+         :timestamp timestamp
+         :paatokset (map
+                      (fn [paatos]
+                        (assoc paatos :poytakirjat
+                               (map
+                                 (fn [pk]
+                                   (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                     (do
+                                       (debug "Download" url)
+                                       (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+
+                                             resp            (http/get url :as :stream :throw-exceptions false)
+                                             headerFilename  (when (get (:headers resp) "content-disposition")
+                                                               (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
+
+                                             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                             urlhash         (digest/sha1 url)
+                                             attachment-id   urlhash
+                                             attachment-type {:type-group "muut" :type-id "muu"}
+                                             target          {:type "verdict" :id urlhash}
+                                             locked          true
+                                             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                         ; If the attachment-id, i.e., hash of the URL matches
+                                         ; any old attachment, a new version will be added
+                                         (if (= 200 (:status resp))
+                                           (attachment/attach-file! {:application-id id
+                                                                     :filename (or headerFilename filename)
+                                                                     :size content-length
+                                                                     :content (:body resp)
+                                                                     :attachment-id attachment-id
+                                                                     :attachment-type attachment-type
+                                                                     :target target
+                                                                     :locked locked
+                                                                     :user user
+                                                                     :created attachment-time})
+                                           (error (str (:status resp) " - unable to download " url ": " resp)))
+                                         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+                                     pk))
+                                 (:poytakirjat paatos))))
+                      (:paatokset verdict))))
+
 (defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
 
 (defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/ya-application-xml legacy id)
           verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
-      verdicts)
+      (map (partial verdict-attachments id user timestamp) verdicts))
     (fail! :error.no-legacy-available)))
 
 (defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/application-xml legacy id)
           verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
-      (map
-        (fn [verdict]
-          (assoc verdict
-            :timestamp timestamp
-            :paatokset (map
-                         (fn [paatos]
-                           (assoc paatos :poytakirjat
-                             (map
-                               (fn [pk]
-                                 (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                   (do
-                                     (debug "Download" url)
-                                     (let [filename       (-> url (URL.) (.getPath) (ss/suffix "/"))
-                                          resp            (http/get url :as :stream :throw-exceptions false)
-                                          content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                          urlhash         (digest/sha1 url)
-                                          attachment-id   urlhash
-                                          attachment-type {:type-group "muut" :type-id "muu"}
-                                          target          {:type "verdict" :id urlhash}
-                                          locked          true
-                                          attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                       ; If the attachment-id, i.e., hash of the URL matches
-                                       ; any old attachment, a new version will be added
-                                       (if (= 200 (:status resp))
-                                         (attachment/attach-file! {:application-id id
-                                                                   :filename filename
-                                                                   :size content-length
-                                                                   :content (:body resp)
-                                                                   :attachment-id attachment-id
-                                                                   :attachment-type attachment-type
-                                                                   :target target
-                                                                   :locked locked
-                                                                   :user user
-                                                                   :created attachment-time})
-                                         (error (str (:status resp) " - unable to download " url ": " resp)))
-                                       (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
-                                   pk))
-                               (:poytakirjat paatos))))
-                         (:paatokset verdict))))
-        verdicts))
+      (map (partial verdict-attachments id user timestamp) verdicts))
     (fail! :error.no-legacy-available)))
 
 (defcommand check-for-verdict
