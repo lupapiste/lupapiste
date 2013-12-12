@@ -251,7 +251,8 @@
                 (fn [{data :data :as command} _]
                   (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
                     ;; LUPA-407
-                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))] }
+                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
+                open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
