@@ -1,18 +1,9 @@
 (ns lupapalvelu.xml.krysp.poikkeamis-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [me.raynes.fs :as fs]
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
-            [sade.util :refer :all]
-            [lupapalvelu.core :as core]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]
-            [lupapalvelu.ke6666 :as ke6666]))
-
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})
@@ -83,10 +74,7 @@
               ) canonical statement-attachments)))
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-  (let [file-name  (str output-dir "/" (:id application))
-        tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))
-        subtype    (keyword (:permitSubtype application))
+  (let [subtype    (keyword (:permitSubtype application))
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)
                       [:Popast :poikkeamisasiatieto :Poikkeamisasia]
@@ -104,20 +92,8 @@
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
                     attachments)
-        xml (element-to-xml canonical poikkeamis_to_krysp)
-        xml-s (indent-str xml)]
+        xml (element-to-xml canonical poikkeamis_to_krysp)]
 
-    ;(clojure.pprint/pprint (:attachments application))
-    ;(clojure.pprint/pprint canonical)
-    ;(println xml-s)
-    (validate xml-s)
-    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
-    (with-open [out-file-stream (writer tempfile)]
-      (emit xml out-file-stream))
-    (mapping-common/write-attachments attachments output-dir)
-    (mapping-common/write-statement-attachments statement-attachments output-dir)
-
-    (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile)))
+    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
 (permit/register-mapper permit/P :app-krysp-mapper save-application-as-krysp)
