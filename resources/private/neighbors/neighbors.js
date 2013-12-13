@@ -87,7 +87,7 @@
       self.owners = ko.observableArray();
       self.propertyId = ko.observable();
       self.selectedOwners = ko.observableArray([]);
-      self.allSelected = ko.observable().extend({ notify: 'always' });;
+      self.allSelected = ko.observable(false).extend({ notify: 'always' });;
 
       function watchAllSelected() {
           allSelectedWatch = self.allSelected.subscribe(function(allSelected) {
@@ -97,14 +97,15 @@
                   _.each(self.owners(), function(owner, index) { self.selectedOwners.push("" + index); });
               }
               watchSelectedOwners();
-          })
+          });
       };
       function watchSelectedOwners() {
           selectedOwnersWatch = self.selectedOwners.subscribe(function(newValue) {
               allSelectedWatch.dispose();
-              self.allSelected(self.owners().length === newValue.length);
+              var ownersLength = self.owners().length;
+              self.allSelected(ownersLength > 0 && ownersLength === newValue.length);
               watchAllSelected();
-          })
+          });
       };
       watchAllSelected();
       watchSelectedOwners();
