@@ -230,7 +230,7 @@ var docgen = (function () {
     self.makeApprovalButtons = function (path, model) {
       var btnContainer$ = $("<span>").addClass("form-buttons");
       var statusContainer$ = $("<span>");
-      var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
+      var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
       var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: getCollection() };
@@ -248,6 +248,7 @@ var docgen = (function () {
           }
           statusContainer$.text(text);
           statusContainer$.addClass("approval-" + approval.value);
+          approvalContainer$.removeClass("empty");
         }
       }
 
@@ -292,6 +293,7 @@ var docgen = (function () {
         btnContainer$.append(approveButton$);
         rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
         btnContainer$.append(rejectButton$);
+        approvalContainer$.removeClass("empty");
       } else {
         setStatus(approval);
       }
