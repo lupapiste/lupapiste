@@ -72,7 +72,8 @@
             (assoc :attachments attachments-wo-sent-timestamp))
           lang
           organization)
-
+        ;; The "sent" timastamp is updated to all attachments of the application, also the ones
+        ;; that were not sent this time.
         (update-application command
           {$set (get-data-argument-for-attachments-mongo-update created (:attachments application))})
         (ok))
