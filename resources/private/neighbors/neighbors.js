@@ -85,8 +85,16 @@
       self.statusSearchFailed     = 4;
       
       self.owners = ko.observableArray();
-      self.selectedOwners = ko.observableArray([]);
       self.propertyId = ko.observable();
+      self.selectedOwners = ko.observableArray([]);
+      self.allSelected = ko.observable().extend({ notify: 'always' });;
+
+      self.allSelected.subscribe(function(allSelected) {
+          self.selectedOwners.removeAll();
+          if (allSelected) {
+              _.each(self.owners(), function(owner, index) { self.selectedOwners.push("" + index); });
+          }
+      })
 
       self.init = function() { 
           return self.status(self.statusInit).propertyId(null).owners([]).selectedOwners([]); 
@@ -115,7 +123,8 @@
       };
       self.ownersFound = function(data) {
           console.log(data);
-          self.owners(_.map(data.owners, toNeighbor));
+          self.owners(_.map(data.owners, convertOwner));
+          self.allSelected(true);
           return self.status(self.statusSelectOwners);
       }
       
@@ -133,24 +142,23 @@
       };
 
       self.addSelectedOwners = function() {
-          var neighbors = _.map(self.selectedOwners(), function(indx) { return self.owners()[indx]; });
-          console.log(neighbors);
+          var owners = _.map(self.selectedOwners(), function(indx) { return self.owners()[indx]; }),
+              parameters = {
+                  id: applicationId,
+                  propertyId: self.propertyId(),
+                  owners: owners
+              };
+          console.log(parameters);
+          ajax
+          .command("neighbor-add-owners", parameters)
+          .complete(_.partial(repository.load, applicationId, 
+                  function(v) {
+                      LUPAPISTE.ModalDialog.close(); 
+                  }))
+          .call();
+        return self;
       }
       
-      self.select = function(neighbor) {
-          console.log(neighbor);
-          ajax
-            .command("neighbor-add", neighbor)
-            .complete(_.partial(repository.load, applicationId, 
-                    function(v) {
-                        self.owners.remove(neighbor);
-                        if (self.owners().length === 0) { 
-                            LUPAPISTE.ModalDialog.close(); 
-                        }
-                    }))
-            .call();
-          return self;
-      };
       self.beginUpdateRequest = function() { 
           self.requestContext.begin(); 
           return self; 
@@ -165,18 +173,16 @@
               return person.nimi;
           }
       }
-      function toNeighbor(owner) {
+      function convertOwner(owner, index) {
           var type = owner.henkilolaji,
               nameOfDeceased = null;
-          
+
           if (owner.yhteyshenkilo) {
               nameOfDeceased = getPersonName(owner);
               owner = owner.yhteyshenkilo;
               type = "KPY";
           }
           return {
-              id: applicationId,
-              propertyId: self.propertyId(),
               type: type,
               name: getPersonName(owner),
               nameOfDeceased: nameOfDeceased,

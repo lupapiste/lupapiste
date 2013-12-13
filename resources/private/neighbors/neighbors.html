@@ -60,17 +60,16 @@
         <table class="property-owners scrolling-content">
           <thead>
             <tr>
-              <th>&nbsp;</th>
+              <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: allSelected" /></th>
               <th data-bind="ltext: 'neighbors.owner'"></th>
               <th data-bind="ltext: 'neighbors.owner.address'"></th>
               <th data-bind="ltext: 'neighbors.owner.type'"></th>
-              <th data-bind="ltext: 'neighbors.actions'"></th>
             </tr>
           </thead>
           <tbody data-bind="foreach: owners">
             <tr>
               <td>
-                <input class="form-input" type="checkbox" data-test-id="select-owner" data-bind="value: $index, checked: $root.selectedOwners, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'select-owner-' + $index()}" />
+                <input class="form-input" type="checkbox" data-bind="value: $index, checked: $parent.selectedOwners, attr: {'data-test-id' : 'select-owner-' + $index()}" />
               </td>
               <td>
                 <!-- ko if: nameOfDeceased -->
@@ -90,9 +89,6 @@
                 <span data-bind="text: city" class="owner-city"></span>
               </td>
               <td data-bind="text: loc(['neighbors.owner.type', type])">
-              </td>
-              <td>
-                <a data-bind="click: $root.select, clickBubble: false, ltext: 'neighbors.actions.select'" data-test-id="manage-neighbors-select" href="#"></a>
               </td>
             </tr>
           </tbody>

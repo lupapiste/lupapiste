@@ -3,6 +3,8 @@ verdict.takuuaikaPaivat: Takuuaika päivissä
 
 neighbors.actions.select: valitse
 neighbor.owners.title: Naapurien valinta
+neighbors.select.ok: Tallenna
+
 neighbors.owners.status.0: Alustetaan hakua
 neighbors.owners.status.1: Haetaan kiinteistötunnusta
 neighbors.owners.status.2: Haetaan omistajatietoja
