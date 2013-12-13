@@ -1,7 +1,6 @@
 (ns lupapalvelu.document.canonical-common
-  (:require [clj-time.format :as timeformat]
-            [clj-time.coerce :as tc]
-            [clojure.string :as s]
+  (:require [clojure.string :as s]
+            [sade.util :refer :all]
             [lupapalvelu.core :refer [now]]))
 
 
@@ -19,7 +18,8 @@
    :submitted "vireill\u00e4"
    :complement-needed "vireill\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
-   :constructions-started "rakennusty\u00f6t aloitettu"})
+   :constructionsStarted "rakennusty\u00f6t aloitettu"
+   :closed "valmis"})
 
 (def state-timestamps
   {:draft :created
@@ -30,27 +30,8 @@
    ; Enables XML to be formed from sent applications
    :sent :opened
    :verdictGiven :opened
-   :constructions-started :opened})
-
-(defn to-xml-date [^Long timestamp]
-  (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") dt))))
-
-(defn to-xml-datetime [^Long timestamp]
-  (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") dt))))
-
-(defn to-xml-date-from-string [^String date-as-string]
-  (when date-as-string
-    (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
-
-(defn to-xml-datetime-from-string [^String date-as-string]
-  (when date-as-string
-    (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
+   :constructionsStarted :opened
+   :closed :closed})
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))

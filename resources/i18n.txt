@@ -1,2 +1,0 @@
-verdict.paatosdokumentinPvm: Päätöksen päiväys
-verdict.takuuaikaPaivat: Takuuaika päivissä

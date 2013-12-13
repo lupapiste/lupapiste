@@ -5,7 +5,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [sade.util :refer [contains-value?]]))
+            [sade.util :refer :all]))
 
 
 (def ^:private operation {:id "52380c6894a74fc25bb4ba46",

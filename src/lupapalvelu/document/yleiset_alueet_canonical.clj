@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.core :refer [now]]
             [lupapalvelu.document.canonical-common :refer :all]
-            [sade.util :as util]
+            [sade.util :refer :all]
             [clojure.walk :as walk]
             [sade.common-reader :as cr]))
 
@@ -103,7 +103,7 @@
 
 (defn- get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-                    :hakemuksenTila ((keyword (:state application)) application-state-to-krysp-state)
+                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
@@ -139,11 +139,20 @@
     (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
+;;
+;; ***  TODO: Vaihda kayttojakson alkuHetkeksi aloitusilmoituksen pvm, kunhan sellainen saadaan.  ***
+;;
+(defn- get-building-ready-info [application]
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:submitted application))
+                                    :loppuHetki (to-xml-datetime (:closed application))}}
+   :valmistumisilmoitusPvm (to-xml-date (now))})
+
+
 (defn- permits [application]
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
-
+  ;;
   (let [documents-by-type (by-type (:documents application))
         operation-name-key (-> application :operations first :name keyword)
         permit-name-key (operation-name-key ya-operation-type-to-schema-name-key)
@@ -236,26 +245,25 @@
                                                         ;:tunniste "..."
                                                         }})
 
-        body {permit-name-key {:kasittelytietotieto (get-kasittelytieto application)
-                               :luvanTunnisteTiedot (lupatunnus (:id application))
-                               :alkuPvm alku-pvm
-                               :loppuPvm loppu-pvm
-                               :sijaintitieto (get-sijaintitieto application)
-                               :osapuolitieto osapuolitieto
-                               :vastuuhenkilotieto vastuuhenkilotieto
-                               :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
-                               :lausuntotieto (get-statements (:statements application))
-                               :lupaAsianKuvaus lupaAsianKuvaus
-                               :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-                               :sijoituslupaviitetieto sijoituslupaviitetieto
-                               :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
-                               :johtoselvitysviitetieto johtoselvitysviitetieto}}
-
-        body (if (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
-               (assoc-in body [permit-name-key :toimintajaksotieto]
-                 (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma))
-               body)]
-
+        body {permit-name-key (merge
+                                {:kasittelytietotieto (get-kasittelytieto application)
+                                 :luvanTunnisteTiedot (lupatunnus (:id application))
+                                 :alkuPvm alku-pvm
+                                 :loppuPvm loppu-pvm
+                                 :sijaintitieto (get-sijaintitieto application)
+                                 :osapuolitieto osapuolitieto
+                                 :vastuuhenkilotieto vastuuhenkilotieto
+                                 :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
+                                 :lausuntotieto (get-statements (:statements application))
+                                 :lupaAsianKuvaus lupaAsianKuvaus
+                                 :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
+                                 :sijoituslupaviitetieto sijoituslupaviitetieto
+                                 :kayttotarkoitus (operation-name-key ya-operation-type-to-usage-description)
+                                 :johtoselvitysviitetieto johtoselvitysviitetieto}
+                                (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
+                                  {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
+                                (when (:closed application)
+                                  (get-building-ready-info application)))}]
     (cr/strip-nils body)))
 
 (defn application-to-canonical

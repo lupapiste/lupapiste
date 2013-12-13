@@ -165,6 +165,7 @@
    :attachments              []
    :auth                     []
    :authority                {}
+   :closed                   nil
    :comments                 []
    :created                  nil
    :documents                []

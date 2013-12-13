@@ -122,9 +122,10 @@
   (-> html
     (.getBytes "UTF-8")
     (io/reader :encoding "UTF-8")
-    (enlive/html-resource)
+    enlive/html-resource
     (enlive/select [:body])
-    (->str*)))
+    ->str*
+    ss/unescape-html))
 
 ;;
 ;; Apply template:
@@ -138,7 +139,7 @@
         html-wrap   (fetch-html-template "html-wrap.html")
         rendered    (clostache/render master context {:header header :body body :footer footer})
         content     (endophile/to-clj (endophile/mp rendered))]
-    [(->str* content)
+    [(-> content ->str* ss/unescape-html)
      (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string)]))
 
 (defn apply-html-template [template-name context]

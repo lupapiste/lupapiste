@@ -5,6 +5,7 @@
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
             [sade.common-reader :as cr]
+            [sade.util :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
@@ -280,7 +281,7 @@
     "rakennekatselmus" "rakennekatselmus"
     "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
     "osittainen loppukatselmus" "osittainen loppukatselmus"
-    "loppukatselmus"
+    "loppukatselmus" ; XXX tarkoituksella ei defaulttia?
     "ei tiedossa"))
   )
 
@@ -294,12 +295,15 @@
 
 ;; TODO: Voisiko tahan tehda YA-canonicalin tyyppisen config-systeemin? Ei tarvitsisi nain montaa parametria.
 ;; TODO: Yhdistele taman namespacen canonical-funktiota.
-
+;                                                   paatokselta (refaktoroidaan building selector)
+;                                                            kirjautunut kayttaja
+;                                                                 lisaa skeemaan (muu-muu)
+;                                                                                          lopullinen-tila
 (defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
-        katselmus (merge {:pitoPvm (to-xml-date pitoPvm)
+        katselmus (merge {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                           :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
                           :vaadittuLupaehtonaKytkin (true? lupaehtona)
                           :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi}
