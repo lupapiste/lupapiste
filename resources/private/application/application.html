@@ -500,6 +500,8 @@
                     </div>
                     <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
+                      <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label><span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span></div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
