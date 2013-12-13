@@ -17,6 +17,7 @@
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
+                 :build             (:build-number env/buildinfo)
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))

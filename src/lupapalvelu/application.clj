@@ -251,7 +251,8 @@
                 (fn [{data :data :as command} _]
                   (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
                     ;; LUPA-407
-                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))] }
+                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
+                open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
@@ -697,22 +698,23 @@
 ;;
 
 (defcommand inform-building-ready
-  {:parameters ["id" readyTimestamp lang]
+  {:parameters ["id" readyTimestampStr lang]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionsStarted]      ;;TODO: Tahan vain :constructionsStarted?
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:readyTimestamp])]}
+   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [application (assoc application :closed readyTimestamp)
+  (let [timestamp (util/to-xml-millis-from-string readyTimestampStr)
+        application (assoc application :closed timestamp)
         organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp
       application
       lang
       application
       organization)
-    (update-application command {$set {:closed readyTimestamp
-                                       :state  :closed}})
+    (update-application command {$set {:closed timestamp
+                                       :state :closed}})
     (ok)))
 
 
