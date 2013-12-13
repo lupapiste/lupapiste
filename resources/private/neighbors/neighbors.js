@@ -75,7 +75,7 @@
   
   function OwnersModel() {
       
-      var self = this;
+      var self = this, allSelectedWatch, selectedOwnersWatch;
 
       self.status = ko.observable();
       self.statusInit             = 0;
@@ -89,13 +89,26 @@
       self.selectedOwners = ko.observableArray([]);
       self.allSelected = ko.observable().extend({ notify: 'always' });;
 
-      self.allSelected.subscribe(function(allSelected) {
-          self.selectedOwners.removeAll();
-          if (allSelected) {
-              _.each(self.owners(), function(owner, index) { self.selectedOwners.push("" + index); });
-          }
-      })
-
+      function watchAllSelected() {
+          allSelectedWatch = self.allSelected.subscribe(function(allSelected) {
+              selectedOwnersWatch.dispose();
+              self.selectedOwners.removeAll();
+              if (allSelected) {
+                  _.each(self.owners(), function(owner, index) { self.selectedOwners.push("" + index); });
+              }
+              watchSelectedOwners();
+          })
+      };
+      function watchSelectedOwners() {
+          selectedOwnersWatch = self.selectedOwners.subscribe(function(newValue) {
+              allSelectedWatch.dispose();
+              self.allSelected(self.owners().length === newValue.length);
+              watchAllSelected();
+          })
+      };
+      watchAllSelected();
+      watchSelectedOwners();
+      
       self.init = function() { 
           return self.status(self.statusInit).propertyId(null).owners([]).selectedOwners([]); 
       };
@@ -123,9 +136,7 @@
       };
       self.ownersFound = function(data) {
           console.log(data);
-          self.owners(_.map(data.owners, convertOwner));
-          self.allSelected(true);
-          return self.status(self.statusSelectOwners);
+          return self.owners(_.map(data.owners, convertOwner)).allSelected(true).status(self.statusSelectOwners);
       }
       
       self.propertyIfNotFound = function() { 
