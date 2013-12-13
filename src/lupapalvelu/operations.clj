@@ -192,13 +192,13 @@
    :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen   ya-sijoituslupa-general
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
-;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
-;                                           :permit-type "YA"
-;                                           :required common-yleiset-alueet-schemas
-;                                           :attachments []}
+;  :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
+;                                          :permit-type "YA"
+;                                          :required common-yleiset-alueet-schemas
+;                                          :attachments []}
    :ya-jatkoaika                          {:schema "hankkeen-kuvaus-minimum"
                                            :permit-type "YA"
-                                           :required [common-yleiset-alueet-schemas]
+                                           :required common-yleiset-alueet-schemas
                                            :attachments []}})
 
 (def operations
