@@ -500,6 +500,8 @@
                     </div>
                     <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
+                      <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label><span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span></div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
@@ -711,25 +713,33 @@
         </div>
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
-        <div>
-        <table data-bind="foreach: taskGroups">
-          <thead>
-            <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
-            <tr>
-              <td data-bind="ltext: 'application.taskState'"></td>
-              <td data-bind="ltext: 'application.taskDisplayName'"></td>
-              <td data-bind="ltext: 'application.taskClosed'"></td>
-            </tr>
-          </thead>
-          <tbody data-bind="foreach: tasks">
-            <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
-              <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-              <td data-bind="text: displayName"></td>
-              <td data-bind="dateString: $data.closed"></td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
+          <div>
+            <table data-bind="foreach: taskGroups">
+              <thead>
+                <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
+                <tr>
+                  <td data-bind="ltext: 'application.taskState'"></td>
+                  <td data-bind="ltext: 'application.taskDisplayName'"></td>
+                  <td data-bind="ltext: 'application.taskClosed'"></td>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: tasks">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                  <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+                  <td data-bind="text: displayName"></td>
+                  <td data-bind="dateString: $data.closed"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-building-ready-btn"
+                  data-bind="click: $root.buildingReadyModel.openBuildingReadyDialog,
+                             ltext: 'application.informBuildingReady',
+                             visible: $root.authorization.ok('inform-building-ready') && !closed(),
+                             enable: $root.authorization.ok('inform-building-ready')"></button>
+
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
