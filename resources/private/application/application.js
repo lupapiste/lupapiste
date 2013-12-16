@@ -16,6 +16,7 @@
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var application = new LUPAPISTE.ApplicationModel();
+  var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
@@ -442,14 +443,16 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       neighborStatusModel: neighborStatusModel,
       addLinkPermitModel: addLinkPermitModel,
-      buildingReadyModel: buildingReadyModel
+      buildingReadyModel: buildingReadyModel,
+      createTaskModel: createTaskModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
+    $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
     $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
     $("#dialog-building-ready").applyBindings({buildingReadyModel: buildingReadyModel});
+    $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     attachmentTemplatesModel.init();
   });
 
