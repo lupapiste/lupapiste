@@ -1,7 +1,11 @@
 var taskUtil = (function() {
 
+  function getTaskName(task) {
+    return task.taskname || loc(task.schema.info.name + "._group_label");
+  }
+
   function shortDisplayName(task) {
-    var displayName = task.taskname || loc(task.schema.info.name + "._group_label" );
+    var displayName = getTaskName(task);
     var prefix = task.schema.info.i18nprefix;
     var path = task.schema.info.i18npath;
     if (path && path.length) {
@@ -16,7 +20,7 @@ var taskUtil = (function() {
   }
 
   function longDisplayName(task, application) {
-    return application.address + ": " + shortDisplayName(task);
+    return application.address + ": " + getTaskName(task);
   }
 
   return {
