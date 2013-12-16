@@ -198,7 +198,8 @@
 ;                                          :attachments []}
    :ya-jatkoaika                          {:schema "hankkeen-kuvaus-minimum"
                                            :permit-type "YA"
-                                           :required common-yleiset-alueet-schemas
+                                           :required (conj common-yleiset-alueet-schemas
+                                                       "tyo-aika-for-jatkoaika")
                                            :attachments []}})
 
 (def operations

@@ -43,6 +43,10 @@
     {:name "tyoaika-alkaa-pvm" :type :date}                 ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date}))
 
+(def tyo-aika-for-jatkoaika
+  (body
+;    {:name "tyoaika-alkaa-pvm" :type :date :readonly true}  ;; alkuPvm / loppuPvm
+    {:name "tyoaika-paattyy-pvm" :type :date}))
 
 (defschemas
   1
@@ -64,12 +68,18 @@
            :repeating false
            :order 62}
     :body yleiset-alueet-maksaja}
-   {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
+   {:info {:name "tyoaika"                                                 ;; alkuPvm / loppuPvm
            :type :group
            :removable false
            :repeating false
            :order 63}
-    :body tyo-aika}])
+    :body tyo-aika}
+   {:info {:name "tyo-aika-for-jatkoaika"                                  ;; (alkuPvm /) loppuPvm
+           :type :group
+           :removable false
+           :repeating false
+           :order 63}
+    :body tyo-aika-for-jatkoaika}])
 
 
 ;;

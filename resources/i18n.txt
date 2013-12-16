@@ -1,3 +1,8 @@
 operations.tree.jatkoaika: Jatkoajan hakeminen
 operations.ya-jatkoaika: Jatkolupa
 operations.ya-jatkoaika.desc: Jatkoluvalla voit hakea jatkoaikaa aikaisemmalle luvallesi. Jos et ole hakenut aikaisempaa lupaa Lupapisteessä, tarvitset jatkolupaa varten vanhan lupasi tunnuksen.
+mainosten-tai-viitoitusten-sijoittaminen._group_label: Hankkeen kuvaus
+tyo-aika-for-jatkoaika._group_label: Työaika
+tyo-aika-for-jatkoaika.tyoaika-paattyy-pvm: Työaika päättyy
+error.link-permit-must-be-chosen-first: Jatkoluvallesi on valittava ensin viitelupa
+error.only-one-link-permit-must-be-chosen: Voit valita hankkeellesi vain yhden viiteluvan
