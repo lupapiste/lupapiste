@@ -134,7 +134,7 @@ var docgen = (function () {
 
     // Option utils
 
-    function getCollection() {
+    self.getCollection = function() {
       return (options && options.collection) ? options.collection : "documents";
     }
 
@@ -233,7 +233,7 @@ var docgen = (function () {
       var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
-      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: getCollection() };
+      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
 
       if (_.isEmpty(model) || !features.enabled('docIndicators')) {
         return approvalContainer$[0];
@@ -578,7 +578,7 @@ var docgen = (function () {
 
           var buildingId = target.value;
           ajax
-            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: getCollection() })
+            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: self.getCollection() })
             .success(function () {
               save(event);
               repository.load(self.appId);
@@ -643,7 +643,7 @@ var docgen = (function () {
         var target = event.target;
         var userId = target.value;
         ajax
-          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: getCollection() })
+          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: self.getCollection() })
           .success(function () {
             save(event, function () { repository.load(self.appId); });
           })
@@ -719,7 +719,7 @@ var docgen = (function () {
 
     function removeData(id, doc, path) {
       ajax
-        .command("remove-document-data", { doc: doc, id: id, path: path, collection: getCollection() })
+        .command("remove-document-data", { doc: doc, id: id, path: path, collection: self.getCollection() })
         .success(function (e) {
           repository.load(id);
         })
@@ -853,7 +853,7 @@ var docgen = (function () {
     function saveForReal(path, value, callback) {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
-        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: getCollection() })
+        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: self.getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
       // elements: [key status message]. Here we use just the status.
         .success(function (e) {
@@ -891,7 +891,7 @@ var docgen = (function () {
     function validate() {
       if (!options || options.validate) {
         ajax
-          .query("validate-doc", { id: self.appId, doc: self.docId, collection: getCollection() })
+          .query("validate-doc", { id: self.appId, doc: self.docId, collection: self.getCollection() })
           .success(function (e) { showValidationResults(e.results); })
           .call();
       }
@@ -967,7 +967,7 @@ var docgen = (function () {
       }
 
       function onRemovalConfirmed() {
-        ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: getCollection() })
+        ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
           .success(function () {
             n$.slideUp(function () { n$.remove(); });
             // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
@@ -1060,17 +1060,19 @@ var docgen = (function () {
     var docgenDiv = $(containerSelector).empty();
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
+      var docModel = new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options);
 
-      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
+      docgenDiv.append(docModel.element);
 
       if (schema.info.repeating && !isDisabled(options) && authorizationModel.ok('create-doc')) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
         btn.className = "btn block";
 
         $(btn).click(function () {
+          debugger;
           var self = this;
           ajax
-            .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: getCollection() })
+            .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: docModel.getCollection() })
             .success(function (data) {
               var newDocId = data.doc;
               var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;

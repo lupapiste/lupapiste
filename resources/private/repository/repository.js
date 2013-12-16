@@ -37,6 +37,7 @@ var repository = (function() {
         var schemaInfo = doc["schema-info"];
         var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
         doc.schema = schema;
+        doc.schema.info = _.merge(schemaInfo, doc.schema.info);
       };
 
       if (application) {
