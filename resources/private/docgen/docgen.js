@@ -1069,7 +1069,6 @@ var docgen = (function () {
         btn.className = "btn block";
 
         $(btn).click(function () {
-          debugger;
           var self = this;
           ajax
             .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: docModel.getCollection() })
