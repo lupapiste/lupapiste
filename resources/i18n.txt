@@ -7,10 +7,14 @@ neighbors.owners.status.1: Haetaan kiinteistötunnusta
 neighbors.owners.status.2: Haetaan omistajatietoja
 neighbors.owners.status.3: Valitse naapurit
 neighbors.owners.status.4: Omistajien haku ei onnistunut. Yritä myöhemmin uudestaan.
+neighbors.owners.status.5: Kiinteistötunnuksen haku ei onnistunut. Yritä myöhemmin uudestaan.
 
+neighbors.owner.businessID: Y-tunnus
+neighbors.owner.nameOfDeceased: Edesmennyt
 neighbors.owner.type: Henkilölaji
-neighbors.owner.type.TU: Tuntematon henkilö
-neighbors.owner.type.JU: Juridinen henkilö
-neighbors.owner.type.LU: Luonnollinen henkilö
-neighbors.owner.type.KP: Kuolinpesä
-neighbors.owner.type.KPY: Kuolinpesän yhteyshenkilö
+neighbors.owner.type.tuntematon: Tuntematon henkilö
+neighbors.owner.type.juridinen: Juridinen henkilö
+neighbors.owner.type.luonnollinen: Luonnollinen henkilö
+neighbors.owner.type.kuolinpesa: Kuolinpesä
+neighbors.owner.type.valtio: Valtio
+neighbors.owner.type.kuolinpesan_yhthl: Kuolinpesän yhteyshenkilö

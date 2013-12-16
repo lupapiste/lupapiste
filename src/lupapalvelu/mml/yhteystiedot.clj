@@ -12,13 +12,21 @@
 
 (defn- path [& p] (interpose :> (concat [enlive/root] p)))
 
+(defn- ->henkilolaji [abbrev]
+  (let [translation {:KP :kuolinpesa
+                     :LU :luonnollinen
+                     :JU :juridinen
+                     :TU :tuntematon
+                     :VA :valtio}]
+    ((keyword abbrev) translation)))
+
 (defn- ->henkilo [henkilo-xml]
   (if (empty? henkilo-xml) nil
     (assoc-when
       {}
       ;; OL=omaan lukuun (oletus), PA=perustettavan asunto-osakeyhtion lukuun, PY=perustettavan yhtion lukuun
-      :lukuuntoiminnanlaji (get-in henkilo-xml [:attrs :lukuuntoiminnanlaji])
-      :henkilolaji (get-text henkilo-xml (path :henkilonTiedot :henkilolaji))
+      ;;:lukuuntoiminnanlaji (get-in henkilo-xml [:attrs :lukuuntoiminnanlaji])
+      :henkilolaji (->henkilolaji (get-text henkilo-xml (path :henkilonTiedot :henkilolaji)))
       ;; Kuolinpesa (KP)
       :kuolinpvm (get-date henkilo-xml (path :henkilonTiedot :kuolinpvm))
       :yhteyshenkilo (->henkilo (select1 henkilo-xml :Kuolinpesa :Yhteyshenkilo))

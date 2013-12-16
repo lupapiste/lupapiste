@@ -82,7 +82,8 @@
       self.statusSearchPropertyId = 1;
       self.statusSearchOwners     = 2;
       self.statusSelectOwners     = 3;
-      self.statusSearchFailed     = 4;
+      self.statusOwnersSearchFailed     = 4;
+      self.statusPropertyIdSearchFailed = 5;
       
       self.owners = ko.observableArray();
       self.propertyId = ko.observable();
@@ -117,7 +118,7 @@
           return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; 
       };
       self.isPropertyIdAvailable = function() { 
-          return self.status() > self.statusSearchPropertyId && self.status() < self.statusSearchFailed; 
+          return self.status() > self.statusSearchPropertyId && self.status() < self.statusPropertyIdSearchFailed; 
       };
       self.search = function(x, y) { 
           return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y); 
@@ -140,10 +141,10 @@
       }
       
       self.propertyIfNotFound = function() { 
-          return self.status(self.statusSearchFailed); 
+          return self.status(self.statusPropertyIdSearchFailed); 
       };
       self.ownersNotFound = function() {
-          return self.status(self.statusSearchFailed); 
+          return self.status(self.statusOwnersSearchFailed); 
       };
       self.cancelSearch = function() { 
           self.status(self.statusEdit).requestContext.begin(); 
@@ -193,12 +194,12 @@
           if (owner.yhteyshenkilo) {
               nameOfDeceased = getPersonName(owner);
               owner = owner.yhteyshenkilo;
-              type = "KPY";
+              type = "kuolinpesan_yhthl";
           }
           return {
-              type: type,
               name: getPersonName(owner),
-              nameOfDeceased: nameOfDeceased,
+              type: type,
+              nameOfDeceased: nameOfDeceased || null,
               businessID: owner.ytunnus || null,
               street: owner.jakeluosoite || null,
               city: owner.paikkakunta || null,
@@ -229,6 +230,9 @@
         .city(address.city)
         .zip(address.zip)
         .email(owner.email)
+        .type(owner.type)
+        .nameOfDeceased(owner.nameOfDeceased)
+        .businessID(owner.businessID)
         .pending(false);
     };
 
@@ -243,6 +247,15 @@
     self.city = ko.observable();
     self.zip = ko.observable();
     self.email = ko.observable();
+    self.type = ko.observable();
+    self.typeLabel = ko.computed(function() {
+        var t = self.type();
+        if (t) return loc(['neighbors.owner.type', t]);
+        else return null;
+    }, self);
+    self.nameOfDeceased = ko.observable();
+    self.businessID = ko.observable();
+    
 
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
     self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
@@ -254,7 +267,7 @@
       return self;
     };
 
-    var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email"];
+    var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email", "type", "businessID", "nameOfDeceased"];
     function paramValue(paramName) { return self[paramName](); }
 
     self.openEdit = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };

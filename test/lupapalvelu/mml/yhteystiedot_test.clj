@@ -10,8 +10,7 @@
 (defn- to-date [x] (cr/to-timestamp x))
 
 (fact "Kaksi luonnollista henkil\u00F6\u00E4" (lh/get-owners "1234") 
-      => [{:lukuuntoiminnanlaji "OL"
-           :henkilolaji "LU"
+      => [{:henkilolaji :luonnollinen
            :etunimet "Ahma Ky\u00F6sti Jaakkima"
            :sukunimi "Voller"
            :syntymapvm (to-date "1975-01-08")
@@ -19,8 +18,7 @@
            :jakeluosoite "Valli & kuja I/X:s Gaatta"
            :postinumero "00100"
            :paikkakunta "Helsinki"} 
-          {:lukuuntoiminnanlaji "OL"
-           :henkilolaji "LU"
+          {:henkilolaji :luonnollinen
            :etunimet "Jaakko Jaakkima Jorma"
            :sukunimi "Pakkanen"
            :syntymapvm (to-date "1979-12-12")
@@ -32,21 +30,19 @@
       (provided (http/get anything) => (mock-response "mml/yhteystiedot-LU.xml")))
 
 (fact "Juridinen henkil\u00F6" (lh/get-owners "1234") 
-      => [{:lukuuntoiminnanlaji "OL"
-           :henkilolaji "JU"
+      => [{:henkilolaji :juridinen
            :nimi "Hokki-kiinteist\u00F6t Oy"
            :ytunnus "0704458-3"}]
       (provided (http/get anything) => (mock-response "mml/yhteystiedot-JU.xml")))
 
 (fact "Kaksi kuolinpes\u00E4\u00E4" (lh/get-owners "1234") 
-      => [{:lukuuntoiminnanlaji "OL"
-           :henkilolaji "KP"
+      => [{:henkilolaji :kuolinpesa
            :etunimet "Pjotr Seppo Risto"
            :sukunimi "Yl\u00E4m\u00E4rssy"
            :syntymapvm (to-date "1917-12-09")
            :kuolinpvm (to-date "1995-05-02")
            :ulkomaalainen false
-           :yhteyshenkilo {:henkilolaji "LU"
+           :yhteyshenkilo {:henkilolaji :luonnollinen
                            :etunimet "Seppo Matias Unto"
                            :sukunimi "Lahti"
                            :syntymapvm (to-date "1951-01-07")
@@ -55,14 +51,13 @@
                            :postinumero "00100"
                            :paikkakunta "Helsinki"
                            }} 
-          {:lukuuntoiminnanlaji "OL"
-           :henkilolaji "KP"
+          {:henkilolaji :kuolinpesa
            :etunimet "Legolas Kalervo Jalmari"
            :sukunimi "Niinist\u00F6"
            :syntymapvm (to-date "1922-07-20")
            :kuolinpvm (to-date "1988-06-09")
            :ulkomaalainen false
-           :yhteyshenkilo {:henkilolaji "LU"
+           :yhteyshenkilo {:henkilolaji :luonnollinen
                            :etunimet "Seppo Matias Unto"
                            :sukunimi "Lahti"
                            :syntymapvm (to-date "1951-01-07")
