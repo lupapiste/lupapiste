@@ -94,7 +94,7 @@
               selectedOwnersWatch.dispose();
               self.selectedOwners.removeAll();
               if (allSelected) {
-                  _.each(self.owners(), function(owner, index) { self.selectedOwners.push("" + index); });
+                  _.each(self.owners(), function(owner, index) { self.selectedOwners.push("" + index); });
               }
               watchSelectedOwners();
           });
@@ -133,14 +133,16 @@
       };
       
       self.searchOwners = function(propertyId) {
-          locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, console.log);
+          locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, self.ownersNotFound);
       };
       self.ownersFound = function(data) {
-          console.log(data);
           return self.owners(_.map(data.owners, convertOwner)).allSelected(true).status(self.statusSelectOwners);
       }
       
       self.propertyIfNotFound = function() { 
+          return self.status(self.statusSearchFailed); 
+      };
+      self.ownersNotFound = function() {
           return self.status(self.statusSearchFailed); 
       };
       self.cancelSearch = function() { 
@@ -160,7 +162,6 @@
                   propertyId: self.propertyId(),
                   owners: owners
               };
-          console.log(parameters);
           ajax
           .command("neighbor-add-owners", parameters)
           .complete(_.partial(repository.load, applicationId, 
@@ -200,7 +201,7 @@
               nameOfDeceased: nameOfDeceased,
               businessID: owner.ytunnus || null,
               street: owner.jakeluosoite || null,
-              city: owner.paikkakunta || null,
+              city: owner.paikkakunta || null,
               zip: owner.postinumero || null
           };
       }
