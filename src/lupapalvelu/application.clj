@@ -363,7 +363,7 @@
                :state :sent}})
 
       (catch org.xml.sax.SAXParseException e
-        (info e "Invalid KRYSM XML message")
+        (info e "Invalid KRYSP XML message")
         (fail (.getMessage e))))))
 
 (defcommand submit-application
@@ -605,7 +605,8 @@
    :roles      [:applicant :authority]}
   [{{:keys [propertyId]} :application user :user :as command}]
   (let [results (mongo/select :applications
-                  (merge (domain/application-query-for user) {:_id {$ne id}})
+                  (merge (domain/application-query-for user) {:_id {$ne id}
+                                                              :state {$in ["verdictGiven" "constructionStarted"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
         enriched-results (map
                            (fn [r]
