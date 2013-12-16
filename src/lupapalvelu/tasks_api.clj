@@ -32,8 +32,7 @@
   [{:keys [created application user] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
     (fail! :illegal-schema))
-  (let [schema (schemas/get-schema (:schema-version application) schemaName)
-        task (tasks/new-task schemaName taskName {} {:created created :assignee user} {:type :authority :id (:id user)})]
+  (let [task (tasks/new-task schemaName taskName {} {:created created :assignee user} {:type :authority :id (:id user)})]
     (update-application command
       {$push {:tasks task}
        $set {:modified created}})
