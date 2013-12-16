@@ -1,3 +1,0 @@
-task.create: Uusi vaatimus
-task.type: Vaatimuksen tyyppi
-task.name: Vaatimuksen nimi
