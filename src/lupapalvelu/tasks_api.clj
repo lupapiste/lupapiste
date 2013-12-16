@@ -4,6 +4,8 @@
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
@@ -23,6 +25,18 @@
     {$set {:tasks.$.state state :modified created}}))
 
 ;; API
+
+(defcommand create-task
+  {:parameters [id taskName schemaName]
+   :roles      [:authority]}
+  [{:keys [created application user] :as command}]
+  (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
+    (fail! :illegal-schema))
+  (let [task (tasks/new-task schemaName taskName {} {:created created :assignee user} {:type :authority :id (:id user)})]
+    (update-application command
+      {$push {:tasks task}
+       $set {:modified created}})
+    (ok :taskId (:id task))))
 
 (defcommand delete-task
   {:parameters [id taskId]
@@ -63,3 +77,10 @@
     (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
     (mapping-to-krysp/save-review-as-krysp application task user lang)
     (set-state command taskId :sent)))
+
+(defquery task-types-for-application
+  {:description "Returns a list of allowed schema names for current application and user"
+   :parameters [:id]
+   :roles      [:authority]}
+  [{application :application}]
+  (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))

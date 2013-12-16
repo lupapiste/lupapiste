@@ -94,4 +94,13 @@
             updated-task (commands/by-id updated-app :tasks task-id)]
         (:state updated-task) => "requires_user_action")))
 
+  (facts "create task"
+    (fact "Applicant can't create tasks"
+      (command pena :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => unauthorized?)
+    (fact "Authority can create tasks"
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => ok?
+      (some #(and (= "do the shopping" (:taskname %)) (= "task-katselmus") (-> % :schema-info :name)) (:tasks (query-application pena application-id))) => truthy)
+    (fact "Can't create documents with create-task command"
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "uusiRakennus") => (partial expected-failure? "illegal-schema")))
+
   )
