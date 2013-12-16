@@ -50,10 +50,10 @@
       </div>
       <div class="dialog-content">
         <div>
-          <h2 data-bind="visible: isPropertyIdAvailable()">
+          <h3 data-bind="visible: isPropertyIdAvailable()">
             <span data-bind="ltext: 'neighbors.edit.propertyId'"></span>:
             <span data-bind="text: propertyId"></span>
-          </h2>
+          </h3>
           <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
           <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
         </div>
