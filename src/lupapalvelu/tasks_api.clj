@@ -84,4 +84,4 @@
    :parameters [:id]
    :roles      [:authority]}
   [{application :application}]
-  (ok :schemas (map (comp :name :info) (tasks/task-schemas application))))
+  (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))
