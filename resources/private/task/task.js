@@ -1,7 +1,7 @@
 var taskUtil = (function() {
 
   function shortDisplayName(task) {
-    var displayName = task.taskname;
+    var displayName = task.taskname || loc(task.schema.info.name + "._group_label" );
     var prefix = task.schema.info.i18nprefix;
     var path = task.schema.info.i18npath;
     if (path && path.length) {
