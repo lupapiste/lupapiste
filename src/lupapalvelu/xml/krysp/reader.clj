@@ -172,15 +172,17 @@
 (def polished  (comp cr/index-maps cleanup cr/convert-booleans))
 
 (defn ->rakennuksen-tiedot
-  ([xml buildingId]
+  ([xml building-id]
     (let [stripped  (cr/strip-xml-namespaces xml)
-          rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])]
+          rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text building-id)])])]
       (->rakennuksen-tiedot rakennus)))
   ([rakennus]
     (when rakennus
       (polished
         {:muutostyolaji                 ...notimplemented...
-         :rakennusnro                   (get-text rakennus :rakennusnro)
+         :rakennusnro                   (get-text rakennus :rakennustunnus :rakennusnro)
+         :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
+         :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
          :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
          :rakennuksenOmistajat          (->>
                                           (select rakennus [:omistaja])
