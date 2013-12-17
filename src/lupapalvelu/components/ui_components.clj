@@ -12,6 +12,10 @@
               :js ["debug.js"]
               :name "common"})
 
+(def mockjax {:depends [:init :jquery]
+              :js ["jquery.mockjax.js"]
+              :name "jquery"})
+
 (defn- conf []
   (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
@@ -44,6 +48,8 @@
    ;; Components to be included in a SPA
 
    :debug        (if (env/dev-mode?) debugjs {})
+   
+   :mockjax      (if (env/dev-mode?) mockjax {})
 
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
