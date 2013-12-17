@@ -807,12 +807,7 @@
     (or
       (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
       (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value)
-      (util/to-local-date (:submitted app))
-
-;      (util/to-xml-date-from-string (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value))
-;      (util/to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
-;      (util/to-xml-date (:submitted app))
-      )))
+      (util/to-local-date (:submitted app)))))
 
 ;;
 ;; TODO: Lisaa validaattoreita:
