@@ -346,25 +346,52 @@
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [{:keys [application created] :as command}]
-  (let [submitted-application (mongo/by-id :submitted-applications id)
-        organization (organization/get-organization (:organization application))]
+
+  (println "\n approve-application, app: ")
+  (clojure.pprint/pprint application)
+  (println "\n")
+
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        ;; Jatkoaika app will need to have some more data from its link permit to enable its canonical transformation.
+;        continuation-period-permit? ;(or
+;                                      (= :ya-jatkoaika (-> application :operations first :name keyword))
+;                                     ; (= "jatkolupa" (:permitSubtype application)))
+;        _ (println "\n continuation-period-permit?: " continuation-period-permit?)
+;        _ (println "\n app linkPermitData: " (:linkPermitData application))
+;        application-for-krysp (if continuation-period-permit?
+;                                #_(meta-fields/enrich-with-additional-data-from-link-permit application)
+;                                (meta-fields/merge-continuation-period-permit-with-orig-application application)
+;                                application)
+;        submitted-application (mongo/by-id :submitted-applications (if continuation-period-permit?
+;                                                                     (-> application :linkPermitData first :id)
+;                                                                     id))
+;        _ (println "\n app id: " (:id application-for-krysp) ", subm app id: " (if continuation-period-permit?
+;                                                                                 (-> application :linkPermitData first :id)
+;                                                                                 id) "\n")
+;        organization (organization/get-organization (:organization application-for-krysp))
+        organization (organization/get-organization (:organization application))
+        ]
+
+    (println "\n app authority: " (:authority application))
     (when (empty? (:authority application))
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
-      (mapping-to-krysp/save-application-as-krysp
-        (meta-fields/enrich-with-link-permit-data application)
-        lang
-        submitted-application
-        organization)
-
-      (update-application command
-        {:state {$in ["submitted" "complement-needed"]}}
-        {$set {:sent created
-               :state :sent}})
+      (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+        (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+        (let [submitted-application (mongo/by-id :submitted-applications id)]
+          (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
 
       (catch org.xml.sax.SAXParseException e
         (info e "Invalid KRYSP XML message")
-        (fail (.getMessage e))))))
+        (fail (.getMessage e))))
+
+
+    (println "\n approve-application, updating application")
+    (update-application command
+      {:state {$in ["submitted" "complement-needed"]}}
+      {$set {:sent created
+             :state :sent}})
+    ))
 
 (defcommand submit-application
   {:parameters [id]
@@ -450,7 +477,7 @@
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
+                     (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
         (conj new-docs hakija)))))
 
 (defn- ->location [x y]
@@ -474,14 +501,7 @@
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 
-;; TODO: separate methods for inforequests & applications for clarity.
-(defcommand create-application
-  {:parameters [:operation :x :y :address :propertyId :municipality]
-   :roles      [:applicant :authority]
-   :notified   true ; OIR
-   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-                      (partial property-id-parameters [:propertyId])
-                      operation-validator]}
+(defn- do-create-application
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
@@ -502,6 +522,7 @@
     (let [id            (make-application-id municipality)
           owner         (user/user-in-role user :owner :type :owner)
           op            (make-op operation created)
+          info-request? (boolean infoRequest)
           state         (cond
                           info-request?              :info
                           (user/authority? user)     :open
@@ -540,13 +561,89 @@
 
           application   (domain/set-software-version application)]
 
-      (mongo/insert :applications application)
+      (println "\n do-create-application, created application: ")
+      (clojure.pprint/pprint application)
+      (println "\n")
+
+      application)))
+
+;; TODO: separate methods for inforequests & applications for clarity.
+(defcommand create-application
+  {:parameters [:operation :x :y :address :propertyId :municipality]
+   :roles      [:applicant :authority]
+   :notified   true ; OIR
+   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+                      (partial property-id-parameters [:propertyId])
+                      operation-validator]}
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  (let [
+        permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+;        organization-id   (:id organization)
+        info-request?     (boolean infoRequest)
+        open-inforequest? (and info-request? (:open-inforequest organization))
+        created-application (do-create-application command)]
+
+;    (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
+;      (fail! :error.unauthorized))
+;    (when-not organization-id
+;      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+;    (if info-request?
+;      (when-not (:inforequest-enabled organization)
+;        (fail! :error.inforequests-disabled))
+;      (when-not (:new-application-enabled organization)
+;        (fail! :error.new-applications-disabled)))
+
+;    (let [id            (make-application-id municipality)
+;          owner         (user/user-in-role user :owner :type :owner)
+;          op            (make-op operation created)
+;          state         (cond
+;                          info-request?              :info
+;                          (user/authority? user)     :open
+;                          :else                      :draft)
+;          make-comment  (partial assoc {:target {:type "application"}
+;                                        :created created
+;                                        :user (user/summary user)} :text)
+;
+;          application   (merge (domain/application-skeleton)
+;                          {:id                  id
+;                           :created             created
+;                           :opened              (when (#{:open :info} state) created)
+;                           :modified            created
+;                           :permitType          permit-type
+;                           :permitSubtype       (first (permit/permit-subtypes permit-type))
+;                           :infoRequest         info-request?
+;                           :openInfoRequest     open-inforequest?
+;                           :operations          [op]
+;                           :state               state
+;                           :municipality        municipality
+;                           :location            (->location x y)
+;                           :organization        organization-id
+;                           :address             address
+;                           :propertyId          propertyId
+;                           :title               address
+;                           :auth                [owner]
+;                           :comments            (map make-comment messages)
+;                           :schema-version      (schemas/get-latest-schema-version)})
+;
+;          application   (merge application
+;                          (if info-request?
+;                            {:allowedAttachmentTypes [[:muut [:muu]]]}
+;                            {:attachments            (make-attachments created op organization-id)
+;                             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
+;                             :documents              (make-documents user created op application)}))
+;
+;          application   (domain/set-software-version application)]
+
+      (mongo/insert :applications created-application)
       (when open-inforequest?
-        (open-inforequest/new-open-inforequest! application))
+        (open-inforequest/new-open-inforequest! created-application))
       (try
-        (autofill-rakennuspaikka application created)
+        (autofill-rakennuspaikka created-application created)
         (catch Exception e (error e "KTJ data was not updated")))
-      (ok :id id))))
+      (ok :id (:id created-application))
+;      )
+      ))
 
 (defcommand add-operation
   {:parameters [id operation]
@@ -669,7 +766,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven]
+   :states     [:verdictGiven :constructionsStarted]
   :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
@@ -692,6 +789,115 @@
     (do-add-link-permit muutoslupa-app (:id application))
     (mongo/insert :applications muutoslupa-app)
     (ok :id muutoslupa-app-id)))
+
+
+;;
+;; Continuation period permit
+;;
+
+(defn- get-tyoaika-alkaa-from-ya-app [app]
+  (let [mainostus-viitoitus-tapahtuma-doc (domain/get-document-by-name app "mainosten-tai-viitoitusten-sijoittaminen")
+        _ (println "\n doc: " mainostus-viitoitus-tapahtuma-doc)
+        mainostus-viitoitus-tapahtuma-name (when mainostus-viitoitus-tapahtuma-doc
+                                             (-> mainostus-viitoitus-tapahtuma-doc :_selected :value))
+        _ (println "\n name: " mainostus-viitoitus-tapahtuma-name)
+        mainostus-viitoitus-tapahtuma (when mainostus-viitoitus-tapahtuma-name
+                                        (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name)))
+        _ (println "\n tapahtuma: " mainostus-viitoitus-tapahtuma)]
+    (or
+      (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
+      (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value)
+      (util/to-local-date (:submitted app))
+
+;      (util/to-xml-date-from-string (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value))
+;      (util/to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
+;      (util/to-xml-date (:submitted app))
+      )))
+
+;;
+;; TODO: Lisaa validaattoreita:
+;;       - applicationilla pitaa olla tasan yksi viitelupa
+;;       - ks viitelupa ei ole jatkolupa-tyyppiä -> TODO: lisaa rekursio, joka etsii oikean luvan lupaketjusta
+;;
+(defcommand create-continuation-period-permit
+  {:parameters ["id"]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionsStarted]
+  :validators [(permit/validate-permit-type-is permit/YA)]}
+  [{:keys [created user application] :as command}]
+
+  (let [
+;        authority (:authority application)
+;        location (:location application)
+;        continuation-app-id (executed "create-application" (-> command (assoc :data {:operation "ya-jatkoaika"})))
+;        continuation-app (mongo/by-id "applications" continuation-app-id)
+        continuation-app (do-create-application
+                           (assoc command :data {:operation "ya-jatkoaika"
+                                                 :x (-> application :location :x)
+                                                 :y (-> application :location :y)
+                                                 :address (:address application)
+                                                 :propertyId (:propertyId application)
+                                                 :municipality (:municipality application)
+                                                 :infoRequest false
+                                                 :messages []}))
+;        orig-submitted (:submitted application)
+
+;        continuation-app (merge continuation-app
+;                           {:permitSubtype :jatkolupa
+;                            ;:location location
+;                            ;:authority authority
+;                            ;:submitted orig-submitted
+;                            })
+        ;; ************
+        ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan päätöspvm jos se on tata aiempi.
+        ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a §
+        ;; ************
+
+;        tyoaika-alkaa-pvm (-> (domain/get-document-by-name application "tyoaika") :data :tyoaika-alkaa-pvm :value)
+;        tyoaika-alkaa-pvm (if-not tyoaika-alkaa-pvm (:submitted application) tyoaika-alkaa-pvm)
+        tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
+        _ (println "\n resolved tyoaika-alkaa-pvm: " tyoaika-alkaa-pvm)
+
+        tyo-aika-for-jatkoaika-doc (domain/get-document-by-name continuation-app "tyo-aika-for-jatkoaika")
+        tyo-aika-for-jatkoaika-doc (assoc-in tyo-aika-for-jatkoaika-doc [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm)
+
+        continuation-app (assoc continuation-app
+                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-minimum")
+                                       tyo-aika-for-jatkoaika-doc
+                                       (domain/get-document-by-name application "hakija-ya")
+                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])
+        ]
+
+    (println "\n create-continuation-period-permit, continuation-app: ")
+    (clojure.pprint/pprint continuation-app)
+    (println "\n")
+
+
+    (do-add-link-permit continuation-app (:id application))
+    (mongo/insert :applications continuation-app)
+    (ok :id (:id continuation-app))
+    )
+
+  #_(let [continuation-app-id (make-application-id (:municipality application))
+        continuation-app (merge application
+                         {:id                  continuation-app-id
+                          :created             created
+                          :opened              created
+                          :modified            created
+                          :documents           (into [] (map
+                                                          #(assoc % :id (mongo/create-id))
+                                                          (:documents application)))
+                          :state               (cond
+                                                 (user/authority? user)  :open
+                                                 :else                   :draft)
+                          :permitSubtype       :jatkolupa}
+                         (select-keys
+                           (domain/application-skeleton)
+                           [:attachments :statements :verdicts :comments :submitted :sent :neighbors
+                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+    (do-add-link-permit continuation-app (:id application))
+    (mongo/insert :applications continuation-app)
+    (ok :id continuation-app-id)))
 
 
 ;;

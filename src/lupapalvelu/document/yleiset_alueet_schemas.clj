@@ -45,7 +45,7 @@
 
 (def tyo-aika-for-jatkoaika
   (body
-;    {:name "tyoaika-alkaa-pvm" :type :date :readonly true}  ;; alkuPvm / loppuPvm
+    {:name "tyoaika-alkaa-pvm" :type :date :readonly true}  ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date}))
 
 (defschemas

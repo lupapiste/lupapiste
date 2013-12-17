@@ -5,6 +5,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.core :refer :all]
+;            [lupapalvelu.document.canonical-common :refer [by-type]]
+;            [sade.util :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
 
@@ -80,6 +83,9 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
+;(defn- get-link-permits-operation-from-mongo [link-permit-id]
+;  (-> (mongo/by-id "applications" link-permit-id {:operations 1}) :operations first :name))
+
 (defn enrich-with-link-permit-data [app]
   (let [app-id (:id app)
         resp (mongo/select :app-links {:link {$in [app-id]}})]
@@ -91,7 +97,15 @@
                                link-permit-id (link-array (if (= 0 app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
                            (if (= (:type ((keyword app-id) link-data)) "application")
-                             {:id link-permit-id :type link-permit-type}
+
+                             ;; TODO: Jos viiteluvan tyyppi on myös jatkolupa, niin sitten :operation pitaa hakea
+                             ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
+                             ;;
+;                            {:id link-permit-id :type link-permit-type}
+                             (let [;link-permit-app-op (get-link-permits-operation-from-mongo link-permit-id)
+                                   link-permit-app-op (-> (mongo/by-id "applications" link-permit-id {:operations 1})
+                                                        :operations first :name)]
+                               {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
                              {:id link-permit-id})))
             our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
             apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
@@ -107,3 +121,63 @@
       (-> app
         (assoc :linkPermitData nil)
         (assoc :appsLinkingToUs nil)))))
+
+
+
+;; For Jatkolupa
+
+;;*******************
+;; TODO:
+;;
+;; Avaimien :continuation-period-end-date  ja  :continuation-period-description
+;; canonical-testaukseen riittaa se, etta tekee sen jossain ya canonical_testissa, esim kaivuluvalla.
+;;
+;;*******************
+
+#_(defn doc-from-app-by-name [app name]
+  (filter #(= name (-> % :schema-info :name)) (:documents app)))
+
+#_(defn merge-continuation-period-permit-with-orig-application [app]
+;  (println "\n merge-continuation-period-permit-with-orig-application, app: ")
+;  (clojure.pprint/pprint app)
+;  (println "\n linkPermitData count: " (-> app :linkPermitData count))
+
+  (when-not (-> app :linkPermitData first :id) (fail! :error.link-permit-must-be-chosen-first))
+  (when (> 1 (-> app :linkPermitData count)) (fail! :error.only-one-link-permit-must-be-chosen))
+
+  (let [orig-app (mongo/by-id "applications" (-> app :linkPermitData first :id))
+;        _ (println "\n tyoaika-paattyy-doc: " (doc-from-app-by-name app "tyo-aika-for-jatkoaika"))
+        end-date (-> (domain/get-document-by-name app "tyo-aika-for-jatkoaika") :data :tyoaika-paattyy-pvm :value)
+;        _ (println "\n tyoaika-paattyy-doc: " (doc-from-app-by-name app "hankkeen-kuvaus-minimum"))
+        kuvaus (-> (domain/get-document-by-name app "hankkeen-kuvaus-minimum") :data :kuvaus :value)
+        result (-> orig-app
+                 (assoc :continuation-period-end-date end-date)
+                 (assoc :continuation-period-description kuvaus))]
+
+;    (println "\n merge-continuation-period-permit-with-orig-application, result: ")
+;    (clojure.pprint/pprint result)
+;    (println "\n")
+
+    result))
+
+
+
+#_(defn enrich-with-additional-data-from-link-permit [app]
+  (if-let [link-permit-id (-> app :linkPermitData :id)]
+    (let [lp (mongo/by-id "applications" link-permit-id {:operations 1})
+          documents-by-type (by-type (:documents lp))
+          mainostus-viitoitus-tapahtuma-doc (or (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data) {})
+          mainostus-viitoitus-tapahtuma-name (-> mainostus-viitoitus-tapahtuma-doc :_selected :value)
+          mainostus-viitoitus-tapahtuma (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name))]
+      (-> app
+        ;, Operation name
+        (assoc-in [:linkPermitData :operation] (-> lp :operations first :name))
+        ;; Work start date    *Horrror!*
+        (assoc-in [:linkPermitData :work-start-date]
+          (or
+            (to-xml-date-from-string (-> documents-by-type :tyoaika first :data :tyoaika-alkaa-pvm :value))
+            (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
+            (to-xml-date (:submitted lp))))))
+
+    (fail! :error.link-permit-must-be-chosen-first)))
+
