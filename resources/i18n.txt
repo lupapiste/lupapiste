@@ -6,3 +6,5 @@ tyo-aika-for-jatkoaika._group_label: Työaika
 tyo-aika-for-jatkoaika.tyoaika-alkaa-pvm: Työaika alkaa
 tyo-aika-for-jatkoaika.tyoaika-paattyy-pvm: Työaika päättyy
 application.createContinuationPeriodPermit: Hae jatkoaikaa
+application.createContinuationPeriodPermit.confirmation.message: Olet hakemassa jatkoaikaa luvallesi. Luvan oleelliset tiedot kopioidaan jatkoaikahakemukselle.
+application.createContinuationPeriodPermit.confirmation.title: Jatkoajan hakeminen
