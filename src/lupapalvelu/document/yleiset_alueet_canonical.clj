@@ -147,14 +147,6 @@
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
-;(defn get-lisaaikatieto [app alku-pvm]
-;  ;(println "\n get-lisaaikatieto, alku-pvm: " alku-pvm "\n")
-;  {:Lisaaika {:alkuPvm alku-pvm
-;              :loppuPvm (to-xml-date-from-string (:continuation-period-end-date app))
-;              :perustelu (:continuation-period-description app)}})
-
-
-
 (def ^:private default-config
   {:tyomaasta-vastaava true
    :tyoaika true
@@ -188,11 +180,6 @@
   ;;
   (let [documents-by-type (by-type (:documents application))
         operation-name-key (-> application :operations first :name keyword)
-;        _ (println "\n canonical, operation-name-key: " operation-name-key "\n")
-        ;; With jatkolupa, let's use link-permit's operation type instead.
-;        operation-name-key (if (= operation-name-key "ya-jatkoaika")
-;                             (-> application :linkPermitData :operation)
-;                             operation-name-key)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
@@ -298,36 +285,25 @@
 (defn jatkoaika-to-canonical [application lang]
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
-
-  (println "\n jatkoaika-to-canonical, application: ")
-  (clojure.pprint/pprint application)
-  (println "\n")
-
   (let [app (assoc application :documents
               (clojure.walk/postwalk empty-strings-to-nil (:documents application)))
         documents-by-type (by-type (:documents application))
 
         link-permit-data (-> application :linkPermitData first)
-;        _ (println "\n jatkoaika-to-canonical, link-permit-data: " link-permit-data "\n")
-
+        ;;
         ;; *** TODO: Onko OK laittaa kaivuulupa operaation puuttuessa (op.puun kautta luotu app) ***
+        ;;
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-kaivuulupa)
-;        _ (println "\n jatkoaika-to-canonical, operation-name-key: " operation-name-key)
-
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
-;        _ (println "\n jatkoaika-to-canonical, permit-name-key: " permit-name-key)
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         tyoaika-doc (-> documents-by-type :tyo-aika-for-jatkoaika first :data)
-        _ (println "\n jatkoaika-to-canonical, before alku-pvm \n")
         alku-pvm (if-let [tyoaika-alkaa-value (-> tyoaika-doc :tyoaika-alkaa-pvm :value)]
                    (to-xml-date-from-string tyoaika-alkaa-value)
                    (to-xml-date (:submitted application)))
-        _ (println "\n jatkoaika-to-canonical, alku-pvm: " alku-pvm "\n")
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
-        _ (println "\n jatkoaika-to-canonical, loppu-pvm: " loppu-pvm)
         maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
         osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}]))
         vastuuhenkilotieto (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))

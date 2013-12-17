@@ -354,10 +354,6 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created] :as command}]
 
-  (println "\n approve-application, app: ")
-  (clojure.pprint/pprint application)
-  (println "\n")
-
   (let [application (meta-fields/enrich-with-link-permit-data application)
         organization (organization/get-organization (:organization application))]
     (when (empty? (:authority application))
@@ -545,10 +541,6 @@
 
           application   (domain/set-software-version application)]
 
-;      (println "\n do-create-application, created application: ")
-;      (clojure.pprint/pprint application)
-;      (println "\n")
-
       application)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
@@ -560,64 +552,13 @@
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [
-        permit-type       (operations/permit-type-of-operation operation)
+
+  ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
+  (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
-;        organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest organization))
         created-application (do-create-application command)]
-
-;    (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
-;      (fail! :error.unauthorized))
-;    (when-not organization-id
-;      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
-;    (if info-request?
-;      (when-not (:inforequest-enabled organization)
-;        (fail! :error.inforequests-disabled))
-;      (when-not (:new-application-enabled organization)
-;        (fail! :error.new-applications-disabled)))
-
-;    (let [id            (make-application-id municipality)
-;          owner         (user/user-in-role user :owner :type :owner)
-;          op            (make-op operation created)
-;          state         (cond
-;                          info-request?              :info
-;                          (user/authority? user)     :open
-;                          :else                      :draft)
-;          make-comment  (partial assoc {:target {:type "application"}
-;                                        :created created
-;                                        :user (user/summary user)} :text)
-;
-;          application   (merge (domain/application-skeleton)
-;                          {:id                  id
-;                           :created             created
-;                           :opened              (when (#{:open :info} state) created)
-;                           :modified            created
-;                           :permitType          permit-type
-;                           :permitSubtype       (first (permit/permit-subtypes permit-type))
-;                           :infoRequest         info-request?
-;                           :openInfoRequest     open-inforequest?
-;                           :operations          [op]
-;                           :state               state
-;                           :municipality        municipality
-;                           :location            (->location x y)
-;                           :organization        organization-id
-;                           :address             address
-;                           :propertyId          propertyId
-;                           :title               address
-;                           :auth                [owner]
-;                           :comments            (map make-comment messages)
-;                           :schema-version      (schemas/get-latest-schema-version)})
-;
-;          application   (merge application
-;                          (if info-request?
-;                            {:allowedAttachmentTypes [[:muut [:muu]]]}
-;                            {:attachments            (make-attachments created op organization-id)
-;                             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-;                             :documents              (make-documents user created op application)}))
-;
-;          application   (domain/set-software-version application)]
 
       (mongo/insert :applications created-application)
       (when open-inforequest?
@@ -625,9 +566,7 @@
       (try
         (autofill-rakennuspaikka created-application created)
         (catch Exception e (error e "KTJ data was not updated")))
-      (ok :id (:id created-application))
-;      )
-      ))
+      (ok :id (:id created-application))))
 
 (defcommand add-operation
   {:parameters [id operation]
@@ -837,10 +776,6 @@
                                        tyo-aika-for-jatkoaika-doc
                                        (domain/get-document-by-name application "hakija-ya")
                                        (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
-
-;    (println "\n create-continuation-period-permit, continuation-app: ")
-;    (clojure.pprint/pprint continuation-app)
-;    (println "\n")
 
     (do-add-link-permit continuation-app (:id application))
     (mongo/insert :applications continuation-app)

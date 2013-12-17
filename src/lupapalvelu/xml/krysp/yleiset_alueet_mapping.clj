@@ -195,7 +195,6 @@
 ;;
 ;; TODO: Mihin submitted-applicationia kaytettiin ennen (_nyt ei mihinkaan_)?
 ;;
-
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
@@ -224,24 +223,7 @@
                             (-> application :linkPermitData first :operation keyword)
                             :ya-kaivuulupa))
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
-;          attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
-;          statement-given-ids (mapping-common/statements-ids-with-status
-;                                (get-in canonical-without-attachments
-;                                  [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
-;          statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-;          canonical-with-statement-attachments (add-statement-attachments
-;                                                 lupa-name-key
-;                                                 canonical-without-attachments
-;                                                 statement-attachments)
-;          canonical (assoc-in
-;                      canonical-with-statement-attachments
-;                      [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
-;                      attachments)
           xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
-
-      (println "\n save-jatkoaika-as-krysp, canonical: ")
-      (clojure.pprint/pprint canonical)
-;      (println "\n save-jatkoaika-as-krysp, xml: " xml)
 
       (mapping-common/write-to-disk application nil nil xml output-dir)))
 
