@@ -343,7 +343,7 @@
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
             (not= 1 (-> application :linkPermitData count)))
-      (fail! :error.jatkolupa-must-have-exactly-one-link-permit))))
+      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
 
 (defcommand approve-application
   {:parameters [id lang]
@@ -729,7 +729,7 @@
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
             (not= 0 (-> application :linkPermitData count)))
-      (fail! :error.jatkolupa-can-only-be-added-one-link-permit))))
+      (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
 
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
@@ -799,7 +799,7 @@
 
 (defn- validate-not-jatkolupa-app [_ application]
   (when (= :ya-jatkoaika (-> application :operations first :name keyword))
-    (fail! :error.cannot-apply-jatkolupa-for-jatkolupa)))
+    (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
 ;;
 ;; TODO: jatkoluvan viitelupa ei ole jatkolupa-tyyppiä -> lisaa rekursio, joka etsii oikean luvan lupaketjusta
