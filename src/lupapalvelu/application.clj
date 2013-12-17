@@ -802,7 +802,7 @@
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
 ;;
-;; TODO: jatkoluvan viitelupa ei ole jatkolupa-tyyppiä -> lisaa rekursio, joka etsii oikean luvan lupaketjusta
+;; TODO: jatkoluvan viitelupa ei ole jatkolupa-tyyppia -> lisaa rekursio, joka etsii oikean luvan lupaketjusta
 ;;
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
@@ -823,8 +823,8 @@
         continuation-app (merge continuation-app {:authority (:authority application)})
         ;;
         ;; ************
-        ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan päätöspvm jos se on tata aiempi.
-        ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a §
+        ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan paatospvm jos se on tata aiempi.
+        ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a pykala
         ;; ************
         ;;
         tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)

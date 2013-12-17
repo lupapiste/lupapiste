@@ -96,7 +96,7 @@
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
                            (if (= (:type ((keyword app-id) link-data)) "application")
 
-                             ;; TODO: Jos viiteluvan tyyppi on myös jatkolupa, niin sitten :operation pitaa hakea
+                             ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
                              ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
                              ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
                              ;;
