@@ -5,6 +5,4 @@ mainosten-tai-viitoitusten-sijoittaminen._group_label: Hankkeen kuvaus
 tyo-aika-for-jatkoaika._group_label: Työaika
 tyo-aika-for-jatkoaika.tyoaika-alkaa-pvm: Työaika alkaa
 tyo-aika-for-jatkoaika.tyoaika-paattyy-pvm: Työaika päättyy
-error.link-permit-must-be-chosen-first: Jatkoluvallesi on valittava ensin viitelupa
-error.only-one-link-permit-must-be-chosen: Voit valita hankkeellesi vain yhden viiteluvan
 application.createContinuationPeriodPermit: Hae jatkoaikaa
