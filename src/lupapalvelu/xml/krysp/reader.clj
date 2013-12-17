@@ -268,20 +268,23 @@
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
     (#(assoc % :liite  (->liite (:liite %))))))
 
-(defn ->verdict [paatos-xml-without-ns]
+(defn- ->verdict [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
    :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                   [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
-(defn ->ya-verdict [paatos-xml-without-ns]
+(defn- ->ya-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
                     :muutMaaraykset (when (not-empty (select paatos-xml-without-ns :lupaehdotJaMaaraykset))
                                       (reduce (fn [c v] (str c ", " v )) (map #(get-text % :lupaehdotJaMaaraykset)  (select paatos-xml-without-ns :lupaehdotJaMaaraykset))))}
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
    :poytakirjat    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
 
+(permit/register-function permit/R :verdict-krysp-reader ->verdict)
+(permit/register-function permit/P :verdict-krysp-reader ->verdict)
+(permit/register-function permit/YA :verdict-krysp-reader ->ya-verdict)
 
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])})

@@ -820,21 +820,17 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defmulti get-verdicts-with-attachments  (fn [application user timestamp xml] (:permitType application)))
-
-(defmethod get-verdicts-with-attachments permit/YA [{:keys [id organization]} user timestamp xml]
-  (let [verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
-    (map (partial verdict-attachments id user timestamp) verdicts)))
-
-(defmethod get-verdicts-with-attachments permit/R [{:keys [id organization]} user timestamp xml]
-  (let [verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
-    (map (partial verdict-attachments id user timestamp) verdicts)))
-
 (defn- get-application-xml [{:keys [id organization permitType]}]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [getter (permit/get-application-xml-getter permitType)]
       (getter legacy id))
     (fail! :error.no-legacy-available)))
+
+(defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
+  (let [reader (permit/get-verdict-reader permit-type)
+        element (permit/get-case-xml-element permit-type)
+        verdicts (krysp/->verdicts xml element reader)]
+    (map (partial verdict-attachments id user timestamp) verdicts)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
@@ -846,16 +842,17 @@
    :notified   true
    :on-success  (notify     :application-verdict)}
   [{:keys [user created application] :as command}]
-  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created (get-application-xml application)))]
-    (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-          tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
-          updates {$set (merge {:verdicts verdicts-with-attachments
-                                :modified created
-                                :state    :verdictGiven}
-                          (when-not has-old-verdict-tasks {:tasks tasks}))}]
-      (update-application command updates)
-      (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
-    (fail :info.no-verdicts-found-from-backend)))
+  (let [xml (get-application-xml application)]
+    (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
+     (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+           tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
+           updates {$set (merge {:verdicts verdicts-with-attachments
+                                 :modified created
+                                 :state    :verdictGiven}
+                           (when-not has-old-verdict-tasks {:tasks tasks}))}]
+       (update-application command updates)
+       (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
+     (fail :info.no-verdicts-found-from-backend))))
 
 ;;
 ;; krysp enrichment
