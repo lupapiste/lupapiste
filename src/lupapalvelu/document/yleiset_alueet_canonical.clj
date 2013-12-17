@@ -298,22 +298,26 @@
 (defn jatkoaika-to-canonical [application lang]
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
+
+  (println "\n jatkoaika-to-canonical, application: ")
+  (clojure.pprint/pprint application)
+  (println "\n")
+
   (let [app (assoc application :documents
               (clojure.walk/postwalk empty-strings-to-nil (:documents application)))
         documents-by-type (by-type (:documents application))
 
         link-permit-data (-> application :linkPermitData first)
-        _ (println "\n jatkoaika-to-canonical, link-permit-data: " link-permit-data "\n")
+;        _ (println "\n jatkoaika-to-canonical, link-permit-data: " link-permit-data "\n")
 
         ;; *** TODO: Onko OK laittaa kaivuulupa operaation puuttuessa (op.puun kautta luotu app) ***
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-kaivuulupa)
-        _ (println "\n jatkoaika-to-canonical, operation-name-key: " operation-name-key)
+;        _ (println "\n jatkoaika-to-canonical, operation-name-key: " operation-name-key)
 
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 ;        _ (println "\n jatkoaika-to-canonical, permit-name-key: " permit-name-key)
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
-;        _ (println "\n jatkoaika-to-canonical, config: " config)
 
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         tyoaika-doc (-> documents-by-type :tyo-aika-for-jatkoaika first :data)
@@ -324,13 +328,9 @@
         _ (println "\n jatkoaika-to-canonical, alku-pvm: " alku-pvm "\n")
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
         _ (println "\n jatkoaika-to-canonical, loppu-pvm: " loppu-pvm)
-;        lisaaikatieto (when (:continuation-period-end-date application)
-;                        (get-lisaaikatieto application alku-pvm loppu-pvm))
         maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
-        _ (println "\n jatkoaika-to-canonical, maksaja: " maksaja)
         osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}]))
         vastuuhenkilotieto (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))
-;        _ (println "\n jatkoaika-to-canonical, hankkeen-kuvaus-minimum doc: " (:hankkeen-kuvaus-minimum documents-by-type) "\n")
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-minimum first :data :kuvaus :value)
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false

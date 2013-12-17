@@ -197,12 +197,6 @@
 ;;
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-
-;  (println "\n save-application-as-krysp, application: ")
-;  (clojure.pprint/pprint application)
-;  (println "\n operation type of the link-permit of the application: " (-> application :linkPermitData :operation))
-;  (println "\n")
-
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
         canonical-without-attachments  (ya-canonical/application-to-canonical application lang)
@@ -247,9 +241,7 @@
 
       (println "\n save-jatkoaika-as-krysp, canonical: ")
       (clojure.pprint/pprint canonical)
-;      (println "\n save-jatkoaika-as-krysp, xml: ")
-;      (clojure.pprint/pprint xml)
-      (println "\n")
+;      (println "\n save-jatkoaika-as-krysp, xml: " xml)
 
       (mapping-common/write-to-disk application nil nil xml output-dir)))
 

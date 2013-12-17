@@ -359,27 +359,7 @@
   (println "\n")
 
   (let [application (meta-fields/enrich-with-link-permit-data application)
-        ;; Jatkoaika app will need to have some more data from its link permit to enable its canonical transformation.
-;        continuation-period-permit? ;(or
-;                                      (= :ya-jatkoaika (-> application :operations first :name keyword))
-;                                     ; (= "jatkolupa" (:permitSubtype application)))
-;        _ (println "\n continuation-period-permit?: " continuation-period-permit?)
-;        _ (println "\n app linkPermitData: " (:linkPermitData application))
-;        application-for-krysp (if continuation-period-permit?
-;                                #_(meta-fields/enrich-with-additional-data-from-link-permit application)
-;                                (meta-fields/merge-continuation-period-permit-with-orig-application application)
-;                                application)
-;        submitted-application (mongo/by-id :submitted-applications (if continuation-period-permit?
-;                                                                     (-> application :linkPermitData first :id)
-;                                                                     id))
-;        _ (println "\n app id: " (:id application-for-krysp) ", subm app id: " (if continuation-period-permit?
-;                                                                                 (-> application :linkPermitData first :id)
-;                                                                                 id) "\n")
-;        organization (organization/get-organization (:organization application-for-krysp))
-        organization (organization/get-organization (:organization application))
-        ]
-
-;    (println "\n app authority: " (:authority application))
+        organization (organization/get-organization (:organization application))]
     (when (empty? (:authority application))
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
@@ -392,13 +372,10 @@
         (info e "Invalid KRYSP XML message")
         (fail (.getMessage e))))
 
-
-    (println "\n approve-application, updating application \n")
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set {:sent created
-             :state :sent}})
-    ))
+             :state :sent}})))
 
 (defcommand submit-application
   {:parameters [id]
@@ -568,9 +545,9 @@
 
           application   (domain/set-software-version application)]
 
-      (println "\n do-create-application, created application: ")
-      (clojure.pprint/pprint application)
-      (println "\n")
+;      (println "\n do-create-application, created application: ")
+;      (clojure.pprint/pprint application)
+;      (println "\n")
 
       application)))
 
@@ -811,20 +788,16 @@
 
 (defn- get-tyoaika-alkaa-from-ya-app [app]
   (let [mainostus-viitoitus-tapahtuma-doc (domain/get-document-by-name app "mainosten-tai-viitoitusten-sijoittaminen")
-        _ (println "\n doc: " mainostus-viitoitus-tapahtuma-doc)
         mainostus-viitoitus-tapahtuma-name (when mainostus-viitoitus-tapahtuma-doc
                                              (-> mainostus-viitoitus-tapahtuma-doc :_selected :value))
-        _ (println "\n name: " mainostus-viitoitus-tapahtuma-name)
         mainostus-viitoitus-tapahtuma (when mainostus-viitoitus-tapahtuma-name
-                                        (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name)))
-        _ (println "\n tapahtuma: " mainostus-viitoitus-tapahtuma)]
+                                        (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name)))]
     (or
       (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
       (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value)
       (util/to-local-date (:submitted app)))))
 
 (defn- validate-not-jatkolupa-app [_ application]
-  (println "\n validate-not-jatkolupa-app, app op: " (-> application :operations first :name keyword) "\n")
   (when (= :ya-jatkoaika (-> application :operations first :name keyword))
     (fail! :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
@@ -847,18 +820,14 @@
                                                  :municipality (:municipality application)
                                                  :infoRequest false
                                                  :messages []}))
-
-        continuation-app (merge continuation-app
-                           {;:permitSubtype :jatkolupa
-                            :authority (:authority application)})
-
+        continuation-app (merge continuation-app {:authority (:authority application)})
+        ;;
         ;; ************
         ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan päätöspvm jos se on tata aiempi.
         ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a §
         ;; ************
-
+        ;;
         tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
-        _ (println "\n resolved tyoaika-alkaa-pvm: " tyoaika-alkaa-pvm)
 
         tyo-aika-for-jatkoaika-doc (domain/get-document-by-name continuation-app "tyo-aika-for-jatkoaika")
         tyo-aika-for-jatkoaika-doc (assoc-in tyo-aika-for-jatkoaika-doc [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm)
@@ -867,39 +836,15 @@
                            :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-minimum")
                                        tyo-aika-for-jatkoaika-doc
                                        (domain/get-document-by-name application "hakija-ya")
-                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])
-        ]
+                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
 
-    (println "\n create-continuation-period-permit, continuation-app: ")
-    (clojure.pprint/pprint continuation-app)
-    (println "\n")
-
+;    (println "\n create-continuation-period-permit, continuation-app: ")
+;    (clojure.pprint/pprint continuation-app)
+;    (println "\n")
 
     (do-add-link-permit continuation-app (:id application))
     (mongo/insert :applications continuation-app)
-    (ok :id (:id continuation-app))
-    )
-
-  #_(let [continuation-app-id (make-application-id (:municipality application))
-        continuation-app (merge application
-                         {:id                  continuation-app-id
-                          :created             created
-                          :opened              created
-                          :modified            created
-                          :documents           (into [] (map
-                                                          #(assoc % :id (mongo/create-id))
-                                                          (:documents application)))
-                          :state               (cond
-                                                 (user/authority? user)  :open
-                                                 :else                   :draft)
-                          :permitSubtype       :jatkolupa}
-                         (select-keys
-                           (domain/application-skeleton)
-                           [:attachments :statements :verdicts :comments :submitted :sent :neighbors
-                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
-    (do-add-link-permit continuation-app (:id application))
-    (mongo/insert :applications continuation-app)
-    (ok :id continuation-app-id)))
+    (ok :id (:id continuation-app))))
 
 
 ;;
