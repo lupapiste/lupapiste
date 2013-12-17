@@ -874,6 +874,7 @@
           schema       (schemas/get-schema (:schema-info document))
           kryspxml     (krysp/building-xml legacy propertyId)
           updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          ; Path should exist in schema!
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (when (seq updates)
