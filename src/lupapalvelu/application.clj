@@ -792,7 +792,7 @@
 
                                              resp            (http/get url :as :stream :throw-exceptions false)
                                              header-filename  (when (get (:headers resp) "content-disposition")
-                                                               (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
+                                                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
                                              content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                              urlhash         (digest/sha1 url)
@@ -822,14 +822,14 @@
 
 (defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
 
-(defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
+(defmethod get-verdicts-with-attachments permit/YA [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/ya-application-xml legacy id)
           verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
       (map (partial verdict-attachments id user timestamp) verdicts))
     (fail! :error.no-legacy-available)))
 
-(defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
+(defmethod get-verdicts-with-attachments permit/R [{:keys [id organization]} user timestamp]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [xml      (krysp/application-xml legacy id)
           verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
