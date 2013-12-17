@@ -374,8 +374,8 @@
 
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
-      {$set {:sent created
-             :state :sent}})))
+      {$set (merge  data-argument {:sent created
+                                   :state :sent})})))
 
 (defcommand submit-application
   {:parameters [id]

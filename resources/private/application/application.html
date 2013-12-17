@@ -745,6 +745,12 @@
                              visible: $root.authorization.ok('inform-building-ready') && !closed(),
                              enable: $root.authorization.ok('inform-building-ready')"></button>
 
+          <button class="btn btn-primary"
+                  data-test-id="application-new-task"
+                  data-bind="click: $root.createTaskModel.createTask,
+                             ltext: 'task.create',
+                             visible: $root.authorization.ok('create-task'),
+                             enable: $root.authorization.ok('create-task')"></button>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >

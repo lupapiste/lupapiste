@@ -13,7 +13,7 @@
 
 (schemas/defschemas
   task-schemas-version
-  [{:info {:name "task-katselmus" :order 1 :i18nprefix "task-katselmus.katselmuksenLaji" :i18npath ["katselmuksenLaji"]}
+  [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji" :i18npath ["katselmuksenLaji"]}
     :body [{:name "katselmuksenLaji"
             :type :select
             :required true
@@ -49,14 +49,16 @@
             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
             {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
-   {:info {:name "task-vaadittu-tyonjohtaja" :order 10}
+
+   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
     :body [{:name "osapuolena" :type :checkbox}
            {:name "asiointitunnus" :type :string :max-len 17}]}
-   {:info {:name "task-lupamaarays" :order 20}
+
+   {:info {:name "task-lupamaarays" :type :task :order 20}
     :body [{:name "maarays" :type :text :readonly true :layout :full-width}
            {:name "kuvaus"  :type :text :max-len 4000  :layout :full-width}]}])
 
-(defn- ->task [schema-name task-name data {:keys [created assignee] :as meta} source]
+(defn new-task [schema-name task-name data {:keys [created assignee] :as meta} source]
   {:pre [schema-name
          source
          (or (map? data) (nil? data))]}
@@ -78,7 +80,7 @@
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         data {:katselmuksenLaji (:katselmuksenLaji katselmus)
               :vaadittuLupaehtona true}]
-    (->task "task-katselmus" task-name data meta source)))
+    (new-task "task-katselmus" task-name data meta source)))
 
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
   (map-indexed
@@ -86,10 +88,10 @@
      (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
        (concat
         (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
-        (map #(->task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
+        (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
           (filter #(not (s/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
-          (map #(->task "task-vaadittu-tyonjohtaja" % {} meta source)
+          (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
             (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))))
    (:paatokset verdict)))
 
@@ -98,3 +100,6 @@
         meta {:created timestamp
               :assignee (user/get-user-by-id (:id owner))}]
     (flatten (map #(verdict->tasks % meta) (:verdicts application)))))
+
+(defn task-schemas [{schema-version :schema-version}]
+  (filter #(= (:type (:info %)) :task) (vals (schemas/get-schemas schema-version))))
