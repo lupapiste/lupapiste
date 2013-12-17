@@ -100,11 +100,12 @@
 
                              ;; TODO: Jos viiteluvan tyyppi on myös jatkolupa, niin sitten :operation pitaa hakea
                              ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
+                             ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
                              ;;
-;                            {:id link-permit-id :type link-permit-type}
                              (let [;link-permit-app-op (get-link-permits-operation-from-mongo link-permit-id)
-                                   link-permit-app-op (-> (mongo/by-id "applications" link-permit-id {:operations 1})
-                                                        :operations first :name)]
+                                   link-permit-app-op (when (= link-permit-type "lupapistetunnus")
+                                                        (-> (mongo/by-id "applications" link-permit-id {:operations 1})
+                                                          :operations first :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
                              {:id link-permit-id})))
             our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)

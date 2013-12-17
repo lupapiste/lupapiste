@@ -302,8 +302,12 @@
               (clojure.walk/postwalk empty-strings-to-nil (:documents application)))
         documents-by-type (by-type (:documents application))
 
-        operation-name-key (-> application :linkPermitData first :operation keyword)
-;        _ (println "\n jatkoaika-to-canonical, operation-name-key: " operation-name-key)
+        ;; *** TODO: Onko OK laittaa kaivuulupa operaation puuttuessa (op.puun kautta luotu app) ***
+        _ (println "\n jatkoaika-to-canonical, linkPermitData: " (-> application :linkPermitData) "\n")
+        operation-name-key (or
+                             (-> application :linkPermitData first :operation keyword)
+                             :ya-kaivuulupa)
+        _ (println "\n jatkoaika-to-canonical, operation-name-key: " operation-name-key)
 
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 ;        _ (println "\n jatkoaika-to-canonical, permit-name-key: " permit-name-key)
@@ -313,13 +317,13 @@
 
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         tyoaika-doc (-> documents-by-type :tyo-aika-for-jatkoaika first :data)
-        alku-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))
-;        alku-pvm (let [tyoaika-alkaa-val (-> tyoaika-doc :tyoaika-alkaa-pvm :value)]
-;                   (if (= -1 (.indexOf tyoaika-alkaa-val "."))
-;                     (to-xml-date tyoaika-alkaa-val)                ;; timestamp
-;                     (to-xml-date-from-string tyoaika-alkaa-val)))  ;; data string
+        _ (println "\n jatkoaika-to-canonical, before alku-pvm \n")
+        alku-pvm (if-let [tyoaika-alkaa-value (-> tyoaika-doc :tyoaika-alkaa-pvm :value)]
+                   (to-xml-date-from-string tyoaika-alkaa-value)
+                   (to-xml-date (:submitted application)))
+        _ (println "\n jatkoaika-to-canonical, alku-pvm: " alku-pvm "\n")
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
-        _ (println "\n jatkoaika-to-canonical, alku-pvm: " alku-pvm ", loppu-pvm: " loppu-pvm)
+        _ (println "\n jatkoaika-to-canonical, loppu-pvm: " loppu-pvm)
 ;        lisaaikatieto (when (:continuation-period-end-date application)
 ;                        (get-lisaaikatieto application alku-pvm loppu-pvm))
         maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))

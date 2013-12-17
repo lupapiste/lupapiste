@@ -192,8 +192,19 @@
       canonical
       statement-attachments)))
 
+;;
+;; TODO: Mihin submitted-applicationia kaytettiin ennen (_nyt ei mihinkaan_)?
+;;
+
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-  (let [lupa-name-key ((-> application :operations first :name keyword) ya-operation-type-to-schema-name-key)
+
+;  (println "\n save-application-as-krysp, application: ")
+;  (clojure.pprint/pprint application)
+;  (println "\n operation type of the link-permit of the application: " (-> application :linkPermitData :operation))
+;  (println "\n")
+
+  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                        (-> application :operations first :name keyword))
         canonical-without-attachments  (ya-canonical/application-to-canonical application lang)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
@@ -220,7 +231,10 @@
 ;    (println "\n save-jatkoaika-as-krysp, lang: " lang ", organization: " organization)
 ;    (println "\n")
 
-    (let [lupa-name-key ((-> application :linkPermitData first :operation keyword) ya-operation-type-to-schema-name-key)
+    (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                          (or
+                            (-> application :linkPermitData first :operation keyword)
+                            :ya-kaivuulupa))
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
 ;          attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
 ;          statement-given-ids (mapping-common/statements-ids-with-status
