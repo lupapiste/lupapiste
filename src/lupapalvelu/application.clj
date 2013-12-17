@@ -791,7 +791,7 @@
                                        (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
 
                                              resp            (http/get url :as :stream :throw-exceptions false)
-                                             headerFilename  (when (get (:headers resp) "content-disposition")
+                                             header-filename  (when (get (:headers resp) "content-disposition")
                                                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
                                              content-length  (util/->int (get-in resp [:headers "content-length"] 0))
@@ -805,7 +805,7 @@
                                          ; any old attachment, a new version will be added
                                          (if (= 200 (:status resp))
                                            (attachment/attach-file! {:application-id id
-                                                                     :filename (or headerFilename filename)
+                                                                     :filename (or header-filename filename)
                                                                      :size content-length
                                                                      :content (:body resp)
                                                                      :attachment-id attachment-id
