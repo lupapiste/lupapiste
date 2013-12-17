@@ -225,12 +225,6 @@
 
 
 (defn save-jatkoaika-as-krysp [application lang organization output-dir begin-of-link]
-
-;    (println "\n save-jatkoaika-as-krysp, application: ")
-;    (clojure.pprint/pprint application)
-;    (println "\n save-jatkoaika-as-krysp, lang: " lang ", organization: " organization)
-;    (println "\n")
-
     (let [lupa-name-key (ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)

@@ -302,11 +302,11 @@
               (clojure.walk/postwalk empty-strings-to-nil (:documents application)))
         documents-by-type (by-type (:documents application))
 
+        link-permit-data (-> application :linkPermitData first)
+        _ (println "\n jatkoaika-to-canonical, link-permit-data: " link-permit-data "\n")
+
         ;; *** TODO: Onko OK laittaa kaivuulupa operaation puuttuessa (op.puun kautta luotu app) ***
-        _ (println "\n jatkoaika-to-canonical, linkPermitData: " (-> application :linkPermitData) "\n")
-        operation-name-key (or
-                             (-> application :linkPermitData first :operation keyword)
-                             :ya-kaivuulupa)
+        operation-name-key (or (-> link-permit-data :operation keyword) :ya-kaivuulupa)
         _ (println "\n jatkoaika-to-canonical, operation-name-key: " operation-name-key)
 
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
@@ -341,7 +341,7 @@
      {:toimituksenTiedot (toimituksen-tiedot app lang)
       :yleinenAlueAsiatieto {permit-name-key
                              {:kasittelytietotieto (get-kasittelytieto application)
-                              :luvanTunnisteTiedot (lupatunnus (:id application))
+                              :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
                               :alkuPvm alku-pvm
                               :loppuPvm loppu-pvm
                               :sijaintitieto (get-sijaintitieto application)
