@@ -787,14 +787,14 @@
 ;;
 
 (defn- get-tyoaika-alkaa-from-ya-app [app]
-  (let [mainostus-viitoitus-tapahtuma-doc (domain/get-document-by-name app "mainosten-tai-viitoitusten-sijoittaminen")
-        mainostus-viitoitus-tapahtuma-name (when mainostus-viitoitus-tapahtuma-doc
-                                             (-> mainostus-viitoitus-tapahtuma-doc :_selected :value))
-        mainostus-viitoitus-tapahtuma (when mainostus-viitoitus-tapahtuma-name
-                                        (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name)))]
+  (let [mainostus-viitoitus-tapahtuma-doc (:data (domain/get-document-by-name app "mainosten-tai-viitoitusten-sijoittaminen"))
+        tapahtuma-name-key (when mainostus-viitoitus-tapahtuma-doc
+                             (-> mainostus-viitoitus-tapahtuma-doc :_selected :value keyword))
+        tapahtuma-data (when tapahtuma-name-key
+                         (mainostus-viitoitus-tapahtuma-doc tapahtuma-name-key))]
     (or
       (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
-      (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value)
+      (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
       (util/to-local-date (:submitted app)))))
 
 (defn- validate-not-jatkolupa-app [_ application]
