@@ -154,6 +154,11 @@
                                        :child [{:tag :alkuHetki :ns "yht"}
                                                {:tag :loppuHetki :ns "yht"}]}]}
                              {:tag :valmistumisilmoitusPvm}
+                             {:tag :lisaaikatieto
+                              :child [{:tag :Lisaaika
+                                       :child [{:tag :alkuPvm :ns "yht"}
+                                               {:tag :loppuPvm :ns "yht"}
+                                               {:tag :perustelu}]}]}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
