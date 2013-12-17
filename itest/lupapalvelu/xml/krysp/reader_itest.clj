@@ -11,7 +11,7 @@
   (let [xml (building-xml local-legacy id)]
     xml => truthy
 
-    (let [buildings (->buildings xml)]
+    (let [buildings (->buildings-summary xml)]
 
       (fact "two buildings are found"
         buildings => truthy

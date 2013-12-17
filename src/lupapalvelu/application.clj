@@ -887,7 +887,7 @@
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [kryspxml  (krysp/building-xml legacy propertyId)
-          buildings (krysp/->buildings kryspxml)]
+          buildings (krysp/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
 

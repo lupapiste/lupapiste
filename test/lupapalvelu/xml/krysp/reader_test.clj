@@ -167,7 +167,7 @@
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
-        buildings (->buildings xml)
+        buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
         schema       (schemas/get-schema (schemas/get-latest-schema-version) "purku")]

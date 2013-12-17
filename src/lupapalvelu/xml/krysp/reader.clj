@@ -93,7 +93,7 @@
    :created    (-> m (get-in [:Rakennus :alkuHetki]) cr/parse-datetime (->> (cr/unparse-datetime :year)))
    })
 
-(defn ->buildings [xml]
+(defn ->buildings-summary [xml]
   (-> xml cr/strip-xml-namespaces (select [:Rakennus]) (->> (map (comp ->buildingIds cr/strip-keys xml->edn)))))
 
 ;;
@@ -176,8 +176,8 @@
     (let [stripped  (cr/strip-xml-namespaces xml)
           rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])]
       (->rakennuksen-tiedot rakennus)))
-  ([rakennus-xml]
-    (when rakennus-xml
+  ([rakennus]
+    (when rakennus
       (polished
         {:muutostyolaji                 ...notimplemented...
          :rakennusnro                   (get-text rakennus :rakennusnro)
