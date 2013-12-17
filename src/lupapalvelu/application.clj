@@ -368,10 +368,17 @@
         (info e "Invalid KRYSP XML message")
         (fail (.getMessage e))))
 
-    (update-application command
-      {:state {$in ["submitted" "complement-needed"]}}
-      {$set (merge  data-argument {:sent created
-                                   :state :sent})})))
+    ;; The "sent" timestamp is updated to all attachments of the application,
+    ;; also the ones that have no versions at all (have no latestVersion).
+    (let [data-argument (reduce
+                              (fn [data-map attachment]
+                                (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+                              {}
+                              (:attachments application))]
+      (update-application command
+        {:state {$in ["submitted" "complement-needed"]}}
+        {$set (merge  data-argument {:sent created
+                                     :state :sent})}))))
 
 (defcommand submit-application
   {:parameters [id]
