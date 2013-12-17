@@ -339,11 +339,18 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
+(defn- validate-jatkolupa-one-link-permit [_ application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
+            (not= 1 (-> application :linkPermitData count)))
+      (fail! :error.jatkolupa-must-have-exactly-one-link-permit))))
+
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
+   :validators [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
   [{:keys [application created] :as command}]
 
@@ -372,7 +379,7 @@
         organization (organization/get-organization (:organization application))
         ]
 
-    (println "\n app authority: " (:authority application))
+;    (println "\n app authority: " (:authority application))
     (when (empty? (:authority application))
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
@@ -386,7 +393,7 @@
         (fail (.getMessage e))))
 
 
-    (println "\n approve-application, updating application")
+    (println "\n approve-application, updating application \n")
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set {:sent created
@@ -741,10 +748,17 @@
                                                  "kuntalupatunnus")}}
       :upsert true)))
 
+(defn- validate-jatkolupa-zero-link-permits [_ application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
+            (not= 0 (-> application :linkPermitData count)))
+      (fail! :error.jatkolupa-can-only-be-added-one-link-permit))))
+
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
+   :validators [validate-jatkolupa-zero-link-permits]
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
   (do-add-link-permit application linkPermitId))
@@ -767,7 +781,7 @@
   {:parameters ["id"]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionsStarted]
-  :validators [(permit/validate-permit-type-is permit/R)]}
+   :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (merge application
@@ -809,16 +823,19 @@
       (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value)
       (util/to-local-date (:submitted app)))))
 
+(defn- validate-not-jatkolupa-app [_ application]
+  (println "\n validate-not-jatkolupa-app, app op: " (-> application :operations first :name keyword) "\n")
+  (when (= :ya-jatkoaika (-> application :operations first :name keyword))
+    (fail! :error.cannot-apply-jatkolupa-for-jatkolupa)))
+
 ;;
-;; TODO: Lisaa validaattoreita:
-;;       - applicationilla pitaa olla tasan yksi viitelupa
-;;       - ks viitelupa ei ole jatkolupa-tyyppiä -> TODO: lisaa rekursio, joka etsii oikean luvan lupaketjusta
+;; TODO: jatkoluvan viitelupa ei ole jatkolupa-tyyppiä -> lisaa rekursio, joka etsii oikean luvan lupaketjusta
 ;;
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionsStarted]
-  :validators [(permit/validate-permit-type-is permit/YA)]}
+   :validators [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
 
   (let [continuation-app (do-create-application
