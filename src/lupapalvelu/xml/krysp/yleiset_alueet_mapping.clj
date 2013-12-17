@@ -207,4 +207,4 @@
 
     (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
-(permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)
+(permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)

@@ -9,11 +9,11 @@
 (def poikkeamislupa :poikkeamislupa)
 (def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
 
-(defn register-mapper [permit-type mapper-key mapper-fn]
+(defn register-function [permit-type k f]
   {:pre [(contains? (permit-types) permit-type)
-         (keyword? mapper-key)
-         (fn? mapper-fn)]}
-  (swap! permit-type-defs assoc-in [permit-type mapper-key] mapper-fn))
+         (keyword? k)
+         (fn? f)]}
+  (swap! permit-type-defs assoc-in [permit-type k] f))
 
 ;;
 ;; Enum
