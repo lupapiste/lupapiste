@@ -826,12 +826,7 @@
   :validators [(permit/validate-permit-type-is permit/YA)]}
   [{:keys [created user application] :as command}]
 
-  (let [
-;        authority (:authority application)
-;        location (:location application)
-;        continuation-app-id (executed "create-application" (-> command (assoc :data {:operation "ya-jatkoaika"})))
-;        continuation-app (mongo/by-id "applications" continuation-app-id)
-        continuation-app (do-create-application
+  (let [continuation-app (do-create-application
                            (assoc command :data {:operation "ya-jatkoaika"
                                                  :x (-> application :location :x)
                                                  :y (-> application :location :y)
@@ -840,21 +835,16 @@
                                                  :municipality (:municipality application)
                                                  :infoRequest false
                                                  :messages []}))
-;        orig-submitted (:submitted application)
 
-;        continuation-app (merge continuation-app
-;                           {:permitSubtype :jatkolupa
-;                            ;:location location
-;                            ;:authority authority
-;                            ;:submitted orig-submitted
-;                            })
+        continuation-app (merge continuation-app
+                           {;:permitSubtype :jatkolupa
+                            :authority (:authority application)})
+
         ;; ************
         ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan päätöspvm jos se on tata aiempi.
         ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a §
         ;; ************
 
-;        tyoaika-alkaa-pvm (-> (domain/get-document-by-name application "tyoaika") :data :tyoaika-alkaa-pvm :value)
-;        tyoaika-alkaa-pvm (if-not tyoaika-alkaa-pvm (:submitted application) tyoaika-alkaa-pvm)
         tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
         _ (println "\n resolved tyoaika-alkaa-pvm: " tyoaika-alkaa-pvm)
 
