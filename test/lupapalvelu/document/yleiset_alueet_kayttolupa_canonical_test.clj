@@ -8,6 +8,30 @@
             [sade.util :refer :all]))
 
 
+(def ^:private drawings [{:id 1,
+                         :name "alue",
+                         :desc "alue 1",
+                         :category "123",
+                         :geometry
+                         "LINESTRING(530856.65649413 6972312.1564941,530906.40649413 6972355.6564941,530895.65649413 6972366.9064941,530851.15649413 6972325.9064941,530856.65649413 6972312.4064941)",
+                         :area "",
+                         :height "1000"}
+                        {:id 2,
+                         :name "Viiva",
+                         :desc "Viiiva",
+                         :category "123",
+                         :geometry
+                         "LINESTRING(530825.15649413 6972348.9064941,530883.65649413 6972370.1564941,530847.65649413 6972339.4064941,530824.90649413 6972342.4064941)",
+                         :area "",
+                         :height ""}
+                        {:id 3,
+                         :name "Piste",
+                         :desc "Piste jutska",
+                         :category "123",
+                         :geometry "POINT(530851.15649413 6972373.1564941)",
+                         :area "",
+                         :height ""}])
+
 (def ^:private operation {:id "52380c6894a74fc25bb4ba46",
                           :created 1379404904514,
                           :name "ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat"})
@@ -50,7 +74,8 @@
                              :documents documents,
 ;                             :allowedAttachmentTypes allowedAttachmentTypes,   ;; TODO: tama pois?
                              :municipality municipality,
-                             :statements statements})
+                             :statements statements
+                             :drawings drawings})
 
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical get-maksaja)
@@ -71,11 +96,11 @@
 
         Kayttolupa-kayttotarkoitus (:kayttotarkoitus Kayttolupa) => truthy
 
-        Sijainti-osoite (-> Kayttolupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Kayttolupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Kayttolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Kayttolupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (-> Kayttolupa :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Kayttolupa :vastuuhenkilotieto) => truthy

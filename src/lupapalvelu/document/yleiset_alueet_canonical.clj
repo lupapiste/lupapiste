@@ -3,7 +3,9 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [sade.util :refer :all]
             [clojure.walk :as walk]
-            [sade.common-reader :as cr]))
+            [sade.common-reader :as cr]
+            [cljts.geom :as geo]
+            [cljts.io :as jts]))
 
 (defn- get-henkilo [henkilo]
   {:nimi {:etunimi (-> henkilo :henkilotiedot :etunimi :value)
@@ -108,11 +110,6 @@
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
 
-(defn- get-sijaintitieto [application]
-  {:Sijainti {:osoite {:yksilointitieto (:id application)
-                       :alkuHetki (to-xml-datetime (now))
-                       :osoitenimi {:teksti (:address application)}}
-              :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}})
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
   (when-let [arvo (-> data :lisatietoja-sijoituskohteesta :value)]
@@ -147,6 +144,37 @@
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
+(defn- get-pos [p]
+  {:pos (str (-> p .x) " " (-> p .y))})
+
+(defn point-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         p (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:piste {:Point (get-pos (.getCoordinate p))}}}))
+
+(defn linestring-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         ls (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:viiva {:LineString {:pos (map #(str (-> % .x) " " (-> % .y)) (-> ls .getCoordinates))}}}});(map get-pos (-> ls .getCoordinates))
+  )
+
+(defn ?drawing-type [t drawing]
+  (.startsWith (:geometry drawing) t))
+
+(defn drawings-as-krysp [drawings]
+   (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
+           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))))
+
+(defn- get-sijaintitieto [application]
+  (let  [drawings (drawings-as-krysp (:drawings application))]
+    (println drawings)
+    {:sijaintitieto (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
+                                               :alkuHetki (to-xml-datetime (now))
+                                               :osoitenimi {:teksti (:address application)}}
+                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+                          drawings)}))
 
 (defn- permits [application]
   ;;
@@ -250,7 +278,6 @@
                                  :luvanTunnisteTiedot (lupatunnus (:id application))
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
-                                 :sijaintitieto (get-sijaintitieto application)
                                  :osapuolitieto osapuolitieto
                                  :vastuuhenkilotieto vastuuhenkilotieto
                                  :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
@@ -263,7 +290,8 @@
                                 (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
                                 (when (:closed application)
-                                  (get-building-ready-info application)))}]
+                                  (get-building-ready-info application))
+                                (get-sijaintitieto application))}]
     (cr/strip-nils body)))
 
 (defn application-to-canonical

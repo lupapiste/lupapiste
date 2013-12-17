@@ -19,8 +19,6 @@
   (fact (to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
 
-
-
 (def ^:private municipality 753)
 
 (def ^:private nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
