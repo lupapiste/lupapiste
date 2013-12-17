@@ -820,20 +820,20 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
+(defmulti get-verdicts-with-attachments  (fn [application user timestamp xml] (:permitType application)))
 
-(defmethod get-verdicts-with-attachments permit/YA [{:keys [id organization]} user timestamp]
-  (if-let [legacy   (organization/get-legacy organization)]
-    (let [xml      (krysp/ya-application-xml legacy id)
-          verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
-      (map (partial verdict-attachments id user timestamp) verdicts))
-    (fail! :error.no-legacy-available)))
+(defmethod get-verdicts-with-attachments permit/YA [{:keys [id organization]} user timestamp xml]
+  (let [verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
+    (map (partial verdict-attachments id user timestamp) verdicts)))
 
-(defmethod get-verdicts-with-attachments permit/R [{:keys [id organization]} user timestamp]
+(defmethod get-verdicts-with-attachments permit/R [{:keys [id organization]} user timestamp xml]
+  (let [verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
+    (map (partial verdict-attachments id user timestamp) verdicts)))
+
+(defn- get-application-xml [{:keys [id organization permitType]}]
   (if-let [legacy   (organization/get-legacy organization)]
-    (let [xml      (krysp/application-xml legacy id)
-          verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
-      (map (partial verdict-attachments id user timestamp) verdicts))
+    (let [getter (permit/get-application-xml-getter permitType)]
+      (getter legacy id))
     (fail! :error.no-legacy-available)))
 
 (defcommand check-for-verdict
@@ -846,7 +846,7 @@
    :notified   true
    :on-success  (notify     :application-verdict)}
   [{:keys [user created application] :as command}]
-  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
+  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created (get-application-xml application)))]
     (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
           tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
           updates {$set (merge {:verdicts verdicts-with-attachments
