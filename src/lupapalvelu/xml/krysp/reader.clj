@@ -10,6 +10,7 @@
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
@@ -80,11 +81,15 @@
     (debug "Get application: " url)
     (cr/get-xml url)))
 
+(permit/register-function permit/R :xml-from-krysp application-xml)
+(permit/register-function permit/P :xml-from-krysp application-xml)
+
 (defn ya-application-xml [server id]
   (let [options (post-body-for-ya-application id)]
     (debug "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options)))
 
+(permit/register-function permit/YA :xml-from-krysp ya-application-xml)
 
 (defn- ->buildingIds [m]
   {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])

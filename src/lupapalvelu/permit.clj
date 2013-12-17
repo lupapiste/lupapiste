@@ -67,6 +67,9 @@
 (defn get-review-mapper [permit-type]
   (get-metadata permit-type :review-krysp-mapper))
 
+(defn get-application-xml-getter [permit-type]
+  (get-metadata permit-type :xml-from-krysp))
+
 (defn permit-type
   "gets the permit-type of application"
   [application]
