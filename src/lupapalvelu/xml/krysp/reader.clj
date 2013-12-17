@@ -185,17 +185,16 @@
          :rakennuksenOmistajat          (->>
                                           (select rakennus [:omistaja])
                                           (map ->rakennuksen-omistaja))
-         :osoite {:kunta                (get-text rakennus :kunta)
-                  :lahiosoite           (get-text rakennus :osoitenimi :teksti)
-                  :osoitenumero         (get-text rakennus :osoitenumero)
-                  :osoitenumero2        (get-text rakennus :osoitenumero2)
-                  :jakokirjain          (get-text rakennus :jakokirjain)
-                  :jakokirjain2         (get-text rakennus :jakokirjain2)
-                  :porras               (get-text rakennus :porras)
-                  :huoneisto            (get-text rakennus :huoneisto)
-                  :postinumero          (get-text rakennus :postinumero)
-                  :postitoimipaikannimi (get-text rakennus :postitoimipaikannimi)
-                  :pistesijanti         ...notimplemented...}
+         :osoite {:kunta                (get-text rakennus :osoite :kunta)
+                  :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
+                  :osoitenumero         (get-text rakennus :osoite :osoitenumero)
+                  :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
+                  :jakokirjain          (get-text rakennus :osoite :jakokirjain)
+                  :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
+                  :porras               (get-text rakennus :osoite :porras)
+                  :huoneisto            (get-text rakennus :osoite :huoneisto)
+                  :postinumero          (get-text rakennus :osoite :postinumero)
+                  :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
          :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
                   :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
          :luokitus {:energialuokka      (get-text rakennus :energialuokka)
