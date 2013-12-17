@@ -118,7 +118,7 @@
           return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; 
       };
       self.isPropertyIdAvailable = function() { 
-          return self.status() > self.statusSearchPropertyId && self.status() < self.statusPropertyIdSearchFailed; 
+          return self.propertyId() != null; 
       };
       self.search = function(x, y) { 
           return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y); 
@@ -130,7 +130,11 @@
       };
       
       self.propertyIdFound = function(propertyId) {
-          return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+          if (propertyId) {
+              return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+          } else {
+              return self.propertyIfNotFound();
+          }
       };
       
       self.searchOwners = function(propertyId) {
@@ -248,13 +252,24 @@
     self.zip = ko.observable();
     self.email = ko.observable();
     self.type = ko.observable();
+    self.nameOfDeceased = ko.observable();
+    self.businessID = ko.observable();
+
     self.typeLabel = ko.computed(function() {
         var t = self.type();
         if (t) return loc(['neighbors.owner.type', t]);
         else return null;
     }, self);
-    self.nameOfDeceased = ko.observable();
-    self.businessID = ko.observable();
+    
+    self.editablePropertyId = ko.computed({
+        read: function() {
+            return util.prop.toHumanFormat(self.propertyId());
+        },
+        write: function(newValue) {
+            self.propertyId(util.prop.toDbFormat(newValue));
+        },
+        owner: self
+    });
     
 
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });

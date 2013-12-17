@@ -18,7 +18,7 @@
         </thead>
         <tbody data-bind="foreach: neighbors">
           <tr data-bind="attr: {'data-test-id': 'manage-neighbors-email-' + neighbor.owner.email}">
-            <td data-bind="text: neighbor.propertyId"></td>
+            <td data-bind="propertyId: neighbor.propertyId"></td>
             <td data-bind="with: neighbor.owner">
               <span data-bind="text: name" class="owner-name"></span>
               <span data-bind="text: address.street" class="owner-street"></span>
@@ -52,7 +52,7 @@
         <div>
           <h3 data-bind="visible: isPropertyIdAvailable()">
             <span data-bind="ltext: 'neighbors.edit.propertyId'"></span>:
-            <span data-bind="text: propertyId"></span>
+            <span data-bind="propertyId: propertyId"></span>
           </h3>
           <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
           <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
@@ -110,7 +110,7 @@
         </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="value: propertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
+          <input data-bind="value: editablePropertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
 
           <!-- ko if: type -->
           <label data-bind="ltext: 'neighbors.owner.type'" class="form-label" for="neighbors.owner.type"></label>
