@@ -177,10 +177,10 @@
     (fact "Rakennustunnus" building1-id => "001")
     (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
     (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
-    (let [building1  (->rakennuksen-tiedot xml building1-id)
+    (let [building1  (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
           omistajat1 (:rakennuksenOmistajat building1)]
 
-      (fact "Reader produces valid document"
+      (fact "Reader produces valid document (sans kiinttun)"
         (model/validate {:data (tools/wrapped building1)} schema) =not=> model/has-errors?)
 
       (fact "Has 2 owners" (count omistajat1) => 2)
@@ -203,10 +203,10 @@
         (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
         (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
 
-    (let [building2  (->rakennuksen-tiedot xml building2-id)
+    (let [building2  (dissoc (->rakennuksen-tiedot xml building2-id) :kiinttun)
           omistajat2 (:rakennuksenOmistajat building2)]
 
-      (fact "Reader produces valid document"
+      (fact "Reader produces valid document (sans kiinttun)"
         (model/validate {:data (tools/wrapped building2)} schema) =not=> model/has-errors?)
 
       (fact "Has 2 owners" (count omistajat2) => 2)

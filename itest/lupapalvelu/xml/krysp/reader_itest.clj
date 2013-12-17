@@ -45,8 +45,8 @@
         (fact "huoneistot is not empty" huoneistot => truthy)
         (fact "omistajat is not empty" omistajat => truthy)
 
-        (fact "without :huoneistot and :omistajat everything matches"
-          (dissoc rakennus :huoneistot :rakennuksenOmistajat)
+        (fact "without :huoneistot, :omistajat and :kiinttun everything matches"
+          (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun)
             => (just
                  {:rakennusnro "001"
                   :verkostoliittymat {:viemariKytkin true
