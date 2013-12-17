@@ -263,3 +263,13 @@
         poytakirjat    => truthy
         (count poytakirjat) => 0))))
 
+
+(facts "Buildings from verdict message"
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
+        buildings (->buildings xml)
+        building1 (first buildings)]
+
+    (count buildings) => 1
+    (:jarjestysnumero building1) => "31216"
+    (:kiinttun building1) => "63820130310000"
+    (:rakennusnro building1) => "123"))
