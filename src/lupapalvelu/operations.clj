@@ -84,7 +84,8 @@
              ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen]
              ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
            #_["liikennetta-haittaavan-tyon-lupa" :ya-liikennetta-haittaavan-tyon-lupa] ;; TODO
-           ]]})
+           ["jatkoaika" :ya-jatkoaika]
+         ]]})
 
 (def ^:private operation-tree-for-P
   {:permit-type permit/P
@@ -129,7 +130,7 @@
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
 
 
-(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-maksaja"])
+(def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus
@@ -156,13 +157,13 @@
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
-                                      :required (conj yleiset-alueet-common-schemas
+                                      :required (conj common-yleiset-alueet-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                                       :attachments []})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                        :permit-type "YA"
-                                       :required (conj yleiset-alueet-common-schemas
+                                       :required (conj common-yleiset-alueet-schemas
                                                    "sijoituslupa-sijoituksen-tarkoitus")
                                        :attachments []})
 
@@ -170,7 +171,7 @@
   {:ya-kaivuulupa   {:schema "tyomaastaVastaava"
                      :permit-type "YA"
                      :schema-data [[["_selected" :value] "yritys"]]
-                     :required (conj yleiset-alueet-common-schemas
+                     :required (conj common-yleiset-alueet-schemas
                                  "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                  "tyoaika")
                      :attachments []}
@@ -185,18 +186,21 @@
 
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type "YA"
-                                           :required yleiset-alueet-common-schemas
+                                           :required common-yleiset-alueet-schemas
                                            :attachments []}
 
    :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen   ya-sijoituslupa-general
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
-
-;   :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
-;                                           :permit-type "YA"
-;                                           :required yleiset-alueet-common-schemas
-;                                           :attachments []}
-})
+;  :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
+;                                          :permit-type "YA"
+;                                          :required common-yleiset-alueet-schemas
+;                                          :attachments []}
+   :ya-jatkoaika                          {:schema "hankkeen-kuvaus-jatkoaika"
+                                           :permit-type "YA"
+                                           :required (conj common-yleiset-alueet-schemas
+                                                       "tyo-aika-for-jatkoaika")
+                                           :attachments []}})
 
 (def operations
   (merge
