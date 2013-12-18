@@ -37,6 +37,8 @@ Teppo declines invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
   Click by test id  decline-invite-button
+  Wait until  Element should be visible  xpath=//*[@data-test-id='confirm-yes']
+  Click by test id  confirm-yes
   Wait until  Element should not be visible  xpath=//*[@data-test-id='decline-invite-button']
   [Teardown]  logout
 
