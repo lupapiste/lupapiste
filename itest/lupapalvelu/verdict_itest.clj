@@ -53,3 +53,31 @@
       (:to email) => (email-for-key mikko)
       (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
       email => (partial contains-application-link-with-tab? application-id "verdict"))))
+
+(facts "Rakennus & rakennelma"
+  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
+        application-id (:id application)
+        _ (command sonja :check-for-verdict :id application-id) => ok?
+        application (query-application mikko application-id)
+        buildings   (:buildings application)
+        {:as building1}   (first buildings)
+        {:as building2}   (second buildings)
+        {:as building3}   (last buildings)]
+
+    (:buildingId building1) => "101"
+    (:propertyId building1) => "18601234567890"
+    (:index building1) => "1"
+    (:usage building1) => "893 turkistarhat"
+    (:created building1) => "2013"
+
+    (:buildingId building2) => "102"
+    (:propertyId building2) => "18601234567891"
+    (:index building2) => "2"
+    (:usage building2) => "891 viljankuivaamot ja viljan säilytysrakennukset"
+    (:created building2) => "2013"
+
+    ;(count buildings) => 3
+
+    )
+  )
+
