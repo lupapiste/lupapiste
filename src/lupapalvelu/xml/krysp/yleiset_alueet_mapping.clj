@@ -227,6 +227,3 @@
           xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
       (mapping-common/write-to-disk application nil nil xml output-dir)))
-
-
-(permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)
