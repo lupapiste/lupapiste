@@ -822,8 +822,8 @@
 
 (defn- get-application-xml [{:keys [id organization permitType]}]
   (if-let [legacy   (organization/get-legacy organization)]
-    (let [getter (permit/get-application-xml-getter permitType)]
-      (getter legacy id))
+    (let [fetch (permit/get-application-xml-getter permitType)]
+      (fetch legacy id))
     (fail! :error.no-legacy-available)))
 
 (defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
@@ -840,16 +840,18 @@
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    :notified   true
-   :on-success  (notify     :application-verdict)}
+   :on-success  (notify :application-verdict)}
   [{:keys [user created application] :as command}]
-  (let [xml (get-application-xml application)]
+  (let [xml (get-application-xml application)
+        extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
            tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
            updates {$set (merge {:verdicts verdicts-with-attachments
                                  :modified created
                                  :state    :verdictGiven}
-                           (when-not has-old-verdict-tasks {:tasks tasks}))}]
+                           (when-not has-old-verdict-tasks {:tasks tasks})
+                           (when extras-reader (extras-reader xml)))}]
        (update-application command updates)
        (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
      (fail :info.no-verdicts-found-from-backend))))

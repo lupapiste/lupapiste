@@ -91,15 +91,15 @@
 
 (permit/register-function permit/YA :xml-from-krysp ya-application-xml)
 
-(defn- ->buildingIds [m]
+(defn- ->building-ids [m]
   {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])
    :buildingId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro])
+   :index      (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero])
    :usage      (get-in m [:Rakennus :rakennuksenTiedot :kayttotarkoitus])
-   :created    (-> m (get-in [:Rakennus :alkuHetki]) cr/parse-datetime (->> (cr/unparse-datetime :year)))
-   })
+   :created    (-> m (get-in [:Rakennus :alkuHetki]) cr/parse-datetime (->> (cr/unparse-datetime :year)))})
 
 (defn ->buildings-summary [xml]
-  (-> xml cr/strip-xml-namespaces (select [:Rakennus]) (->> (map (comp ->buildingIds cr/strip-keys xml->edn)))))
+  (-> xml cr/strip-xml-namespaces (select [:Rakennus]) (->> (map (comp ->building-ids cr/strip-keys xml->edn)))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
@@ -303,4 +303,9 @@
           verdict-model)))
     (select (cr/strip-xml-namespaces xml) for-elem)))
 
+(defn- buildings-summary-for-application [xml]
+  (let [summary (->buildings-summary xml)]
+    (when (seq summary)
+      {:buildings summary})))
 
+(permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
