@@ -322,4 +322,11 @@
                                                          (when (-> kiinteisto :maaraalaTunnus :value)
                                                            {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
 
+(defn get-viitelupatieto [link-permit-data]
+  (when link-permit-data
+    (->
+      (if (= (:type link-permit-data) "lupapistetunnus")
+        (lupatunnus (:id link-permit-data))
+        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
+      (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia"))))
 
