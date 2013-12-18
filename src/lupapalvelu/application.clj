@@ -779,7 +779,7 @@
         tyo-aika-for-jatkoaika-doc (assoc-in tyo-aika-for-jatkoaika-doc [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm)
 
         continuation-app (assoc continuation-app
-                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-minimum")
+                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
                                        tyo-aika-for-jatkoaika-doc
                                        (domain/get-document-by-name application "hakija-ya")
                                        (domain/get-document-by-name application "yleiset-alueet-maksaja")])]

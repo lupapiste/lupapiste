@@ -1,7 +1,9 @@
+mainosten-tai-viitoitusten-sijoittaminen._group_label: Hankkeen kuvaus
 operations.tree.jatkoaika: Jatkoajan hakeminen
 operations.ya-jatkoaika: Jatkolupa
 operations.ya-jatkoaika.desc: Jatkoluvalla voit hakea jatkoaikaa aikaisemmalle luvallesi. Jos et ole hakenut aikaisempaa lupaa Lupapisteessä, tarvitset jatkolupaa varten vanhan lupasi tunnuksen.
-mainosten-tai-viitoitusten-sijoittaminen._group_label: Hankkeen kuvaus
+ya-jatkoaika._group_label: Hankkeen kuvaus
+hankkeen-kuvaus-jatkoaika.kuvaus: Perustelut jatkoajan tarpeelle
 tyo-aika-for-jatkoaika._group_label: Työaika
 tyo-aika-for-jatkoaika.tyoaika-alkaa-pvm: Työaika alkaa
 tyo-aika-for-jatkoaika.tyoaika-paattyy-pvm: Työaika päättyy

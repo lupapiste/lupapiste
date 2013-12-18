@@ -307,7 +307,7 @@
         maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
         osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}]))
         vastuuhenkilotieto (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))
-        hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-minimum first :data :kuvaus :value)
+        hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus :value)
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false
                                                         ;:tunniste "..."

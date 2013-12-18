@@ -48,6 +48,10 @@
     {:name "tyoaika-alkaa-pvm" :type :date :readonly true}  ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date}))
 
+(def hankkeen-kuvaus-jatkoaika
+  (body
+    {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}))
+
 (defschemas
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
@@ -79,7 +83,11 @@
            :removable false
            :repeating false
            :order 63}
-    :body tyo-aika-for-jatkoaika}])
+    :body tyo-aika-for-jatkoaika}
+   {:info {:name "hankkeen-kuvaus-jatkoaika"
+           :approvable true
+           :order 1}
+    :body hankkeen-kuvaus-jatkoaika}])
 
 
 ;;
