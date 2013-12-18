@@ -52,13 +52,30 @@ Sonja corrects the email address of neighbor c
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
   
 Sonja adds owners
+#  Set selenium speed  ${SLOW_SPEED}
   Mock proxy  property-id-by-point  "75341600380013"
   Mock query  owners  {"ok":true,"owners":[{"sukunimi":"Sammal","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Linda Jamina Berit","syntymapvm":-454204800000}]}
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
   Wait until  Page Should Contain  Sammal, Linda Jamina Berit
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='neighbors.select.ok']
   Click element  xpath=//*[@data-test-id='neighbors.select.ok']
+  Clear mocks
+  
+Property-id-by-point error
+  Mock proxy error  property-id-by-point
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Wait until  Page Should Contain  Kiinteistötunnuksen haku ei onnistunut.
+  Click element  xpath=//button[@data-test-id='neighbors.edit.cancel']
+  Clear mocks
 
+Find owners error
+  Mock proxy  property-id-by-point  "75341600380013"
+  Mock query error  owners
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Wait until  Page Should Contain  Omistajien haku ei onnistunut.
+  Page Should Contain  753-416-38-13
+  Click element  xpath=//button[@data-test-id='neighbors.edit.cancel']
+  Clear mocks
 
 Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-a@example.com']

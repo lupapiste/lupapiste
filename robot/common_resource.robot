@@ -488,10 +488,18 @@ Mock query
   [Arguments]  ${name}  ${jsonResponse}
   Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: ${jsonResponse}});
 
+Mock query error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', status:500});
+
 Mock proxy
   [Arguments]  ${name}  ${jsonResponse}
   Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', responseText: ${jsonResponse}});
 
+Mock proxy error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', status:500});
+
 Clear mocks
-  Execute Javascript  $.mockjaxClear()
+  Execute Javascript  $.mockjaxClear();
   
