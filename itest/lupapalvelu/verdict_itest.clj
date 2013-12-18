@@ -64,20 +64,25 @@
         {:as building2}   (second buildings)
         {:as building3}   (last buildings)]
 
+    (count buildings) => 3
+
     (:buildingId building1) => "101"
     (:propertyId building1) => "18601234567890"
     (:index building1) => "1"
     (:usage building1) => "893 turkistarhat"
+    (:area building1) => "501"
     (:created building1) => "2013"
 
     (:buildingId building2) => "102"
     (:propertyId building2) => "18601234567891"
     (:index building2) => "2"
     (:usage building2) => "891 viljankuivaamot ja viljan säilytysrakennukset"
+    (:area building2) => "602"
     (:created building2) => "2013"
 
-    ;(count buildings) => 3
-
-    )
-  )
-
+    (:buildingId building3) => "103"
+    (:propertyId building3) => "18601234567892"
+    (:index building3) => "3"
+    (:usage building3) => nil
+    (:area building3) => "22"
+    (:created building3) => "2013"))
