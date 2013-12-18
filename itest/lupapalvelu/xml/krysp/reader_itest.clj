@@ -1,7 +1,10 @@
 (ns lupapalvelu.xml.krysp.reader-itest
-  (:use [lupapalvelu.xml.krysp.reader]
-        [lupapalvelu.itest-util]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.itest-util :refer :all]))
+
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
 
 (def id "75300301050006")
 
@@ -21,12 +24,16 @@
         (first buildings) => {:propertyId "75300301050006"
                               :buildingId "001"
                               :usage      "039 muut asuinkerrostalot"
+                              :area "2682"
+                              :index nil
                               :created    "1962"})
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId "75300301050006"
                                :buildingId "002"
                                :usage      "021 rivitalot"
+                               :area "281"
+                               :index nil
                                :created    "1998"}))))
 
 (fact "converting building krysp to lupapiste domain model"
