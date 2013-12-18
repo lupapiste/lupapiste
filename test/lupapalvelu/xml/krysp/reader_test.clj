@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
             [clj-time.coerce :as coerce]
             [lupapalvelu.document.model :as model]
@@ -8,6 +9,8 @@
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
+
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
