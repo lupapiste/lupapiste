@@ -114,6 +114,11 @@
 
 
 
+(defn to-local-date [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "dd.MM.YYYY") dt))))
+
 (defn to-xml-date [^Long timestamp]
   (when timestamp
     (let [dt (tc/from-long timestamp)]

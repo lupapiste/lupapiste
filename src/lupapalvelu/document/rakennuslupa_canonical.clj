@@ -216,14 +216,6 @@
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
 
-(defn- get-viitelupatieto [link-permit-data]
-  (when link-permit-data
-    (->
-      (if (= (:type link-permit-data) "lupapistetunnus")
-        (lupatunnus (:id link-permit-data))
-        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
-      (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia"))))
-
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]

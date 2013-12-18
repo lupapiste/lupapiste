@@ -5,6 +5,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
+            [lupapalvelu.core :refer :all]
+;            [lupapalvelu.document.canonical-common :refer [by-type]]
+;            [sade.util :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
 
@@ -80,6 +83,7 @@
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
+
 (defn enrich-with-link-permit-data [app]
   (let [app-id (:id app)
         resp (mongo/select :app-links {:link {$in [app-id]}})]
@@ -91,7 +95,15 @@
                                link-permit-id (link-array (if (= 0 app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
                            (if (= (:type ((keyword app-id) link-data)) "application")
-                             {:id link-permit-id :type link-permit-type}
+
+                             ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
+                             ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
+                             ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
+                             ;;
+                             (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
+                                                        (-> (mongo/by-id "applications" link-permit-id {:operations 1})
+                                                          :operations first :name))]
+                               {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
                              {:id link-permit-id})))
             our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
             apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
@@ -107,3 +119,4 @@
       (-> app
         (assoc :linkPermitData nil)
         (assoc :appsLinkingToUs nil)))))
+
