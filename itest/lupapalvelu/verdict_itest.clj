@@ -76,7 +76,7 @@
     (:buildingId building2) => "102"
     (:propertyId building2) => "18601234567891"
     (:index building2) => "2"
-    (:usage building2) => "891 viljankuivaamot ja viljan säilytysrakennukset"
+    (:usage building2) => "891 viljankuivaamot ja viljan s\u00e4ilytysrakennukset"
     (:area building2) => "602"
     (:created building2) => "2013"
 
