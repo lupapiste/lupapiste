@@ -50,11 +50,21 @@ Sonja corrects the email address of neighbor c
   Click by test id  neighbors.edit.ok
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-remove']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
+  
+Sonja adds owners
+  Mock proxy  property-id-by-point  "75341600380013"
+  Mock query  owners  {"ok":true,"owners":[{"sukunimi":"Sammal","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Linda Jamina Berit","syntymapvm":-454204800000}]}
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Wait until  Page Should Contain  Sammal, Linda Jamina Berit
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='neighbors.select.ok']
+  Click element  xpath=//*[@data-test-id='neighbors.select.ok']
+
 
 Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-a@example.com']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-b@example.com']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']
+  Wait until  Page Should Contain  Sammal, Linda Jamina Berit
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']
   Click by test id  manager-neighbors-done

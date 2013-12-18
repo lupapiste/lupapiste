@@ -7,9 +7,9 @@ Library        Selenium2Library   timeout=10  run_on_failure=Log Source
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   10
+${WAIT_DELAY}                   5
 ${BROWSER}                      firefox
-${DEFAULT_SPEED}                0
+${DEFAULT_SPEED}                0.1
 ${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
@@ -478,3 +478,20 @@ Add neighbor
   Click by test id  neighbors.edit.ok
   Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
   Wait Until  Page Should Contain  ${email}
+
+
+#
+# Mock Ajax calls: jquery.mockjax
+#
+
+Mock query
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: ${jsonResponse}});
+
+Mock proxy
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', responseText: ${jsonResponse}});
+
+Clear mocks
+  Execute Javascript  $.mockjaxClear()
+  
