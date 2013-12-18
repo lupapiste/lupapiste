@@ -30,7 +30,15 @@
                          :category "123",
                          :geometry "POINT(530851.15649413 6972373.1564941)",
                          :area "",
-                         :height ""}])
+                         :height ""}
+                        {:id 4
+                         :name "Alueen nimi"
+                         :desc "Alueen kuvaus"
+                         :category "123"
+                         :geometry "POLYGON((530859.15649413 6972389.4064941,530836.40649413 6972367.4064941,530878.40649413 6972372.6564941,530859.15649413 6972389.4064941))",
+                         :area "402",
+                         :height  ""
+                         }])
 
 (def ^:private operation {:id "52380c6894a74fc25bb4ba46",
                           :created 1379404904514,

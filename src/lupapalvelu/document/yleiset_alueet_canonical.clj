@@ -144,20 +144,29 @@
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
-(defn- get-pos [p]
-  {:pos (str (-> p .x) " " (-> p .y))})
+
+(defn get-pos [coordinates]
+  {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
 (defn point-drawing [drawing]
   (let  [geometry (:geometry drawing)
-         p (jts/read-wkt-str geometry)]
+         p (jts/read-wkt-str geometry)
+         cord (.getCoordinate p)]
     {:Sijainti
-     {:piste {:Point (get-pos (.getCoordinate p))}}}))
+     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
 
 (defn linestring-drawing [drawing]
   (let  [geometry (:geometry drawing)
          ls (jts/read-wkt-str geometry)]
     {:Sijainti
-     {:viiva {:LineString {:pos (map #(str (-> % .x) " " (-> % .y)) (-> ls .getCoordinates))}}}});(map get-pos (-> ls .getCoordinates))
+     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}})
+  )
+
+(defn polygon-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         polygon (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}})
   )
 
 (defn ?drawing-type [t drawing]
@@ -165,7 +174,8 @@
 
 (defn drawings-as-krysp [drawings]
    (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
-           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))))
+           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))
+           (map polygon-drawing (filter (partial ?drawing-type "POLYGON") drawings))))
 
 (defn- get-sijaintitieto [application]
   (let  [drawings (drawings-as-krysp (:drawings application))]
