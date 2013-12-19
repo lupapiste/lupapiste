@@ -630,10 +630,11 @@
   {:parameters [id]
    :verified   true
    :roles      [:applicant :authority]}
-  [{{:keys [propertyId]} :application user :user :as command}]
+  [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$in ["verdictGiven" "constructionStarted"]}})
+                                                              :state {$in ["verdictGiven" "constructionStarted"]}
+                                                              :permitType (:permitType application)})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
         enriched-results (map
                            (fn [r]
