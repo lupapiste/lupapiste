@@ -192,6 +192,8 @@
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
 
+    (fact "Sonja can't cancel Mikko's application" (command sonja :cancel-application :id application-id) => unauthorized?)
+
     (command mikko :cancel-application :id application-id) => ok?
 
     (fact "Sonja does not see the application" (query sonja :application :id application-id) => fail?)
@@ -200,7 +202,12 @@
       (:to email) => (email-for-key mikko)
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
-      email => (partial contains-application-link? application-id))))
+      email => (partial contains-application-link? application-id)))
+
+  (fact "Authority can cancel own application"
+    (let [application-id  (create-app-id sonja :municipality sonja-muni)]
+      (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
+      (fact "Sonja can cancel the application" (command sonja :cancel-application :id application-id) => ok?))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (create-app sonja :municipality veikko-muni) => unauthorized?)
