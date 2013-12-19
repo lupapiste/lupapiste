@@ -110,6 +110,25 @@
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Kayttolupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
+        PisteSijanti (-> Kayttolupa :sijaintitieto second :Sijainti :piste :Point :pos) => "530851.15649413 6972373.1564941"
+
+        LineString1 (-> Kayttolupa :sijaintitieto (nth 2) :Sijainti :viiva :LineString :pos) => '("530856.65649413 6972312.1564941"
+                                                                                                   "530906.40649413 6972355.6564941"
+                                                                                                   "530895.65649413 6972366.9064941"
+                                                                                                   "530851.15649413 6972325.9064941"
+                                                                                                   "530856.65649413 6972312.4064941")
+
+        LineString2 (-> Kayttolupa :sijaintitieto (nth 3) :Sijainti :viiva :LineString :pos) => '("530825.15649413 6972348.9064941"
+                                                                                                   "530883.65649413 6972370.1564941"
+                                                                                                   "530847.65649413 6972339.4064941"
+                                                                                                   "530824.90649413 6972342.4064941")
+
+
+        Alue (-> Kayttolupa :sijaintitieto (nth 4) :Sijainti :alue :Polygon :exterior :LinearRing :pos) => '("530859.15649413 6972389.4064941"
+                                                                                                              "530836.40649413 6972367.4064941"
+                                                                                                              "530878.40649413 6972372.6564941"
+                                                                                                              "530859.15649413 6972389.4064941")
+
         osapuolet-vec (-> Kayttolupa :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Kayttolupa :vastuuhenkilotieto) => truthy
 

@@ -133,7 +133,7 @@
                                                         :child [{:tag :pos}]}]}
                                                {:tag :alue :ns "yht"
                                                 :child [{:tag :Polygon :ns "gml"
-                                                        :child [{:tag :exterion
+                                                        :child [{:tag :exterior
                                                                  :child [{:tag :LinearRing
                                                                           :child [{:tag :pos}]}]} ]}]}]}]}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa

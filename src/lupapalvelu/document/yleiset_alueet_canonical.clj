@@ -179,7 +179,6 @@
 
 (defn- get-sijaintitieto [application]
   (let  [drawings (drawings-as-krysp (:drawings application))]
-    (println drawings)
     {:sijaintitieto (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
                                                :alkuHetki (to-xml-datetime (now))
                                                :osoitenimi {:teksti (:address application)}}
