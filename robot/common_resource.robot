@@ -316,23 +316,23 @@ Select operations path R
   Click tree item by text  "Asuinrakennuksen rakentaminen"
 
 Select operations path YA kayttolupa
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Yleisillä alueilla kuten kaduilla ja puistoissa työskenteleminen (katutyöt)"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
   Click tree item by text  "Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"
 
 Select operations path YA kayttolupa kaivu
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Yleisillä alueilla kuten kaduilla ja puistoissa työskenteleminen (katutyöt)"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
   Click tree item by text  "Kaivaminen yleisellä alueella (kadut ja puistot)"
 
 Select operations path YA kayttolupa mainostus-viitoitus
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Yleisillä alueilla kuten kaduilla ja puistoissa työskenteleminen (katutyöt)"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
   Click tree item by text  "Mainoslaitteiden ja opasteviittojen sijoittaminen"
 
 Select operations path YA sijoituslupa
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Rakenteiden sijoittaminen"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Rakenteiden sijoittaminen yleiselle alueelle (Sijoittamissopimus)"
   Click tree item by text  "Pysyvien maanalaisten rakenteiden sijoittaminen"
 
 Click tree item by text
