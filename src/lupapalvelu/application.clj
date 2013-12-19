@@ -656,7 +656,8 @@
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
                                                               :state {$in ["verdictGiven" "constructionStarted"]}
-                                                              :permitType (:permitType application)})
+                                                              :permitType (:permitType application)
+                                                              :operations.name {$nin ["ya-jatkoaika"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
         enriched-results (map
                            (fn [r]
