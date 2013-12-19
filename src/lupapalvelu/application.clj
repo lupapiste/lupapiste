@@ -229,6 +229,7 @@
   (update-application command
       {$pull {:auth {$and [{:username (ss/lower-case email)}
                            {:type {$ne :owner}}]}}}))
+
 (defcommand decline-invitation
   {:parameters [:id]
    :authenticated true}
