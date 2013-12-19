@@ -802,7 +802,7 @@
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [timestamp (util/to-xml-millis-from-string readyTimestampStr)
+  (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
         application (assoc application :closed timestamp)
         organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp
