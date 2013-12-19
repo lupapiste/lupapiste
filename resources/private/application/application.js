@@ -16,6 +16,7 @@
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var application = new LUPAPISTE.ApplicationModel();
+  var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
@@ -109,7 +110,7 @@
 
     var x = (application.location && application.location().x) ? application.location().x() : 0;
     var y = (application.location && application.location().y) ? application.location().y() : 0;
-    hub.send("documents-map", {
+    hub.send("oskari-center-map", {
       data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
       clear: true
     });
@@ -442,14 +443,16 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       neighborStatusModel: neighborStatusModel,
       addLinkPermitModel: addLinkPermitModel,
-      constructionStateChangeModel: constructionStateChangeModel
+      constructionStateChangeModel: constructionStateChangeModel,
+      createTaskModel: createTaskModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
+    $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
     $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
     $("#dialog-construction-ready").applyBindings({constructionStateChangeModel: constructionStateChangeModel});
+    $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     attachmentTemplatesModel.init();
   });
 

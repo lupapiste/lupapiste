@@ -28,9 +28,7 @@
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key)) => true)
 
-;    (println "\n xml-s: \n")
-;    (println xml-s)
-;    (println "\n")
+;    (println "\n xml-s: " xml-s "\n")
 
 ;    (println "\n application: ")
 ;    (clojure.pprint/pprint application)

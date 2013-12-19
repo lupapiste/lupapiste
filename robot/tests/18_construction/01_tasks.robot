@@ -74,6 +74,16 @@ Listing contains one less task
   Tab should be visible  tasks
   Task count is  task-katselmus  2
 
+Add katselmus
+  Click enabled by test id  application-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Select From List By Value  choose-task-type   task-katselmus
+  Input text  create-task-name  uus muu tarkastus
+  Click enabled by test id  create-task-save
+  Wait until  Element should not be visible  dialog-create-task
+  Task count is  task-katselmus  3
+  Open task  uus muu tarkastus
+
 *** Keywords ***
 
 Task count is

@@ -732,7 +732,6 @@
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-viitelupatieto)
 
 (fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi") => truthy

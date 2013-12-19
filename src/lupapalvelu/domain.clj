@@ -169,6 +169,7 @@
    :comments                 []
    :created                  nil
    :documents                []
+   :drawings                 []
    :infoRequest              false
    :location                 {}
    :modified                 nil
