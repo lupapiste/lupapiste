@@ -450,8 +450,8 @@
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
     $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
-    $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
-    $("#dialog-construction-ready").applyBindings({constructionStateChangeModel: constructionStateChangeModel});
+    $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
+    $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     attachmentTemplatesModel.init();
   });
