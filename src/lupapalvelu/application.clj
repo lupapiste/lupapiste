@@ -225,13 +225,22 @@
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
+(defn- do-remove-auth [command email]
+  (update-application command
+      {$pull {:auth {$and [{:username (ss/lower-case email)}
+                           {:type {$ne :owner}}]}}}))
+
+(defcommand decline-invitation
+  {:parameters [:id]
+   :authenticated true}
+  [command]
+  (do-remove-auth command (get-in command [:user :email])))
+
 (defcommand remove-auth
   {:parameters [:id email]
    :roles      [:applicant :authority]}
   [command]
-  (update-application command
-    {$pull {:auth {$and [{:username (ss/lower-case email)}
-                         {:type {$ne :owner}}]}}}))
+  (do-remove-auth command email))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
   (when (and to (not (user/authority? user)))
