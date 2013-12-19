@@ -14,7 +14,6 @@
             [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
