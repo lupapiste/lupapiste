@@ -294,23 +294,18 @@
   (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
                                                             nil
                                                             v)) (:documents application)))
-        katselmus (merge {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
-                          :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
-                          :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                          :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi}
-                         (when building {:rakennustunnus {:jarjestysnumero (:jarjestysnumero building)
-                                                          :kiinttun (:propertyId application)
-                                                          :rakennusnro  (:rakennusnro building)}})
-                         (when osittainen
-                           {:osittainen osittainen})
-                         (when pitaja
-                           {:pitaja pitaja})
-                         (when huomautukset
-                           {:huomautukset {:huomautus {:kuvaus huomautukset}}})
-                         (when lasnaolijat
-                           {:lasnaolijat lasnaolijat})
-                         (when poikkeamat
-                           {:poikkeamat poikkeamat}))
+        katselmus (cr/strip-nils
+                    (merge
+                      {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
+                       :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
+                       :vaadittuLupaehtonaKytkin (true? lupaehtona)
+                       :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi
+                       :osittainen osittainen
+                       :lasnaolijat lasnaolijat
+                       :pitaja pitaja
+                       :poikkeamat poikkeamat}
+                      (when building {:rakennustunnus (select-keys building [:jarjestysnumero :kiinttun :rakennusnro])})
+                      (when huomautukset {:huomautukset {:huomautus {:kuvaus huomautukset}}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
