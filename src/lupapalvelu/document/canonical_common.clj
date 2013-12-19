@@ -102,20 +102,18 @@
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen :Sijoituslupa
    :ya-sijoituslupa-muu-sijoituslupa :Sijoituslupa})
 
-(defn toimituksen-tiedot [application lang]
-  {:aineistonnimi (:title application)
+(defn toimituksen-tiedot [{:keys [title municipality]} lang]
+  {:aineistonnimi title
    :aineistotoimittaja "lupapiste@solita.fi"
    :tila toimituksenTiedot-tila
    :toimitusPvm (to-xml-date (now))
-   :kuntakoodi (:municipality application)
+   :kuntakoodi municipality
    :kielitieto lang})
 
-(defn- get-handler [application]
-  (let [handler (:authority application)]
+(defn- get-handler [{handler :authority}]
     (if (seq handler)
-      {:henkilo {:nimi {:etunimi  (:firstName handler)
-                        :sukunimi (:lastName handler)}}}
-      empty-tag)))
+    {:henkilo {:nimi {:etunimi (:firstName handler) :sukunimi (:lastName handler)}}}
+    empty-tag))
 
 
 (defn get-state [application]
