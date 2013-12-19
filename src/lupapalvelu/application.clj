@@ -812,7 +812,13 @@
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
-        application (assoc application :closed timestamp)
+        application (merge application
+                      {:closed timestamp}
+                      (select-keys
+                        (domain/application-skeleton)
+                        [:allowedAttachmentTypes :attachments :comments :drawings
+                         :neighbors :openInfoRequest :statements :tasks :verdicts
+                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
         organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp
       application
