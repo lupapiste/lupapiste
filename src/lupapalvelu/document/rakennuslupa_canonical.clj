@@ -220,9 +220,7 @@
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [link-permit-data (first (:linkPermitData application))
-        documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
-                                                            nil
-                                                            v)) (:documents application)))
+        documents (by-type (documents-by-type-without-blanks application))
         toimenpiteet (get-operations documents application)
         operation-name (-> application :operations first :name)
         canonical {:Rakennusvalvonta
@@ -291,9 +289,7 @@
 ;                                                                 lisaa skeemaan (muu-muu)
 ;                                                                                          lopullinen-tila
 (defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
-  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
-                                                            nil
-                                                            v)) (:documents application)))
+  (let [documents (documents-by-type-without-blanks application)
         katselmus (cr/strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
@@ -327,9 +323,7 @@
     canonical))
 
 (defn unsent-attachments-to-canonical [application lang]
-  (let [documents (by-type (clojure.walk/postwalk (fn [v] (if (and (string? v) (s/blank? v))
-                                                            nil
-                                                            v)) (:documents application)))
+  (let [documents (documents-by-type-without-blanks application)
         hakija-info (-> (filter #(= (-> % :Osapuoli :VRKrooliKoodi) "hakija") (get-parties documents))
                       first
                       (assoc-in [:Osapuoli :kuntaRooliKoodi] "ei tiedossa"))

@@ -178,7 +178,7 @@
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
   ;;
-  (let [documents-by-type (by-type (:documents application))
+  (let [documents-by-type (documents-by-type-without-blanks application)
         operation-name-key (-> application :operations first :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
@@ -276,18 +276,14 @@
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  (let [app (assoc application :documents
-              (clojure.walk/postwalk empty-strings-to-nil (:documents application)))]
-    {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot app lang)
-                     :yleinenAlueAsiatieto (permits app)}}))
+  {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
+                   :yleinenAlueAsiatieto (permits application)}})
 
 
 (defn jatkoaika-to-canonical [application lang]
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
-  (let [app (assoc application :documents
-              (clojure.walk/postwalk empty-strings-to-nil (:documents application)))
-        documents-by-type (by-type (:documents application))
+  (let [documents-by-type (documents-by-type-without-blanks application)
 
         link-permit-data (-> application :linkPermitData first)
         ;;
@@ -314,7 +310,7 @@
                                                         }})
         ]
     {:YleisetAlueet
-     {:toimituksenTiedot (toimituksen-tiedot app lang)
+     {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
                              {:kasittelytietotieto (get-kasittelytieto application)
                               :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
