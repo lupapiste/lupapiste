@@ -653,7 +653,6 @@
                              (assoc r :text
                                (str
                                  (:address r) ", "
-                                 (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
                                  (:id r))))
                            results)
         same-property-id-fn #(= propertyId (:propertyId %))
