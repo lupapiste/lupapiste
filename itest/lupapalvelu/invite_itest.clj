@@ -47,18 +47,23 @@
         (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-invite :id id :email "teppo@example.com") => unauthorized?
+      (command sonja :remove-auth :id id :email "teppo@example.com") => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko must be able to uninvite Teppo!"
-      (command mikko :remove-invite :id id :email "teppo@example.com") => ok?
+      (command mikko :remove-auth :id id :email "teppo@example.com") => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Mikko must be able to re-invite Teppo!"
       (invite mikko id suunnittelija-doc "teppo@example.com") => ok?
       (count (:invites (query teppo :invites))) => 1)
 
+    (fact "Teppo must be able to decline invitation!"
+      (command teppo :decline-invitation :id id) => ok?
+      (count (:invites (query teppo :invites))) => 0)
+
     (fact "Mikko must NOT be able to accept Teppo's invite"
+      (invite mikko id suunnittelija-doc "teppo@example.com") => ok?
       (command mikko :approve-invite :id id :email "teppo@example.com")
       (count (:invites (query teppo :invites))) => 1)
 
@@ -102,7 +107,7 @@
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Sonja must be able to uninvite Teppo!"
-      (command sonja :remove-invite :id id :email "teppo@example.com") => ok?
+      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Reinvite & accept"

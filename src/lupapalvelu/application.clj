@@ -214,17 +214,6 @@
       ; because only the last $elemMatch counts.
       (set-user-to-document id document (:id user) (:path my-invite) user created))))
 
-(defcommand remove-invite
-  {:parameters [id email]
-   :roles      [:applicant :authority]
-   :validators [validate-owner-or-writer]}
-  [command]
-  (let [email (ss/lower-case email)]
-    (with-user-by-email email
-      (update-application command
-        {$pull {:auth {$and [{:username email}
-                             {:type {$ne :owner}}]}}}))))
-
 (defn- do-remove-auth [command email]
   (update-application command
       {$pull {:auth {$and [{:username (ss/lower-case email)}
