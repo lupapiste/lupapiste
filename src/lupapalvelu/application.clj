@@ -214,24 +214,22 @@
       ; because only the last $elemMatch counts.
       (set-user-to-document id document (:id user) (:path my-invite) user created))))
 
-(defcommand remove-invite
-  {:parameters [id email]
-   :roles      [:applicant :authority]
-   :validators [validate-owner-or-writer]}
+(defn- do-remove-auth [command email]
+  (update-application command
+      {$pull {:auth {$and [{:username (ss/lower-case email)}
+                           {:type {$ne :owner}}]}}}))
+
+(defcommand decline-invitation
+  {:parameters [:id]
+   :authenticated true}
   [command]
-  (let [email (ss/lower-case email)]
-    (with-user-by-email email
-      (update-application command
-        {$pull {:auth {$and [{:username email}
-                             {:type {$ne :owner}}]}}}))))
+  (do-remove-auth command (get-in command [:user :email])))
 
 (defcommand remove-auth
   {:parameters [:id email]
    :roles      [:applicant :authority]}
   [command]
-  (update-application command
-    {$pull {:auth {$and [{:username (ss/lower-case email)}
-                         {:type {$ne :owner}}]}}}))
+  (do-remove-auth command email))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
   (when (and to (not (user/authority? user)))
@@ -630,10 +628,11 @@
   {:parameters [id]
    :verified   true
    :roles      [:applicant :authority]}
-  [{{:keys [propertyId]} :application user :user :as command}]
+  [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$in ["verdictGiven" "constructionStarted"]}})
+                                                              :state {$in ["verdictGiven" "constructionStarted"]}
+                                                              :permitType (:permitType application)})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
         enriched-results (map
                            (fn [r]
@@ -747,9 +746,6 @@
   (when (= :ya-jatkoaika (-> application :operations first :name keyword))
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
-;;
-;; TODO: jatkoluvan viitelupa ei ole jatkolupa-tyyppia -> lisaa rekursio, joka etsii oikean luvan lupaketjusta
-;;
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
@@ -801,7 +797,7 @@
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [timestamp (util/to-xml-millis-from-string readyTimestampStr)
+  (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
         application (assoc application :closed timestamp)
         organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp

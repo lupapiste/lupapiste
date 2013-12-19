@@ -139,7 +139,7 @@
     (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
 
-(defn to-xml-millis-from-string [^String date-as-string]
+(defn to-millis-from-local-date-string [^String date-as-string]
   (when date-as-string
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
