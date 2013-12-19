@@ -343,6 +343,14 @@
             (not= 1 (-> application :linkPermitData count)))
       (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
 
+(defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
+  (let [link-permit-app-id (-> application :linkPermitData first :id)
+        verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
+        kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
+    (-> application
+      (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
+      (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))))
+
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
@@ -358,7 +366,12 @@
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
       (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-        (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+        ;; jatkoaika application
+        (let [application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                            (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                            application)]
+          (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization))
+        ;; ordinary application
         (let [submitted-application (mongo/by-id :submitted-applications id)]
           (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
 
@@ -632,7 +645,8 @@
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
                                                               :state {$in ["verdictGiven" "constructionStarted"]}
-                                                              :permitType (:permitType application)})
+                                                              :permitType (:permitType application)
+                                                              :operations.name {$nin ["ya-jatkoaika"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
         enriched-results (map
                            (fn [r]
