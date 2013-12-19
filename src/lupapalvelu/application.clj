@@ -757,9 +757,6 @@
   (when (= :ya-jatkoaika (-> application :operations first :name keyword))
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
-;;
-;; TODO: jatkoluvan viitelupa ei ole jatkolupa-tyyppia -> lisaa rekursio, joka etsii oikean luvan lupaketjusta
-;;
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
