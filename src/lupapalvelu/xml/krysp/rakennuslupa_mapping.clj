@@ -221,7 +221,7 @@
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
-        huomautukset (-> data :huomautukset :kuvaus)
+        huomautukset (-> data :katselmus :huomautukset :kuvaus)
         building     (-> data :rakennus vals first :rakennus)]
     (save-katselmus-xml application lang output-dir
                                pitoPvm
