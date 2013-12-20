@@ -222,8 +222,8 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven'], state()) && features.enabled('rakentamisen-aikaiset-tabi')"><a data-bind="click: changeTab"
-                   href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
+            <li data-bind="if: (_.contains(['verdictGiven'], state()) || _.contains(['constructionStarted'], state())) && features.enabled('rakentamisen-aikaiset-tabi')">
+              <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
                     <span data-bind="text: tasksRequiringAction"
@@ -739,11 +739,18 @@
           </div>
 
           <button class="btn btn-primary"
-                  data-test-id="application-inform-building-ready-btn"
-                  data-bind="click: $root.buildingReadyModel.openBuildingReadyDialog,
-                             ltext: 'application.informBuildingReady',
-                             visible: $root.authorization.ok('inform-building-ready') && !closed(),
-                             enable: $root.authorization.ok('inform-building-ready')"></button>
+                  data-test-id="application-inform-construction-started-btn"
+                  data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
+                             ltext: 'application.button.informConstructionStarted',
+                             visible: $root.authorization.ok('inform-construction-started'),
+                             enable: $root.authorization.ok('inform-construction-started')"></button>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-construction-ready-btn"
+                  data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
+                             ltext: 'application.button.informConstructionReady',
+                             visible: $root.authorization.ok('inform-construction-ready'),
+                             enable: $root.authorization.ok('inform-construction-ready')"></button>
 
           <button class="btn btn-primary"
                   data-test-id="application-new-task"
