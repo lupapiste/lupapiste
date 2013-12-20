@@ -220,7 +220,7 @@
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [link-permit-data (first (:linkPermitData application))
-        documents (by-type (documents-by-type-without-blanks application))
+        documents (documents-by-type-without-blanks application)
         toimenpiteet (get-operations documents application)
         operation-name (-> application :operations first :name)
         canonical {:Rakennusvalvonta
