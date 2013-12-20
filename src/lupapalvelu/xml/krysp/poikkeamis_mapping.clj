@@ -79,8 +79,8 @@
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)
                       [:Popast :poikkeamisasiatieto :Poikkeamisasia]
-                      (= subtype lupapalvelu.permit/poikkeamislupa)
-                      [:Popast :suunnittelutarveasiatieto :Suunnittelutarveratkaisu]
+                      (= subtype lupapalvelu.permit/suunnittelutarveratkaisu)
+                      [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia]
                       :default nil)
         krysp-polku-lausuntoon (conj krysp-polku :lausuntotieto)
         canonical-without-attachments  (poikkeus-application-to-canonical application lang)
