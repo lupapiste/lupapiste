@@ -897,7 +897,7 @@
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
                  kiinttun (:kiinttun rakennustunnus) => "21111111111111"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
@@ -1118,7 +1118,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" 
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
                  kiinttun (:kiinttun rakennustunnus) => "01234567891234"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
