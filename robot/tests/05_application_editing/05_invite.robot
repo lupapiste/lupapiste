@@ -17,15 +17,7 @@ Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
-  Invite count is  0
-  Click by test id  application-invite-paasuunnittelija
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  teppo@example.com
-  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
-  Click by test id  application-invite-submit
-  Wait until  Mask is invisible
-  Wait until  Element should not be visible  invite-email
-  Wait until  Invite count is  1
+  Invite Teppo
 
 Mikko can't reinvite Teppo
   Click by test id  application-invite-paasuunnittelija
@@ -41,7 +33,24 @@ Mikko can't reinvite Teppo
 # TODO: can remove auth for someone else
   [Teardown]  logout
 
-Teppo can see the invite
+Teppo declines invitation
+  Teppo logs in
+  Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
+  Click by test id  decline-invite-button
+  Wait until  Element should be visible  xpath=//*[@data-test-id='confirm-yes']
+  Click by test id  confirm-yes
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='decline-invite-button']
+  [Teardown]  logout
+
+Mikko reinvites Teppo
+  Mikko logs in
+  Open application  invite-app  753-416-25-25
+  Open tab  parties
+  Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
+  Invite Teppo
+  [Teardown]  logout
+  
+Teppo accepts invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
   Click by test id  accept-invite-button
@@ -124,3 +133,15 @@ Mask is invisible
 Invite count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
+
+Invite Teppo
+  Invite count is  0
+  Click by test id  application-invite-paasuunnittelija
+  Wait until  Element should be visible  invite-email
+  Input Text  invite-email  teppo@example.com
+  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Click by test id  application-invite-submit
+  Wait until  Mask is invisible
+  Wait until  Element should not be visible  invite-email
+  Wait until  Invite count is  1
+  
