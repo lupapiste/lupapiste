@@ -38,7 +38,8 @@
                              {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}
                                                                                     {:tag :suoramarkkinointikieltoKytkin}]}]}
                              {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
-                                                                                   {:tag :poikkeamisasianKuvaus}]}]}
+                                                                                   {:tag :poikkeamisasianKuvaus}
+                                                                                   {:tag :suunnittelutarveasianKuvaus}]}]}
                              {:tag :kayttotapaus}])
 
 
