@@ -127,7 +127,15 @@
                                                          :child [{:tag :teksti}]}]}
                                                {:tag :piste :ns "yht"
                                                 :child [{:tag :Point :ns "gml"
-                                                         :child [{:tag :pos}]}]}]}]}
+                                                         :child [{:tag :pos}]}]}
+                                               {:tag :viiva :ns "yht"
+                                                :child [{:tag :LineString :ns "gml"
+                                                        :child [{:tag :pos}]}]}
+                                               {:tag :alue :ns "yht"
+                                                :child [{:tag :Polygon :ns "gml"
+                                                        :child [{:tag :exterior
+                                                                 :child [{:tag :LinearRing
+                                                                          :child [{:tag :pos}]}]} ]}]}]}]}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                               :child [{:tag :Osapuoli
                                        :child osapuoli}]}
