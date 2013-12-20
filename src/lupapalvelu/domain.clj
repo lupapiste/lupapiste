@@ -184,6 +184,7 @@
    :permitType               ""
    :schema-version           nil
    :sent                     nil
+   :started                  nil
    :state                    ""
    :statements               []
    :submitted                nil
