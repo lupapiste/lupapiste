@@ -403,6 +403,7 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
+
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
