@@ -314,10 +314,11 @@
 
 (defcommand cancel-application
   {:parameters [id]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :states     [:draft :info :open :submitted]}
+   :states     [:draft :info :open :submitted]
+   :validators [validate-owner-or-writer]}
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
