@@ -14,7 +14,6 @@
             [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -316,10 +315,11 @@
 
 (defcommand cancel-application
   {:parameters [id]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :states     [:draft :info :open :submitted]}
+   :states     [:draft :info :open :submitted]
+   :validators [validate-owner-or-writer]}
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
@@ -344,6 +344,14 @@
             (not= 1 (-> application :linkPermitData count)))
       (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
 
+(defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
+  (let [link-permit-app-id (-> application :linkPermitData first :id)
+        verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
+        kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
+    (-> application
+      (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
+      (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))))
+
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
@@ -354,12 +362,24 @@
   [{:keys [application created] :as command}]
 
   (let [application (meta-fields/enrich-with-link-permit-data application)
-        organization (organization/get-organization (:organization application))]
+        organization (organization/get-organization (:organization application))
+        jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))]
     (when (empty? (:authority application))
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
-      (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-        (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+      (if jatkoaika-app?
+        ;; jatkoaika application
+        (let [application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                            (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                            application)
+              application (merge application
+                            (select-keys
+                              (domain/application-skeleton)
+                              [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                               :neighbors :openInfoRequest :statements :tasks :verdicts
+                               :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+          (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization))
+        ;; ordinary application
         (let [submitted-application (mongo/by-id :submitted-applications id)]
           (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
 
@@ -369,15 +389,19 @@
 
     ;; The "sent" timestamp is updated to all attachments of the application,
     ;; also the ones that have no versions at all (have no latestVersion).
-    (let [data-argument (reduce
-                              (fn [data-map attachment]
-                                (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-                              {}
-                              (:attachments application))]
+    (let [data-argument (when-not jatkoaika-app?
+                          (reduce
+                            (fn [data-map attachment]
+                              (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+                            {}
+                            (:attachments application)))]
       (update-application command
         {:state {$in ["submitted" "complement-needed"]}}
-        {$set (merge  data-argument {:sent created
-                                     :state :sent})}))))
+        {$set (merge
+                data-argument
+                (if jatkoaika-app?
+                  {:sent created :state :closed :closed created}
+                  {:sent created :state :sent}))}))))
 
 (defcommand submit-application
   {:parameters [id]
@@ -415,6 +439,7 @@
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
+
 
 (defcommand save-application-drawings
   {:parameters [:id drawings]
@@ -632,14 +657,14 @@
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
                                                               :state {$in ["verdictGiven" "constructionStarted"]}
-                                                              :permitType (:permitType application)})
+                                                              :permitType (:permitType application)
+                                                              :operations.name {$nin ["ya-jatkoaika"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
         enriched-results (map
                            (fn [r]
                              (assoc r :text
                                (str
                                  (:address r) ", "
-                                 (i18n/with-lang (:lang command) (i18n/loc (:permitType r))) ", "
                                  (:id r))))
                            results)
         same-property-id-fn #(= propertyId (:propertyId %))
@@ -702,7 +727,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven :constructionsStarted]
+   :states     [:verdictGiven :constructionStarted]
    :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
@@ -737,10 +762,12 @@
                              (-> mainostus-viitoitus-tapahtuma-doc :_selected :value keyword))
         tapahtuma-data (when tapahtuma-name-key
                          (mainostus-viitoitus-tapahtuma-doc tapahtuma-name-key))]
-    (or
-      (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
-      (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
-      (util/to-local-date (:submitted app)))))
+    (if (:started app)
+      (util/to-local-date (:started app))
+      (or
+        (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
+        (util/to-local-date (:submitted app))))))
 
 (defn- validate-not-jatkolupa-app [_ application]
   (when (= :ya-jatkoaika (-> application :operations first :name keyword))
@@ -749,7 +776,7 @@
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven :constructionsStarted]
+   :states     [:verdictGiven :constructionStarted]
    :validators [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
 
@@ -786,19 +813,38 @@
 
 
 ;;
-;; Inform building ready
+;; Inform construction started & ready
 ;;
 
-(defcommand inform-building-ready
+(defcommand inform-construction-started
+  {:parameters ["id" startedTimestampStr]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven]
+   :on-success (notify :application-state-change)
+   :validators [(permit/validate-permit-type-is permit/YA)]
+   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
+  [{:keys [created application] :as command}]
+  (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
+    (update-application command {$set {:started timestamp
+                                       :state  :constructionStarted}}))
+  (ok))
+
+(defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven :constructionsStarted]      ;;TODO: Tahan vain :constructionsStarted?
+   :states     [:constructionStarted]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
-        application (assoc application :closed timestamp)
+        application (merge application
+                      {:closed timestamp}
+                      (select-keys
+                        (domain/application-skeleton)
+                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                         :neighbors :openInfoRequest :statements :tasks :verdicts
+                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
         organization (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp
       application
@@ -1015,7 +1061,7 @@
       "applications" {:infoRequest false}
       "inforequests" {:infoRequest true}
       "both"         nil)
-    (condp = filter-state                       ;; TODO: Tanne closed-tila ?
+    (condp = filter-state
       "all"       {:state {$ne "canceled"}}
       "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
       "canceled"  {:state "canceled"})
