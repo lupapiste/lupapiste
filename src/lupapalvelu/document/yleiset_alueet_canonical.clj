@@ -142,7 +142,7 @@
 ;;
 ;; ***  TODO: Vaihda kayttojakson alkuHetkeksi aloitusilmoituksen pvm, kunhan sellainen saadaan.  ***
 ;;
-(defn- get-building-ready-info [application]
+(defn- get-construction-ready-info [application]
   {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:submitted application))
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
@@ -270,7 +270,7 @@
                                 (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
                                 (when (:closed application)
-                                  (get-building-ready-info application)))}]
+                                  (get-construction-ready-info application)))}]
     (cr/strip-nils body)))
 
 (defn application-to-canonical

@@ -9,7 +9,7 @@
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
-  var buildingReadyModel = new LUPAPISTE.BuildingReadyModel();
+  var constructionStateChangeModel = new LUPAPISTE.ConstructionStateChangeModel();
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
@@ -443,15 +443,15 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       neighborStatusModel: neighborStatusModel,
       addLinkPermitModel: addLinkPermitModel,
-      buildingReadyModel: buildingReadyModel,
+      constructionStateChangeModel: constructionStateChangeModel,
       createTaskModel: createTaskModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
     $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
-    $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
-    $("#dialog-building-ready").applyBindings({buildingReadyModel: buildingReadyModel});
+    $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
+    $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     attachmentTemplatesModel.init();
   });
