@@ -110,6 +110,45 @@
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
 
+(defn get-pos [coordinates]
+  {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
+
+(defn point-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         p (jts/read-wkt-str geometry)
+         cord (.getCoordinate p)]
+    {:Sijainti
+     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
+
+(defn linestring-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         ls (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}})
+  )
+
+(defn polygon-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         polygon (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}})
+  )
+
+(defn ?drawing-type [t drawing]
+  (.startsWith (:geometry drawing) t))
+
+(defn drawings-as-krysp [drawings]
+   (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
+           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))
+           (map polygon-drawing (filter (partial ?drawing-type "POLYGON") drawings))))
+
+(defn- get-sijaintitieto [application]
+  (let  [drawings (drawings-as-krysp (:drawings application))]
+    (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
+                                               :alkuHetki (to-xml-datetime (now))
+                                               :osoitenimi {:teksti (:address application)}}
+                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+                          drawings)))
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
   (when-let [arvo (-> data :lisatietoja-sijoituskohteesta :value)]
@@ -169,46 +208,6 @@
                                            (dissoc :hankkeen-kuvaus)
                                            (merge {:mainostus-viitoitus-tapahtuma-pvm true
                                                    :mainostus-viitoitus-lisatiedot true}))})
-
-(defn get-pos [coordinates]
-  {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
-
-(defn point-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         p (jts/read-wkt-str geometry)
-         cord (.getCoordinate p)]
-    {:Sijainti
-     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
-
-(defn linestring-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         ls (jts/read-wkt-str geometry)]
-    {:Sijainti
-     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}})
-  )
-
-(defn polygon-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         polygon (jts/read-wkt-str geometry)]
-    {:Sijainti
-     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}})
-  )
-
-(defn ?drawing-type [t drawing]
-  (.startsWith (:geometry drawing) t))
-
-(defn drawings-as-krysp [drawings]
-   (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
-           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))
-           (map polygon-drawing (filter (partial ?drawing-type "POLYGON") drawings))))
-
-(defn- get-sijaintitieto [application]
-  (let  [drawings (drawings-as-krysp (:drawings application))]
-    {:sijaintitieto (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                                               :alkuHetki (to-xml-datetime (now))
-                                               :osoitenimi {:teksti (:address application)}}
-                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
-                          drawings)}))
 
 (defn- permits [application]
   ;;
@@ -293,6 +292,7 @@
                                  :luvanTunnisteTiedot (lupatunnus (:id application))
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
+                                 :sijaintitieto (get-sijaintitieto application)
                                  :osapuolitieto osapuolitieto
                                  :vastuuhenkilotieto vastuuhenkilotieto
                                  :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
