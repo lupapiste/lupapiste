@@ -161,7 +161,6 @@
    :_verdicts-seen-by        {}
    :_comments-seen-by        {}
    :address                  ""
-   :allowedAttachmentTypes   []
    :attachments              []
    :auth                     []
    :authority                {}

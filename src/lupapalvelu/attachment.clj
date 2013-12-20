@@ -123,6 +123,10 @@
       :P (attachment-types-R)
       (fail! "unsupported permit-type"))))
 
+(defn get-attachment-types-for-application
+  [application]
+  (get-attachment-types-by-permit-type (:permitType application)))
+
 (defn make-attachment [now target locked op attachement-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
    :type attachement-type
@@ -244,8 +248,14 @@
       {:type-group type-group :type-id type-id})))
 
 (defn allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
-  (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
-    (some (partial = (name type-id)) types)))
+  (let [type-group (keyword type-group)
+        type-id (keyword type-id)]
+    (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
+      (some #(= (keyword %) type-id) types))))
+
+(defn allowed-attachment-type-for-application? [application attachment-type]
+  (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
+    (allowed-attachment-type-for? allowedAttachmentTypes attachment-type)))
 
 (defn get-attachment-info
   "gets an attachment from application or nil"

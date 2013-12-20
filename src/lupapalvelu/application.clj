@@ -105,9 +105,10 @@
    :parameters [:id]}
   [{app :application user :user}]
   (if app
-    (ok :application ((app-post-processor user) app)
-        :authorities (find-authorities-in-applications-organization app)
-        :permitSubtypes (permit/permit-subtypes (:permitType app)))
+    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+      (ok :application ((app-post-processor user) app)
+          :authorities (find-authorities-in-applications-organization app)
+          :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -539,9 +540,8 @@
 
           application   (merge application
                           (if info-request?
-                            {:allowedAttachmentTypes [[:muut [:muu]]]}
+                            {}
                             {:attachments            (make-attachments created op organization-id)
-                             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
 
           application   (domain/set-software-version application)]
@@ -827,7 +827,6 @@
     (update-application command
       {$set {:infoRequest false
              :state :open
-             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
              :documents (make-documents user created op application)
              :modified created}
        $pushAll {:attachments (make-attachments created op (:organization application))}})

@@ -44,7 +44,7 @@
   (fact (next-attachment-version nil {:role :dude})       => {:major 1 :minor 0}))
 
 (facts "Facts about allowed-attachment-type-for?"
-  (let [allowed-types [["a" ["1" "2"]] ["b" ["3" "4"]]]]
+  (let [allowed-types [["a" ["1" "2"]] [:b [:3 :4]]]]
     (fact (allowed-attachment-type-for? allowed-types {:type-group :a :type-id :1}) => truthy)
     (fact (allowed-attachment-type-for? allowed-types {:type-group :a :type-id :2}) => truthy)
     (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :3}) => truthy)

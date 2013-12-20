@@ -212,8 +212,7 @@
           (:comments %)
           (:schema-version %)
           (:documents %)
-          (:attachments %)
-          (:allowedAttachmentTypes %) (pos? (count (:allowedAttachmentTypes %)))]}
+          (:attachments %)]}
   (let [{:keys [application ok]} (query apikey :application :id id)]
     (assert ok)
     application))

@@ -48,7 +48,6 @@
                              :operations [operation],
                              :propertyId "75341600550007",
                              :documents documents,
-;                             :allowedAttachmentTypes allowedAttachmentTypes,   ;; TODO: tama pois?
                              :municipality municipality,
                              :statements statements})
 
