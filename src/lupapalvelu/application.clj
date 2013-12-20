@@ -360,15 +360,22 @@
   [{:keys [application created] :as command}]
 
   (let [application (meta-fields/enrich-with-link-permit-data application)
-        organization (organization/get-organization (:organization application))]
+        organization (organization/get-organization (:organization application))
+        jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))]
     (when (empty? (:authority application))
       (executed "assign-to-me" command)) ;; FIXME combine mongo writes
     (try
-      (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+      (if jatkoaika-app?
         ;; jatkoaika application
         (let [application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
                             (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
-                            application)]
+                            application)
+              application (merge application
+                            (select-keys
+                              (domain/application-skeleton)
+                              [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                               :neighbors :openInfoRequest :statements :tasks :verdicts
+                               :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
           (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization))
         ;; ordinary application
         (let [submitted-application (mongo/by-id :submitted-applications id)]
@@ -380,15 +387,19 @@
 
     ;; The "sent" timestamp is updated to all attachments of the application,
     ;; also the ones that have no versions at all (have no latestVersion).
-    (let [data-argument (reduce
-                              (fn [data-map attachment]
-                                (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-                              {}
-                              (:attachments application))]
+    (let [data-argument (when-not jatkoaika-app?
+                          (reduce
+                            (fn [data-map attachment]
+                              (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+                            {}
+                            (:attachments application)))]
       (update-application command
         {:state {$in ["submitted" "complement-needed"]}}
-        {$set (merge  data-argument {:sent created
-                                     :state :sent})}))))
+        {$set (merge
+                data-argument
+                (if jatkoaika-app?
+                  {:sent created :state :closed :closed created}
+                  {:sent created :state :sent}))}))))
 
 (defcommand submit-application
   {:parameters [id]
