@@ -838,7 +838,7 @@
                       {:closed timestamp}
                       (select-keys
                         (domain/application-skeleton)
-                        [:allowedAttachmentTypes :attachments :comments :drawings
+                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                          :neighbors :openInfoRequest :statements :tasks :verdicts
                          :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
         organization (organization/get-organization (:organization application))]
