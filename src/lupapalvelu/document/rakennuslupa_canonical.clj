@@ -199,14 +199,15 @@
                                    "ruotsi"
                                    "suomi")}}))
 
-(defn- get-asian-tiedot [documents maisematyo_documents add-poikkeaminen?]
-  (let [asian-tiedot (:data (first documents))
+(defn- get-asian-tiedot [documents maisematyo_documents]
+  (let [hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents))
+        asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
                                  ":" (-> maisematyo_doc :data :kuvaus :value)))
         r {:Asiantiedot {:rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value)
                                                         (apply str maisematyo_kuvaukset))}}]
-    (if add-poikkeaminen?
+    (if (:poikkeamat asian-tiedot)
       (assoc-in r [:Asiantiedot :vahainenPoikkeaminen] (or (-> asian-tiedot :poikkeamat :value) empty-tag))
       r)))
 
@@ -214,14 +215,6 @@
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
-
-(defn- get-viitelupatieto [link-permit-data]
-  (when link-permit-data
-    (->
-      (if (= (:type link-permit-data) "lupapistetunnus")
-        (lupatunnus (:id link-permit-data))
-        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
-      (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia"))))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -246,9 +239,7 @@
                                         "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                         "jatkoaika" "Jatkoaikahakemus"
                                         (get-kayttotapaus documents toimenpiteet)))
-                      :asianTiedot (if link-permit-data
-                                     (get-asian-tiedot (:hankkeen-kuvaus-minimum documents) (:maisematyo documents) false)
-                                     (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents) true))
+                      :asianTiedot (get-asian-tiedot documents (:maisematyo documents))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}}}}
         canonical (if link-permit-data
                     (-> canonical

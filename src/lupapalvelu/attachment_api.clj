@@ -38,13 +38,6 @@
 ;; KRYSP
 ;;
 
-(defn- get-data-argument-for-attachments-mongo-update [timestamp attachments]
-  (reduce
-    (fn [data-map attachment]
-      (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) timestamp}))
-    {}
-    attachments))
-
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
@@ -72,9 +65,14 @@
             (assoc :attachments attachments-wo-sent-timestamp))
           lang
           organization)
-
-        (update-application command
-          {$set (get-data-argument-for-attachments-mongo-update created (:attachments application))})
+        ;; The "sent" timastamp is updated to all attachments of the application, also the ones
+        ;; that were not sent this time, and the ones that have no versions at all (have no latestVersion).
+        (let [data-argument (reduce
+                              (fn [data-map attachment]
+                                (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+                              {}
+                              (:attachments application))]
+          (update-application command {$set data-argument}))
         (ok))
 
       (fail :error.sending-unsent-attachments-failed))))

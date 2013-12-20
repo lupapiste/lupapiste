@@ -165,6 +165,11 @@
           <button data-bind="click: createChangePermit,    visible: $root.authorization.ok('create-change-permit'),     enable: $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
             <span data-bind="ltext: 'application.createChangePermit'"></span>
             <span class="icon add-grey left-align"></span>
+          </button>
+          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'),     enable: $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
+            <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
+            <span class="icon add-grey left-align"></span>
+          </button>
           <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
@@ -740,6 +745,12 @@
                              visible: $root.authorization.ok('inform-building-ready') && !closed(),
                              enable: $root.authorization.ok('inform-building-ready')"></button>
 
+          <button class="btn btn-primary"
+                  data-test-id="application-new-task"
+                  data-bind="click: $root.createTaskModel.createTask,
+                             ltext: 'task.create',
+                             visible: $root.authorization.ok('create-task'),
+                             enable: $root.authorization.ok('create-task')"></button>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >

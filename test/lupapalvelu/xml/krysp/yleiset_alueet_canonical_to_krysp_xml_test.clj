@@ -20,7 +20,6 @@
   (let [operation-name-key (-> application :operations first :name keyword)
         lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
         canonical (application-to-canonical application "fi")
-        _ (clojure.pprint/pprint canonical)
         mapping (get-yleiset-alueet-krysp-mapping lupa-name-key)
         xml (element-to-xml canonical mapping)
         xml-s (indent-str xml)]
@@ -29,11 +28,7 @@
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key)) => true)
 
-;    (println "\n xml-s: \n")
-
-(println xml-s)
-
-;    (println "\n")
+;    (println "\n xml-s: " xml-s "\n")
 
 ;    (println "\n application: ")
 ;    (clojure.pprint/pprint application)
