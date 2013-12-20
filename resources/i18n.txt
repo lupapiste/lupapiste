@@ -12,5 +12,7 @@ constructionReady.dialog.helpParagraph: Valitse alta hankkeesi valmistumispäiv�
 constructionReady.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi valmistuneeksi {0}?
 constructionReady.readyDate: Valmistumispäivämäärä:
 
+constructionStarted: Rakennustyöt aloitettu
+
 task.send: Siirrä taustajärjestelmään
 error.invalid-task-type: Toiminto ei ole käytössä tämän tyyppiselle vaatimukselle

@@ -725,7 +725,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven :constructionsStarted]
+   :states     [:verdictGiven :constructionStarted]
    :validators [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
@@ -772,7 +772,7 @@
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :roles      [:applicant :authority]
-   :states     [:verdictGiven :constructionsStarted]
+   :states     [:verdictGiven :constructionStarted]
    :validators [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
 
@@ -822,13 +822,13 @@
   [{:keys [created application] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:started timestamp
-                                       :state  :constructionsStarted}}))
+                                       :state  :constructionStarted}}))
   (ok))
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
    :roles      [:applicant :authority]
-   :states     [:constructionsStarted]
+   :states     [:constructionStarted]
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
