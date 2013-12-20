@@ -820,7 +820,7 @@
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [timestamp (util/to-xml-millis-from-string startedTimestampStr)]
+  (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:started timestamp
                                        :state  :constructionsStarted}}))
   (ok))
