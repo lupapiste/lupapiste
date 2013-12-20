@@ -102,7 +102,7 @@
         "pohjakatselmus"
         :katselmus
         "pidetty"
-        "string"
+        "pitaja"
         true
         "kuvaus"
         "Tiivi Taavi, Hipsu ja Lala"
@@ -114,24 +114,22 @@
       {:id "123"
        :schema-info {:name "task-katselmus"}
        :data {:katselmuksenLaji {:value "pohjakatselmus"},
-              :vaadittuLupaehtona {:value true},
+              :vaadittuLupaehtona {:value true} ; missing
               :rakennus
               {:0
                {:rakennus
-                {:jarjestysnumero {:value "1"},
-                 :rakennusnro {:value "001"},
-                 :kiinttun {:value "09100200990013"}}
-                :tila {:tila {:value "pidetty"} :kayttoonottava {:value true}}}},
-              :katselmus {:pitoPvm {:value "2.5.1974"},
-                          :pitaja {:value "string"}
+                {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
+                :tila {:tila {:value "osittainen"} ; missing
+                       :kayttoonottava {:value true}}}} ; missing
+              :katselmus {:pitoPvm {:value "2.5.1974"}
+                          :pitaja {:value "pitaja"}
                           :huomautukset {:kuvaus {:value "kuvaus"}
-                                         :maaraAika {:value "2.5.1974"}
-                                         :toteaja {:value "string"}
-                                         :toteamisHetki {:value "2.5.1974"}}
+                                         :maaraAika {:value "3.5.1974"}; missing
+                                         :toteaja {:value "toteaja"} ; missing
+                                         :toteamisHetki {:value "1.5.1974"}} ; missing
                           :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
                           :poikkeamat {:value "Ei poikkeamisia"}
                           :tila {:value "pidetty"}}}}
-
       user
       "fi"
       "target"
