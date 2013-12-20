@@ -84,11 +84,11 @@
 
         Sijoituslupa-kayttotarkoitus (:kayttotarkoitus Sijoituslupa) => truthy
 
-        Sijainti-osoite (-> Sijoituslupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Sijoituslupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Sijoituslupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Sijoituslupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (-> Sijoituslupa :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Sijoituslupa :vastuuhenkilotieto) => truthy
