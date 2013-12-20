@@ -70,6 +70,10 @@
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
 
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro"}
+                                {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
+
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :blacklist [turvakielto]

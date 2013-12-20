@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
+            [clojure.walk :as walk]
             [sade.util :refer :all]
             [lupapalvelu.core :refer [now]]))
 
@@ -36,6 +37,13 @@
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
 
+(defn empty-strings-to-nil [v]
+  (if (and (string? v) (s/blank? v)) nil v))
+
+(defn documents-by-type-without-blanks
+  "Converts blank strings to nils and groups documents by schema name"
+  [{documents :documents}]
+  (by-type (walk/postwalk empty-strings-to-nil documents)))
 
 (def ^:private puolto-mapping {:condition "ehdoilla"
                                :no "ei puolla"
@@ -60,8 +68,6 @@
   ;Returing vector because this element to be Associative
   (vec (map get-statement statements)))
 
-(defn empty-strings-to-nil [v]
-  (if (and (string? v) (s/blank? v)) nil v))
 
 (defn muu-select-map
   "If 'sel-val' is \"other\" considers 'muu-key' and 'muu-val', else considers 'sel-key' and 'sel-val'.
@@ -102,20 +108,18 @@
    :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen :Sijoituslupa
    :ya-sijoituslupa-muu-sijoituslupa :Sijoituslupa})
 
-(defn toimituksen-tiedot [application lang]
-  {:aineistonnimi (:title application)
+(defn toimituksen-tiedot [{:keys [title municipality]} lang]
+  {:aineistonnimi title
    :aineistotoimittaja "lupapiste@solita.fi"
    :tila toimituksenTiedot-tila
    :toimitusPvm (to-xml-date (now))
-   :kuntakoodi (:municipality application)
+   :kuntakoodi municipality
    :kielitieto lang})
 
-(defn- get-handler [application]
-  (let [handler (:authority application)]
-    (if (seq handler)
-      {:henkilo {:nimi {:etunimi  (:firstName handler)
-                        :sukunimi (:lastName handler)}}}
-      empty-tag)))
+(defn- get-handler [{handler :authority}]
+  (if (seq handler)
+    {:henkilo {:nimi {:etunimi (:firstName handler) :sukunimi (:lastName handler)}}}
+    empty-tag))
 
 
 (defn get-state [application]
