@@ -761,10 +761,12 @@
                              (-> mainostus-viitoitus-tapahtuma-doc :_selected :value keyword))
         tapahtuma-data (when tapahtuma-name-key
                          (mainostus-viitoitus-tapahtuma-doc tapahtuma-name-key))]
-    (or
-      (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
-      (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
-      (util/to-local-date (:submitted app)))))
+    (if (:started app)
+      (util/to-local-date (:started app))
+      (or
+        (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
+        (util/to-local-date (:submitted app))))))
 
 (defn- validate-not-jatkolupa-app [_ application]
   (when (= :ya-jatkoaika (-> application :operations first :name keyword))
