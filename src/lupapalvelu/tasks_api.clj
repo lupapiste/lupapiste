@@ -75,6 +75,7 @@
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)]
     (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
+    (when-not (get-in task [:data :katselmuksenLaji :value]) (fail! :error.missing-parameters))
     (mapping-to-krysp/save-review-as-krysp application task user lang)
     (set-state command taskId :sent)))
 
