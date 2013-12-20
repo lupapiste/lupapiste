@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa_canonical_to_krysp_xml_test
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
-            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.rakennuslupa_canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
@@ -8,12 +8,15 @@
                                                                       ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
                                                                 save-aloitusilmoitus-as-krysp
+
                                                                 save-katselmus-as-krysp]]
+            [lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :refer :all :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]))
 
@@ -60,32 +63,6 @@
                  :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
                  :apikey "5051ba0caa2480f374dcfefg"}})
 
-    #_(save-katselmus-as-krysp
-      (assoc application :state "verdictGiven")
-      "fi"
-      ""
-      (lupapalvelu.core/now)
-      {:jarjestysnumero 1 :rakennusnro "123"}
-      {:id "777777777777777777000017"
-       :email "jussi.viranomainen@tampere.fi"
-       :enabled true
-       :role "authority"
-       :username "jussi"
-       :organizations ["837-YA"]
-       :firstName "Jussi"
-       :lastName "Viranomainen"
-       :street "Katuosoite 1 a 1"
-       :phone "1231234567"
-       :zip "33456"
-       :city "Tampere"
-       :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
-                 :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
-                 :apikey "5051ba0caa2480f374dcfefg"}}
-      "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
-Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
-
-
-
     ))
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
@@ -99,4 +76,63 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" 
   (fact "Suunnittelija application -> canonical -> xml"
     (do-test application-suunnittelijan-nimeaminen)))
 
+(let [application (assoc application-rakennuslupa :state "verdictGiven")
+      user        {:id "777777777777777777000017"
+                   :email "jussi.viranomainen@tampere.fi"
+                   :enabled true
+                   :role "authority"
+                   :username "jussi"
+                   :organizations ["837-YA"]
+                   :firstName "Jussi"
+                   :lastName "Viranomainen"
+                   :street "Katuosoite 1 a 1"
+                   :phone "1231234567"
+                   :zip "33456"
+                   :city "Tampere"}]
 
+  (fact "Katselmus data is parsed correctly from task. Not caring about actual mapping here."
+    (against-background
+      (#'lupapalvelu.xml.krysp.rakennuslupa-mapping/save-katselmus-xml
+        application
+        "fi"
+        "target"
+        "2.5.1974"
+        {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}
+        user
+        "pohjakatselmus"
+        :katselmus
+        "pidetty"
+        "string"
+        true
+        "kuvaus"
+        "Tiivi Taavi, Hipsu ja Lala"
+        "Ei poikkeamisia"
+        "begin-of-link"
+        {:type "task" :id "123"}) => nil)
+    (save-katselmus-as-krysp
+      application
+      {:id "123"
+       :schema-info {:name "task-katselmus"}
+       :data {:katselmuksenLaji {:value "pohjakatselmus"},
+              :vaadittuLupaehtona {:value true},
+              :rakennus
+              {:0
+               {:rakennus
+                {:jarjestysnumero {:value "1"},
+                 :rakennusnro {:value "001"},
+                 :kiinttun {:value "09100200990013"}}
+                :tila {:tila {:value "pidetty"} :kayttoonottava {:value true}}}},
+              :katselmus {:pitoPvm {:value "2.5.1974"},
+                          :pitaja {:value "string"}
+                          :huomautukset {:kuvaus {:value "kuvaus"}
+                                         :maaraAika {:value "2.5.1974"}
+                                         :toteaja {:value "string"}
+                                         :toteamisHetki {:value "2.5.1974"}}
+                          :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
+                          :poikkeamat {:value "Ei poikkeamisia"}
+                          :tila {:value "pidetty"}}}}
+
+      user
+      "fi"
+      "target"
+      "begin-of-link") => nil ))
