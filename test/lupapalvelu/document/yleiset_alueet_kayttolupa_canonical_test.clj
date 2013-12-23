@@ -42,7 +42,7 @@
 
 (def ^:private operation {:id "52380c6894a74fc25bb4ba46",
                           :created 1379404904514,
-                          :name "ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat"})
+                          :name "ya-kayttolupa-terassit"})
 
 (def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                                 :created 1379404904514,
