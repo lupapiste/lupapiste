@@ -3,7 +3,9 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [sade.util :refer :all]
             [clojure.walk :as walk]
-            [sade.common-reader :as cr]))
+            [sade.common-reader :as cr]
+            [cljts.geom :as geo]
+            [cljts.io :as jts]))
 
 (defn- get-henkilo [henkilo]
   {:nimi {:etunimi (-> henkilo :henkilotiedot :etunimi :value)
@@ -108,11 +110,45 @@
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
 
+(defn get-pos [coordinates]
+  {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
+
+(defn point-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         p (jts/read-wkt-str geometry)
+         cord (.getCoordinate p)]
+    {:Sijainti
+     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
+
+(defn linestring-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         ls (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}})
+  )
+
+(defn polygon-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         polygon (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}})
+  )
+
+(defn ?drawing-type [t drawing]
+  (.startsWith (:geometry drawing) t))
+
+(defn drawings-as-krysp [drawings]
+   (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
+           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))
+           (map polygon-drawing (filter (partial ?drawing-type "POLYGON") drawings))))
+
 (defn- get-sijaintitieto [application]
-  {:Sijainti {:osoite {:yksilointitieto (:id application)
-                       :alkuHetki (to-xml-datetime (now))
-                       :osoitenimi {:teksti (:address application)}}
-              :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}})
+  (let  [drawings (drawings-as-krysp (:drawings application))]
+    (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
+                                               :alkuHetki (to-xml-datetime (now))
+                                               :osoitenimi {:teksti (:address application)}}
+                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+                          drawings)))
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
   (when-let [arvo (-> data :lisatietoja-sijoituskohteesta :value)]
@@ -142,7 +178,7 @@
 ;;
 ;; ***  TODO: Vaihda kayttojakson alkuHetkeksi aloitusilmoituksen pvm, kunhan sellainen saadaan.  ***
 ;;
-(defn- get-building-ready-info [application]
+(defn- get-construction-ready-info [application]
   {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:submitted application))
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
@@ -178,7 +214,7 @@
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
   ;;               -> Maksaja gets Hakija's henkilotieto, AlkuPvm/LoppuPvm both get application's "modified" date.
   ;;
-  (let [documents-by-type (by-type (:documents application))
+  (let [documents-by-type (documents-by-type-without-blanks application)
         operation-name-key (-> application :operations first :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
@@ -270,24 +306,20 @@
                                 (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
                                 (when (:closed application)
-                                  (get-building-ready-info application)))}]
+                                  (get-construction-ready-info application)))}]
     (cr/strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  (let [app (assoc application :documents
-              (clojure.walk/postwalk empty-strings-to-nil (:documents application)))]
-    {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot app lang)
-                     :yleinenAlueAsiatieto (permits app)}}))
+  {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
+                   :yleinenAlueAsiatieto (permits application)}})
 
 
 (defn jatkoaika-to-canonical [application lang]
   "Transforms continuation period application mongodb-document to canonical model."
   [application lang]
-  (let [app (assoc application :documents
-              (clojure.walk/postwalk empty-strings-to-nil (:documents application)))
-        documents-by-type (by-type (:documents application))
+  (let [documents-by-type (documents-by-type-without-blanks application)
 
         link-permit-data (-> application :linkPermitData first)
         ;;
@@ -314,7 +346,7 @@
                                                         }})
         ]
     {:YleisetAlueet
-     {:toimituksenTiedot (toimituksen-tiedot app lang)
+     {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
                              {:kasittelytietotieto (get-kasittelytieto application)
                               :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)

@@ -74,11 +74,11 @@
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
 
-        Sijainti-osoite (-> Tyolupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Tyolupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Tyolupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (:osapuolitieto Tyolupa) => truthy
         vastuuhenkilot-vec (:vastuuhenkilotieto Tyolupa) => truthy

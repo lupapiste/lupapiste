@@ -127,7 +127,15 @@
                                                          :child [{:tag :teksti}]}]}
                                                {:tag :piste :ns "yht"
                                                 :child [{:tag :Point :ns "gml"
-                                                         :child [{:tag :pos}]}]}]}]}
+                                                         :child [{:tag :pos}]}]}
+                                               {:tag :viiva :ns "yht"
+                                                :child [{:tag :LineString :ns "gml"
+                                                        :child [{:tag :pos}]}]}
+                                               {:tag :alue :ns "yht"
+                                                :child [{:tag :Polygon :ns "gml"
+                                                        :child [{:tag :exterior
+                                                                 :child [{:tag :LinearRing
+                                                                          :child [{:tag :pos}]}]} ]}]}]}]}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                               :child [{:tag :Osapuoli
                                        :child osapuoli}]}
@@ -216,6 +224,7 @@
 
     (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
+(permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
 
 (defn save-jatkoaika-as-krysp [application lang organization output-dir begin-of-link]
     (let [lupa-name-key (ya-operation-type-to-schema-name-key
@@ -226,6 +235,3 @@
           xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
       (mapping-common/write-to-disk application nil nil xml output-dir)))
-
-
-(permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)

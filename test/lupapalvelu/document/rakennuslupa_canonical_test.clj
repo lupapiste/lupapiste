@@ -861,7 +861,7 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "sv"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}
                              authority-user-jussi
                              "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -897,7 +897,7 @@
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
                  kiinttun (:kiinttun rakennustunnus) => "21111111111111"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
@@ -1080,7 +1080,7 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "fi"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
                              authority-user-jussi
                              "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
 Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
@@ -1118,9 +1118,9 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" 
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
-                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"
+                 kiinttun (:kiinttun rakennustunnus) => "01234567891234"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
                  osittainen (:osittainen Katselmus) => "pidetty"
                  pitaja (:pitaja Katselmus) => "Sonja Silja"
