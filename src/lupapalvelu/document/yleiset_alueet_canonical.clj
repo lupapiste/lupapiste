@@ -238,10 +238,6 @@
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
                       (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))))
-
-;        lisaaikatieto (when (:continuation-period-end-date application)
-;                        (get-lisaaikatieto application alku-pvm))
-
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
                   (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
@@ -299,7 +295,6 @@
                                  :lausuntotieto (get-statements (:statements application))
                                  :lupaAsianKuvaus lupaAsianKuvaus
                                  :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-;                                 :lisaaikatieto lisaaikatieto
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
