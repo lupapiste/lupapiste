@@ -195,24 +195,24 @@
                                  "tyoaika")
                      :attachments []}
 
-   :ya-kayttolupa-tapahtumat                                                    ya-kayttolupa-general
-   :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen                ya-kayttolupa-general
-   :ya-kayttolupa-metsastys                                                     ya-kayttolupa-general
-   :ya-kayttolupa-vesistoluvat                                                  ya-kayttolupa-general
-   :ya-kayttolupa-terassit                                                      ya-kayttolupa-general
-   :ya-kayttolupa-kioskit                                                       ya-kayttolupa-general
-   :ya-kayttolupa-muu-kayttolupa                                                ya-kayttolupa-general
-   :ya-katulupa-vesi-ja-viemarityot                                             ya-kayttolupa-general
-   :ya-katulupa-kaukolampotyot                                                  ya-kayttolupa-general
-   :ya-katulupa-kaapelityot                                                     ya-kayttolupa-general
-   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat                     ya-kayttolupa-general
-   :ya-katulupa-nostotyot                                                       ya-kayttolupa-general
-   :ya-katulupa-vaihtolavat                                                     ya-kayttolupa-general
-   :ya-katulupa-kattolumien-pudotustyot                                         ya-kayttolupa-general
-   :ya-katulupa-muu-liikennealuetyo                                             ya-kayttolupa-general
-   :ya-katulupa-talon-julkisivutyot                                             ya-kayttolupa-general
-   :ya-katulupa-talon-rakennustyot                                              ya-kayttolupa-general
-   :ya-katulupa-muu-tyomaakaytto                                                ya-kayttolupa-general
+   :ya-kayttolupa-tapahtumat                                          ya-kayttolupa-general
+   :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen      ya-kayttolupa-general
+   :ya-kayttolupa-metsastys                                           ya-kayttolupa-general
+   :ya-kayttolupa-vesistoluvat                                        ya-kayttolupa-general
+   :ya-kayttolupa-terassit                                            ya-kayttolupa-general
+   :ya-kayttolupa-kioskit                                             ya-kayttolupa-general
+   :ya-kayttolupa-muu-kayttolupa                                      ya-kayttolupa-general
+   :ya-katulupa-vesi-ja-viemarityot                                   ya-kayttolupa-general
+   :ya-katulupa-kaukolampotyot                                        ya-kayttolupa-general
+   :ya-katulupa-kaapelityot                                           ya-kayttolupa-general
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-kayttolupa-general
+   :ya-katulupa-nostotyot                                             ya-kayttolupa-general
+   :ya-katulupa-vaihtolavat                                           ya-kayttolupa-general
+   :ya-katulupa-kattolumien-pudotustyot                               ya-kayttolupa-general
+   :ya-katulupa-muu-liikennealuetyo                                   ya-kayttolupa-general
+   :ya-katulupa-talon-julkisivutyot                                   ya-kayttolupa-general
+   :ya-katulupa-talon-rakennustyot                                    ya-kayttolupa-general
+   :ya-katulupa-muu-tyomaakaytto                                      ya-kayttolupa-general
 
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type "YA"
