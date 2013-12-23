@@ -138,6 +138,8 @@
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
                        :kokemusvuodet {:value "3"}
                        :valvottavienKohteidenMaara {:value "9"}}
+            :vastuuaika {:vastuuaika-alkaa-pvm {:value "19.12.2013"},
+                         :vastuuaika-paattyy-pvm {:value "31.12.2013"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
@@ -523,13 +525,15 @@
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)]
     (fact "model" tyonjohtaja-model => truthy)
-    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "KVV-ty\u00f6njohtaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => "Koulutus")
-    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2010")
-    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "AA")
-    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => "3")
-    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => "9")
+    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
+    (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => (to-xml-date-from-string (-> tyonjohtaja :data :vastuuaika :vastuuaika-alkaa-pvm :value)))
+    (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => (to-xml-date-from-string (-> tyonjohtaja :data :vastuuaika :vastuuaika-paattyy-pvm :value)))
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutus :value))
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")

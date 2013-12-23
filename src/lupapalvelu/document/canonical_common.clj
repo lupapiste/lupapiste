@@ -285,11 +285,12 @@
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))
         patevyys (:patevyys tyonjohtaja)]
-    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
+    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
                      :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                     :koulutus (-> patevyys :koulutus :value)
                      :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
                      :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm :value))
+                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm :value))
                      :kokemusvuodet (-> patevyys :kokemusvuodet :value)
                      :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
                      :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))

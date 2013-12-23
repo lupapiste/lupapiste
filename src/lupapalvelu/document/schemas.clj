@@ -229,9 +229,15 @@
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
+(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
+                              :type :group
+                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
+                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    vastattavat-tyotehtavat-tyonjohtaja
+                   vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
