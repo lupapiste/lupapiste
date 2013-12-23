@@ -21,7 +21,7 @@
                                               :type "group",
                                               :order 60},
                                 :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
-                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
+                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00002"}
                                        :sijoituksen-tarkoitus {:value "other"},
                                        ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
                                        :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
@@ -154,7 +154,7 @@
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
-      (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
+      (fact "Muu tunnus" (:tunnus MuuTunnus) => (:id kaivulupa-application))
       (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => ((keyword (:name operation)) ya-operation-type-to-usage-description))
