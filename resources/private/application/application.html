@@ -103,14 +103,28 @@
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <a data-bind="text: $data.id,
-                            click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                            attr: {'data-test-app-linking-to-us': $data.id}"
+
+              <span data-bind="visible: $data.type() === 'lupapistetunnus'">
+
+                <a data-bind="text: $data.id,
+                              click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                              attr: {'data-test-app-link-permit': $data.id}"
+                   data-test-id="test-application-link-permit"
+                   href="#" class="link-permit-item"></a>
+
+                <a data-bind="visible: !_.contains(['sent', 'verdictGiven', 'closed'], $root.application.state()),
+                              ltext: 'application.linkPermitRemoveSelected',
+                              click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                   href="#" class="remove-link-permit"></a>
+              </span>
+
+              <span data-bind="visible: $data.type() === 'kuntalupatunnus',
+                               text: $data.id,
+                               attr: {'data-test-app-link-permit': $data.id}"
                  data-test-id="test-application-link-permit"
-                 href="#" class="link-permit-item"></a>
-              <a data-bind="ltext: 'application.linkPermitRemoveSelected',
-                            click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                 href="#" class="remove-link-permit"></a>
+                 href="#" class="link-permit-item"></span>
+
+
             </span>
           </div>
           <!-- /ko -->
@@ -222,7 +236,7 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: (_.contains(['verdictGiven'], state()) || _.contains(['constructionStarted'], state())) && features.enabled('rakentamisen-aikaiset-tabi')">
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state()) && features.enabled('rakentamisen-aikaiset-tabi')">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">

@@ -9,11 +9,11 @@
 (def poikkeamislupa :poikkeamislupa)
 (def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
 
-(defn register-mapper [permit-type mapper-key mapper-fn]
+(defn register-function [permit-type k f]
   {:pre [(contains? (permit-types) permit-type)
-         (keyword? mapper-key)
-         (fn? mapper-fn)]}
-  (swap! permit-type-defs assoc-in [permit-type mapper-key] mapper-fn))
+         (keyword? k)
+         (fn? f)]}
+  (swap! permit-type-defs assoc-in [permit-type k] f))
 
 ;;
 ;; Enum
@@ -27,22 +27,26 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-user-key    :rakennus-ftp-user
-   :sftp-directory   "/rakennus"})
+   :sftp-directory   "/rakennus"
+   :case-xml-element :RakennusvalvontaAsia})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes         []
    :sftp-user-key    :yleiset-alueet-ftp-user
-   :sftp-directory   "/yleiset_alueet"})
+   :sftp-directory   "/yleiset_alueet"
+   :case-xml-element :yleinenAlueAsiatieto})
 
 (defpermit Y  "Ymparistoluvat"
   {:subtypes       []
    :sftp-user-key  nil
-   :sftp-directory nil}) ;; TODO
+   :sftp-directory nil
+   :case-xml-element nil}) ;; TODO
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-user-key    :poikkari-ftp-user
-   :sftp-directory   "/poikkeusasiat"})
+   :sftp-directory   "/poikkeusasiat"
+   :case-xml-element :RakennusvalvontaAsia})
 
 ;;
 ;; Helpers
@@ -61,11 +65,32 @@
 (defn get-sftp-user-key [permit-type]
   (get-metadata permit-type :sftp-user-key))
 
-(defn get-application-mapper [permit-type]
+(defn get-case-xml-element [permit-type]
+  (get-metadata permit-type :case-xml-element))
+
+(defn get-application-mapper
+  "Returns a function that maps application into KRYSP XML and saves the XML to disk."
+  [permit-type]
   (get-metadata permit-type :app-krysp-mapper))
 
 (defn get-review-mapper [permit-type]
+  "Returns a function that maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
   (get-metadata permit-type :review-krysp-mapper))
+
+(defn get-verdict-reader [permit-type]
+  "Returns a function that reads verdics (sequence) from KRYSP xml.
+   Function takes xml as parameter.
+   Use ((get-application-xml-getter permit-type) url application-id) to fetch the XML."
+  (get-metadata permit-type :verdict-krysp-reader))
+
+(defn get-verdict-extras-reader [permit-type]
+  "Returns a function that reads some extras from verdict KRYSP xml.
+   Function takes xml as parameter and returns a map that should be merged into the application."
+  (get-metadata permit-type :verdict-extras-krysp-reader))
+
+(defn get-application-xml-getter [permit-type]
+  "Returns a function that fetches KRYSP XML from municipality backend. Function parameters: url, application-id."
+  (get-metadata permit-type :xml-from-krysp))
 
 (defn permit-type
   "gets the permit-type of application"

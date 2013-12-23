@@ -29,14 +29,7 @@
 
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain kayttotapaus]
   (let [root (root-element application lang)
-        documents (by-type
-                    (clojure.walk/postwalk
-                      (fn [v]
-                        (if (and (string? v)
-                                 (s/blank? v))
-                          nil
-                          v))
-                      (:documents application)))
+        documents (documents-by-type-without-blanks application)
         lisatiedot (:data (first (:lisatiedot documents)))
         hanke (:data (first (:hankkeen-kuvaus documents)))]
     (assoc-in

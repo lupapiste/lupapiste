@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
             [clj-time.coerce :as coerce]
             [lupapalvelu.document.model :as model]
@@ -8,6 +9,8 @@
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
+
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -167,7 +170,7 @@
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
-        buildings (->buildings xml)
+        buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
         schema       (schemas/get-schema (schemas/get-latest-schema-version) "purku")]
@@ -177,10 +180,10 @@
     (fact "Rakennustunnus" building1-id => "001")
     (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
     (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
-    (let [building1  (->rakennuksen-tiedot xml building1-id)
+    (let [building1  (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
           omistajat1 (:rakennuksenOmistajat building1)]
 
-      (fact "Reader produces valid document"
+      (fact "Reader produces valid document (sans kiinttun)"
         (model/validate {:data (tools/wrapped building1)} schema) =not=> model/has-errors?)
 
       (fact "Has 2 owners" (count omistajat1) => 2)
@@ -203,10 +206,10 @@
         (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
         (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
 
-    (let [building2  (->rakennuksen-tiedot xml building2-id)
+    (let [building2  (dissoc (->rakennuksen-tiedot xml building2-id) :kiinttun)
           omistajat2 (:rakennuksenOmistajat building2)]
 
-      (fact "Reader produces valid document"
+      (fact "Reader produces valid document (sans kiinttun)"
         (model/validate {:data (tools/wrapped building2)} schema) =not=> model/has-errors?)
 
       (fact "Has 2 owners" (count omistajat2) => 2)
@@ -263,3 +266,13 @@
         poytakirjat    => truthy
         (count poytakirjat) => 0))))
 
+
+(facts "Buildings from verdict message"
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
+        buildings (->buildings xml)
+        building1 (first buildings)]
+
+    (count buildings) => 1
+    (:jarjestysnumero building1) => "31216"
+    (:kiinttun building1) => "63820130310000"
+    (:rakennusnro building1) => "123"))
