@@ -1,0 +1,3 @@
+tyonjohtaja.vastuuaika._group_label: Tehtävä- ja vastuuaika
+tyonjohtaja.vastuuaika.vastuuaika-alkaa-pvm: Alkaa
+tyonjohtaja.vastuuaika.vastuuaika-paattyy-pvm: Päättyy
