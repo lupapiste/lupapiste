@@ -10,7 +10,7 @@
 
 (def ^:private operation {:id "51cc1cab23e74941fee4f495",
                           :created 1372331179008,
-                          :name "ya-kaivuulupa"})
+                          :name "ya-katulupa-vesi-ja-viemarityot"})
 
 (def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                                 :created 1379404904514,
