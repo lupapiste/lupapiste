@@ -14,7 +14,7 @@
 
 (def ^:private link-permit-data {:id "LP-753-2013-00003"
                                  :type "lupapistetunnus"
-                                 :operation "ya-kaivuulupa"})
+                                 :operation "ya-katulupa-vesi-ja-viemarityot"})
 
 (def ^:private hankkeen-kuvaus-jatkoaika {:id "Hankkeen kuvaus"
                                           :schema-info {:name "hankkeen-kuvaus-jatkoaika" :version 1 :order 1}
@@ -68,11 +68,6 @@
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Jatkoaika (:Tyolupa yleinenAlueAsiatieto) => truthy
-
-        _ (do
-            (println "\n Jatkoaika:")
-            (clojure.pprint/pprint Jatkoaika)
-            (println "\n"))
 
         Kasittelytieto (-> Jatkoaika :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy

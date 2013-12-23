@@ -230,7 +230,7 @@
     (let [lupa-name-key (ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)
-                            :ya-kaivuulupa))
+                            :ya-katulupa-vesi-ja-viemarityot))
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
