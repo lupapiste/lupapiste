@@ -103,14 +103,28 @@
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <a data-bind="text: $data.id,
-                            click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                            attr: {'data-test-app-linking-to-us': $data.id}"
+
+              <span data-bind="visible: $data.type() === 'lupapistetunnus'">
+
+                <a data-bind="text: $data.id,
+                              click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                              attr: {'data-test-app-link-permit': $data.id}"
+                   data-test-id="test-application-link-permit"
+                   href="#" class="link-permit-item"></a>
+
+                <a data-bind="visible: !_.contains(['closed'], $root.application.state()),
+                              ltext: 'application.linkPermitRemoveSelected',
+                              click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                   href="#" class="remove-link-permit"></a>
+              </span>
+
+              <span data-bind="visible: $data.type() === 'kuntalupatunnus',
+                               text: $data.id,
+                               attr: {'data-test-app-link-permit': $data.id}"
                  data-test-id="test-application-link-permit"
-                 href="#" class="link-permit-item"></a>
-              <a data-bind="ltext: 'application.linkPermitRemoveSelected',
-                            click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                 href="#" class="remove-link-permit"></a>
+                 href="#" class="link-permit-item"></span>
+
+
             </span>
           </div>
           <!-- /ko -->
