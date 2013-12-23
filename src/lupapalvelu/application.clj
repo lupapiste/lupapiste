@@ -360,6 +360,10 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created] :as command}]
 
+  (println "\n approve-application, application: ")
+  (clojure.pprint/pprint application)
+  (println "\n")
+
   (let [application (meta-fields/enrich-with-link-permit-data application)
         organization (organization/get-organization (:organization application))
         jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))]
