@@ -287,7 +287,6 @@
         patevyys (:patevyys tyonjohtaja)]
     (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
                      :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-;                     :koulutus (-> patevyys :koulutus :value)
                      :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
                      :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
                      :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm :value))
