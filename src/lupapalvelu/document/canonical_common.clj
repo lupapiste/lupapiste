@@ -83,7 +83,7 @@
 (def ya-operation-type-to-usage-description
   {:ya-kayttolupa-tapahtumat "erilaiset messujen ja tapahtumien aikaiset alueiden k\u00e4yt\u00f6t"
    :ya-kayttolupa-mainostus-ja-viitoitus "mainoslaitteiden ja opasteviittojen sijoittaminen"
-   :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-kayttolupa-metsastys "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-kayttolupa-vesistoluvat "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-kayttolupa-terassit "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
@@ -117,7 +117,7 @@
 (def ya-operation-type-to-schema-name-key
   {:ya-kayttolupa-tapahtumat                                     :Kayttolupa
    :ya-kayttolupa-mainostus-ja-viitoitus                         :Kayttolupa
-   :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen :Kayttolupa
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen               :Kayttolupa
    :ya-kayttolupa-metsastys                                      :Kayttolupa
    :ya-kayttolupa-vesistoluvat                                   :Kayttolupa
    :ya-kayttolupa-terassit                                       :Kayttolupa
