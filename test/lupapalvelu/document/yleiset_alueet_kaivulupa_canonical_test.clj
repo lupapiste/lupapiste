@@ -35,22 +35,22 @@
                           hankkeen-kuvaus
                           tyoaika])
 
-(def kaivulupa-application {:id "LP-753-2013-00001",
-                            :permitType "YA",
-                            :created 1372331179008,
-                            :opened 1372331643985,
-                            :modified 1372342070624,
-                            :submitted 1379405092649,
-                            :authority sonja,
-                            :state "submitted",
-                            :title "Latokuja 1",
-                            :address "Latokuja 1",
-                            :location location,
-                            :attachments [],
-                            :operations [operation],
-                            :propertyId "75341600550007",
-                            :documents documents,
-                            :municipality municipality,
+(def kaivulupa-application {:id "LP-753-2013-00001"
+                            :permitType "YA"
+                            :created 1372331179008
+                            :opened 1372331643985
+                            :modified 1372342070624
+                            :submitted 1379405092649
+                            :authority sonja
+                            :state "submitted"
+                            :title "Latokuja 1"
+                            :address "Latokuja 1"
+                            :location location
+                            :attachments []
+                            :operations [operation]
+                            :propertyId "75341600550007"
+                            :documents documents
+                            :municipality municipality
                             :statements statements})
 
 

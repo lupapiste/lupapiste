@@ -89,17 +89,17 @@
    :ya-kayttolupa-terassit "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-kayttolupa-kioskit "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-kayttolupa-muu-kayttolupa "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-nostotyot "kadulta tapahtuvat nostot"
+   :ya-kayttolupa-vaihtolavat "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-kattolumien-pudotustyot "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-muu-liikennealuetyo "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
+   :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
+   :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t "
    :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-nostotyot "kadulta tapahtuvat nostot"
-   :ya-katulupa-vaihtolavat "muu tyolupa"
-   :ya-katulupa-kattolumien-pudotustyot "muu tyolupa"
-   :ya-katulupa-muu-liikennealuetyo "muu tyolupa"
-   :ya-katulupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
-   :ya-katulupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
-   :ya-katulupa-muu-tyomaakaytto "muu tyolupa"
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
@@ -108,6 +108,11 @@
    :ya-sijoituslupa-jatekatoksien-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muu-sijoituslupa "muu sijoituslupa"})
+
+(def ya-operation-type-to-additional-usage-description
+  {:ya-kayttolupa-vaihtolavat "vaihtolavat"
+   :ya-kayttolupa-kattolumien-pudotustyot "kattolumien pudotusty\u00f6t"
+   :ya-kayttolupa-muu-liikennealuetyo "muu liikennealuety\u00f6"})
 
 (def ya-operation-type-to-schema-name-key
   {:ya-kayttolupa-tapahtumat                                     :Kayttolupa
@@ -118,17 +123,17 @@
    :ya-kayttolupa-terassit                                       :Kayttolupa
    :ya-kayttolupa-kioskit                                        :Kayttolupa
    :ya-kayttolupa-muu-kayttolupa                                 :Kayttolupa
+   :ya-kayttolupa-nostotyot                                      :Kayttolupa
+   :ya-kayttolupa-vaihtolavat                                    :Kayttolupa
+   :ya-kayttolupa-kattolumien-pudotustyot                        :Kayttolupa
+   :ya-kayttolupa-muu-liikennealuetyo                            :Kayttolupa
+   :ya-kayttolupa-talon-julkisivutyot                            :Kayttolupa
+   :ya-kayttolupa-talon-rakennustyot                             :Kayttolupa
+   :ya-kayttolupa-muu-tyomaakaytto                               :Kayttolupa
    :ya-katulupa-vesi-ja-viemarityot                              :Tyolupa
    :ya-katulupa-kaukolampotyot                                   :Tyolupa
    :ya-katulupa-kaapelityot                                      :Tyolupa
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      :Tyolupa
-   :ya-katulupa-nostotyot                                        :Tyolupa
-   :ya-katulupa-vaihtolavat                                      :Tyolupa
-   :ya-katulupa-kattolumien-pudotustyot                          :Tyolupa
-   :ya-katulupa-muu-liikennealuetyo                              :Tyolupa
-   :ya-katulupa-talon-julkisivutyot                              :Tyolupa
-   :ya-katulupa-talon-rakennustyot                               :Tyolupa
-   :ya-katulupa-muu-tyomaakaytto                                 :Tyolupa
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        :Sijoituslupa
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                :Sijoituslupa
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen :Sijoituslupa

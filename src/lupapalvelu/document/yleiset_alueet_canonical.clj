@@ -160,6 +160,10 @@
                     (-> data :sijoituksen-tarkoitus :value))]
     {:selitysteksti "Sijoituksen tarkoitus" :arvo arvo}))
 
+(defn- get-erikoiskuvaus-operaatiosta [operation-name-key]
+  (when-let [arvo (ya-operation-type-to-additional-usage-description operation-name-key)]
+    {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta" :arvo arvo}))
+
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
   {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm :value))
                    :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-paattyy-pvm :value))}})
@@ -180,31 +184,42 @@
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
-(def ^:private default-config
-  {:tyomaasta-vastaava true
-   :tyoaika true
-   :hankkeen-kuvaus true})
+
+;; Configs
+
+(def ^:private default-config {:hankkeen-kuvaus                                true
+                               :tyoaika                                        true})
+
+(def ^:private kayttolupa-config-plus-tyomaastavastaava
+  (merge default-config {:tyomaasta-vastaava                                   true
+                         :erikoiskuvaus-operaatiosta                           true}))
 
 (def ^:private configs-per-permit-name
-  {:Tyolupa      (-> default-config
-                   (merge {:sijoitus-lisatiedot true
-                           :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
-                           :johtoselvitysviitetieto true}))
+  {:Kayttolupa                  default-config
 
-   :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
+   :Tyolupa                     (merge default-config
+                                  {:sijoitus-lisatiedot                        true
+                                   :tyomaasta-vastaava                         true
+                                   :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
+                                   :johtoselvitysviitetieto                    true})
 
-   :Sijoituslupa (-> default-config
-                   (dissoc :tyomaasta-vastaava)
-                   (dissoc :tyoaika)
-                   (merge {:dummy-alku-and-loppu-pvm true
-                           :sijoitus-lisatiedot true}))
 
-   :ya-kayttolupa-mainostus-ja-viitoitus (-> default-config
-                                           (dissoc :tyomaasta-vastaava)
-                                           (dissoc :tyoaika)
-                                           (dissoc :hankkeen-kuvaus)
-                                           (merge {:mainostus-viitoitus-tapahtuma-pvm true
-                                                   :mainostus-viitoitus-lisatiedot true}))})
+   :Sijoituslupa                (merge default-config
+                                  {:tyoaika                                    false
+                                   :dummy-alku-and-loppu-pvm                   true
+                                   :sijoitus-lisatiedot                        true})
+
+   :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-kattolumien-pudotustyot kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-muu-liikennealuetyo     kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-talon-julkisivutyot     kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-talon-rakennustyot      kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-muu-tyomaakaytto        kayttolupa-config-plus-tyomaastavastaava
+
+   :ya-kayttolupa-mainostus-ja-viitoitus {:mainostus-viitoitus-tapahtuma-pvm   true
+                                          :mainostus-viitoitus-lisatiedot      true}})
+
 
 (defn- permits [application]
   ;;
@@ -247,12 +262,13 @@
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
-        hankkeen-kuvaus-key (case permit-name-key
-                              :Sijoituslupa :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
-                              :Kayttolupa :yleiset-alueet-hankkeen-kuvaus-kayttolupa
-                              :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (-> documents-by-type hankkeen-kuvaus-key first :data))
+                          (->
+                            (or
+                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
+                            first :data))
 
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
@@ -265,15 +281,18 @@
                                           (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
                                             [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                              {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
-                                        (when (:mainostus-viitoitus-lisatiedot config)
-                                          (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma))))
+                                        (if (:erikoiskuvaus-operaatiosta config)
+                                          [{:LupakohtainenLisatieto (get-erikoiskuvaus-operaatiosta operation-name-key)}]
+                                          (when (:mainostus-viitoitus-lisatiedot config)
+                                            (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
 
         sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 {:Sijoituslupaviite {:vaadittuKytkin false
-                                                      :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
+                                 (when-let [tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)]
+                                   {:Sijoituslupaviite {:vaadittuKytkin false
+                                                        :tunniste tunniste}}))
 
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false
