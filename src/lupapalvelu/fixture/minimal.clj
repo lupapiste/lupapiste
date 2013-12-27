@@ -301,7 +301,7 @@
    ])
 
 (def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
-                                            :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen      [[:muut :muu]]
+                                            :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    [[:muut :muu]]
                                             :ya-kayttolupa-metsastys                                           [[:muut :muu]]
                                             :ya-kayttolupa-vesistoluvat                                        [[:muut :muu]]
                                             :ya-kayttolupa-terassit                                            [[:muut :muu]]
