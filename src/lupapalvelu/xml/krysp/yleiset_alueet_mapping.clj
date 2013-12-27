@@ -206,7 +206,7 @@
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
-        canonical-without-attachments  (ya-canonical/application-to-canonical application lang)
+        canonical-without-attachments (ya-canonical/application-to-canonical application lang)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments

@@ -110,44 +110,45 @@
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
 
-(defn get-pos [coordinates]
+
+(defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
-(defn point-drawing [drawing]
+(defn- point-drawing [drawing]
   (let  [geometry (:geometry drawing)
          p (jts/read-wkt-str geometry)
          cord (.getCoordinate p)]
     {:Sijainti
      {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
 
-(defn linestring-drawing [drawing]
+(defn- linestring-drawing [drawing]
   (let  [geometry (:geometry drawing)
          ls (jts/read-wkt-str geometry)]
     {:Sijainti
-     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}})
-  )
+     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}}))
 
-(defn polygon-drawing [drawing]
+(defn- polygon-drawing [drawing]
   (let  [geometry (:geometry drawing)
          polygon (jts/read-wkt-str geometry)]
     {:Sijainti
      {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
 
-(defn ?drawing-type [t drawing]
+(defn- drawing-type? [t drawing]
   (.startsWith (:geometry drawing) t))
 
-(defn drawings-as-krysp [drawings]
-   (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
-           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))
-           (map polygon-drawing (filter (partial ?drawing-type "POLYGON") drawings))))
+(defn- drawings-as-krysp [drawings]
+   (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
+           (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
+           (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings))))
+
 
 (defn- get-sijaintitieto [application]
-  (let  [drawings (drawings-as-krysp (:drawings application))]
+  (let [drawings (drawings-as-krysp (:drawings application))]
     (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                                               :alkuHetki (to-xml-datetime (now))
-                                               :osoitenimi {:teksti (:address application)}}
-                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
-                          drawings)))
+                               :alkuHetki (to-xml-datetime (now))
+                               :osoitenimi {:teksti (:address application)}}
+                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+      drawings)))
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
   (when-let [arvo (-> data :lisatietoja-sijoituskohteesta :value)]
@@ -174,11 +175,8 @@
     (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
-;;
-;; ***  TODO: Vaihda kayttojakson alkuHetkeksi aloitusilmoituksen pvm, kunhan sellainen saadaan.  ***
-;;
 (defn- get-construction-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:submitted application))
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:started application))
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
