@@ -180,31 +180,29 @@
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
-(def ^:private default-config
-  {:tyomaasta-vastaava true
-   :tyoaika true
-   :hankkeen-kuvaus true})
+
+;; Configs
 
 (def ^:private configs-per-permit-name
-  {:Tyolupa      (-> default-config
-                   (merge {:sijoitus-lisatiedot true
-                           :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
-                           :johtoselvitysviitetieto true}))
+  {:Kayttolupa                  {:hankkeen-kuvaus                            true
+                                 :tyoaika                                    true}
 
-   :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
+   :Tyolupa                     {:hankkeen-kuvaus                            true
+                                 :sijoitus-lisatiedot                        true
+                                 :tyoaika                                    true
+                                 :tyomaasta-vastaava                         true
+                                 :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
+                                 :johtoselvitysviitetieto                    true}
 
-   :Sijoituslupa (-> default-config
-                   (dissoc :tyomaasta-vastaava)
-                   (dissoc :tyoaika)
-                   (merge {:dummy-alku-and-loppu-pvm true
-                           :sijoitus-lisatiedot true}))
 
-   :ya-kayttolupa-mainostus-ja-viitoitus (-> default-config
-                                           (dissoc :tyomaasta-vastaava)
-                                           (dissoc :tyoaika)
-                                           (dissoc :hankkeen-kuvaus)
-                                           (merge {:mainostus-viitoitus-tapahtuma-pvm true
-                                                   :mainostus-viitoitus-lisatiedot true}))})
+   :Sijoituslupa                {:hankkeen-kuvaus                            true
+                                 :dummy-alku-and-loppu-pvm                   true
+                                 :sijoitus-lisatiedot                        true}
+
+   :ya-kayttolupa-mainostus-ja-viitoitus {:hankkeen-kuvaus                   false
+                                          :mainostus-viitoitus-tapahtuma-pvm true
+                                          :mainostus-viitoitus-lisatiedot    true}})
+
 
 (defn- permits [application]
   ;;
