@@ -300,6 +300,34 @@
     :role  "applicant"}
    ])
 
+(def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
+                                            :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen      [[:muut :muu]]
+                                            :ya-kayttolupa-metsastys                                           [[:muut :muu]]
+                                            :ya-kayttolupa-vesistoluvat                                        [[:muut :muu]]
+                                            :ya-kayttolupa-terassit                                            [[:muut :muu]]
+                                            :ya-kayttolupa-kioskit                                             [[:muut :muu]]
+                                            :ya-kayttolupa-muu-kayttolupa                                      [[:muut :muu]]
+                                            :ya-kayttolupa-nostotyot                                           [[:muut :muu]]
+                                            :ya-kayttolupa-vaihtolavat                                         [[:muut :muu]]
+                                            :ya-kayttolupa-kattolumien-pudotustyot                             [[:muut :muu]]
+                                            :ya-kayttolupa-muu-liikennealuetyo                                 [[:muut :muu]]
+                                            :ya-kayttolupa-talon-julkisivutyot                                 [[:muut :muu]]
+                                            :ya-kayttolupa-talon-rakennustyot                                  [[:muut :muu]]
+                                            :ya-kayttolupa-muu-tyomaakaytto                                    [[:muut :muu]]
+                                            :ya-kayttolupa-mainostus-ja-viitoitus                              [[:muut :muu]]
+                                            :ya-katulupa-vesi-ja-viemarityot                                   [[:muut :muu]]
+                                            :ya-katulupa-kaukolampotyot                                        [[:muut :muu]]
+                                            :ya-katulupa-kaapelityot                                           [[:muut :muu]]
+                                            :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           [[:muut :muu]]
+                                            :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             [[:muut :muu]]
+                                            :ya-sijoituslupa-maalampoputkien-sijoittaminen                     [[:muut :muu]]
+                                            :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      [[:muut :muu]]
+                                            :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        [[:muut :muu]]
+                                            :ya-sijoituslupa-muuntamoiden-sijoittaminen                        [[:muut :muu]]
+                                            :ya-sijoituslupa-jatekatoksien-sijoittaminen                       [[:muut :muu]]
+                                            :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        [[:muut :muu]]
+                                            :ya-sijoituslupa-muu-sijoituslupa                                  [[:muut :muu]]
+                                            :ya-jatkoaika                                                      [[:muut :muu]]})
 
 (def organizations [{:id "186-R"
                      :inforequest-enabled true
@@ -351,18 +379,7 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments {:ya-kaivuulupa [[:muut :muu]]
-                                              :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat [[:muut :muu]]
-                                              :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot [[:muut :muu]]
-                                              :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot [[:muut :muu]]
-                                              :ya-kayttolupa-kadulta-tapahtuvat-nostot [[:muut :muu]]
-                                              :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi [[:muut :muu]]
-                                              :ya-kayttolupa-rakennustelineet-kadulla [[:muut :muu]]
-                                              :ya-kayttolupa-muu-kayttolupa [[:muut :muu]]
-                                              :ya-kayttolupa-mainostus-ja-viitoitus [[:muut :muu]]
-                                              :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen [[:muut :muu]]
-                                              :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen [[:muut :muu]]
-                                              :ya-sijoituslupa-muu-sijoituslupa [[:muut :muu]]}}
+                     :operations-attachments ya-default-attachments-for-operations}
 
                     ;;Kuopio-ya
                     {:id "297-YA"
@@ -378,18 +395,7 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments {:ya-kaivuulupa [[:muut :muu]]
-                                              :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat [[:muut :muu]]
-                                              :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot [[:muut :muu]]
-                                              :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot [[:muut :muu]]
-                                              :ya-kayttolupa-kadulta-tapahtuvat-nostot [[:muut :muu]]
-                                              :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi [[:muut :muu]]
-                                              :ya-kayttolupa-rakennustelineet-kadulla [[:muut :muu]]
-                                              :ya-kayttolupa-muu-kayttolupa [[:muut :muu]]
-                                              :ya-kayttolupa-mainostus-ja-viitoitus [[:muut :muu]]
-                                              :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen [[:muut :muu]]
-                                              :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen [[:muut :muu]]
-                                              :ya-sijoituslupa-muu-sijoituslupa [[:muut :muu]]}}
+                     :operations-attachments ya-default-attachments-for-operations}
 
 
 
@@ -424,18 +430,7 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments {:ya-kaivuulupa [[:muut :muu]]
-                                               :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat [[:muut :muu]]
-                                               :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot [[:muut :muu]]
-                                               :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot [[:muut :muu]]
-                                               :ya-kayttolupa-kadulta-tapahtuvat-nostot [[:muut :muu]]
-                                               :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi [[:muut :muu]]
-                                               :ya-kayttolupa-rakennustelineet-kadulla [[:muut :muu]]
-                                               :ya-kayttolupa-muu-kayttolupa [[:muut :muu]]
-                                               :ya-kayttolupa-mainostus-ja-viitoitus [[:muut :muu]]
-                                               :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen [[:muut :muu]]
-                                               :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen [[:muut :muu]]
-                                               :ya-sijoituslupa-muu-sijoituslupa [[:muut :muu]]}}
+                      :operations-attachments ya-default-attachments-for-operations}
 
                     {:id "638-R"
                      :inforequest-enabled true

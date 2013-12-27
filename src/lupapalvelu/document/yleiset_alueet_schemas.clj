@@ -3,10 +3,29 @@
             [lupapalvelu.document.schemas :refer :all]))
 
 ;;
+;; Kayttolupa
+;;
+
+(def hankkeen-kuvaus-kayttolupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
+
+(defschemas
+  1
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+           :type :group
+           :removable false
+           :repeating false
+           :order 60}
+    :body hankkeen-kuvaus-kayttolupa}])
+
+
+;;
 ;; Kaivulupa
 ;;
 
-(def sijoituksen-tarkoitus-dropdown
+(def tyon-tarkoitus-dropdown
   [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
     :body [{:name "jakokaappi-(tele/sahko)"}
            {:name "jate--tai-sadevesi"}
@@ -23,10 +42,9 @@
 
 (def hankkeen-kuvaus-kaivulupa
   (body
-    sijoituksen-tarkoitus-dropdown
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
+    tyon-tarkoitus-dropdown
+    hankkeen-kuvaus-kayttolupa
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))   ;; sijoituslupaviitetietoType
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -91,25 +109,6 @@
 
 
 ;;
-;; Kayttolupa
-;;
-
-(def hankkeen-kuvaus-kayttolupa
-  (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
-
-(defschemas
-  1
-  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
-           :type :group
-           :removable false
-           :repeating false
-           :order 60}
-    :body hankkeen-kuvaus-kayttolupa}])
-
-
-;;
 ;; Sijoituslupa
 ;;
 
@@ -166,7 +165,7 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    sijoituksen-tarkoitus-dropdown                                                          ;; lupakohtainenLisatietotieto
+    tyon-tarkoitus-dropdown                                                                 ;; lupakohtainenLisatietotieto
     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
 
 (defschemas

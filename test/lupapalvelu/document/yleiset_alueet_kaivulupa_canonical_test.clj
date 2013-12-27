@@ -10,7 +10,7 @@
 
 (def ^:private operation {:id "51cc1cab23e74941fee4f495",
                           :created 1372331179008,
-                          :name "ya-kaivuulupa"})
+                          :name "ya-katulupa-vesi-ja-viemarityot"})
 
 (def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                                 :created 1379404904514,
@@ -21,7 +21,7 @@
                                               :type "group",
                                               :order 60},
                                 :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
-                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
+                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00002"}
                                        :sijoituksen-tarkoitus {:value "other"},
                                        ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
                                        :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
@@ -35,22 +35,22 @@
                           hankkeen-kuvaus
                           tyoaika])
 
-(def kaivulupa-application {:id "LP-753-2013-00001",
-                            :permitType "YA",
-                            :created 1372331179008,
-                            :opened 1372331643985,
-                            :modified 1372342070624,
-                            :submitted 1379405092649,
-                            :authority sonja,
-                            :state "submitted",
-                            :title "Latokuja 1",
-                            :address "Latokuja 1",
-                            :location location,
-                            :attachments [],
-                            :operations [operation],
-                            :propertyId "75341600550007",
-                            :documents documents,
-                            :municipality municipality,
+(def kaivulupa-application {:id "LP-753-2013-00001"
+                            :permitType "YA"
+                            :created 1372331179008
+                            :opened 1372331643985
+                            :modified 1372342070624
+                            :submitted 1379405092649
+                            :authority sonja
+                            :state "submitted"
+                            :title "Latokuja 1"
+                            :address "Latokuja 1"
+                            :location location
+                            :attachments []
+                            :operations [operation]
+                            :propertyId "75341600550007"
+                            :documents documents
+                            :municipality municipality
                             :statements statements})
 
 
@@ -154,7 +154,7 @@
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
-      (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
+      (fact "Muu tunnus" (:tunnus MuuTunnus) => (:id kaivulupa-application))
       (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => ((keyword (:name operation)) ya-operation-type-to-usage-description))

@@ -110,45 +110,45 @@
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
 
-(defn get-pos [coordinates]
+
+(defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
-(defn point-drawing [drawing]
+(defn- point-drawing [drawing]
   (let  [geometry (:geometry drawing)
          p (jts/read-wkt-str geometry)
          cord (.getCoordinate p)]
     {:Sijainti
      {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
 
-(defn linestring-drawing [drawing]
+(defn- linestring-drawing [drawing]
   (let  [geometry (:geometry drawing)
          ls (jts/read-wkt-str geometry)]
     {:Sijainti
-     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}})
-  )
+     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}}))
 
-(defn polygon-drawing [drawing]
+(defn- polygon-drawing [drawing]
   (let  [geometry (:geometry drawing)
          polygon (jts/read-wkt-str geometry)]
     {:Sijainti
-     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}})
-  )
+     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
 
-(defn ?drawing-type [t drawing]
+(defn- drawing-type? [t drawing]
   (.startsWith (:geometry drawing) t))
 
-(defn drawings-as-krysp [drawings]
-   (concat (map point-drawing (filter (partial ?drawing-type "POINT") drawings))
-           (map linestring-drawing (filter (partial ?drawing-type "LINESTRING") drawings))
-           (map polygon-drawing (filter (partial ?drawing-type "POLYGON") drawings))))
+(defn- drawings-as-krysp [drawings]
+   (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
+           (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
+           (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings))))
+
 
 (defn- get-sijaintitieto [application]
-  (let  [drawings (drawings-as-krysp (:drawings application))]
+  (let [drawings (drawings-as-krysp (:drawings application))]
     (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                                               :alkuHetki (to-xml-datetime (now))
-                                               :osoitenimi {:teksti (:address application)}}
-                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
-                          drawings)))
+                               :alkuHetki (to-xml-datetime (now))
+                               :osoitenimi {:teksti (:address application)}}
+                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+      drawings)))
 
 (defn- get-lisatietoja-sijoituskohteesta [data]
   (when-let [arvo (-> data :lisatietoja-sijoituskohteesta :value)]
@@ -159,6 +159,10 @@
                     (-> data :muu-sijoituksen-tarkoitus :value)
                     (-> data :sijoituksen-tarkoitus :value))]
     {:selitysteksti "Sijoituksen tarkoitus" :arvo arvo}))
+
+(defn- get-erikoiskuvaus-operaatiosta [operation-name-key]
+  (when-let [arvo (ya-operation-type-to-additional-usage-description operation-name-key)]
+    {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta" :arvo arvo}))
 
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
   {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm :value))
@@ -175,39 +179,47 @@
     (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa :value)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
-;;
-;; ***  TODO: Vaihda kayttojakson alkuHetkeksi aloitusilmoituksen pvm, kunhan sellainen saadaan.  ***
-;;
 (defn- get-construction-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:submitted application))
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:started application))
                                     :loppuHetki (to-xml-datetime (:closed application))}}
    :valmistumisilmoitusPvm (to-xml-date (now))})
 
-(def ^:private default-config
-  {:tyomaasta-vastaava true
-   :tyoaika true
-   :hankkeen-kuvaus true})
+
+;; Configs
+
+(def ^:private default-config {:hankkeen-kuvaus                                true
+                               :tyoaika                                        true})
+
+(def ^:private kayttolupa-config-plus-tyomaastavastaava
+  (merge default-config {:tyomaasta-vastaava                                   true
+                         :erikoiskuvaus-operaatiosta                           true}))
 
 (def ^:private configs-per-permit-name
-  {:Tyolupa      (-> default-config
-                   (merge {:sijoitus-lisatiedot true
-                           :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
-                           :johtoselvitysviitetieto true}))
+  {:Kayttolupa                  default-config
 
-   :Kayttolupa   (dissoc default-config :tyomaasta-vastaava)
+   :Tyolupa                     (merge default-config
+                                  {:sijoitus-lisatiedot                        true
+                                   :tyomaasta-vastaava                         true
+                                   :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
+                                   :johtoselvitysviitetieto                    true})
 
-   :Sijoituslupa (-> default-config
-                   (dissoc :tyomaasta-vastaava)
-                   (dissoc :tyoaika)
-                   (merge {:dummy-alku-and-loppu-pvm true
-                           :sijoitus-lisatiedot true}))
 
-   :ya-kayttolupa-mainostus-ja-viitoitus (-> default-config
-                                           (dissoc :tyomaasta-vastaava)
-                                           (dissoc :tyoaika)
-                                           (dissoc :hankkeen-kuvaus)
-                                           (merge {:mainostus-viitoitus-tapahtuma-pvm true
-                                                   :mainostus-viitoitus-lisatiedot true}))})
+   :Sijoituslupa                (merge default-config
+                                  {:tyoaika                                    false
+                                   :dummy-alku-and-loppu-pvm                   true
+                                   :sijoitus-lisatiedot                        true})
+
+   :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-kattolumien-pudotustyot kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-muu-liikennealuetyo     kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-talon-julkisivutyot     kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-talon-rakennustyot      kayttolupa-config-plus-tyomaastavastaava
+   :ya-kayttolupa-muu-tyomaakaytto        kayttolupa-config-plus-tyomaastavastaava
+
+   :ya-kayttolupa-mainostus-ja-viitoitus {:mainostus-viitoitus-tapahtuma-pvm   true
+                                          :mainostus-viitoitus-lisatiedot      true}})
+
 
 (defn- permits [application]
   ;;
@@ -238,10 +250,6 @@
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
                       (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))))
-
-;        lisaaikatieto (when (:continuation-period-end-date application)
-;                        (get-lisaaikatieto application alku-pvm))
-
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
                   (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
@@ -254,12 +262,13 @@
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
-        hankkeen-kuvaus-key (case permit-name-key
-                              :Sijoituslupa :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
-                              :Kayttolupa :yleiset-alueet-hankkeen-kuvaus-kayttolupa
-                              :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (-> documents-by-type hankkeen-kuvaus-key first :data))
+                          (->
+                            (or
+                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
+                            first :data))
 
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
@@ -272,15 +281,18 @@
                                           (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
                                             [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                              {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
-                                        (when (:mainostus-viitoitus-lisatiedot config)
-                                          (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma))))
+                                        (if (:erikoiskuvaus-operaatiosta config)
+                                          [{:LupakohtainenLisatieto (get-erikoiskuvaus-operaatiosta operation-name-key)}]
+                                          (when (:mainostus-viitoitus-lisatiedot config)
+                                            (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
 
         sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 {:Sijoituslupaviite {:vaadittuKytkin false
-                                                      :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
+                                 (when-let [tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)]
+                                   {:Sijoituslupaviite {:vaadittuKytkin false
+                                                        :tunniste tunniste}}))
 
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false
@@ -299,7 +311,6 @@
                                  :lausuntotieto (get-statements (:statements application))
                                  :lupaAsianKuvaus lupaAsianKuvaus
                                  :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
-;                                 :lisaaikatieto lisaaikatieto
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
@@ -322,10 +333,8 @@
   (let [documents-by-type (documents-by-type-without-blanks application)
 
         link-permit-data (-> application :linkPermitData first)
-        ;;
-        ;; *** TODO: Onko OK laittaa kaivuulupa operaation puuttuessa (op.puun kautta luotu app) ***
-        ;;
-        operation-name-key (or (-> link-permit-data :operation keyword) :ya-kaivuulupa)
+        ;; When operation is missing, setting kaivulupa as the operation (app created via op tree)
+        operation-name-key (or (-> link-permit-data :operation keyword) :ya-katulupa-vesi-ja-viemarityot)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
@@ -343,8 +352,7 @@
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false
                                                         ;:tunniste "..."
-                                                        }})
-        ]
+                                                        }})]
     {:YleisetAlueet
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
