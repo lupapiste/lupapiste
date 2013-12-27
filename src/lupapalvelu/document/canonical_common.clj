@@ -114,6 +114,11 @@
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muu-sijoituslupa "muu sijoituslupa"})
 
+(def ya-operation-type-to-additional-usage-description
+  {:ya-kayttolupa-vaihtolavat "vaihtolavat"
+   :ya-kayttolupa-kattolumien-pudotustyot "kattolumien pudotusty\u00f6t"
+   :ya-kayttolupa-muu-liikennealuetyo "muu liikennealuety\u00f6"})
+
 (def ya-operation-type-to-schema-name-key
   {:ya-kayttolupa-tapahtumat                                     :Kayttolupa
    :ya-kayttolupa-mainostus-ja-viitoitus                         :Kayttolupa

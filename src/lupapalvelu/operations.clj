@@ -182,16 +182,14 @@
                                                 "tyoaika")
                                     :attachments []})
 
-;(def ^:private ya-katulupa-general-with-sijoitusluvantunniste
-;  (assoc ya-katulupa-general :required (conj common-yleiset-alueet-schemas
-;                                         "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
-;                                         "tyoaika")))
-
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
                                       :required (conj common-yleiset-alueet-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                                       :attachments []})
+
+(def ^:private ya-kayttolupa-with-tyomaastavastaava
+  (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                         :permit-type "YA"
@@ -211,13 +209,13 @@
                                            :permit-type "YA"
                                            :required common-yleiset-alueet-schemas
                                            :attachments []}
-   :ya-kayttolupa-nostotyot                                           ya-kayttolupa-general
-   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-general
-   :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-general
-   :ya-kayttolupa-muu-liikennealuetyo                                 ya-kayttolupa-general
-   :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-general
-   :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-general
-   :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-general
+   :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
+   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
+   :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-with-tyomaastavastaava
+   :ya-kayttolupa-muu-liikennealuetyo                                 ya-kayttolupa-with-tyomaastavastaava
+   :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-with-tyomaastavastaava
+   :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava
+   :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-with-tyomaastavastaava
    :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
    :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
    :ya-katulupa-kaapelityot                                           ya-katulupa-general
