@@ -78,12 +78,6 @@
            :repeating false
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
-;   {:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
-;           :type :group
-;           :removable false
-;           :repeating false
-;           :order 60}
-;    :body hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :removable false
