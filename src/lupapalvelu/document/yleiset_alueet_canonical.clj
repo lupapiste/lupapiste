@@ -131,8 +131,7 @@
   (let  [geometry (:geometry drawing)
          polygon (jts/read-wkt-str geometry)]
     {:Sijainti
-     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}})
-  )
+     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
 
 (defn ?drawing-type [t drawing]
   (.startsWith (:geometry drawing) t))
@@ -317,9 +316,7 @@
   (let [documents-by-type (documents-by-type-without-blanks application)
 
         link-permit-data (-> application :linkPermitData first)
-        ;;
-        ;; *** TODO: Onko OK laittaa kaivuulupa operaation puuttuessa (op.puun kautta luotu app) ***
-        ;;
+        ;; When operation is missing, setting kaivulupa as the operation (app created via op tree)
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-katulupa-vesi-ja-viemarityot)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
@@ -338,8 +335,7 @@
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false
                                                         ;:tunniste "..."
-                                                        }})
-        ]
+                                                        }})]
     {:YleisetAlueet
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
