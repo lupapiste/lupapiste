@@ -175,12 +175,17 @@
                                                   :julkisivupiirros]])
 
 (def ^:private ya-katulupa-general {:schema "tyomaastaVastaava"
-                                     :permit-type "YA"
-                                     :schema-data [[["_selected" :value] "yritys"]]
-                                     :required (conj common-yleiset-alueet-schemas
-                                                 "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-                                                 "tyoaika")
-                                     :attachments []})
+                                    :permit-type "YA"
+                                    :schema-data [[["_selected" :value] "yritys"]]
+                                    :required (conj common-yleiset-alueet-schemas
+                                                "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                                "tyoaika")
+                                    :attachments []})
+
+(def ^:private ya-katulupa-general-with-sijoitusluvantunniste
+  (assoc ya-katulupa-general :required (conj common-yleiset-alueet-schemas
+                                         "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
+                                         "tyoaika")))
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
@@ -189,10 +194,10 @@
                                       :attachments []})
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
-                                       :permit-type "YA"
-                                       :required (conj common-yleiset-alueet-schemas
-                                                   "sijoituslupa-sijoituksen-tarkoitus")
-                                       :attachments []})
+                                        :permit-type "YA"
+                                        :required (conj common-yleiset-alueet-schemas
+                                                    "sijoituslupa-sijoituksen-tarkoitus")
+                                        :attachments []})
 
 (def ya-operations
   {:ya-kayttolupa-tapahtumat                                          ya-kayttolupa-general
@@ -206,10 +211,10 @@
                                            :permit-type "YA"
                                            :required common-yleiset-alueet-schemas
                                            :attachments []}
-   :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
-   :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
-   :ya-katulupa-kaapelityot                                           ya-katulupa-general
-   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general
+   :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general-with-sijoitusluvantunniste
+   :ya-katulupa-kaukolampotyot                                        ya-katulupa-general-with-sijoitusluvantunniste
+   :ya-katulupa-kaapelityot                                           ya-katulupa-general-with-sijoitusluvantunniste
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general-with-sijoitusluvantunniste
    :ya-katulupa-nostotyot                                             ya-katulupa-general
    :ya-katulupa-vaihtolavat                                           ya-katulupa-general
    :ya-katulupa-kattolumien-pudotustyot                               ya-katulupa-general
@@ -225,8 +230,6 @@
    :ya-sijoituslupa-jatekatoksien-sijoittaminen                       ya-sijoituslupa-general
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
-
-
 ;  :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
 ;                                          :permit-type "YA"
 ;                                          :required common-yleiset-alueet-schemas

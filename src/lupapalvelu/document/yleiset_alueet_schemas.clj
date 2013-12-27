@@ -21,12 +21,15 @@
            {:name "vesijohto"}]}
    {:name "muu-sijoituksen-tarkoitus" :type :string :size "l"}])
 
-(def hankkeen-kuvaus-kaivulupa
+(def hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste
   (body
     tyon-tarkoitus-dropdown
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
     {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
     {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
+
+(def hankkeen-kuvaus-kaivulupa
+  (schema-body-without-element-by-name hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste "sijoitusLuvanTunniste"))
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -60,6 +63,12 @@
            :repeating false
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
+   {:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
+           :type :group
+           :removable false
+           :repeating false
+           :order 60}
+    :body hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :removable false
