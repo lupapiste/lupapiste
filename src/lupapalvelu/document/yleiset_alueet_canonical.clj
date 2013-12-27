@@ -247,12 +247,14 @@
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
-        hankkeen-kuvaus-key (case permit-name-key
-                              :Sijoituslupa :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
-                              :Kayttolupa :yleiset-alueet-hankkeen-kuvaus-kayttolupa
-                              :yleiset-alueet-hankkeen-kuvaus-kaivulupa)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (-> documents-by-type hankkeen-kuvaus-key first :data))
+                          (->
+                            (or
+                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
+;                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste documents-by-type)
+                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
+                            first :data))
 
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
@@ -272,8 +274,9 @@
                                      :kaivuLuvanTunniste
                                      :sijoitusLuvanTunniste)
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 {:Sijoituslupaviite {:vaadittuKytkin false
-                                                      :tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)}})
+                                 (when-let [tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)]
+                                   {:Sijoituslupaviite {:vaadittuKytkin false
+                                                        :tunniste tunniste}}))
 
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false

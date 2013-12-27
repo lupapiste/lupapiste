@@ -182,10 +182,10 @@
                                                 "tyoaika")
                                     :attachments []})
 
-(def ^:private ya-katulupa-general-with-sijoitusluvantunniste
-  (assoc ya-katulupa-general :required (conj common-yleiset-alueet-schemas
-                                         "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
-                                         "tyoaika")))
+;(def ^:private ya-katulupa-general-with-sijoitusluvantunniste
+;  (assoc ya-katulupa-general :required (conj common-yleiset-alueet-schemas
+;                                         "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
+;                                         "tyoaika")))
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type "YA"
@@ -211,17 +211,17 @@
                                            :permit-type "YA"
                                            :required common-yleiset-alueet-schemas
                                            :attachments []}
-   :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general-with-sijoitusluvantunniste
-   :ya-katulupa-kaukolampotyot                                        ya-katulupa-general-with-sijoitusluvantunniste
-   :ya-katulupa-kaapelityot                                           ya-katulupa-general-with-sijoitusluvantunniste
-   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general-with-sijoitusluvantunniste
-   :ya-katulupa-nostotyot                                             ya-katulupa-general
-   :ya-katulupa-vaihtolavat                                           ya-katulupa-general
-   :ya-katulupa-kattolumien-pudotustyot                               ya-katulupa-general
-   :ya-katulupa-muu-liikennealuetyo                                   ya-katulupa-general
-   :ya-katulupa-talon-julkisivutyot                                   ya-katulupa-general
-   :ya-katulupa-talon-rakennustyot                                    ya-katulupa-general
-   :ya-katulupa-muu-tyomaakaytto                                      ya-katulupa-general
+   :ya-kayttolupa-nostotyot                                           ya-kayttolupa-general
+   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-general
+   :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-general
+   :ya-kayttolupa-muu-liikennealuetyo                                 ya-kayttolupa-general
+   :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-general
+   :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-general
+   :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-general
+   :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
+   :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
+   :ya-katulupa-kaapelityot                                           ya-katulupa-general
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             ya-sijoituslupa-general
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                     ya-sijoituslupa-general
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      ya-sijoituslupa-general

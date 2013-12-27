@@ -3,6 +3,25 @@
             [lupapalvelu.document.schemas :refer :all]))
 
 ;;
+;; Kayttolupa
+;;
+
+(def hankkeen-kuvaus-kayttolupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
+
+(defschemas
+  1
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+           :type :group
+           :removable false
+           :repeating false
+           :order 60}
+    :body hankkeen-kuvaus-kayttolupa}])
+
+
+;;
 ;; Kaivulupa
 ;;
 
@@ -21,15 +40,11 @@
            {:name "vesijohto"}]}
    {:name "muu-sijoituksen-tarkoitus" :type :string :size "l"}])
 
-(def hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste
+(def hankkeen-kuvaus-kaivulupa
   (body
     tyon-tarkoitus-dropdown
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
-
-(def hankkeen-kuvaus-kaivulupa
-  (schema-body-without-element-by-name hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste "sijoitusLuvanTunniste"))
+    hankkeen-kuvaus-kayttolupa
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))   ;; sijoituslupaviitetietoType
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -63,12 +78,12 @@
            :repeating false
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
-   {:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
-           :type :group
-           :removable false
-           :repeating false
-           :order 60}
-    :body hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste}
+;   {:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste"
+;           :type :group
+;           :removable false
+;           :repeating false
+;           :order 60}
+;    :body hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :removable false
@@ -97,25 +112,6 @@
            :approvable true
            :order 1}
     :body hankkeen-kuvaus-jatkoaika}])
-
-
-;;
-;; Kayttolupa
-;;
-
-(def hankkeen-kuvaus-kayttolupa
-  (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
-
-(defschemas
-  1
-  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
-           :type :group
-           :removable false
-           :repeating false
-           :order 60}
-    :body hankkeen-kuvaus-kayttolupa}])
 
 
 ;;
@@ -175,7 +171,7 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    tyon-tarkoitus-dropdown                                                          ;; lupakohtainenLisatietotieto
+    tyon-tarkoitus-dropdown                                                                 ;; lupakohtainenLisatietotieto
     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
 
 (defschemas
