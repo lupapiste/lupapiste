@@ -154,7 +154,6 @@
         loppuPvm (-> Kayttolupa :loppuPvm) => truthy
 
         lupaAsianKuvaus (:lupaAsianKuvaus Kayttolupa) => truthy
-;        Sijoituslupaviite (-> Kayttolupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
         Sijoituslupaviite (-> Kayttolupa :sijoituslupaviitetieto :Sijoituslupaviite) => falsey
 
         rooliKoodi-Hakija "hakija"
@@ -227,6 +226,4 @@
     (fact "loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
 
     ;; Hankkeen kuvaus
-    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
-;    (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
-;    (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
+    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))))
