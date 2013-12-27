@@ -250,7 +250,6 @@
                             (or
                               (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
                               (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
-;                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa-with-sijoitusluvantunniste documents-by-type)
                               (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
                             first :data))
 
