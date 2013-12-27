@@ -6,7 +6,7 @@
 ;; Kaivulupa
 ;;
 
-(def sijoituksen-tarkoitus-dropdown
+(def tyon-tarkoitus-dropdown
   [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
     :body [{:name "jakokaappi-(tele/sahko)"}
            {:name "jate--tai-sadevesi"}
@@ -23,7 +23,7 @@
 
 (def hankkeen-kuvaus-kaivulupa
   (body
-    sijoituksen-tarkoitus-dropdown
+    tyon-tarkoitus-dropdown
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
     {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
     {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
@@ -166,7 +166,7 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    sijoituksen-tarkoitus-dropdown                                                          ;; lupakohtainenLisatietotieto
+    tyon-tarkoitus-dropdown                                                          ;; lupakohtainenLisatietotieto
     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
 
 (defschemas
