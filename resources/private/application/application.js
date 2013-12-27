@@ -86,7 +86,7 @@
     authorities(authorityInfos);
   }
 
-  // When Oskari map has initialized itself, draw shapes and marker
+  // When Oskari map has initialized itself, draw drawings and marker
   hub.subscribe("oskari-map-initialized", function() {
 
     if (application.drawings && application.drawings().length) {
@@ -130,11 +130,6 @@
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       var app = applicationDetails.application;
-
-      // Delete shapes
-      if (application.shapes) {
-        delete application.shapes;
-      }
 
       // Plain data
       application._js = app;
@@ -192,8 +187,9 @@
       var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
 
-      if (application.shapes && application.shapes().length > 0) {
-        map.drawShape(application.shapes()[0]);
+      if (application.drawings && application.drawings().length > 0) {
+        
+        //map.drawShape(application.shapes()[0]);
       }
 
       if (application.infoRequest() && authorizationModel.ok("mark-seen")) {
