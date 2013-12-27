@@ -123,13 +123,13 @@
    :ya-kayttolupa-terassit                                       :Kayttolupa
    :ya-kayttolupa-kioskit                                        :Kayttolupa
    :ya-kayttolupa-muu-kayttolupa                                 :Kayttolupa
-   :ya-katulupa-nostotyot                                        :Kayttolupa
-   :ya-katulupa-vaihtolavat                                      :Kayttolupa
-   :ya-katulupa-kattolumien-pudotustyot                          :Kayttolupa
-   :ya-katulupa-muu-liikennealuetyo                              :Kayttolupa
-   :ya-katulupa-talon-julkisivutyot                              :Kayttolupa
-   :ya-katulupa-talon-rakennustyot                               :Kayttolupa
-   :ya-katulupa-muu-tyomaakaytto                                 :Kayttolupa
+   :ya-kayttolupa-nostotyot                                      :Kayttolupa
+   :ya-kayttolupa-vaihtolavat                                    :Kayttolupa
+   :ya-kayttolupa-kattolumien-pudotustyot                        :Kayttolupa
+   :ya-kayttolupa-muu-liikennealuetyo                            :Kayttolupa
+   :ya-kayttolupa-talon-julkisivutyot                            :Kayttolupa
+   :ya-kayttolupa-talon-rakennustyot                             :Kayttolupa
+   :ya-kayttolupa-muu-tyomaakaytto                               :Kayttolupa
    :ya-katulupa-vesi-ja-viemarityot                              :Tyolupa
    :ya-katulupa-kaukolampotyot                                   :Tyolupa
    :ya-katulupa-kaapelityot                                      :Tyolupa

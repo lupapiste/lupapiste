@@ -87,14 +87,14 @@
                ["kaapelityot" :ya-katulupa-kaapelityot]
                ["kiinteiston-johto-kaapeli-ja-putkiliitynnat" :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat]]]
              ["liikennealueen-rajaaminen-tyokayttoon"
-              [["nostotyot" :ya-katulupa-nostotyot]
-               ["vaihtolavat" :ya-katulupa-vaihtolavat]
-               ["kattolumien-pudotustyot" :ya-katulupa-kattolumien-pudotustyot]
-               ["muu-liikennealuetyo" :ya-katulupa-muu-liikennealuetyo]]]
+              [["nostotyot" :ya-kayttolupa-nostotyot]
+               ["vaihtolavat" :ya-kayttolupa-vaihtolavat]
+               ["kattolumien-pudotustyot" :ya-kayttolupa-kattolumien-pudotustyot]
+               ["muu-liikennealuetyo" :ya-kayttolupa-muu-liikennealuetyo]]]
              ["yleisen-alueen-rajaaminen-tyomaakayttoon"
-              [["talon-julkisivutyot" :ya-katulupa-talon-julkisivutyot]
-               ["talon-rakennustyot" :ya-katulupa-talon-rakennustyot]
-               ["muu-tyomaakaytto" :ya-katulupa-muu-tyomaakaytto]]]]]
+              [["talon-julkisivutyot" :ya-kayttolupa-talon-julkisivutyot]
+               ["talon-rakennustyot" :ya-kayttolupa-talon-rakennustyot]
+               ["muu-tyomaakaytto" :ya-kayttolupa-muu-tyomaakaytto]]]]]
            ["kayttolupa"
             [["tapahtumat" :ya-kayttolupa-tapahtumat]
              ["harrastustoiminnan-jarjestaminen" :ya-kayttolupa-harrastustoiminnan-jarjestaminen]
