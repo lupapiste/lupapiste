@@ -199,7 +199,7 @@
 
 (def ya-operations
   {:ya-kayttolupa-tapahtumat                                          ya-kayttolupa-general
-   :ya-kayttolupa-ya-kayttolupa-harrastustoiminnan-jarjestaminen      ya-kayttolupa-general
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    ya-kayttolupa-general
    :ya-kayttolupa-metsastys                                           ya-kayttolupa-general
    :ya-kayttolupa-vesistoluvat                                        ya-kayttolupa-general
    :ya-kayttolupa-terassit                                            ya-kayttolupa-general
