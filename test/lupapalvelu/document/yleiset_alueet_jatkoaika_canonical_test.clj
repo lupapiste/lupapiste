@@ -110,7 +110,10 @@
         hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
-        ]
+
+        lupakohtainenLisatietotieto (-> Jatkoaika :lupakohtainenLisatietotieto) => falsey
+
+        pinta-ala (:pintaala Jatkoaika) => falsey]
 
 
     (fact "contains nil" (contains-value? canonical nil?) => falsey)

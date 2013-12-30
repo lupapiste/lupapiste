@@ -161,7 +161,9 @@
         hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
         hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
-        hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy]
+        hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
+
+        pinta-ala (:pintaala Kayttolupa) => truthy]
 
 ;    (println "\n canonical:")
 ;    (clojure.pprint/pprint canonical)
@@ -225,4 +227,5 @@
     (fact "loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
 
     ;; Hankkeen kuvaus
-    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))))
+    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
+    (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))
