@@ -206,7 +206,7 @@
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
-        canonical-without-attachments  (ya-canonical/application-to-canonical application lang)
+        canonical-without-attachments (ya-canonical/application-to-canonical application lang)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
@@ -224,16 +224,14 @@
 
     (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
+(permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
 
 (defn save-jatkoaika-as-krysp [application lang organization output-dir begin-of-link]
     (let [lupa-name-key (ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)
-                            :ya-kaivuulupa))
+                            :ya-katulupa-vesi-ja-viemarityot))
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
       (mapping-common/write-to-disk application nil nil xml output-dir)))
-
-
-(permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)

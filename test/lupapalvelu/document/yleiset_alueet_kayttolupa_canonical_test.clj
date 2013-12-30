@@ -42,18 +42,19 @@
 
 (def ^:private operation {:id "52380c6894a74fc25bb4ba46",
                           :created 1379404904514,
-                          :name "ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat"})
+                          :name "ya-kayttolupa-terassit"})
 
-(def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
-                                :created 1379404904514,
-                                :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa",
-                                              :removable false,
-                                              :repeating false,
-                                              :version 1,
-                                              :type "group",
-                                              :order 60},
-                                :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
-                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}}})
+(def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a"
+                                :created 1379404904514
+                                :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+                                              :removable false
+                                              :repeating false
+                                              :version 1
+                                              :type "group"
+                                              :order 60}
+                                :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}
+;                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
+                                       :varattava-pinta-ala {:value "333"}}})
 
 (def ^:private tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
 
@@ -152,7 +153,7 @@
         loppuPvm (-> Kayttolupa :loppuPvm) => truthy
 
         lupaAsianKuvaus (:lupaAsianKuvaus Kayttolupa) => truthy
-        Sijoituslupaviite (-> Kayttolupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
+        Sijoituslupaviite (-> Kayttolupa :sijoituslupaviitetieto :Sijoituslupaviite) => falsey
 
         rooliKoodi-Hakija "hakija"
         hakija-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
@@ -224,6 +225,4 @@
     (fact "loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
 
     ;; Hankkeen kuvaus
-    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
-    (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
-    (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
+    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))))

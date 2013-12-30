@@ -138,6 +138,8 @@
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
                        :kokemusvuodet {:value "3"}
                        :valvottavienKohteidenMaara {:value "9"}}
+            :vastuuaika {:vastuuaika-alkaa-pvm {:value "19.12.2013"},
+                         :vastuuaika-paattyy-pvm {:value "31.12.2013"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
@@ -523,13 +525,15 @@
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)]
     (fact "model" tyonjohtaja-model => truthy)
-    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "KVV-ty\u00f6njohtaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => "Koulutus")
-    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2010")
-    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "AA")
-    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => "3")
-    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => "9")
+    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
+    (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => (to-xml-date-from-string (-> tyonjohtaja :data :vastuuaika :vastuuaika-alkaa-pvm :value)))
+    (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => (to-xml-date-from-string (-> tyonjohtaja :data :vastuuaika :vastuuaika-paattyy-pvm :value)))
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutus :value))
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
@@ -861,7 +865,7 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "sv"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}
                              authority-user-jussi
                              "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -897,7 +901,7 @@
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
                  kiinttun (:kiinttun rakennustunnus) => "21111111111111"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
@@ -1017,7 +1021,7 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "fi"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
                              authority-user-jussi
                              "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
 Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
@@ -1055,9 +1059,9 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" 
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
-                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"
+                 kiinttun (:kiinttun rakennustunnus) => "01234567891234"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
                  osittainen (:osittainen Katselmus) => "pidetty"
                  pitaja (:pitaja Katselmus) => "Sonja Silja"

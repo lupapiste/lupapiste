@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
+            [clojure.walk :as walk]
             [sade.util :refer :all]
             [lupapalvelu.core :refer [now]]))
 
@@ -36,6 +37,13 @@
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
 
+(defn empty-strings-to-nil [v]
+  (if (and (string? v) (s/blank? v)) nil v))
+
+(defn documents-by-type-without-blanks
+  "Converts blank strings to nils and groups documents by schema name"
+  [{documents :documents}]
+  (by-type (walk/postwalk empty-strings-to-nil documents)))
 
 (def ^:private puolto-mapping {:condition "ehdoilla"
                                :no "ei puolla"
@@ -60,8 +68,6 @@
   ;Returing vector because this element to be Associative
   (vec (map get-statement statements)))
 
-(defn empty-strings-to-nil [v]
-  (if (and (string? v) (s/blank? v)) nil v))
 
 (defn muu-select-map
   "If 'sel-val' is \"other\" considers 'muu-key' and 'muu-val', else considers 'sel-key' and 'sel-val'.
@@ -75,47 +81,80 @@
       {k v})))
 
 (def ya-operation-type-to-usage-description
-  {:ya-kaivuulupa "kaivu- tai katuty\u00f6lupa"
-   :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat "ty\u00f6maasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"
+  {:ya-kayttolupa-tapahtumat "erilaiset messujen ja tapahtumien aikaiset alueiden k\u00e4yt\u00f6t"
    :ya-kayttolupa-mainostus-ja-viitoitus "mainoslaitteiden ja opasteviittojen sijoittaminen"
-   :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
-   :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot "erilaiset messujen ja tapahtumien aikaiset alueiden k\u00e4yt\u00f6t"
-   :ya-kayttolupa-kadulta-tapahtuvat-nostot "kadulta tapahtuvat nostot"
-   :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
-   :ya-kayttolupa-rakennustelineet-kadulla "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-kayttolupa-metsastys "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-kayttolupa-vesistoluvat "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-kayttolupa-terassit "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-kayttolupa-kioskit "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-kayttolupa-muu-kayttolupa "muu kaytt\u00f6lupa"
-   :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
-   :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
+   :ya-kayttolupa-nostotyot "kadulta tapahtuvat nostot"
+   :ya-kayttolupa-vaihtolavat "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-kattolumien-pudotustyot "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-muu-liikennealuetyo "muu kaytt\u00f6lupa"
+   :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
+   :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
+   :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t "
+   :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "kaivu- tai katuty\u00f6lupa"
+   :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-ilmajohtojen-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-muuntamoiden-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-jatekatoksien-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muu-sijoituslupa "muu sijoituslupa"})
 
-(def ya-operation-type-to-schema-name-key
-  {:ya-kaivuulupa :Tyolupa
-   :ya-kayttolupa-tyomaasuojat-ja-muut-rakennelmat :Kayttolupa
-   :ya-kayttolupa-mainostus-ja-viitoitus :Kayttolupa
-   :ya-kayttolupa-muut-yleisten-alueiden-tilojen-kaytot :Kayttolupa
-   :ya-kayttolupa-messujen-ja-tapahtumien-alueiden-kaytot :Kayttolupa
-   :ya-kayttolupa-kadulta-tapahtuvat-nostot :Kayttolupa
-   :ya-kayttolupa-kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi :Kayttolupa
-   :ya-kayttolupa-rakennustelineet-kadulla :Kayttolupa
-   :ya-kayttolupa-muu-kayttolupa :Kayttolupa
-   :ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen :Sijoituslupa
-   :ya-sijoituslupa-pysyvien-maanpaallisten-rakenteiden-sijoittaminen :Sijoituslupa
-   :ya-sijoituslupa-muu-sijoituslupa :Sijoituslupa})
+(def ya-operation-type-to-additional-usage-description
+  {:ya-kayttolupa-vaihtolavat "vaihtolavat"
+   :ya-kayttolupa-kattolumien-pudotustyot "kattolumien pudotusty\u00f6t"
+   :ya-kayttolupa-muu-liikennealuetyo "muu liikennealuety\u00f6"})
 
-(defn toimituksen-tiedot [application lang]
-  {:aineistonnimi (:title application)
+(def ya-operation-type-to-schema-name-key
+  {:ya-kayttolupa-tapahtumat                                     :Kayttolupa
+   :ya-kayttolupa-mainostus-ja-viitoitus                         :Kayttolupa
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen               :Kayttolupa
+   :ya-kayttolupa-metsastys                                      :Kayttolupa
+   :ya-kayttolupa-vesistoluvat                                   :Kayttolupa
+   :ya-kayttolupa-terassit                                       :Kayttolupa
+   :ya-kayttolupa-kioskit                                        :Kayttolupa
+   :ya-kayttolupa-muu-kayttolupa                                 :Kayttolupa
+   :ya-kayttolupa-nostotyot                                      :Kayttolupa
+   :ya-kayttolupa-vaihtolavat                                    :Kayttolupa
+   :ya-kayttolupa-kattolumien-pudotustyot                        :Kayttolupa
+   :ya-kayttolupa-muu-liikennealuetyo                            :Kayttolupa
+   :ya-kayttolupa-talon-julkisivutyot                            :Kayttolupa
+   :ya-kayttolupa-talon-rakennustyot                             :Kayttolupa
+   :ya-kayttolupa-muu-tyomaakaytto                               :Kayttolupa
+   :ya-katulupa-vesi-ja-viemarityot                              :Tyolupa
+   :ya-katulupa-kaukolampotyot                                   :Tyolupa
+   :ya-katulupa-kaapelityot                                      :Tyolupa
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      :Tyolupa
+   :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        :Sijoituslupa
+   :ya-sijoituslupa-maalampoputkien-sijoittaminen                :Sijoituslupa
+   :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen :Sijoituslupa
+   :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   :Sijoituslupa
+   :ya-sijoituslupa-muuntamoiden-sijoittaminen                   :Sijoituslupa
+   :ya-sijoituslupa-jatekatoksien-sijoittaminen                  :Sijoituslupa
+   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen   :Sijoituslupa
+   :ya-sijoituslupa-muu-sijoituslupa                             :Sijoituslupa})
+
+(defn toimituksen-tiedot [{:keys [title municipality]} lang]
+  {:aineistonnimi title
    :aineistotoimittaja "lupapiste@solita.fi"
    :tila toimituksenTiedot-tila
    :toimitusPvm (to-xml-date (now))
-   :kuntakoodi (:municipality application)
+   :kuntakoodi municipality
    :kielitieto lang})
 
-(defn- get-handler [application]
-  (let [handler (:authority application)]
-    (if (seq handler)
-      {:henkilo {:nimi {:etunimi  (:firstName handler)
-                        :sukunimi (:lastName handler)}}}
-      empty-tag)))
+(defn- get-handler [{handler :authority}]
+  (if (seq handler)
+    {:henkilo {:nimi {:etunimi (:firstName handler) :sukunimi (:lastName handler)}}}
+    empty-tag))
 
 
 (defn get-state [application]
@@ -281,11 +320,12 @@
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))
         patevyys (:patevyys tyonjohtaja)]
-    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja) ; Note the lower case 'koodi'
+    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
                      :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                     :koulutus (-> patevyys :koulutus :value)
                      :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
                      :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
+                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm :value))
+                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm :value))
                      :kokemusvuodet (-> patevyys :kokemusvuodet :value)
                      :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
                      :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))

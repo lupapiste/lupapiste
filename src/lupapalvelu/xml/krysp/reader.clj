@@ -10,6 +10,7 @@
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
@@ -80,21 +81,29 @@
     (debug "Get application: " url)
     (cr/get-xml url)))
 
+(permit/register-function permit/R :xml-from-krysp application-xml)
+(permit/register-function permit/P :xml-from-krysp application-xml)
+
 (defn ya-application-xml [server id]
   (let [options (post-body-for-ya-application id)]
     (debug "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options)))
 
+(permit/register-function permit/YA :xml-from-krysp ya-application-xml)
 
-(defn- ->buildingIds [m]
-  {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])
-   :buildingId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro])
-   :usage      (get-in m [:Rakennus :rakennuksenTiedot :kayttotarkoitus])
-   :created    (-> m (get-in [:Rakennus :alkuHetki]) cr/parse-datetime (->> (cr/unparse-datetime :year)))
-   })
+(defn- ->building-ids [id-container xml-no-ns]
+  {:propertyId (get-text xml-no-ns id-container :kiinttun)
+  :buildingId  (get-text xml-no-ns id-container :rakennusnro)
+  :index       (get-text xml-no-ns id-container :jarjestysnumero)
+  :usage       (get-text xml-no-ns :kayttotarkoitus)
+  :area        (get-text xml-no-ns :kokonaisala)
+  :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
 
-(defn ->buildings [xml]
-  (-> xml cr/strip-xml-namespaces (select [:Rakennus]) (->> (map (comp ->buildingIds cr/strip-keys xml->edn)))))
+(defn ->buildings-summary [xml]
+  (let [xml-no-ns (cr/strip-xml-namespaces xml)]
+    (concat
+      (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
+      (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma])))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
@@ -169,29 +178,34 @@
 
 (def cleanup (comp cr/strip-empty-maps cr/strip-nils))
 
-(defn ->rakennuksen-tiedot [xml buildingId]
-  (let [stripped  (cr/strip-xml-namespaces xml)
-        rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
-        polished  (comp cr/index-maps cleanup cr/convert-booleans)]
+(def polished  (comp cr/index-maps cleanup cr/convert-booleans))
+
+(defn ->rakennuksen-tiedot
+  ([xml building-id]
+    (let [stripped  (cr/strip-xml-namespaces xml)
+          rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text building-id)])])]
+      (->rakennuksen-tiedot rakennus)))
+  ([rakennus]
     (when rakennus
       (polished
         {:muutostyolaji                 ...notimplemented...
-         :rakennusnro                   (get-text rakennus :rakennusnro)
+         :rakennusnro                   (get-text rakennus :rakennustunnus :rakennusnro)
+         :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
+         :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
          :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
          :rakennuksenOmistajat          (->>
                                           (select rakennus [:omistaja])
                                           (map ->rakennuksen-omistaja))
-         :osoite {:kunta                (get-text rakennus :kunta)
-                  :lahiosoite           (get-text rakennus :osoitenimi :teksti)
-                  :osoitenumero         (get-text rakennus :osoitenumero)
-                  :osoitenumero2        (get-text rakennus :osoitenumero2)
-                  :jakokirjain          (get-text rakennus :jakokirjain)
-                  :jakokirjain2         (get-text rakennus :jakokirjain2)
-                  :porras               (get-text rakennus :porras)
-                  :huoneisto            (get-text rakennus :huoneisto)
-                  :postinumero          (get-text rakennus :postinumero)
-                  :postitoimipaikannimi (get-text rakennus :postitoimipaikannimi)
-                  :pistesijanti         ...notimplemented...}
+         :osoite {:kunta                (get-text rakennus :osoite :kunta)
+                  :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
+                  :osoitenumero         (get-text rakennus :osoite :osoitenumero)
+                  :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
+                  :jakokirjain          (get-text rakennus :osoite :jakokirjain)
+                  :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
+                  :porras               (get-text rakennus :osoite :porras)
+                  :huoneisto            (get-text rakennus :osoite :huoneisto)
+                  :postinumero          (get-text rakennus :osoite :postinumero)
+                  :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
          :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
                   :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
          :luokitus {:energialuokka      (get-text rakennus :energialuokka)
@@ -220,6 +234,8 @@
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
                                :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
 
+(defn ->buildings [xml]
+  (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
 (defn ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
@@ -256,20 +272,23 @@
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
     (#(assoc % :liite  (->liite (:liite %))))))
 
-(defn ->verdict [paatos-xml-without-ns]
+(defn- ->verdict [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
    :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                   [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
-(defn ->ya-verdict [paatos-xml-without-ns]
+(defn- ->ya-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
                     :muutMaaraykset (when (not-empty (select paatos-xml-without-ns :lupaehdotJaMaaraykset))
                                       (reduce (fn [c v] (str c ", " v )) (map #(get-text % :lupaehdotJaMaaraykset)  (select paatos-xml-without-ns :lupaehdotJaMaaraykset))))}
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
    :poytakirjat    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
 
+(permit/register-function permit/R :verdict-krysp-reader ->verdict)
+(permit/register-function permit/P :verdict-krysp-reader ->verdict)
+(permit/register-function permit/YA :verdict-krysp-reader ->ya-verdict)
 
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])})
@@ -288,4 +307,9 @@
           verdict-model)))
     (select (cr/strip-xml-namespaces xml) for-elem)))
 
+(defn- buildings-summary-for-application [xml]
+  (let [summary (->buildings-summary xml)]
+    (when (seq summary)
+      {:buildings summary})))
 
+(permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)

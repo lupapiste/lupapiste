@@ -360,7 +360,6 @@
    :validators [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
   [{:keys [application created] :as command}]
-
   (let [application (meta-fields/enrich-with-link-permit-data application)
         organization (organization/get-organization (:organization application))
         jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))]
@@ -921,8 +920,8 @@
                                        (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
 
                                              resp            (http/get url :as :stream :throw-exceptions false)
-                                             headerFilename  (when (get (:headers resp) "content-disposition")
-                                                               (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
+                                             header-filename  (when (get (:headers resp) "content-disposition")
+                                                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
                                              content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                                              urlhash         (digest/sha1 url)
@@ -935,7 +934,7 @@
                                          ; any old attachment, a new version will be added
                                          (if (= 200 (:status resp))
                                            (attachment/attach-file! {:application-id id
-                                                                     :filename (or headerFilename filename)
+                                                                     :filename (or header-filename filename)
                                                                      :size content-length
                                                                      :content (:body resp)
                                                                      :attachment-id attachment-id
@@ -950,21 +949,17 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defmulti get-verdicts-with-attachments  (fn [application user timestamp] (:permitType application)))
-
-(defmethod get-verdicts-with-attachments "YA" [{:keys [id organization]} user timestamp]
+(defn- get-application-xml [{:keys [id organization permitType]}]
   (if-let [legacy   (organization/get-legacy organization)]
-    (let [xml      (krysp/ya-application-xml legacy id)
-          verdicts (krysp/->verdicts xml :yleinenAlueAsiatieto krysp/->ya-verdict)]
-      (map (partial verdict-attachments id user timestamp) verdicts))
+    (let [fetch (permit/get-application-xml-getter permitType)]
+      (fetch legacy id))
     (fail! :error.no-legacy-available)))
 
-(defmethod get-verdicts-with-attachments "R" [{:keys [id organization]} user timestamp]
-  (if-let [legacy   (organization/get-legacy organization)]
-    (let [xml      (krysp/application-xml legacy id)
-          verdicts (krysp/->verdicts xml :RakennusvalvontaAsia krysp/->verdict)]
-      (map (partial verdict-attachments id user timestamp) verdicts))
-    (fail! :error.no-legacy-available)))
+(defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
+  (let [reader (permit/get-verdict-reader permit-type)
+        element (permit/get-case-xml-element permit-type)
+        verdicts (krysp/->verdicts xml element reader)]
+    (map (partial verdict-attachments id user timestamp) verdicts)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
@@ -974,18 +969,21 @@
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    :notified   true
-   :on-success  (notify     :application-verdict)}
+   :on-success  (notify :application-verdict)}
   [{:keys [user created application] :as command}]
-  (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created))]
-    (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-          tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
-          updates {$set (merge {:verdicts verdicts-with-attachments
-                                :modified created
-                                :state    :verdictGiven}
-                          (when-not has-old-verdict-tasks {:tasks tasks}))}]
-      (update-application command updates)
-      (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
-    (fail :info.no-verdicts-found-from-backend)))
+  (let [xml (get-application-xml application)
+        extras-reader (permit/get-verdict-extras-reader (:permitType application))]
+    (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
+     (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+           tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
+           updates {$set (merge {:verdicts verdicts-with-attachments
+                                 :modified created
+                                 :state    :verdictGiven}
+                           (when-not has-old-verdict-tasks {:tasks tasks})
+                           (when extras-reader (extras-reader xml)))}]
+       (update-application command updates)
+       (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
+     (fail :info.no-verdicts-found-from-backend))))
 
 ;;
 ;; krysp enrichment
@@ -1004,6 +1002,7 @@
           schema       (schemas/get-schema (:schema-info document))
           kryspxml     (krysp/building-xml legacy propertyId)
           updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          ; Path should exist in schema!
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (when (seq updates)
@@ -1017,7 +1016,7 @@
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [legacy   (organization/get-legacy organization)]
     (let [kryspxml  (krysp/building-xml legacy propertyId)
-          buildings (krysp/->buildings kryspxml)]
+          buildings (krysp/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
 

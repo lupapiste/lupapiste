@@ -32,7 +32,7 @@
            {:name "rakennus"
             :type :group
             :repeating true
-            :body [{:name "rakennus" :type :group :body schemas/rakennuksen-valitsin}
+            :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
                    {:name "tila" :type :group
                     :body [{:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}
                            {:name "kayttoonottava" :type :checkbox}]}]}

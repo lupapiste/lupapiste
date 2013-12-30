@@ -10,7 +10,7 @@
 
 (def ^:private operation {:id "523ae9ba94a7542b3520e649",
                           :created 1379592634015,
-                          :name "ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen"})
+                          :name "ya-sijoituslupa-maalampoputkien-sijoittaminen"})
 
 (def ^:private  hankkeen-kuvaus-sijoituslupa
   {:id "523ae9ba94a7542b3520e64a",
