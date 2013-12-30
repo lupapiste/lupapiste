@@ -273,6 +273,9 @@
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (-> hankkeen-kuvaus :kayttotarkoitus :value))
 
+        pinta-ala (when (:hankkeen-kuvaus config)
+                    (-> hankkeen-kuvaus :varattava-pinta-ala :value))
+
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
                                       (if (:sijoitus-lisatiedot config)
                                         (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
@@ -305,6 +308,7 @@
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
                                  :sijaintitieto (get-sijaintitieto application)
+                                 :pintaala pinta-ala
                                  :osapuolitieto osapuolitieto
                                  :vastuuhenkilotieto vastuuhenkilotieto
                                  :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
