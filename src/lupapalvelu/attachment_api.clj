@@ -8,9 +8,10 @@
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application executed]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
+            [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for-application? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
@@ -85,7 +86,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [{application :application}]
-  (ok :attachmentTypes (:allowedAttachmentTypes application)))
+  (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
@@ -93,7 +94,7 @@
    :states     [:draft :info :open :submitted :complement-needed]}
   [{:keys [application] :as command}]
   (let [attachment-type (parse-attachment-type attachmentType)]
-    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
+    (if (allowed-attachment-type-for-application? application attachment-type)
       (update-application command
         {:attachments {$elemMatch {:id attachmentId}}}
         {$set {:attachments.$.type attachment-type}})
@@ -249,7 +250,7 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (when-not (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType) (fail! :error.illegal-attachment-type))
+  (when-not (allowed-attachment-type-for-application? application attachmentType) (fail! :error.illegal-attachment-type))
 
   (when (= (:type target) "statement")
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
