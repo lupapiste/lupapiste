@@ -133,7 +133,8 @@
 
         ;; Lisatiedot
         lupakohtainenLisatietotieto (-> Tyolupa :lupakohtainenLisatietotieto) => truthy
-        sijoituksen-tark (-> lupakohtainenLisatietotieto first :LupakohtainenLisatieto :arvo) => truthy
+        lisatietoja-filter-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
+        sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
         sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
