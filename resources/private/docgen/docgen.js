@@ -198,7 +198,9 @@ var docgen = (function () {
       var help = null;
       var helpLocKey = locKeyFromPath(pathStr + ".help");
       var span = document.createElement("span");
-      span.className = "form-entry";
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
+      span.className = "form-entry " + sizeClass;
+      
 
       // Display text areas in a wide container
       if (subSchema.type === "text") {
@@ -207,7 +209,7 @@ var docgen = (function () {
 
       // Override style with layout option
       if (subSchema.layout) {
-        span.className = "form-entry form-" + subSchema.layout;
+        span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
       }
 
       // durable field error panels
