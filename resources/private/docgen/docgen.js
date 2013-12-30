@@ -478,17 +478,19 @@ var docgen = (function () {
       if (selectedOption === "") option.selected = "selected";
       select.appendChild(option);
 
-      $.each(subSchema.body, function (i, o) {
-        var name = o.name;
-        var option = document.createElement("option");
-        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
-
-        option.value = name;
-        option.appendChild(document.createTextNode(loc(locKey)));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
+      _(subSchema.body)
+        .map(function(e) { return [e.name,
+                                   loc(self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name)]; })
+        .sortBy(function(e) { return e[1]; })
+        .forEach(function(e) {
+          var name = e[0];
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(e[1]));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
       });
 
       if (otherKey) {
