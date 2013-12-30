@@ -165,8 +165,8 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    tyon-tarkoitus-dropdown                                                                 ;; lupakohtainenLisatietotieto
-    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
+    (update-in tyon-tarkoitus-dropdown [0 :body] conj {:name "kunnallistekniset-liittymat"})  ;; lupakohtainenLisatietotieto
+    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}))   ;; lupakohtainenLisatietotieto
 
 (defschemas
   1
