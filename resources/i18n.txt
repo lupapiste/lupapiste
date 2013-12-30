@@ -18,3 +18,5 @@ attachmentType.muut.valokuva: Valokuva
 attachmentType.muut.vesi_ja_viemariliitoslausunto_tai_kartta: Vesi- ja viemäriliitoslausunto tai -kartta
 attachmentType.muut.vesikattopiirustus: Vesikattopiirustus
 attachmentType.muut.ympariston_tietomalli_BIM: Ympäristön tietomalli (BIM)
+
+sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kunnallistekniset-liittymat: Kunnallistekniset liittymät

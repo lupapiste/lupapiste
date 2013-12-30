@@ -110,9 +110,32 @@
    :ya-sijoituslupa-muu-sijoituslupa "muu sijoituslupa"})
 
 (def ya-operation-type-to-additional-usage-description
-  {:ya-kayttolupa-vaihtolavat "vaihtolavat"
-   :ya-kayttolupa-kattolumien-pudotustyot "kattolumien pudotusty\u00f6t"
-   :ya-kayttolupa-muu-liikennealuetyo "muu liikennealuety\u00f6"})
+  {;; Muu kayttolupa
+   :ya-kayttolupa-vaihtolavat                      "vaihtolavat"
+   :ya-kayttolupa-kattolumien-pudotustyot          "kattolumien pudotusty\u00f6t"
+   :ya-kayttolupa-muu-liikennealuetyo              "muu liikennealuety\u00f6"
+   :ya-kayttolupa-muu-kayttolupa                   "muu k\u00e4ytt\u00f6lupa"
+   ;; Muut yleiselle alueelle kohdistuvat tilan kaytot
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen "harrastustoiminnan j\u00e4rjest\u00e4minen"
+   :ya-kayttolupa-metsastys                        "mets\u00e4stys"
+   :ya-kayttolupa-vesistoluvat                     "vesistoluvat"
+   :ya-kayttolupa-terassit                         "terassit"
+   :ya-kayttolupa-kioskit                          "kioskit"
+   :ya-kayttolupa-muu-tyomaakaytto                 "muu ty\u00f6maak\u00e4ytt\u00f6"
+   ;; Kaivu- tai katutyolupa
+   :ya-katulupa-vesi-ja-viemarityot                "vesi-ja-viem\u00e4rity\u00f6t"
+   :ya-katulupa-kaukolampotyot                     "kaukol\u00e4mp\u00f6ty\u00f6t"
+   :ya-katulupa-kaapelityot                        "kaapelity\u00f6t"
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      "kiinteist\u00f6n johto-, kaapeli- ja putkiliitynn\u00e4t"
+   ;; Pysyvien maanalaisten rakenteiden sijoittaminen
+   :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        "vesi- ja viem\u00e4rijohtojen sijoittaminen"
+   :ya-sijoituslupa-maalampoputkien-sijoittaminen                "maal\u00e4mp\u00f6putkien sijoittaminen"
+   :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "s\u00e4hk\u00f6-, data- ja muiden kaapelien sijoittaminen"
+   ;; pysyvien maanpaallisten rakenteiden sijoittaminen
+   :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   "ilmajohtojen sijoittaminen"
+   :ya-sijoituslupa-muuntamoiden-sijoittaminen                   "muuntamoiden sijoittaminen"
+   :ya-sijoituslupa-jatekatoksien-sijoittaminen                  "j\u00e4tekatoksien sijoittaminen"
+   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen   "leikkipaikan tai koiratarhan sijoittaminen"})
 
 (def ya-operation-type-to-schema-name-key
   {:ya-kayttolupa-tapahtumat                                     :Kayttolupa

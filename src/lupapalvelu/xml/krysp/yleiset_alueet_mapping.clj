@@ -136,6 +136,7 @@
                                                         :child [{:tag :exterior
                                                                  :child [{:tag :LinearRing
                                                                           :child [{:tag :pos}]}]} ]}]}]}]}
+                             {:tag :pintaala}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                               :child [{:tag :Osapuoli
                                        :child osapuoli}]}
