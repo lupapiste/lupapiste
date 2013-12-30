@@ -447,6 +447,7 @@ var docgen = (function () {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var span = makeEntrySpan(subSchema, myPath);
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
 
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
@@ -455,7 +456,7 @@ var docgen = (function () {
       select.setAttribute("data-docgen-path", myPath);
 
       select.name = myPath;
-      select.className = "form-input combobox";
+      select.className = "form-input combobox " + (sizeClass || "");
 
       select.id = pathStrToID(myPath);
 
