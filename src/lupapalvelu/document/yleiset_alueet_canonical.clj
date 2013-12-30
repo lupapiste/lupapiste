@@ -160,10 +160,6 @@
                     (-> data :sijoituksen-tarkoitus :value))]
     {:selitysteksti "Sijoituksen tarkoitus" :arvo arvo}))
 
-(defn- get-erikoiskuvaus-operaatiosta [operation-name-key]
-  (when-let [arvo (ya-operation-type-to-additional-usage-description operation-name-key)]
-    {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta" :arvo arvo}))
-
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
   {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm :value))
                    :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-paattyy-pvm :value))}})
@@ -191,8 +187,7 @@
                                :tyoaika                                        true})
 
 (def ^:private kayttolupa-config-plus-tyomaastavastaava
-  (merge default-config {:tyomaasta-vastaava                                   true
-                         :erikoiskuvaus-operaatiosta                           true}))
+  (merge default-config {:tyomaasta-vastaava                                   true}))
 
 (def ^:private configs-per-permit-name
   {:Kayttolupa                  default-config
@@ -277,15 +272,18 @@
                     (-> hankkeen-kuvaus :varattava-pinta-ala :value))
 
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
-                                      (if (:sijoitus-lisatiedot config)
-                                        (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
-                                          (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)]
-                                            [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}])
-                                          (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                            [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                             {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}]))
-                                        (if (:erikoiskuvaus-operaatiosta config)
-                                          [{:LupakohtainenLisatieto (get-erikoiskuvaus-operaatiosta operation-name-key)}]
+                                      (flatten
+                                        (conj []
+                                          (when-let [erikoiskuvaus-operaatiosta (ya-operation-type-to-additional-usage-description operation-name-key)]
+                                            {:LupakohtainenLisatieto {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta"
+                                                                      :arvo erikoiskuvaus-operaatiosta}})
+                                          (when (:sijoitus-lisatiedot config)
+                                            (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
+                                              (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)]
+                                                [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}])
+                                              (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
+                                                [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
+                                                 {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])))
                                           (when (:mainostus-viitoitus-lisatiedot config)
                                             (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
 
