@@ -23,7 +23,7 @@ sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kunnallistekniset-liitt
 
 operations.tree.Aloitusoikeus: Aloitusoikeuden hakeminen
 operations.aloitusoikeus: Aloitusoikeuden hakeminen
-operations.aloitusoikeus.desc: ???
+operations.aloitusoikeus.desc: 
 
 aloitusoikeus._group_label: Aloitusoikeushakemus
 aloitusoikeus.kuvaus: Kuvaus
