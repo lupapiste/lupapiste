@@ -20,3 +20,14 @@ attachmentType.muut.vesikattopiirustus: Vesikattopiirustus
 attachmentType.muut.ympariston_tietomalli_BIM: Ympäristön tietomalli (BIM)
 
 sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kunnallistekniset-liittymat: Kunnallistekniset liittymät
+
+operations.tree.Aloitusoikeus: Aloitusoikeuden hakeminen
+operations.aloitusoikeus: Aloitusoikeuden hakeminen
+operations.aloitusoikeus.desc: ???
+
+aloitusoikeus._group_label: Aloitusoikeushakemus
+aloitusoikeus.kuvaus: Kuvaus
+aloitusoikeus.vakuudenMaara: Vakuuden määrä
+aloitusoikeus.voimassaolopvm: Voimassaolopvm
+aloitusoikeus.vakuudenLaji: Vakuuden laji
+aloitusoikeus.Vakuuspaatospykala: Vakuuspäätöspykälä

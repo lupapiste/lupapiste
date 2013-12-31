@@ -50,6 +50,9 @@
                              treepart)
                   treepart (if (env/feature? :jatkoaika)
                              (conj treepart ["Jatkoaika" :jatkoaika])
+                             treepart)
+                  treepart (if (env/feature? :aloitusoikeus)
+                             (conj treepart ["Aloitusoikeus" :aloitusoikeus])
                              treepart)]
               treepart)]}))
 
@@ -401,6 +404,10 @@
                                    :permit-type "R"
                                    :required ["maksaja"]
                                    :attachments []}
+
+     :aloitusoikeus     {:schema "aloitusoikeus"
+                         :permit-type "R"
+                         :attachments []}
      }
     ya-operations))
 
