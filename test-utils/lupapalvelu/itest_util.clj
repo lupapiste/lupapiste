@@ -221,7 +221,8 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id) => ok?]
+        resp  (command apikey :submit-application :id id)]
+    resp => ok?
     (query-application apikey id)))
 
 (defn allowed? [action & args]
