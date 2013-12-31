@@ -91,7 +91,7 @@
 ;; TODO: Aloitetulla hakemuksella valittavana vain "hae jatkoaikaa"-komento.
 ;;       Suljetulla hakemuksella ei mitään.
 ;;
-(fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
+#_(fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
   (let [application            (create-and-submit-application sonja
                                  :operation "ya-katulupa-vesi-ja-viemarityot"
                                  :municipality sonja-muni
