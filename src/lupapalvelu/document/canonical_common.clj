@@ -95,7 +95,7 @@
    :ya-kayttolupa-muu-liikennealuetyo "muu kaytt\u00f6lupa"
    :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
-   :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t "
+   :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
