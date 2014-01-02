@@ -256,7 +256,7 @@
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group

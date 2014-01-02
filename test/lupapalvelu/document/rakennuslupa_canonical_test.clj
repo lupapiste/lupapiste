@@ -209,7 +209,9 @@
                     :varusteet {:parvekeTaiTerassiKytkin {:value true}
                                 :WCKytkin {:value true}}}
                 :1 {:muutostapa {:value "lis\u00e4ys"}
-                    :huoneistoTunnus {}
+                    :huoneistoTunnus {:porras {:value "A"}
+                                      :huoneistonumero {:value "2"}
+                                      :jakokirjain {:value "a"}}
                     :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
                                        :huoneistoala {:value "02"}
                                        :huoneluku {:value "12"}}
@@ -592,7 +594,7 @@
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
-        h1 (first huoneistot), h2 (last huoneistot)]
+        h2 (first huoneistot), h1 (last huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
     (fact "h1 huoneluku" (:huoneluku h1) => "66")
@@ -619,7 +621,10 @@
     (fact "h2 varusteet: saunaKytkin" (-> h2 :varusteet :saunaKytkin) => true)
     (fact "h2 varusteet: parvekeTaiTerassiKytkin" (-> h2 :varusteet :parvekeTaiTerassiKytkin) => false)
     (fact "h2 varusteet: lamminvesiKytkin" (-> h2 :varusteet :lamminvesiKytkin) => true)
-    (fact "h2 huoneistotunnus" (:huoneistotunnus h2) => falsey)))
+    (fact "h2 huoneistotunnus" (:huoneistotunnus h1) => truthy)
+    (fact "h2 huoneistotunnus: porras" (-> h1 :huoneistotunnus :porras) => "A")
+    (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
+    (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
 
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
 
