@@ -28,6 +28,7 @@ operations.aloitusoikeus.desc:
 aloitusoikeus._group_label: Aloitusoikeushakemus
 aloitusoikeus.kuvaus: Kuvaus
 aloitusoikeus.vakuudenMaara: Vakuuden määrä
+unit.euroa: euroa
 aloitusoikeus.voimassaolopvm: Voimassaolopvm
 aloitusoikeus.vakuudenLaji: Vakuuden laji
 aloitusoikeus.Vakuuspaatospykala: Vakuuspäätöspykälä

@@ -243,7 +243,7 @@
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
 
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}
-                    {:name "vakuudenMaara" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true}
+                    {:name "vakuudenMaara" :type :string :subtype :number :unit "euroa" :size "s" :min 1 :max 9999999 :required true}
                     {:name "voimassaolopvm" :type :date :required true}
                     {:name "vakuudenLaji" :type :string :required false}
                     {:name "Vakuuspaatospykala" :type :string :required false}])

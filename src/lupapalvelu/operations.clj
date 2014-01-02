@@ -407,6 +407,7 @@
 
      :aloitusoikeus     {:schema "aloitusoikeus"
                          :permit-type "R"
+                         :required ["maksaja"]
                          :attachments []}
      }
     ya-operations))
