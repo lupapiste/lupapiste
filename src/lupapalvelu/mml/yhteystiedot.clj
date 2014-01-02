@@ -42,9 +42,14 @@
       :jakeluosoite (get-text henkilo-xml (path :Osoite :jakeluosoite))
       :postinumero (get-text henkilo-xml (path :Osoite :postinumero))
       :paikkakunta (get-text henkilo-xml (path :Osoite :paikkakunta)))))
-    
-(defn get-owners [id]
+
+(defn- get-yhteystiedot [id]
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" (URLEncoder/encode id "UTF-8"))
-        xml (cr/strip-xml-namespaces (cr/get-xml uri))
+        username (env/value :mml :yhteystiedot :username)
+        password (env/value :mml :yhteystiedot :password)]
+    (cr/get-xml uri [username password]) (cr/get-xml uri)))
+
+(defn get-owners [id]
+  (let [xml (cr/strip-xml-namespaces (get-yhteystiedot id))
         henkilot (children (select1 xml :kohteenHenkilot))]
     (map ->henkilo henkilot)))
