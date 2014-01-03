@@ -198,7 +198,7 @@
         vakuus (when aloitusoikeus
                  {:vakuus {:vakuudenLaji (-> aloitusoikeus :vakuudenLaji :value)
                            :voimassaolopvm (to-xml-date-from-string (-> aloitusoikeus :voimassaolopvm :value))
-                           :vakuudenMaara (-> aloitusoikeus :vakuudenMaara :value)
+                           :vakuudenmaara (-> aloitusoikeus :vakuudenMaara :value)
                            :Vakuuspaatospykala (-> aloitusoikeus :Vakuuspaatospykala :value)
                            }})]
     {:Lisatiedot (merge

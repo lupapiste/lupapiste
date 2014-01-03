@@ -164,7 +164,12 @@
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
                                       {:tag :asioimiskieli}
-                                      {:tag :suoramarkkinointikieltoKytkin}]}]}
+                                      {:tag :suoramarkkinointikieltoKytkin}
+                                      {:tag :vakuus
+                                       :child [{:tag :vakuudenLaji}
+                                               {:tag :voimassaolopvm}
+                                               {:tag :vakuudenmaara}
+                                               {:tag :vakuuspaatospykala}]}]}]}
                              {:tag :liitetieto
                               :child [{:tag :Liite
                                        :child [{:tag :kuvaus :ns "yht"}

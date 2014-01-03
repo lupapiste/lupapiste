@@ -1203,8 +1203,9 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  vakuus (:vakuus Lisatiedot) => truthy
                  vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"
                  voimassaolopvm (:voimassaolopvm vakuus) => "2014-01-15"
-                 vakuudenMaara (:vakuudenMaara vakuus) => "10000"
+                 vakuudenMaara (:vakuudenmaara vakuus) => "10000"
                  Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14§"
+                 viiteluvalle tarkastus.näytäis puuttuvan osittain xml sanomasta
                  ]
              ))
 
