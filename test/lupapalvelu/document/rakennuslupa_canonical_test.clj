@@ -1196,7 +1196,8 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
                  aineistonnimi (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
                  asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
-                 rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot) => "Tarttis aloitta asp rakentaminen."
+                 Asiantiedot (:Asiantiedot asianTiedot)
+                 rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
                  lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
                  Lisatiedot (:Lisatiedot lisatiedot) => truthy
                  vakuus (:vakuus Lisatiedot) => truthy

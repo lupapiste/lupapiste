@@ -208,8 +208,9 @@
                                      "suomi")}
                    vakuus)}))
 
-(defn- get-asian-tiedot [documents maisematyo_documents]
-  (let [hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents) (:aloitusoikeus documents))
+(defn- get-asian-tiedot [documents]
+  (let [maisematyo_documents (:maisematyo documents)
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents) (:aloitusoikeus documents))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -247,7 +248,7 @@
                                         "jatkoaika" "Jatkoaikahakemus"
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents toimenpiteet)))
-                      :asianTiedot (get-asian-tiedot documents (:maisematyo documents))
+                      :asianTiedot (get-asian-tiedot documents)
                       :lisatiedot (get-lisatiedot documents lang)}}}}
         canonical (if link-permit-data
                     (-> canonical
