@@ -193,14 +193,23 @@
 
 
 (defn- get-lisatiedot [documents lang]
-  (let [lisatiedot (:data (first documents))]
-    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
-                  :asioimiskieli (if (= lang "sv")
-                                   "ruotsi"
-                                   "suomi")}}))
+  (let [lisatiedot (:data (first (:lisatiedot documents)))
+        aloitusoikeus (:data (first (:aloitusoikeus documents)))
+        vakuus (when aloitusoikeus
+                 {:vakuus {:vakuudenLaji (-> aloitusoikeus :vakuudenLaji :value)
+                           :voimassaolopvm (to-xml-date-from-string (-> aloitusoikeus :voimassaolopvm :value))
+                           :vakuudenMaara (-> aloitusoikeus :vakuudenMaara :value)
+                           :Vakuuspaatospykala (-> aloitusoikeus :Vakuuspaatospykala :value)
+                           }})]
+    {:Lisatiedot (merge
+                   {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
+                    :asioimiskieli (if (= lang "sv")
+                                     "ruotsi"
+                                     "suomi")}
+                   vakuus)}))
 
 (defn- get-asian-tiedot [documents maisematyo_documents]
-  (let [hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents))
+  (let [hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents) (:aloitusoikeus documents))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -236,9 +245,10 @@
                                         "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
                                         "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                         "jatkoaika" "Jatkoaikahakemus"
+                                        "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents (:maisematyo documents))
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}}}}
+                      :lisatiedot (get-lisatiedot documents lang)}}}}
         canonical (if link-permit-data
                     (-> canonical
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
