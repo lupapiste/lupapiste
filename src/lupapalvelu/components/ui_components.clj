@@ -12,6 +12,10 @@
               :js ["debug.js"]
               :name "common"})
 
+(def mockjax {:depends [:init :jquery]
+              :js ["jquery.mockjax.js"]
+              :name "jquery"})
+
 (defn- conf []
   (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
@@ -44,6 +48,8 @@
    ;; Components to be included in a SPA
 
    :debug        (if (env/dev-mode?) debugjs {})
+   
+   :mockjax      (if (env/dev-mode?) mockjax {})
 
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
@@ -60,7 +66,7 @@
    :expanded-content  {:depends [:jquery]
                   :js ["expanded-content.js"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses :expanded-content]
+   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js"]

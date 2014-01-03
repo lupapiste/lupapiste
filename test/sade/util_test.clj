@@ -112,5 +112,29 @@
   (fact "invalid date" (to-millis-from-local-date-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 
 
+(facts sequable?
+       (sequable? [])        => true
+       (sequable? '())       => true
+       (sequable? {})        => true
+       (sequable? "")        => true
+       (sequable? nil)       => true
+       (sequable? (.toArray (java.util.ArrayList.))) => true
+       (sequable? 1)         => false
+       (sequable? true)      => false)
 
+(facts empty-or-nil?
+       (empty-or-nil? [])      => true
+       (empty-or-nil? [1])     => false
+       (empty-or-nil? {})      => true
+       (empty-or-nil? {:a :a}) => false
+       (empty-or-nil? '())     => true
+       (empty-or-nil? false)   => false
+       (empty-or-nil? true)    => false
+       (empty-or-nil? "")      => true
+       (empty-or-nil? nil)     => true)
 
+(facts assoc-when
+       (assoc-when {} :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
+       => {:a :a, :e [:e], :f {:f :f}}
+       (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
+       => {:a :a, :b :b, :c :c})
