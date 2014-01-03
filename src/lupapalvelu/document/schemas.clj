@@ -70,6 +70,10 @@
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
 
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro"}
+                                {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
+
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :blacklist [turvakielto]
@@ -225,9 +229,15 @@
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
+(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
+                              :type :group
+                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
+                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    vastattavat-tyotehtavat-tyonjohtaja
+                   vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
@@ -240,7 +250,7 @@
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
@@ -352,7 +362,7 @@
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select
+                                 {:name "kayttotarkoitus" :type :select :size "l"
                                   :body rakennuksen-kayttotarkoitus}]}
                          {:name "mitat"
                           :type :group
@@ -464,7 +474,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true :size "l"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}

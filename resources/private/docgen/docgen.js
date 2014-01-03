@@ -198,7 +198,9 @@ var docgen = (function () {
       var help = null;
       var helpLocKey = locKeyFromPath(pathStr + ".help");
       var span = document.createElement("span");
-      span.className = "form-entry";
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
+      span.className = "form-entry " + sizeClass;
+      
 
       // Display text areas in a wide container
       if (subSchema.type === "text") {
@@ -207,7 +209,7 @@ var docgen = (function () {
 
       // Override style with layout option
       if (subSchema.layout) {
-        span.className = "form-entry form-" + subSchema.layout;
+        span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
       }
 
       // durable field error panels
@@ -447,6 +449,7 @@ var docgen = (function () {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var span = makeEntrySpan(subSchema, myPath);
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
 
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
@@ -455,7 +458,7 @@ var docgen = (function () {
       select.setAttribute("data-docgen-path", myPath);
 
       select.name = myPath;
-      select.className = "form-input combobox";
+      select.className = "form-input combobox " + (sizeClass || "");
 
       select.id = pathStrToID(myPath);
 
@@ -478,17 +481,19 @@ var docgen = (function () {
       if (selectedOption === "") option.selected = "selected";
       select.appendChild(option);
 
-      $.each(subSchema.body, function (i, o) {
-        var name = o.name;
-        var option = document.createElement("option");
-        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
-
-        option.value = name;
-        option.appendChild(document.createTextNode(loc(locKey)));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
+      _(subSchema.body)
+        .map(function(e) { return [e.name,
+                                   loc(self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name)]; })
+        .sortBy(function(e) { return e[1]; })
+        .forEach(function(e) {
+          var name = e[0];
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(e[1]));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
       });
 
       if (otherKey) {
@@ -627,6 +632,75 @@ var docgen = (function () {
       return span;
     }
 
+    function buildNewBuildingSelector(subSchema, model, path) {
+      var myPath = path.join(".");
+      var select = document.createElement("select");
+      var selectedOption = getModelValue(model, subSchema.name);
+      var option = document.createElement("option");
+      var span = makeEntrySpan(subSchema, myPath);
+      span.className = "form-entry really-long";
+
+      select.id = pathStrToID(myPath);
+
+      select.name = myPath;
+      select.className = "form-input combobox long";
+
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = function() {
+          var target = select;
+          var indicator = createIndicator(target);
+          var path = target.name;
+          var label = document.getElementById(pathStrToLabelID(path));
+          var loader = loaderImg();
+          var basePathEnd = (path.lastIndexOf(".") > 0) ? path.lastIndexOf(".") : path.length;
+          var basePath = path.substring(0, basePathEnd);
+
+          var option$ = $(target[target.selectedIndex]);
+          var index = option$.val();
+          var propertyId = option$.attr("data-propertyid") || "";
+          var buildingId = option$.attr("data-buildingid") || "";
+
+          var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro"];
+          var values = [index, propertyId, buildingId];
+
+          if (label) {
+            label.appendChild(loader);
+          }
+
+          saveForReal(paths, values, _.partial(afterSave, label, loader, indicator, null));
+          return false;
+        };
+      }
+
+      option.value = "";
+      option.appendChild(document.createTextNode(loc("selectone")));
+      if (selectedOption === "") {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
+
+      $.each(self.application.buildings, function (i, building) {
+            var name = building.index;
+            var usage = building.usage ? " (" + building.usage + ")" : "";
+            var area = (building.area || "?") + " " + loc("unit.m2");
+            var option = document.createElement("option");
+            option.value = name;
+            option.setAttribute("data-propertyid", building.propertyId);
+            option.setAttribute("data-buildingid", building.buildingId);
+            option.appendChild(document.createTextNode(name + usage + " - "+ area));
+            if (selectedOption === name) {
+              option.selected = "selected";
+            }
+            select.appendChild(option);
+          });
+
+      span.appendChild(makeLabel(subSchema, "select", myPath));
+      span.appendChild(select);
+      return span;
+    }
+
     function buildPersonSelector(subSchema, model, path) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
@@ -713,6 +787,7 @@ var docgen = (function () {
       date: buildDate,
       element: buildElement,
       buildingSelector: buildBuildingSelector,
+      newBuildingSelector: buildNewBuildingSelector,
       personSelector: buildPersonSelector,
       unknown: buildUnknown
     };
@@ -727,6 +802,10 @@ var docgen = (function () {
     }
 
     function build(subSchema, model, path, partOfChoice) {
+      if (subSchema.hidden) {
+        return;
+      }
+
       var myName = subSchema.name;
       var myPath = path.concat([myName]);
       var builder = builders[subSchema.type] || buildUnknown;
@@ -734,22 +813,21 @@ var docgen = (function () {
 
       function makeElem(myModel, id) {
         var elem = builder(subSchema, myModel, myPath.concat([id]), partOfChoice);
-        elem.setAttribute("data-repeating-id", repeatingId);
-        elem.setAttribute("data-repeating-id-" + repeatingId, id);
+        if (elem) {
+          elem.setAttribute("data-repeating-id", repeatingId);
+          elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
-          var removeButton = document.createElement("span");
-          removeButton.className = "icon remove-grey inline-right";
-          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
-          removeButton.onclick = function () {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
-                { title: loc("no") });
-          };
-          elem.insertBefore(removeButton, elem.childNodes[0]);
-        }
-
-        if (subSchema.type === "group") {
+          if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
+            var removeButton = document.createElement("span");
+            removeButton.className = "icon remove-grey inline-right";
+            removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
+            removeButton.onclick = function () {
+              LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+                  { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
+                  { title: loc("no") });
+            };
+            elem.insertBefore(removeButton, elem.childNodes[0]);
+          }
         }
         return elem;
       }
@@ -818,8 +896,9 @@ var docgen = (function () {
             elem.setAttribute("data-select-one-of", subSchema.name);
             $(elem).hide();
           }
-
-          body.appendChild(elem);
+          if (elem) {
+            body.appendChild(elem);
+          }
         });
       });
 
@@ -850,10 +929,15 @@ var docgen = (function () {
       return img;
     }
 
-    function saveForReal(path, value, callback) {
-      var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
+    function saveForReal(paths, values, callback) {
+      var p = _.isArray(paths) ? paths : [paths];
+      var v = _.isArray(values) ? values : [values];
+      var updates = _.zip(
+          _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
+          v);
+
       ajax
-        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]], collection: self.getCollection() })
+        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
       // elements: [key status message]. Here we use just the status.
         .success(function (e) {
@@ -905,53 +989,62 @@ var docgen = (function () {
       }
     }
 
+    function createIndicator(eventTarget) {
+      var parent$ = $(eventTarget.parentNode);
+      parent$.find(".form-indicator").remove();
+      var indicator = document.createElement("span");
+      indicator.className = "form-indicator";
+      parent$.append(indicator);
+      return indicator;
+    }
+
+    function showIndicator(indicator, className, locKey) {
+      var i$ = $(indicator);
+      i$.addClass(className).text(loc(locKey)).fadeIn(200);
+
+      setTimeout(function () {
+        i$.removeClass(className).fadeOut(200, function () { i$.remove; });
+      }, 4000);
+    }
+
+    function afterSave(label, loader, indicator, callback, status, results) {
+      showValidationResults(results);
+      if (label) {
+        label.removeChild(loader);
+      }
+      if (status === "warn" || status === "tip") {
+        showIndicator(indicator, "form-input-saved", "form.saved");
+      } else if (status === "err") {
+        showIndicator(indicator, "form-input-err", "form.err");
+      } else if (status === "ok") {
+        showIndicator(indicator, "form-input-saved", "form.saved");
+      } else if (status !== "ok") {
+        error("Unknown status:", status, "path:", path);
+      }
+      if (callback) { callback(); }
+      // No return value or stoping the event propagation:
+      // That would prevent moving to the next field with tab key in IE8.
+    }
+
     function save(e, callback) {
       var event = getEvent(e);
       var target = event.target;
-      if (target.parentNode.indicator) {
-        $(target.parentNode.indicator).fadeOut(200, function () { target.removeChild(indicator); });
-      }
-      var indicator = document.createElement("span");
-      $(indicator).addClass("form-indicator");
-      target.parentNode.appendChild(indicator);
+      var indicator = createIndicator(target);
+
       var path = target.name;
       var loader = loaderImg();
-      var label = document.getElementById(pathStrToLabelID(path));
+
       var value = target.value;
       if (target.type === "checkbox") {
         value = target.checked;
       }
+
+      var label = document.getElementById(pathStrToLabelID(path));
       if (label) {
         label.appendChild(loader);
       }
 
-      function showIndicator(className, locKey) {
-        $(indicator).addClass(className).text(loc(locKey));
-        $(indicator).fadeIn(200);
-        setTimeout(function () {
-          $(indicator).removeClass(className);
-          $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
-        }, 4000);
-      }
-
-      saveForReal(path, value, function (status, results) {
-        showValidationResults(results);
-        if (label) {
-          label.removeChild(loader);
-        }
-        if (status === "warn" || status === "tip") {
-          showIndicator("form-input-saved", "form.saved");
-        } else if (status === "err") {
-          showIndicator("form-input-err", "form.err");
-        } else if (status === "ok") {
-          showIndicator("form-input-saved", "form.saved");
-        } else if (status !== "ok") {
-          error("Unknown status:", status, "path:", path);
-        }
-        if (callback) { callback(); }
-        // No return value or stoping the event propagation:
-        // That would prevent moving to the next field with tab key in IE8.
-      });
+      saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
     }
 
     function removeDoc(e) {

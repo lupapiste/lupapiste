@@ -106,10 +106,10 @@
   (fact "valid date" (to-xml-datetime-from-string "1.1.2013") => "2013-01-01T00:00:00")
   (fact "invalid date" (to-xml-datetime-from-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 
-(facts "to-xml-millis-from-string"
-  (fact "nil -> nil" (to-xml-millis-from-string nil) => nil)
-  (fact "valid date" (to-xml-millis-from-string "1.1.2013") => 1356998400000)
-  (fact "invalid date" (to-xml-millis-from-string "1.2013") => (throws java.lang.IllegalArgumentException)))
+(facts "to-millis-from-local-date-string"
+  (fact "nil -> nil" (to-millis-from-local-date-string nil) => nil)
+  (fact "valid date" (to-millis-from-local-date-string "1.1.2013") => 1356998400000)
+  (fact "invalid date" (to-millis-from-local-date-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 
 
 (facts sequable?

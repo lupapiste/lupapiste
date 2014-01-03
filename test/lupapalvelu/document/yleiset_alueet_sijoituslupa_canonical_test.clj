@@ -10,7 +10,7 @@
 
 (def ^:private operation {:id "523ae9ba94a7542b3520e649",
                           :created 1379592634015,
-                          :name "ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen"})
+                          :name "ya-sijoituslupa-maalampoputkien-sijoittaminen"})
 
 (def ^:private  hankkeen-kuvaus-sijoituslupa
   {:id "523ae9ba94a7542b3520e64a",
@@ -60,7 +60,6 @@
                                :operations [operation],
                                :propertyId "75342300010054",
                                :documents documents,
-                               ; :allowedAttachmentTypes allowedAttachmentTypes,
                                ; :neighbors neighbors,
                                :municipality municipality,
                                :statements statements})
@@ -84,11 +83,11 @@
 
         Sijoituslupa-kayttotarkoitus (:kayttotarkoitus Sijoituslupa) => truthy
 
-        Sijainti-osoite (-> Sijoituslupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Sijoituslupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Sijoituslupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Sijoituslupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (-> Sijoituslupa :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Sijoituslupa :vastuuhenkilotieto) => truthy
@@ -147,7 +146,9 @@
 
         match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :selitysteksti))
         lisatietoja-sijoituskohteesta-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy]
+        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy
+
+        pinta-ala (:pintaala Sijoituslupa) => falsey]
 
 ;    (println "\n canonical:")
 ;    (clojure.pprint/pprint canonical)

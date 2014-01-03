@@ -155,6 +155,8 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}
                              ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
@@ -253,7 +255,10 @@
 (defn get-attachments-as-canonical [application begin-of-link & [target]]
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))) (or (nil? target) (= target (:target attachment))))
+                                    :when (and (:latestVersion attachment)
+                                            (not= "statement" (-> attachment :target :type))
+                                            (not= "verdict" (-> attachment :target :type))
+                                            (or (nil? target) (= target (:target attachment))))
                                     :let [type (get-in attachment [:type :type-id])
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])

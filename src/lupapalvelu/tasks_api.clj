@@ -28,7 +28,8 @@
 
 (defcommand create-task
   {:parameters [id taskName schemaName]
-   :roles      [:authority]}
+   :roles      [:authority]
+   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created application user] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
     (fail! :illegal-schema))
@@ -41,7 +42,8 @@
 (defcommand delete-task
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :roles      [:authority]}
+   :roles      [:authority]
+   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{created :created :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
   (update-application command
@@ -52,7 +54,8 @@
   {:description "Authority can approve task, moves to ok"
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :roles       [:authority]}
+   :roles       [:authority]
+   :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
   [command]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
   (set-state command taskId :ok))
@@ -61,7 +64,8 @@
   {:description "Authority can reject task, requires user action."
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :roles       [:authority]}
+   :roles       [:authority]
+   :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
   [command]
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
@@ -70,11 +74,13 @@
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
-   :roles       [:authority]}
+   :roles       [:authority]
+   :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application user :user :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)]
     (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
+    (when-not (get-in task [:data :katselmuksenLaji :value]) (fail! :error.missing-parameters))
     (mapping-to-krysp/save-review-as-krysp application task user lang)
     (set-state command taskId :sent)))
 

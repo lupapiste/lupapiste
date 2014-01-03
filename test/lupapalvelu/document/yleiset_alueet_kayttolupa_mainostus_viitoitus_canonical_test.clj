@@ -87,11 +87,11 @@
 
         Mainostus-viitoituslupa-kayttotarkoitus (:kayttotarkoitus Mainostus-viitoituslupa) => truthy
 
-        Sijainti-osoite (-> Mainostus-viitoituslupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Mainostus-viitoituslupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Mainostus-viitoituslupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Mainostus-viitoituslupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         vastuuhenkilot-vec (-> Mainostus-viitoituslupa :vastuuhenkilotieto) => truthy
 
@@ -135,6 +135,8 @@
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
 
         lisatieto-vec (-> Mainostus-viitoituslupa :lupakohtainenLisatietotieto) => truthy
+
+        pinta-ala (:pintaala Mainostus-viitoituslupa) => falsey
 
         match-fn #(= "Tapahtuman nimi" (-> % :LupakohtainenLisatieto :selitysteksti))
         tapahtuman-nimi-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy

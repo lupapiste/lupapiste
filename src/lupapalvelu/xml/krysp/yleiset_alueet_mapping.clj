@@ -5,7 +5,7 @@
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
-            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 ;; Tags changed in "yritys-child-modified":
@@ -127,7 +127,16 @@
                                                          :child [{:tag :teksti}]}]}
                                                {:tag :piste :ns "yht"
                                                 :child [{:tag :Point :ns "gml"
-                                                         :child [{:tag :pos}]}]}]}]}
+                                                         :child [{:tag :pos}]}]}
+                                               {:tag :viiva :ns "yht"
+                                                :child [{:tag :LineString :ns "gml"
+                                                        :child [{:tag :pos}]}]}
+                                               {:tag :alue :ns "yht"
+                                                :child [{:tag :Polygon :ns "gml"
+                                                        :child [{:tag :exterior
+                                                                 :child [{:tag :LinearRing
+                                                                          :child [{:tag :pos}]}]} ]}]}]}]}
+                             {:tag :pintaala}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                               :child [{:tag :Osapuoli
                                        :child osapuoli}]}
@@ -154,6 +163,11 @@
                                        :child [{:tag :alkuHetki :ns "yht"}
                                                {:tag :loppuHetki :ns "yht"}]}]}
                              {:tag :valmistumisilmoitusPvm}
+                             {:tag :lisaaikatieto
+                              :child [{:tag :Lisaaika
+                                       :child [{:tag :alkuPvm :ns "yht"}
+                                               {:tag :loppuPvm :ns "yht"}
+                                               {:tag :perustelu}]}]}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
@@ -187,9 +201,13 @@
       canonical
       statement-attachments)))
 
+;;
+;; TODO: Mihin submitted-applicationia kaytettiin ennen (_nyt ei mihinkaan_)?
+;;
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-  (let [lupa-name-key ((-> application :operations first :name keyword) ya-operation-type-to-schema-name-key)
-        canonical-without-attachments  (application-to-canonical application lang)
+  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                        (-> application :operations first :name keyword))
+        canonical-without-attachments (ya-canonical/application-to-canonical application lang)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
@@ -207,4 +225,14 @@
 
     (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
-(permit/register-mapper permit/YA :app-krysp-mapper save-application-as-krysp)
+(permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
+
+(defn save-jatkoaika-as-krysp [application lang organization output-dir begin-of-link]
+    (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                          (or
+                            (-> application :linkPermitData first :operation keyword)
+                            :ya-katulupa-vesi-ja-viemarityot))
+          canonical (ya-canonical/jatkoaika-to-canonical application lang)
+          xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
+
+      (mapping-common/write-to-disk application nil nil xml output-dir)))

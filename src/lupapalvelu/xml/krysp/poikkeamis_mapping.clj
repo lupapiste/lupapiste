@@ -38,7 +38,8 @@
                              {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}
                                                                                     {:tag :suoramarkkinointikieltoKytkin}]}]}
                              {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
-                                                                                   {:tag :poikkeamisasianKuvaus}]}]}
+                                                                                   {:tag :poikkeamisasianKuvaus}
+                                                                                   {:tag :suunnittelutarveasianKuvaus}]}]}
                              {:tag :kayttotapaus}])
 
 
@@ -78,8 +79,8 @@
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)
                       [:Popast :poikkeamisasiatieto :Poikkeamisasia]
-                      (= subtype lupapalvelu.permit/poikkeamislupa)
-                      [:Popast :suunnittelutarveasiatieto :Suunnittelutarveratkaisu]
+                      (= subtype lupapalvelu.permit/suunnittelutarveratkaisu)
+                      [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia]
                       :default nil)
         krysp-polku-lausuntoon (conj krysp-polku :lausuntotieto)
         canonical-without-attachments  (poikkeus-application-to-canonical application lang)
@@ -96,4 +97,4 @@
 
     (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
-(permit/register-mapper permit/P :app-krysp-mapper save-application-as-krysp)
+(permit/register-function permit/P :app-krysp-mapper save-application-as-krysp)

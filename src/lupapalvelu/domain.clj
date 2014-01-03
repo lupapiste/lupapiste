@@ -5,6 +5,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.strings :refer [lower-case]]
+            [sade.env :as env]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
@@ -150,7 +151,7 @@
 ;;
 
 (defn set-software-version [m]
-  (assoc m :_software_version "1.0.5"))
+  (assoc m :_software_version (str (:build-number env/buildinfo))))
 
 ;;
 ;; Application skeleton with default values
@@ -161,10 +162,10 @@
    :_verdicts-seen-by        {}
    :_comments-seen-by        {}
    :address                  ""
-   :allowedAttachmentTypes   []
    :attachments              []
    :auth                     []
    :authority                {}
+   :buildings                []
    :closed                   nil
    :comments                 []
    :created                  nil
@@ -184,6 +185,7 @@
    :permitType               ""
    :schema-version           nil
    :sent                     nil
+   :started                  nil
    :state                    ""
    :statements               []
    :submitted                nil

@@ -2,7 +2,7 @@
   (:require [sade.strings :refer [numeric? decimal-number?]]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]))
-            
+
 ; from clojure.contrib/core
 
 (defn dissoc-in
@@ -113,6 +113,11 @@
          required-keys)))
 
 
+(defn to-local-date [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "dd.MM.YYYY") dt))))
+
 (defn to-xml-date [^Long timestamp]
   (when timestamp
     (let [dt (tc/from-long timestamp)]
@@ -133,7 +138,7 @@
     (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
 
-(defn to-xml-millis-from-string [^String date-as-string]
+(defn to-millis-from-local-date-string [^String date-as-string]
   (when date-as-string
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))

@@ -3,10 +3,29 @@
             [lupapalvelu.document.schemas :refer :all]))
 
 ;;
+;; Kayttolupa
+;;
+
+(def hankkeen-kuvaus-kayttolupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 5 :size "s"}))
+
+(defschemas
+  1
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+           :type :group
+           :removable false
+           :repeating false
+           :order 60}
+    :body hankkeen-kuvaus-kayttolupa}])
+
+
+;;
 ;; Kaivulupa
 ;;
 
-(def sijoituksen-tarkoitus-dropdown
+(def tyon-tarkoitus-dropdown
   [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
     :body [{:name "jakokaappi-(tele/sahko)"}
            {:name "jate--tai-sadevesi"}
@@ -23,10 +42,9 @@
 
 (def hankkeen-kuvaus-kaivulupa
   (body
-    sijoituksen-tarkoitus-dropdown
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}                     ;; sijoituslupaviitetietoType
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
+    tyon-tarkoitus-dropdown
+    hankkeen-kuvaus-kayttolupa
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))   ;; sijoituslupaviitetietoType
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -43,6 +61,14 @@
     {:name "tyoaika-alkaa-pvm" :type :date}                 ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date}))
 
+(def tyo-aika-for-jatkoaika
+  (body
+    {:name "tyoaika-alkaa-pvm" :type :date :readonly true}  ;; alkuPvm / loppuPvm
+    {:name "tyoaika-paattyy-pvm" :type :date}))
+
+(def hankkeen-kuvaus-jatkoaika
+  (body
+    {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}))
 
 (defschemas
   1
@@ -64,31 +90,22 @@
            :repeating false
            :order 62}
     :body yleiset-alueet-maksaja}
-   {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
+   {:info {:name "tyoaika"                                                 ;; alkuPvm / loppuPvm
            :type :group
            :removable false
            :repeating false
            :order 63}
-    :body tyo-aika}])
-
-
-;;
-;; Kayttolupa
-;;
-
-(def hankkeen-kuvaus-kayttolupa
-  (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
-
-(defschemas
-  1
-  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+    :body tyo-aika}
+   {:info {:name "tyo-aika-for-jatkoaika"                                  ;; (alkuPvm /) loppuPvm
            :type :group
            :removable false
            :repeating false
-           :order 60}
-    :body hankkeen-kuvaus-kayttolupa}])
+           :order 63}
+    :body tyo-aika-for-jatkoaika}
+   {:info {:name "hankkeen-kuvaus-jatkoaika"
+           :approvable true
+           :order 1}
+    :body hankkeen-kuvaus-jatkoaika}])
 
 
 ;;
@@ -148,8 +165,8 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    sijoituksen-tarkoitus-dropdown                                                          ;; lupakohtainenLisatietotieto
-    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
+    (update-in tyon-tarkoitus-dropdown [0 :body] conj {:name "kunnallistekniset-liittymat"})                                                  ;; lupakohtainenLisatietotieto
+    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}))   ;; lupakohtainenLisatietotieto
 
 (defschemas
   1

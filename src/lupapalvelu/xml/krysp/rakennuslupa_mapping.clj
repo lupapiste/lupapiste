@@ -215,17 +215,14 @@
                     attachments)
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
-    ;TODO
     (mapping-common/write-to-disk application attachments nil xml output-dir)))
 
 (defn save-katselmus-as-krysp [application katselmus user lang output-dir begin-of-link]
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
-        huomautukset (-> data :huomautukset :kuvaus)
-        building {:rakennusnro (-> data :rakennus vals first :rakennus :rakennusnro) ; TODO manuaalinen rak.nro?
-                  :jarjestysnumero 0} ; TODO
-        ]
+        huomautukset (-> data :katselmus :huomautukset :kuvaus)
+        building     (-> data :rakennus vals first :rakennus)]
     (save-katselmus-xml application lang output-dir
                                pitoPvm
                                building
@@ -241,10 +238,10 @@
                                begin-of-link
                                {:type "task" :id (:id katselmus)})))
 
-(permit/register-mapper permit/R :review-krysp-mapper save-katselmus-as-krysp)
+(permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
-  (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil)
+  (save-katselmus-xml application lang output-dir started (assoc building-id :kiinttun (:propertyId application)) user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil)
   )
 
 (defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link]
@@ -293,4 +290,4 @@
       output-dir
       #(write-application-pdf-versions output-dir application submitted-application lang))))
 
-(permit/register-mapper permit/R :app-krysp-mapper save-application-as-krysp)
+(permit/register-function permit/R :app-krysp-mapper save-application-as-krysp)
