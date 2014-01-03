@@ -20,6 +20,11 @@
           <tr data-bind="attr: {'data-test-id': 'manage-neighbors-email-' + neighbor.owner.email}">
             <td data-bind="propertyId: neighbor.propertyId"></td>
             <td data-bind="with: neighbor.owner">
+              <!-- ko if: nameOfDeceased -->
+              <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span> 
+              -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
+              <br/>
+              <!-- /ko -->
               <span data-bind="text: name" class="owner-name"></span>
               <span data-bind="text: address.street" class="owner-street"></span>
               <span data-bind="text: address.zip" class="owner-zip"></span>
@@ -57,7 +62,7 @@
           <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
           <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
         </div>
-        <table class="property-owners scrolling-content">
+        <table class="application-neighbors property-owners scrolling-content">
           <thead>
             <tr>
               <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: allSelected" /></th>
@@ -73,8 +78,9 @@
               </td>
               <td>
                 <!-- ko if: nameOfDeceased -->
-                <span data-bind="text nameOfDeceased" class="owner-nameOfDeceased"></span> 
-                -<span data-bind="text: loc('neighbors.owner.type.KP'])"></span>
+                <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span> 
+                -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
+                <br/>
                 <!-- /ko -->
 
                 <span data-bind="text: name" class="owner-name"></span>
