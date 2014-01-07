@@ -9,7 +9,7 @@
 (def hankkeen-kuvaus-kayttolupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 3 :size "s"}))
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 5 :size "s"}))
 
 (defschemas
   1
@@ -165,8 +165,8 @@
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    tyon-tarkoitus-dropdown                                                                 ;; lupakohtainenLisatietotieto
-    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width})) ;; lupakohtainenLisatietotieto
+    (update-in tyon-tarkoitus-dropdown [0 :body] conj {:name "kunnallistekniset-liittymat"})                                                  ;; lupakohtainenLisatietotieto
+    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}))   ;; lupakohtainenLisatietotieto
 
 (defschemas
   1

@@ -1,0 +1,43 @@
+neighbors.actions.select: valitse
+neighbor.owners.title: Naapurien valinta
+neighbors.select.ok: Tallenna
+
+neighbors.owners.status.0: Alustetaan hakua
+neighbors.owners.status.1: Haetaan kiinteistötunnusta
+neighbors.owners.status.2: Haetaan omistajatietoja
+neighbors.owners.status.3: Valitse naapurit
+neighbors.owners.status.4: Omistajien haku ei onnistunut. Yritä myöhemmin uudestaan.
+neighbors.owners.status.5: Kiinteistötunnuksen haku ei onnistunut. Yritä myöhemmin uudestaan.
+
+neighbors.owner.businessID: Y-tunnus
+neighbors.owner.nameOfDeceased: Edesmennyt
+neighbors.owner.type: Henkilölaji
+neighbors.owner.type.tuntematon: Tuntematon henkilö
+neighbors.owner.type.juridinen: Juridinen henkilö
+neighbors.owner.type.luonnollinen: Luonnollinen henkilö
+neighbors.owner.type.kuolinpesa: Kuolinpesä
+neighbors.owner.type.valtio: Valtio
+neighbors.owner.type.kuolinpesan_yhthl: Kuolinpesän yhteyshenkilö
+
+attachmentType.hakija.osakeyhtion_perustamiskirja: Osakeyhtiön perustamiskirja
+attachmentType.rakennuspaikan_hallinta.ote_asunto-osakeyhtion_kokouksen_poytakirjasta: Ote asunto-osakeyhtiön kokouksen pöytäkirjasta
+attachmentType.rakennuspaikan_hallinta.rasitesopimus: Rasitesopimus
+attachmentType.rakennuspaikka.ote_ranta-asemakaavasta: Ote ranta-asemakaavasta
+attachmentType.rakennuspaikka.ote_yleiskaavasta: Ote yleiskaavasta
+attachmentType.rakennuspaikka.rakennusoikeuslaskelma: Rakennusoikeuslaskelma
+attachmentType.osapuolet.paa_ja_rakennussuunnittelijan_tiedot: Pää- ja rakennussuunnittelijan tiedot
+attachmentType.muut.ilmoitus_vaestonsuojasta: Ilmoitus väestönsuojasta
+attachmentType.muut.jatevesijarjestelman_rakennustapaseloste: Jätevesijärjestelmän rakennustapaseloste
+attachmentType.muut.lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta: Lomarakennuksen muutos asuinrakennukseksi, selvitys määräysten toteutumisesta
+attachmentType.muut.palotekninen_selvitys: Palotekninen selvitys
+attachmentType.muut.pohjaveden_hallintasuunnitelma: Pohjaveden hallintasuunnitelma
+attachmentType.muut.rakennetapaselvitys: Rakennetapaselvitys
+attachmentType.muut.rakennuksen_tietomalli_BIM: Rakennuksen tietomalli (BIM)
+attachmentType.muut.riskianalyysi: Riskianalyysi   
+attachmentType.muut.sopimusjaljennos: Sopimusjäljennös
+attachmentType.muut.valokuva: Valokuva
+attachmentType.muut.vesi_ja_viemariliitoslausunto_tai_kartta: Vesi- ja viemäriliitoslausunto tai -kartta
+attachmentType.muut.vesikattopiirustus: Vesikattopiirustus
+attachmentType.muut.ympariston_tietomalli_BIM: Ympäristön tietomalli (BIM)
+
+sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kunnallistekniset-liittymat: Kunnallistekniset liittymät

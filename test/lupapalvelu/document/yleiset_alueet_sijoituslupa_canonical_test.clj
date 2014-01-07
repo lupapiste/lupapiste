@@ -60,7 +60,6 @@
                                :operations [operation],
                                :propertyId "75342300010054",
                                :documents documents,
-                               ; :allowedAttachmentTypes allowedAttachmentTypes,
                                ; :neighbors neighbors,
                                :municipality municipality,
                                :statements statements})
@@ -147,7 +146,9 @@
 
         match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :selitysteksti))
         lisatietoja-sijoituskohteesta-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy]
+        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy
+
+        pinta-ala (:pintaala Sijoituslupa) => falsey]
 
 ;    (println "\n canonical:")
 ;    (clojure.pprint/pprint canonical)

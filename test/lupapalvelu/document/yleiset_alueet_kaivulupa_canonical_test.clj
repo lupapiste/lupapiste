@@ -131,9 +131,12 @@
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
 
+        pinta-ala (:pintaala Tyolupa) => truthy
+
         ;; Lisatiedot
         lupakohtainenLisatietotieto (-> Tyolupa :lupakohtainenLisatietotieto) => truthy
-        sijoituksen-tark (-> lupakohtainenLisatietotieto first :LupakohtainenLisatieto :arvo) => truthy
+        lisatietoja-filter-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
+        sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
         sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
@@ -259,4 +262,5 @@
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
       (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :sijoituksen-tarkoitus :value))
-      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")))
+      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
+      (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))
