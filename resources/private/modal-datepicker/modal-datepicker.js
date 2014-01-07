@@ -4,7 +4,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.datepickerSelector = "#modal-datepicker-date";
 
   self.appId = 0;
-  self.constructionStateChangeDate = ko.observable(null);
+  self.dateObservable = ko.observable(null);
   self.errorMessage = ko.observable(null);
   self.processing = ko.observable();
   self.pending = ko.observable();
@@ -17,7 +17,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.areYouSureMessage = ko.observable("");
 
 
-  self.ok = ko.computed( function() {return self.constructionStateChangeDate();} );
+  self.ok = ko.computed( function() {return self.dateObservable();} );
 
   self.onError = function(resp) {
     self.errorMessage(resp.text);
@@ -25,7 +25,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
 
   self.reset = function(app) {
     self.appId = app.id();
-    self.constructionStateChangeDate(null);
+    self.dateObservable(null);
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
@@ -56,7 +56,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
         $("#modal-datepicker").show();
         LUPAPISTE.ModalDialog.close();
         self.errorMessage(null);
-        self.constructionStateChangeDate(null);
+        self.dateObservable(null);
       })
       .error(self.onError)
       .call();
@@ -67,7 +67,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
     $("#modal-datepicker").show();
   };
 
-  self.sendConstructionStateChangeDateInfo = function() {
+  self.confirm = function() {
     $("#modal-datepicker").hide();
     LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("areyousure"),
