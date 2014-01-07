@@ -975,7 +975,7 @@
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-           tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
+           tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
            updates {$set (merge {:verdicts verdicts-with-attachments
                                  :modified created
                                  :state    :verdictGiven}

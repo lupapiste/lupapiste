@@ -237,7 +237,7 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state()) && features.enabled('rakentamisen-aikaiset-tabi')">
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state())">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
