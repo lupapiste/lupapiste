@@ -37,6 +37,9 @@
         neighbor (find-by-id neighborId neighbors)]
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
+                                           :businessID nil
+                                           :nameOfDeceased nil
+                                           :type nil
                                            :address {:street "s" :city "c" :zip "z"}
                                            :email "e"}})
     (fact (count (:status neighbor)) => 1)
@@ -52,6 +55,9 @@
     (fact (count neighbors) => 1)
     (fact (:neighbor neighbor) => {:propertyId "p2"
                                    :owner {:name "n2"
+                                           :businessID nil
+                                           :nameOfDeceased nil
+                                           :type nil
                                            :address {:street "s2" :city "c2" :zip "z2"}
                                            :email "e2"}})
     (fact (count (:status neighbor)) => 1)
