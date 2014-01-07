@@ -225,6 +225,10 @@
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
+(defn- assoc-in-no-nil [m ks v]
+  (if v
+    (assoc-in m ks v)
+    m))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -261,7 +265,7 @@
                     (-> canonical
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
                         (get-bulding-places (:rakennuspaikka documents) application))
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+                      (assoc-in-no-nil [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
                         toimenpiteet)
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
                         (get-statements (:statements application))))
