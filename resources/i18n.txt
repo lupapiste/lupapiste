@@ -10,3 +10,4 @@ application.buildingOperation: Toimenpide
 application.buildingStartedDate: Päivämäärä
 application.buildingStartedBy: Tekijä
 application.aloitusilmoitukset: Aloitusilmoitukset
+application.beginConstructionOf: Ilmoita työt alkaneiksi
