@@ -721,6 +721,7 @@
     (fact "KuntaRooliKoodi" (:kuntaRooliKoodi rakennuksen-omistajatieto) => "Rakennuksen omistaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
+    (fact "vakuus" (:vakuus Lisatiedot) => nil)
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")
@@ -1077,3 +1078,133 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "pohjakatselmus"
                  kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"]))
+
+
+;Aloitusoikeus(Takuu)(tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta
+(def aloitusoikeus-hakemus {:sent nil,
+                            :linkPermitData {0 {:type "kuntalupatunnus", :id "8333-1231"}},
+                            :neighbors {},
+                            :schema-version 1,
+                            :authority {},
+                            :auth
+                            [{:lastName "Panaani",
+                              :firstName "Pena",
+                              :username "pena",
+                              :type "owner",
+                              :role "owner",
+                              :id "777777777777777777000020"}],
+                            :drawings [],
+                            :submitted 1388665814105,
+                            :state "submitted",
+                            :permitSubtype nil,
+                            :tasks [],
+                            :_verdicts-seen-by {},
+                            :location {:x 406390.19848633, :y 6681812.5},
+                            :attachments [],
+                            :statements [],
+                            :organization "753-R",
+                            :buildings [],
+                            :title "Vainuddintie 92",
+                            :started nil,
+                            :closed nil,
+                            :operations
+                            [{:id "52c5461042065cf9f379de8b",
+                              :name "aloitusoikeus",
+                              :created 1388660240013}],
+                            :infoRequest false,
+                            :openInfoRequest false,
+                            :opened 1388665814105,
+                            :created 1388660240013,
+                            :_comments-seen-by {},
+                            :propertyId "75341900080007",
+                            :verdicts [],
+                            :documents
+                            [{:created 1388660240013,
+                              :data
+                              {:_selected {:value "henkilo"},
+                               :henkilo
+                               {:henkilotiedot
+                                {:etunimi {:modified 1388660303335, :value "Pena"},
+                                 :hetu {:modified
+                                        1388660303335, :value "010203-0405"},
+                                 :sukunimi {:modified 1388660303335, :value "Panaani"}},
+                                :osoite
+                                {:katu {:modified 1388660303335, :value "Paapankuja 12"},
+                                 :postinumero {:modified 1388660303335, :value "010203"},
+                                 :postitoimipaikannimi
+                                 {:modified 1388660303335, :value "Piippola"}},
+                                :userId
+                                {:modified 1388660303402, :value "777777777777777777000020"},
+                                :yhteystiedot
+                                {:email {:modified 1388660303335, :value "pena@example.com"},
+                                 :puhelin {:modified 1388660303335, :value "0102030405"}}}},
+                              :id "52c5461042065cf9f379de8d",
+                              :schema-info
+                              {:approvable true,
+                               :subtype "hakija",
+                               :name "hakija",
+                               :removable true,
+                               :repeating true,
+                               :version 1,
+                               :type "party",
+                               :order 3}}
+                             {:created 1388660240013,
+                              :data
+                              {:Vakuuspaatospykala {:modified 1388660299530, :value "14\u00a7"},
+                               :kuvaus
+                               {:modified 1388667082757,
+                                :value "Tarttis aloitta asp rakentaminen."},
+                               :vakuudenLaji {:modified 1388660291061, :value "Pankkitalletus"},
+                               :vakuudenMaara {:modified 1388667085880, :value "10000"},
+                               :voimassaolopvm {:modified 1388667087403, :value "15.01.2014"}},
+                              :id "52c5461042065cf9f379de8c",
+                              :schema-info
+                              {:version 1,
+                               :name "aloitusoikeus",
+                               :approvable true,
+                               :op
+                               {:id "52c5461042065cf9f379de8b",
+                                :name "aloitusoikeus",
+                                :created 1388660240013},
+                               :removable false}}
+                             {:id "52c5461042065cf9f379de8e",
+                              :schema-info
+                              {:approvable true,
+                               :name "maksaja",
+                               :removable true,
+                               :repeating true,
+                               :version 1,
+                               :type "party",
+                               :order 6},
+                              :created 1388660240013,
+                              :data {}}],
+                            :_statements-seen-by {:777777777777777777000020 1388664440961},
+                            :_software_version "0",
+                            :modified 1388667087403,
+                            :comments [],
+                            :address "Vainuddintie 92",
+                            :permitType "R",
+                            :id "LP-753-2014-00001",
+                            :municipality "753"})
+
+(fl/facts* "Canonical model is correct"
+           (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
+                 rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+                 rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+                 rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+
+                 toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
+                 aineistonnimi (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
+                 asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
+                 Asiantiedot (:Asiantiedot asianTiedot)
+                 rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
+                 lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
+                 Lisatiedot (:Lisatiedot lisatiedot) => truthy
+                 vakuus (:vakuus Lisatiedot) => truthy
+                 vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"
+                 voimassaolopvm (:voimassaolopvm vakuus) => "2014-01-15"
+                 vakuudenMaara (:vakuudenmaara vakuus) => "10000"
+                 Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14\u00a7"
+                 ]
+             ))
+

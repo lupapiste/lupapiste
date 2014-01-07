@@ -5,6 +5,7 @@
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
+                                                                      aloitusoikeus-hakemus
                                                                       ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
                                                                 save-aloitusilmoitus-as-krysp
@@ -74,7 +75,10 @@
     (do-test application-tyonjohtajan-nimeaminen))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen)))
+    (do-test application-suunnittelijan-nimeaminen))
+
+  (fact "aloitusilmoitus -> canonical -> xml"
+    (do-test aloitusoikeus-hakemus)))
 
 (let [application (assoc application-rakennuslupa :state "verdictGiven")
       user        {:id "777777777777777777000017"
