@@ -751,7 +751,8 @@
                   <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
                   <td data-bind="text: util.buildingName($data)"></td>
                   <td>
-                    <span data-bind="if: !$data.constructionStarted"><a data-bind="" href="#">Aloita</a></span>
+                    <span data-bind="if: !$data.constructionStarted">
+                      <a data-bind="click: $parent.beginConstructionOf" href="#">Aloita</a></span>
                     <span data-bind="if: $data.constructionStarted">
                       <span data-bind="dateString: $data.constructionStarted"></span>
                     </span>
