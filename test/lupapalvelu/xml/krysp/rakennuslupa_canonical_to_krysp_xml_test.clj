@@ -28,7 +28,7 @@
 
     (fact ":tag is set" (has-tag rakennuslupa_to_krysp) => true)
 
-    (println xml-s)
+    ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     ;; TODO: own test
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"})
