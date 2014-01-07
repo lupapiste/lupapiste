@@ -50,6 +50,9 @@
                              treepart)
                   treepart (if (env/feature? :jatkoaika)
                              (conj treepart ["Jatkoaika" :jatkoaika])
+                             treepart)
+                  treepart (if (env/feature? :aloitusoikeus)
+                             (conj treepart ["Aloitusoikeus" :aloitusoikeus])
                              treepart)]
               treepart)]}))
 
@@ -243,7 +246,7 @@
     {:asuinrakennus               {:schema "uusiRakennus"
                                    :permit-type "R"
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                                 [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
+                                                 [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "000"]] ;FIXME Aftre krysp update change to 000
                                    :required common-schemas
                                    :attachments uuden_rakennuksen_liitteet}
      :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
@@ -401,6 +404,11 @@
                                    :permit-type "R"
                                    :required ["maksaja"]
                                    :attachments []}
+
+     :aloitusoikeus     {:schema "aloitusoikeus"
+                         :permit-type "R"
+                         :required ["maksaja"]
+                         :attachments []}
      }
     ya-operations))
 

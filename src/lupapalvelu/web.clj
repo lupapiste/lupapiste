@@ -454,7 +454,7 @@
 ;;
 
 (defn get-session-timeout [request]
-  (get-in request [:session :noir :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 1)))
+  (get-in request [:session :noir :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 4)))
 
 (defn session-timeout-handler [handler request]
   (let [now (now)

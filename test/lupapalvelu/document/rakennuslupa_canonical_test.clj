@@ -209,7 +209,9 @@
                     :varusteet {:parvekeTaiTerassiKytkin {:value true}
                                 :WCKytkin {:value true}}}
                 :1 {:muutostapa {:value "lis\u00e4ys"}
-                    :huoneistoTunnus {}
+                    :huoneistoTunnus {:porras {:value "A"}
+                                      :huoneistonumero {:value "2"}
+                                      :jakokirjain {:value "a"}}
                     :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
                                        :huoneistoala {:value "02"}
                                        :huoneluku {:value "12"}}
@@ -592,7 +594,7 @@
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
-        h1 (first huoneistot), h2 (last huoneistot)]
+        h2 (first huoneistot), h1 (last huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
     (fact "h1 huoneluku" (:huoneluku h1) => "66")
@@ -619,7 +621,10 @@
     (fact "h2 varusteet: saunaKytkin" (-> h2 :varusteet :saunaKytkin) => true)
     (fact "h2 varusteet: parvekeTaiTerassiKytkin" (-> h2 :varusteet :parvekeTaiTerassiKytkin) => false)
     (fact "h2 varusteet: lamminvesiKytkin" (-> h2 :varusteet :lamminvesiKytkin) => true)
-    (fact "h2 huoneistotunnus" (:huoneistotunnus h2) => falsey)))
+    (fact "h2 huoneistotunnus" (:huoneistotunnus h1) => truthy)
+    (fact "h2 huoneistotunnus: porras" (-> h1 :huoneistotunnus :porras) => "A")
+    (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
+    (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
 
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
 
@@ -716,6 +721,7 @@
     (fact "KuntaRooliKoodi" (:kuntaRooliKoodi rakennuksen-omistajatieto) => "Rakennuksen omistaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
+    (fact "vakuus" (:vakuus Lisatiedot) => nil)
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")
@@ -998,69 +1004,6 @@
     hakija-henkilo],
    :_software_version "1.0.5",
    :modified 1384167309006,
-   :allowedAttachmentTypes
-   [["hakija"
-     ["valtakirja"
-      "ote_kauppa_ja_yhdistysrekisterista"
-      "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]]
-    ["rakennuspaikan_hallinta"
-     ["jaljennos_myonnetyista_lainhuudoista"
-      "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta"
-      "rasitustodistus"
-      "todistus_erityisoikeuden_kirjaamisesta"
-      "jaljennos_vuokrasopimuksesta"
-      "jaljennos_perunkirjasta"]]
-    ["rakennuspaikka"
-     ["ote_alueen_peruskartasta"
-      "ote_asemakaavasta_jos_asemakaava_alueella"
-      "ote_kiinteistorekisteristerista"
-      "tonttikartta_tarvittaessa"
-      "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"
-      "kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma"]]
-    ["paapiirustus"
-     ["asemapiirros"
-    "pohjapiirros"
-    "leikkauspiirros"
-    "julkisivupiirros"]]
-    ["ennakkoluvat_ja_lausunnot"
-     ["naapurien_suostumukset"
-    "selvitys_naapurien_kuulemisesta"
-    "elyn_tai_kunnan_poikkeamapaatos"
-    "suunnittelutarveratkaisu"
-    "ymparistolupa"]]
-    ["muut"
-     ["selvitys_rakennuspaikan_terveellisyydesta"
-      "selvitys_rakennuspaikan_korkeusasemasta"
-      "selvitys_liittymisesta_ymparoivaan_rakennuskantaan"
-      "julkisivujen_varityssuunnitelma"
-      "selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta"
-      "piha_tai_istutussuunnitelma"
-      "selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta"
-      "selvitys_rakennuksen_kosteusteknisesta_toimivuudesta"
-      "selvitys_rakennuksen_aaniteknisesta_toimivuudesta"
-      "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"
-      "energiataloudellinen_selvitys"
-      "paloturvallisuussuunnitelma"
-      "liikkumis_ja_esteettomyysselvitys"
-      "kerrosalaselvitys"
-      "vaestonsuojasuunnitelma"
-      "rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo"
-      "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"
-      "selvitys_kiinteiston_jatehuollon_jarjestamisesta"
-      "rakennesuunnitelma"
-      "ilmanvaihtosuunnitelma"
-      "lammityslaitesuunnitelma"
-      "radontekninen_suunnitelma"
-      "kalliorakentamistekninen_suunnitelma"
-      "paloturvallisuusselvitys"
-      "suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta"
-      "merkki_ja_turvavalaistussuunnitelma"
-      "sammutusautomatiikkasuunnitelma"
-      "rakennusautomaatiosuunnitelma"
-      "valaistussuunnitelma"
-      "selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta"
-      "selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta"
-      "muu"]]],
    :comments [],
    :address "It\u00e4inen Hangelbyntie 163",
    :permitType "R",
@@ -1135,3 +1078,133 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "pohjakatselmus"
                  kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"]))
+
+
+;Aloitusoikeus(Takuu)(tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta
+(def aloitusoikeus-hakemus {:sent nil,
+                            :linkPermitData {0 {:type "kuntalupatunnus", :id "8333-1231"}},
+                            :neighbors {},
+                            :schema-version 1,
+                            :authority {},
+                            :auth
+                            [{:lastName "Panaani",
+                              :firstName "Pena",
+                              :username "pena",
+                              :type "owner",
+                              :role "owner",
+                              :id "777777777777777777000020"}],
+                            :drawings [],
+                            :submitted 1388665814105,
+                            :state "submitted",
+                            :permitSubtype nil,
+                            :tasks [],
+                            :_verdicts-seen-by {},
+                            :location {:x 406390.19848633, :y 6681812.5},
+                            :attachments [],
+                            :statements [],
+                            :organization "753-R",
+                            :buildings [],
+                            :title "Vainuddintie 92",
+                            :started nil,
+                            :closed nil,
+                            :operations
+                            [{:id "52c5461042065cf9f379de8b",
+                              :name "aloitusoikeus",
+                              :created 1388660240013}],
+                            :infoRequest false,
+                            :openInfoRequest false,
+                            :opened 1388665814105,
+                            :created 1388660240013,
+                            :_comments-seen-by {},
+                            :propertyId "75341900080007",
+                            :verdicts [],
+                            :documents
+                            [{:created 1388660240013,
+                              :data
+                              {:_selected {:value "henkilo"},
+                               :henkilo
+                               {:henkilotiedot
+                                {:etunimi {:modified 1388660303335, :value "Pena"},
+                                 :hetu {:modified
+                                        1388660303335, :value "010203-0405"},
+                                 :sukunimi {:modified 1388660303335, :value "Panaani"}},
+                                :osoite
+                                {:katu {:modified 1388660303335, :value "Paapankuja 12"},
+                                 :postinumero {:modified 1388660303335, :value "010203"},
+                                 :postitoimipaikannimi
+                                 {:modified 1388660303335, :value "Piippola"}},
+                                :userId
+                                {:modified 1388660303402, :value "777777777777777777000020"},
+                                :yhteystiedot
+                                {:email {:modified 1388660303335, :value "pena@example.com"},
+                                 :puhelin {:modified 1388660303335, :value "0102030405"}}}},
+                              :id "52c5461042065cf9f379de8d",
+                              :schema-info
+                              {:approvable true,
+                               :subtype "hakija",
+                               :name "hakija",
+                               :removable true,
+                               :repeating true,
+                               :version 1,
+                               :type "party",
+                               :order 3}}
+                             {:created 1388660240013,
+                              :data
+                              {:Vakuuspaatospykala {:modified 1388660299530, :value "14\u00a7"},
+                               :kuvaus
+                               {:modified 1388667082757,
+                                :value "Tarttis aloitta asp rakentaminen."},
+                               :vakuudenLaji {:modified 1388660291061, :value "Pankkitalletus"},
+                               :vakuudenMaara {:modified 1388667085880, :value "10000"},
+                               :voimassaolopvm {:modified 1388667087403, :value "15.01.2014"}},
+                              :id "52c5461042065cf9f379de8c",
+                              :schema-info
+                              {:version 1,
+                               :name "aloitusoikeus",
+                               :approvable true,
+                               :op
+                               {:id "52c5461042065cf9f379de8b",
+                                :name "aloitusoikeus",
+                                :created 1388660240013},
+                               :removable false}}
+                             {:id "52c5461042065cf9f379de8e",
+                              :schema-info
+                              {:approvable true,
+                               :name "maksaja",
+                               :removable true,
+                               :repeating true,
+                               :version 1,
+                               :type "party",
+                               :order 6},
+                              :created 1388660240013,
+                              :data {}}],
+                            :_statements-seen-by {:777777777777777777000020 1388664440961},
+                            :_software_version "0",
+                            :modified 1388667087403,
+                            :comments [],
+                            :address "Vainuddintie 92",
+                            :permitType "R",
+                            :id "LP-753-2014-00001",
+                            :municipality "753"})
+
+(fl/facts* "Canonical model is correct"
+           (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
+                 rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+                 rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+                 rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+
+                 toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
+                 aineistonnimi (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
+                 asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
+                 Asiantiedot (:Asiantiedot asianTiedot)
+                 rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
+                 lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
+                 Lisatiedot (:Lisatiedot lisatiedot) => truthy
+                 vakuus (:vakuus Lisatiedot) => truthy
+                 vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"
+                 voimassaolopvm (:voimassaolopvm vakuus) => "2014-01-15"
+                 vakuudenMaara (:vakuudenmaara vakuus) => "10000"
+                 Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14\u00a7"
+                 ]
+             ))
+

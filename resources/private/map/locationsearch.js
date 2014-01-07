@@ -38,10 +38,20 @@ var locationSearch = (function() {
       .call();
   };
 
+  var searchOwnersByPropertyId = function(requestContext, propertyId, onSuccess, onFail) {
+      ajax
+      .get("/api/query/owners")
+      .param("propertyId", propertyId)
+      .success(requestContext.onResponse(onSuccess))
+      .fail(requestContext.onResponse(onFail))
+      .call();
+  };
+  
   return {
     pointByAddress: serchPointByAddress,
     pointByPropertyId: searchPointByPropertyId,
     propertyIdByPoint: searchPropertyId,
-    addressByPoint: searchAddress
+    addressByPoint: searchAddress,
+    ownersByPropertyId: searchOwnersByPropertyId
   };
 })();

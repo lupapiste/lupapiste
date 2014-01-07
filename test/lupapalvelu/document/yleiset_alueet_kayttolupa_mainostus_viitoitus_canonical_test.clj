@@ -136,6 +136,8 @@
 
         lisatieto-vec (-> Mainostus-viitoituslupa :lupakohtainenLisatietotieto) => truthy
 
+        pinta-ala (:pintaala Mainostus-viitoituslupa) => falsey
+
         match-fn #(= "Tapahtuman nimi" (-> % :LupakohtainenLisatieto :selitysteksti))
         tapahtuman-nimi-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
         tapahtuman-nimi (:arvo tapahtuman-nimi-Lisatieto) => truthy

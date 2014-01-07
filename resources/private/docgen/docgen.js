@@ -198,7 +198,9 @@ var docgen = (function () {
       var help = null;
       var helpLocKey = locKeyFromPath(pathStr + ".help");
       var span = document.createElement("span");
-      span.className = "form-entry";
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
+      span.className = "form-entry " + sizeClass;
+      
 
       // Display text areas in a wide container
       if (subSchema.type === "text") {
@@ -207,7 +209,7 @@ var docgen = (function () {
 
       // Override style with layout option
       if (subSchema.layout) {
-        span.className = "form-entry form-" + subSchema.layout;
+        span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
       }
 
       // durable field error panels
@@ -447,6 +449,7 @@ var docgen = (function () {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var span = makeEntrySpan(subSchema, myPath);
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
 
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
@@ -455,7 +458,7 @@ var docgen = (function () {
       select.setAttribute("data-docgen-path", myPath);
 
       select.name = myPath;
-      select.className = "form-input combobox";
+      select.className = "form-input combobox " + (sizeClass || "");
 
       select.id = pathStrToID(myPath);
 
@@ -478,17 +481,19 @@ var docgen = (function () {
       if (selectedOption === "") option.selected = "selected";
       select.appendChild(option);
 
-      $.each(subSchema.body, function (i, o) {
-        var name = o.name;
-        var option = document.createElement("option");
-        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
-
-        option.value = name;
-        option.appendChild(document.createTextNode(loc(locKey)));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
+      _(subSchema.body)
+        .map(function(e) { return [e.name,
+                                   loc(self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name)]; })
+        .sortBy(function(e) { return e[1]; })
+        .forEach(function(e) {
+          var name = e[0];
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(e[1]));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
       });
 
       if (otherKey) {

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kyyh:Yhteystiedot xmlns:y="http://xml.nls.fi/ktjkir/yhteinen/2013/03/01"
+                  xmlns:kyyh="http://xml.nls.fi/ktjkir/kysely/yhteystiedot/2013/11/01"
+                  xmlns:tryh="http://xml.nls.fi/ktjkir/yhteystiedot/2013/11/01"
+                  xmlns:trpt="http://xml.nls.fi/ktjkir/perustiedot/2013/03/01"
+                  xmlns:muti="http://xml.nls.fi/ktjkir/yhteystiedot_muti/2013/03/01">
+  <tryh:Rekisteriyksikko>
+      <trpt:rekisteriyksikonPerustiedot ajantasaistettu="true">
+        <y:kiinteistotunnus>27141300170004</y:kiinteistotunnus>
+        <trpt:olotila>1</trpt:olotila>
+        <trpt:rekisteriyksikkolaji>1</trpt:rekisteriyksikkolaji>
+        <trpt:rekisterointipvm pvm="1979-05-30">19790530</trpt:rekisterointipvm>
+        <trpt:nimi>KYNSIRINNE II</trpt:nimi>
+        <trpt:maapintaala yksikko="neliometri">14941</trpt:maapintaala>
+        <trpt:arkistoviittaus>
+            <trpt:arkisto>
+              <trpt:arkistoviite>16:246</trpt:arkistoviite>
+            </trpt:arkisto>
+        </trpt:arkistoviittaus>
+        <trpt:kuntaviittaus>
+            <trpt:kunta>
+              <trpt:nimi kieli="fi">Kokemäki</trpt:nimi>
+              <trpt:nimi kieli="sv">Kumo</trpt:nimi>
+              <trpt:kuntatunnus>271</trpt:kuntatunnus>
+            </trpt:kunta>
+        </trpt:kuntaviittaus>
+      </trpt:rekisteriyksikonPerustiedot>
+      <tryh:kohteenHenkilot>
+        <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+              <y:henkilolaji>LU</y:henkilolaji>
+              <y:etunimet>Ahma Kyösti Jaakkima</y:etunimet>
+              <y:sukunimi>Voller</y:sukunimi>
+              <y:syntymapvm>1975-01-08</y:syntymapvm>
+              <y:ulkomaalainen>false</y:ulkomaalainen>
+            </y:henkilonTiedot>
+            <muti:Osoite>
+              <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+              <muti:postinumero>00100</muti:postinumero>
+              <muti:paikkakunta>Helsinki</muti:paikkakunta>
+            </muti:Osoite>
+        </y:Henkilo>
+        <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+              <y:henkilolaji>LU</y:henkilolaji>
+              <y:etunimet>Jaakko Jaakkima Jorma</y:etunimet>
+              <y:sukunimi>Pakkanen</y:sukunimi>
+              <y:syntymapvm>1979-12-12</y:syntymapvm>
+              <y:ulkomaalainen>true</y:ulkomaalainen>
+            </y:henkilonTiedot>
+            <muti:Osoite>
+              <muti:jakeluosoite>Valli &amp; kuja I/X:s Gaatta</muti:jakeluosoite>
+              <muti:postinumero>00100</muti:postinumero>
+              <muti:paikkakunta>Helsinki</muti:paikkakunta>
+            </muti:Osoite>
+        </y:Henkilo>
+      </tryh:kohteenHenkilot>
+  </tryh:Rekisteriyksikko>
+  
+</kyyh:Yhteystiedot>

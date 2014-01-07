@@ -242,6 +242,12 @@
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
 
+(def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}
+                    {:name "vakuudenMaara" :type :string :subtype :number :unit "euroa" :size "s" :min 1 :max 9999999 :required true}
+                    {:name "voimassaolopvm" :type :date :required true}
+                    {:name "vakuudenLaji" :type :string :required false}
+                    {:name "Vakuuspaatospykala" :type :string :required false}])
+
 (def muutostapa {:name "muutostapa" :type :select :required true
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys"}
@@ -250,7 +256,7 @@
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
@@ -362,7 +368,7 @@
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select
+                                 {:name "kayttotarkoitus" :type :select :size "l"
                                   :body rakennuksen-kayttotarkoitus}]}
                          {:name "mitat"
                           :type :group
@@ -474,7 +480,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true :size "l"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -586,8 +592,8 @@
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-    {:info {:name "uusiRakennus" :approvable true}
-     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+   {:info {:name "uusiRakennus" :approvable true}
+    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
     {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
@@ -658,6 +664,9 @@
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+    {:info {:name "aloitusoikeus" :removable false :approvable true}
+     :body aloitusoikeus}
 
     {:info {:name "lisatiedot"
             :order 100}
