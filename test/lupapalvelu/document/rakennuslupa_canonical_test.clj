@@ -1201,7 +1201,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
                  Lisatiedot (:Lisatiedot lisatiedot) => truthy
                  vakuus (:vakuus Lisatiedot) => truthy
-                 vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"ﬁ
+                 vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"
                  voimassaolopvm (:voimassaolopvm vakuus) => "2014-01-15"
                  vakuudenMaara (:vakuudenmaara vakuus) => "10000"
                  Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14\u00a7"
