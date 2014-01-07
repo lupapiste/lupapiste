@@ -5,3 +5,8 @@ unit.euroa: euroa
 aloitusoikeus.voimassaolopvm: Voimassaolopvm
 aloitusoikeus.vakuudenLaji: Vakuuden laji
 aloitusoikeus.Vakuuspaatospykala: Vakuuspäätöspykälä
+application.buildingStatus: Tila
+application.buildingOperation: Toimenpide
+application.buildingStartedDate: Päivämäärä
+application.buildingStartedBy: Tekijä
+application.aloitusilmoitukset: Aloitusilmoitukset
