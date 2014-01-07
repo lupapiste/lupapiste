@@ -1,7 +1,7 @@
-LUPAPISTE.ConstructionStateChangeModel = function() {
+LUPAPISTE.ModalDatepickerModel = function() {
   var self = this;
-  self.dialogSelector = "#dialog-construction-state-change";
-  self.datepickerSelector = "#construction-state-change-date";
+  self.dialogSelector = "#dialog-modal-datepicker";
+  self.datepickerSelector = "#modal-datepicker-date";
 
   self.configs = {
       "start" : {commandName : "inform-construction-started",
@@ -68,7 +68,7 @@ LUPAPISTE.ConstructionStateChangeModel = function() {
       .pending(self.pending)
       .success(function() {
         repository.load(self.appId);
-        $("#construction-state-change").show();
+        $("#modal-datepicker").show();
         LUPAPISTE.ModalDialog.close();
         self.errorMessage(null);
         self.constructionStateChangeDate(null);
@@ -79,11 +79,11 @@ LUPAPISTE.ConstructionStateChangeModel = function() {
   };
 
   self.doCancel = function() {
-    $("#construction-state-change").show();
-  }
+    $("#modal-datepicker").show();
+  };
 
   self.sendConstructionStateChangeDateInfo = function() {
-    $("#construction-state-change").hide();
+    $("#modal-datepicker").hide();
     LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("areyousure"),
         loc(self.config.areYouSureMessage, $(self.datepickerSelector).val()),

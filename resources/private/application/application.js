@@ -9,7 +9,8 @@
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
-  var constructionStateChangeModel = new LUPAPISTE.ConstructionStateChangeModel();
+  var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
