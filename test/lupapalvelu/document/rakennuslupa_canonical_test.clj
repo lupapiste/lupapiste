@@ -1150,7 +1150,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                                :order 3}}
                              {:created 1388660240013,
                               :data
-                              {:Vakuuspaatospykala {:modified 1388660299530, :value "14§"},
+                              {:Vakuuspaatospykala {:modified 1388660299530, :value "14\u00a7"},
                                :kuvaus
                                {:modified 1388667082757,
                                 :value "Tarttis aloitta asp rakentaminen."},
@@ -1201,10 +1201,10 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
                  Lisatiedot (:Lisatiedot lisatiedot) => truthy
                  vakuus (:vakuus Lisatiedot) => truthy
-                 vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"
+                 vakuudenLaji (:vakuudenLaji vakuus) => "Pankkitalletus"ﬁ
                  voimassaolopvm (:voimassaolopvm vakuus) => "2014-01-15"
                  vakuudenMaara (:vakuudenmaara vakuus) => "10000"
-                 Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14§"
+                 Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14\u00a7"
                  ]
              ))
 
