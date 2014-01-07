@@ -3,25 +3,6 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.dialogSelector = "#dialog-modal-datepicker";
   self.datepickerSelector = "#modal-datepicker-date";
 
-  self.configs = {
-      "start" : {commandName : "inform-construction-started",
-                 dateParameter: "startedTimestampStr",
-                 dateSelectorLabel   : "constructionStarted.startedDate",
-                 dialogHeader        : "constructionStarted.dialog.header",
-                 dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
-                 dialogButtonSend    : "constructionStarted.dialog.continue",
-                 areYouSureMessage   : "constructionStarted.dialog.areyousure.message"},
-
-      "ready" : {commandName : "inform-construction-ready",
-                 dateParameter: "readyTimestampStr",
-                 extraParameters: {lang: loc.getCurrentLanguage()},
-                 dateSelectorLabel   : "constructionReady.readyDate",
-                 dialogHeader        : "constructionReady.dialog.header",
-                 dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
-                 dialogButtonSend    : "constructionReady.dialog.continue",
-                 areYouSureMessage   : "constructionReady.dialog.areyousure.message"}
-  };
-
   self.appId = 0;
   self.constructionStateChangeDate = ko.observable(null);
   self.errorMessage = ko.observable(null);
@@ -105,8 +86,5 @@ LUPAPISTE.ModalDatepickerModel = function() {
       LUPAPISTE.ModalDialog.open(self.dialogSelector);
     }
   };
-
-  self.openConstructionStartDialog = _.partial(self.configure, self.configs.start);
-  self.openConstructionReadyDialog = _.partial(self.configure, self.configs.ready);
 
 };

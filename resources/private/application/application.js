@@ -10,6 +10,25 @@
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+  constructionStateChangeModel.openConstructionStartDialog = _.partial(
+      constructionStateChangeModel.configure,
+      {commandName : "inform-construction-started",
+       dateParameter: "startedTimestampStr",
+       dateSelectorLabel   : "constructionStarted.startedDate",
+       dialogHeader        : "constructionStarted.dialog.header",
+       dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "constructionStarted.dialog.areyousure.message"});
+  constructionStateChangeModel.openConstructionReadyDialog = _.partial(
+      constructionStateChangeModel.configure,
+      {commandName : "inform-construction-ready",
+       dateParameter: "readyTimestampStr",
+       extraParameters: {lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "constructionReady.readyDate",
+       dialogHeader        : "constructionReady.dialog.header",
+       dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
+       dialogButtonSend    : "constructionReady.dialog.continue",
+       areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
 
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
