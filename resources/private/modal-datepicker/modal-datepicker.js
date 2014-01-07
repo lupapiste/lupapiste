@@ -5,10 +5,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
 
   self.configs = {
       "start" : {commandName : "inform-construction-started",
-                 getCommandData : function() {
-                                    return {id:                  self.appId,
-                                            startedTimestampStr: $(self.datepickerSelector).val()};
-                                  },
+                 dateParameter: "startedTimestampStr",
                  dateSelectorLabel   : "constructionStarted.startedDate",
                  dialogHeader        : "constructionStarted.dialog.header",
                  dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
@@ -16,11 +13,8 @@ LUPAPISTE.ModalDatepickerModel = function() {
                  areYouSureMessage   : "constructionStarted.dialog.areyousure.message"},
 
       "ready" : {commandName : "inform-construction-ready",
-                 getCommandData : function() {
-                                    return {id:                self.appId,
-                                            readyTimestampStr: $(self.datepickerSelector).val(),
-                                            lang:              loc.getCurrentLanguage()};
-                                  },
+                 dateParameter: "readyTimestampStr",
+                 extraParameters: {lang: loc.getCurrentLanguage()},
                  dateSelectorLabel   : "constructionReady.readyDate",
                  dialogHeader        : "constructionReady.dialog.header",
                  dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
@@ -63,7 +57,17 @@ LUPAPISTE.ModalDatepickerModel = function() {
   };
 
   self.doSend = function() {
-    ajax.command(self.config.commandName, self.config.getCommandData())
+    var commandData = {id: self.appId};
+    commandData[self.config.dateParameter] = $(self.datepickerSelector).val();
+    if (self.config.extraParameters) {
+      if (_.isFunction(self.config.extraParameters)) {
+        _.merge(commandData, self.config.extraParameters());
+      } else {
+        _.merge(commandData, self.config.extraParameters);
+      }
+    }
+
+    ajax.command(self.config.commandName, commandData)
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
@@ -94,16 +98,15 @@ LUPAPISTE.ModalDatepickerModel = function() {
 
   //Open the dialog
 
-  function openConstructionStateChangeDialog(stateChangeType, app) {
-    self.config = null;
-    self.config = self.configs[stateChangeType];
+  self.configure = function(config, app) {
+    self.config = config;
     if (self.config) {
       self.reset(app);
       LUPAPISTE.ModalDialog.open(self.dialogSelector);
     }
   };
 
-  self.openConstructionStartDialog = _.partial(openConstructionStateChangeDialog, "start");
-  self.openConstructionReadyDialog = _.partial(openConstructionStateChangeDialog, "ready");
+  self.openConstructionStartDialog = _.partial(self.configure, self.configs.start);
+  self.openConstructionReadyDialog = _.partial(self.configure, self.configs.ready);
 
 };
