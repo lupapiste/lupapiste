@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="construction-state-change" style="visibility: visible; display: block;">
+      <div id="dialog-construction-state-change" class="window autosized" >
+        <div data-bind="with: constructionStateChangeModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: dialogHeader"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+
+          <div class="dialog-content">
+
+            <p data-bind ="lhtml: dialogHelpParagraph"></p>
+
+            <label class="form-label" data-bind="ltext: dateSelectorLabel"></label><br/>
+            <input type="text" class="form-input long" id="construction-state-change-date"
+                   data-bind="datepicker: constructionStateChangeDate"></input>
+            <br>
+
+            <div data-bind="if: errorMessage" >
+              <div data-bind="ltext: errorMessage" class="context-error"></div>
+            </div>
+
+            <button class="btn btn-primary btn-dialog"
+                    data-bind="click: sendConstructionStateChangeDateInfo, enable: ok, disable: processing">
+              <span data-bind="ltext: dialogButtonSend"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -48,7 +48,7 @@
    ;; Components to be included in a SPA
 
    :debug        (if (env/dev-mode?) debugjs {})
-   
+
    :mockjax      (if (env/dev-mode?) mockjax {})
 
    :i18n         {:depends [:jquery :underscore]
@@ -83,6 +83,10 @@
 
    :user-menu     {:html ["nav.html"]}
 
+   :modal-datepicker {:depends [:common]
+                      :html ["modal-datepicker.html"]
+                      :js   ["modal-datepicker.js"]}
+
    :authenticated {:depends [:init :jquery :knockout :moment :i18n :selectm :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
@@ -110,11 +114,11 @@
                   :js ["task.js"]
                   :html ["task.html"]}
 
-   :application  {:depends [:common :repository :tree :task]
-                  :js ["add-link-permit.js" "construction-state-change.js" "change-location.js" "invite.js" "verdicts-model.js"
+   :application  {:depends [:common :repository :tree :task :modal-datepicker]
+                  :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js" "create-task-model.js"
                        "application-model.js" "application.js"]
-                  :html ["add-link-permit.html" "construction-state-change.html" "application.html" "inforequest.html" "add-operation.html"
+                  :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "create-task.html"]}
 
    :applications {:depends [:common :repository :invites]
