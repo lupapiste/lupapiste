@@ -193,14 +193,24 @@
 
 
 (defn- get-lisatiedot [documents lang]
-  (let [lisatiedot (:data (first documents))]
-    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
-                  :asioimiskieli (if (= lang "sv")
-                                   "ruotsi"
-                                   "suomi")}}))
+  (let [lisatiedot (:data (first (:lisatiedot documents)))
+        aloitusoikeus (:data (first (:aloitusoikeus documents)))
+        vakuus (when aloitusoikeus
+                 {:vakuus {:vakuudenLaji (-> aloitusoikeus :vakuudenLaji :value)
+                           :voimassaolopvm (to-xml-date-from-string (-> aloitusoikeus :voimassaolopvm :value))
+                           :vakuudenmaara (-> aloitusoikeus :vakuudenMaara :value)
+                           :Vakuuspaatospykala (-> aloitusoikeus :Vakuuspaatospykala :value)
+                           }})]
+    {:Lisatiedot (merge
+                   {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
+                    :asioimiskieli (if (= lang "sv")
+                                     "ruotsi"
+                                     "suomi")}
+                   vakuus)}))
 
-(defn- get-asian-tiedot [documents maisematyo_documents]
-  (let [hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents))
+(defn- get-asian-tiedot [documents]
+  (let [maisematyo_documents (:maisematyo documents)
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents) (:hankkeen-kuvaus-minimum documents) (:aloitusoikeus documents))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -215,6 +225,10 @@
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
+(defn- assoc-in-no-nil [m ks v]
+  (if v
+    (assoc-in m ks v)
+    m))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -236,9 +250,10 @@
                                         "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
                                         "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                         "jatkoaika" "Jatkoaikahakemus"
+                                        "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents toimenpiteet)))
-                      :asianTiedot (get-asian-tiedot documents (:maisematyo documents))
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)}}}}
+                      :asianTiedot (get-asian-tiedot documents)
+                      :lisatiedot (get-lisatiedot documents lang)}}}}
         canonical (if link-permit-data
                     (-> canonical
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
@@ -250,7 +265,7 @@
                     (-> canonical
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
                         (get-bulding-places (:rakennuspaikka documents) application))
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+                      (assoc-in-no-nil [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
                         toimenpiteet)
                       (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
                         (get-statements (:statements application))))
