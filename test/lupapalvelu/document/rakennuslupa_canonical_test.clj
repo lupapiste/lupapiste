@@ -1082,7 +1082,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
 
 ;Aloitusoikeus(Takuu)(tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta
 (def aloitusoikeus-hakemus {:sent nil,
-                            :linkPermitData {0 {:type "kuntalupatunnus", :id nil}},
+                            :linkPermitData {0 {:type "kuntalupatunnus", :id "8333-1231"}},
                             :neighbors {},
                             :schema-version 1,
                             :authority {},
@@ -1205,7 +1205,6 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                  voimassaolopvm (:voimassaolopvm vakuus) => "2014-01-15"
                  vakuudenMaara (:vakuudenmaara vakuus) => "10000"
                  Vakuuspaatospykala (:Vakuuspaatospykala vakuus) => "14§"
-                 viiteluvalle tarkastus.näytäis puuttuvan osittain xml sanomasta
                  ]
              ))
 
