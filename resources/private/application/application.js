@@ -3,6 +3,7 @@
 
   var isInitializing = true;
   var currentId = null;
+  var application = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
   var applicationMap = null;
@@ -29,13 +30,25 @@
        dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
        dialogButtonSend    : "constructionReady.dialog.continue",
        areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
+  constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
+    console.log(ko.mapping.toJS(building));
+    constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
+       dateParameter: "startedTimestampStr",
+       extraParameters: {buildingIndex: building.index()},
+       // TODO actual message keys
+       dateSelectorLabel   : "constructionStarted.startedDate",
+       dialogHeader        : "constructionStarted.dialog.header",
+       dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "constructionStarted.dialog.areyousure.message"}, application);
+    return false;
+  };
 
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
-  var application = new LUPAPISTE.ApplicationModel();
   var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   var authorities = ko.observableArray([]);

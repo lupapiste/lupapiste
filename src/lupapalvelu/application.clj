@@ -819,6 +819,7 @@
   {:parameters ["id" startedTimestampStr]
    :roles      [:applicant :authority]
    :states     [:verdictGiven]
+   :notified   true
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
@@ -826,6 +827,26 @@
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:started timestamp
                                        :state  :constructionStarted}}))
+  (ok))
+
+(defcommand inform-building-construction-started
+  {:parameters ["id" buildingIndex startedTimestampStr]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionStarted]
+   :notified   true
+   :validators [(permit/validate-permit-type-is permit/R)]
+   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
+  [{:keys [user created application] :as command}]
+  ; TODO find building by index or fail!
+  (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
+    ; TODO Call KRYPS integration
+    ; TODO update building (in the same mongo query and set
+    ; * constructionStarted timestamp
+    ; * startedBy user's name or user summary
+    (when (= "verdictGiven" (:state application))
+      (update-application command {$set {:started timestamp
+                                         :state  :constructionStarted}})
+      (notifications/notify! :application-state-change command)))
   (ok))
 
 (defcommand inform-construction-ready

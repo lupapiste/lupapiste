@@ -734,7 +734,7 @@
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
-          <div data-bind="if: buildings() && buildings().length">
+          <div data-bind="if: buildings() && buildings().length && $root.authorization.ok('inform-building-construction-started')">
 
             <table>
               <thead>
@@ -752,7 +752,7 @@
                   <td data-bind="text: util.buildingName($data)"></td>
                   <td>
                     <span data-bind="if: !$data.constructionStarted">
-                      <a data-bind="click: $parent.beginConstructionOf, ltext: 'application.beginConstructionOf'" href="#"></a></span>
+                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
                     <span data-bind="if: $data.constructionStarted">
                       <span data-bind="dateString: $data.constructionStarted"></span>
                     </span>
