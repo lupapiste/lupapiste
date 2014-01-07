@@ -18,7 +18,7 @@
 
 (defn- do-test [application]
   (let [operation-name-key (-> application :operations first :name keyword)
-        lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
+        lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         canonical (application-to-canonical application "fi")
         mapping (get-yleiset-alueet-krysp-mapping lupa-name-key)
         xml (element-to-xml canonical mapping)
