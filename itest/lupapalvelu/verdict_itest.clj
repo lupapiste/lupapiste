@@ -1,7 +1,8 @@
 (ns lupapalvelu.verdict-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet  :refer :all]))
+            [lupapalvelu.factlet  :refer :all]
+            [lupapalvelu.domain :as domain]))
 
 (fact* "Authority is able to add an attachment to an application after verdict has been given for it"
   (doseq [user [sonja pena]]
@@ -91,39 +92,32 @@
 ;; TODO: Aloitetulla hakemuksella valittavana vain "hae jatkoaikaa"-komento.
 ;;       Suljetulla hakemuksella ei mitään.
 ;;
-#_(fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
-  (let [application            (create-and-submit-application sonja
+(fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
+  (let [application-id         (create-app-id sonja
                                  :operation "ya-katulupa-vesi-ja-viemarityot"
                                  :municipality sonja-muni
-                                 :address "Paatoskuja 11") => truthy
-;        _ (do
-;            (println "\n application: ")
-;            (clojure.pprint/pprint application)
-;            (println "\n")
-;            )
-        application-id         (:id application)
-        ;_   (println "\n application-id: " application-id "\n")
+                                 :address "Paatoskuja 11")
+        application            (query-application sonja application-id) => truthy
+        _                      (generate-documents application sonja)
+        application            (query-application sonja application-id) => truthy
+        submit-resp            (command sonja :submit-application :id application-id) => ok?
         approve-resp           (command sonja :approve-application :id application-id :lang "fi") => ok?
-        started-resp1          (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.command-illegal-state")
+        started-resp-fail      (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.command-illegal-state")
         verdict-resp           (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
         application            (query-application sonja application-id) => truthy
         app-state              (:state application) => "verdictGiven"
-        closed-resp1           (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => (partial expected-failure? "error.command-illegal-state")
-;        ;_   (println "\n closed-resp1: " closed-resp1)
-        started-resp2          (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => ok?
+        closed-resp-fail       (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => (partial expected-failure? "error.command-illegal-state")
+
+        started-resp           (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => ok?
         application            (query-application sonja application-id) => truthy
         app-state              (:state application) => "constructionStarted"
-
-        ;; *** TODO: Korjaa tama testi -> jaa tahan closed-resp2:iin... ***
-
         closed-resp2           (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => ok?
-;        application            (query-application sonja application-id) => truthy
+        application            (query-application sonja application-id) => truthy
         ]
-;    (:state application) => "closed"
-;    sonja =not=> (allowed? :create-continuation-period-permit :id application-id)
+    (:state application) => "closed"
+    sonja =not=> (allowed? :inform-construction-started :id application-id)
+    sonja =not=> (allowed? :create-continuation-period-permit :id application-id)
     ))
-
-
 
 (fact* "Application cannot be set to Started state if it is not an YA type of application."
   (let [application            (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 11")

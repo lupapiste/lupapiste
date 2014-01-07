@@ -320,16 +320,16 @@
     (upload-attachment pena (:id application) attachment true)))
 
 
-(defn generate-documents [application]
+(defn generate-documents [application apikey]
   (doseq [document (:documents application)]
     (let [data    (tools/create-document-data (model/get-document-schema document) tools/dummy-values)
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]
-      (command pena :update-doc
-                    :id (:id application)
-                    :doc (:id document)
-                    :updates updates) => ok?)))
+      (command apikey :update-doc
+        :id (:id application)
+        :doc (:id document)
+        :updates updates) => ok?)))
 
 ;;
 ;; Vetuma
