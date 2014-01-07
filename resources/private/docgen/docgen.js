@@ -200,7 +200,7 @@ var docgen = (function () {
       var span = document.createElement("span");
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       span.className = "form-entry " + sizeClass;
-      
+
 
       // Display text areas in a wide container
       if (subSchema.type === "text") {
@@ -683,13 +683,11 @@ var docgen = (function () {
 
       $.each(self.application.buildings, function (i, building) {
             var name = building.index;
-            var usage = building.usage ? " (" + building.usage + ")" : "";
-            var area = (building.area || "?") + " " + loc("unit.m2");
             var option = document.createElement("option");
             option.value = name;
             option.setAttribute("data-propertyid", building.propertyId);
             option.setAttribute("data-buildingid", building.buildingId);
-            option.appendChild(document.createTextNode(name + usage + " - "+ area));
+            option.appendChild(document.createTextNode(util.buildingName(building)));
             if (selectedOption === name) {
               option.selected = "selected";
             }
