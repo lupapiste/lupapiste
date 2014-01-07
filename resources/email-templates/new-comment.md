@@ -6,4 +6,4 @@ Uusi kommentti lis&auml;tty keskusteluun: {{link-fi}}
 
 # Hej,
 
-Ett nytt komment lagt till diskusionet: {{link-sv}}
+En ny kommentar har inkommit till diskusionet: {{link-sv}}

@@ -7,11 +7,9 @@
             [lupapalvelu.core :refer [now fail!]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
-
 
 
 (defn- base-email-model [{{token :token-id} :data} _]

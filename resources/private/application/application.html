@@ -36,7 +36,7 @@
           </div>
 
           <!-- Submitted: -->
-          <div data-bind="with: $root.application.data">
+          <div>
             <p data-bind="ltext: 'application.submissionDate'"></p>
             <span data-bind="if: $data.submitted">
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
@@ -71,7 +71,7 @@
           <!-- /ko -->
 
           <!-- Operations: -->
-          <!-- ko if: !$root.authorization.ok('change-permit-sub-type') -->
+          <!-- ko if: $root.permitSubtypes().length == 0 -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
             <ul data-bind="foreach: operationsCount">
@@ -87,11 +87,12 @@
           <!-- /ko -->
 
           <!-- Subtypes: -->
-          <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
+          <!-- ko if: $root.permitSubtypes().length > 0 -->
           <div>
             <p data-bind="ltext: 'application.permitSubtypes'"></p>
             <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                               attr: { disabled: !$root.authorization.ok('change-permit-sub-type') },
                                optionsText: function(item) {return loc('permitSubtype.' + item); }">
             </select>
             </span>
@@ -99,19 +100,38 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
+          <!-- ko if: linkPermitData -->
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <span data-bind="text: $data.id, attr: {'data-test-link-permit': $data.id}"
-                    data-test-id="test-application-link-permit">
+
+              <span data-bind="visible: $data.type() === 'lupapistetunnus'">
+
+                <a data-bind="text: $data.id,
+                              click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                              attr: {'data-test-app-link-permit': $data.id}"
+                   data-test-id="test-application-link-permit"
+                   href="#" class="link-permit-item"></a>
+
+                <a data-bind="visible: !_.contains(['sent', 'verdictGiven', 'closed'], $root.application.state()),
+                              ltext: 'application.linkPermitRemoveSelected',
+                              click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                   href="#" class="remove-link-permit"></a>
               </span>
-              <a data-bind="ltext: 'application.linkPermitRemoveSelected',
-                            click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                 href="#" class="remove-link-permit"></a>
+
+              <span data-bind="visible: $data.type() === 'kuntalupatunnus',
+                               text: $data.id,
+                               attr: {'data-test-app-link-permit': $data.id}"
+                 data-test-id="test-application-link-permit"
+                 href="#" class="link-permit-item"></span>
+
+
             </span>
           </div>
+          <!-- /ko -->
 
           <!-- Applications linking to us: -->
+          <!-- ko if: appsLinkingToUs -->
           <div data-bind="with: appsLinkingToUs">
             <p data-bind="ltext: 'application.appsLinkingToUs'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
@@ -122,6 +142,7 @@
                  href="#" class="remove-link-permit"></a>
             </span>
           </div>
+          <!-- /ko -->
 
         </div>
 
@@ -156,11 +177,19 @@
             <span data-bind="ltext: 'application.addLinkPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
+          <button data-bind="click: createChangePermit,    visible: $root.authorization.ok('create-change-permit'),     enable: $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
+            <span data-bind="ltext: 'application.createChangePermit'"></span>
+            <span class="icon add-grey left-align"></span>
+          </button>
+          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'),     enable: $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
+            <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
+            <span class="icon add-grey left-align"></span>
+          </button>
           <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
+          <button data-bind="click: $root.stampModel.init, visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
@@ -171,43 +200,55 @@
         </div>
 
         <!-- Tabs: -->
-        <div class="tabs-container">
+        <div class="tabs-container" data-bind="with: application">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="click: $root.application.changeTab"
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="info" data-test-id="application-open-info-tab">
                   <span data-bind="ltext: 'application.tabInfo'"></span>
-                  <span data-bind="if: $root.application.nonpartyDocumentIndicator">
-                    <span data-bind="text: $root.application.nonpartyDocumentIndicator"
+                  <span data-bind="if: nonpartyDocumentIndicator">
+                    <span data-bind="text: nonpartyDocumentIndicator"
                         id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="parties" data-test-id="application-open-parties-tab">
                   <span data-bind="ltext: 'application.tabParties'"></span>
-                  <span data-bind="if: $root.application.partyDocumentIndicator">
-                    <span data-bind="text: $root.application.partyDocumentIndicator"
+                  <span data-bind="if: partyDocumentIndicator">
+                    <span data-bind="text: partyDocumentIndicator"
                           id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
-                <span data-bind="if: $root.application.attachmentsRequiringAction">
-                  <span data-bind="text: $root.application.attachmentsRequiringAction"
+                <span data-bind="if: attachmentsRequiringAction">
+                  <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="statement" data-test-id="application-open-statement-tab">
                   <span data-bind="ltext: 'application.tabStatement'"></span>
-                  <span data-bind="if: $root.application.unseenStatements">
-                    <span data-bind="text: $root.application.unseenStatements"
+                  <span data-bind="if: unseenStatements">
+                    <span data-bind="text: unseenStatements"
                           id="applicationUnseenStatements" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
                    <span data-bind="ltext: 'application.tabVerdict'"></span>
-                <span data-bind="if: $root.application.unseenVerdicts">
-                  <span data-bind="text: $root.application.unseenVerdicts"
+                <span data-bind="if: unseenVerdicts">
+                  <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
-            <li><a data-bind="click: $root.application.changeTab"
+
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state()) && features.enabled('rakentamisen-aikaiset-tabi')">
+              <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
+                  <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
+                  <span data-bind="if: $data.tasksRequiringAction">
+                    <span data-bind="text: tasksRequiringAction"
+                          id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+
+            <li><a data-bind="click: changeTab"
                    href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
                   <span data-bind="ltext: 'application.tabConversation'"></span>
-                  <span data-bind="if: $root.application.unseenComments">
-                    <span data-bind="text: $root.application.unseenComments"
+                  <span data-bind="if: unseenComments">
+                    <span data-bind="text: unseenComments"
                           id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
@@ -233,7 +274,7 @@
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="applicationDocgen">
+            <div id="applicationDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -269,13 +310,13 @@
 
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="partiesDocgen">
+            <div id="partiesDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
 
           <button
-              data-bind="click: application.addParty, ltext: 'application.addParty', visible: authorization.ok('create-doc')"
+              data-bind="click: addPartyModel.init, ltext: 'application.addParty', visible: authorization.ok('create-doc')"
               class="btn btn-primary modal"
               data-test-id="add-party">
           </button>
@@ -373,16 +414,22 @@
                 data-test-id="add-attachment">
             </button>
             <button
+                data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+                class="btn btn-primary"
+                data-test-id="attachments-copy-own">
+            </button>
+            <button
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
                 class="btn">
             </button>
             <button
                 data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
-                           ltext: 'application.attachmentsMoveToBackingSystem',
-                           disable: application.sendUnsentAttachmentsToBackingSystemDisabled,
+                           disable: application.sendUnsentAttachmentsButtonDisabled,
                            visible: $root.authorization.ok('move-attachments-to-backing-system')"
                 class="btn btn-primary modal"
                 data-test-id="send-unsent-attachments">
+                <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
+                <em data-bind="visible: application.pending" class="button-loader"></em>
             </button>
           </div>
           <div class="process-nav">
@@ -441,6 +488,10 @@
                       <label data-bind="ltext: 'verdict.julkipano'"></label>
                       <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
                     </div>
+                    <div data-bind="if: paivamaarat.paatosdokumentinPvm" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
+                    </div>
                     <!-- /ko --> <!-- /paivamaarat -->
 
                     <!--  ko if:  $data.lupamaaraykset -->
@@ -467,13 +518,17 @@
                       <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
+                    <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
+                      <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label><span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span></div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
 
                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                         <li data-bind='if: $data.katselmuksenLaji'>
-                          <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
+                          <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
                           <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                             (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                           </span>
@@ -560,10 +615,10 @@
 
         <div id="application-statement-tab" class="tab-content">
 
-          <div data-bind="with: $root.application.data" class="application-statements">
+          <div data-bind="with: application" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.statementsDesc')" class="tab-info"></p>
+            <p data-bind="html: loc('help.' + permitType() + '.statementsDesc')" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -675,6 +730,49 @@
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
 
           </div>
+        </div>
+
+        <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
+          <div>
+            <table data-bind="foreach: taskGroups">
+              <thead>
+                <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
+                <tr>
+                  <td data-bind="ltext: 'application.taskState'"></td>
+                  <td data-bind="ltext: 'application.taskDisplayName'"></td>
+                  <td data-bind="ltext: 'application.taskClosed'"></td>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: tasks">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                  <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+                  <td data-bind="text: displayName"></td>
+                  <td data-bind="dateString: $data.closed"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-construction-started-btn"
+                  data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
+                             ltext: 'application.button.informConstructionStarted',
+                             visible: $root.authorization.ok('inform-construction-started'),
+                             enable: $root.authorization.ok('inform-construction-started')"></button>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-construction-ready-btn"
+                  data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
+                             ltext: 'application.button.informConstructionReady',
+                             visible: $root.authorization.ok('inform-construction-ready'),
+                             enable: $root.authorization.ok('inform-construction-ready')"></button>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-new-task"
+                  data-bind="click: $root.createTaskModel.createTask,
+                             ltext: 'task.create',
+                             visible: $root.authorization.ok('create-task'),
+                             enable: $root.authorization.ok('create-task')"></button>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >

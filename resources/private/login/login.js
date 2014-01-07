@@ -4,6 +4,7 @@
   function login() {
     var username = $("#login-username").val();
     var password = $("#login-password").val();
+    $("#login-message").text("").hide();
 
     ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)

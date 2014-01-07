@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="targetted-attachments-template">
+    <div data-bind="with: $root.attachmentsModel" >
+      <div class="statement-attachments">
+        <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
+        <div data-bind="if: attachments().length">
+          <table class="table" data-test-id="inforequest-attachments-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'application.attachmentFile'"></th>
+                <th data-bind="ltext: 'application.attachmentEditDate'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: attachments">
+              <tr data-bind="with: $data.latestVersion">
+                <td>
+                  <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+                  <i data-bind="ltext: contentType"></i>
+                  <i data-bind="size: size"></i>
+                </td>
+                <td>
+                  <span data-bind="dateString: $parent.modified"></span>
+                  <span data-bind="fullName: user"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div data-bind="ifnot: attachments().length">
+          <i data-bind="ltext: 'no-attachments'"></i>
+        </div>
+
+        <button
+          class="btn"
+          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: newAttachment"
+          data-test-id="add-targetted-attachment">
+        </button>
+      </div>
+    </div>
+    </script>
+  </section>
+</body>
+</html>

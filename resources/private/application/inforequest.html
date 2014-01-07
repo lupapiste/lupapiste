@@ -40,7 +40,7 @@
             <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
           <!-- Created: -->
-          <div data-bind="with: $root.application.data">
+          <div>
             <p data-bind="ltext: 'inforequest.created'"></p>
             <span data-bind="if: $data.created">
               <span class="application_summary_text" data-bind="dateString: created"></span>
@@ -82,6 +82,10 @@
           <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
+          <div class="muncipality-info">
+            <h2 data-bind="ltext: 'application.muncipality'"></h2>
+            <p data-bind="text: loc(['municipality', municipality()])"></p>
+          </div>
           <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
             <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
             <span class="icon send left-align"></span>
@@ -103,17 +107,17 @@
       </div>
 
       <div class="content">
-      
+
         <div data-bind="visible: currentUser.get().oir">
           <h2 data-test-id="wanna-join">
             <span data-bind="ltext: 'oir.wanna-join.message'"></span>
             <a data-bind="attr: {href: LUPAPISTE.config.wannaJoinUrl}, ltext: 'oir.wanna-join.link'" href="#" target="_blank"></a>
           </h2>
         </div>
-      
-      
-        <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'"></h3>
-        <div data-bind="if: attachments().length">
+
+        <p data-bind="lhtml: 'inforequest.desc'" class="tab-info"></p>
+        <h2 data-bind="ltext: 'inforequest.attachments'"></h2>
+        <div data-bind="if: application.hasAttachment">
           <table class="table" data-test-id="inforequest-attachments-table">
             <tbody>
               <tr>
@@ -121,8 +125,8 @@
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                 <th></th>
               </tr>
-              <!-- ko foreach: attachments -->
-              <!-- ko if: latestVersion && latestVersion.filename -->
+              <!-- ko foreach: application.attachments -->
+              <!-- ko if: $data.latestVersion && latestVersion.filename -->
               <tr>
                 <td>
                     <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
@@ -144,7 +148,7 @@
           </table>
         </div>
 
-        <div data-bind="ifnot: attachments().length">
+        <div data-bind="ifnot: application.hasAttachment">
           <i data-bind="ltext: 'inforequest.attachmentsEmpty'" data-test-id="inforequest-attachments-no-attachments"></i>
         </div>
 
@@ -154,8 +158,8 @@
           data-test-id="add-inforequest-attachment"
           data-window-id="upload-dialog"></button>
 
-        <div>
-          <h3  data-bind="ltext: 'inforequest.comments'"></h3>
+        <div class="inforequest-conversation">
+          <h2  data-bind="ltext: 'inforequest.comments'"></h2>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
         </div>
 

@@ -65,8 +65,13 @@
     (when-not (or (s/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
+;; FIXME implement validator, the same as :select?
 (defmethod validate-field :radioGroup [elem v] nil)
-(defmethod validate-field :buildingSelector [elem v] nil)
+
+(defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
+
+;; FIXME implement validator (mongo id, check that user exists)
 (defmethod validate-field :personSelector [elem v] nil)
 
 (defmethod validate-field nil [_ _]
@@ -290,14 +295,14 @@
                     (let [k (keyword name)
                           current-path (conj path k)
                           v (get-in data current-path)]
-                    (if ((set (map keyword blacklist)) (keyword blacklist-item))
-                      [k nil]
-                      (when v
-                        (if (not= (keyword type) :group)
-                          [k v]
-                          [k (if repeating
-                               (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
-                               (strip body current-path))])))))
+                      (if ((set (map keyword blacklist)) (keyword blacklist-item))
+                        [k nil]
+                        (when v
+                          (if (not= (keyword type) :group)
+                            [k v]
+                            [k (if repeating
+                                 (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
+                                 (strip body current-path))])))))
                   schema-body)))]
       (let [path (into [] initial-path)
             schema (get-document-schema document)

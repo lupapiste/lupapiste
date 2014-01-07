@@ -5,7 +5,7 @@
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [lupapalvelu.factlet :as fl]
-            [sade.util :refer [contains-value?]]
+            [sade.util :refer :all]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
             [midje.sweet :refer :all]
@@ -138,6 +138,8 @@
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
                        :kokemusvuodet {:value "3"}
                        :valvottavienKohteidenMaara {:value "9"}}
+            :vastuuaika {:vastuuaika-alkaa-pvm {:value "19.12.2013"},
+                         :vastuuaika-paattyy-pvm {:value "31.12.2013"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
@@ -207,7 +209,9 @@
                     :varusteet {:parvekeTaiTerassiKytkin {:value true}
                                 :WCKytkin {:value true}}}
                 :1 {:muutostapa {:value "lis\u00e4ys"}
-                    :huoneistoTunnus {}
+                    :huoneistoTunnus {:porras {:value "A"}
+                                      :huoneistonumero {:value "2"}
+                                      :jakokirjain {:value "a"}}
                     :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
                                        :huoneistoala {:value "02"}
                                        :huoneluku {:value "12"}}
@@ -380,6 +384,7 @@
                                                  :id "5272668be8db5aaa01084601"
                                                  :created 1383229067483}]
                                    :documents [hakija-henkilo
+                                               maksaja-henkilo
                                                tyonjohtaja
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-kuntalupatunnus]
@@ -394,6 +399,7 @@
                                                  :id "527b3392e8dbbb95047a89de"
                                                  :created 1383805842761}]
                                    :documents [hakija-henkilo
+                                               maksaja-henkilo
                                                suunnittelija1
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-lupapistetunnus]
@@ -521,13 +527,15 @@
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)]
     (fact "model" tyonjohtaja-model => truthy)
-    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "KVV-ty\u00f6njohtaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => "Koulutus")
-    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => "2010")
-    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "AA")
-    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => "3")
-    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => "9")
+    (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
+    (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => (to-xml-date-from-string (-> tyonjohtaja :data :vastuuaika :vastuuaika-alkaa-pvm :value)))
+    (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => (to-xml-date-from-string (-> tyonjohtaja :data :vastuuaika :vastuuaika-paattyy-pvm :value)))
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutus :value))
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
@@ -586,7 +594,7 @@
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
-        h1 (first huoneistot), h2 (last huoneistot)]
+        h2 (first huoneistot), h1 (last huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
     (fact "h1 huoneluku" (:huoneluku h1) => "66")
@@ -613,7 +621,10 @@
     (fact "h2 varusteet: saunaKytkin" (-> h2 :varusteet :saunaKytkin) => true)
     (fact "h2 varusteet: parvekeTaiTerassiKytkin" (-> h2 :varusteet :parvekeTaiTerassiKytkin) => false)
     (fact "h2 varusteet: lamminvesiKytkin" (-> h2 :varusteet :lamminvesiKytkin) => true)
-    (fact "h2 huoneistotunnus" (:huoneistotunnus h2) => falsey)))
+    (fact "h2 huoneistotunnus" (:huoneistotunnus h1) => truthy)
+    (fact "h2 huoneistotunnus: porras" (-> h1 :huoneistotunnus :porras) => "A")
+    (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
+    (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
 
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
 
@@ -730,7 +741,6 @@
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
 
-(testable-privates lupapalvelu.document.rakennuslupa_canonical get-viitelupatieto)
 
 (fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi") => truthy
@@ -748,12 +758,29 @@
                                         :muuTunnustieto
                                         :MuuTunnus) => truthy
 
+
+        osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
+
+        ;; henkilotyyppinen maksaja
+        rooliKoodi-laskun-maksaja "Rakennusvalvonta-asian laskun maksaja"
+        maksaja-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-laskun-maksaja)
+        maksaja-Osapuoli (:Osapuoli (first (filter maksaja-filter-fn osapuolet-vec)))
+        maksaja-Osapuoli-henkilo (:henkilo maksaja-Osapuoli)
+        maksaja-Osapuoli-yritys (:yritys maksaja-Osapuoli)
+
         kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
         Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
         vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
         rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
 
         viitelupatieto-LupaTunnus_2 (:LupaTunnus (get-viitelupatieto link-permit-data-lupapistetunnus))]
+
+    (facts "Maksaja is correct"
+      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-Osapuoli) => "Rakennusvalvonta-asian laskun maksaja")
+      (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-Osapuoli) => "maksaja")
+      (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-Osapuoli) => true)
+      (validate-person maksaja-Osapuoli-henkilo)
+      (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
     (facts "\"kuntalupatunnus\" type of link permit data"
       (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => falsey)
@@ -785,6 +812,15 @@
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
         viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
 
+        osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
+
+        ;; henkilotyyppinen maksaja
+        rooliKoodi-laskun-maksaja "Rakennusvalvonta-asian laskun maksaja"
+        maksaja-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-laskun-maksaja)
+        maksaja-Osapuoli (:Osapuoli (first (filter maksaja-filter-fn osapuolet-vec)))
+        maksaja-Osapuoli-henkilo (:henkilo maksaja-Osapuoli)
+        maksaja-Osapuoli-yritys (:yritys maksaja-Osapuoli)
+
         luvanTunnisteTiedot-MuuTunnus (-> rakennusvalvontaasia
                                         :luvanTunnisteTiedot
                                         :LupaTunnus
@@ -795,6 +831,13 @@
         Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
         vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
         rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy]
+
+    (facts "Maksaja is correct"
+      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-Osapuoli) => "Rakennusvalvonta-asian laskun maksaja")
+      (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-Osapuoli) => "maksaja")
+      (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-Osapuoli) => true)
+      (validate-person maksaja-Osapuoli-henkilo)
+      (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
     (facts "\"lupapistetunnus\" type of link permit data"
       (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
@@ -827,7 +870,7 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "sv"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}
                              authority-user-jussi
                              "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -863,7 +906,7 @@
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
                  kiinttun (:kiinttun rakennustunnus) => "21111111111111"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
@@ -874,9 +917,8 @@
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
            (let [canonical (unsent-attachments-to-canonical
-                             (assoc application-rakennuslupa :state "verdictGiven") ;; TODO: Lisataanko tahan liitteet?
-                             "sv"
-                             authority-user-jussi)
+                             (assoc application-rakennuslupa :state "verdictGiven")
+                             "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -906,10 +948,10 @@
 
              (facts "Osapuolet"
                (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
-               (fact "etunimi" (:etunimi nimi) => "Jussi")
-               (fact "sukunimi" (:sukunimi nimi) => "Viranomainen")
-               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1")
-               (fact "puhelin" (:puhelin henkilo) => "1231234567"))))
+               (fact "etunimi" (:etunimi nimi) => "Pena")
+               (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
+               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
+               (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
 
 
 
@@ -961,69 +1003,6 @@
     hakija-henkilo],
    :_software_version "1.0.5",
    :modified 1384167309006,
-   :allowedAttachmentTypes
-   [["hakija"
-     ["valtakirja"
-      "ote_kauppa_ja_yhdistysrekisterista"
-      "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]]
-    ["rakennuspaikan_hallinta"
-     ["jaljennos_myonnetyista_lainhuudoista"
-      "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta"
-      "rasitustodistus"
-      "todistus_erityisoikeuden_kirjaamisesta"
-      "jaljennos_vuokrasopimuksesta"
-      "jaljennos_perunkirjasta"]]
-    ["rakennuspaikka"
-     ["ote_alueen_peruskartasta"
-      "ote_asemakaavasta_jos_asemakaava_alueella"
-      "ote_kiinteistorekisteristerista"
-      "tonttikartta_tarvittaessa"
-      "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"
-      "kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma"]]
-    ["paapiirustus"
-     ["asemapiirros"
-    "pohjapiirros"
-    "leikkauspiirros"
-    "julkisivupiirros"]]
-    ["ennakkoluvat_ja_lausunnot"
-     ["naapurien_suostumukset"
-    "selvitys_naapurien_kuulemisesta"
-    "elyn_tai_kunnan_poikkeamapaatos"
-    "suunnittelutarveratkaisu"
-    "ymparistolupa"]]
-    ["muut"
-     ["selvitys_rakennuspaikan_terveellisyydesta"
-      "selvitys_rakennuspaikan_korkeusasemasta"
-      "selvitys_liittymisesta_ymparoivaan_rakennuskantaan"
-      "julkisivujen_varityssuunnitelma"
-      "selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta"
-      "piha_tai_istutussuunnitelma"
-      "selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta"
-      "selvitys_rakennuksen_kosteusteknisesta_toimivuudesta"
-      "selvitys_rakennuksen_aaniteknisesta_toimivuudesta"
-      "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"
-      "energiataloudellinen_selvitys"
-      "paloturvallisuussuunnitelma"
-      "liikkumis_ja_esteettomyysselvitys"
-      "kerrosalaselvitys"
-      "vaestonsuojasuunnitelma"
-      "rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo"
-      "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"
-      "selvitys_kiinteiston_jatehuollon_jarjestamisesta"
-      "rakennesuunnitelma"
-      "ilmanvaihtosuunnitelma"
-      "lammityslaitesuunnitelma"
-      "radontekninen_suunnitelma"
-      "kalliorakentamistekninen_suunnitelma"
-      "paloturvallisuusselvitys"
-      "suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta"
-      "merkki_ja_turvavalaistussuunnitelma"
-      "sammutusautomatiikkasuunnitelma"
-      "rakennusautomaatiosuunnitelma"
-      "valaistussuunnitelma"
-      "selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta"
-      "selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta"
-      "muu"]]],
    :comments [],
    :address "It\u00e4inen Hangelbyntie 163",
    :permitType "R",
@@ -1047,7 +1026,7 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "fi"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1}
+                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
                              authority-user-jussi
                              "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
 Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
@@ -1085,9 +1064,9 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" 
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus)
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
-                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"
+                 kiinttun (:kiinttun rakennustunnus) => "01234567891234"
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
                  osittainen (:osittainen Katselmus) => "pidetty"
                  pitaja (:pitaja Katselmus) => "Sonja Silja"

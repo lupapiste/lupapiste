@@ -28,16 +28,9 @@
 (defn activate-account [activation-key]
   (let [act     (mongo/select-one :activation {:activation-key activation-key})
         userid  (:user-id act)
-        success (mongo/update-by-id :users userid {$set {:enabled true}})]
-    (when success
-      (mongo/remove :activation (:_id act))
-      (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
-
-(defn activate-account-by-email [email]
-  (let [act     (mongo/select-one :activation {:email (lower-case email)})
-        userid  (:user-id act)
-        success (mongo/update-by-id :users userid {$set {:enabled true}})]
-    (when success
+        updated-user (mongo/update-one-and-return :users {:_id userid} {$set {:enabled true}})]
+    (when updated-user
+      (user/clear-logins (:username updated-user))
       (mongo/remove :activation (:_id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
 

@@ -313,6 +313,7 @@
               {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
           return;
         }
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
       } else {
         if (model.newApplicationsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(

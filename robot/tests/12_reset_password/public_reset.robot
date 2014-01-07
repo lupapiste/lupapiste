@@ -8,6 +8,10 @@ Resource       ../../common_resource.robot
 Unable to log in
   Go to login page
   Login fails  teppo@example.com  teppo123
+  Login fails  teppo@example.com  teppo123
+  Login fails  teppo@example.com  teppo123
+  Login fails  teppo@example.com  teppo123
+  Wait Until  Page Should Contain  Tunnus on lukittu
 
 Go to reset password page
   Click Link  Oletko unohtanut salasanasi?

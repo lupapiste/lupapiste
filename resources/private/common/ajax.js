@@ -43,7 +43,7 @@ var ajax = (function() {
 
     self.successHandler = function(e) { };
     self.errorHandler = function(e) {
-      error("AJAX: ERROR", self.request.url, e.text);
+      error("AJAX: ERROR", self.request.url, e);
       notify.error(loc("error.dialog.title"), loc(e.text));
       };
     self.failHandler = function(jqXHR, textStatus, errorThrown) {

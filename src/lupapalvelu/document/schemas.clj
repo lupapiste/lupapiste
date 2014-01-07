@@ -26,8 +26,8 @@
 (defn get-schema
   ([{:keys [version name]}] (get-schema version name))
   ([schema-version schema-name]
-  {:pre [schema-version schema-name]}
-  (get-in @registered-schemas [schema-version (name schema-name)])))
+    {:pre [schema-version schema-name]}
+    (get-in @registered-schemas [schema-version (name schema-name)])))
 
 
 
@@ -67,8 +67,12 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}
-                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero}])
+(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
+
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro"}
+                                {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
@@ -103,9 +107,12 @@
                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
-(def henkilotiedot
-  (update-in henkilotiedot-minimal [:body]
-    conj {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}))
+(def henkilotiedot {:name "henkilotiedot"
+                            :type :group
+                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
                henkilo-valitsin
@@ -148,6 +155,7 @@
 (def patevyys [{:name "koulutus" :type :string :required false}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
+               {:name "patevyys" :type :string :required false}
                {:name "patevyysluokka" :type :select :required false
                 :body [{:name "AA"}
                        {:name "A"}
@@ -221,9 +229,15 @@
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
+(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
+                              :type :group
+                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
+                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    vastattavat-tyotehtavat-tyonjohtaja
+                   vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
@@ -236,7 +250,7 @@
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
@@ -348,7 +362,7 @@
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select
+                                 {:name "kayttotarkoitus" :type :select :size "l"
                                   :body rakennuksen-kayttotarkoitus}]}
                          {:name "mitat"
                           :type :group
@@ -460,7 +474,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true :size "l"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -623,6 +637,14 @@
             :type :party}
      :body suunnittelija}
 
+    {:info {:name "tyonjohtaja"
+            :order 5
+            :removable true
+            :repeating true
+            :approvable true
+            :type :party}
+     :body tyonjohtaja}
+
     {:info {:name "maksaja"
             :repeating true
             :order 6
@@ -632,14 +654,6 @@
      :body (body
              party
              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
-
-    {:info {:name "tyonjohtaja"
-            :order 7
-            :removable true
-            :repeating true
-            :approvable true
-            :type :party}
-     :body tyonjohtaja}
 
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}

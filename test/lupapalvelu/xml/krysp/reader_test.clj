@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
             [clj-time.coerce :as coerce]
             [lupapalvelu.document.model :as model]
@@ -9,6 +10,8 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
+
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
@@ -17,7 +20,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml)]
+      cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
@@ -40,7 +43,7 @@
         (:autopaikkojaUlkopuolella lupamaaraykset) => 3
         (:kerrosala lupamaaraykset) => "100"
         (:kokonaisala lupamaaraykset) => "110"
-        (:vaaditutTyonjohtajat lupamaaraykset) => "Jokim\u00e4ki"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "vastaava ylijohtaja, vastaava varajohtaja, altavastaava johtaja"
         (let [katselmukset (:vaaditutKatselmukset lupamaaraykset)
               maaraykset   (:maaraykset lupamaaraykset)]
           (facts "katselmukset"
@@ -98,7 +101,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
-        cases (->verdicts xml)]
+        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -148,18 +151,18 @@
 
 (facts "case not found"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
-        cases (->verdicts xml)]
+        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil)]
+  (let [cases (->verdicts nil :RakennusvalvontaAsia ->verdict)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
-        cases (->verdicts xml)]
+        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -167,7 +170,7 @@
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
-        buildings (->buildings xml)
+        buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
         schema       (schemas/get-schema (schemas/get-latest-schema-version) "purku")]
@@ -177,10 +180,10 @@
     (fact "Rakennustunnus" building1-id => "001")
     (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
     (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
-    (let [building1  (->rakennuksen-tiedot xml building1-id)
+    (let [building1  (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
           omistajat1 (:rakennuksenOmistajat building1)]
 
-      (fact "Reader produces valid document"
+      (fact "Reader produces valid document (sans kiinttun)"
         (model/validate {:data (tools/wrapped building1)} schema) =not=> model/has-errors?)
 
       (fact "Has 2 owners" (count omistajat1) => 2)
@@ -191,22 +194,22 @@
         (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Antero"
         (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
         (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
-        (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 18"
+        (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 1"
         (get-in owner1 [:henkilo :osoite :postinumero]) => "06500"
         (get-in owner1 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
 
         (get-in owner1 [:_selected]) => "henkilo"
         (get-in owner2 [:henkilo :henkilotiedot :etunimi]) => "Pauliina"
         (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
-        (get-in owner2 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 19"
+        (get-in owner2 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 1"
         (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
         (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
         (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
 
-    (let [building2  (->rakennuksen-tiedot xml building2-id)
+    (let [building2  (dissoc (->rakennuksen-tiedot xml building2-id) :kiinttun)
           omistajat2 (:rakennuksenOmistajat building2)]
 
-      (fact "Reader produces valid document"
+      (fact "Reader produces valid document (sans kiinttun)"
         (model/validate {:data (tools/wrapped building2)} schema) =not=> model/has-errors?)
 
       (fact "Has 2 owners" (count omistajat2) => 2)
@@ -227,6 +230,49 @@
         (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
         (get-in owner2 [:yritys :yritysnimi]) => "Pekkalan Putki Oy"
         (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
-        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 18"
+        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 1\u20132 d\u2013e A 1"
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
+
+
+;YA verdict
+
+(facts "KRYSP ya-verdict"
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
+      cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "xml has 1 cases" (count cases) => 1)
+    (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+
+    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "422")
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:takuuaikaPaivat lupamaaraykset) => "760"
+        )
+
+      (facts "paivamaarat data is correct"
+        paivamaarat    => truthy
+        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2013-11-04")
+        )
+
+      (facts "p\u00f6yt\u00e4kirjat data is correct"
+        poytakirjat    => truthy
+        (count poytakirjat) => 0))))
+
+
+(facts "Buildings from verdict message"
+  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
+        buildings (->buildings xml)
+        building1 (first buildings)]
+
+    (count buildings) => 1
+    (:jarjestysnumero building1) => "31216"
+    (:kiinttun building1) => "63820130310000"
+    (:rakennusnro building1) => "123"))

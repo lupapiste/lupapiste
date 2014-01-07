@@ -19,7 +19,8 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notifications]))
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.attachment :as attachment]))
 
 ;;
 ;; ==============================================================================
@@ -330,24 +331,29 @@
 ;; ==============================================================================
 ;;
 
-;; TODO: count error trys!
+
 (defcommand login
   {:parameters [username password]
    :verified false}
   [_]
-  (if-let [user (user/get-user-with-password username password)]
+  (if (user/throttle-login? username)
     (do
-      (info "login successful, username:" username)
-      (session/put! :user user)
-      (if-let [application-page (user/applicationpage-for (:role user))]
-        (ok :user user :applicationpage application-page)
-        (do
-          (error "Unknown user role:" (:role user))
-          (fail :error.login))))
-    (do
-      (info "login failed, username:" username)
-      (fail :error.login))))
-
+      (info "login throttled, username:" username)
+      (fail :error.login-trottle))
+    (if-let [user (user/get-user-with-password username password)]
+      (do
+        (info "login successful, username:" username)
+        (user/clear-logins username)
+        (session/put! :user user)
+        (if-let [application-page (user/applicationpage-for (:role user))]
+          (ok :user user :applicationpage application-page)
+          (do
+            (error "Unknown user role:" (:role user))
+            (fail :error.login))))
+      (do
+        (info "login failed, username:" username)
+        (user/login-failed username)
+        (fail :error.login)))))
 
 (defcommand impersonate-authority
   {:parameters [organizationId password]
@@ -396,25 +402,24 @@
   [{user :user}]
   (ok :attachments (:attachments user)))
 
-(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
   (let [user              (user/current-user)
         filename          (mime/sanitize-filename filename)
-        attachment-type   (keyword attachment-type)
+        attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
-                           :filename         filename
+                           :file-name        filename
                            :content-type     content-type
                            :size             size
                            :created          (now)}]
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
-
-    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
-    (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
+    (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
+    (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
-    (mongo/update-by-id :users (:id user) {$set {(str "attachments." attachment-id) file-info}})
+    (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
     (user/refresh-user!)
 
     (->> (assoc file-info :ok true)
@@ -440,9 +445,39 @@
    :authenticated true}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
-  (mongo/update-by-id :users (:id user) {$unset {(str "attachments." attachment-id) nil}})
+  (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
   (user/refresh-user!)
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
+  (ok))
+
+(defcommand copy-user-attachments-to-application
+  {:parameters [id]
+   :authenticated true
+   :roles [:applicant]
+   :states     [:draft :open :submitted :complement-needed]
+   :validators [(fn [command application] (not (-> command :user :architect)))]
+   :feature [:architect-info]}
+  [{user :user}]
+  (doseq [attachment (:attachments user)]
+    (let [
+          application-id id
+          user-id (:id user)
+          {:keys [attachment-type attachment-id file-name content-type size created]} attachment
+          attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+          attachment-id (str application-id "." user-id "." attachment-id)
+          ]
+      (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
+        (attachment/attach-file! {:application-id application-id
+                       :attachment-id attachment-id
+                       :attachment-type attachment-type
+                       :content ((:content attachment))
+                       :filename file-name
+                       :content-type content-type
+                       :file-size size
+                       :created created
+                       :user user
+                       ;:attachment-target attachment-target
+                       :locked false}))))
   (ok))
 
 ;;
@@ -453,13 +488,6 @@
 
 ; FIXME: generalize
 (env/in-dev
-
-  (defquery activate-user-by-email
-    {:parameters [:email]}
-    [{{:keys [email]} :data}]
-    (if-let [user (activation/activate-account-by-email email)]
-      (ok)
-      (fail :cant_activate_user_by_email)))
 
   (defquery activations {} [query]
     (ok :activations (activation/activations))))

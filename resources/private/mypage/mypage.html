@@ -123,9 +123,9 @@
                       <td
                         data-bind="attr: {'data-test-id': $data['attachment-id']}">
                         <div
-                          data-bind="text: loc(['userinfo.architect.attachments.name', $data['attachment-type']])"
+                          data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
                           data-test-id="attachment-type"></div>
-                        <div data-bind="text: filename"
+                        <div data-bind="text:  $data['file-name']"
                           data-test-id="filename"></div>
                       </td>
                       <td><a
@@ -140,7 +140,7 @@
                   </tbody>
                 </table>
                 <button
-                  data-bind="click: add, ltext: 'userinfo.architect.attachments.add'"></button>
+                  data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="add-attachment"></button>
               </div>
             </div>
           </div>
@@ -220,13 +220,10 @@
 
         <form>
 
-          <select data-bind="options: availableAttachmentTypes, value: attachmentType, optionsText: 'name', optionsCaption: loc('userinfo.architect.qualification.choose')"></select>
+          <select name="attachmentType" data-bind="options: availableAttachmentTypes, value: attachmentType, optionsText: 'name', optionsValue: 'id', optionsCaption: loc('userinfo.architect.qualification.choose')"></select>
           <div class="clear"></div>
           <input type="file" name="files[]" class="file-upload"></input>
-          <input data-bind="attr: {value: attachmentType() && attachmentType().id}"
-            type="hidden" name="attachmentType"></input> <input
-            data-bind="attr: {value: csrf}" type="hidden"
-            name="__anti-forgery-token"></input>
+          <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"></input>
         </form>
 
         <div>

@@ -73,10 +73,6 @@
   (apply-remote-minimal)
 
   (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :organization "555-R" :apikey "xyz") => ok?)
-  #_(let [email (last-email)]
-    (:to email) => "foo"
-    (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi"
-    (get-in email [:body :plain]) => (contains #"/app/security/activate/[a-zA-Z0-9]+"))
 
   (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
   (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
@@ -165,17 +161,17 @@
   ; Initially pena does not have attachments?
   ;
 
-  (fact "Initially pena does not have attachments?" (:attachments (query pena "user-attachments")) => nil?)
+  (fact "Initially pena does not have attachments?"
+        (:attachments (query pena "user-attachments")) => nil?)
 
   ;
-  ; Pena uploads an examination:
+  ; Pena uploads a tutkintotodistus:
   ;
 
-  (let [attachment-id (:attachment-id (upload-user-attachment pena "examination" true))]
+  (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))]
 
     ; Now Pena has attachment
-
-    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => (contains {:attachment-id attachment-id :attachment-type "examination"})
+    (get (:attachments (query pena "user-attachments")) 0) => (contains {:attachment-id attachment-id :attachment-type {:type-group "osapuolet", :type-id "tutkintotodistus"}})
 
     ; Attachment is in GridFS
 
@@ -189,12 +185,12 @@
     ; Sonja can not delete attachment
 
     (command sonja "remove-user-attachment" :attachment-id attachment-id)
-    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) =not=> nil?
+    (get (:attachments (query pena "user-attachments")) 0) =not=> nil?
 
     ; Pena can delete attachment
 
     (command pena "remove-user-attachment" :attachment-id attachment-id) => ok?
-    (get-in (query pena "user-attachments") [:attachments (keyword attachment-id)]) => nil?))
+    (:attachments (query pena "user-attachments")) => empty?))
 
 ;;
 ;; ==============================================================================

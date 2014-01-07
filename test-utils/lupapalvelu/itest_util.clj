@@ -212,8 +212,7 @@
           (:comments %)
           (:schema-version %)
           (:documents %)
-          (:attachments %)
-          (:allowedAttachmentTypes %) (pos? (count (:allowedAttachmentTypes %)))]}
+          (:attachments %)]}
   (let [{:keys [application ok]} (query apikey :application :id id)]
     (assert ok)
     application))
@@ -281,21 +280,22 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0)))))
 
-(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
-  (when statement-id
+(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type]
+  {:pre [target-id target-type]}
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart [{:name "applicationId"  :content application-id}
-                                   {:name "Content/type"   :content "text/plain"}
-                                   {:name "attachmentType" :content "muut.muu"}
-                                   {:name "attachmentId"   :content attachment-id}
-                                   {:name "upload"         :content uploadfile}
-                                   {:name "targetId"       :content statement-id}
-                                   {:name "targetType"     :content "statement"}]}
+                       :multipart (filter identity
+                                    [{:name "applicationId"  :content application-id}
+                                     {:name "Content/type"   :content "text/plain"}
+                                     {:name "attachmentType" :content "muut.muu"}
+                                     (when attachment-id {:name "attachmentId"   :content attachment-id})
+                                     {:name "upload"         :content uploadfile}
+                                     {:name "targetId"       :content target-id}
+                                     {:name "targetType"     :content target-type}])}
                       )]
     (if expect-to-succeed
       (facts "Statement upload succesfully"
@@ -304,8 +304,10 @@
       ;(facts "Statement upload should fail"
       ;  (fact "Status code" (:status resp) => 302)
       ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0))
-      ))))
+      )))
 
+(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 

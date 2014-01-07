@@ -18,6 +18,7 @@
     :radioGroup       (-> body first :name)
     :personSelector   "123"
     :buildingSelector "001"
+    :newBuildingSelector "1"
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
