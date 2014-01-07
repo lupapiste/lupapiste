@@ -101,7 +101,7 @@
     m)))
 
 (defn create-document-data
-  "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
+  "Creates document data from schema using function f as input-creator. f defaults to 'nil-values'"
   ([schema]
     (create-document-data schema nil-values))
   ([schema f]
