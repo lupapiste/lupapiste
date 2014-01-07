@@ -6,8 +6,8 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.appId = 0;
   self.dateObservable = ko.observable(null);
   self.errorMessage = ko.observable(null);
-  self.processing = ko.observable();
-  self.pending = ko.observable();
+  self.processing = ko.observable(false);
+  self.pending = ko.observable(false);
 
   self.config = null;
   self.dialogHeader = ko.observable("");
@@ -79,7 +79,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
 
   //Open the dialog
 
-  self.configure = function(config, app) {
+  self.openWithConfig = function(config, app) {
     self.config = config;
     if (self.config) {
       self.reset(app);

@@ -11,7 +11,7 @@
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
-      constructionStateChangeModel.configure,
+      constructionStateChangeModel.openWithConfig,
       {commandName : "inform-construction-started",
        dateParameter: "startedTimestampStr",
        dateSelectorLabel   : "constructionStarted.startedDate",
@@ -20,7 +20,7 @@
        dialogButtonSend    : "constructionStarted.dialog.continue",
        areYouSureMessage   : "constructionStarted.dialog.areyousure.message"});
   constructionStateChangeModel.openConstructionReadyDialog = _.partial(
-      constructionStateChangeModel.configure,
+      constructionStateChangeModel.openWithConfig,
       {commandName : "inform-construction-ready",
        dateParameter: "readyTimestampStr",
        extraParameters: {lang: loc.getCurrentLanguage()},
