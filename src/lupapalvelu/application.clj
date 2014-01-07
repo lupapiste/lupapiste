@@ -373,7 +373,7 @@
                             application)
               application (merge application
                             (select-keys
-                              (domain/application-skeleton)
+                              domain/application-skeleton
                               [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                                :neighbors :openInfoRequest :statements :tasks :verdicts
                                :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
@@ -541,7 +541,7 @@
                                         :created created
                                         :user (user/summary user)} :text)
 
-          application   (merge (domain/application-skeleton)
+          application   (merge domain/application-skeleton
                           {:id                  id
                            :created             created
                            :opened              (when (#{:open :info} state) created)
@@ -743,7 +743,7 @@
                                                  :else                   :draft)
                           :permitSubtype       :muutoslupa}
                          (select-keys
-                           (domain/application-skeleton)
+                           domain/application-skeleton
                            [:attachments :statements :verdicts :comments :submitted :sent :neighbors
                             :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
@@ -840,7 +840,7 @@
         application (merge application
                       {:closed timestamp}
                       (select-keys
-                        (domain/application-skeleton)
+                        domain/application-skeleton
                         [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                          :neighbors :openInfoRequest :statements :tasks :verdicts
                          :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
