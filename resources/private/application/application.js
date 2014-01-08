@@ -31,7 +31,6 @@
        dialogButtonSend    : "constructionReady.dialog.continue",
        areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
   constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
-    console.log(ko.mapping.toJS(building));
     constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
        dateParameter: "startedDate",
        extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
