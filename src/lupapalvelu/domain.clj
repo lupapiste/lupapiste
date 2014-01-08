@@ -157,7 +157,7 @@
 ;; Application skeleton with default values
 ;;
 
-(defn application-skeleton []
+(def application-skeleton
   {:_statements-seen-by      {}
    :_verdicts-seen-by        {}
    :_comments-seen-by        {}
