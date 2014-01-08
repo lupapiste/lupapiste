@@ -29,6 +29,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.application-meta-fields :as meta-fields])
@@ -830,22 +831,27 @@
   (ok))
 
 (defcommand inform-building-construction-started
-  {:parameters ["id" buildingIndex startedTimestampStr]
+  {:parameters ["id" buildingIndex startedDate]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionStarted]
    :notified   true
    :validators [(permit/validate-permit-type-is permit/R)]
-   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
+   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate])]}
   [{:keys [user created application] :as command}]
-  ; TODO find building by index or fail!
-  (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
+  (let [building  (or
+                    (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
+                    (fail! :error.unknown-building))
+        timestamp (util/to-millis-from-local-date-string startedDate)
+        updates   {$set (merge
+                          {:modified created
+                           :buildings.$.constructionStarted timestamp
+                           :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
+                          (when (= "verdictGiven" (:state application))
+                            {:started created
+                             :state  :constructionStarted}))}]
     ; TODO Call KRYPS integration
-    ; TODO update building (in the same mongo query and set
-    ; * constructionStarted timestamp
-    ; * startedBy user's name or user summary
+    (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
-      (update-application command {$set {:started timestamp
-                                         :state  :constructionStarted}})
       (notifications/notify! :application-state-change command)))
   (ok))
 

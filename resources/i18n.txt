@@ -11,3 +11,4 @@ application.buildingStartedDate: Päivämäärä
 application.buildingStartedBy: Tekijä
 application.aloitusilmoitukset: Aloitusilmoitukset
 application.beginConstructionOf: Ilmoita työt alkaneiksi
+error.unknown-building: Rakennuksen tietoja ei löydy
