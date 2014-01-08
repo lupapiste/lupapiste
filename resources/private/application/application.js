@@ -37,10 +37,10 @@
        extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
        // TODO actual message keys
        dateSelectorLabel   : "constructionStarted.startedDate",
-       dialogHeader        : "constructionStarted.dialog.header",
-       dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
+       dialogHeader        : "application.beginConstructionOf",
+       dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
        dialogButtonSend    : "constructionStarted.dialog.continue",
-       areYouSureMessage   : "constructionStarted.dialog.areyousure.message"}, application);
+       areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, application);
     return false;
   };
 

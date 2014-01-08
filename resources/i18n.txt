@@ -12,3 +12,6 @@ application.buildingStartedBy: Tekijä
 application.aloitusilmoitukset: Aloitusilmoitukset
 application.beginConstructionOf: Ilmoita työt alkaneiksi
 error.unknown-building: Rakennuksen tietoja ei löydy
+
+building.constructionStarted.dialog.helpParagraph: Valitse alta hankkeesi alkamispäivämäärä ja valitse sitten Jatka.
+building.constructionStarted.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi alkaneeksi {0}?
