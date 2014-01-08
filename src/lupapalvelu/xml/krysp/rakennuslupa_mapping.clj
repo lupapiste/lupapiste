@@ -190,8 +190,8 @@
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
-        submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
-        current-file (io/file (str output-dir "/"  (mapping-common/get-current-filename id)))]
+        submitted-file (io/file (str output-dir "/" (lupapalvelu.core/now) "_" (mapping-common/get-submitted-filename id)))
+        current-file (io/file (str output-dir "/"  (lupapalvelu.core/now) "_" (mapping-common/get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
