@@ -35,8 +35,7 @@
     constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
        dateParameter: "startedDate",
        extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
-       // TODO actual message keys
-       dateSelectorLabel   : "constructionStarted.startedDate",
+       dateSelectorLabel   : "building.constructionStarted.startedDate",
        dialogHeader        : "application.beginConstructionOf",
        dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
        dialogButtonSend    : "constructionStarted.dialog.continue",

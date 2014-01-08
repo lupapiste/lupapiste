@@ -5,6 +5,7 @@ unit.euroa: euroa
 aloitusoikeus.voimassaolopvm: Voimassaolopvm
 aloitusoikeus.vakuudenLaji: Vakuuden laji
 aloitusoikeus.Vakuuspaatospykala: Vakuuspäätöspykälä
+application.building: Rakennus
 application.buildingStatus: Tila
 application.buildingOperation: Toimenpide
 application.buildingStartedDate: Päivämäärä
@@ -13,5 +14,6 @@ application.aloitusilmoitukset: Aloitusilmoitukset
 application.beginConstructionOf: Ilmoita työt alkaneiksi
 error.unknown-building: Rakennuksen tietoja ei löydy
 
-building.constructionStarted.dialog.helpParagraph: Valitse alta hankkeesi alkamispäivämäärä ja valitse sitten Jatka.
-building.constructionStarted.dialog.areyousure.message: Haluatko varmasti ilmoittaa hankkeesi alkaneeksi {0}?
+building.constructionStarted.startedDate: Aloituspäivämäärä
+building.constructionStarted.dialog.helpParagraph: Valitse rakentamisen aloituspäivämäärä ja valitse sitten Jatka.
+building.constructionStarted.dialog.areyousure.message: Haluatko varmasti ilmoittaa rakentamisen alkaneeksi {0}?

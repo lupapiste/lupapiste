@@ -742,6 +742,7 @@
                 <tr>
                   <th data-bind="ltext: 'application.buildingStatus'"></th>
                   <th data-bind="ltext: 'application.buildingOperation'"></th>
+                  <th data-bind="ltext: 'application.building'"></th>
                   <th data-bind="ltext: 'application.buildingStartedDate'"></th>
                   <th data-bind="ltext: 'application.buildingStartedBy'"></th>
                 </tr>
@@ -750,6 +751,7 @@
                 <tr>
                   <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
                   <td data-bind="text: util.buildingName($data)"></td>
+                  <td data-bind="text: $data.buildingId"></td>
                   <td>
                     <span data-bind="if: !$data.constructionStarted">
                       <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
