@@ -34,7 +34,7 @@
     console.log(ko.mapping.toJS(building));
     constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
        dateParameter: "startedDate",
-       extraParameters: {buildingIndex: building.index()},
+       extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
        // TODO actual message keys
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",

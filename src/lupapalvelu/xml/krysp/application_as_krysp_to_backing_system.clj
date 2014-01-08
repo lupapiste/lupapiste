@@ -14,6 +14,11 @@
 (defn- get-begin-of-link [permit-type]
   (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
 
+(defn resolve-output-directory [application]
+  (let [permit-type (permit/permit-type application)
+        organization (organization/get-organization (:organization application))]
+    (get-output-directory permit-type organization)))
+
 (defn save-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)

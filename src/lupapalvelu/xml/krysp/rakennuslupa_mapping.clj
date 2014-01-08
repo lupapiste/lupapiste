@@ -245,8 +245,11 @@
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
-  (save-katselmus-xml application lang output-dir started (assoc building-id :kiinttun (:propertyId application)) user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil)
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index buildingId propertyId] :as building} user]
+  (let [building-id {:jarjestysnumero index
+                     :kiinttun        propertyId
+                     :rakennusnro     buildingId}]
+    (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil))
   )
 
 (defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link]

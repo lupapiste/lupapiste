@@ -831,12 +831,12 @@
   (ok))
 
 (defcommand inform-building-construction-started
-  {:parameters ["id" buildingIndex startedDate]
+  {:parameters ["id" buildingIndex startedDate lang]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionStarted]
    :notified   true
    :validators [(permit/validate-permit-type-is permit/R)]
-   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate])]}
+   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
   [{:keys [user created application] :as command}]
   (let [building  (or
                     (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
@@ -848,8 +848,9 @@
                            :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
                           (when (= "verdictGiven" (:state application))
                             {:started created
-                             :state  :constructionStarted}))}]
-    ; TODO Call KRYPS integration
+                             :state  :constructionStarted}))}
+        output-dir (mapping-to-krysp/resolve-output-directory application)]
+    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user)
     (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
       (notifications/notify! :application-state-change command)))
