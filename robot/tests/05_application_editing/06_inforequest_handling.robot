@@ -23,7 +23,7 @@ Authority assigns an inforequest to herself
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Element should be visible  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
-  Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
+  Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Now Sonja is marked as authority
   Go to page  applications
@@ -68,13 +68,10 @@ Mikko does not see the cancelled inforequest
 Mikko waits until the first inforequest is answered
   Logout
 
-Authority can not cancel the inforequest
+Authority can not convert the inforequest to application
   Sonja logs in
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Inforequest state is  Avoin
-  Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
-
-Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
@@ -95,6 +92,15 @@ Mikko should still be able to add attachment
 When Mikko adds a comment inforequest goes back to Avoin
   Add comment   tuulivoima on ok.
   Wait until  Inforequest state is  Avoin
+  Logout
+  
+Authority cancels the inforequest
+  Sonja logs in
+  Open inforequest  ${inforequest-handling}  ${propertyId}
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
+  Click enabled by test id  inforequest-cancel-btn
+  Confirm  dynamic-yes-no-confirm-dialog
+  
 
 *** Keywords ***
 
