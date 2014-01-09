@@ -209,13 +209,13 @@
 
 
 (defn get-file-name-on-server [file-id file-name]
-  (str file-id "_" (ss/encode-filename file-name)))
+  (str (lupapalvelu.core/now) "_" file-id "_" (ss/encode-filename file-name)))
 
 (defn get-submitted-filename [application-id]
-  (str application-id "_submitted_application.pdf"))
+  (str (lupapalvelu.core/now) "_" application-id "_submitted_application.pdf"))
 
 (defn get-current-filename [application-id]
-  (str application-id "_current_application.pdf"))
+  (str (lupapalvelu.core/now) "_" application-id "_current_application.pdf"))
 
 (defn statements-ids-with-status [lausuntotieto]
   (reduce
@@ -225,13 +225,14 @@
         r))
     #{} lausuntotieto))
 
-(defn get-Liite [title link attachment type file-id]
+(defn get-Liite [title link attachment type file-id filename]
    {:kuvaus title
     :linkkiliitteeseen link
     :muokkausHetki (to-xml-datetime (:modified attachment))
     :versionumero 1
     :tyyppi type
-    :fileId file-id})
+    :fileId file-id
+    :filename filename})
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -239,7 +240,7 @@
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)]
-    {:Liite (get-Liite title link attachment type file-id)}))
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
@@ -264,15 +265,16 @@
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-Liite title link attachment type file-id)})]
+                                {:Liite (get-Liite title link attachment type file-id attachment-file-name)})]
     (not-empty canonical-attachments)))
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (get-in attachment [:Liite :fileId])
+          filename (get-in attachment [:Liite :filename])
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
-          attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name attachment-file)))
+          attachment-file-name (str output-dir "/" filename)
           attachment-file (io/file attachment-file-name)
           ]
       (with-open [out (io/output-stream attachment-file)
@@ -303,7 +305,7 @@
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing."
   [application attachments statement-attachments xml output-dir & [extra-emitter]]
-  (let [file-name  (str output-dir "/" (:id application))
+  (let [file-name  (str output-dir "/" (lupapalvelu.core/now) "_" (:id application))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
