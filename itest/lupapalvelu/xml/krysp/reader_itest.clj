@@ -123,10 +123,16 @@
 (fact "converting verdict krysp to lupapiste domain model"
   (let [xml (application-xml local-legacy id)]
     xml => truthy
-    (->verdicts xml :RakennusvalvontaAsia ->verdict)))
+    (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
+
+(fact "converting poikkeamis verdict krysp to lupapiste domain model"
+  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-legacy id)]
+    xml => truthy
+    (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
+
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
   (let [xml (ya-application-xml local-legacy id)]
     xml => truthy
-    (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)))
+    (count (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)) => 1))
 

@@ -46,7 +46,7 @@
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-user-key    :poikkari-ftp-user
    :sftp-directory   "/poikkeusasiat"
-   :case-xml-element :RakennusvalvontaAsia})
+   :case-xml-element :Popast})
 
 ;;
 ;; Helpers

@@ -3,19 +3,50 @@
 
   var isInitializing = true;
   var currentId = null;
+  var application = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
   var applicationMap = null;
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
-  var constructionStateChangeModel = new LUPAPISTE.ConstructionStateChangeModel();
+  var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+  constructionStateChangeModel.openConstructionStartDialog = _.partial(
+      constructionStateChangeModel.openWithConfig,
+      {commandName : "inform-construction-started",
+       dateParameter: "startedTimestampStr",
+       dateSelectorLabel   : "constructionStarted.startedDate",
+       dialogHeader        : "constructionStarted.dialog.header",
+       dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "constructionStarted.dialog.areyousure.message"});
+  constructionStateChangeModel.openConstructionReadyDialog = _.partial(
+      constructionStateChangeModel.openWithConfig,
+      {commandName : "inform-construction-ready",
+       dateParameter: "readyTimestampStr",
+       extraParameters: {lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "constructionReady.readyDate",
+       dialogHeader        : "constructionReady.dialog.header",
+       dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
+       dialogButtonSend    : "constructionReady.dialog.continue",
+       areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
+  constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
+    constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
+       dateParameter: "startedDate",
+       extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "building.constructionStarted.startedDate",
+       dialogHeader        : "application.beginConstructionOf",
+       dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, application);
+    return false;
+  };
+
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
-  var application = new LUPAPISTE.ApplicationModel();
   var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   var authorities = ko.observableArray([]);

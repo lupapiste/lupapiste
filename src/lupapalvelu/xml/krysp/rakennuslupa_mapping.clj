@@ -191,7 +191,7 @@
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
         submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
-        current-file (io/file (str output-dir "/"  (mapping-common/get-current-filename id)))]
+        current-file (io/file (str output-dir "/" (mapping-common/get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
@@ -213,11 +213,11 @@
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
         canonical-without-attachments (katselmus-canonical application lang started building-id user
-                                        katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
-                                        huomautukset lasnaolijat poikkeamat)
+                                                           katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
+                                                           huomautukset lasnaolijat poikkeamat)
         canonical (assoc-in canonical-without-attachments
-                    [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                    attachments)
+                            [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
+                            attachments)
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
     (mapping-common/write-to-disk application attachments nil xml output-dir)))
@@ -245,8 +245,11 @@
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started building-id user]
-  (save-katselmus-xml application lang output-dir started (assoc building-id :kiinttun (:propertyId application)) user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil)
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index buildingId propertyId] :as building} user]
+  (let [building-id {:jarjestysnumero index
+                     :kiinttun        propertyId
+                     :rakennusnro     buildingId}]
+    (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil))
   )
 
 (defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link]
