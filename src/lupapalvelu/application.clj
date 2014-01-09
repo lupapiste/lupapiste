@@ -29,6 +29,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.application-meta-fields :as meta-fields])
@@ -373,7 +374,7 @@
                             application)
               application (merge application
                             (select-keys
-                              (domain/application-skeleton)
+                              domain/application-skeleton
                               [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                                :neighbors :openInfoRequest :statements :tasks :verdicts
                                :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
@@ -541,7 +542,7 @@
                                         :created created
                                         :user (user/summary user)} :text)
 
-          application   (merge (domain/application-skeleton)
+          application   (merge domain/application-skeleton
                           {:id                  id
                            :created             created
                            :opened              (when (#{:open :info} state) created)
@@ -743,7 +744,7 @@
                                                  :else                   :draft)
                           :permitSubtype       :muutoslupa}
                          (select-keys
-                           (domain/application-skeleton)
+                           domain/application-skeleton
                            [:attachments :statements :verdicts :comments :submitted :sent :neighbors
                             :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
@@ -819,6 +820,7 @@
   {:parameters ["id" startedTimestampStr]
    :roles      [:applicant :authority]
    :states     [:verdictGiven]
+   :notified   true
    :on-success (notify :application-state-change)
    :validators [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
@@ -826,6 +828,32 @@
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:started timestamp
                                        :state  :constructionStarted}}))
+  (ok))
+
+(defcommand inform-building-construction-started
+  {:parameters ["id" buildingIndex startedDate lang]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionStarted]
+   :notified   true
+   :validators [(permit/validate-permit-type-is permit/R)]
+   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
+  [{:keys [user created application] :as command}]
+  (let [building  (or
+                    (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
+                    (fail! :error.unknown-building))
+        timestamp (util/to-millis-from-local-date-string startedDate)
+        updates   {$set (merge
+                          {:modified created
+                           :buildings.$.constructionStarted timestamp
+                           :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
+                          (when (= "verdictGiven" (:state application))
+                            {:started created
+                             :state  :constructionStarted}))}
+        output-dir (mapping-to-krysp/resolve-output-directory application)]
+    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user)
+    (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
+    (when (= "verdictGiven" (:state application))
+      (notifications/notify! :application-state-change command)))
   (ok))
 
 (defcommand inform-construction-ready
@@ -840,7 +868,7 @@
         application (merge application
                       {:closed timestamp}
                       (select-keys
-                        (domain/application-skeleton)
+                        domain/application-skeleton
                         [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                          :neighbors :openInfoRequest :statements :tasks :verdicts
                          :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
@@ -975,7 +1003,7 @@
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-           tasks (when (env/feature? :rakentamisen-aikaiset-tabi) (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created))
+           tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
            updates {$set (merge {:verdicts verdicts-with-attachments
                                  :modified created
                                  :state    :verdictGiven}
