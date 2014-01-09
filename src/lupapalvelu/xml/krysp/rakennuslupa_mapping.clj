@@ -213,11 +213,11 @@
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
         canonical-without-attachments (katselmus-canonical application lang started building-id user
-                                        katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
-                                        huomautukset lasnaolijat poikkeamat)
+                                                           katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
+                                                           huomautukset lasnaolijat poikkeamat)
         canonical (assoc-in canonical-without-attachments
-                    [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                    attachments)
+                            [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
+                            attachments)
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
     (mapping-common/write-to-disk application attachments nil xml output-dir)))
