@@ -212,10 +212,10 @@
   (str (lupapalvelu.core/now) "_" file-id "_" (ss/encode-filename file-name)))
 
 (defn get-submitted-filename [application-id]
-  (str application-id "_submitted_application.pdf"))
+  (str (lupapalvelu.core/now) "_" application-id "_submitted_application.pdf"))
 
 (defn get-current-filename [application-id]
-  (str application-id "_current_application.pdf"))
+  (str (lupapalvelu.core/now) "_" application-id "_current_application.pdf"))
 
 (defn statements-ids-with-status [lausuntotieto]
   (reduce
