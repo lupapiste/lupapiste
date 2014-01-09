@@ -370,7 +370,7 @@
 (defcommand stamp-attachments
   {:parameters [:id files xMargin yMargin]
    :roles      [:authority]
-   :states     [:open :submitted :complement-needed :verdictGiven]
+   :states     [:submitted :complement-needed :verdictGiven]
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (ok :job (make-stamp-job
