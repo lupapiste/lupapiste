@@ -481,6 +481,37 @@ Add neighbor
   Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
   Wait Until  Page Should Contain  ${email}
 
+#
+# Verdict
+#
+
+Go to give new verdict
+  Open tab  verdict
+  Click enabled by test id  give-verdict
+  Wait until  element should be visible  verdict-id
+  Wait Until  Element Should Be Enabled  verdict-id
+
+Input verdict
+  [Arguments]  ${verdict-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text  verdict-id  ${verdict-id}
+  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
+  Input text  verdict-given  ${verdict-given-date}
+  Input text  verdict-official  ${verdict-official-date}
+  Input text  verdict-name  ${verdict-giver-name}
+  ## Trigger change manually
+  Execute JavaScript  $("#verdict-id").change();
+  Execute JavaScript  $("#verdict-type-select").change();
+  Execute JavaScript  $("#verdict-given").change();
+  Execute JavaScript  $("#verdict-official").change();
+  Execute JavaScript  $("#verdict-name").change();
+
+Submit verdict
+  Focus  verdict-submit
+  Wait Until  Element Should Be Enabled  verdict-submit
+  Click button  verdict-submit
+
 
 #
 # Mock Ajax calls: jquery.mockjax
@@ -504,4 +535,3 @@ Mock proxy error
 
 Clear mocks
   Execute Javascript  $.mockjaxClear();
-  
