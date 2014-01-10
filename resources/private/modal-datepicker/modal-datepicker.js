@@ -3,11 +3,9 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.dialogSelector = "#dialog-modal-datepicker";
   self.datepickerSelector = "#modal-datepicker-date";
 
-  self.appId = 0;
+  self.appId = null;
   self.dateObservable = ko.observable(null);
   self.errorMessage = ko.observable(null);
-  self.processing = ko.observable(false);
-  self.pending = ko.observable(false);
 
   self.config = null;
   self.dialogHeader = ko.observable("");
@@ -27,8 +25,6 @@ LUPAPISTE.ModalDatepickerModel = function() {
     self.appId = app.id();
     self.dateObservable(null);
     self.errorMessage(null);
-    self.processing(false);
-    self.pending(false);
 
     self.dialogHeader(self.config.dialogHeader);
     self.dateSelectorLabel(self.config.dateSelectorLabel);
@@ -53,7 +49,6 @@ LUPAPISTE.ModalDatepickerModel = function() {
       .pending(self.pending)
       .success(function() {
         repository.load(self.appId);
-        $("#modal-datepicker").show();
         LUPAPISTE.ModalDialog.close();
         self.errorMessage(null);
         self.dateObservable(null);
@@ -64,11 +59,11 @@ LUPAPISTE.ModalDatepickerModel = function() {
   };
 
   self.doCancel = function() {
-    $("#modal-datepicker").show();
+    LUPAPISTE.ModalDialog.close();
   };
 
   self.confirm = function() {
-    $("#modal-datepicker").hide();
+    LUPAPISTE.ModalDialog.close();
     LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("areyousure"),
         loc(self.config.areYouSureMessage, $(self.datepickerSelector).val()),
