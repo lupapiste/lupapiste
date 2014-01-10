@@ -73,19 +73,39 @@
     (fn [{:keys [statementPersons]}]
       (let [personIdSet    (set personIds)
             persons        (filter #(personIdSet (:id %)) statementPersons)
-            users          (map #(assoc (user-api/get-or-create-user-by-email (:email %)) :text (:text %)) persons)
-            writers        (map #(user/user-in-role % :writer) users)
-            new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
-            new-userids    (set (map :id new-writers))
-            unique-writers (distinct new-writers)
-            ->statement    (fn [person] {:id        (mongo/create-id)
-                                         :person    person
-                                         :requested now
-                                         :given     nil
-                                         :status    nil})
-            statements    (map ->statement persons)]
-        (update-application command {$pushAll {:statements statements :auth unique-writers}})
-        (notifications/notify! :request-statement (assoc command :data {:users users}))))))
+            details        (map #(hash-map :person %) persons)]
+        (map 
+          (-> 
+            #(assoc % :user (user/get-user-by-email (get-in % :person :email)))
+            #(if-not (:user %) (fail! :error.not-found) %)
+            #(assoc % :statement {:id        (mongo/create-id)
+                                  :person    {:id (comment personista)
+                                              :user-id (comment userin id)
+                                              :text (comment personista)}
+                                  ;:user      (:user %)
+                                  :requested now
+                                  :given     nil
+                                  :status    nil})) details)
+            #(assoc-in % :user :statementId (get-in % :statement :id))
+            
+            (map 
+              details        (fn [person] )
+            
+              ->user-or-fail #(assoc (or (user/get-user-by-email (:email %)) (fail! :error.not-found)) :text (:text %))
+              users          (->user-or-fail persons) 
+              writers        (map #(user/user-in-role % :stementPerson) users)
+              ;new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
+              ;unique-writers (distinct new-writers)
+              ->statement    (fn [person] {:id        (mongo/create-id)
+                                           :person    person
+                                           :user      (some #(when (= (:email person) (:username %)) %) writers)
+                                           :requested now
+                                           :given     nil
+                                           :status    nil})
+              statements    (map ->statement persons)
+              writers   (map #(assoc (:user %) :stementId (:id %))  statements)]
+          (update-application command {$pushAll {:statements statements :auth writers}})
+          (notifications/notify! :request-statement (assoc command :data {:users users}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
