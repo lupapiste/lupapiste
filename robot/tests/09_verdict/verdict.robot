@@ -24,7 +24,6 @@ Sonja logs in and throws in a verdict
   Sonja logs in
   Open application  ${appname}  753-416-25-30
   Throw in a verdict
-#  Wait until  Application state should be  verdictGiven
   Verdict is given  123567890
   Can't regive verdict
 
