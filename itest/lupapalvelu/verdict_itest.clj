@@ -88,6 +88,8 @@
     (:area building3) => "22"
     (:created building3) => "2013"))
 
+;; Construction start / ready
+
 (fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
   (let [application-id         (create-app-id sonja
                                  :operation "ya-katulupa-vesi-ja-viemarityot"
@@ -137,4 +139,44 @@
         application            (query-application sonja application-id) => truthy
         app-state              (:state application) => "verdictGiven"]
     (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.invalid-permit-type")))
+
+
+;; Change permit
+
+;;
+;; TODO: Miten mongon link-permit-tietojen muutokset tarkastetaan?  Vain ftest-puolella?
+;;
+(fact* "A change permit can be created based on current R application after verdict has been given."
+  (let [application-id         (create-app-id sonja
+                                 :municipality sonja-muni
+                                 :address "Paatoskuja 12")
+        application            (query-application sonja application-id) => truthy
+        _                      (generate-documents application sonja)
+        application            (query-application sonja application-id) => truthy
+        submit-resp            (command sonja :submit-application :id application-id) => ok?
+        approve-resp           (command sonja :approve-application :id application-id :lang "fi") => ok?
+        changepermit-resp-fail (command sonja :create-change-permit :id application-id) => (partial expected-failure? "error.command-illegal-state")
+        verdict-resp           (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+        application            (query-application sonja application-id) => truthy
+        app-state              (:state application) => "verdictGiven"
+;        changepermit-resp      (command sonja :create-change-permit :id application-id) => ok?
+;        application            (query-application sonja application-id) => truthy
+        ]
+
+    sonja => (allowed? :create-change-permit :id application-id)
+    ))
+
+(fact* "Change permit can only be applied for an R type of application."
+  (let [application            (create-and-submit-application sonja
+                                 :municipality sonja-muni
+                                 :address "Paatoskuja 13"
+                                 :operation "ya-katulupa-vesi-ja-viemarityot")
+        application-id         (:id application)
+        approve-resp           (command sonja :approve-application :id application-id :lang "fi") => ok?
+        verdict-resp           (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+        application            (query-application sonja application-id) => truthy
+        app-state              (:state application) => "verdictGiven"]
+    (command sonja :create-change-permit :id application-id) => (partial expected-failure? "error.invalid-permit-type")))
+
+
 
