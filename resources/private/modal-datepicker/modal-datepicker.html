@@ -23,10 +23,8 @@
             </div>
 
             <button class="btn btn-primary btn-dialog"
-                    data-bind="click: confirm, enable: ok, disable: processing"
+                    data-bind="ltext: dialogButtonSend, click: confirm, enable: ok"
                     data-test-id="modal-datepicker-continue">
-              <span data-bind="ltext: dialogButtonSend"></span>
-              <em data-bind="visible: pending" class="button-loader"></em>
             </button>
 
             <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
