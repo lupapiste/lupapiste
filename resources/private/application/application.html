@@ -110,7 +110,7 @@
                 <a data-bind="text: $data.id,
                               click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
                               attr: {'data-test-app-link-permit': $data.id}"
-                   data-test-id="test-application-link-permit"
+                   data-test-id="test-application-link-permit-lupapistetunnus"
                    href="#" class="link-permit-item"></a>
 
                 <a data-bind="visible: !_.contains(['sent', 'verdictGiven', 'closed'], $root.application.state()),
@@ -122,7 +122,7 @@
               <span data-bind="visible: $data.type() === 'kuntalupatunnus',
                                text: $data.id,
                                attr: {'data-test-app-link-permit': $data.id}"
-                 data-test-id="test-application-link-permit"
+                 data-test-id="test-application-link-permit-kuntalupatunnus"
                  href="#" class="link-permit-item"></span>
 
 
