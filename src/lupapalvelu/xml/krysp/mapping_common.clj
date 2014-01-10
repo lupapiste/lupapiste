@@ -209,13 +209,13 @@
 
 
 (defn get-file-name-on-server [file-id file-name]
-  (str (lupapalvelu.core/now) "_" file-id "_" (ss/encode-filename file-name)))
+  (str file-id "_" (ss/encode-filename file-name)))
 
 (defn get-submitted-filename [application-id]
-  (str (lupapalvelu.core/now) "_" application-id "_submitted_application.pdf"))
+  (str  application-id "_submitted_application" "_" (lupapalvelu.core/now) ".pdf"))
 
 (defn get-current-filename [application-id]
-  (str (lupapalvelu.core/now) "_" application-id "_current_application.pdf"))
+  (str application-id "_current_application"  "_" (lupapalvelu.core/now) ".pdf"))
 
 (defn statements-ids-with-status [lausuntotieto]
   (reduce
@@ -305,7 +305,7 @@
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing."
   [application attachments statement-attachments xml output-dir & [extra-emitter]]
-  (let [file-name  (str output-dir "/" (lupapalvelu.core/now) "_" (:id application))
+  (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
