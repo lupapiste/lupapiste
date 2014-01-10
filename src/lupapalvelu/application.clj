@@ -319,8 +319,7 @@
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :states     [:draft :info :open :submitted]
-   :validators [validate-owner-or-writer]}
+   :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
