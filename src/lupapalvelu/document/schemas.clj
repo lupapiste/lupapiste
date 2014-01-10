@@ -92,8 +92,7 @@
                           {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
                           {:name "postinumero" :type :string :subtype :zip :size "s"}
-                          {:name "postitoimipaikannimi" :type :string :size "m"}
-                          {:name "pistesijanti" :type :string}]}])
+                          {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
