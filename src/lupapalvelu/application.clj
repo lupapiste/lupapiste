@@ -352,6 +352,51 @@
       (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
       (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))))
 
+
+(defn do-approve-regular-app [{:keys [application created user] :as command} id lang]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        organization (organization/get-organization (:organization application))]
+
+    (let [submitted-application (mongo/by-id :submitted-applications id)]
+      (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
+
+    ;; The "sent" timestamp is updated to all attachments of the application,
+    ;; also the ones that have no versions at all (have no latestVersion).
+    (let [attachments-argument
+          (reduce
+            (fn [data-map attachment]
+              (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+            {}
+            (:attachments application))]
+      (update-application command
+        {:state {$in ["submitted" "complement-needed"]}}
+        {$set (merge
+                {:sent created :state :sent}
+                attachments-argument
+                (when (empty? (:authority application))
+                    {:authority (user/summary user)}))}))))
+
+(defn do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                      (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                      application)
+        application (merge application
+                      (select-keys
+                        domain/application-skeleton
+                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                         :neighbors :openInfoRequest :statements :tasks :verdicts
+                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
+        organization (organization/get-organization (:organization application))]
+
+    (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+    (update-application command
+      {:state {$in ["submitted" "complement-needed"]}}
+      {$set (merge
+              {:sent created :state :closed :closed created}
+              (when (empty? (:authority application))
+                {:authority (user/summary user)}))})))
+
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
@@ -359,48 +404,15 @@
    :on-success (notify :application-state-change)
    :validators [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
-  [{:keys [application created] :as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        organization (organization/get-organization (:organization application))
-        jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))]
-    (when (empty? (:authority application))
-      (executed "assign-to-me" command)) ;; FIXME combine mongo writes
-    (try
-      (if jatkoaika-app?
-        ;; jatkoaika application
-        (let [application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
-                            (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
-                            application)
-              application (merge application
-                            (select-keys
-                              domain/application-skeleton
-                              [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
-                               :neighbors :openInfoRequest :statements :tasks :verdicts
-                               :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
-          (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization))
-        ;; ordinary application
-        (let [submitted-application (mongo/by-id :submitted-applications id)]
-          (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+  [{:keys [application] :as command}]
+  (try
+    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+      (do-approve-jatkoaika-app command id lang)
+      (do-approve-regular-app command id lang))
+    (catch org.xml.sax.SAXParseException e
+      (info e "Invalid KRYSP XML message")
+      (fail (.getMessage e)))))
 
-      (catch org.xml.sax.SAXParseException e
-        (info e "Invalid KRYSP XML message")
-        (fail (.getMessage e))))
-
-    ;; The "sent" timestamp is updated to all attachments of the application,
-    ;; also the ones that have no versions at all (have no latestVersion).
-    (let [data-argument (when-not jatkoaika-app?
-                          (reduce
-                            (fn [data-map attachment]
-                              (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-                            {}
-                            (:attachments application)))]
-      (update-application command
-        {:state {$in ["submitted" "complement-needed"]}}
-        {$set (merge
-                data-argument
-                (if jatkoaika-app?
-                  {:sent created :state :closed :closed created}
-                  {:sent created :state :sent}))}))))
 
 (defcommand submit-application
   {:parameters [id]
