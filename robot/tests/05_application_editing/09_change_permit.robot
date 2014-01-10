@@ -56,11 +56,11 @@ Sonja creates a change permit
 
   # Go to the link permit via link
 ##  TODO: *** FIX THIS ***
-#  Click enabled by test id  test-application-link-permit-lupapistetunnus
+  Click by test id  test-application-link-permit-lupapistetunnus
 
-#  Wait Until  Element should not be visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
-#  Wait Until  Element should be visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
-#  Element Text Should Be  xpath=//span[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid}
+  Wait Until  Element should not be visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
+  Wait Until  Element should be visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
+  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid}
 
 
 *** Keywords ***
