@@ -102,8 +102,9 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
+  Wait for jQuery
   ${secs} =  Get Time  epoch
-  Go to  ${LOGOUT URL}?s=${secs}
+  Execute JavaScript  window.location="${LOGOUT URL}?s=${secs}";
 
 #
 # Login stuff
@@ -261,11 +262,13 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Kill dev-box
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
