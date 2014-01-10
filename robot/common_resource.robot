@@ -512,6 +512,14 @@ Submit verdict
   Wait Until  Element Should Be Enabled  verdict-submit
   Click button  verdict-submit
 
+Throw in a verdict
+  Go to give new verdict
+  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
+  Submit verdict
+  Wait until  Application state should be  verdictGiven
+  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
+  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
+
 
 #
 # Mock Ajax calls: jquery.mockjax

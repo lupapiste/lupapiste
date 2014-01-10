@@ -15,7 +15,7 @@ Sonja prepares the application
 Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
-  Give verdict
+  Throw in a verdict
   Wait Until  Element should not be visible  application-inform-construction-ready-btn
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
@@ -37,13 +37,6 @@ Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
 
 
 *** Keywords ***
-
-Give verdict
-  Go to give new verdict
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
-  Submit verdict
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
 
 Sets construction started/ready via modal datepicker dialog
   [Arguments]  ${openDialogButtonId}  ${date}

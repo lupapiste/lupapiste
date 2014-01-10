@@ -23,14 +23,10 @@ Mikko submits application & goes for lunch
 Sonja logs in and throws in a verdict
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Go to give new verdict
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
-  Submit verdict
-
+  Throw in a verdict
+#  Wait until  Application state should be  verdictGiven
   Verdict is given  123567890
   Can't regive verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
 
 Stamping dialog opens and closes
   Element should be visible  xpath=//section[@id='application']//button[@data-test-id='application-stamp-btn']
