@@ -232,7 +232,7 @@ Input text by test id
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change().blur();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -504,4 +504,3 @@ Mock proxy error
 
 Clear mocks
   Execute Javascript  $.mockjaxClear();
-  
