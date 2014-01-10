@@ -3,26 +3,62 @@
 
   var isInitializing = true;
   var currentId = null;
+  var application = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
   var applicationMap = null;
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
+  var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+  constructionStateChangeModel.openConstructionStartDialog = _.partial(
+      constructionStateChangeModel.openWithConfig,
+      {commandName : "inform-construction-started",
+       dateParameter: "startedTimestampStr",
+       dateSelectorLabel   : "constructionStarted.startedDate",
+       dialogHeader        : "constructionStarted.dialog.header",
+       dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "constructionStarted.dialog.areyousure.message"});
+  constructionStateChangeModel.openConstructionReadyDialog = _.partial(
+      constructionStateChangeModel.openWithConfig,
+      {commandName : "inform-construction-ready",
+       dateParameter: "readyTimestampStr",
+       extraParameters: {lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "constructionReady.readyDate",
+       dialogHeader        : "constructionReady.dialog.header",
+       dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
+       dialogButtonSend    : "constructionReady.dialog.continue",
+       areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
+  constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
+    constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
+       dateParameter: "startedDate",
+       extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "building.constructionStarted.startedDate",
+       dialogHeader        : "application.beginConstructionOf",
+       dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, application);
+    return false;
+  };
+
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
-  var application = new LUPAPISTE.ApplicationModel();
+  var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-  var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
   function getAttachmentsByGroup(source) {
-    var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
+    var attachments = _.map(source, function(a) {
+      a.latestVersion = _.last(a.versions || []);
+      a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
+      return a;
+    });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
@@ -105,7 +141,7 @@
 
     var x = (application.location && application.location().x) ? application.location().x() : 0;
     var y = (application.location && application.location().y) ? application.location().y() : 0;
-    hub.send("documents-map", {
+    hub.send("oskari-center-map", {
       data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
       clear: true
     });
@@ -127,9 +163,12 @@
       var app = applicationDetails.application;
 
       // Delete shapes
-      if(application.shapes) {
+      if (application.shapes) {
         delete application.shapes;
       }
+
+      // Plain data
+      application._js = app;
 
       // Update observebles
       ko.mapping.fromJS(app, {}, application);
@@ -148,18 +187,7 @@
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       // Attachments:
-
-      application.hasAttachment(false);
-
-      attachments(_.map(app.attachments || [], function(a) {
-        a.statusName = application.statuses[a.state] || "unknown";
-        a.latestVersion = _.last(a.versions);
-        if (a.versions && a.versions.length) { application.hasAttachment(true); }
-        return a;
-      }));
-
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
-
 
       // Setting disable value for the "Send unsent attachments" button:
 
@@ -334,7 +362,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","statement","neighbors","task"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -431,7 +459,6 @@
       application: application,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
-      attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
       comment: commentModel,
       invite: inviteModel,
@@ -446,13 +473,17 @@
       neighbor: neighborActions,
       sendNeighborEmailModel: sendNeighborEmailModel,
       neighborStatusModel: neighborStatusModel,
-      addLinkPermitModel: addLinkPermitModel
+      addLinkPermitModel: addLinkPermitModel,
+      constructionStateChangeModel: constructionStateChangeModel,
+      createTaskModel: createTaskModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
-    $("#dialog-add-link-permit").applyBindings({addLinkPermitModel: addLinkPermitModel});
+    $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
+    $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
+    $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
+    $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     attachmentTemplatesModel.init();
   });
 

@@ -42,10 +42,12 @@
                                                                               (= created (:created d))
                                                                               (= target-document-name (get-in d [:schema-info :name])))
                                                                             d)) documents)
-                                         updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                            :removable (= "R" (:permitType application))})))
+                                         updated (when document-to-update
+                                                   (assoc document-to-update :schema-info
+                                                     (merge (:schema-info document-to-update)
+                                                       {:op o
+                                                        :removable (= "R" (:permitType application))})))
                                          ]
-
                                      updated)))
         unmatched-operations (filter
                                (fn [{id :id :as op}]
@@ -148,12 +150,21 @@
             (mongo/update-by-id collection (:id app)
               {$set {:documents (map
                                   (fn [doc] (-> doc
-                                                 strip-fax
-                                                 cleanup-uusirakennus
-                                                 fix-hakija
-                                                 strip-nils))
+                                                strip-fax
+                                                cleanup-uusirakennus
+                                                fix-hakija
+                                                strip-nils))
                                   (:documents app))}}))
           applications)))))
 
 (defmigration vetuma-token-cleanup-LUPA-976
   (mongo/drop-collection :vetuma))
+
+(defmigration set-missing-default-values-for-keys-in-applications-LUPA-642
+  (let [missing-keys-in-mongo [:buildings :shapes]
+        keys-and-default-values (select-keys domain/application-skeleton missing-keys-in-mongo)]
+    (doseq [collection [:applications :submitted-applications]
+            [k d] keys-and-default-values]
+      (mongo/update-by-query collection {k {$exists false}} {$set {k d}}))))
+
+

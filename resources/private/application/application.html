@@ -71,7 +71,7 @@
           <!-- /ko -->
 
           <!-- Operations: -->
-          <!-- ko if: !$root.authorization.ok('change-permit-sub-type') -->
+          <!-- ko if: $root.permitSubtypes().length == 0 -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
             <ul data-bind="foreach: operationsCount">
@@ -87,11 +87,12 @@
           <!-- /ko -->
 
           <!-- Subtypes: -->
-          <!-- ko if: $root.authorization.ok('change-permit-sub-type') -->
+          <!-- ko if: $root.permitSubtypes().length > 0 -->
           <div>
             <p data-bind="ltext: 'application.permitSubtypes'"></p>
             <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                               attr: { disabled: !$root.authorization.ok('change-permit-sub-type') },
                                optionsText: function(item) {return loc('permitSubtype.' + item); }">
             </select>
             </span>
@@ -99,21 +100,38 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
+          <!-- ko if: linkPermitData -->
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <a data-bind="text: $data.id,
-                            click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                            attr: {'data-test-app-linking-to-us': $data.id}"
+
+              <span data-bind="visible: $data.type() === 'lupapistetunnus'">
+
+                <a data-bind="text: $data.id,
+                              click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                              attr: {'data-test-app-link-permit': $data.id}"
+                   data-test-id="test-application-link-permit"
+                   href="#" class="link-permit-item"></a>
+
+                <a data-bind="visible: !_.contains(['sent', 'verdictGiven', 'closed'], $root.application.state()),
+                              ltext: 'application.linkPermitRemoveSelected',
+                              click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                   href="#" class="remove-link-permit"></a>
+              </span>
+
+              <span data-bind="visible: $data.type() === 'kuntalupatunnus',
+                               text: $data.id,
+                               attr: {'data-test-app-link-permit': $data.id}"
                  data-test-id="test-application-link-permit"
-                 href="#" class="link-permit-item"></a>
-              <a data-bind="ltext: 'application.linkPermitRemoveSelected',
-                            click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
-                 href="#" class="remove-link-permit"></a>
+                 href="#" class="link-permit-item"></span>
+
+
             </span>
           </div>
+          <!-- /ko -->
 
           <!-- Applications linking to us: -->
+          <!-- ko if: appsLinkingToUs -->
           <div data-bind="with: appsLinkingToUs">
             <p data-bind="ltext: 'application.appsLinkingToUs'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
@@ -124,6 +142,7 @@
                  href="#" class="remove-link-permit"></a>
             </span>
           </div>
+          <!-- /ko -->
 
         </div>
 
@@ -161,6 +180,11 @@
           <button data-bind="click: createChangePermit,    visible: $root.authorization.ok('create-change-permit'),     enable: $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
             <span data-bind="ltext: 'application.createChangePermit'"></span>
             <span class="icon add-grey left-align"></span>
+          </button>
+          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'),     enable: $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
+            <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
+            <span class="icon add-grey left-align"></span>
+          </button>
           <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
@@ -213,8 +237,8 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven'], state()) && features.enabled('rakentamisen-aikaiset-tabi')"><a data-bind="click: changeTab"
-                   href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state())">
+              <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
                     <span data-bind="text: tasksRequiringAction"
@@ -250,7 +274,7 @@
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="applicationDocgen">
+            <div id="applicationDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -286,7 +310,7 @@
 
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="partiesDocgen">
+            <div id="partiesDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -464,6 +488,10 @@
                       <label data-bind="ltext: 'verdict.julkipano'"></label>
                       <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
                     </div>
+                    <div data-bind="if: paivamaarat.paatosdokumentinPvm" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
+                    </div>
                     <!-- /ko --> <!-- /paivamaarat -->
 
                     <!--  ko if:  $data.lupamaaraykset -->
@@ -490,13 +518,17 @@
                       <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
+                    <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
+                      <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label><span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span></div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
 
                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                         <li data-bind='if: $data.katselmuksenLaji'>
-                          <span data-bind="ltext: 'verdict.katselmus.'+ $data.katselmuksenLaji"></span>
+                          <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
                           <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                             (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                           </span>
@@ -701,25 +733,78 @@
         </div>
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
-        <div>
-        <table data-bind="foreach: taskGroups">
-          <thead>
-            <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
-            <tr>
-              <td data-bind="ltext: 'application.taskState'"></td>
-              <td data-bind="ltext: 'application.taskDisplayName'"></td>
-              <td data-bind="ltext: 'application.taskClosed'"></td>
-            </tr>
-          </thead>
-          <tbody data-bind="foreach: tasks">
-            <tr data-bind="attr: {'data-test-type': schema.info.name}">
-              <td data-bin="text: state"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-              <td data-bind="text:displayName"></td>
-              <td data-bind="dateString:$data.closed"></td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
+
+          <div data-bind="if: buildings() && buildings().length && $root.authorization.ok('inform-building-construction-started')">
+
+            <table>
+              <thead>
+                <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
+                <tr>
+                  <th data-bind="ltext: 'application.buildingStatus'"></th>
+                  <th data-bind="ltext: 'application.buildingOperation'"></th>
+                  <th data-bind="ltext: 'application.building'"></th>
+                  <th data-bind="ltext: 'application.buildingStartedDate'"></th>
+                  <th data-bind="ltext: 'application.buildingStartedBy'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: buildings">
+                <tr>
+                  <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
+                  <td data-bind="text: util.buildingName($data)"></td>
+                  <td data-bind="text: $data.buildingId"></td>
+                  <td>
+                    <span data-bind="if: !$data.constructionStarted">
+                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
+                    <span data-bind="if: $data.constructionStarted">
+                      <span data-bind="dateString: $data.constructionStarted"></span>
+                    </span>
+                  </td>
+                  <td data-bind="fullName: $data.startedBy"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <table data-bind="foreach: taskGroups">
+              <thead>
+                <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+                <tr>
+                  <th data-bind="ltext: 'application.taskState'"></th>
+                  <th data-bind="ltext: 'application.taskDisplayName'"></th>
+                  <th data-bind="ltext: 'application.taskClosed'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: tasks">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                  <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
+                  <td data-bind="text: displayName"></td>
+                  <td data-bind="dateString: $data.closed"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-construction-started-btn"
+                  data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
+                             ltext: 'application.button.informConstructionStarted',
+                             visible: $root.authorization.ok('inform-construction-started'),
+                             enable: $root.authorization.ok('inform-construction-started')"></button>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-inform-construction-ready-btn"
+                  data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
+                             ltext: 'application.button.informConstructionReady',
+                             visible: $root.authorization.ok('inform-construction-ready'),
+                             enable: $root.authorization.ok('inform-construction-ready')"></button>
+
+          <button class="btn btn-primary"
+                  data-test-id="application-new-task"
+                  data-bind="click: $root.createTaskModel.createTask,
+                             ltext: 'task.create',
+                             visible: $root.authorization.ok('create-task'),
+                             enable: $root.authorization.ok('create-task')"></button>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >

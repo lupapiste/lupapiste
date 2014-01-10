@@ -29,11 +29,12 @@
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.21"]
+                 [fi.sito/oskari "0.9.26"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
                  [digest "1.4.3"]
-                 [org.clojure/tools.trace "0.7.6"]]
+                 [org.clojure/tools.trace "0.7.6"]
+                 [cljts "0.2.0"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
@@ -41,6 +42,7 @@
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]]
+                   :resource-paths ["dev-resources"]
                    :source-paths ["test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
                               "-Xmx1G" "-XX:MaxPermSize=256M"]}

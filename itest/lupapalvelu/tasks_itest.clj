@@ -1,9 +1,11 @@
 (ns lupapalvelu.tasks-itest
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.xml.krysp.reader :as reader]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
@@ -45,7 +47,7 @@
   (facts "maaraykset"
     (count maaraykset) => 3
     (map :taskname maaraykset) => ["Maarays 1" "Maarays 2" "tee joku muukin tarkastus"]
-    (map :data maaraykset) => (partial every? empty?))
+    (map #(get-in % [:data :maarays :value]) maaraykset) => (partial every? truthy))
 
   (facts "tyonjohtajat"
     (count tyonjohtajat) => 3
@@ -72,4 +74,33 @@
 
       (reduce + 0 (map #(let [schema (schemas/get-schema (:schema-info %))]
                          (model/modifications-since-approvals (:body schema) [] (:data %) {} true modified)) tasks)) => 0))
+
+  (let [task-id (-> tasks first :id)
+        task (commands/by-id application :tasks task-id)]
+
+    (fact "Pena can't approve"
+      (command pena :approve-task :id application-id :taskId task-id) => unauthorized?)
+
+    (facts* "Approve the first task"
+      (let [_ (command sonja :approve-task :id application-id :taskId task-id) => ok?
+            updated-app (query-application pena application-id)
+            updated-task (commands/by-id updated-app :tasks task-id)]
+        (:state task) => "requires_user_action"
+        (:state updated-task) => "ok"))
+
+    (facts* "Reject the first task"
+      (let [_ (command sonja :reject-task :id application-id :taskId task-id) => ok?
+            updated-app (query-application pena application-id)
+            updated-task (commands/by-id updated-app :tasks task-id)]
+        (:state updated-task) => "requires_user_action")))
+
+  (facts "create task"
+    (fact "Applicant can't create tasks"
+      (command pena :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => unauthorized?)
+    (fact "Authority can create tasks"
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => ok?
+      (some #(and (= "do the shopping" (:taskname %)) (= "task-katselmus") (-> % :schema-info :name)) (:tasks (query-application pena application-id))) => truthy)
+    (fact "Can't create documents with create-task command"
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "uusiRakennus") => (partial expected-failure? "illegal-schema")))
+
   )

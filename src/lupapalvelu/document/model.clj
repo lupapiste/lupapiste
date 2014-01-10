@@ -65,8 +65,13 @@
     (when-not (or (s/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
+;; FIXME implement validator, the same as :select?
 (defmethod validate-field :radioGroup [elem v] nil)
-(defmethod validate-field :buildingSelector [elem v] nil)
+
+(defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
+
+;; FIXME implement validator (mongo id, check that user exists)
 (defmethod validate-field :personSelector [elem v] nil)
 
 (defmethod validate-field nil [_ _]

@@ -5,7 +5,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.dummy-email-server :as dummy]))
 
-(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application open-inforequest-invite-model)
+(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
 
 (facts "email titles"
   (get-email-subject {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
@@ -62,11 +62,12 @@
     (mongo/by-id :users "w2" {:email 1}) => {:email "w2@foo.com"}
     (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
 
+(testable-privates lupapalvelu.open-inforequest base-email-model)
 (fact "Email for sending an open inforequest is like"
   (against-background
     (sade.env/value :host) => "http://lupapiste.fi"
     (sade.env/value :oir :wanna-join-url) => "http://lupapiste.fi/yhteydenotto")
-  (let  [model (open-inforequest-invite-model {:data {:token-id "123"}} nil)]
+  (let  [model (base-email-model {:data {:token-id "123"}} nil)]
     (:link-fi model) => "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi"
     (:info-fi model) => "http://lupapiste.fi/yhteydenotto"))
 

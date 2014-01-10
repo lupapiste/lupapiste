@@ -10,7 +10,7 @@
                            :repeating true}
                     :body [{:name "kaytettykerrosala" :type :group
                             :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
-                                   {:name "kayttotarkoitusKoodi" :type :select
+                                   {:name "kayttotarkoitusKoodi" :type :select :size "l"
                                     :body [{:name yhden-asunnon-talot}
                                           {:name "012 kahden asunnon talot"}
                                           {:name "013 muut erilliset talot"}
@@ -93,7 +93,7 @@
                             :type :group
                             :repeating false
                             :approvable true
-                            :body [{:name "kayttotarkoitus" :type :select
+                            :body [{:name "kayttotarkoitus" :type :select :size "l"
                                     :body [{:name yhden-asunnon-talot}
                                           {:name "012 kahden asunnon talot"}
                                           {:name "013 muut erilliset talot"}
@@ -172,7 +172,7 @@
                                           {:name talousrakennus}
                                           {:name "999 muualla luokittelemattomat rakennukset"}
                                           {:name "ei tiedossa"}]}
-                            {:name "Toimenpide" :type :select
+                            {:name "Toimenpide" :type :select :size "l"
                              :body [{:name "uusi"}
                                     {:name "laajennus"}
                                     {:name "perustus"}

@@ -1,6 +1,6 @@
 (ns sade.util-test
-  (:use sade.util
-        midje.sweet))
+  (:require [sade.util :refer :all]
+            [midje.sweet :refer :all]))
 
 (facts
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :b]) => {:a {:c \c}})
@@ -87,3 +87,54 @@
   (missing-keys {:a 1 :b 1 :c 1} [:a :b :c])  => nil
   (missing-keys {:a false} [:a])              => nil
   (missing-keys {:a nil} [:a])                => [:a])
+
+(facts "to-xml-date"
+  (fact "nil -> nil" (to-xml-date nil) => nil)
+  (fact "0 -> 1970"  (to-xml-date 0) => "1970-01-01"))
+
+(facts "to-xml-datetime"
+  (fact "nil -> nil" (to-xml-datetime nil) => nil)
+  (fact "0 -> 1970"  (to-xml-datetime 0) => "1970-01-01T00:00:00"))
+
+(facts "to-xml-date-from-string"
+  (fact "nil -> nil" (to-xml-date-from-string nil) => nil)
+  (fact "valid date" (to-xml-date-from-string "1.1.2013") => "2013-01-01")
+  (fact "invalid date" (to-xml-date-from-string "1.2013") => (throws java.lang.IllegalArgumentException)))
+
+(facts "to-xml-datetime-from-string"
+  (fact "nil -> nil" (to-xml-datetime-from-string nil) => nil)
+  (fact "valid date" (to-xml-datetime-from-string "1.1.2013") => "2013-01-01T00:00:00")
+  (fact "invalid date" (to-xml-datetime-from-string "1.2013") => (throws java.lang.IllegalArgumentException)))
+
+(facts "to-millis-from-local-date-string"
+  (fact "nil -> nil" (to-millis-from-local-date-string nil) => nil)
+  (fact "valid date" (to-millis-from-local-date-string "1.1.2013") => 1356998400000)
+  (fact "invalid date" (to-millis-from-local-date-string "1.2013") => (throws java.lang.IllegalArgumentException)))
+
+
+(facts sequable?
+       (sequable? [])        => true
+       (sequable? '())       => true
+       (sequable? {})        => true
+       (sequable? "")        => true
+       (sequable? nil)       => true
+       (sequable? (.toArray (java.util.ArrayList.))) => true
+       (sequable? 1)         => false
+       (sequable? true)      => false)
+
+(facts empty-or-nil?
+       (empty-or-nil? [])      => true
+       (empty-or-nil? [1])     => false
+       (empty-or-nil? {})      => true
+       (empty-or-nil? {:a :a}) => false
+       (empty-or-nil? '())     => true
+       (empty-or-nil? false)   => false
+       (empty-or-nil? true)    => false
+       (empty-or-nil? "")      => true
+       (empty-or-nil? nil)     => true)
+
+(facts assoc-when
+       (assoc-when {} :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
+       => {:a :a, :e [:e], :f {:f :f}}
+       (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
+       => {:a :a, :b :b, :c :c})

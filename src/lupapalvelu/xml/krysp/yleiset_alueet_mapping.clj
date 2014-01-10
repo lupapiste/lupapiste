@@ -1,15 +1,12 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [me.raynes.fs :as fs]
-            [lupapalvelu.mongo :as mongo]  ;; used in "write-attachments"
-            [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]
-            [clojure.walk :refer [prewalk]]
             [sade.util :refer :all]
-            [lupapalvelu.document.canonical-common :refer [to-xml-datetime ya-operation-type-to-schema-name-key]]
-            [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]))
+            [lupapalvelu.core :refer [now]]
+            [clojure.walk :as walk]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -17,14 +14,14 @@
 ;; Added tag :Kayntiosoite after :kayntiosoitetieto
 ;; Added tag :Postiosoite after :postiosoitetieto
 (def ^:private yritys-child-modified
-  (prewalk
+  (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
               (assoc
                 (assoc m :tag :kayntiosoitetieto)
                 :child
                 [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
               m))
-    (prewalk
+    (walk/prewalk
       (fn [m] (if (= (:tag m) :postiosoite)
                 (assoc
                   (assoc m :tag :postiosoitetieto)
@@ -92,7 +89,7 @@
    :attr {:xsi:schemaLocation
           "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
            http://www.paikkatietopalvelu.fi/gml/yhteiset
-           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
+           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
            http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
            http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
           :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
@@ -130,7 +127,16 @@
                                                          :child [{:tag :teksti}]}]}
                                                {:tag :piste :ns "yht"
                                                 :child [{:tag :Point :ns "gml"
-                                                         :child [{:tag :pos}]}]}]}]}
+                                                         :child [{:tag :pos}]}]}
+                                               {:tag :viiva :ns "yht"
+                                                :child [{:tag :LineString :ns "gml"
+                                                        :child [{:tag :pos}]}]}
+                                               {:tag :alue :ns "yht"
+                                                :child [{:tag :Polygon :ns "gml"
+                                                        :child [{:tag :exterior
+                                                                 :child [{:tag :LinearRing
+                                                                          :child [{:tag :pos}]}]} ]}]}]}]}
+                             {:tag :pintaala}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                               :child [{:tag :Osapuoli
                                        :child osapuoli}]}
@@ -148,10 +154,20 @@
                               :child [{:tag :LupakohtainenLisatieto
                                        :child [{:tag :selitysteksti :ns "yht"}
                                                {:tag :arvo :ns "yht"}]}]}
+                             {:tag :kayttojaksotieto
+                              :child [{:tag :Kayttojakso
+                                       :child [{:tag :alkuHetki :ns "yht"}
+                                               {:tag :loppuHetki :ns "yht"}]}]}
                              {:tag :toimintajaksotieto
                               :child [{:tag :Toimintajakso
                                        :child [{:tag :alkuHetki :ns "yht"}
                                                {:tag :loppuHetki :ns "yht"}]}]}
+                             {:tag :valmistumisilmoitusPvm}
+                             {:tag :lisaaikatieto
+                              :child [{:tag :Lisaaika
+                                       :child [{:tag :alkuPvm :ns "yht"}
+                                               {:tag :loppuPvm :ns "yht"}
+                                               {:tag :perustelu}]}]}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
@@ -162,66 +178,6 @@
                                        :child [{:tag :vaadittuKytkin
                                                 ;:tag :tunniste
                                                 }]}]}]}]}]})
-
-(defn- get-Liite [title link attachment type file-id]
-   {:kuvaus title
-    :linkkiliitteeseen link
-    :muokkausHetki (to-xml-datetime (:modified attachment))
-    :versionumero 1
-    :tyyppi type
-    :fileId file-id})
-
-(defn- get-liite-for-lausunto [attachment application begin-of-link]
-  (let [type "Lausunto"
-        title (str (:title application) ": " type "-" (:id attachment))
-        file-id (get-in attachment [:latestVersion :fileId])
-        attachment-file-name (mapping-common/get-file-name-on-server
-                               file-id
-                               (get-in attachment [:latestVersion :filename]))
-        link (str begin-of-link attachment-file-name)]
-    {:Liite (get-Liite title link attachment type file-id)}))
-
-(defn- get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
-  (let [statement-attachments-by-id (group-by
-                                      (fn-> :target :id keyword)
-                                      (filter
-                                        (fn-> :target :type (= "statement"))
-                                        (:attachments application)))
-        canonical-attachments (for [id allowed-statement-ids]
-                                {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
-                                                (get-liite-for-lausunto attachment application begin-of-link))})]
-    (not-empty canonical-attachments)))
-
-
-(defn- get-attachments-as-canonical [application begin-of-link]
-  (let [attachments (:attachments application)
-        canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
-                                    :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (mapping-common/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-Liite title link attachment type file-id)})]
-    (not-empty canonical-attachments)))
-
-(defn- write-attachments [attachments output-dir]
-  (doseq [attachment attachments]
-    (let [file-id (get-in attachment [:Liite :fileId])
-          attachment-file (mongo/download file-id)
-          content (:content attachment-file)
-          attachment-file-name (str output-dir "/" (mapping-common/get-file-name-on-server file-id (:file-name attachment-file)))
-          attachment-file (file attachment-file-name)
-          ]
-      (with-open [out (output-stream attachment-file)
-                  in (content)]
-        (copy in out)))))
-
-(defn- write-statement-attachments [attachments output-dir]
-  (let [f (for [fi attachments]
-            (vals fi))
-        files (reduce concat (reduce concat f))]
-    (write-attachments files output-dir)))
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
   ;; if we have no statement-attachments to add return the canonical map itself
@@ -245,17 +201,18 @@
       canonical
       statement-attachments)))
 
+;;
+;; TODO: Mihin submitted-applicationia kaytettiin ennen (_nyt ei mihinkaan_)?
+;;
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
-  (let [lupa-name-key ((-> application :operations first :name keyword) ya-operation-type-to-schema-name-key)
-        file-name  (str output-dir "/" (:id application))
-        tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))
-        canonical-without-attachments  (application-to-canonical application lang)
-        attachments (get-attachments-as-canonical application begin-of-link)
+  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                        (-> application :operations first :name keyword))
+        canonical-without-attachments (ya-canonical/application-to-canonical application lang)
+        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
-        statement-attachments (get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         canonical-with-statement-attachments (add-statement-attachments
                                                lupa-name-key
                                                canonical-without-attachments
@@ -264,48 +221,18 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
-        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))
-        xml-s (indent-str xml)]
+        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
+    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
 
-;    (println "\n lupa-name-key: ")
-;    (clojure.pprint/pprint lupa-name-key)
-;    (println "\n")
+(permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
 
-;    (println "output-dir: " output-dir)
+(defn save-jatkoaika-as-krysp [application lang organization output-dir begin-of-link]
+    (let [lupa-name-key (ya-operation-type-to-schema-name-key
+                          (or
+                            (-> application :linkPermitData first :operation keyword)
+                            :ya-katulupa-vesi-ja-viemarityot))
+          canonical (ya-canonical/jatkoaika-to-canonical application lang)
+          xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
-;    (clojure.pprint/pprint (:attachments application))
-;    (clojure.pprint/pprint canonical-with-statement-attachments)
-;    (println xml-s)
-
-;    (println "\n attachments: ")
-;    (clojure.pprint/pprint attachments)
-;    (println "\n")
-
-;    (println "\n statement-attachments: ")
-;    (clojure.pprint/pprint statement-attachments)
-;    (println "\n")
-
-;    (println "\n canonical-with-statement-attachments: ")
-;    (clojure.pprint/pprint canonical-with-statement-attachments)
-
-;    (println "\n save-application-as-krysp, canonical: ")
-;    (clojure.pprint/pprint canonical)
-
-;    (println "\n canonical-with-statement-attachments's liitetieto: "
-;      (:liitetieto canonical-with-statement-attachments))
-
-;    (println "\n")
-
-    (validate xml-s)
-    (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below
-    (with-open [out-file-stream (writer tempfile)]
-      (emit xml out-file-stream))
-
-    (write-attachments attachments output-dir)
-    (write-statement-attachments statement-attachments output-dir)
-
-    (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile)))
-
-
+      (mapping-common/write-to-disk application nil nil xml output-dir)))

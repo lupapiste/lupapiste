@@ -47,6 +47,21 @@
     :city "Tampere"
     :private {:password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
               :apikey "5051ba0caa2480f374dcfefg"}}
+   {:id "77777777777777777700669"
+    :email "sakari.viranomainen@tampere.fi"
+    :enabled true
+    :role "authority"
+    :username "sakari"
+    :organizations ["297-YA"]
+    :firstName "Sakari"
+    :lastName "Viranomainen"
+    :phone "1231234567"
+    :street "Katuosoite 1 a 1"
+    :zip "33456"
+    :city "Kuopio"
+    :private {:password "$2a$10$VnwROer5dhRJCQxoZusOney/hyN7Vk4ILQMSVqT8iZMO4XiQz.8Cm" ;; sakari
+              }}
+
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti
    ;; sonja / sonja
    {:id "777777777777777777000023"
@@ -188,6 +203,20 @@
     :zip "010203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}} ;; tampere
+   ;;Kuopio ya paakayttaja
+   {:id "297-YA"
+    :enabled true
+    :lastName "Kuopio"
+    :firstName "Paakayttaja-YA"
+    :city "Kuopio"
+    :username "kuopio-ya"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "kuopio-ya"
+    :role "authorityAdmin"
+    :zip "010203"
+    :organizations ["297-YA"]
+    :private {:password "$2a$10$YRYlyCbgAAD9XS8O8KJPaux1Yh7b/McBr7d8Ih8EXG/xaNNdJ/atW" }}
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
@@ -271,6 +300,35 @@
     :role  "applicant"}
    ])
 
+(def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
+                                            :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    [[:muut :muu]]
+                                            :ya-kayttolupa-metsastys                                           [[:muut :muu]]
+                                            :ya-kayttolupa-vesistoluvat                                        [[:muut :muu]]
+                                            :ya-kayttolupa-terassit                                            [[:muut :muu]]
+                                            :ya-kayttolupa-kioskit                                             [[:muut :muu]]
+                                            :ya-kayttolupa-muu-kayttolupa                                      [[:muut :muu]]
+                                            :ya-kayttolupa-nostotyot                                           [[:muut :muu]]
+                                            :ya-kayttolupa-vaihtolavat                                         [[:muut :muu]]
+                                            :ya-kayttolupa-kattolumien-pudotustyot                             [[:muut :muu]]
+                                            :ya-kayttolupa-muu-liikennealuetyo                                 [[:muut :muu]]
+                                            :ya-kayttolupa-talon-julkisivutyot                                 [[:muut :muu]]
+                                            :ya-kayttolupa-talon-rakennustyot                                  [[:muut :muu]]
+                                            :ya-kayttolupa-muu-tyomaakaytto                                    [[:muut :muu]]
+                                            :ya-kayttolupa-mainostus-ja-viitoitus                              [[:muut :muu]]
+                                            :ya-katulupa-vesi-ja-viemarityot                                   [[:muut :muu]]
+                                            :ya-katulupa-kaukolampotyot                                        [[:muut :muu]]
+                                            :ya-katulupa-kaapelityot                                           [[:muut :muu]]
+                                            :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           [[:muut :muu]]
+                                            :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             [[:muut :muu]]
+                                            :ya-sijoituslupa-maalampoputkien-sijoittaminen                     [[:muut :muu]]
+                                            :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      [[:muut :muu]]
+                                            :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        [[:muut :muu]]
+                                            :ya-sijoituslupa-muuntamoiden-sijoittaminen                        [[:muut :muu]]
+                                            :ya-sijoituslupa-jatekatoksien-sijoittaminen                       [[:muut :muu]]
+                                            :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        [[:muut :muu]]
+                                            :ya-sijoituslupa-muu-sijoituslupa                                  [[:muut :muu]]
+                                            :ya-jatkoaika                                                      [[:muut :muu]]})
+
 (def organizations [{:id "186-R"
                      :inforequest-enabled true
                      :new-application-enabled true
@@ -321,7 +379,25 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments []}
+                     :operations-attachments ya-default-attachments-for-operations}
+
+                    ;;Kuopio-ya
+                    {:id "297-YA"
+                     :inforequest-enabled true
+                     :new-application-enabled true
+                     :name {:fi "Kuopio yleisten alueiden kaytto"}
+                     :scope [{:municipality "297" :permitType "YA"}]
+                     :links [{:name {:fi "Kuopio", :sv "Kuopio"}
+                              :url "http://www.kuopio.fi"}]
+                     :yleiset-alueet-ftp-user "ya_kuopio"
+                     :legacy local-legacy
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]
+                     :operations-attachments ya-default-attachments-for-operations}
+
+
 
                     {:id "837-R"
                      :inforequest-enabled true
@@ -354,7 +430,7 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                       :yleiset-alueet-ftp-user "ya_tampere"
-                      :operations-attachments []}
+                      :operations-attachments ya-default-attachments-for-operations}
 
                     {:id "638-R"
                      :inforequest-enabled true

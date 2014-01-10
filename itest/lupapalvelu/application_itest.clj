@@ -80,7 +80,7 @@
     application-id => truthy
     application => truthy
     (success resp) => true
-    authority-before-assignation => nil
+    (empty? authority-before-assignation) => true
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
       sonja =not=> (allowed? sonja :submit-application :id application-id))))
@@ -97,8 +97,8 @@
         resp (command sonja :assign-application :id application-id :assigneeId nil)
         assigned-app (query-application sonja application-id)
         authority-in-the-end (:authority assigned-app)]
-    authority-before-assignation => nil
-    authority-in-the-end => nil))
+    (empty? authority-before-assignation) => true
+    (empty? authority-in-the-end) => true))
 
 (fact* "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
@@ -132,57 +132,6 @@
     (:opened app1) => nil
     (:opened app2) => number?))
 
-(fact* "Authority is able to add an attachment to an application after verdict has been given for it"
-  (doseq [user [sonja pena]]
-    (last-email) ; Inbox zero
-
-    (let [application-id  (create-app-id user :municipality sonja-muni :address "Paatoskuja 9")
-          resp            (command user :submit-application :id application-id) => ok?
-          application     (query-application user application-id)
-          email           (last-email)]
-      (:state application) => "submitted"
-      (:to email) => (email-for-key user)
-      (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
-      (get-in email [:body :plain]) => (contains "Vireill\u00e4")
-      email => (partial contains-application-link? application-id)
-
-      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-            application (query-application sonja application-id)
-            verdict     (first (:verdicts application))
-            paatos      (first (:paatokset verdict))
-            poytakirja  (first (:poytakirjat paatos))
-            email       (last-email)]
-        (:state application) => "verdictGiven"
-        (count (:verdicts application)) => 1
-        (count (:paatokset verdict)) => 1
-        (count (:poytakirjat paatos)) => 1
-
-        (:kuntalupatunnus verdict) => "aaa"
-        (:status poytakirja) => 42
-        (:paatoksentekija poytakirja) => "Paatoksen antaja"
-        (get-in paatos [:paivamaarat :anto]) => 123
-        (get-in paatos [:paivamaarat :lainvoimainen]) => 124
-
-        (let [first-attachment (get-in application [:attachments 0])]
-          (upload-attachment sonja (:id application) first-attachment true)
-          (upload-attachment pena (:id application) first-attachment false))
-
-        (:to email) => (email-for-key user)
-        (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
-        email => (partial contains-application-link-with-tab? application-id "verdict")))))
-
-(fact "Applicant receives email after verdict has been fetched from KRYPS backend"
-  (last-email) ; Inbox zero
-
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
-        application-id (:id application)]
-    (:organization application) => "753-R"
-    (command sonja :check-for-verdict :id application-id) => ok?
-    (let [email (last-email)]
-      (:to email) => (email-for-key mikko)
-      (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
-      email => (partial contains-application-link-with-tab? application-id "verdict"))))
-
 (facts* "cancel application"
   (last-email) ; Inbox zero
 
@@ -191,16 +140,17 @@
 
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
-
-    (command mikko :cancel-application :id application-id) => ok?
-
+    (fact "Sonja can cancel Mikko's application" (command sonja :cancel-application :id application-id) => ok?)
     (fact "Sonja does not see the application" (query sonja :application :id application-id) => fail?)
-
     (let [email (last-email)]
       (:to email) => (email-for-key mikko)
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
-      email => (partial contains-application-link? application-id))))
+      email => (partial contains-application-link? application-id)))
+  (fact "Authority can cancel own application"
+    (let [application-id  (create-app-id sonja :municipality sonja-muni)]
+      (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
+      (fact "Sonja can cancel the application" (command sonja :cancel-application :id application-id) => ok?))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (create-app sonja :municipality veikko-muni) => unauthorized?)
@@ -216,9 +166,7 @@
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
-(fact "create-and-submit-application"
-  (let [app  (create-and-submit-application pena)]
-    (:state app) => "submitted"))
+
 
 (fact "Pena cannot create app for organization that has new applications disabled"
   (let [resp  (create-app pena :municipality "997")]
@@ -280,8 +228,8 @@
           (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))
 
       (fact "suunnittelija patevyys is set"
-        (command mikko :update-doc :id application-id :doc doc-id :updates 
-                 [["patevyys.kokemus" "10"] 
+        (command mikko :update-doc :id application-id :doc doc-id :updates
+                 [["patevyys.kokemus" "10"]
                   ["patevyys.patevyysluokka" "AA"]
                   ["patevyys.patevyys" "Patevyys"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
@@ -310,12 +258,12 @@
         resp            (command pena :add-operation :id application-id :operation "kayttotark-muutos")
         app             (query-application pena application-id)
         rakmuu-doc      (domain/get-document-by-name app "rakennuksen-muuttaminen")
-        resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
+        resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
         updated-app     (query-application pena application-id)
         building-info   (command pena :get-building-info-from-legacy :id application-id)
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
-        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :buildingId building-id)
+        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id)
         merged-app      (query-application pena application-id)
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"

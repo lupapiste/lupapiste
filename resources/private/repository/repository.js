@@ -34,10 +34,10 @@ var repository = (function() {
           application = loading.application;
 
       function setSchema(doc) {
-        var schemaInfo = doc["schema-info"],
-            schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
-        schema.info = schemaInfo;
+        var schemaInfo = doc["schema-info"];
+        var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
         doc.schema = schema;
+        doc.schema.info = _.merge(schemaInfo, doc.schema.info);
       };
 
       if (application) {

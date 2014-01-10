@@ -47,7 +47,7 @@ var docgen = (function () {
       }
     };
 
-    self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
+    self.sizeClasses = { "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
 
     // Context help
     self.addFocus = function (e) {
@@ -132,14 +132,34 @@ var docgen = (function () {
       return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     }
 
-    function makeLabel(type, pathStr, groupLabel) {
+    // Option utils
+
+    self.getCollection = function() {
+      return (options && options.collection) ? options.collection : "documents";
+    }
+
+    function getUpdateCommand() {
+      return (options && options.updateCommand) ? options.updateCommand : "update-doc";
+    }
+
+    // Element constructors
+    function makeLabel(schema, type, pathStr, groupLabel) {
       var label = document.createElement("label");
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
+
       var locKey = locKeyFromPath(path);
+      if (schema.i18nkey) {
+        locKey = schema.i18nkey;
+      }
+
+      var className = "form-label form-label-" + type;
+      if (schema.labelclass) {
+        className = className + " " + schema.labelclass;
+      }
 
       label.id = pathStrToLabelID(pathStr);
       label.htmlFor = pathStrToID(pathStr);
-      label.className = "form-label form-label-" + type;
+      label.className = className;
       label.innerHTML = loc(locKey);
       return label;
     }
@@ -178,7 +198,9 @@ var docgen = (function () {
       var help = null;
       var helpLocKey = locKeyFromPath(pathStr + ".help");
       var span = document.createElement("span");
-      span.className = "form-entry";
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
+      span.className = "form-entry " + sizeClass;
+
 
       // Display text areas in a wide container
       if (subSchema.type === "text") {
@@ -187,7 +209,7 @@ var docgen = (function () {
 
       // Override style with layout option
       if (subSchema.layout) {
-        span.className = "form-entry form-" + subSchema.layout;
+        span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
       }
 
       // durable field error panels
@@ -210,10 +232,10 @@ var docgen = (function () {
     self.makeApprovalButtons = function (path, model) {
       var btnContainer$ = $("<span>").addClass("form-buttons");
       var statusContainer$ = $("<span>");
-      var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
+      var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
-      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join(".") };
+      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
 
       if (_.isEmpty(model) || !features.enabled('docIndicators')) {
         return approvalContainer$[0];
@@ -228,6 +250,7 @@ var docgen = (function () {
           }
           statusContainer$.text(text);
           statusContainer$.addClass("approval-" + approval.value);
+          approvalContainer$.removeClass("empty");
         }
       }
 
@@ -272,6 +295,7 @@ var docgen = (function () {
         btnContainer$.append(approveButton$);
         rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
         btnContainer$.append(rejectButton$);
+        approvalContainer$.removeClass("empty");
       } else {
         setStatus(approval);
       }
@@ -284,7 +308,7 @@ var docgen = (function () {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
       var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
-      var label = makeLabel("checkbox", myPath);
+      var label = makeLabel(subSchema, "checkbox", myPath);
       input.onmouseover = self.showHelp;
       input.onmouseout = self.hideHelp;
       label.onmouseover = self.showHelp;
@@ -307,7 +331,7 @@ var docgen = (function () {
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
       setMaxLen(input, subSchema);
 
-      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
+      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
 
       if (subSchema.subtype === "maaraala-tunnus" ) {
           var kiitunAndInput = document.createElement("span");
@@ -387,7 +411,7 @@ var docgen = (function () {
       input.className = "form-input textarea";
       input.value = getModelValue(model, subSchema.name);
 
-      span.appendChild(makeLabel("text", myPath));
+      span.appendChild(makeLabel(subSchema, "text", myPath));
       span.appendChild(input);
       return span;
     }
@@ -399,7 +423,7 @@ var docgen = (function () {
 
       var span = makeEntrySpan(subSchema, myPath);
 
-      span.appendChild(makeLabel("date", myPath));
+      span.appendChild(makeLabel(subSchema, "date", myPath));
 
       // date
       var input = $("<input>", {
@@ -425,6 +449,7 @@ var docgen = (function () {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var span = makeEntrySpan(subSchema, myPath);
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
 
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
@@ -433,7 +458,7 @@ var docgen = (function () {
       select.setAttribute("data-docgen-path", myPath);
 
       select.name = myPath;
-      select.className = "form-input combobox";
+      select.className = "form-input combobox " + (sizeClass || "");
 
       select.id = pathStrToID(myPath);
 
@@ -456,17 +481,19 @@ var docgen = (function () {
       if (selectedOption === "") option.selected = "selected";
       select.appendChild(option);
 
-      $.each(subSchema.body, function (i, o) {
-        var name = o.name;
-        var option = document.createElement("option");
-        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
-
-        option.value = name;
-        option.appendChild(document.createTextNode(loc(locKey)));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
+      _(subSchema.body)
+        .map(function(e) { return [e.name,
+                                   loc(self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name)]; })
+        .sortBy(function(e) { return e[1]; })
+        .forEach(function(e) {
+          var name = e[0];
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(e[1]));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
       });
 
       if (otherKey) {
@@ -477,7 +504,7 @@ var docgen = (function () {
         select.appendChild(option);
       }
 
-      span.appendChild(makeLabel("select", myPath, true));
+      span.appendChild(makeLabel(subSchema, "select", myPath, true));
       span.appendChild(select);
       return span;
     }
@@ -488,7 +515,7 @@ var docgen = (function () {
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
-      var label = makeLabel("group", myPath, true);
+      var label = makeLabel(subSchema, "group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
@@ -527,7 +554,7 @@ var docgen = (function () {
         input.checked = o.name === myModel;
 
         span.appendChild(input);
-        span.appendChild(makeLabel("radio", pathForId));
+        span.appendChild(makeLabel(subSchema, "radio", pathForId));
       });
 
       partsDiv.appendChild(span);
@@ -540,6 +567,7 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
+      span.className = "form-entry really-long";
 
       select.id = pathStrToID(myPath);
 
@@ -555,7 +583,7 @@ var docgen = (function () {
 
           var buildingId = target.value;
           ajax
-            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
+            .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: self.getCollection() })
             .success(function () {
               save(event);
               repository.load(self.appId);
@@ -599,7 +627,74 @@ var docgen = (function () {
         })
         .call();
 
-      span.appendChild(makeLabel("select", "", "buildingSelector", true));
+      span.appendChild(makeLabel(subSchema, "select", myPath));
+      span.appendChild(select);
+      return span;
+    }
+
+    function buildNewBuildingSelector(subSchema, model, path) {
+      var myPath = path.join(".");
+      var select = document.createElement("select");
+      var selectedOption = getModelValue(model, subSchema.name);
+      var option = document.createElement("option");
+      var span = makeEntrySpan(subSchema, myPath);
+      span.className = "form-entry really-long";
+
+      select.id = pathStrToID(myPath);
+
+      select.name = myPath;
+      select.className = "form-input combobox long";
+
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = function() {
+          var target = select;
+          var indicator = createIndicator(target);
+          var path = target.name;
+          var label = document.getElementById(pathStrToLabelID(path));
+          var loader = loaderImg();
+          var basePathEnd = (path.lastIndexOf(".") > 0) ? path.lastIndexOf(".") : path.length;
+          var basePath = path.substring(0, basePathEnd);
+
+          var option$ = $(target[target.selectedIndex]);
+          var index = option$.val();
+          var propertyId = option$.attr("data-propertyid") || "";
+          var buildingId = option$.attr("data-buildingid") || "";
+
+          var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro"];
+          var values = [index, propertyId, buildingId];
+
+          if (label) {
+            label.appendChild(loader);
+          }
+
+          saveForReal(paths, values, _.partial(afterSave, label, loader, indicator, null));
+          return false;
+        };
+      }
+
+      option.value = "";
+      option.appendChild(document.createTextNode(loc("selectone")));
+      if (selectedOption === "") {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
+
+      $.each(self.application.buildings, function (i, building) {
+            var name = building.index;
+            var option = document.createElement("option");
+            option.value = name;
+            option.setAttribute("data-propertyid", building.propertyId);
+            option.setAttribute("data-buildingid", building.buildingId);
+            option.appendChild(document.createTextNode(util.buildingName(building)));
+            if (selectedOption === name) {
+              option.selected = "selected";
+            }
+            select.appendChild(option);
+          });
+
+      span.appendChild(makeLabel(subSchema, "select", myPath));
       span.appendChild(select);
       return span;
     }
@@ -620,7 +715,7 @@ var docgen = (function () {
         var target = event.target;
         var userId = target.value;
         ajax
-          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs })
+          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: self.getCollection() })
           .success(function () {
             save(event, function () { repository.load(self.appId); });
           })
@@ -690,13 +785,14 @@ var docgen = (function () {
       date: buildDate,
       element: buildElement,
       buildingSelector: buildBuildingSelector,
+      newBuildingSelector: buildNewBuildingSelector,
       personSelector: buildPersonSelector,
       unknown: buildUnknown
     };
 
     function removeData(id, doc, path) {
       ajax
-        .command("remove-document-data", { doc: doc, id: id, path: path })
+        .command("remove-document-data", { doc: doc, id: id, path: path, collection: self.getCollection() })
         .success(function (e) {
           repository.load(id);
         })
@@ -704,6 +800,10 @@ var docgen = (function () {
     }
 
     function build(subSchema, model, path, partOfChoice) {
+      if (subSchema.hidden) {
+        return;
+      }
+
       var myName = subSchema.name;
       var myPath = path.concat([myName]);
       var builder = builders[subSchema.type] || buildUnknown;
@@ -711,22 +811,21 @@ var docgen = (function () {
 
       function makeElem(myModel, id) {
         var elem = builder(subSchema, myModel, myPath.concat([id]), partOfChoice);
-        elem.setAttribute("data-repeating-id", repeatingId);
-        elem.setAttribute("data-repeating-id-" + repeatingId, id);
+        if (elem) {
+          elem.setAttribute("data-repeating-id", repeatingId);
+          elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
-          var removeButton = document.createElement("span");
-          removeButton.className = "icon remove-grey inline-right";
-          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
-          removeButton.onclick = function () {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
-                { title: loc("no") });
-          };
-          elem.insertBefore(removeButton, elem.childNodes[0]);
-        }
-
-        if (subSchema.type === "group") {
+          if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
+            var removeButton = document.createElement("span");
+            removeButton.className = "icon remove-grey inline-right";
+            removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
+            removeButton.onclick = function () {
+              LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+                  { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
+                  { title: loc("no") });
+            };
+            elem.insertBefore(removeButton, elem.childNodes[0]);
+          }
         }
         return elem;
       }
@@ -795,8 +894,9 @@ var docgen = (function () {
             elem.setAttribute("data-select-one-of", subSchema.name);
             $(elem).hide();
           }
-
-          body.appendChild(elem);
+          if (elem) {
+            body.appendChild(elem);
+          }
         });
       });
 
@@ -827,10 +927,15 @@ var docgen = (function () {
       return img;
     }
 
-    function saveForReal(path, value, callback) {
-      var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
+    function saveForReal(paths, values, callback) {
+      var p = _.isArray(paths) ? paths : [paths];
+      var v = _.isArray(values) ? values : [values];
+      var updates = _.zip(
+          _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
+          v);
+
       ajax
-        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
+        .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
       // elements: [key status message]. Here we use just the status.
         .success(function (e) {
@@ -868,67 +973,76 @@ var docgen = (function () {
     function validate() {
       if (!options || options.validate) {
         ajax
-          .query("validate-doc", { id: self.appId, doc: self.docId })
+          .query("validate-doc", { id: self.appId, doc: self.docId, collection: self.getCollection() })
           .success(function (e) { showValidationResults(e.results); })
           .call();
       }
     }
 
     function disableBasedOnOptions() {
-      if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
+      if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
         $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
       }
     }
 
+    function createIndicator(eventTarget) {
+      var parent$ = $(eventTarget.parentNode);
+      parent$.find(".form-indicator").remove();
+      var indicator = document.createElement("span");
+      indicator.className = "form-indicator";
+      parent$.append(indicator);
+      return indicator;
+    }
+
+    function showIndicator(indicator, className, locKey) {
+      var i$ = $(indicator);
+      i$.addClass(className).text(loc(locKey)).fadeIn(200);
+
+      setTimeout(function () {
+        i$.removeClass(className).fadeOut(200, function () { i$.remove; });
+      }, 4000);
+    }
+
+    function afterSave(label, loader, indicator, callback, status, results) {
+      showValidationResults(results);
+      if (label) {
+        label.removeChild(loader);
+      }
+      if (status === "warn" || status === "tip") {
+        showIndicator(indicator, "form-input-saved", "form.saved");
+      } else if (status === "err") {
+        showIndicator(indicator, "form-input-err", "form.err");
+      } else if (status === "ok") {
+        showIndicator(indicator, "form-input-saved", "form.saved");
+      } else if (status !== "ok") {
+        error("Unknown status:", status, "path:", path);
+      }
+      if (callback) { callback(); }
+      // No return value or stoping the event propagation:
+      // That would prevent moving to the next field with tab key in IE8.
+    }
+
     function save(e, callback) {
       var event = getEvent(e);
       var target = event.target;
-      if (target.parentNode.indicator) {
-        $(target.parentNode.indicator).fadeOut(200, function () { target.removeChild(indicator); });
-      }
-      var indicator = document.createElement("span");
-      $(indicator).addClass("form-indicator");
-      target.parentNode.appendChild(indicator);
+      var indicator = createIndicator(target);
+
       var path = target.name;
       var loader = loaderImg();
-      var label = document.getElementById(pathStrToLabelID(path));
+
       var value = target.value;
       if (target.type === "checkbox") {
         value = target.checked;
       }
+
+      var label = document.getElementById(pathStrToLabelID(path));
       if (label) {
         label.appendChild(loader);
       }
 
-      function showIndicator(className, locKey) {
-        $(indicator).addClass(className).text(loc(locKey));
-        $(indicator).fadeIn(200);
-        setTimeout(function () {
-          $(indicator).removeClass(className);
-          $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
-        }, 4000);
-      }
-
-      saveForReal(path, value, function (status, results) {
-        showValidationResults(results);
-        if (label) {
-          label.removeChild(loader);
-        }
-        if (status === "warn" || status === "tip") {
-          showIndicator("form-input-saved", "form.saved");
-        } else if (status === "err") {
-          showIndicator("form-input-err", "form.err");
-        } else if (status === "ok") {
-          showIndicator("form-input-saved", "form.saved");
-        } else if (status !== "ok") {
-          error("Unknown status:", status, "path:", path);
-        }
-        if (callback) { callback(); }
-        // No return value or stoping the event propagation:
-        // That would prevent moving to the next field with tab key in IE8.
-      });
+      saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
     }
 
     function removeDoc(e) {
@@ -944,7 +1058,7 @@ var docgen = (function () {
       }
 
       function onRemovalConfirmed() {
-        ajax.command("remove-doc", { id: self.appId, docId: self.docId })
+        ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
           .success(function () {
             n$.slideUp(function () { n$.remove(); });
             // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
@@ -1037,8 +1151,9 @@ var docgen = (function () {
     var docgenDiv = $(containerSelector).empty();
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
+      var docModel = new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options);
 
-      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
+      docgenDiv.append(docModel.element);
 
       if (schema.info.repeating && !isDisabled(options) && authorizationModel.ok('create-doc')) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -1047,7 +1162,7 @@ var docgen = (function () {
         $(btn).click(function () {
           var self = this;
           ajax
-            .command("create-doc", { schemaName: schema.info.name, id: application.id })
+            .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: docModel.getCollection() })
             .success(function (data) {
               var newDocId = data.doc;
               var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;

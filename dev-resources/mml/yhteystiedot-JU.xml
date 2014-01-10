@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kyyh:Yhteystiedot xmlns:y="http://xml.nls.fi/ktjkir/yhteinen/2013/03/01"
+                   xmlns:kyyh="http://xml.nls.fi/ktjkir/kysely/yhteystiedot/2013/11/01"
+                   xmlns:tryh="http://xml.nls.fi/ktjkir/yhteystiedot/2013/11/01"
+                   xmlns:trpt="http://xml.nls.fi/ktjkir/perustiedot/2013/03/01"
+                   xmlns:muti="http://xml.nls.fi/ktjkir/yhteystiedot_muti/2013/03/01">
+   <tryh:Rekisteriyksikko>
+      <trpt:rekisteriyksikonPerustiedot ajantasaistettu="true">
+         <y:kiinteistotunnus>18600101340006</y:kiinteistotunnus>
+         <trpt:olotila>1</trpt:olotila>
+         <trpt:rekisteriyksikkolaji>13</trpt:rekisteriyksikkolaji>
+         <trpt:rekisterointipvm pvm="1998-02-10">19980210</trpt:rekisterointipvm>
+         <trpt:maapintaala yksikko="neliometri">20699</trpt:maapintaala>
+         <trpt:kayttotarkoitusLyhenne>KM</trpt:kayttotarkoitusLyhenne>
+         <trpt:kuntaviittaus>
+            <trpt:kunta>
+               <trpt:nimi kieli="fi">Järvenpää</trpt:nimi>
+               <trpt:nimi kieli="sv">Träskända</trpt:nimi>
+               <trpt:kuntatunnus>186</trpt:kuntatunnus>
+            </trpt:kunta>
+         </trpt:kuntaviittaus>
+      </trpt:rekisteriyksikonPerustiedot>
+      <tryh:kohteenHenkilot>
+         <y:Henkilo lukuuntoiminnanlaji="OL">
+            <y:henkilonTiedot>
+               <y:henkilolaji>JU</y:henkilolaji>
+               <y:ytunnus>0704458-3</y:ytunnus>
+               <y:nimi>Hokki-kiinteistöt Oy</y:nimi>
+            </y:henkilonTiedot>
+         </y:Henkilo>
+      </tryh:kohteenHenkilot>
+   </tryh:Rekisteriyksikko>
+   
+</kyyh:Yhteystiedot>

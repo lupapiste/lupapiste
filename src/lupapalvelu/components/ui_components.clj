@@ -12,11 +12,16 @@
               :js ["debug.js"]
               :name "common"})
 
+(def mockjax {:depends [:init :jquery]
+              :js ["jquery.mockjax.js"]
+              :name "jquery"})
+
 (defn- conf []
   (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
+                 :build             (:build-number env/buildinfo)
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
@@ -44,6 +49,8 @@
 
    :debug        (if (env/dev-mode?) debugjs {})
 
+   :mockjax      (if (env/dev-mode?) mockjax {})
+
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
@@ -59,10 +66,10 @@
    :expanded-content  {:depends [:jquery]
                   :js ["expanded-content.js"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses :expanded-content]
+   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
-                       "authorization.js" "vetuma.js"]
+                       "statuses.js" "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
                   :html ["404.html" "footer.html"]}
 
@@ -76,7 +83,11 @@
 
    :user-menu     {:html ["nav.html"]}
 
-   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm :screenmessages]
+   :modal-datepicker {:depends [:common]
+                      :html ["modal-datepicker.html"]
+                      :js   ["modal-datepicker.js"]}
+
+   :authenticated {:depends [:init :jquery :knockout :moment :i18n :selectm :screenmessages]
                    :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
@@ -95,26 +106,30 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :application  {:depends [:common :repository :tree]
+   :attachment   {:depends [:common :repository]
+                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
+                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
+
+   :task         {:depends [:common :attachment]
+                  :js ["task.js"]
+                  :html ["task.html"]}
+
+   :application  {:depends [:common :repository :tree :task :modal-datepicker]
                   :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
-                       "application-model.js" "application.js" ]
+                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js" "create-task-model.js"
+                       "application-model.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html"]}
+                         "change-location.html" "create-task.html"]}
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]
                   :js ["applications.js"]}
 
-   :attachment   {:depends [:common :repository]
-                  :js ["attachment.js" "attachmentTypeSelect.js"]
-                  :html ["attachment.html" "upload.html"]}
-
    :statement    {:depends [:common :repository]
                   :js ["statement.js"]
                   :html ["statement.html"]}
 
-   :verdict      {:depends [:common :repository]
+   :verdict      {:depends [:common :repository :attachment]
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
@@ -156,12 +171,12 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant    {:depends [:common :authenticated :map :applications :application :attachment
+   :applicant    {:depends [:common :authenticated :map :applications :application
                             :statement :docgen :create :mypage :user-menu :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :authenticated :map :applications :application :attachment
+   :authority    {:depends [:common :authenticated :map :applications :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
@@ -178,9 +193,9 @@
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
              :js ["admin.js"
-                  "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "activations.js" "screenmessages-list.js"]
+                  "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
-                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html" "activations.html" "screenmessages-list.html"]}
+                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html" "screenmessages-list.html"]}
 
    :login-frame {:depends [:login]
                  :html    ["login-frame.html"]

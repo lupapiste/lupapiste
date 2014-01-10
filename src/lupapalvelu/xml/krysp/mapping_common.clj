@@ -1,10 +1,11 @@
 (ns lupapalvelu.xml.krysp.mapping-common
-  (:require [lupapalvelu.document.canonical-common :refer [to-xml-datetime]]
+  (:require [clojure.java.io :as io]
+            [clojure.data.xml :refer [emit indent-str]]
+            [me.raynes.fs :as fs]
             [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [me.raynes.fs :as fs]
-            [clojure.java.io :refer :all]))
+            [lupapalvelu.xml.krysp.validator :as validator]))
 
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -154,6 +155,8 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}
                              ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
@@ -209,7 +212,7 @@
   (str file-id "_" (ss/encode-filename file-name)))
 
 (defn get-submitted-filename [application-id]
-  (str application-id "_submitted_application.pdf"))
+  (str  application-id "_submitted_application.pdf"))
 
 (defn get-current-filename [application-id]
   (str application-id "_current_application.pdf"))
@@ -222,13 +225,14 @@
         r))
     #{} lausuntotieto))
 
-(defn get-Liite [title link attachment type file-id]
+(defn get-Liite [title link attachment type file-id filename]
    {:kuvaus title
     :linkkiliitteeseen link
     :muokkausHetki (to-xml-datetime (:modified attachment))
     :versionumero 1
     :tyyppi type
-    :fileId file-id})
+    :fileId file-id
+    :filename filename})
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -236,7 +240,7 @@
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)]
-    {:Liite (get-Liite title link attachment type file-id)}))
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
@@ -249,29 +253,33 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [application begin-of-link ]
+(defn get-attachments-as-canonical [application begin-of-link & [target]]
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
-                                    :let [type (get-in attachment [:type :type-id] )
+                                    :when (and (:latestVersion attachment)
+                                            (not= "statement" (-> attachment :target :type))
+                                            (not= "verdict" (-> attachment :target :type))
+                                            (or (nil? target) (= target (:target attachment))))
+                                    :let [type (get-in attachment [:type :type-id])
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-Liite title link attachment type file-id)})]
+                                {:Liite (get-Liite title link attachment type file-id attachment-file-name)})]
     (not-empty canonical-attachments)))
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (get-in attachment [:Liite :fileId])
+          filename (get-in attachment [:Liite :filename])
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
-          attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name attachment-file)))
-          attachment-file (file attachment-file-name)
+          attachment-file-name (str output-dir "/" filename)
+          attachment-file (io/file attachment-file-name)
           ]
-      (with-open [out (output-stream attachment-file)
+      (with-open [out (io/output-stream attachment-file)
                   in (content)]
-        (copy in out)))))
+        (io/copy in out)))))
 
 (defn write-statement-attachments [attachments output-dir]
   (let [f (for [fi attachments]
@@ -293,3 +301,25 @@
           (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty)))
       canonical
       statement-attachments)))
+
+(defn write-to-disk
+  "Writes XML string to disk and copies attachments from database. XML is validated before writing."
+  [application attachments statement-attachments xml output-dir & [extra-emitter]]
+  (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
+        tempfile   (io/file (str file-name ".tmp"))
+        outfile    (io/file (str file-name ".xml"))
+        xml-s      (indent-str xml)]
+
+    (validator/validate xml-s)
+
+    (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below)
+    (with-open [out-file-stream (io/writer tempfile)]
+      (emit xml out-file-stream))
+
+    (write-attachments attachments output-dir)
+    (write-statement-attachments statement-attachments output-dir)
+
+    (when (fn? extra-emitter) (extra-emitter))
+
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)))

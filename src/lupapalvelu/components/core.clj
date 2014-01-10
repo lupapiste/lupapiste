@@ -20,9 +20,12 @@
   "Return a lazy-seq of all dependencies of component 'c'. The returned seq contains the keywords of dependencies
    with the root dependency first."
   ([components c]
-    (get-dependencies components [] c))
-  ([components found c]
-    (conj (reduce (partial get-dependencies components) found (exclude found (get-component-deps components c))) c)))
+    (get-dependencies components #{} [] c))
+  ([components walked found c]
+    (letfn [(add-to [coll] (if ((set coll) c) coll (conj coll c)))]
+      (if-not (walked c)
+        (add-to (reduce #(get-dependencies components (conj walked c) %1 %2) found (exclude found (get-component-deps components c))))
+        found))))
 
 (defn component-resources
   "Returns a lazy-seq of resources names registered for specified component. The seq contains strings,
