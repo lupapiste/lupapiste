@@ -360,24 +360,24 @@
       (let [submitted-application (mongo/by-id :submitted-applications id)]
         (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
 
+      ;; The "sent" timestamp is updated to all attachments of the application,
+      ;; also the ones that have no versions at all (have no latestVersion).
+      (let [attachments-argument (reduce
+                                   (fn [data-map attachment]
+                                     (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+                                   {}
+                                   (:attachments application))]
+        (update-application command
+          {:state {$in ["submitted" "complement-needed"]}}
+          {$set (merge
+                  {:sent created :state :sent}
+                  attachments-argument
+                  (when (empty? (:authority application))
+                    {:authority (user/summary user)}))}))
+
       (catch org.xml.sax.SAXParseException e
         (info e "Invalid KRYSP XML message")
-        (fail! (.getMessage e))))
-
-    ;; The "sent" timestamp is updated to all attachments of the application,
-    ;; also the ones that have no versions at all (have no latestVersion).
-    (let [attachments-argument (reduce
-                                 (fn [data-map attachment]
-                                   (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-                                 {}
-                                 (:attachments application))]
-      (update-application command
-        {:state {$in ["submitted" "complement-needed"]}}
-        {$set (merge
-                {:sent created :state :sent}
-                attachments-argument
-                (when (empty? (:authority application))
-                  {:authority (user/summary user)}))}))))
+        (fail (.getMessage e))))))
 
 (defn do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang]
   (let [application (meta-fields/enrich-with-link-permit-data application)
@@ -394,16 +394,16 @@
                              :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
         (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization))
 
+        (update-application command
+          {:state {$in ["submitted" "complement-needed"]}}
+          {$set (merge
+                  {:sent created :state :closed :closed created}
+                  (when (empty? (:authority application))
+                    {:authority (user/summary user)}))})
+
       (catch org.xml.sax.SAXParseException e
         (info e "Invalid KRYSP XML message")
-        (fail! (.getMessage e))))
-
-    (update-application command
-        {:state {$in ["submitted" "complement-needed"]}}
-        {$set (merge
-                {:sent created :state :closed :closed created}
-                (when (empty? (:authority application))
-                  {:authority (user/summary user)}))})))
+        (fail (.getMessage e))))))
 
 (defcommand approve-application
   {:parameters [id lang]
