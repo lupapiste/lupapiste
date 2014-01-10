@@ -3,517 +3,62 @@
 
   var isInitializing = true;
   var currentId = null;
+  var application = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
   var applicationMap = null;
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
+  var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
+  var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+  constructionStateChangeModel.openConstructionStartDialog = _.partial(
+      constructionStateChangeModel.openWithConfig,
+      {commandName : "inform-construction-started",
+       dateParameter: "startedTimestampStr",
+       dateSelectorLabel   : "constructionStarted.startedDate",
+       dialogHeader        : "constructionStarted.dialog.header",
+       dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "constructionStarted.dialog.areyousure.message"});
+  constructionStateChangeModel.openConstructionReadyDialog = _.partial(
+      constructionStateChangeModel.openWithConfig,
+      {commandName : "inform-construction-ready",
+       dateParameter: "readyTimestampStr",
+       extraParameters: {lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "constructionReady.readyDate",
+       dialogHeader        : "constructionReady.dialog.header",
+       dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
+       dialogButtonSend    : "constructionReady.dialog.continue",
+       areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
+  constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
+    constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
+       dateParameter: "startedDate",
+       extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : "building.constructionStarted.startedDate",
+       dialogHeader        : "application.beginConstructionOf",
+       dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
+       dialogButtonSend    : "constructionStarted.dialog.continue",
+       areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, application);
+    return false;
+  };
+
   var inviteModel = new LUPAPISTE.InviteModel();
-
-  function isNum(s) {
-    return s && s.match(/^\s*\d+\s*$/) !== null;
-  }
-
-  var transparencies = _.map([0,25,50,75,100], function(v) {
-    return {text: loc("stamp.transparency", v.toString()), value: Math.round(255 * v / 100.0)};
-  });
-
-  var stampModel = new function() {
-    var self = this;
-
-                               // Start:  Cancel:  Ok:
-    self.statusInit      = 0;  //   -       -       -
-    self.statusReady     = 1;  //   +       +       -
-    self.statusStarting  = 2;  //   -       -       -
-    self.statusRunning   = 3;  //   -       -       -
-    self.statusDone      = 4;  //   -       -       +
-    self.statusNoFiles   = 5;  //   -       -       +
-
-    self.status = ko.observable(self.statusStarting);
-    self.application = null;
-    self.applicationId = null;
-    self.files = ko.observable(null);
-    self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
-    self.jobId = null;
-    self.jobVersion = null;
-
-    self.xMargin = ko.observable("");
-    self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
-    self.yMargin = ko.observable("");
-    self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
-    self.transparency = ko.observable();
-    self.transparencies = transparencies;
-
-    function stampableAttachment(a) {
-      var ct = "";
-      if (a.latestVersion && typeof a.latestVersion.contentType === "function") {
-        ct = a.latestVersion.contentType();
-      }
-      return ct === "application/pdf" || ct.search(/^image\//) === 0;
-    }
-
-    function normalizeAttachment(a) {
-      var versions = _(a.versions()).reverse().value(),
-          restamp = (typeof versions[0].stamped === "function" && versions[0].stamped()),
-          selected = restamp ? versions[1] : versions[0];
-      return {
-        id:           a.id(),
-        type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
-        contentType:  selected.contentType(),
-        filename:     selected.filename(),
-        version:      { major: selected.version.major(), minor: selected.version.minor() },
-        size:         selected.size(),
-        selected:     ko.observable(true),
-        status:       ko.observable(""),
-        restamp:      restamp
-      };
-    }
-
-    self.init = function(application) {
-      self.application = application;
-
-      self
-        .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
-        .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
-        .xMargin("10")
-        .yMargin("85")
-        .transparency(self.transparencies[0]);
-
-      LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
-      return self;
-    };
-
-    self.start = function() {
-      self.status(self.statusStarting);
-      ajax
-        .command("stamp-attachments", {
-          id: self.application.id(),
-          files: _.map(self.selectedFiles(), "id"),
-          xMargin: _.parseInt(self.xMargin(), 10),
-          yMargin: _.parseInt(self.yMargin(), 10),
-          transparency: self.transparency().value
-        })
-        .success(self.started)
-        .call();
-      return false;
-    };
-
-    self.started = function(data) {
-      self.jobId = data.job.id;
-      self.jobVersion = 0;
-      self.status(self.statusRunning).queryUpdate();
-      return false;
-    };
-
-    self.queryUpdate = function() {
-      ajax
-        .query("stamp-attachments-job")
-        .param("job-id", self.jobId)
-        .param("version", self.jobVersion)
-        .success(self.update)
-        .call();
-      return self;
-    };
-
-    self.update = function(data) {
-      if (data.result === "update") {
-        var update = data.job;
-
-        self.jobVersion = update.version;
-        _.each(update.value, function (newStatus, fileId) {
-          _(self.files()).filter({id: fileId}).each(function(f) { f.status(newStatus); });
-        });
-
-        if (update.status === "done") {
-          repository.load(self.application.id());
-          return self.status(self.statusDone);
-        }
-      }
-
-      return self.queryUpdate();
-    };
-
-    function selectAllFiles(value) { _.each(self.files(), function(f) { f.selected(value); }); }
-    self.selectAll = _.partial(selectAllFiles, true);
-    self.selectNone = _.partial(selectAllFiles, false);
-
-  }();
-
-  var removeApplicationModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
-      return self;
-    };
-    self.ok = function() {
-      ajax
-        .command("cancel-application", {id: self.applicationId})
-        .success(function() {
-          window.location.hash = "!/applications";
-        })
-        .call();
-      return false;
-    };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
-  }();
-
-  var removeAuthModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-    self.username = null;
-
-    self.init = function(applicationId, username) {
-      self.applicationId = applicationId;
-      self.username = username;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-remove-auth");
-      return self;
-    };
-
-    self.ok = function() {
-      ajax.command("remove-auth", { id : self.applicationId, email : self.username})
-        .success(function() {
-          notify.success("oikeus poistettu", self.username);
-          repository.load(self.applicationId);
-        })
-        .call();
-      return false;
-    };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-remove-auth", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
-  }();
-
-  var requestForStatementModel = new function() {
-    var self = this;
-    self.data = ko.observableArray();
-    self.personIds = ko.observableArray([]);
-    self.submitting = ko.observable(false);
-
-    self.disabled = ko.computed(function() {
-      return _.isEmpty(self.personIds()) || self.submitting();
-    });
-
-    self.load = function() {
-      ajax
-        .query("get-statement-persons", {id: currentId})
-        .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
-        .call();
-    };
-
-    self.openDialog = function() {
-      self.load();
-      LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
-    };
-
-    self.send = function() {
-      self.submitting(true);
-      ajax.command("request-for-statement", {id: currentId, personIds: self.personIds()})
-        .success(function() {
-          self.personIds([]);
-          repository.load(currentId);
-          LUPAPISTE.ModalDialog.close();
-        })
-        .complete(function() { self.submitting(false); })
-        .call();
-    };
-
-    self.openStatement = function(model) {
-      window.location.hash = "#!/statement/" + currentId + "/" + model.id();
-      return false;
-    };
-
-  }();
-
-  var verdictModel = new function() {
-    var self = this;
-
-    self.verdicts = ko.observable();
-    self.attachments = ko.observable();
-
-    self.refresh = function(application) {
-      self.verdicts(application.verdict);
-      self.attachments(_.filter(application.attachments,function(attachment) {
-        return _.isEqual(attachment.target, {type: "verdict"});
-      }));
-    };
-
-    self.openVerdict = function() {
-      window.location.hash = "#!/verdict/" + currentId;
-      return false;
-    };
-
-  }();
-
-  var submitApplicationModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-submit");
-      return self;
-    };
-
-    self.ok = function() {
-      ajax.command("submit-application", {id: self.applicationId})
-        .success(function() { repository.load(self.applicationId); })
-        .call();
-      return false;
-    };
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
-    });
-  }();
-
-  var addPartyModel = new function() {
-    var self = this;
-
-    self.applicationId = null;
-    self.partyDocumentNames = ko.observableArray();
-
-    self.documentName = ko.observable();
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
-
-      LUPAPISTE.ModalDialog.open("#dialog-add-party");
-      return false;
-    };
-
-    self.addPartyEnabled = function() {
-      return self.documentName();
-    };
-
-    self.addParty = function () {
-      ajax.command("create-doc", {id: self.applicationId, schemaName: self.documentName()})
-        .success(function() { repository.load(self.applicationId); })
-        .call();
-      return false;
-    };
-  }();
-
-  function ApplicationModel() {
-    var self = this;
-    self.id = ko.observable();
-    self.infoRequest = ko.observable();
-    self.state = ko.observable();
-    self.location = ko.observable();
-    self.municipality = ko.observable();
-    self.permitType = ko.observable();
-    self.propertyId = ko.observable();
-    self.title = ko.observable();
-    self.created = ko.observable();
-    self.documents = ko.observable();
-    self.attachments = ko.observableArray();
-    self.hasAttachment = ko.observable(false);
-    self.address = ko.observable();
-    self.operations = ko.observable();
-    self.operationsCount = ko.observable();
-    self.applicant = ko.observable();
-    self.assignee = ko.observable();
-    self.neighbors = ko.observable();
-    self.nonpartyDocumentIndicator = ko.observable(0);
-    self.partyDocumentIndicator = ko.observable(0);
-
-    self.attachmentsRequiringAction = ko.observable();
-    self.unseenStatements = ko.observable();
-    self.unseenVerdicts = ko.observable();
-    self.unseenComments = ko.observable();
-
-    // new stuff
-    self.invites = ko.observableArray();
-
-    // all data in here
-    self.data = ko.observable();
-
-    self.roles = ko.computed(function() {
-      var value = [];
-
-      if (self.data() !== undefined) {
-        var auth = ko.utils.unwrapObservable(self.data().auth());
-        var withRoles = function(r, i) {
-          var a = r[i.id()] || (i.roles = [], i);
-          a.roles.push(i.role());
-          r[i.id()] = a;
-          return r;
-        };
-        var pimped = _.reduce(auth, withRoles, {});
-        value = _.values(pimped);
-      }
-      return value;
-    });
-
-    self.openOskariMap = function() {
-      var url = '/oskari/fullmap.html?coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
-      window.open(url);
-      var applicationId = self.id();
-
-      // FIXME: Can't just subscribe repeatedly.
-      hub.subscribe("map-initialized", function() {
-        if(self.shapes && self.shapes().length > 0) {
-          oskariDrawShape(self.shapes()[0]);
-        }
-
-        oskariSetMarker(self.location().x(), self.location().y());
-      });
-
-      // FIXME: Can't just subscribe repeatedly.
-      hub.subscribe("map-draw-done", function(e) {
-        var drawing = "" + e.data.drawing;
-        ajax.command("save-application-shape", {id: applicationId, shape: drawing})
-        .success(function() {
-          repository.load(applicationId);
-        })
-        .call();
-      });
-    };
-
-    self.submitApplication = function() {
-      submitApplicationModel.init(self.id());
-      return false;
-    };
-
-    self.requestForComplement = function(model) {
-      var applicationId = self.id();
-      ajax.command("request-for-complement", { id: applicationId})
-        .success(function() {
-          notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    };
-
-    self.convertToApplication = function() {
-      var id = self.id();
-      ajax.command("convert-to-application", {id: id})
-        .success(function() {
-          repository.load(id);
-          window.location.hash = "!/application/" + id;
-        })
-        .call();
-      return false;
-    };
-
-    self.approveApplication = function(model) {
-      var applicationId = self.id();
-      ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
-        .success(function() {
-        //FIXME parempi tapa ilmoittaa onnistumisesta
-          notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.load(applicationId);
-        })//FIXME parempi/tyylikaampi virheilmoitus
-        .error(function(resp) {alert(resp.text);})
-        .call();
-      return false;
-    };
-
-    self.refreshKTJ = function(model) {
-      var applicationId = self.id();
-      ajax.command("refresh-ktj", { id: applicationId})
-        .success(function() {
-          //FIXME parempi tapa ilmoittaa onnistumisesta
-          notify.success("KTJ tiedot p\u00e4ivitetty",model);
-          repository.load(applicationId);
-        })//FIXME parempi/tyylikaampi virheilmoitus
-        .error(function(resp) {alert(resp.text);})
-        .call();
-      return false;
-    };
-
-    self.removeInvite = function(model) {
-      var applicationId = self.id();
-      ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
-        .success(function() {
-          notify.success("kutsu poistettu", model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    };
-
-    self.removeAuth = function(model) {
-      removeAuthModel.init(self.id(), model.username());
-      return false;
-    };
-
-    self.isNotOwner = function(model) {
-      return model.role() !== "owner";
-    };
-
-    self.addOperation = function() {
-      window.location.hash = "#!/add-operation/" + self.id();
-      return false;
-    };
-
-    self.addParty = function() {
-      addPartyModel.init(self.id());
-      return false;
-    };
-
-    self.cancelApplication = function() {
-      removeApplicationModel.init(self.id());
-      return false;
-    };
-
-    self.exportPdf = function() {
-      window.open("/api/raw/pdf-export?id=" + self.id() + "&lang=" + loc.currentLanguage, "_blank");
-      return false;
-    };
-
-    self.stampAttachments = function() {
-      stampModel.init(self);
-      return false;
-    };
-
-    self.newAttachment = function() {
-      attachment.initFileUpload(currentId, null, null, true);
-    };
-
-    self.newOtherAttachment = function() {
-      attachment.initFileUpload(currentId, null, 'muut.muu', false);
-    };
-
-    self.changeTab = function(model,event) {
-      var $target = $(event.target);
-      while ($target.is("span")) {
-        $target = $target.parent();
-      }
-      var targetTab = $target.attr("data-target");
-      window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
-    };
-     self.nextTab = function(model,event) {
-      var $target = $(event.target);
-      while ($target.is("span")) {
-        $target = $target.parent();
-      }
-      var targetTab = $target.attr("data-target");
-      window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
-      var y = $('#applicationTabs').position().top + 40;
-      window.scrollTo(0,y);
-    };
-  }
-
-  var application = new ApplicationModel();
+  var verdictModel = new LUPAPISTE.VerdictsModel();
+  var stampModel = new LUPAPISTE.StampModel();
+  var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
+  var addPartyModel = new LUPAPISTE.AddPartyModel();
+  var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   var authorities = ko.observableArray([]);
-  var attachments = ko.observableArray([]);
+  var permitSubtypes = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
   function getAttachmentsByGroup(source) {
-    var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
+    var attachments = _.map(source, function(a) {
+      a.latestVersion = _.last(a.versions || []);
+      a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
+      return a;
+    });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
@@ -535,26 +80,30 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {authorizationModel.refresh(currentId);})
+      .success(function() {
+        authorizationModel.refresh(currentId);
+        })
+      .error(function(data) {
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+      })
       .call();
   }
 
-  function oskariDrawShape(shape) {
-    hub.send("map-viewvectors", {
-      drawing: shape,
-      style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
-      clear: false
-    });
-  }
+  function updatePermitSubtype(value){
+    if (isInitializing) { return; }
 
-  function oskariSetMarker(x, y) {
-    hub.send("documents-map", {
-      data:  [{location: {x: x, y: y}}],
-      clear: true
-    });
+    ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
+    .success(function() {
+      authorizationModel.refresh(currentId);
+      })
+    .error(function(data) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+    })
+    .call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
+  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
@@ -568,17 +117,60 @@
     authorities(authorityInfos);
   }
 
+  // When Oskari map has initialized itself, draw shapes and marker
+  hub.subscribe("oskari-map-initialized", function() {
+
+    if (application.drawings && application.drawings().length) {
+      var drawings = _.map(application.drawings(), function(d) {
+        return {
+          "id": d.id(),
+          "name": d.name? d.name() :"",
+          "desc": d.desc ? d.desc() : "",
+          "category": d.category ? d.category() : "",
+          "geometry": d.geometry ? d.geometry() : "",
+          "area": d.area? d.area() : "",
+          "height": d.height? d.height():""
+        }});
+
+      hub.send("oskari-show-shapes", {
+        drawings: drawings,
+        style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
+        clear: true
+      });
+    }
+
+    var x = (application.location && application.location().x) ? application.location().x() : 0;
+    var y = (application.location && application.location().y) ? application.location().y() : 0;
+    hub.send("oskari-center-map", {
+      data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
+      clear: true
+    });
+  });
+
+  // When a shape is draw in Oskari map, save it to application
+  hub.subscribe("oskari-save-drawings", function(e) {
+    ajax.command("save-application-drawings", {id: currentId, drawings: e.data.drawings})
+    .success(function() {
+      repository.load(currentId);
+    })
+    .call();
+  });
+
   function showApplication(applicationDetails) {
     isInitializing = true;
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       var app = applicationDetails.application;
-      var documents = app.documents;
 
-      // Performance improvement: documents should not be mapped with ko.mapping
-      delete app.documents;
+      // Delete shapes
+      if (application.shapes) {
+        delete application.shapes;
+      }
 
-      application.data(ko.mapping.fromJS(app));
+      // Plain data
+      application._js = app;
+
+      // Update observebles
       ko.mapping.fromJS(app, {}, application);
 
       // Invite
@@ -595,26 +187,27 @@
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       // Attachments:
-
-      var statuses = {
-        requires_user_action: "missing",
-        requires_authority_action: "new",
-        ok: "ok"
-      };
-
-      application.hasAttachment(false);
-
-      attachments(_.map(app.attachments || [], function(a) {
-        a.statusName = statuses[a.state] || "unknown";
-        a.latestVersion = _.last(a.versions);
-        if (a.versions && a.versions.length) { application.hasAttachment(true); }
-        return a;
-      }));
-
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
+
+      // Setting disable value for the "Send unsent attachments" button:
+
+      var unsentAttachmentFound =
+        _.some(app.attachments, function(a) {
+          var lastVersion = _.last(a.versions);
+          return lastVersion &&
+                 (!a.sent || lastVersion.created > a.sent) &&
+                 (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
+        });
+      application.unsentAttachmentsNotFound(!unsentAttachmentFound);
+
+      // Statements
+      requestForStatementModel.setApplicationId(app.id);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
+
+      // permit subtypes
+      permitSubtypes(applicationDetails.permitSubtypes);
 
       // Update map:
       var location = application.location();
@@ -627,17 +220,20 @@
         $('#application-map').css("display", "inline-block");
       }
 
-      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application")
+      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
-      if (application.shapes && application.shapes().length > 0) map.drawShape(application.shapes()[0]);
 
-      if (application.infoRequest()) {
+      if (application.shapes && application.shapes().length > 0) {
+        map.drawShape(application.shapes()[0]);
+      }
+
+      if (application.infoRequest() && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
       // Documents
-      var nonpartyDocs = _.filter(documents, function(doc) {return doc.schema.info.type !== "party"; });
-      var partyDocs = _.filter(documents, function(doc) {return doc.schema.info.type === "party"; });
+      var nonpartyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; });
+      var partyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; });
       docgen.displayDocuments("#applicationDocgen", app, nonpartyDocs, authorizationModel);
       docgen.displayDocuments("#partiesDocgen",     app, partyDocs, authorizationModel);
 
@@ -694,7 +290,7 @@
                       "statement":   {type: "statements", model: application.unseenStatements},
                       "verdict":     {type: "verdicts",   model: application.unseenVerdicts}};
       // Mark comments seen after a second
-      if (tabMeta[tab] && currentId) {
+      if (tabMeta[tab] && currentId && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
           .success(function() {tabMeta[tab].model(0);})
           .call();
@@ -766,7 +362,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","statement","neighbors","task"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -862,14 +458,13 @@
     var bindings = {
       application: application,
       authorities: authorities,
-      attachments: attachments,
+      permitSubtypes: permitSubtypes,
       attachmentsByGroup: attachmentsByGroup,
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
       accordian: accordian,
       addPartyModel: addPartyModel,
-      removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
@@ -877,12 +472,18 @@
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
       sendNeighborEmailModel: sendNeighborEmailModel,
-      neighborStatusModel: neighborStatusModel
+      neighborStatusModel: neighborStatusModel,
+      addLinkPermitModel: addLinkPermitModel,
+      constructionStateChangeModel: constructionStateChangeModel,
+      createTaskModel: createTaskModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
+    $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
+    $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
+    $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
+    $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     attachmentTemplatesModel.init();
   });
 

@@ -1,11 +1,12 @@
 (ns lupapalvelu.organization
-  (:use [monger.operators]
-        [lupapalvelu.core])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
+            [monger.operators :refer :all]
+            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
+            [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
@@ -28,123 +29,189 @@
         legacy       (:legacy organization)]
     (when-not (s/blank? legacy) legacy)))
 
-(defn municipalities-with-organization []
+(defn- municipalities-with-organization []
   (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
     (distinct
       (for [{id :id scopes :scope} id-and-scopes
             {:keys [municipality]} scopes] municipality))))
 
-(defn find-user-organizations [user]
+(defn- find-user-organizations [user]
   (mongo/select :organizations {:_id {$in (:organizations user)}}))
 
-(defn find-user-municipalities [user]
+(defn- find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+(defn- organization-attachments
+  "Returns a map where key is permit type, value is a list of attachment types for the permit type"
+  [{scope :scope}]
+  (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
+
+(defn- organization-operations
+  "Returns a map where key is permit type, value is a list of operations for the permit type"
+  [{scope :scope :as organization}]
+  (reduce
+    #(assoc %1 %2 (let [operation-names (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations))
+                        empty-operation-attachments (zipmap operation-names (repeat []))
+                        saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)]
+                    (merge empty-operation-attachments saved-operation-attachments))) {}
+    (map :permitType scope)))
 
 ;;
 ;; Actions
 ;;
 
-(defquery "users-in-same-organizations"
+(defquery users-in-same-organizations
   {:roles [:authority]}
   [{user :user}]
-  (ok :users (map security/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
+  ;; TODO toimiiko jos jompi kumpi user on kahdessa organisaatiossa?
+  (ok :users (map user/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
-(defquery "organization-by-user"
+(defquery organization-by-user
   {:description "Lists all organization users by organization."
    :roles [:authorityAdmin]
    :verified true}
-  [{user :user {:keys [organizations]} :user}]
+  [{{:keys [organizations] :as user} :user}]
   (let [orgs (find-user-organizations user)
         organization (first orgs)
-        ops (merge (zipmap (keys operations/operations) (repeat [])) (:operations-attachments organization))]
+        ops (organization-operations organization)]
     (ok :organization (assoc organization :operations-attachments ops)
-        :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
+        :attachmentTypes (organization-attachments organization))))
 
-(defcommand "add-organization-link"
+(defcommand update-organization
+  {:description "Update organization details."
+   :parameters [organizationId inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
+   :roles [:admin]
+   :verified true}
+  [_]
+  (mongo/update-by-id :organizations organizationId {$set {"inforequest-enabled" inforequestEnabled
+                                                           "new-application-enabled" applicationEnabled
+                                                           "open-inforequest" openInforequestEnabled
+                                                           "open-inforequest-email" openInforequestEmail}})
+  (ok))
+
+(defcommand add-organization-link
   {:description "Adds link to organization."
-   :parameters [:url :nameFi :nameSv]
+   :parameters [url nameFi nameSv]
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations]} :user {:keys [url nameFi nameSv]} :data}]
+  [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update-by-id :organizations organization {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "update-organization-link"
+(defcommand update-organization-link
   {:description "Updates organization link."
-   :parameters [:url :nameFi :nameSv :index]
+   :parameters [url nameFi nameSv index]
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations]} :user {url :url nameFi :nameFi nameSv :nameSv i :index} :data}]
+  [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update-by-id :organizations organization {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "remove-organization-link"
+(defcommand remove-organization-link
   {:description "Removes organization link."
-   :parameters [:nameFi :nameSv :url]
+   :parameters [nameFi nameSv url]
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations]} :user {nameFi :nameFi nameSv :nameSv url :url} :data}]
+  [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+    (mongo/update-by-id :organizations organization {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defquery "organization-names"
+(defquery organizations
+  {:roles       [:admin]
+   :authenticated true
+   :verified true}
+  [{user :user}]
+  (ok :organizations (mongo/select :organizations {})))
+
+(defquery organization-names
   {:authenticated true
    :verified true}
   [{user :user}]
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
 (defquery "municipalities-with-organization"
-  {} [_] (ok :municipalities (municipalities-with-organization)))
+  {:verified true}
+  [_]
+  (ok :municipalities (municipalities-with-organization)))
 
-(defquery "operations-for-municipality"
-  {:authenticated true}
-  [{{:keys [municipality]} :data}]
+(defquery operations-for-municipality
+  {:parameters [municipality]
+   :authenticated true
+   :verified true}
+  [_]
   (ok :operations (operations/municipality-operations municipality)))
 
 (defn resolve-organization [municipality permit-type]
-  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType permit-type}]})]
+  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality :permitType permit-type}}})]
     (when (> (count organizations) 1)
-      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type))
+      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
-(defquery "organization-details"
-  {:parameters [:municipality :operation] :verified true}
-  [{{:keys [municipality operation]} :data}]
-  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
-    (ok :links (:links result)
-        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
-    (fail :unknown-organization)))
+(defquery organization-by-id
+  {:parameters [organizationId]
+   :roles [:admin]
+   :verified true}
+  [_]
+  (mongo/select-one :organizations {:_id organizationId}))
 
-(defcommand "organization-operations-attachments"
-  {:parameters [:operation :attachments]
+(defquery organization-details
+  {:parameters [municipality operation lang]
+   :verified true}
+  [_]
+  (let [permit-type (:permit-type ((keyword operation) operations/operations))]
+    (let [result (mongo/select-one
+                      :organizations
+                      {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
+                      {"name" 1
+                       "links" 1
+                       "operations-attachments" 1
+                       "inforequest-enabled" 1
+                       "new-application-enabled" 1})]
+      (when-not result (fail! :error.unknown-organization :municipality municipality :permitType permit-type))
+      (let [inforequests-enabled (:inforequest-enabled result)
+            new-applications-enabled (:new-application-enabled result)
+            name-map (-> result :name)
+            ;; if name of the organization is not set in current language, then use the name that is set for it
+            org-name (if ((keyword lang) name-map)
+                       ((keyword lang) name-map)
+                       (first (vals name-map)))]
+        (ok
+          :inforequests-disabled (not (:inforequest-enabled result))
+          :new-applications-disabled (not (:new-application-enabled result))
+          :links (:links result)
+          :attachmentsForOp (-> result :operations-attachments ((keyword operation))))))))
+
+(defcommand organization-operations-attachments
+  {:parameters [operation attachments]
    :roles [:authorityAdmin]}
-  [{{:keys [operation attachments]} :data user :user}]
+  [{user :user}]
   ; FIXME: validate operation and attachments
   (let [organizations (:organizations user)
         organization  (first organizations)]
-    (mongo/update :organizations {:_id organization} {$set {(str "operations-attachments." operation) attachments}})
+    (mongo/update-by-id :organizations organization {$set {(str "operations-attachments." operation) attachments}})
     (ok)))
 
-(defquery "legacy-system"
-  {:roles [:authorityAdmin] :verified true}
+(defquery legacy-system
+  {:roles [:authorityAdmin]
+   :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
     (if-let [result (mongo/select-one :organizations {:_id organization} {"legacy" 1})]
       (ok :legacy (:legacy result))
-      (fail :unknown-organization))))
+      (fail :error.unknown-organization))))
 
-(defcommand "set-legacy-system"
-  {:parameters [:legacy]
+(defcommand set-legacy-system
+  {:parameters [legacy]
    :roles      [:authorityAdmin]
    :verified   true}
-  [{{:keys [legacy]} :data {:keys [organizations] :as user} :user}]
+  [{{:keys [organizations] :as user} :user}]
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
-      (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
-      (fail :legacy_is_dead))))
+      (mongo/update-by-id :organizations organization {$set {:legacy legacy}})
+      (fail :error.legacy_is_dead))))
 
 ;;
 ;; Helpers

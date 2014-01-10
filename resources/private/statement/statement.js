@@ -76,7 +76,12 @@
     };
 
     self.openDeleteDialog = function() {
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("statement.delete.header"),
+          loc("statement.delete.message"),
+          {title: loc("yes"), fn: deleteStatementFromServer},
+          {title: loc("no")}
+        );
     };
 
     self.submit = function() {
@@ -131,7 +136,12 @@
 
     self.deleteAttachment = function(attachmentId) {
       deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement-attachment");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("attachment.delete.version.header"),
+        loc("attachment.delete.version.message"),
+        {title: loc("yes"), fn: deleteAttachmentFromServerProxy},
+        {title: loc("no")}
+      );
     };
 
     self.newAttachment = function() {
@@ -162,18 +172,12 @@
   });
 
   $(function() {
-    ko.applyBindings({
+    $("#statement").applyBindings({
       statementModel: statementModel,
       authorization: authorizationModel,
       commentsModel: commentsModel,
       attachmentsModel: attachmentsModel
-    }, $("#statement")[0]);
-
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",
-      loc("statement.delete.header"), loc("statement.delete.message"), loc("yes"), deleteStatementFromServer, loc("no"));
-
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement-attachment",
-      loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() { deleteAttachmentFromServerProxy(); }, loc("no"));
+    });
   });
 
 })();

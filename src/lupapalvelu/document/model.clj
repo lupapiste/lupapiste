@@ -1,7 +1,8 @@
 (ns lupapalvelu.document.model
-  (:use [sade.strings]
-        [clojure.walk :only [keywordize-keys]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [sade.strings :refer :all]
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.set :refer [union difference]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
@@ -58,12 +59,19 @@
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
-(defmethod validate-field :select [{:keys [body]} v]
-  (when-not (or (s/blank? v) (some #{v} (map :name body)))
-    [:warn "illegal-value:select"]))
+(defmethod validate-field :select [{:keys [body other-key]} v]
+  (let [accepted-values (set (map :name body))
+        accepted-values (if other-key (conj accepted-values "other") accepted-values)]
+    (when-not (or (s/blank? v) (contains? accepted-values v))
+      [:warn "illegal-value:select"])))
 
+;; FIXME implement validator, the same as :select?
 (defmethod validate-field :radioGroup [elem v] nil)
-(defmethod validate-field :buildingSelector [elem v] nil)
+
+(defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
+
+;; FIXME implement validator (mongo id, check that user exists)
 (defmethod validate-field :personSelector [elem v] nil)
 
 (defmethod validate-field nil [_ _]
@@ -82,7 +90,7 @@
     (if (nil? ks)
       elem
       (if (:repeating elem)
-        (when (numeric? (first ks))
+        (when (numeric? (name (first ks)))
           (if (seq (rest ks))
             (find-by-name (:body elem) (rest ks))
             elem))
@@ -109,8 +117,11 @@
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
 
+(defn- one-of-many-options [sub-schemas]
+  (map :name (:body (sub-schema-by-name sub-schemas schemas/select-one-of-key))))
+
 (defn- one-of-many-selection [sub-schemas path data]
-  (when-let [one-of (seq (map :name (:body (sub-schema-by-name sub-schemas "_selected"))))]
+  (when-let [one-of (seq (one-of-many-options sub-schemas))]
     (or (get-in data (conj path :_selected :value)) (first one-of))))
 
 (defn- validate-required-fields [schema-body path data validation-errors]
@@ -126,32 +137,37 @@
                       (if repeating
                         (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
                         (validate-required-fields body current-path data []))
-                      []))))]
-    (if-let [selected (one-of-many-selection schema-body path data)]
-      [(check (sub-schema-by-name schema-body selected))]
-      (map check schema-body))))
+                      []))))
+
+        selected (one-of-many-selection schema-body path data)
+        sub-schemas-to-validate (-> (set (map :name schema-body))
+                                  (difference (set (one-of-many-options schema-body)) #{schemas/select-one-of-key})
+                                  (union (when selected #{selected})))]
+
+      (map #(check (sub-schema-by-name schema-body %)) sub-schemas-to-validate)))
+
+(defn get-document-schema [{schema-info :schema-info}]
+  (schemas/get-schema schema-info))
 
 (defn validate
-  "Validates document against it's local schema and document level rules
-   retuning list of validation errors."
-  [{{schema-body :body} :schema data :data :as document}]
-  (and data
-    (flatten
-      (concat
-        (validate-fields schema-body nil data [])
-        (validate-required-fields schema-body [] data [])
-        (validator/validate document)))))
+  "Validates document against schema and document level rules. Returns list of validation errors.
+   If schema is not given, uses schema defined in document."
+  ([document]
+    (validate document nil))
+  ([document schema]
+    (let [data (:data document)
+          schema (or schema (get-document-schema document))
+          schema-body (:body schema)]
+      (when data
+        (flatten
+          (concat
+            (validate-fields schema-body nil data [])
+            (validate-required-fields schema-body [] data [])
+            (validator/validate document)))))))
 
 (defn valid-document?
   "Checks weather document is valid."
   [document] (empty? (validate document)))
-
-(defn validate-against-current-schema
-  "Validates document against the latest schema and returns list of errors."
-  [{{{schema-name :name} :info} :schema document-data :data :as document}]
-  (let [latest-schema (schemas/get-schema schema-name)
-        pimped-doc    (assoc document :schema latest-schema)]
-    (validate pimped-doc)))
 
 (defn has-errors?
   [results]
@@ -224,25 +240,28 @@
     (with-timestamp timestamp (apply-approval document path status user))))
 
 (defn approvable?
-  ([document] (approvable? document nil))
-  ([document path]
-  (if (seq path)
-    (let [schema-body (get-in document [:schema :body])
-          str-path    (map #(if (keyword? %) (name %) %) path)
-          element     (keywordize-keys (find-by-name schema-body str-path))]
-      (true? (:approvable element)))
-    (true? (get-in document [:schema :info :approvable])))))
+  ([document] (approvable? document nil nil))
+  ([document path] (approvable? document nil path))
+  ([document schema path]
+    (if (seq path)
+      (let [schema      (or schema (get-document-schema document))
+            schema-body (:body schema)
+            str-path    (map #(if (keyword? %) (name %) %) path)
+            element     (keywordize-keys (find-by-name schema-body str-path))]
+        (true? (:approvable element)))
+      (true? (get-in document [:schema-info :approvable])))))
 
 (defn modifications-since-approvals
-  ([{:keys [schema data meta]}]
-    (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0)))
+  ([{:keys [schema-info data meta]}]
+    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))]
+      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0))))
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
-              [{:keys [name approvable repeating body] :as element}]
+              [{:keys [name approvable repeating body type] :as element}]
               (let [current-path (conj path (keyword name))
                     current-approvable (or approvable-parent approvable)]
-                (if body
+                (if (= :group type)
                   (if repeating
                     (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
@@ -256,7 +275,56 @@
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]
-  {:id      (mongo/create-id)
-   :created created
-   :schema  schema
-   :data    {}})
+  {:id           (mongo/create-id)
+   :created      created
+   :schema-info  (:info schema)
+   :data         {}})
+
+;;
+;; Blacklists
+;;
+
+(defn strip-blacklisted-data
+  "Strips values from document data if blacklist in schema includes given blacklist-item."
+  [{data :data :as document} blacklist-item & [initial-path]]
+  (when data
+    (letfn [(strip [schema-body path]
+              (into {}
+                (map
+                  (fn [{:keys [name type body repeating blacklist] :as element}]
+                    (let [k (keyword name)
+                          current-path (conj path k)
+                          v (get-in data current-path)]
+                      (if ((set (map keyword blacklist)) (keyword blacklist-item))
+                        [k nil]
+                        (when v
+                          (if (not= (keyword type) :group)
+                            [k v]
+                            [k (if repeating
+                                 (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
+                                 (strip body current-path))])))))
+                  schema-body)))]
+      (let [path (into [] initial-path)
+            schema (get-document-schema document)
+            schema-body (:body (if (seq path) (find-by-name (:body schema) path) schema))]
+        (assoc-in document (concat [:data] path)
+          (strip schema-body path))))))
+
+
+;;
+;; Turvakielto
+;;
+
+(defn strip-turvakielto-data [{data :data :as document}]
+  (reduce
+    (fn [doc [path v]]
+      (let [turvakielto-value (:value v)
+            ; Strip data starting from one level up.
+            ; Fragile, but currently schemas are modeled this way!
+            strip-from (butlast path)]
+        (if turvakielto-value
+          (strip-blacklisted-data doc schemas/turvakielto strip-from)
+          doc)))
+    document
+    (tools/deep-find data (keyword schemas/turvakielto))))
+

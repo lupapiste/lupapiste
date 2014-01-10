@@ -1,12 +1,13 @@
 (ns lupapalvelu.csrf-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet]
-        [clojure.pprint :only [pprint]])
-  (:require [clj-http.client :as c]))
+  (:require [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.http :as http]))
 
 (fact "Valid apikey bypasses CSRF check"
   (with-anti-csrf
-    (raw-query mikko :allowed-actions) => (contains {:status 200 :body (contains {:ok true})})))
+    (let [resp (raw-query mikko :allowed-actions)]
+      resp => http200?
+      (:body resp) => ok?)))
 
 (fact "CSRF check must not be bypassed if there is no apikey"
   (with-anti-csrf
@@ -14,22 +15,21 @@
 
 (fact "Calling a non-protected resource returns a csrf token"
   (with-anti-csrf
-    (let [resp (c/get (str (server-address) "/app/fi/welcome"))
+    (let [resp (http/get (str (server-address) "/app/fi/welcome"))
           cookie (get-in resp [:cookies "anti-csrf-token"])]
-      (:status resp) => 200
+      resp => http200?
       cookie => truthy
       (:path cookie) => "/")))
 
 (fact "Sending the cookie and a header passes CSRF protection"
   (with-anti-csrf
-    (let [resp (c/get (str (server-address) "/api/query/allowed-actions")
+    (http/get (str (server-address) "/api/query/allowed-actions")
                  {:cookies {"anti-csrf-token" {:value "my-token"}}
-                  :headers {"x-anti-forgery-token" "my-token"}})]
-      resp => (contains {:status 200}))))
+                  :headers {"x-anti-forgery-token" "my-token"}}) => http200?))
 
 (fact "Failing to send the header fails CSRF check"
-  (with-anti-csrf 
-    (let [resp (c/get (str (server-address) "/api/query/allowed-actions")
+  (with-anti-csrf
+    (let [resp (http/get (str (server-address) "/api/query/allowed-actions")
                  {:cookies {"anti-csrf-token" {:value "my-token"}}
                   :query-params {:id 123}
                   :headers {"Referer" "http://attacker.example.com/"}

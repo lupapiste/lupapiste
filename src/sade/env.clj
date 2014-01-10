@@ -1,57 +1,65 @@
 (ns sade.env
-  (:use [sade.util]
-        [sade.strings :only [numeric?]])
-  (:require [clojure.java.io :as io]
+  (:require [sade.util :refer :all]
+            [sade.strings :refer [numeric?]]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.walk :as walk]
             [me.raynes.fs :as fs]
-            [monger.collection :as mc])
+            [monger.collection :as mc]
+            [swiss-arrows.core :refer :all])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
-(def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
+(defn- try-to-open [in]
+  (when in
+    (try
+      (io/input-stream in)
+      (catch java.io.FileNotFoundException _
+        nil))))
 
+(def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
 (defn hgnotes [] (read-string (slurp (io/resource "hgnotes.clj"))))
 
-(def mongo-connection-info
-  (if (fs/exists? "mongo-connection.clj")
-    {:mongodb (read-string (slurp (io/file "mongo-connection.clj")))}
-    {}))
-
-(defn- parse-target-env [build-tag]
-  (or (re-find #"[PRODEVTSQA]+" (or build-tag "")) "local"))
-
+(defn- parse-target-env [buildinfo] (or (re-find #"[PRODEVTSQA]+" (or buildinfo "")) "local"))
 (def target-env (parse-target-env (:build-tag buildinfo)))
 
-; TODO rewrite? Perhaps determine from mode or env parameter?
-(def ^:private prop-file (-> target-env (s/lower-case) (str ".properties")))
+(defn- make-decryptor [password]
+  (EncryptableProperties.
+    (doto (StandardPBEStringEncryptor.)
+      (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
+      (.setPassword password))))
 
 (defn read-value [s]
   (cond
     (.equalsIgnoreCase "true" s) true
     (.equalsIgnoreCase "false" s) false
     (numeric? s) (Long/parseLong s)
-    :default s))
+    :else s))
 
-(defn read-config
-  ([file-name]
-    (read-config file-name (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")))
-  ([file-name password]
-    (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
-                                              (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
-                                              (.setPassword password)))]
-      (with-open [resource (io/input-stream (io/resource file-name))]
-        (.load decryptor resource)
-        (merge
-          (clojure.walk/keywordize-keys
-            (apply deep-merge-with into
-                   (for [[k _] decryptor
-                         ; _ contains "ENC(...)" value, decryption using getProperty
-                         :let [v (.getProperty decryptor k)]]
-                     (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))
-          mongo-connection-info)))))
+(defn- read-config [password in]
+  (when-let [in (try-to-open in)]
+    (try
+      (let [decryptor (make-decryptor password)]
+        (.load decryptor in)
+        (doall
+          (reduce
+            (fn [m k]
+              (assoc-in m (map keyword (s/split k #"\.")) (read-value (.getProperty decryptor k))))
+            {}
+            (keys decryptor))))
+      (finally
+        (try (.close in) (catch Exception _))))))
 
-(def ^:private config (atom (read-config prop-file)))
+(defn- read-all-configs []
+  (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
+    (reduce merge (map (partial read-config password)
+                    [(io/resource "lupapiste.properties")
+                     (io/resource (str (s/lower-case target-env) ".properties"))
+                     (io/file "lupapiste.properties")
+                     (io/file (System/getProperty "lupapiste.properties"))
+                     (io/file (System/getenv "LUPAPISTE_PROPERTIES"))]))))
+
+(def ^:private config (atom (read-all-configs)))
 
 (defn get-config [] @config)
 
@@ -102,7 +110,7 @@
     default))
 
 (def mode (keyword (get-prop "lupapiste.mode" "dev")))
-(def port (Integer/parseInt (get-prop "lupapiste.port" "8000")))
+(def port (->int (get-prop "lupapiste.port" "8000")))
 (def log-level (keyword (get-prop "lupapiste.loglevel" (if (= mode :dev) "debug" "info"))))
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" "")))
 (def perf-mon-on (Boolean/parseBoolean (str (get-prop "lupapiste.perfmon" "false"))))
@@ -110,6 +118,9 @@
 
 (defn dev-mode? []
   (= :dev mode))
+
+(defn test-build? []
+  (= target-env "TEST"))
 
 (def ^:dynamic *in-dev-macro* false)
 

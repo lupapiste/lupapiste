@@ -1,14 +1,12 @@
 (ns lupapalvelu.proxy-services
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
-            [clj-http.client :as client]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [noir.response :as resp]
             [clojure.xml :as xml]
-            [clojure.zip :as zip]
             [clojure.string :as s]
             [lupapalvelu.wfs :as wfs]
-            [lupapalvelu.find-address :as find-address])
-  (:use [clojure.data.zip.xml]
-        [sade.util :only [dissoc-in select]]))
+            [lupapalvelu.find-address :as find-address]
+            [clojure.data.zip.xml :refer :all]
+            [sade.util :refer [dissoc-in select]]))
 
 ;;
 ;; NLS:
@@ -81,9 +79,9 @@
   "Takes a service function as an argument and returns a proxy function that invokes the original
   function. Proxy function returns what ever the service function returns, excluding some unsafe
   stuff. At the moment strips the 'Set-Cookie' headers."
-  [f]
+  [f service]
   (fn [request]
-    (let [response (f request)]
+    (let [response (f request service)]
       (assoc response :headers (dissoc (:headers response) "set-cookie" "server")))))
 
 (defn- cache [max-age-in-s f]
@@ -96,7 +94,8 @@
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images))
+(def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images "nls"))
+               "wms" (cache (* 3 60 60 24) (secure wfs/raster-images "wms"))
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy

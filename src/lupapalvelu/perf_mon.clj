@@ -1,7 +1,7 @@
 (ns lupapalvelu.perf-mon
-  (:use [noir.core :only [defpage]]
-        [monger.operators])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [noir.core :refer [defpage]]
+            [monger.operators :refer :all]
             [clojure.string :refer [join]]
             [clojure.java.io :as io]
             [monger.collection :as mc]

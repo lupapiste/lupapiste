@@ -1,5 +1,5 @@
 (ns lupapalvelu.logging
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal spy with-log-level)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal spy with-log-level]]
             [clojure.string :as s]
             [sade.env :as env]
             [sade.util :as util]

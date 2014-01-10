@@ -1,32 +1,30 @@
 (ns lupapalvelu.server
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.server :as server]
-            [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
             [sade.env :as env]
+            [sade.security-headers :as headers]
+            [sade.dummy-email-server]
             [lupapalvelu.fixture :as fixture]
-            [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
-            [lupapalvelu.fixture.finland-rakval]
-            [lupapalvelu.fixture.cgi-test-users]
-            [lupapalvelu.admin]
-            [lupapalvelu.application]
-            [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
-            [lupapalvelu.user]
+            [lupapalvelu.user-api]
+            [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
-            [lupapalvelu.statement]
+            [lupapalvelu.attachment-api]
+            [lupapalvelu.statement-api]
+            [lupapalvelu.tasks-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
-            [lupapalvelu.etag :as etag]
-            [sade.security-headers :as headers]
-            [sade.dummy-email-server]
-            [lupapalvelu.migration.migration :as migration]))
+            [lupapalvelu.document.schema-repository]
+            [lupapalvelu.common-actions]
+            [lupapalvelu.migration.migration :as migration]
+            [lupapalvelu.screenmessage]))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
@@ -38,8 +36,9 @@
     (System/getProperty "javax.net.ssl.trustStore"))
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
-  (mongo/ensure-indexes)
   (migration/update!)
+  (mongo/ensure-indexes)
+  (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
   (server/add-middleware uach/add-ua-compatible-header)
@@ -48,14 +47,14 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/authentication)
   (server/add-middleware web/session-timeout)
-  (server/add-middleware etag/if-none-match-build-number)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init)))
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9090))
+    (require 'clojure.tools.nrepl.server)
+    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090))
   (let [jetty-opts (into
                      {:max-threads 250}
                      (when (env/dev-mode?)

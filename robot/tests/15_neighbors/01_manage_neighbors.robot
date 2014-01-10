@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Authority add neighbors to be heard
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 

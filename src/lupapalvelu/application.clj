@@ -1,18 +1,19 @@
 (ns lupapalvelu.application
-  (:use [monger.operators]
-        [lupapalvelu.core]
-        [clojure.string :only [blank? join trim]]
-        [sade.util :only [lower-case]]
-        [clj-time.core :only [year]]
-        [clj-time.local :only [local-now]]
-        [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
-            [clj-time.format :as timeformat]
-            [lupapalvelu.mongo :as mongo]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [clojure.string :refer [blank? join trim split]]
+            [clj-time.core :refer [year]]
+            [clj-time.local :refer [local-now]]
+            [clj-time.format :as tf]
+            [sade.http :as http]
+            [monger.operators :refer :all]
             [monger.query :as query]
             [sade.env :as env]
             [sade.util :as util]
-            [lupapalvelu.tepa :as tepa]
+            [sade.strings :as ss]
+            [sade.xml :as xml]
+            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -21,16 +22,24 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.security :as security]
+            [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.neighbors :as neighbors]
-            [clj-time.format :as tf]))
+            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.application-meta-fields :as meta-fields])
+  (:import [java.net URL]))
 
 ;; Validators
+
+(defn not-open-inforequest-user-validator [{user :user} _]
+  (when (:oir user)
+    (fail :error.not-allowed-for-oir)))
 
 (defn- property-id? [^String s]
   (and s (re-matches #"^[0-9]{14}$" s)))
@@ -48,92 +57,58 @@
     (fail :error.unauthorized)))
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (->double x) 800000)))
+  (when (and x (not (< 10000 (util/->double x) 800000)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (->double y) 7779999)))
+  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
-(defn count-unseen-comment [user app]
-  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [comment]
-                     (and (> (:created comment) last-seen)
-                          (not= (get-in comment [:user :id]) (:id user))
-                          (not (blank? (:text comment)))))
-                   (:comments app)))))
+;; Helpers
 
-(defn count-unseen-statements [user app]
-  (if-not (:infoRequest app)
-    (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [statement]
-                       (and (> (or (:given statement) 0) last-seen)
-                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
-                     (:statements app))))
-    0))
-
-(defn count-unseen-verdicts [user app]
-  (if (and (= (:role user) "applicant") (not (:infoRequest app)))
-    (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdict app))))
-    0))
-
-(defn count-attachments-requiring-action [user app]
-  (if-not (:infoRequest app)
-    (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
-      (case (keyword (:role user))
-        :applicant (count-attachments "requires_user_action")
-        :authority (count-attachments "requires_authority_action")
-        0))
-    0))
-
-(defn count-document-modifications-per-doc [user app]
-  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
-    (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
-    {}))
-
-
-(defn count-document-modifications [user app]
-  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
-    (reduce + 0 (vals (:documentModificationsPerDoc app)))
-    0))
-
-(defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
-
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :neighbors :fn neighbors/normalize-negighbors}
-                  {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
-                  {:field :documentModifications :fn count-document-modifications}
-                  {:field :unseenComments :fn count-unseen-comment}
-                  {:field :unseenStatements :fn count-unseen-statements}
-                  {:field :unseenVerdicts :fn count-unseen-verdicts}
-                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
-                  {:field :indicators :fn indicator-sum}])
-
-(defn with-meta-fields [user app]
-  (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
+(defn- set-user-to-document [application-id document user-id path current-user timestamp]
+  {:pre [document]}
+  (let [schema       (schemas/get-schema (:schema-info document))
+         subject      (user/get-user-by-id user-id)
+         with-hetu    (and
+                        (domain/has-hetu? (:body schema) [path])
+                        (user/same-user? current-user subject))
+         person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+         model        (if-not (blank? path)
+                        (assoc-in {} (map keyword (split path #"\.")) person)
+                        person)
+         updates      (tools/path-vals model)
+         ; Path should exist in schema!
+         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
+     (when-not schema (fail! :error.schema-not-found))
+     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+     (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
+  )
 
 ;;
 ;; Query application:
 ;;
 
 (defn- app-post-processor [user]
-  (comp without-system-keys (partial with-meta-fields user)))
-
-(defquery applications {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
+  (comp
+    without-system-keys
+    (partial meta-fields/with-meta-fields user)
+    meta-fields/enrich-with-link-permit-data))
 
 (defn find-authorities-in-applications-organization [app]
-  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
+  (mongo/select :users
+    {:organizations (:organization app) :role "authority" :enabled true}
+    {:firstName 1 :lastName 1}))
 
 (defquery application
   {:authenticated true
    :parameters [:id]}
   [{app :application user :user}]
   (if app
-    (ok :application ((app-post-processor user) app)
-        :authorities (find-authorities-in-applications-organization app))
+    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+      (ok :application ((app-post-processor user) app)
+          :authorities (find-authorities-in-applications-organization app)
+          :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -144,44 +119,43 @@
   [{app :application}]
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
-(defn filter-repeating-party-docs [names]
+(defn filter-repeating-party-docs [schema-version schema-names]
+  (let [schemas (schemas/get-schemas schema-version)]
   (filter
-    (fn [name]
-      (and (= :party (get-in (schemas/get-schemas) [name :info :type]))
-        (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
-    names))
+      (fn [schema-name]
+        (let [schema-info (get-in schemas [schema-name :info])]
+          (and (:repeating schema-info) (= (:type schema-info) :party))))
+      schema-names)))
 
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
-         kiinteistotunnus (:propertyId application)
-         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
-     (when ktj-tiedot
-       (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                      [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                      [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                      [[:kiinteisto :rekisterointipvm] (or (try
-                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                         (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-         (commands/persist-model-updates
-           (:id application)
-           rakennuspaikka
-           updates
-           time)))))
+   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
+     (when-let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")]
+       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                        [[:kiinteisto :rekisterointipvm] (or (try
+                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+           (commands/persist-model-updates
+             (:id application)
+             "documents"
+             rakennuspaikka
+             updates
+             time))))))
 
 (defquery party-document-names
   {:parameters [:id]
    :authenticated true}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [documents (:documents application)
-            initialOp (:name (first (:operations application)))
-            original-schema-names (:required ((keyword initialOp) operations/operations))
-            original-party-documents (filter-repeating-party-docs original-schema-names)]
-        (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
+  [{application :application}]
+  (let [documents (:documents application)
+        initialOp (:name (first (:operations application)))
+        original-schema-names (:required ((keyword initialOp) operations/operations))
+        original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
+    (ok :partyDocumentNames (conj original-party-documents "hakija"))))
 
 ;;
 ;; Invites
@@ -198,129 +172,108 @@
     (ok :invites invites)))
 
 (defcommand invite
-  {:parameters [:id :email :title :text :documentName :path]
+  {:parameters [id email title text documentName documentId path]
+   :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
    :roles      [:applicant :authority]
-   :notify     "invite"
+   :notified   true
+   :on-success (notify :invite)
    :verified   true}
-  [{created :created
-    user    :user
-    {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
-  (with-application command
-    (fn [{application-id :id :as application}]
-      (let [email (lower-case email)]
-        (if (domain/invited? application email)
-          (fail :invite.already-invited)
-          (let [invited (security/get-or-create-user-by-email email)
-                invite  {:title        title
-                         :application  application-id
-                         :text         text
-                         :path         path
-                         :documentName documentName
-                         :documentId   documentId
-                         :created      created
-                         :email        email
-                         :user         (security/summary invited)
-                         :inviter      (security/summary user)}
-                writer  (role invited :writer)
-                auth    (assoc writer :invite invite)]
-            (if (domain/has-auth? application (:id invited))
-              (fail :invite.already-has-auth)
-              (mongo/update
-                :applications
-                {:_id application-id
-                 :auth {$not {$elemMatch {:invite.user.username email}}}}
-                {$push {:auth auth}}))))))))
+  [{:keys [created user application] :as command}]
+  (let [email (ss/lower-case email)]
+    (if (domain/invited? application email)
+      (fail :invite.already-invited)
+      (let [invited (user-api/get-or-create-user-by-email email)
+            invite  {:title        title
+                     :application  id
+                     :text         text
+                     :path         path
+                     :documentName documentName
+                     :documentId   documentId
+                     :created      created
+                     :email        email
+                     :user         (user/summary invited)
+                     :inviter      (user/summary user)}
+            writer  (user/user-in-role invited :writer)
+            auth    (assoc writer :invite invite)]
+        (if (domain/has-auth? application (:id invited))
+          (fail :invite.already-has-auth)
+          (update-application command
+            {:auth {$not {$elemMatch {:invite.user.username email}}}}
+            {$push {:auth auth}}))))))
 
-(defcommand "approve-invite"
-  {:parameters [:id]
+(defcommand approve-invite
+  {:parameters [id]
    :roles      [:applicant]
    :verified   true}
-  [{user :user :as command}]
-  (with-application command
-    (fn [{application-id :id :as application}]
-      (when-let [my-invite (domain/invite application (:email user))]
-        (executed "set-user-to-document"
-          (-> command
-            (assoc-in [:data :documentId] (:documentId my-invite))
-            (assoc-in [:data :path]       (:path my-invite))
-            (assoc-in [:data :userId]     (:id user))))
-        (mongo/update :applications
-          {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
-          {$set  {:auth.$ (role user :writer)}})))))
+  [{user :user application :application created :created :as command}]
+  (when-let [my-invite (domain/invite application (:email user))]
+    (update-application command
+      {:auth {$elemMatch {:invite.user.id (:id user)}}}
+      {$set  {:auth.$ (user/user-in-role user :writer)}})
+    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
+      ; It's not possible to combine Mongo writes here,
+      ; because only the last $elemMatch counts.
+      (set-user-to-document id document (:id user) (:path my-invite) user created))))
 
-(defcommand "remove-invite"
-  {:parameters [:id :email]
-   :roles      [:applicant :authority]
-   :validators [validate-owner-or-writer]}
-  [{{:keys [id email]} :data :as command}]
-  (with-application command
-    (fn [{application-id :id}]
-      (let [email (lower-case email)]
-        (with-user email
-          (fn [_]
-            (mongo/update-by-id :applications application-id
-              {$pull {:auth {$and [{:username email}
-                                   {:type {$ne :owner}}]}}})))))))
+(defn- do-remove-auth [command email]
+  (update-application command
+      {$pull {:auth {$and [{:username (ss/lower-case email)}
+                           {:type {$ne :owner}}]}}}))
+
+(defcommand decline-invitation
+  {:parameters [:id]
+   :authenticated true}
+  [command]
+  (do-remove-auth command (get-in command [:user :email])))
 
 (defcommand remove-auth
   {:parameters [:id email]
    :roles      [:applicant :authority]}
   [command]
-  (update-application command
-    {$pull {:auth {$and [{:username (lower-case email)}
-                         {:type {$ne :owner}}]}}}))
+  (do-remove-auth command email))
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
-  (when (and to (not (security/authority? user)))
+  (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-target-comment-to-authority {:roles [:authority] :feature [:targetted-comments]})
+(defcommand can-target-comment-to-authority
+  {:roles [:authority]
+   :validators  [not-open-inforequest-user-validator]
+   :description "Dummy command for UI logic"})
 
 (defcommand add-comment
-  {:parameters [:id :text :target]
+  {:parameters [id text target]
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to]
-   :notify     "new-comment"}
-  [{{:keys [text target to mark-answered] :or {mark-answered true}} :data {:keys [host]} :web :keys [user created] :as command}]
-  (with-application command
-    (fn [{:keys [id state] :as application}]
-      (let [to-user   (and to (or (security/get-non-private-userinfo to)
-                                  (fail! :to-is-not-id-of-any-user-in-system)))
-            from-user (security/summary user)]
-        (update-application command
-          {$set  {:modified created}
-           $push {:comments {:text    text
-                             :target  target
-                             :created created
-                             :to      (security/summary to-user)
-                             :user    from-user}}})
+   :notified   true
+   :on-success [(notify :new-comment)
+                (fn [{data :data :as command} _]
+                  (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
+                    ;; LUPA-407
+                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
+                open-inforequest/notify-on-comment]}
+  [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
+  (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
+    (update-application command
+      (util/deep-merge
+        {$set  {:modified created}
+         $push {:comments {:text    text
+                           :target  target
+                           :created created
+                           :to      (user/summary to-user)
+                           :user    (user/summary user)}}}
 
-        (condp = (keyword state)
-
+        (case (keyword (:state application))
           ;; LUPA-XYZ (was: open-application)
-          :draft  (when (not (blank? text))
-                    (update-application command
-                      {$set {:modified created
-                             :state    :open
-                             :opened   created}}))
+          :draft  (when-not (blank? text) {$set {:state :open, :opened created}})
 
           ;; LUPA-371, LUPA-745
-          :info (when (and mark-answered (security/authority? user))
-                  (update-application command
-                    {$set {:state    :answered
-                           :modified created}}))
+          :info (when (and mark-answered (user/authority? user)) {$set {:state :answered}})
 
           ;; LUPA-371 (was: mark-inforequest-answered)
-          :answered (when (security/applicant? user)
-                      (update-application command
-                        {$set {:state :info
-                               :modified created}}))
+          :answered (when (user/applicant? user) {$set {:state :info}})
 
-          nil)
-
-        ;; LUPA-407
-        (when to-user
-          (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) host))))))
+          nil)))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -330,31 +283,12 @@
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand set-user-to-document
-  {:parameters [:id documentId userId path]
+  {:parameters [id documentId userId path]
    :authenticated true}
   [{:keys [user created application] :as command}]
-  (let [document     (domain/get-document-by-id application documentId)
-        schema-name  (get-in document [:schema :info :name])
-        schema       (schemas/get-schema schema-name)
-        subject      (security/get-non-private-userinfo userId)
-        with-hetu    (and
-                       (domain/has-hetu? (:body schema) [path])
-                       (security/same-user? user subject))
-        henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
-        full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-    (info "setting-user-to-document, with hetu: " with-hetu)
-    (if-not document
-      (fail :error.document-not-found)
-      ;; TODO: update via model
-      (do
-        (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :documents {$elemMatch {:id documentId}}}
-          {$set {full-path henkilo
-                 :modified created}})))))
-
+  (if-let [document (domain/get-document-by-id application documentId)]
+    (set-user-to-document id document userId path user created)
+    (fail :error.document-not-found)))
 
 ;;
 ;; Assign
@@ -365,86 +299,128 @@
    :roles      [:authority]}
   [{user :user :as command}]
   (update-application command
-    {$set {:authority (security/summary user)}}))
+    {$set {:authority (user/summary user)}}))
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
+   :validators  [not-open-inforequest-user-validator]
    :roles       [:authority]}
   [{user :user :as command}]
-  (update-application command
-    (if assigneeId
-      {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-      {$unset {:authority ""}})))
-
-;;
-;;
-;;
+  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
+    (if (or assignee (nil? assigneeId))
+      (update-application command
+                          (if assignee
+                            {$set   {:authority (user/summary assignee)}}
+                            {$unset {:authority ""}}))
+      (fail "error.user.not.found" :id assigneeId))))
 
 (defcommand cancel-application
-  {:parameters [:id]
-   :roles      [:applicant]
-   :notify     "state-change"
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
-           :state     :canceled}}))
+           :state     :canceled}})
+  (mongo/remove-many :app-links {:link {$in [id]}})
+  (ok))
 
 (defcommand request-for-complement
   {:parameters [:id]
    :roles      [:authority]
-   :notify     "state-change"
+   :notified   true
+   :on-success (notify :application-state-change)
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
            :state :complement-needed}}))
 
-;; FIXME: does not set state if complement-needed
+(defn- validate-jatkolupa-one-link-permit [_ application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
+            (not= 1 (-> application :linkPermitData count)))
+      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
+
+(defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
+  (let [link-permit-app-id (-> application :linkPermitData first :id)
+        verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
+        kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
+    (-> application
+      (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
+      (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))))
+
 (defcommand approve-application
-  {:parameters [:id lang]
+  {:parameters [id lang]
    :roles      [:authority]
-   :notify     "state-change"
+   :notified   true
+   :on-success (notify :application-state-change)
+   :validators [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
-  [{{:keys [host]} :web :as command}]
-  (with-application command
-    (fn [application]
-      (let [new-state :submitted
-            application-id (:id application)
-            submitted-application (mongo/by-id :submitted-applications (:id application))
-            organization (mongo/by-id :organizations (:organization application))]
-        (if (nil? (:authority application))
-          (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application lang submitted-application organization)
-          (mongo/update
-            :applications {:_id (:id application) :state new-state}
-            {$set {:state :sent}})
-          (catch org.xml.sax.SAXParseException e
-            (.printStackTrace e)
-            (fail (.getMessage e))))))))
+  [{:keys [application created] :as command}]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        organization (organization/get-organization (:organization application))
+        jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))]
+    (when (empty? (:authority application))
+      (executed "assign-to-me" command)) ;; FIXME combine mongo writes
+    (try
+      (if jatkoaika-app?
+        ;; jatkoaika application
+        (let [application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                            (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                            application)
+              application (merge application
+                            (select-keys
+                              domain/application-skeleton
+                              [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                               :neighbors :openInfoRequest :statements :tasks :verdicts
+                               :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+          (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization))
+        ;; ordinary application
+        (let [submitted-application (mongo/by-id :submitted-applications id)]
+          (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+
+      (catch org.xml.sax.SAXParseException e
+        (info e "Invalid KRYSP XML message")
+        (fail (.getMessage e))))
+
+    ;; The "sent" timestamp is updated to all attachments of the application,
+    ;; also the ones that have no versions at all (have no latestVersion).
+    (let [data-argument (when-not jatkoaika-app?
+                          (reduce
+                            (fn [data-map attachment]
+                              (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
+                            {}
+                            (:attachments application)))]
+      (update-application command
+        {:state {$in ["submitted" "complement-needed"]}}
+        {$set (merge
+                data-argument
+                (if jatkoaika-app?
+                  {:sent created :state :closed :closed created}
+                  {:sent created :state :sent}))}))))
 
 (defcommand submit-application
-  {:parameters [:id]
+  {:parameters [id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :notify     "state-change"
+   :notified   true
+   :on-success (notify :application-state-change)
    :validators [validate-owner-or-writer]}
-  [{{:keys [host]} :web :keys [created] :as command}]
-  (with-application command
-    (fn [{:keys [id opened] :as application}]
-      (mongo/update
-        :applications
-        {:_id id}
-        {$set {:state     :submitted
-               :opened    (or opened created)
-               :submitted created}})
-      (try
-        (mongo/insert
-          :submitted-applications
-          (assoc (dissoc application :id) :_id id))
-        (catch com.mongodb.MongoException$DuplicateKey e
-          ; This is ok. Only the first submit is saved.
-            )))))
+  [{:keys [application created] :as command}]
+  (update-application command
+    {$set {:state     :submitted
+           :opened    (or (:opened application) created)
+           :submitted created}})
+
+  (try
+    (mongo/insert :submitted-applications
+      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
+    (catch com.mongodb.MongoException$DuplicateKey e
+      ; This is ok. Only the first submit is saved.
+      )))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -452,18 +428,27 @@
    :states     [:draft :open :submitted :complement-needed]
    :validators [validate-owner-or-writer]}
   [{:keys [application]}]
-  (autofill-rakennuspaikka application (now)))
+  (try (autofill-rakennuspaikka application (now))
+    (catch Exception e (error e "KTJ data was not updated"))))
 
 (defcommand save-application-shape
   {:parameters [:id shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed :info]}
   [command]
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn make-attachments [created operation organization-id & {:keys [target]}]
 
+(defcommand save-application-drawings
+  {:parameters [:id drawings]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :submitted :complement-needed :info]}
+  [command]
+  (update-application command
+    {$set {:drawings drawings}}))
+
+(defn make-attachments [created operation organization-id & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
       (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
@@ -473,6 +458,7 @@
     (fn [body [data-path data-value]]
       (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
             val (if (fn? data-value) (data-value application) data-value)]
+        ; FIXME: why not assoc-in?
         (update-in body path (constantly val))))
     {} schema-data))
 
@@ -481,119 +467,162 @@
   (let [op-info               (operations/operations (keyword (:name op)))
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
+        schema-version        (:schema-version application)
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema (schemas/get-schema schema-name)
+                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
                                                  :created created
-                                                 :data (if (= schema-name (:schema op-info))
-                                                         (schema-data-to-body (:schema-data op-info) application)
-                                                         {})})
-        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+                                                 :data (tools/timestamped
+                                                         (if (= schema-name (:schema op-info))
+                                                           (schema-data-to-body (:schema-data op-info) application)
+                                                           {})
+                                                         created)})
+        existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
-        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
+        op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
       (let [hakija (condp = permit-type
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
-            hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
-            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
+                     (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
         (conj new-docs hakija)))))
 
- (defn- ->location [x y]
-   {:x (->double x) :y (->double y)})
+(defn- ->location [x y]
+  {:x (util/->double x) :y (util/->double y)})
 
- (defn- make-application-id [municipality]
-   (let [year           (str (year (local-now)))
-         sequence-name  (str "applications-" municipality "-" year)
-         counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
-     (str "LP-" municipality "-" year "-" counter)))
+(defn- make-application-id [municipality]
+  (let [year           (str (year (local-now)))
+        sequence-name  (str "applications-" municipality "-" year)
+        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+    (str "LP-" municipality "-" year "-" counter)))
 
- (defn- make-op [op-name created]
-   {:id (mongo/create-id)
-    :name (keyword op-name)
-    :created created
-    :operation-type (:operation-type (operations/operations (keyword op-name)))})
+(defn- make-op [op-name created]
+  {:id (mongo/create-id)
+   :name (keyword op-name)
+   :created created})
 
- (defn user-is-authority-in-organization? [user-id organization-id]
-   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
+(defn user-is-authority-in-organization? [user-id organization-id]
+  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
- (defn- operation-validator [{{operation :operation} :data}]
-   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+(defn- operation-validator [{{operation :operation} :data}]
+  (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
-;; TODO: separate methods for inforequests & applications for clarity.
-(defcommand "create-application"
-  {:parameters [:operation :x :y :address :propertyId :municipality]
-   :roles      [:applicant :authority]
-   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-                      (partial property-id-parameters [:propertyId])
-                      operation-validator]}
+
+(defn- do-create-application
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [permit-type     (operations/permit-type-of-operation operation)
-        organization-id (:id (organization/resolve-organization municipality permit-type))]
-    (when-not
-      (or (security/applicant? user)
-          (user-is-authority-in-organization? (:id user) organization-id))
+  (let [permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+        organization-id   (:id organization)
+        info-request?     (boolean infoRequest)
+        open-inforequest? (and info-request? (:open-inforequest organization))]
+
+    (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (if info-request?
+      (when-not (:inforequest-enabled organization)
+        (fail! :error.inforequests-disabled))
+      (when-not (:new-application-enabled organization)
+        (fail! :error.new-applications-disabled)))
+
     (let [id            (make-application-id municipality)
-          owner         (role user :owner :type :owner)
+          owner         (user/user-in-role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (boolean infoRequest)
           state         (cond
                           info-request?              :info
-                          (security/authority? user) :open
+                          (user/authority? user)     :open
                           :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
-                                        :user (security/summary user)} :text)
-          application   {:id            id
-                         :created       created
-                         :opened        (when (#{:open :info} state) created)
-                         :modified      created
-                         :permitType    permit-type
-                         :infoRequest   info-request?
-                         :operations    [op]
-                         :state         state
-                         :municipality  municipality
-                         :location      (->location x y)
-                         :organization  organization-id
-                         :address       address
-                         :propertyId    propertyId
-                         :title         address
-                         :auth          [owner]
-                         :comments      (map make-comment messages)}
+                                        :user (user/summary user)} :text)
+
+          application   (merge domain/application-skeleton
+                          {:id                  id
+                           :created             created
+                           :opened              (when (#{:open :info} state) created)
+                           :modified            created
+                           :permitType          permit-type
+                           :permitSubtype       (first (permit/permit-subtypes permit-type))
+                           :infoRequest         info-request?
+                           :openInfoRequest     open-inforequest?
+                           :operations          [op]
+                           :state               state
+                           :municipality        municipality
+                           :location            (->location x y)
+                           :organization        organization-id
+                           :address             address
+                           :propertyId          propertyId
+                           :title               address
+                           :auth                [owner]
+                           :comments            (map make-comment messages)
+                           :schema-version      (schemas/get-latest-schema-version)})
+
           application   (merge application
                           (if info-request?
-                            {:attachments            []
-                             :allowedAttachmentTypes [[:muut [:muu]]]
-                             :documents              []}
+                            {}
                             {:attachments            (make-attachments created op organization-id)
-                             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                              :documents              (make-documents user created op application)}))
+
           application   (domain/set-software-version application)]
 
-      (mongo/insert :applications application)
-      (autofill-rakennuspaikka application created)
-      (ok :id id))))
+      application)))
+
+;; TODO: separate methods for inforequests & applications for clarity.
+(defcommand create-application
+  {:parameters [:operation :x :y :address :propertyId :municipality]
+   :roles      [:applicant :authority]
+   :notified   true ; OIR
+   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+                      (partial property-id-parameters [:propertyId])
+                      operation-validator]}
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+
+  ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
+  (let [permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+        info-request?     (boolean infoRequest)
+        open-inforequest? (and info-request? (:open-inforequest organization))
+        created-application (do-create-application command)]
+
+      (mongo/insert :applications created-application)
+      (when open-inforequest?
+        (open-inforequest/new-open-inforequest! created-application))
+      (try
+        (autofill-rakennuspaikka created-application created)
+        (catch Exception e (error e "KTJ data was not updated")))
+      (ok :id (:id created-application))))
 
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]
+   :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
-  [{:keys [created] :as command}]
-  (with-application command
-    (fn [application]
-      (let [op-id      (mongo/create-id)
-            op         (make-op operation created)
-            new-docs   (make-documents nil created op application)]
-        (mongo/update-by-id :applications id {$push {:operations op}
-                                              $pushAll {:documents new-docs
-                                                        :attachments (make-attachments created op (:organization application))}
-                                              $set {:modified created}})))))
+  [{:keys [application created] :as command}]
+  (let [op-id      (mongo/create-id)
+        op         (make-op operation created)
+        new-docs   (make-documents nil created op application)]
+    (update-application command {$push {:operations op}
+                                 $pushAll {:documents new-docs
+                                           :attachments (make-attachments created op (:organization application))}
+                                 $set {:modified created}})))
+
+(defcommand change-permit-sub-type
+  {:parameters [id permitSubtype]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :validators [permit/validate-permit-has-subtypes]}
+  [{:keys [application created] :as command}]
+  (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
+    validation-errors
+    (update-application command
+      {$set {:permitSubtype permitSubtype
+             :modified      created}})))
 
 (defcommand change-location
   {:parameters [id x y address propertyId]
@@ -602,31 +631,279 @@
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
-  [{:keys [created application]}]
+  [{:keys [created application] :as command}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (do
-      (mongo/update-by-id :applications id {$set {:location      (->location x y)
-                                                  :address       (trim address)
-                                                  :propertyId    propertyId
-                                                  :title         (trim address)
-                                                  :modified      created}})
-      (if-not (:infoRequest application) (autofill-rakennuspaikka (mongo/by-id :applications id) (now))))
+      (update-application command
+        {$set {:location      (->location x y)
+               :address       (trim address)
+               :propertyId    propertyId
+               :title         (trim address)
+               :modified      created}})
+      (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+        (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
+
+;;
+;; Link permits
+;;
+
+(defquery app-matches-for-link-permits
+  {:parameters [id]
+   :verified   true
+   :roles      [:applicant :authority]}
+  [{{:keys [propertyId] :as application} :application user :user :as command}]
+  (let [results (mongo/select :applications
+                  (merge (domain/application-query-for user) {:_id {$ne id}
+                                                              :state {$in ["verdictGiven" "constructionStarted"]}
+                                                              :permitType (:permitType application)
+                                                              :operations.name {$nin ["ya-jatkoaika"]}})
+                  {:_id 1 :permitType 1 :address 1 :propertyId 1})
+        enriched-results (map
+                           (fn [r]
+                             (assoc r :text
+                               (str
+                                 (:address r) ", "
+                                 (:id r))))
+                           results)
+        same-property-id-fn #(= propertyId (:propertyId %))
+        with-same-property-id (into [] (filter same-property-id-fn enriched-results))
+        without-same-property-id (sort-by :text #(compare %1 %2)
+                                   (into [] (filter (comp not same-property-id-fn) enriched-results)))
+        organized-results (flatten (conj with-same-property-id without-same-property-id))
+        final-results (map #(select-keys % [:id :text]) organized-results)]
+    (ok :app-links final-results)))
+
+(defn- make-mongo-id-for-link-permit [app-id link-permit-id]
+  (if (<= (compare app-id link-permit-id) 0)
+    (str app-id "|" link-permit-id)
+    (str link-permit-id "|" app-id)))
+
+(defn- do-add-link-permit [application linkPermitId]
+  (let [id (:id application)
+        db-id (make-mongo-id-for-link-permit id linkPermitId)]
+    (mongo/update-by-id :app-links db-id
+      {:_id db-id
+       :link [id linkPermitId]
+       (keyword id) {:type "application"
+                     :apptype (-> application :operations first :name)
+                     :propertyId (:propertyId application)}
+       (keyword linkPermitId) {:type "linkpermit"
+                               :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
+                                                 "lupapistetunnus"
+                                                 "kuntalupatunnus")}}
+      :upsert true)))
+
+(defn- validate-jatkolupa-zero-link-permits [_ application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
+            (not= 0 (-> application :linkPermitData count)))
+      (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
+
+(defcommand add-link-permit
+  {:parameters ["id" linkPermitId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :validators [validate-jatkolupa-zero-link-permits]
+   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+  [{application :application}]
+  (do-add-link-permit application linkPermitId))
+
+(defcommand remove-link-permit-by-app-id
+  {:parameters [id linkPermitId]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]}
+  [{application :application}]
+  (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
+    (ok)
+    (fail :error.unknown)))
+
+
+;;
+;; Change permit
+;;
+
+(defcommand create-change-permit
+  {:parameters ["id"]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionStarted]
+   :validators [(permit/validate-permit-type-is permit/R)]}
+  [{:keys [created user application] :as command}]
+  (let [muutoslupa-app-id (make-application-id (:municipality application))
+        muutoslupa-app (merge application
+                         {:id                  muutoslupa-app-id
+                          :created             created
+                          :opened              created
+                          :modified            created
+                          :documents           (into [] (map
+                                                          #(assoc % :id (mongo/create-id))
+                                                          (:documents application)))
+                          :state               (cond
+                                                 (user/authority? user)  :open
+                                                 :else                   :draft)
+                          :permitSubtype       :muutoslupa}
+                         (select-keys
+                           domain/application-skeleton
+                           [:attachments :statements :verdicts :comments :submitted :sent :neighbors
+                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
+    (do-add-link-permit muutoslupa-app (:id application))
+    (mongo/insert :applications muutoslupa-app)
+    (ok :id muutoslupa-app-id)))
+
+
+;;
+;; Continuation period permit
+;;
+
+(defn- get-tyoaika-alkaa-from-ya-app [app]
+  (let [mainostus-viitoitus-tapahtuma-doc (:data (domain/get-document-by-name app "mainosten-tai-viitoitusten-sijoittaminen"))
+        tapahtuma-name-key (when mainostus-viitoitus-tapahtuma-doc
+                             (-> mainostus-viitoitus-tapahtuma-doc :_selected :value keyword))
+        tapahtuma-data (when tapahtuma-name-key
+                         (mainostus-viitoitus-tapahtuma-doc tapahtuma-name-key))]
+    (if (:started app)
+      (util/to-local-date (:started app))
+      (or
+        (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
+        (util/to-local-date (:submitted app))))))
+
+(defn- validate-not-jatkolupa-app [_ application]
+  (when (= :ya-jatkoaika (-> application :operations first :name keyword))
+    (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
+
+(defcommand create-continuation-period-permit
+  {:parameters ["id"]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionStarted]
+   :validators [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
+  [{:keys [created user application] :as command}]
+
+  (let [continuation-app (do-create-application
+                           (assoc command :data {:operation "ya-jatkoaika"
+                                                 :x (-> application :location :x)
+                                                 :y (-> application :location :y)
+                                                 :address (:address application)
+                                                 :propertyId (:propertyId application)
+                                                 :municipality (:municipality application)
+                                                 :infoRequest false
+                                                 :messages []}))
+        continuation-app (merge continuation-app {:authority (:authority application)})
+        ;;
+        ;; ************
+        ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan paatospvm jos se on tata aiempi.
+        ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a pykala
+        ;; ************
+        ;;
+        tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
+
+        tyo-aika-for-jatkoaika-doc (domain/get-document-by-name continuation-app "tyo-aika-for-jatkoaika")
+        tyo-aika-for-jatkoaika-doc (assoc-in tyo-aika-for-jatkoaika-doc [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm)
+
+        continuation-app (assoc continuation-app
+                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
+                                       tyo-aika-for-jatkoaika-doc
+                                       (domain/get-document-by-name application "hakija-ya")
+                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
+
+    (do-add-link-permit continuation-app (:id application))
+    (mongo/insert :applications continuation-app)
+    (ok :id (:id continuation-app))))
+
+
+;;
+;; Inform construction started & ready
+;;
+
+(defcommand inform-construction-started
+  {:parameters ["id" startedTimestampStr]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :validators [(permit/validate-permit-type-is permit/YA)]
+   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
+  [{:keys [created application] :as command}]
+  (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
+    (update-application command {$set {:started timestamp
+                                       :state  :constructionStarted}}))
+  (ok))
+
+(defcommand inform-building-construction-started
+  {:parameters ["id" buildingIndex startedDate lang]
+   :roles      [:applicant :authority]
+   :states     [:verdictGiven :constructionStarted]
+   :notified   true
+   :validators [(permit/validate-permit-type-is permit/R)]
+   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
+  [{:keys [user created application] :as command}]
+  (let [building  (or
+                    (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
+                    (fail! :error.unknown-building))
+        timestamp (util/to-millis-from-local-date-string startedDate)
+        updates   {$set (merge
+                          {:modified created
+                           :buildings.$.constructionStarted timestamp
+                           :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
+                          (when (= "verdictGiven" (:state application))
+                            {:started created
+                             :state  :constructionStarted}))}
+        output-dir (mapping-to-krysp/resolve-output-directory application)]
+    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user)
+    (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
+    (when (= "verdictGiven" (:state application))
+      (notifications/notify! :application-state-change command)))
+  (ok))
+
+(defcommand inform-construction-ready
+  {:parameters ["id" readyTimestampStr lang]
+   :roles      [:applicant :authority]
+   :states     [:constructionStarted]
+   :on-success (notify :application-state-change)
+   :validators [(permit/validate-permit-type-is permit/YA)]
+   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
+  [{:keys [created application] :as command}]
+  (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
+        application (merge application
+                      {:closed timestamp}
+                      (select-keys
+                        domain/application-skeleton
+                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                         :neighbors :openInfoRequest :statements :tasks :verdicts
+                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
+        organization (organization/get-organization (:organization application))]
+    (mapping-to-krysp/save-application-as-krysp
+      application
+      lang
+      application
+      organization)
+    (update-application command {$set {:closed timestamp
+                                       :state :closed}})
+    (ok)))
+
+
+(defn- validate-new-applications-enabled [command {:keys [organization]}]
+  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
+    (if (= (:new-application-enabled org) true)
+      nil
+      (fail :error.new-applications.disabled))))
 
 (defcommand convert-to-application
   {:parameters [id]
    :roles      [:applicant]
-   :states     [:draft :info :answered]}
+   :states     [:draft :info :answered]
+   :validators [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]
-    (mongo/update-by-id :applications id
-                        {$set {:infoRequest false
-                               :state :open
-                               :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                               :documents (make-documents user created op application)
-                               :modified created}
-           $pushAll {:attachments (make-attachments created op (:organization application))}})))
+    (update-application command
+      {$set {:infoRequest false
+             :state :open
+             :documents (make-documents user created op application)
+             :modified created}
+       $pushAll {:attachments (make-attachments created op (:organization application))}})
+    (try (autofill-rakennuspaikka application (now))
+      (catch Exception e (error e "KTJ data was not updated")))))
 
 ;;
 ;; Verdicts
@@ -640,18 +917,100 @@
   {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
-   :notify     "verdict"
+   :notified   true
+   :on-success (notify :application-verdict)
    :roles      [:authority]}
   [{:keys [created] :as command}]
   (update-application command
     {$set {:modified created
            :state    :verdictGiven}
-     $push {:verdict  {:id verdictId
-                       :timestamp created
-                       :name name
-                       :given given
-                       :status status
-                       :official official}}}))
+     $push {:verdicts (domain/->paatos
+                        {:id verdictId      ; Kuntalupatunnus
+                         :timestamp created ; tekninen Lupapisteen aikaleima
+                         :name name         ; poytakirja[] / paatoksentekija
+                         :given given       ; paivamaarat / antoPvm
+                         :status status     ; poytakirja[] / paatoskoodi
+                         :official official ; paivamaarat / lainvoimainenPvm
+                         })}}))
+
+(defn verdict-attachments [id user timestamp verdict]
+  (assoc verdict
+         :timestamp timestamp
+         :paatokset (map
+                      (fn [paatos]
+                        (assoc paatos :poytakirjat
+                               (map
+                                 (fn [pk]
+                                   (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+                                     (do
+                                       (debug "Download" url)
+                                       (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+
+                                             resp            (http/get url :as :stream :throw-exceptions false)
+                                             header-filename  (when (get (:headers resp) "content-disposition")
+                                                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
+
+                                             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                                             urlhash         (digest/sha1 url)
+                                             attachment-id   urlhash
+                                             attachment-type {:type-group "muut" :type-id "muu"}
+                                             target          {:type "verdict" :id urlhash}
+                                             locked          true
+                                             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+                                         ; If the attachment-id, i.e., hash of the URL matches
+                                         ; any old attachment, a new version will be added
+                                         (if (= 200 (:status resp))
+                                           (attachment/attach-file! {:application-id id
+                                                                     :filename (or header-filename filename)
+                                                                     :size content-length
+                                                                     :content (:body resp)
+                                                                     :attachment-id attachment-id
+                                                                     :attachment-type attachment-type
+                                                                     :target target
+                                                                     :locked locked
+                                                                     :user user
+                                                                     :created attachment-time})
+                                           (error (str (:status resp) " - unable to download " url ": " resp)))
+                                         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+                                     pk))
+                                 (:poytakirjat paatos))))
+                      (:paatokset verdict))))
+
+(defn- get-application-xml [{:keys [id organization permitType]}]
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [fetch (permit/get-application-xml-getter permitType)]
+      (fetch legacy id))
+    (fail! :error.no-legacy-available)))
+
+(defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
+  (let [reader (permit/get-verdict-reader permit-type)
+        element (permit/get-case-xml-element permit-type)
+        verdicts (krysp/->verdicts xml element reader)]
+    (map (partial verdict-attachments id user timestamp) verdicts)))
+
+(defcommand check-for-verdict
+  {:description "Fetches verdicts from municipality backend system.
+                 If the command is run more than once, existing verdicts are
+                 replaced by the new ones."
+   :parameters [:id]
+   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles      [:authority]
+   :notified   true
+   :on-success  (notify :application-verdict)}
+  [{:keys [user created application] :as command}]
+  (let [xml (get-application-xml application)
+        extras-reader (permit/get-verdict-extras-reader (:permitType application))]
+    (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
+     (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+           tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
+           updates {$set (merge {:verdicts verdicts-with-attachments
+                                 :modified created
+                                 :state    :verdictGiven}
+                           (when-not has-old-verdict-tasks {:tasks tasks})
+                           (when extras-reader (extras-reader xml)))}]
+       (update-application command updates)
+       (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
+     (fail :info.no-verdicts-found-from-backend))))
 
 ;;
 ;; krysp enrichment
@@ -661,39 +1020,32 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defcommand "merge-details-from-krysp"
-  {:parameters [:id :documentId :buildingId]
+  {:parameters [id documentId buildingId collection]
+   :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]}
-  [{{:keys [id documentId buildingId]} :data created :created :as command}]
-  (with-application command
-    (fn [{:keys [organization propertyId] :as application}]
-      (if-let [legacy (organization/get-legacy organization)]
-        (let [doc-name     "rakennuksen-muuttaminen"
-              document     (domain/get-document-by-id (:documents application) documentId)
-              old-body     (:data document)
-              kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)]
-          ;; TODO: update via model
-          (mongo/update
-            :applications
-            {:_id (:id application)
-             :documents {$elemMatch {:id documentId}}}
-            {$set {:documents.$.data with-value-metadata
-                   :modified created}})
-          (ok))
-        (fail :no-legacy-available)))))
+  [{created :created {:keys [organization propertyId] :as application} :application :as command}]
+  (if-let [legacy (organization/get-legacy organization)]
+    (let [document     (commands/by-id application collection documentId)
+          schema       (schemas/get-schema (:schema-info document))
+          kryspxml     (krysp/building-xml legacy propertyId)
+          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          ; Path should exist in schema!
+          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
+      (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
+      (when (seq updates)
+        (commands/persist-model-updates id collection document updates created :source "krysp"))
+      (ok))
+    (fail :error.no-legacy-available)))
 
 (defcommand get-building-info-from-legacy
   {:parameters [id]
    :roles      [:applicant :authority]}
-  [command]
-  (with-application command
-    (fn [{:keys [organization propertyId] :as application}]
-      (if-let [legacy   (organization/get-legacy organization)]
-        (let [kryspxml  (krysp/building-xml legacy propertyId)
-              buildings (krysp/->buildings kryspxml)]
-          (ok :data buildings))
-        (fail :no-legacy-available)))))
+  [{{:keys [organization propertyId] :as application} :application}]
+  (if-let [legacy   (organization/get-legacy organization)]
+    (let [kryspxml  (krysp/building-xml legacy propertyId)
+          buildings (krysp/->buildings-summary kryspxml)]
+      (ok :data buildings))
+    (fail :error.no-legacy-available)))
 
 ;;
 ;; Service point for jQuery dataTables:
@@ -701,7 +1053,7 @@
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   (juxt :address :municipality)
-                  get-application-operation
+                  meta-fields/get-application-operation
                   :applicant
                   :submitted
                   :indicators
@@ -762,14 +1114,14 @@
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row (partial with-meta-fields user)) apps)
-        echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
+        rows        (map (comp make-row (partial meta-fields/with-meta-fields user)) apps)
+        echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
-(defcommand "applications-for-datatables"
+(defquery "applications-for-datatables"
   {:parameters [:params]
    :verified true}
   [{user :user {params :params} :data}]

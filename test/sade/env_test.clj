@@ -1,8 +1,10 @@
 (ns sade.env-test
-  (:use sade.env
-        midje.sweet))
+  (:require [sade.env :refer :all]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [clojure.java.io :as io]))
 
-(def parse-target-env #'sade.env/parse-target-env)
+(testable-privates sade.env parse-target-env)
 
 (facts "target environment ID is parsed from build tag"
   (fact (parse-target-env "lupapiste - PROD - Build") => "PROD")
@@ -12,8 +14,10 @@
   (fact (parse-target-env "") => "local")
   (fact (parse-target-env nil) => "local"))
 
+(testable-privates sade.env read-config)
+
 (fact "Password is decrypted and can be found in a sub map"
-  (read-config "lupapalvelu/nested.properties" "testpassword")
+  (read-config "testpassword" (io/input-stream (io/resource "lupapalvelu/nested.properties")) )
   =>
   {:mongodb {:uri "mongodb://127.0.0.1/lupapiste"
              :credentials {:username "lupapiste"

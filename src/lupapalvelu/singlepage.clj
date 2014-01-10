@@ -1,10 +1,11 @@
 (ns lupapalvelu.singlepage
-  (:use [clj-time.coerce :only [from-long to-date]]
-        [lupapalvelu.components.ui-components :only [ui-components]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
+            [lupapalvelu.components.ui-components :refer [ui-components]]
             [net.cgrand.enlive-html :as enlive]
+            [clj-time.coerce :as tc]
             [sade.env :as env]
+            [sade.strings :as ss]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -56,7 +57,7 @@
         (if (fn? src)
           (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-            (if (.contains src ".min.")
+            (if (ss/contains src ".min.")
               (IOUtils/copy in (write-header kind out src))
               (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
@@ -73,19 +74,20 @@
   (str (kind (env/value :cdn)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
 
 (def ^:private buildinfo-summary
-  (format "%s-%s %3$tF %3$tT [%4$s]"
+  (format "%s %s [%s] %4$tF %4$tT (%5$s)"
           env/target-env
-          (:build-number env/buildinfo)
-          (to-date (from-long (:time env/buildinfo)))
-          (name env/mode)))
+          (:branch env/buildinfo)
+          (name env/mode)
+          (tc/to-date (tc/from-long (:time env/buildinfo)))
+          (:build-number env/buildinfo)))
 
 (defn inject-content [t {:keys [header nav page footer]} component]
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:header] (constantly (first header)))
-                  (enlive/transform [:nav] (constantly (last nav)))
+                  (enlive/transform [:nav] (enlive/content (map :content nav)))
                   (enlive/transform [:section] (enlive/content page))
-                  (enlive/transform [:footer] (constantly (first footer)))
+                  (enlive/transform [:footer] (enlive/content (map :content footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
                   (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
                   (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary)))))

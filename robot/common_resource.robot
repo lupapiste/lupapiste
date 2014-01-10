@@ -18,7 +18,8 @@ ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
-${FIXTURE URL}                  ${SERVER}/fixture
+${FIXTURE URL}                  ${SERVER}/dev/fixture
+${CREATE URL}                   ${SERVER}/dev/create
 
 ${SELENIUM}                     ${EMPTY}
 
@@ -36,7 +37,7 @@ Open browser to login page
 
 Go to login page
   Go to  ${LOGIN URL}
-  Title should be  Lupapiste
+  Wait Until  Title should be  Lupapiste
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -49,10 +50,10 @@ Authority applications page should be open
   Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority-admin front page should be open
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 Admin front page should be open
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 Number of visible applications
   [Arguments]  ${amount}
@@ -80,8 +81,6 @@ Wait for jQuery
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
 
-Show dev-box
-  Execute Javascript  $(".dev-debug").show();
 
 #
 # Navigation
@@ -89,6 +88,7 @@ Show dev-box
 
 Go to page
   [Arguments]  ${page}
+  Wait for jQuery
   Execute Javascript  window.location.hash = "!/${page}";
   Wait until  Element should be visible  ${page}
 
@@ -102,8 +102,8 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
-  Go to  ${LOGOUT URL}
-  Wait until page contains element  login-username
+  ${secs} =  Get Time  epoch
+  Go to  ${LOGOUT URL}?s=${secs}
 
 #
 # Login stuff
@@ -146,30 +146,39 @@ Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  applicant
+  User nav menu is visible
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  authority
+  User nav menu is visible
   Authority applications page should be open
 
 Authority-admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
+  User nav menu is visible
   Authority-admin front page should be open
 
 Admin logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
   User role should be  admin
+  User nav menu is visible
   Admin front page should be open
 
 User role should be
-  [Arguments]  ${role}
-  Wait Until   Page should contain element  user-name
-  ${found_role} =  Get Element Attribute  user-name@data-test-role
-  Should be equal  ${role}  ${found_role}
+  [Arguments]  ${expected-role}
+  ${user-role}=  Execute JavaScript  return window.currentUser.get().role();
+  Should Be Equal  ${expected-role}  ${user-role}
+
+User nav menu is visible
+  Element should be visible  //*[@data-test-id='user-nav-menu']
+
+User nav menu is not visible
+  Element should not be visible  //*[@data-test-id='user-nav-menu']
 
 As Mikko
   Open browser to login page
@@ -212,7 +221,7 @@ Sipoo logs in
 
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
-  Wait until page contains element  admin-header
+  Wait until  Element should be visible  admin
 
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
@@ -250,71 +259,99 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Wait until  Element should be visible  user-name
-  # Temporarily an extra sleep to prevent this:
-  # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  2
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
-  Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Wait until  Element should be visible  user-name
-  # Temporarily an extra sleep to prevent this:
-  # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
-  Sleep  2
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
+  Confirm  dynamic-ok-confirm-dialog
   Wait Until  Element should be visible  inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Click by test id  create-search-button
-  # for IE8
-  Focus  xpath=//input[@data-test-id="create-address"]
-  Execute Javascript  $("select[data-test-id='create-municipality-select']").show();
-  Execute Javascript  $("input[data-test-id='create-property-id']").removeAttr("readonly").removeAttr("disabled").val("${propertyId}").change();
+  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
   Input text by test id  create-address  ${address}
-  Select From List by test id  create-municipality-select  ${municipality}
   Set animations off
   Click enabled by test id  create-continue
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
-  Wait until  Element should be visible  xpath=//*[@class="attachments-list"]/span[text()="Asemapiirros"]
+  Select operation path by permit type  ${permitType}
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
+
+
+Select operation path by permit type
+  [Arguments]  ${permitType}
+  Run Keyword If  '${permitType}' == 'R'  Select operations path R
+  ...  ELSE IF  '${permitType}' == 'YA-kaivulupa'  Select operations path YA kayttolupa kaivu
+  ...  ELSE IF  '${permitType}' == 'YA-kayttolupa'  Select operations path YA kayttolupa
+  ...  ELSE IF  '${permitType}' == 'YA-kayttolupa-mainostus-viitoitus'  Select operations path YA kayttolupa mainostus-viitoitus
+  ...  ELSE IF  '${permitType}' == 'YA-sijoituslupa'  Select operations path YA sijoituslupa
+  ...  ELSE  Select operations path R
+
+Select operations path R
+  Click tree item by text  "Rakentaminen ja purkaminen"
+  Click tree item by text  "Uuden rakennuksen rakentaminen"
+  Click tree item by text  "Asuinrakennuksen rakentaminen"
+
+Select operations path YA kayttolupa
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Yleisten alueiden käyttö (tapahtumat, mainokset, yms.)"
+  Click tree item by text  "Terassin sijoittaminen"
+
+Select operations path YA kayttolupa kaivu
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
+  Click tree item by text  "Kaivaminen yleisellä alueella"
+  Click tree item by text  "Vesi- ja viemäritöiden tekeminen"
+
+Select operations path YA kayttolupa mainostus-viitoitus
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Yleisten alueiden käyttö (tapahtumat, mainokset, yms.)"
+  Click tree item by text  "Mainoksien sijoittaminen"
+
+Select operations path YA sijoituslupa
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Rakenteiden sijoittaminen yleiselle alueelle (Sijoittamissopimus)"
+  Click tree item by text  "Pysyvien maanalaisten rakenteiden sijoittaminen"
+  Click tree item by text  "Vesi- ja viemärijohtojen sijoittaminen"
+
+Click tree item by text
+  [Arguments]  ${itemName}
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()=${itemName}]
+
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Confirm  dialog-confirm-cancel
+  Confirm  dynamic-yes-no-confirm-dialog
 
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Focus  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
   Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  ${modalId}
 
@@ -323,7 +360,7 @@ It is possible to add operation
 
 Submit application
   Click enabled by test id  application-submit-btn
-  Confirm  dialog-confirm-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
 
 #
@@ -334,18 +371,19 @@ Open the request
   [Arguments]  ${address}
   Go to page  applications
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+  Wait for jQuery
 
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  inforequest
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
   [Arguments]  ${address}
@@ -362,14 +400,13 @@ Request should not be visible
 Add comment
   [Arguments]  ${message}
   Open tab  conversation
-  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//table[@data-test-id='comments-table']//span[text()='${message}']
 
 Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
 
@@ -382,10 +419,9 @@ Comment count is
 #
 
 Apply minimal fixture now
-  Show dev-box
-  Click element  debug-apply-minimal
-  Wait until  Element should be visible  debug-apply-done
-  Kill dev-box
+  Go to  ${FIXTURE URL}/minimal
+  Page should contain  true
+  Go to login page
 
 #
 # Application state check:
@@ -406,9 +442,19 @@ Permit type should be
 
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
+  Wait for jQuery
 
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Wait for jQuery
+  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
+  Wait for jQuery
 
 #
 # Animations control:
@@ -420,3 +466,42 @@ Set animations on
 Set animations off
   Execute Javascript  tree.animation(false);
 
+#
+# Neighbor
+#
+
+Add neighbor
+  [Arguments]  ${propertyId}  ${name}  ${email}
+  Click enabled by test id  manager-neighbors-add
+  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Input text by test id  neighbors.edit.propertyId  ${propertyId}
+  Input text by test id  neighbors.edit.name  ${name}
+  Input text by test id  neighbors.edit.email  ${email}
+  Click by test id  neighbors.edit.ok
+  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Wait Until  Page Should Contain  ${email}
+
+
+#
+# Mock Ajax calls: jquery.mockjax
+#
+
+Mock query
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: ${jsonResponse}});
+
+Mock query error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', status:500});
+
+Mock proxy
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', responseText: ${jsonResponse}});
+
+Mock proxy error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', status:500});
+
+Clear mocks
+  Execute Javascript  $.mockjaxClear();
+  

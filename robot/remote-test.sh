@@ -9,6 +9,7 @@ fi
 hubert='192.168.7.223'
 bianca='192.168.7.253'
 
-remote=$bianca
+#remote=$bianca
+remote=$hubert
 
 pybot -d target --variable BROWSER:firefox --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:https://test.lupapiste.fi $target

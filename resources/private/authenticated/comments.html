@@ -40,7 +40,7 @@
             maxlength="4000">
           </textarea>
           <button
-            data-bind="disable: disabled, click: submit"
+            data-bind="visible: $root.authorization.ok('add-comment'), disable: disabled, click: submit"
             data-test-id="application-new-comment-btn"
             type="submit"
             class="btn btn-primary">
@@ -52,7 +52,7 @@
             <div class="mark-answered" data-bind="visible: $root.application.infoRequest">
               <input type="checkbox" data-bind="checked: $parent.markAnswered" data-test-id="comment-request-mark-answered" id="mark-answered" />
               <label data-bind="ltext: 'comment-request-mark-answered-label'" for="mark-answered"></label>
-              
+
             </div>
             <div class="comment-request">
               <label data-bind="ltext: 'comment-request-label'"></label>

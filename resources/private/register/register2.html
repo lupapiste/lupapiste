@@ -6,51 +6,59 @@
       <form id="register-form">
         <h1 data-bind="ltext: 'register.header2'"></h1>
         <p data-bind="ltext: 'register.personal-info'"></p>
+        <p data-bind="lhtml: 'required.field.desc'"></p>
         <div class="form-group">
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.firstName'">Etunimi</label>
-            <input class="form-input text long" id="test-register-firstName" data-bind="value: firstname" type="text" disabled="disabled" />
+            <label class="form-label tip" data-bind="ltext: 'userinfo.firstName'">Etunimi</label>
+            <input class="form-input text long" id="test-register-firstName" data-bind="value: firstName" type="text" disabled="disabled" />
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.lastName'">Sukunimi</label>
-            <input class="form-input text long" id="test-register-lastName" data-bind="value: lastname" type="text" disabled="disabled" />
+            <label class="form-label tip" data-bind="ltext: 'userinfo.lastName'">Sukunimi</label>
+            <input class="form-input text long" id="test-register-lastName" data-bind="value: lastName" type="text" disabled="disabled" />
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.personId'">Henkil&ouml;tunnus</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.personId'">Henkil&ouml;tunnus</label>
             <input class="form-input text long" id="test-register-personid" data-bind="value: personId" type="text" disabled="disabled"></input>
           </div>
           <div class="clear"></div>
         </div>
         <div class="form-group">
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.street'">Katuosoite</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.street'">Katuosoite</label>
             <input class="form-input text long" id="test-register-street" data-bind="value: street, valueUpdate: 'afterkeydown'" type="text" autofocus="autofocus"/>
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.zip'">Postinumero</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.zip'">Postinumero</label>
             <input class="form-input text long" id="test-register-zip" data-bind="value: zip, valueUpdate: 'afterkeydown'" type="text" />
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.city'">Postitoimipaikka</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.city'">Postitoimipaikka</label>
             <input class="form-input text long" id="test-register-city" data-bind="value: city, valueUpdate: 'afterkeydown'" type="text" />
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.phone'">Puhelinnumero</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.phone'">Puhelinnumero</label>
             <input class="form-input text long" id="test-register-phone" data-bind="value: phone, valueUpdate: 'afterkeydown'" type="text" />
           </div>
           <div class="clear"></div>
         </div>
         <div class="form-group">
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'register.email'">S&auml;hk&ouml;postiosoite (samalla k&auml;ytt&auml;j&auml;tunnus)</label>
+            <label class="form-label tip" data-bind="ltext: 'register.email'">S&auml;hk&ouml;postiosoite (samalla k&auml;ytt&auml;j&auml;tunnus)</label>
             <input class="form-input text long" id="test-register-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" required="required" />
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.password'">Salasana</label>
+            <label class="form-label tip" data-bind="ltext: 'register.email2'">uudelleen</label>
+            <input class="form-input text long" id="test-register-confirmEmail" data-bind="value: confirmEmail, valueUpdate: 'afterkeydown'" type="email" required="required" />
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.password'">Salasana</label>
             <input class="form-input text long" id="test-register-password" data-bind="value: password, valueUpdate: 'afterkeydown'" type="password" required="required" />
           </div>
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.newPassword2'">Salasana uudelleen</label>
+            <label class="form-label tip" data-bind="ltext: 'userinfo.newPassword2'">Salasana uudelleen</label>
             <input class="form-input text long" id="test-register-confirmPassword" data-bind="value: confirmPassword, valueUpdate: 'afterkeydown'" type="password" required="required" />
           </div>
           <div class="clear"></div>
@@ -60,7 +68,7 @@
             <label>
               <input type="checkbox" id="acceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
               <span data-bind="ltext: 'register.accept-terms.label'"></span>
-              <a href="about#!/terms" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
+              <a href="https://www.lupapiste.fi/?page_id=337" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
             </label>
           </div>
           <div class="clear"></div>

@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.validator
   (:require [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.clojure15 :refer [some->>]]
             [sade.util :refer [fn->]]))
 
 (defonce validators (atom {}))
@@ -40,7 +39,7 @@
         :level ~level
         :schema ~schema
         :facts ~facts
-        :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
+        :fn (fn [{~'data :data {~'doc-schema :name} :schema-info}]
               (let [~'data (tools/unwrapped ~'data)]
                 (when (or (not ~schema) (= ~schema ~'doc-schema))
                   (let

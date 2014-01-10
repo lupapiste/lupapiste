@@ -38,9 +38,10 @@ var attachment = (function() {
     return false;
   }
 
+  // These cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo,
+  // because the ids are registered with hub.subscribe.
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
     loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
-
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
     loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
 
@@ -71,7 +72,6 @@ var attachment = (function() {
       var id = self.application.id;
       ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
-          notify.success("liite hyl\u00E4tty",model);
           repository.load(id);
         })
         .error(function() {
@@ -85,7 +85,6 @@ var attachment = (function() {
       var id = self.application.id;
       ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
-          notify.success("liite hyv\u00E4ksytty",model);
           repository.load(id);
         })
         .error(function() {
@@ -118,7 +117,7 @@ var attachment = (function() {
       var version = model.latestVersion();
       if (!version) { return false; }
       var contentType = version.contentType;
-      return contentType && contentType.indexOf('image/') === 0;
+      return contentType && contentType.indexOf("image/") === 0;
     },
 
     isPdf: function() {
@@ -195,6 +194,8 @@ var attachment = (function() {
       return;
     }
 
+    $("#file-preview-iframe").attr("src","");
+
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
     model.filename(attachment.filename);
@@ -255,12 +256,13 @@ var attachment = (function() {
   });
 
   $(function() {
-    ko.applyBindings({
+    $("#attachment").applyBindings({
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
       commentsModel: commentsModel
-    }, $("#attachment")[0]);
+    });
+    $("#upload-page").applyBindings({});
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
@@ -279,7 +281,7 @@ var attachment = (function() {
 
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
     uploadingApplicationId = applicationId;
-    var iframeId = 'uploadFrame';
+    var iframeId = "uploadFrame";
     var iframe = document.getElementById(iframeId);
     iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
   }

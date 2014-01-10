@@ -1,70 +1,13 @@
 (ns lupapalvelu.security-test
-  (:use [midje.sweet]
-        [lupapalvelu.security]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.security :refer :all]))
 
-(facts "non-private"
-  (fact "strips away private keys from map"
-    (non-private {:name "tommi" :private {:secret "1234"}}) => {:name "tommi"})
-  (fact ".. but not non-recursively"
-    (non-private {:name "tommi" :child {:private {:secret "1234"}}}) => {:name "tommi" :child {:private {:secret "1234"}}}))
+(fact random-password
+  (random-password) => #"[a-zA-Z0-9]{40}")
 
-(let [user {:id "1"
-            :firstName "Simo"
-            :username  "simo@salminen.com"
-            :lastName "Salminen"
-            :role "comedian"
-            :private "SECRET"}]
-  (facts "summary"
-    (fact (summary nil) => nil)
-    (fact (summary user) => (just (dissoc user :private)))))
-
-(facts "roles"
-  (fact "authority"
-    (authority? {:role "authority"}) => true
-    (authority? {:role :authority}) => true
-    (authority? {}) => false)
-  (fact "applicant"
-    (applicant? {:role "applicant"}) => true
-    (applicant? {:role :applicant}) => true
-    (applicant? {}) => false))
-
-;; Metaconstant cannot be cast to java.lang.String
-(def ^:private some-password "p4sswodr")
-
-(facts "user entity mongo model"
-  (fact "is a map with all the data"
-     (create-use-entity "Foo@Bar.Com" some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:email        "foo@bar.com"
-                   :personId     ..userid..
-                   :role         ..role..
-                   :firstName    ..firstname..
-                   :lastName     ..lastname..
-                   :phone        ..phone..
-                   :city         ..city..
-                   :street       ..street..
-                   :zip          ..zip..
-                   :enabled      ..enabled..}))
-
-  (fact "does not contain plaintext password"
-     (let [entity   (create-use-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-           password (get-in entity [:private :password])]
-       password => truthy
-       (.contains password some-password) => false
-       (.contains (str entity) some-password) => false))
-
-  (fact "applicant does not have organizations"
-     (:organizations
-       (create-use-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
-     => nil)
-
-  (fact "authority does have organizations"
-     (create-use-entity ..email.. some-password ..userid.. :authority ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:organizations ..organizations..}))
-
-  (fact "authorityAdmin does have organizations"
-     (create-use-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:organizations ..organizations..})))
-
-(facts "same-user?"
-  (same-user? {:id "123"} {:id "123"}) => true
-  (same-user? {:id "123"} {:id "234"}) => false)
+(fact check-password
+  (check-password "foobar" (get-hash "foobar" (dispense-salt))) => truthy
+  (check-password "foobar" (get-hash "foobaz" (dispense-salt))) => falsey
+  
+  (check-password "foobar" (get-hash "foobar")) => truthy
+  (check-password "foobar" (get-hash "foobaz")) => falsey)

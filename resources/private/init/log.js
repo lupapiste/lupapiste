@@ -26,4 +26,12 @@
 
   window.setLogLimit = function(l) { limit = l; };
 
+  if (LUPAPISTE.config.mode !== "dev") {
+    window.onerror = function(msg, url, line) {
+      window.error(url + ":" + line + " " + msg);
+      return true;
+    };
+  }
+
+
 })();

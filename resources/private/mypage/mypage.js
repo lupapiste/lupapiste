@@ -17,37 +17,10 @@
     };
   }
 
-  function val(f) { return _.isFunction(f) ? f() : f; }
-
-  function FileInfo(context, attachmentType) {
-    var self = this;
-    self.attachmentType = ko.observable(attachmentType);
-    self.fileId = ko.observable();
-    self.filename = ko.observable();
-    self.contentType = ko.observable();
-    self.size = ko.observable();
-    self.update = function(from) {
-      self
-        .filename(from && val(from["filename"]))
-        .fileId(from && val(from["file-id"]))
-        .contentType(from && val(from["content-type"]))
-        .size(from && val(from["size"]));
-      return context;
-    };
-    self.clear = function() {
-      self
-        .filename(null)
-        .fileId(null)
-        .contentType(null)
-        .size(null);
-      return context;
-    };
-  }
-
   function OwnInfo() {
 
     var self = this;
-    
+
     self.error = ko.observable();
     self.saved = ko.observable();
     self.firstName = ko.observable();
@@ -59,23 +32,17 @@
     self.role = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable();
-    self.experience = ko.observable();
+    self.graduatingYear = ko.observable();
     self.fise = ko.observable();
-    self.qualification = ko.observable();
     self.companyName = ko.observable();
     self.companyId = ko.observable();
-    self.companyStreet = ko.observable();
-    self.companyZip = ko.observable();
-    self.companyCity = ko.observable();
-    
-    self.availableQualifications = ["AA", "A", "B", "C"];
+    self.attachments = ko.observable();
+    self.hasAttachments = ko.computed(function() {
+      var a = self.attachments();
+      return a && a.length > 0;
+    });
+    self.loadingAttachments = ko.observable();
 
-    // Attachments:
-    self.examination = new FileInfo(self, "examination");
-    self.proficiency = new FileInfo(self, "proficiency");
-    self.cv = new FileInfo(self, "cv");
-    self.loadingAttachments = ko.observable(false);
-    
     self.init = function(u) {
       return self
         .error(null)
@@ -89,48 +56,36 @@
         .role(u.role)
         .architect(u.architect)
         .degree(u.degree)
-        .experience(u.experience)
+        .graduatingYear(u.graduatingYear)
         .fise(u.fise)
-        .qualification(u.qualification)
         .companyName(u.companyName)
         .companyId(u.companyId)
-        .companyStreet(u.companyStreet)
-        .companyZip(u.companyZip)
-        .companyCity(u.companyCity)
-        .examination.clear() 
-        .proficiency.clear()
-        .cv.clear()
         .updateAttachments();
     };
 
     self.updateAttachments = function() {
+      self.attachments(null);
       ajax
         .query("user-attachments", {})
         .pending(self.loadingAttachments)
-        .success(self.setAttachments)
+        .success(function(data) {
+          self.attachments(_.map(data.attachments, function(info, id) { info.id = id; return info; }));
+        })
         .call();
       return self;
     };
-    
-    self.setAttachments = function(data) {
-      var attachments = data.attachments || {}; 
-      return self
-        .examination.update(attachments.examination) 
-        .proficiency.update(attachments.proficiency)
-        .cv.update(attachments.cv);
-    };
-    
+
     self.clear = function() {
       return self.saved(false).error(null);
     };
 
     self.ok = ko.computed(function() { return isNotBlank(self.firstName()) && isNotBlank(self.lastName()); }, self);
-    self.save = makeSaveFn("save-user-info",
+    self.save = makeSaveFn("update-user",
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
-         "degree", "experience", "fise", "qualification",
-         "companyName", "companyId", "companyStreet", "companyZip", "companyCity"]);
+         "degree", "graduatingYear", "fise", 
+         "companyName", "companyId"]);
 
     self.updateUserName = function() {
       $("#user-name")
@@ -138,43 +93,33 @@
         .attr("data-test-role", self.role());
       return self;
     };
-    
-    self.upload = function(prop) {
-      return function() {
-        uploadModel.init(prop).open();
-        return false;
-      };
+
+    self.add = function() {
+      uploadModel.init().open();
+      return false;
     };
-    
+
     self.fileToRemove = null;
 
-    self.remove = function(prop) {
-      return function() {
-        self.fileToRemove = prop;
-        LUPAPISTE.ModalDialog.open("#dialog-confirm-mypage-attachment-remove");
-      };
+    self.remove = function(data) {
+      self.fileToRemove = data['attachment-id'];
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("userinfo.architect.remove.title"),
+        loc("userinfo.architect.remove.message"),
+        {title: loc("yes"), fn: self.doRemove},
+        {title: loc("no")}
+      );
+      return false;
     };
-    
+
     self.doRemove = function() {
-      var p = self.fileToRemove;
       ajax
-        .command("remove-user-attachment", {attachmentType: p.attachmentType(), fileId: p.fileId()})
+        .command("remove-user-attachment", {"attachment-id": self.fileToRemove})
         .success(self.updateAttachments)
         .call();
     };
 
     self.saved.subscribe(self.updateUserName);
-
-    $(function() {
-      LUPAPISTE.ModalDialog.newYesNoDialog(
-        "dialog-confirm-mypage-attachment-remove",
-        loc("userinfo.architect.remove.title"),
-        loc("userinfo.architect.remove.message"),
-        loc("yes"),
-        self.doRemove,
-        loc("no"));
-    });
-    
   }
 
   function Password() {
@@ -210,12 +155,12 @@
     self.stateError    = 4;
 
     self.state = ko.observable(-1); // -1 makes sure that init() fires state change.
-    
+
     self.ready = _.partial(self.state, self.stateReady);
     self.sending = _.partial(self.state, self.stateSending);
     self.done = _.partial(self.state, self.stateDone);
     self.error = _.partial(self.state, self.stateError);
-    
+
     self.start = ko.observable();
     self.filename = ko.observable();
     self.filesize = ko.observable();
@@ -223,18 +168,25 @@
     self.prop = ko.observable();
     self.attachmentType = ko.observable();
     self.csrf = ko.observable();
-    
-    self.init = function(prop) {
+    self.canStart = ko.computed(function() {
+      return !_.isBlank(self.filename()) && self.attachmentType();
+    });
+
+    self.availableAttachmentTypes = _.map(LUPAPISTE.config.userAttachmentTypes, function(type) {
+      return {id: type, name: loc(["attachmentType", type])};
+    });
+
+    self.init = function() {
       return self
         .state(self.stateInit)
         .filename(null)
         .filesize(null)
         .start(null)
-        .attachmentType(prop.attachmentType())
+        .attachmentType(null)
         .csrf($.cookie("anti-csrf-token"));
     };
-    
-    self.open = function(uploadFileType) {
+
+    self.open = function() {
       LUPAPISTE.ModalDialog.open("#dialog-userinfo-architect-upload");
       return self;
     };
@@ -269,7 +221,7 @@
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
 
   $(function() {
-    
+
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
@@ -287,14 +239,16 @@
               uploadModel
                 .start(function() { data.process().done(function() { data.submit(); }); })
                 .filename(f.name)
-                .filesize(f.size)
-                .ready();
+                .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) { uploadModel.done(); },
+            done: function(e, data) { 
+              uploadModel.done(); 
+              LUPAPISTE.ModalDialog.close();
+            },
             fail: uploadModel.error
           });
-    
+
   });
 
 })();

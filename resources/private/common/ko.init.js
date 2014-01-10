@@ -41,13 +41,13 @@
     }
   };
 
-  ko.bindingHandlers.ltext = {
-    update: function(element, valueAccessor) {
-      var e$ = $(element);
-      var value = ko.utils.unwrapObservable(valueAccessor());
-      if (value) {
+  function localized(fnName, element, valueAccessor) {
+    var e$ = $(element);
+    var fn = e$[fnName];
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    if (value) {
         var v = loc(value);
-        e$.text(v ? v : "$$EMPTY_LTEXT$$");
+        fn.call(e$, (v ? v : "$$EMPTY_LTEXT$$"));
         if (v) {
           e$.removeClass("ltext-error");
         } else {
@@ -57,9 +57,17 @@
         // value is null or undefined, show it as empty string. Note that this
         // does not mean that the localization would be missing. It's just that
         // the actual value to use for localization is not available at this time.
-        e$.text("").removeClass("ltext-error");
-      }
-    }
+        fn.call(e$, "");
+        e$.removeClass("ltext-error");
+      }   
+  }
+
+  ko.bindingHandlers.ltext = {
+    update: _.partial(localized, "text")
+  };
+
+  ko.bindingHandlers.lhtml = {
+    update: _.partial(localized, "html")
   };
 
   ko.bindingHandlers.fullName = {
@@ -171,6 +179,13 @@
   };
 
   $.fn.applyBindings = function(model) {
+    if (!this.length) {
+      warn(this.selector + " didn't match any elements");
+      return this;
+    }
+    if (this.length > 1) {
+      warn("Apply bindings to " + this.length + " nodes");
+    }
     _.each(this, _.partial(ko.applyBindings, model));
     return this;
   };
@@ -186,7 +201,7 @@
     this.find("input").each(function(i, element) {
       var e = $(element),
           id = e.attr("id"),
-          p = loc(id, "placeholder");
+          p = loc([id, "placeholder"]);
       if (p) { e.attr("placeholder", p); }
     });
     return this;

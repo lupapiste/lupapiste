@@ -1,111 +1,53 @@
 (ns lupapalvelu.user-itest
-  (:require [lupapalvelu.itest-util :refer :all]
-            [midje.sweet :refer :all]
-            [clojure.pprint :refer [pprint]]
-            [clojure.java.io :as io]
-            [cheshire.core :as json]
-            [clojure.walk :refer [keywordize-keys]]
-            [clj-http.client :as c]))
+  (:require [lupapalvelu.user :as user]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.security :as security]
+            [lupapalvelu.fixture :as fixture]
+            [midje.sweet :refer :all]))
 
-(fact "changing user info"
-  (apply-remote-minimal)
-  (let [resp (query teppo :user)]
-    resp => ok?
-    resp => (contains
-              {:user
-               (just
-                 {:city "Tampere"
-                  :email "teppo@example.com"
-                  :enabled true
-                  :firstName "Teppo"
-                  :id "5073c0a1c2e6c470aef589a5"
-                  :lastName "Nieminen"
-                  :personId "210281-0001"
-                  :phone "0505503171"
-                  :postalCode "33200"
-                  :role "applicant"
-                  :street "Mutakatu 7"
-                  :username "teppo@example.com"
-                  :zip "33560"})}))
+;;
+;; ==============================================================================
+;; Change password:
+;; ==============================================================================
+;;
 
-  (let [data {:firstName "Seppo"
-              :lastName "Sieninen"
-              :street "Sutakatu 7"
-              :city "Sampere"
-              :zip "33200"
-              :phone "0505503171"
-              :architect true
-              :degree "d"
-              :experience 5
-              :fise "f"
-              :qualification "q"
-              :companyName "cn"
-              :companyId "cid"
-              :companyStreet "cs"
-              :companyZip "cz"
-              :companyCity "cc"}]
+(facts change-password
+  (fixture/apply-fixture "minimal")
 
-  (apply command teppo :save-user-info (flatten (seq data))) => ok?
-  (query teppo :user) => (contains {:user (contains data)})))
+  (fact (user/change-password "veikko.viranomainen@tampere.fi" "passu") => nil
+     (provided (security/get-hash "passu" anything) => "hash"))
 
-(defn upload-user-attachment [apikey attachment-type expect-to-succeed]
-  (let [filename    "dev-resources/test-attachment.txt"
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload/user-attachment")
-        resp        (c/post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart [{:name "attachmentType"  :content attachment-type}
-                                   {:name "files[]"         :content uploadfile}]})
-        body        (-> resp :body json/parse-string keywordize-keys)]
-    (if expect-to-succeed
-      (facts "successful"
-        (:status resp) => 200
-        body => (contains {:ok true}))
-      (facts "should fail"
-        (:status resp) =not=> 200
-        body => (contains {:ok false})))
-    body))
+  (fact (-> (user/find-user {:email "veikko.viranomainen@tampere.fi"}) :private :password) => "hash")
 
-(defn current-user [apikey]
-  (let [resp (decode-response (c/get (str (server-address) "/dev/user")
-                                     {:headers {"authorization" (str "apikey=" apikey)}}))]
-    (assert (= 200 (:status resp)))
-    (:body resp)))
+  (fact (user/change-password "does.not@exist.at.all" "anything") => (throws Exception #"unknown-user")))
 
-(defn file-info [id]
-  (let [resp (c/get (str (server-address) "/dev/fileinfo/" id) {:throw-exceptions false})]
-    (when (= 200 (:status resp))
-      (:body (decode-response resp)))))
+;;
+;; ==============================================================================
+;; Login Throttle:
+;; ==============================================================================
+;;
 
-(facts "uploading user attachment"
-  (apply-remote-minimal)
+(facts login-trottle
+  (against-background 
+    [(sade.env/value :login :allowed-failures) => 2
+     (sade.env/value :login :throttle-expires) => 1] 
+    (fact "First failure doesn't lock username"
+      (user/throttle-login? "foo") => false
+      (user/login-failed "foo") => nil
+      (user/throttle-login? "foo") => false)
+    (fact "Second failure locks username"
+      (user/login-failed "foo") => nil
+      (user/throttle-login? "foo") => true)
+    (fact "Lock expires after timeout"
+      (Thread/sleep 1001)
+      (user/throttle-login? "foo") => false)))
 
-  ;
-  ; Initially pena does not have examination?
-  ;
-
-  (fact "Initially pena does not have examination?" (:examination (current-user pena)) => nil?)
-
-  ;
-  ; Pena uploads an examination:
-  ;
-
-  (upload-user-attachment pena "examination" true)
-  (let [file-1 (get-in (current-user pena) [:attachment :examination])
-        att-1 (file-info (:file-id file-1))]
-    (fact "filename of file 1"    file-1  => (contains {:filename "test-attachment.txt"}))
-    (fact "db has same filename"  att-1   => (contains {:file-name "test-attachment.txt"}))
-    (fact "file 1 metadata"       att-1   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})}))
-
-    ;
-    ; Pena updates the examination:
-    ;
-
-    (upload-user-attachment pena "examination" true)
-    (let [file-2 (get-in (current-user pena) [:attachment :examination])
-          att-2 (file-info (:file-id file-2))]
-      (fact "filename of file 2"   file-2  => (contains {:filename "test-attachment.txt"}))
-      (fact "db has same filename" att-2   => (contains {:file-name "test-attachment.txt"}))
-      (fact "file 2 metadata"      att-2   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})})))
-
-    (fact "old file is deleted"  (file-info (:file-id file-1)) => nil?)))
+(facts clear-login-trottle
+  (against-background 
+    [(sade.env/value :login :allowed-failures) => 1
+     (sade.env/value :login :throttle-expires) => 10] 
+    (fact (user/throttle-login? "bar") => false
+          (user/login-failed "bar") => nil
+          (user/throttle-login? "bar") => true
+          (user/clear-logins "bar") => true
+          (user/throttle-login? "bar") => false)))

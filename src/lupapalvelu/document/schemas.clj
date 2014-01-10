@@ -7,19 +7,32 @@
 
 (defonce ^:private registered-schemas (atom {}))
 
-(defn get-schemas [] @registered-schemas)
+(defn get-all-schemas [] @registered-schemas)
+(defn get-schemas [version] (get @registered-schemas version))
 
-(defn defschema [data]
+(defn defschema [version data]
   (let [schema-name (name (get-in data [:info :name]))]
-    (swap! registered-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
+    (swap! registered-schemas
+      assoc-in
+      [version schema-name]
+      (-> data
+        (assoc-in [:info :name] schema-name)
+        (assoc-in [:info :version] version)))))
 
-(defn defschemas [schemas]
+(defn defschemas [version schemas]
   (doseq [schema schemas]
-    (defschema schema)))
+    (defschema version schema)))
 
-(defn get-schema [schema-name]
-  {:pre [(not= nil schema-name)]}
-  (@registered-schemas (name schema-name)))
+(defn get-schema
+  ([{:keys [version name]}] (get-schema version name))
+  ([schema-version schema-name]
+    {:pre [schema-version schema-name]}
+    (get-in @registered-schemas [schema-version (name schema-name)])))
+
+
+
+(defn get-latest-schema-version []
+  (->> @registered-schemas keys (sort >) first))
 
 ;;
 ;; helpers
@@ -46,15 +59,24 @@
 ;; schema sniplets
 ;;
 
+(def select-one-of-key "_selected")
+
+(def turvakielto "turvakieltoKytkin")
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def henkilo-valitsin [{:name "userId" :type :personSelector}
-                       {:name "turvakieltoKytkin" :type :checkbox}])
+(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
+(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
+
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro"}
+                                {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
+                     :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
@@ -75,33 +97,35 @@
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
+                    :blacklist [:neighbor turvakielto]
                     :body [{:name "puhelin" :type :string :subtype :tel :required true}
-                           {:name "email" :type :string :subtype :email :required true}
-                           #_{:name "fax" :type :string :subtype :tel}]}])
+                           {:name "email" :type :string :subtype :email :required true}]}])
 
-(def henkilotiedot-minimal [{:name "henkilotiedot"
-                             :type :group
-                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}]}])
+(def henkilotiedot-minimal {:name "henkilotiedot"
+                            :type :group
+                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
-(def henkilotiedot-with-hetu {:name "henkilotiedot"
-                               :type :group
-                               :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true}]})
+(def henkilotiedot {:name "henkilotiedot"
+                            :type :group
+                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
                henkilo-valitsin
-               [henkilotiedot-with-hetu]
+               [henkilotiedot]
                simple-osoite
                yhteystiedot))
 
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
-                                  [(assoc henkilotiedot-with-hetu
+                                  [(assoc henkilotiedot
                                      :body
                                      (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
-                                       (:body henkilotiedot-with-hetu)))]
+                                       (:body henkilotiedot)))]
                                   simple-osoite
                                   yhteystiedot))
 
@@ -114,31 +138,38 @@
               {:name "yhteyshenkilo"
                :type :group
                :body (body
-                       henkilotiedot-minimal
+                       [henkilotiedot-minimal]
                        yhteystiedot)}))
 
 (def party (body
-             {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+             {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
              {:name "henkilo" :type :group :body henkilo}
              {:name "yritys" :type :group :body yritys}))
 
 (def party-with-required-hetu (body
-                                [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                                 {:name "henkilo" :type :group :body henkilo-with-required-hetu}
-                                 {:name "yritys" :type :group :body yritys}]))
+                                {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                                {:name "henkilo" :type :group :body henkilo-with-required-hetu}
+                                {:name "yritys" :type :group :body yritys}))
 
 
-(def patevyys [{:name "koulutus" :type :string :required true}
-               {:name "patevyysluokka" :type :select :required true
+(def patevyys [{:name "koulutus" :type :string :required false}
+               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+               {:name "fise" :type :string :required false}
+               {:name "patevyys" :type :string :required false}
+               {:name "patevyysluokka" :type :select :required false
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
                        {:name "C"}
-                       {:name "ei tiedossa"}]}])
+                       {:name "ei tiedossa"}]}
+               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}])
 
 (def designer-basic (body
-                      henkilotiedot-minimal
-                      {:name "yritys" :type :group :body yritys-minimal}
+                      (schema-body-without-element-by-name henkilotiedot turvakielto)
+                      {:name "yritys" :type :group
+                       :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
+                                                              (assoc c :required false)
+                                                              c)) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
@@ -162,16 +193,70 @@
                      henkilo-valitsin
                      designer-basic
                      {:name "patevyys" :type :group :body patevyys}))
-(def muutostapa {:name "muutostapa" :type :select
+
+(def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
+                                           :type :group
+                                           :layout :vertical
+                                           :body [{:name "rakennuksenRakentaminen" :type :checkbox}
+                                                  {:name "rakennuksenMuutosJaKorjaustyo" :type :checkbox}
+                                                  {:name "rakennuksenPurkaminen" :type :checkbox}
+                                                  {:name "maanrakennustyo" :type :checkbox}
+                                                  {:name "rakennelmaTaiLaitos" :type :checkbox}
+                                                  {:name "elementtienAsennus" :type :checkbox}
+                                                  {:name "terasRakenteet_tiilirakenteet" :type :checkbox}
+                                                  {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :type :checkbox}
+                                                  {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
+                                                  {:name "muuMika" :type :string}]}])
+
+(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select
+                                   :body [{:name "KVV-ty\u00F6njohtaja"}
+                                          {:name "IV-ty\u00F6njohtaja"}
+                                          {:name "erityisalojen ty\u00F6njohtaja"}
+                                          {:name "vastaava ty\u00F6njohtaja"}
+                                          {:name "ty\u00F6njohtaja"}
+                                          {:name "ei tiedossa"}]}])
+
+(def patevyys-tyonjohtaja [{:name "koulutus" :type :string :required false}
+                           {:name "patevyysvaatimusluokka" :type :select :required false
+                            :body [{:name "1"}
+                                   {:name "AA"}
+                                   {:name "ei tiedossa"}]}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+                           {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
+                           ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
+                           {:name "tyonjohtajaHakemusKytkin" :type :select :required false :blacklist [:applicant]
+                            :body [{:name "nimeaminen"}
+                                   {:name "hakemus"}]}])
+
+(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
+                              :type :group
+                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
+                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
+(def tyonjohtaja (body
+                   kuntaroolikoodi-tyonjohtaja
+                   vastattavat-tyotehtavat-tyonjohtaja
+                   vastuuaika-tyonjohtaja
+                   henkilo-valitsin
+                   designer-basic
+                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
+
+(def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}
+                    {:name "vakuudenMaara" :type :string :subtype :number :unit "euroa" :size "s" :min 1 :max 9999999 :required true}
+                    {:name "voimassaolopvm" :type :date :required true}
+                    {:name "vakuudenLaji" :type :string :required false}
+                    {:name "Vakuuspaatospykala" :type :string :required false}])
+
+(def muutostapa {:name "muutostapa" :type :select :required true
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys"}
-                        {:name "muutos"}
-                        {:name "ei tiedossa"}]})
+                        {:name "muutos"}]})
 
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
@@ -283,7 +368,7 @@
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select
+                                 {:name "kayttotarkoitus" :type :select :size "l"
                                   :body rakennuksen-kayttotarkoitus}]}
                          {:name "mitat"
                           :type :group
@@ -298,14 +383,14 @@
                                   :body [{:name "elementti"}
                                          {:name "paikalla"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select :required true
+                                 {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "ter\u00e4s"}
                                          {:name "puu"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muuRakennusaine" :type :string}
-                                 {:name "julkisivu" :type :select
+                                 {:name "julkisivu" :type :select :other-key "muuMateriaali"
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "metallilevy"}
@@ -319,11 +404,11 @@
                           :body [{:name "lammitystapa" :type :select
                                   :body [{:name "vesikeskus"}
                                          {:name "ilmakeskus"}
-                                         {:name "suorasahk\u00f6"}
+                                         {:name "suora s\u00e4hk\u00f6"}
                                          {:name "uuni"}
-                                         {:name "eiLammitysta"}
+                                         {:name "ei l\u00e4mmityst\u00e4"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select :required true
+                                 {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
                                          {:name "raskas poltto\u00f6ljy"}
@@ -333,7 +418,6 @@
                                          {:name "turve"}
                                          {:name "maal\u00e4mp\u00f6"}
                                          {:name "puu"}
-                                         {:name "muu" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muu-lammonlahde" :type :string}]}
                          {:name "verkostoliittymat" :type :group :layout :vertical
@@ -396,22 +480,22 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                         [{:name "omistajalaji" :type :select
-                                           :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
-                                                  {:name "muu yksityinen henkil\u00f6 tai perikunta"}
-                                                  {:name "asunto-oy tai asunto-osuuskunta"}
-                                                  {:name "kiinteist\u00f6 oy"}
-                                                  {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
-                                                  {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
-                                                  {:name "kunnan liikelaitos"}
-                                                  {:name "valtion liikelaitos"}
-                                                  {:name "pankki tai vakuutuslaitos"}
-                                                  {:name "kunta tai kuntainliitto"}
-                                                  {:name "valtio"}
-                                                  {:name "sosiaaliturvarahasto"}
-                                                  {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
-                                                  {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :string}])}])
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true :size "l"
+                                       :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
+                                              {:name "muu yksityinen henkil\u00f6 tai perikunta"}
+                                              {:name "asunto-oy tai asunto-osuuskunta"}
+                                              {:name "kiinteist\u00f6 oy"}
+                                              {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
+                                              {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
+                                              {:name "kunnan liikelaitos"}
+                                              {:name "valtion liikelaitos"}
+                                              {:name "pankki tai vakuutuslaitos"}
+                                              {:name "kunta tai kuntainliitto"}
+                                              {:name "valtio"}
+                                              {:name "sosiaaliturvarahasto"}
+                                              {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
+                                              {:name "ei tiedossa"}]}
+                                      {:name "muu-omistajalaji" :type :string}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
@@ -462,56 +546,92 @@
               :body [{:name "purettu uudisrakentamisen vuoksi"}
                      {:name "purettu muusta syyst\u00e4"}
                      {:name "tuhoutunut"}
-                     {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                     {:name "r\u00e4nsistymisen vuoksi hyl\u00e4tty"}
                      {:name "poistaminen"}]}
              {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
+
+(def rakennuspaikka [{:name "kiinteisto"
+                      :type :group
+                      :body [{:name "maaraalaTunnus" :type :string :subtype :maaraala-tunnus :size "s"}
+                             {:name "tilanNimi" :type :string :readonly true}
+                             {:name "rekisterointipvm" :type :string :readonly true}
+                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
+                             {:name "rantaKytkin" :type :checkbox}]}
+                     {:name "hallintaperuste" :type :select :required true
+                      :body [{:name "oma"}
+                             {:name "vuokra"}
+                             {:name "ei tiedossa"}]}
+                     {:name "kaavanaste" :type :select
+                      :body [{:name "asema"}
+                             {:name "ranta"}
+                             {:name "rakennus"}
+                             {:name "yleis"}
+                             {:name "ei kaavaa"}
+                             {:name "ei tiedossa"}]}])
+
+
+(defn- approvable-top-level-groups [v]
+  (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 ;;
 ;; schemas
 ;;
 
 (defschemas
-  [{:info {:name "hankkeen-kuvaus"
+  1
+  [{:info {:name "hankkeen-kuvaus-minimum"
+           :approvable true
+           :order 1}
+    :body [kuvaus]}
+
+   {:info {:name "hankkeen-kuvaus"
+           :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-    {:info {:name "uusiRakennus" :approvable true}
-     :body (body rakennuksen-omistajat rakennuksen-tiedot)}
+   {:info {:name "uusiRakennus" :approvable true}
+    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
-    {:info {:name "rakennuksen-muuttaminen"}
-     :body rakennuksen-muuttaminen}
+    {:info {:name "rakennuksen-muuttaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen)}
 
-    {:info {:name "rakennuksen-laajentaminen"}
-     :body rakennuksen-laajentaminen}
+    {:info {:name "rakennuksen-laajentaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-    {:info {:name "purku"}
-     :body purku}
+    {:info {:name "purku" :approvable true}
+     :body (approvable-top-level-groups purku)}
 
-    {:info {:name "kaupunkikuvatoimenpide"}
-     :body rakennelma}
+    {:info {:name "kaupunkikuvatoimenpide" :approvable true}
+     :body (approvable-top-level-groups rakennelma)}
 
-    {:info {:name "maisematyo"}
-     :body maisematyo}
+    {:info {:name "maisematyo" :approvable true}
+     :body (approvable-top-level-groups maisematyo)}
 
     {:info {:name "hakija"
             :order 3
             :removable true
             :repeating true
-            :type :party}
+            :approvable true
+            :type :party
+            :subtype :hakija}
      :body party}
 
     {:info {:name "hakija-ya"
             :order 3
-            :removable true
-            :repeating true
-            :type :party}
-     :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
+            :removable false
+            :repeating false
+            :approvable true
+            :type :party
+            :subtype :hakija}
+     :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
             :order 4
             :removable false
+            :approvable true
             :type :party}
      :body paasuunnittelija}
 
@@ -519,39 +639,34 @@
             :repeating true
             :order 5
             :removable true
+            :approvable true
             :type :party}
      :body suunnittelija}
+
+    {:info {:name "tyonjohtaja"
+            :order 5
+            :removable true
+            :repeating true
+            :approvable true
+            :type :party}
+     :body tyonjohtaja}
 
     {:info {:name "maksaja"
             :repeating true
             :order 6
             :removable true
+            :approvable true
             :type :party}
      :body (body
              party
              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
 
-    {:info {:name "rakennuspaikka"
+    {:info {:name "rakennuspaikka" :approvable true
             :order 2}
-     :body [{:name "kiinteisto"
-             :type :group
-             :body [{:name "maaraalaTunnus" :type :string}
-                    {:name "tilanNimi" :type :string :readonly true}
-                    {:name "rekisterointipvm" :type :string :readonly true}
-                    {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                    {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
 
-            {:name "hallintaperuste" :type :select :required true
-             :body [{:name "oma"}
-                    {:name "vuokra"}
-                    {:name "ei tiedossa"}]}
-            {:name "kaavanaste" :type :select
-             :body [{:name "asema"}
-                    {:name "ranta"}
-                    {:name "rakennus"}
-                    {:name "yleis"}
-                    {:name "eiKaavaa"}
-                    {:name "ei tiedossa"}]}]}
+    {:info {:name "aloitusoikeus" :removable false :approvable true}
+     :body aloitusoikeus}
 
     {:info {:name "lisatiedot"
             :order 100}

@@ -6,7 +6,7 @@ var LUPAPISTE = LUPAPISTE || {};
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
- LUPAPISTE.App = function (startPage, allowAnonymous) {
+ LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
   "use strict";
 
   var self = this;
@@ -15,6 +15,7 @@ var LUPAPISTE = LUPAPISTE || {};
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
+  self.showUserMenu = (showUserMenu != undefined) ? showUserMenu : !allowAnonymous;
 
   /**
   * Window unload event handler
@@ -34,11 +35,15 @@ var LUPAPISTE = LUPAPISTE || {};
 
       var page = $("#" + pageId);
       if (page.length === 0) {
-        error("Unknown page", pageId);
-        // firefox bug: does not compute with hashbangs (LUPA-80)
-        pageId = allowAnonymous ? "login" : "404";
+        pageId = self.startPage;
         pagePath = [];
         page = $("#" + pageId);
+      }
+
+      if (page.length === 0) {
+        // Something is seriously wrong, even startPage was not found
+        error("Unknown page " + pageId + " and failed to default to " + self.startPage);
+        return;
       }
 
       page.addClass("visible");
@@ -50,8 +55,6 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.hashChanged = function () {
-    trace("hash changed");
-
     var hash = (location.hash || "").substr(3);
 
     if (hash === "") {
@@ -62,7 +65,6 @@ var LUPAPISTE = LUPAPISTE || {};
     var path = hash.split("/");
 
     if (!self.allowAnonymous && self.session === undefined) {
-      trace("session === undefined", hash, path);
       ajax.query("user")
         .success(function (e) {
           self.session = true;
@@ -97,6 +99,19 @@ var LUPAPISTE = LUPAPISTE || {};
       .call();
   };
 
+  self.redirectToHashbang = function() {
+    var href = window.location.href;
+    var hash = window.location.hash;
+    if (hash && hash.length > 0) {
+      var withoutHash = href.substring(0, href.indexOf("#"));
+      window.location = withoutHash + "?hashbang=" + encodeURIComponent(hash.substring(1, hash.length));
+    } else {
+      // No hashbang. Go directly to front page.
+      window.location = "/app/" + loc.getCurrentLanguage();
+    }
+    return false;
+  };
+
   var offline = false;
   var wasLoggedIn = false;
 
@@ -120,7 +135,7 @@ var LUPAPISTE = LUPAPISTE || {};
     if (wasLoggedIn) {
       LUPAPISTE.ModalDialog.mask.unbind("click");
       LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
-          {title: loc("session-dead.logout"), fn: function() {hub.send("logout");return false;}});
+          {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
     }
   });
 
@@ -150,14 +165,27 @@ var LUPAPISTE = LUPAPISTE || {};
 
     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
+    var logoHref = window.location.href;
+    if (self.startPage && !self.startPage.charAt(0) != "/") {
+      logoHref = "#!/" + self.startPage;
+    }
+
     var model = {
       languages: loc.getSupportedLanguages(),
       currentLanguage: loc.getCurrentLanguage(),
       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-      startPage: self.startPage,
-      allowAnonymous: self.allowAnonymous
+      logoHref: logoHref,
+      showUserMenu: self.showUserMenu
     };
 
-    $("nav").applyBindings(model);
+    if (LUPAPISTE.Screenmessage) {
+      LUPAPISTE.Screenmessage.refresh();
+      $("#sys-notification").applyBindings({
+        screenMessage: LUPAPISTE.Screenmessage
+      });
+    }
+
+    $("nav").applyBindings(model).css("visibility", "visible");
+    $("footer").applyBindings(model).css("visibility", "visible");
   };
 };

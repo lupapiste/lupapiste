@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="features">
+      <div class="container">
+
+        <h2>Featuret</h2>
+
+        <ul data-bind="foreach: features">
+          <li>
+            <span data-bind="text: $data[0].join('.'),
+                             attr: {'style': 'color: ' + ($data[1] ? 'green' : 'red')}">
+            </span>
+          </li>
+        </ul>
+
+      </div>
+    </section>
+  </body>
+</html>

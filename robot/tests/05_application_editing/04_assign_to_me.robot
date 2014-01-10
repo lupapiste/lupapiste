@@ -38,10 +38,6 @@ Assignee has changed
   Wait Until  Application is assigned to  Sonja Sibbo
 
 # LUPA-23
-Sonja can not close the application
-  Wait Until  Element Should Not Be Visible  xpath=//button[@data-test-id="application-cancel-btn"]
-
-# LUPA-23
 Sonja could add an operation
   It is possible to add operation
 
@@ -57,11 +53,21 @@ Open latest email
 
 Clicking the first link in email should redirect to front page
   Click link  xpath=//a
+  Wait until page contains element  login-username
   Wait Until  Title should be  Lupapiste
 
 Application is shown after login
   User logs in  mikko@example.com  mikko123  Mikko Intonen
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Logout
+
+# LUPA-791
+Sonja cancels the application
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-cancel-btn']
+  Click enabled by test id  application-cancel-btn
+  Confirm  dynamic-yes-no-confirm-dialog
 
 
 *** Keywords ***

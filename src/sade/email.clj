@@ -1,12 +1,14 @@
 (ns sade.email
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [postal.core :as postal]
             [sade.env :as env]
+            [sade.strings :as ss]
             [net.cgrand.enlive-html :as enlive]
             [endophile.core :as endophile]
-            [clostache.parser :as clostache]))
+            [clostache.parser :as clostache]
+            [net.cgrand.enlive-html :as html]))
 
 ;;
 ;; Default headers:
@@ -56,10 +58,12 @@
 
 (defn send-email-message
   "Sends email message using a template."
-  [to subject template context]
-  (assert (and to subject template context) "missing argument")
-  (let [[plain html] (apply-template template context)]
-    (send-mail to subject :plain plain :html html)))
+  [to subject msg]
+  {:pre [subject msg]}
+  (if to
+    (let [[plain html] msg]
+      (send-mail to subject :plain plain :html html))
+    (error "Email could not be sent because of missing To field. Subject being: " subject)))
 
 ;;
 ;; templating:
@@ -73,8 +77,12 @@
   (with-open [in (io/input-stream (find-resource template-name))]
     (slurp in)))
 
+(defn fetch-html-template [template-name]
+  (enlive/html-resource (find-resource template-name)))
+
 (when-not (env/dev-mode?)
-  (def fetch-template (memoize fetch-template)))
+  (alter-var-root #'fetch-template memoize)
+  (alter-var-root #'fetch-html-template memoize))
 
 ;;
 ;; Plain text support:
@@ -91,7 +99,12 @@
 (defmethod ->str :p       [element] (str \newline (->str* (:content element)) \newline))
 (defmethod ->str :ul      [element] (->str* (:content element)))
 (defmethod ->str :li      [element] (str \* \space (->str* (:content element)) \newline))
-(defmethod ->str :a       [element] (str (->str* (:content element)) \: \space (get-in element [:attrs :href])))
+(defmethod ->str :a       [element] (let [linktext (->str* (:content element))
+                                          href (get-in element [:attrs :href])
+                                          separator (if (> (count href) 50) \newline \space)]
+                                      (if-not (= linktext href)
+                                        (str linktext \: separator href \space)
+                                        (str separator href \space))))
 (defmethod ->str :img     [element] "")
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] "\n---------\n")
@@ -102,18 +115,47 @@
 ;; -------------
 
 (defn- wrap-html [html-body]
-  (let [html-wrap (enlive/html-resource (find-resource "html-wrap.html"))]
+  (let [html-wrap (fetch-html-template "html-wrap.html")]
     (enlive/transform html-wrap [:body] (enlive/content html-body))))
+
+(defn- html->plain [html]
+  (-> html
+    (.getBytes "UTF-8")
+    (io/reader :encoding "UTF-8")
+    enlive/html-resource
+    (enlive/select [:body])
+    ->str*
+    ss/unescape-html))
 
 ;;
 ;; Apply template:
 ;; ---------------
 
+(defn apply-md-template [template context]
+  (let [master      (fetch-template "master.md")
+        header      (fetch-template "header.md")
+        body        (fetch-template template)
+        footer      (fetch-template "footer.md")
+        html-wrap   (fetch-html-template "html-wrap.html")
+        rendered    (clostache/render master context {:header header :body body :footer footer})
+        content     (endophile/to-clj (endophile/mp rendered))]
+    [(-> content ->str* ss/unescape-html)
+     (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string)]))
+
+(defn apply-html-template [template-name context]
+  (let [master    (fetch-html-template "master.html")
+        template  (fetch-html-template template-name)
+        html      (-> master
+                    (enlive/transform [:style] (enlive/append (->> (enlive/select template [:style]) (map :content) flatten s/join)))
+                    (enlive/transform [:.body] (enlive/append (map :content (enlive/select template [:body]))))
+                    (endophile/html-string)
+                    (clostache/render context))
+        plain     (html->plain html)]
+    [plain html]))
+
 (defn apply-template [template context]
-  (let [master    (fetch-template "master.md")
-        header    (fetch-template "header.md")
-        body      (fetch-template template)
-        footer    (fetch-template "footer.md")
-        rendered  (clostache/render master context {:header header :body body :footer footer})
-        content   (endophile/to-clj (endophile/mp rendered))]
-    [(->str* content) (endophile/html-string (wrap-html content))]))
+  (cond
+    (ss/ends-with template ".md")    (apply-md-template template context)
+    (ss/ends-with template ".html")  (apply-html-template template context)
+    :else                            (throw (Exception. (str "unsupported template: " template)))))
+

@@ -36,7 +36,7 @@
             <select
               data-bind="visible: useManualEntry,
                          options: municipalities.municipalities,
-                         optionsText: function(m) { return loc('municipality', m.id); },
+                         optionsText: function(m) { return loc(['municipality', m.id]); },
                          optionsValue: 'id',
                          value: municipalityCode,
                          optionsCaption: loc('choose')"
@@ -126,19 +126,19 @@
       </span>
       <span data-bind="visible: stack().length > 0, foreach: stack">
         <span data-bind="visible: $index"> / </span>
-        <span data-bind="text: loc('operations.tree', op)"></span>
+        <span data-bind="text: loc(['operations.tree', op])"></span>
       </span>
     </div>
 
     <div class="tree-link">
-      <span data-bind="text: loc('operations.tree', op)"></span>
+      <span data-bind="text: loc(['operations.tree', op])"></span>
       <span class="icon drill-right-orange inline-right"></span>
     </div>
 
     <div class="tree-last">
 
-      <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', operation())"></div>
-      <div data-bind="html: loc('operations', operation(), 'desc')"></div>
+      <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
+      <div data-bind="html: loc(['operations', operation(), 'desc'])"></div>
 
       <div class="organization-links" data-bind="visible: organizationLinks">
         <div data-bind="ltext: 'organization.links'"></div>
@@ -151,7 +151,9 @@
 
       <div class="organization-attachments" data-bind="visible: attachmentsForOp">
         <div data-bind="ltext: 'organization.attachments'"></div>
-        <div class="attachments-list" data-bind="foreach: attachmentsForOp"><span data-bind="visible: $index">, </span><span data-bind="text: loc('attachmentType', group, id)"></span></div>
+        <ul class="attachments-list" data-bind="foreach: attachmentsForOp">
+          <li data-bind="text: loc(['attachmentType', group, id])" class="mandatory-attachments"></li>
+        </ul>
       </div>
 
       <div class="create-buttons">

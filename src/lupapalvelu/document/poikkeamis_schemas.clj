@@ -1,13 +1,16 @@
 (ns lupapalvelu.document.poikkeamis-schemas
-  (:use [lupapalvelu.document.schemas]))
+  (:require [lupapalvelu.document.schemas :refer :all]))
 ;TODO: refactor kayttotarkoitus to use same as in schemas file has if this stays
 
 
 (def rakennushanke {:info {:name "rakennushanke"
-                           :order 50}
+                           :order 50
+                           :removable true
+                           :deny-removing-last-document true
+                           :repeating true}
                     :body [{:name "kaytettykerrosala" :type :group
                             :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
-                                   {:name "kayttotarkoitusKoodi" :type :select
+                                   {:name "kayttotarkoitusKoodi" :type :select :size "l"
                                     :body [{:name yhden-asunnon-talot}
                                           {:name "012 kahden asunnon talot"}
                                           {:name "013 muut erilliset talot"}
@@ -88,9 +91,10 @@
                                           {:name "ei tiedossa"}]}]}
                            {:name "toimenpiteet"
                             :type :group
-                            :repeating true
-                            :body [{:name "kayttotarkoitus" :type :select
-                                   :body [{:name yhden-asunnon-talot}
+                            :repeating false
+                            :approvable true
+                            :body [{:name "kayttotarkoitus" :type :select :size "l"
+                                    :body [{:name yhden-asunnon-talot}
                                           {:name "012 kahden asunnon talot"}
                                           {:name "013 muut erilliset talot"}
                                           {:name "021 rivitalot"}
@@ -168,7 +172,7 @@
                                           {:name talousrakennus}
                                           {:name "999 muualla luokittelemattomat rakennukset"}
                                           {:name "ei tiedossa"}]}
-                            {:name "Toimenpide" :type :select
+                            {:name "Toimenpide" :type :select :size "l"
                              :body [{:name "uusi"}
                                     {:name "laajennus"}
                                     {:name "perustus"}
@@ -185,7 +189,7 @@
 
 (def suunnittelutarveratkaisun-lisaosa {:info {:name "suunnittelutarveratkaisun-lisaosa"
              :order 52}
-      :body [{:name "kaavoituksen_ja_alueiden_tilanne":type :group
+      :body [{:name "kaavoituksen_ja_alueiden_tilanne":type :group :layout :vertical
               :body [{:name "asemakaavaluonnos" :type :checkbox}
                      {:name "yleiskaavaa" :type :checkbox}
                      {:name "rajoittuuko_tiehen" :type :checkbox}
@@ -193,31 +197,32 @@
                      {:name "vesijohto" :type :checkbox}
                      {:name "viemarijohto" :type :checkbox}]}
 
-             {:name "vaikutukset_yhdyskuntakehykselle":type :group
-              :body [{:name "etaisyyys_kouluun" :type :string :subtype :number :unit "km" :size "s"}
-                     {:name "turvallinen_polkupyoratie_kouluun" :type :checkbox}
+             {:name "vaikutukset_yhdyskuntakehykselle":type :group :layout :vertical
+              :body [{:name "etaisyyys_alakouluun" :type :string :subtype :number :unit "km" :size "s"}
+                     {:name "etaisyyys_ylakouluun" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyys_kauppaan" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyys_paivakotiin" :type :string :subtype :number :unit "km" :size "s"}
                      {:name "etaisyys_kuntakeskuksen_palveluihin" :type :string :subtype :number :unit "km" :size "s"}
+                     {:name "turvallinen_polkupyoratie_kouluun" :type :checkbox}
                      {:name "muita_vaikutuksia" :type :text :max-len 4000 :layout :full-width}]}
 
-             {:name "maisema":type :group
+             {:name "maisema":type :group :layout :vertical
               :body [{:name "pellolla" :type :checkbox}
                      {:name "metsassa" :type :checkbox}
                      {:name "metsan_reunassa" :type :checkbox}
                      {:name "nykyisen_rakennuspaikan_vieressa" :type :checkbox}
                      {:name "vanhalla_rakennuspaikalla" :type :checkbox}]}
 
-             {:name "luonto_ja_kulttuuri":type :group
+             {:name "luonto_ja_kulttuuri":type :group :layout :vertical
               :body [{:name "kulttuurisesti_merkittava" :type :checkbox}
                      {:name "suojelukohteita" :type :checkbox}]}
 
-             {:name "virkistys_tarpeet":type :group
+             {:name "virkistys_tarpeet":type :group :layout :vertical
               :body [{:name "virkistysalueella" :type :checkbox}
                      {:name "vaikeuttaako_ulkoilureittia" :type :checkbox}
                      {:name "ulkoilu_ja_virkistysaluetta_varattu" :type :checkbox}]}
 
-             {:name "muut_vaikutukset":type :group
+             {:name "muut_vaikutukset":type :group :layout :vertical
               :body [{:name "etaisyys_viemariverkosta"  :type :string :subtype :number :unit "m" :size "s"}
                      {:name "liitytaanko_viemariverkostoon" :type :checkbox}
                      {:name "pohjavesialuetta" :type :checkbox}]}
@@ -225,6 +230,12 @@
              {:name "merkittavyys":type :group
               :body [{:name "rakentamisen_vaikutusten_merkittavyys" :type :text :max-len 4000 :layout :full-width}]}]})
 
+(def poikkeusasian-rakennuspaikka {:info {:name "poikkeusasian-rakennuspaikka" :i18name "rakennuspaikka" :approvable true
+                                          :order 2}
+                                   :body rakennuspaikka})
+
 (defschemas
+  1
   [rakennushanke
-   suunnittelutarveratkaisun-lisaosa])
+   suunnittelutarveratkaisun-lisaosa
+   poikkeusasian-rakennuspaikka])

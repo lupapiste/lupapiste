@@ -1,5 +1,5 @@
 (ns lupapalvelu.job
-  (:use [slingshot.slingshot :only [throw+]]))
+  (:require [slingshot.slingshot :refer [throw+]]))
 
 (defonce jobs (ref {}))
 (defonce job-id (atom 0))

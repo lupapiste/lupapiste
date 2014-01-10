@@ -1,6 +1,6 @@
 (ns lupapalvelu.mongo
-  (:refer-clojure :exclude [count])
-  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
+  (:refer-clojure :exclude [count remove])
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -40,6 +40,11 @@
 ;; Database Api
 ;;
 
+(defn update-n
+  "Updates data into collection by query, returns a number of updated documents."
+  [collection query data & {:as opts}]
+  (.getN (apply mc/update collection query data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
+
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
@@ -48,8 +53,8 @@
 
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
-  [collection id data]
-  (mc/update-by-id collection id data)
+  [collection id data & opts]
+  (apply mc/update-by-id collection id data opts)
   nil)
 
 (defn update-by-query
@@ -98,23 +103,29 @@
 (defn drop-collection [collection]
   (mc/drop collection))
 
+(defn remove
+  "Removes documents by id."
+  [collection id]
+  (.ok (.getLastError (mc/remove collection {:_id id}))))
+
 (defn remove-many
-  "Removes all documents matching query."
-  [collection query] (mc/remove collection query))
+  "Removes all documents matching query. Returns the success status."
+  [collection query]
+  (.ok (.getLastError (mc/remove collection query))))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input id)
   input)
 
-(defn upload [file-id filename content-type tempfile & metadata]
-  (assert (and (string? file-id)
-               (string? filename)
-               (string? content-type)
-               (instance? java.io.File tempfile)
-               (sequential? metadata)
-               (even? (clojure.core/count metadata))))
+(defn upload [file-id filename content-type content & metadata]
+  (assert (string? file-id))
+  (assert (string? filename))
+  (assert (string? content-type))
+  (assert (or (instance? java.io.File content) (instance? java.io.InputStream content)))
+  (assert (sequential? metadata))
+  (assert (even? (clojure.core/count metadata)))
   (gfs/store-file
-    (gfs/make-input-file tempfile)
+    (gfs/make-input-file content)
     (set-file-id file-id)
     (gfs/filename filename)
     (gfs/content-type content-type)
@@ -244,7 +255,7 @@
   (debug "ensure-indexes")
   (mc/ensure-index :users {:username 1} {:unique true})
   (mc/ensure-index :users {:email 1} {:unique true})
-  (mc/ensure-index :users {:municipality 1} {:sparse true})
+  (mc/ensure-index :users {:organizations 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
   (mc/ensure-index :users {:personId 1} {:unique true :sparse true})
   (mc/ensure-index :applications {:municipality 1})
@@ -254,7 +265,12 @@
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :activation {:email 1})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
-  (mc/ensure-index :organizations {:municipalities 1}))
+  (mc/ensure-index :vetuma {:user.stamp 1})
+  (mc/ensure-index :vetuma {:sessionid 1})
+  (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
+  (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
+  (mc/ensure-index :open-inforequest-token {:application-id 1})
+  (mc/ensure-index :app-links {:link 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

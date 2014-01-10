@@ -9,8 +9,8 @@ Resource        ../../common_resource.robot
 Mikko creates two new inforequests
   Mikko logs in
   ${secs} =  Get Time  epoch
-  Set Suite Variable  ${inforequest-handling}  inforequest-handlings${secs}
-  Set Suite Variable  ${inforequest-cancelling}  inforequest-cancelling${secs}
+  Set Suite Variable  ${inforequest-handling}  ir-h${secs}
+  Set Suite Variable  ${inforequest-cancelling}  ir-c${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
   Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  Jiihaa
@@ -23,7 +23,7 @@ Authority assigns an inforequest to herself
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Element should be visible  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
-  Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
+  Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Now Sonja is marked as authority
   Go to page  applications
@@ -46,9 +46,11 @@ Mikko opens inforequest for renaming and cancellation
   Open inforequest  ${inforequest-cancelling}  ${propertyId}
 
 Mikko changes inforequest address
+  Page should contain  ${inforequest-cancelling}
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
   Click element  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
+  Textfield Value Should Be  xpath=//input[@data-test-id="application-new-address"]  ${inforequest-cancelling}
   Input text by test id  application-new-address  ${newName}
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}
@@ -56,7 +58,7 @@ Mikko changes inforequest address
 Mikko cancels an inforequest
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
   Click enabled by test id  inforequest-cancel-btn
-  Confirm  dialog-confirm-cancel
+  Confirm  dynamic-yes-no-confirm-dialog
 
 Mikko does not see the cancelled inforequest
   Wait until  Element should be visible  applications-list
@@ -66,13 +68,10 @@ Mikko does not see the cancelled inforequest
 Mikko waits until the first inforequest is answered
   Logout
 
-Authority can not cancel the inforequest
+Authority can not convert the inforequest to application
   Sonja logs in
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Inforequest state is  Avoin
-  Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
-
-Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
@@ -93,6 +92,15 @@ Mikko should still be able to add attachment
 When Mikko adds a comment inforequest goes back to Avoin
   Add comment   tuulivoima on ok.
   Wait until  Inforequest state is  Avoin
+  Logout
+  
+Authority cancels the inforequest
+  Sonja logs in
+  Open inforequest  ${inforequest-handling}  ${propertyId}
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
+  Click enabled by test id  inforequest-cancel-btn
+  Confirm  dynamic-yes-no-confirm-dialog
+  
 
 *** Keywords ***
 

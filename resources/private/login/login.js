@@ -4,6 +4,7 @@
   function login() {
     var username = $("#login-username").val();
     var password = $("#login-password").val();
+    $("#login-message").text("").hide();
 
     ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
@@ -34,7 +35,8 @@
       var email = self.email();
       if (!_.isBlank(email)) {
         ajax
-          .command("reset-password", {"email": email})
+          .postJson("/api/reset-password", {"email": email})
+          .raw(false)
           .success(function() { self.sent(true).fail(null).email(""); })
           .error(function(e) { self.sent(false).fail(e.text); $("#reset input:first").focus(); })
           .call();
@@ -54,7 +56,7 @@
   function SetPW() {
     var self = this;
 
-    self.token = ko.observable(window.location.hash.split("/")[2]);
+    self.token = ko.observable();
     self.password1 = ko.observable();
     self.password2 = ko.observable();
     self.passwordQuality = ko.computed(function() { return quality(self.password1()); });

@@ -83,3 +83,17 @@
   (schema-without-element-by-name schema "band") => {:info {:name "band"} :body []}
   (schema-without-element-by-name schema "INVALID") => schema
   (schema-without-element-by-name schema "band") => {:info {:name "band"} :body []})
+
+(def deep-find-test-data {:a {:1 {:b {:c 1}}
+                              :2 {:b {:c 2}}
+                              :3 {:c {:b {:c 3}}}}})
+
+(def deep-find-result (deep-find deep-find-test-data [:b :c]))
+
+(fact "Deep find"
+      (some #(= % [[:a :1] 1]) deep-find-result) => truthy
+      (some #(= % [[:a :2] 2]) deep-find-result) => truthy
+      (some #(= % [[:a :3 :c] 3]) deep-find-result) => truthy
+      (deep-find deep-find-test-data [:b :e]) => '()
+      )
+

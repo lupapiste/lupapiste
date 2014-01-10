@@ -1,93 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
-<body>
-  <section class="page" id="admin">
-    <div class="container">
-      <div class="breadcrumb">
-        <a href="#!/admin" data-bind="ltext: 'admin.adminpage-title'"></a>
+<html>
+  <body>
+    <section class="page" id="admin">
+      <div class="container">
+        
+        <h1>Admin</h1>
+        
+        <p>Eh, welcome...or what ever.</p>
+
       </div>
-      <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
-
-      <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.users.type, users: $root.users.data(), usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateModal, openCommandEditModal: $root.users.openModifyModal, openCommandResetPwModal: $root.users.openPasswordModal}}"></div>
-      <br/>
-      <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.applicantUsers.type, users: $root.applicantUsers.data(), usersListTitle: 'admin.applicant-users', addUserButtonLabel: 'admin.addApplicantUser', openCommandEditModal: $root.applicantUsers.openModifyModal}}"></div>
-
-      <h2>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h2>
-      <ul data-bind="foreach: fixtures.data()">
-        <li>
-          <a href="#" data-bind="text: $data, click: $root.fixtures.apply, attr: {id:$data}"></a>
-        </li>
-      </ul><br/>
-      <h2>Aktivoi tili</h2>
-      <ul data-bind="foreach: activations.data()">
-        <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
-      </ul><br/>
-      <h2>Featuret</h2>
-      <ul data-bind="foreach: features.data()">
-        <li><span data-bind="text: $data[0].join('.'), attr: {'style': 'color: ' + ($data[1] ? 'green' : 'red')}"></span></li>
-      </ul><br/>
-      <h2>Toiminnot</h2>
-      <table>
-        <thead>
-          <th>status</th>
-          <th>toiminto</th>
-          <th>tyyppi</th>
-          <th>roolit</th>
-          <th>tilat</th>
-          <th>parametrit</th>
-          <th>email</th>
-          <th>feature</th>
-          <th>l&auml;hdekoodi</th>
-          <th>kuvaus</th>
-        </thead>
-        <tbody data-bind="foreach: actions.data">
-          <tr>
-            <td data-bind="attr: {'class': $data.verified === true ? 'btn-primary' : 'btn-decline'}">
-            </td>
-            <td data-bind="text: name"></td>
-            <td data-bind="text: type"></td>
-            <td>
-              <!-- ko if: $data.roles -->
-              <ul data-bind="foreach: roles">
-                <li data-bind="text: $data"></li>
-              </ul>
-              <!-- /ko -->
-            </td>
-            <td>
-              <!-- ko if: $data.states -->
-              <ul data-bind="foreach: states">
-                <li data-bind="text: $data"></li>
-              </ul>
-              <!-- /ko -->
-            </td>
-            <td>
-              <!-- ko if: $data.parameters -->
-              <ul data-bind="foreach: parameters">
-                <li data-bind="text: $data"></li>
-              </ul>
-              <!-- /ko -->
-            </td>
-            <td data-bind="attr: {'class': $data.notify ? 'btn-primary' : $data.notified ? 'btn-decline' : ''}">
-              <span data-bind="text: $data.notify || ''"></span>
-            </td>
-            <td data-bind="attr: {'class': $data.feature ? features.enabled($data.feature.join(',')) ? 'btn-primary' : 'btn-decline' : ''}">
-              <span data-bind="text: $data.feature || ''"></span>
-            </td>
-            <td>
-              <span data-bind="text: ns"></span>: <span data-bind="text: line"></span>
-            </td>
-            <td>
-              <!-- ko if: $data.description -->
-                <span data-bind="text: description"></span>
-              <!-- /ko -->
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserTitle: 'admin.addAdminUser', modifyUserTitle: 'admin.editAdminUser'}}"></div>
-
-  </section>
-</body>
+    </section>
+  </body>
 </html>

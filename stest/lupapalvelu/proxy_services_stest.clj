@@ -1,17 +1,18 @@
 (ns lupapalvelu.proxy-services-stest
-  (:use [lupapalvelu.proxy-services]
-        [lupapalvelu.itest-util]
-        [midje.sweet])
-  (:require [lupapalvelu.wfs :as wfs]
+  (:require [lupapalvelu.proxy-services :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
-            [clj-http.client :as c]
+            [sade.http :as http]
+            [sade.env :as env]
             [cheshire.core :as json]))
 
 ; make sure proxies are enabled:
-(c/post (str (server-address) "/api/proxy-ctrl/on"))
+(http/post (str (server-address) "/api/proxy-ctrl/on"))
 
 (defn- proxy-request [apikey proxy-name & args]
-  (-> (c/post
+  (-> (http/post
         (str (server-address) "/proxy/" (name proxy-name))
         {:headers {"authorization" (str "apikey=" apikey)
                    "content-type" "application/json;charset=utf-8"}
@@ -88,7 +89,7 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Tampere"))))
 
-(facts "raster-images"
+(facts "geoserver-layers"
   (let [base-params {"FORMAT" "image/png"
                      "SERVICE" "WMS"
                      "VERSION" "1.1.1"
@@ -98,13 +99,39 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "taustakartta_5k"}
-                   {"LAYERS" "taustakartta_10k"}
-                   {"LAYERS" "taustakartta_20k"}
-                   {"LAYERS" "taustakartta_40k"}
-                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
-      (let [request {:params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}]
+    (doseq [layer [{"LAYERS" "lupapiste:Mikkeli_Asemakaavat"
+                    "BBOX"   "512000,6837760,514560,6840320"}
+                   {"LAYERS" "lupapiste:Hameenlinna_Asemakaava"
+                    "BBOX"   "358400,6758400,409600,6809600"}
+                   {"LAYERS" "lupapiste:Hameenlinna_Kantakartta"
+                    "BBOX"   "358400,6758400,409600,6809600"}
+                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
+                    "BBOX"   "208384,6715136,208640,6715392"}
+                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
+                    "BBOX"   "226816,6713856,227328,6714368"}]]
+      (let [request {:query-params (merge base-params layer)
+                     :headers {"accept-encoding" "gzip, deflate"}
+                     :as :stream}]
         (println "Checking" (get layer "LAYERS"))
-        (:status (wfs/raster-images request)) => 200))))
+        (http/get (env/value :maps :geoserver) request) => http200?))))
+
+(facts "raster-images"
+       (let [base-params {"FORMAT" "image/png"
+                          "SERVICE" "WMS"
+                          "VERSION" "1.1.1"
+                          "REQUEST" "GetMap"
+                          "STYLES"  ""
+                          "SRS"     "EPSG:3067"
+                          "BBOX"   "444416,6666496,444672,6666752"
+                          "WIDTH"   "256"
+                          "HEIGHT" "256"}]
+         (doseq [layer [{"LAYERS" "taustakartta_5k"}
+                        {"LAYERS" "taustakartta_10k"}
+                        {"LAYERS" "taustakartta_20k"}
+                        {"LAYERS" "taustakartta_40k"}
+                        {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                        {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+           (let [request {:params (merge base-params layer)
+                          :headers {"accept-encoding" "gzip, deflate"}}]
+             (println "Checking" (get layer "LAYERS"))
+             (wfs/raster-images request "wms") => http200?))))

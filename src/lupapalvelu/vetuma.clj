@@ -1,22 +1,19 @@
 (ns lupapalvelu.vetuma
-  (:use [clojure.set :only [rename-keys]]
-        [noir.core :only [defpage]]
-        [noir.response :only [redirect status json]]
-        [hiccup.core :only [html]]
-        [monger.operators]
-        [clj-time.local :only [local-now]]
-        [hiccup.form]
-        [lupapalvelu.core :only [fail]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+            [clojure.set :refer [rename-keys]]
+            [clojure.string :as string]
+            [noir.core :refer [defpage]]
+            [noir.request :as request]
+            [noir.response :refer [redirect status json]]
+            [hiccup.core :refer [html]]
+            [hiccup.form :as form]
+            [monger.operators :refer :all]
+            [clj-time.local :refer [local-now]]
+            [clj-time.format :as format]
             [digest]
             [sade.env :as env]
-            [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.vtj :as vtj]
-            [noir.request :as request]
-            [noir.session :as session]
-            [clj-time.core :as time]
-            [clj-time.format :as format]))
+            [lupapalvelu.vtj :as vtj]))
 
 ;;
 ;; Configuration
@@ -24,10 +21,10 @@
 
 (def encoding "ISO-8859-1")
 
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
-(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
-(def constants
+(defn config []
   {:url       (env/value :vetuma :url)
    :rcvid     (env/value :vetuma :rcvid)
    :appid     "Lupapiste"
@@ -41,11 +38,11 @@
    :errurl    "{host}/api/vetuma/error"
    :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   ;;:extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
+   :extradata "VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
-(doseq [[k v] constants]
+(doseq [[k v] (config)]
   (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
 
 ;;
@@ -62,7 +59,9 @@
 (defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
 (defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
-(defn- logged [m] (info (str m)) m)
+(defn- logged [m]
+  (info (-> m (dissoc "ERRURL") (dissoc :errurl) str))
+  m)
 
 (defn apply-template
   "changes all variables in braces {} with keywords with same name.
@@ -78,7 +77,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
+(defn mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -102,7 +101,7 @@
 ;; response parsing
 ;;
 
-(defn- extract-subjectdata [{s :subjectdata}]
+(defn extract-subjectdata [{s :subjectdata}]
   (-> s
     (string/split #", ")
     (->> (map #(string/split % #"=")))
@@ -120,9 +119,9 @@
 (defn- extract-request-id [{id :trid}]
   {:stamp id})
 
-(defn- user-extracted [m]
+(defn user-extracted [m]
   (merge (extract-subjectdata m)
-         #_(extract-vtjdata m)
+         (extract-vtjdata m)
          (extract-userid m)
          (extract-request-id m)))
 
@@ -130,8 +129,8 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn- request-data [host]
-  (-> constants
+(defn request-data [host]
+  (-> (config)
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     (assoc :host  host)
@@ -142,10 +141,10 @@
     (dissoc :host)
     keys-as-strings))
 
-(defn- parsed [m]
+(defn parsed [m]
   (-> m
     keys-as-keywords
-    (assoc :key (:key constants))
+    (assoc :key (:key (config)))
     mac-verified
     (dissoc :key)))
 
@@ -156,7 +155,7 @@
 (defn session-id [] (get-in (request/ring-request) [:cookies "ring-session" :value]))
 
 (defn- field [[k v]]
-  (hidden-field k v))
+  (form/hidden-field k v))
 
 (defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
 
@@ -182,11 +181,11 @@
     (if (non-local? paths)
       (status 400 (format "invalid return paths: %s" paths))
       (do
-        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths} :upsert true)
+        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths :created-at (java.util.Date.)} :upsert true)
         (html
-          (form-to [:post (:url constants)]
-                   (map field (request-data (host :secure)))
-                   (submit-button "submit")))))))
+          (form/form-to [:post (:url (config))]
+            (map field (request-data (host :secure)))
+            (form/submit-button "submit")))))))
 
 (defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
@@ -200,10 +199,24 @@
       (redirect uri)
       (redirect (str (host) "/app/fi/welcome#!/register2")))))
 
+(def ^:private error-status-codes
+  ; From Vetuma_palvelun_kutsurajapinnan_maarittely_v3_0.pdf
+  {"REJECTED" "Kutsun palveleminen ep\u00e4onnistui, koska se k\u00e4ytt\u00e4j\u00e4n valitsema vuorovaikutteinen taustapalvelu johon Vetuma-palvelu ohjasi k\u00e4ytt\u00e4j\u00e4n toimintoa suorittamaan hylk\u00e4si toiminnon suorittaminen."
+   "ERROR" "Kutsu oli virheellinen."
+   "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
+
 (defpage [:any "/api/vetuma/:status"] {status :status}
-  (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
-        return-uri (get-in data [:paths (keyword status)])
-        return-uri (or return-uri "/")]
+  (let [data         (mongo/select-one :vetuma {:sessionid (session-id)})
+        params       (:form-params (request/ring-request))
+        status-param (get params "STATUS")
+        return-uri   (get-in data [:paths (keyword status)])
+        return-uri   (or return-uri "/")]
+
+    (case status
+      "cancel" (info "Vetuma cancel")
+      "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params))
+      (error "Unknown status:" status))
+
     (redirect return-uri)))
 
 (defpage "/api/vetuma/user" []
@@ -235,5 +248,5 @@
     (let [stamp (generate-stamp)
           user  (select-keys data [:userid :firstname :lastname])
           user  (assoc user :stamp stamp)]
-      (mongo/insert :vetuma {:user user})
+      (mongo/insert :vetuma {:user user :created-at (java.util.Date.)})
       (json user))))

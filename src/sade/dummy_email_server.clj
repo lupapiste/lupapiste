@@ -1,12 +1,13 @@
 (ns sade.dummy-email-server
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
-            [sade.email]
-            [sade.env :as env]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clojure.java.io :as io]
             [clojure.pprint]
             [noir.core :refer [defpage]]
             [net.cgrand.enlive-html :as enlive]
-            [clojure.java.io :as io]
-            [lupapalvelu.core :refer [defquery defcommand ok fail now]]))
+            [sade.email :as email]
+            [sade.env :as env]
+            [lupapalvelu.core :refer [ok fail now]]
+            [lupapalvelu.action :refer [defquery defcommand]]))
 
 ;;
 ;; Dummy email server:
@@ -15,7 +16,7 @@
 (when (get-in (env/get-config) [:email :dummy-server])
 
   (warn "Initializing dummy email server")
-  
+
   (def sent-messages (atom []))
 
   (defn parse-body [body {content-type :type content :content}]
@@ -25,7 +26,7 @@
                     "text/html; charset=utf-8"  :html
                     content-type) content)
       body))
-  
+
   (defn deliver-email [to subject body]
     (assert to "must provide 'to'")
     (assert subject "must provide 'subject'")
@@ -35,38 +36,38 @@
                                :body (reduce parse-body {} body)
                                :time (now)})
     nil)
-  
+
   (alter-var-root (var sade.email/deliver-email) (constantly deliver-email))
-  
+
   (defn reset-sent-messages []
     (reset! sent-messages []))
-  
+
   (defn messages [& {reset :reset :or {reset false}}]
     (let [m @sent-messages]
       (when reset (reset-sent-messages))
       m))
-  
+
   (defn dump-sent-messages []
     (doseq [message (messages)]
       (clojure.pprint/pprint message)))
-  
+
   (defcommand "send-email"
     {:parameters [:to :subject :template]}
     [{{:keys [to subject template] :as data} :data}]
-    (if-let [error (sade.email/send-email-message to subject template (dissoc data :from :to :subject :template))]
+    (if-let [error (sade.email/send-email-message to subject (email/apply-template template (dissoc data :from :to :subject :template)))]
       (fail "send-email-message failed" error)
       (ok)))
-  
+
   (defquery "sent-emails"
     {}
     [{{reset :reset :or {reset false}} :data}]
     (ok :messages (messages :reset reset)))
-  
+
   (defquery "last-email"
     {}
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
-  
+
   (defpage "/api/last-email" {reset :reset}
     (if-let [msg (last (messages :reset reset))]
       (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8")))
@@ -79,6 +80,6 @@
                                                                                      {:tag :dd :attrs {:id "time"} :content [(:time msg)]}]}
                                                                  {:tag :hr}]))))
       {:status 404 :body "No emails"}))
-  
+
   (info "Dummy email server initialized"))
 

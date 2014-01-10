@@ -1,17 +1,20 @@
 (ns lupapalvelu.xml.krysp.reader-itest
-  (:use [lupapalvelu.xml.krysp.reader]
-        [lupapalvelu.itest-util]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.itest-util :refer :all]))
+
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
 
 (def id "75300301050006")
 
-(def local-test-legacy  (str (server-address) "/krysp/building.xml"))
+(def local-legacy  (str (server-address) "/dev/krysp"))
 
 (fact "two buildings can be extracted"
-  (let [xml (building-xml local-test-legacy id)]
+  (let [xml (building-xml local-legacy id)]
     xml => truthy
 
-    (let [buildings (->buildings xml)]
+    (let [buildings (->buildings-summary xml)]
 
       (fact "two buildings are found"
         buildings => truthy
@@ -21,16 +24,20 @@
         (first buildings) => {:propertyId "75300301050006"
                               :buildingId "001"
                               :usage      "039 muut asuinkerrostalot"
+                              :area "2682"
+                              :index nil
                               :created    "1962"})
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId "75300301050006"
                                :buildingId "002"
                                :usage      "021 rivitalot"
+                               :area "281"
+                               :index nil
                                :created    "1998"}))))
 
-(fact "converting krysp to lupapiste domain model"
-  (let [xml (building-xml local-test-legacy id)]
+(fact "converting building krysp to lupapiste domain model"
+  (let [xml (building-xml local-legacy id)]
     xml => truthy
 
     (fact "invalid buildingid returns nil"
@@ -45,8 +52,8 @@
         (fact "huoneistot is not empty" huoneistot => truthy)
         (fact "omistajat is not empty" omistajat => truthy)
 
-        (fact "without :huoneistot and :omistajat everything matches"
-          (dissoc rakennus :huoneistot :rakennuksenOmistajat)
+        (fact "without :huoneistot, :omistajat and :kiinttun everything matches"
+          (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun)
             => (just
                  {:rakennusnro "001"
                   :verkostoliittymat {:viemariKytkin true
@@ -111,5 +118,21 @@
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}
-                              :yritysnimi "Testiyritys 11477"}})
-        ))))
+                              :yritysnimi "Testiyritys 11477"}})))))
+
+(fact "converting verdict krysp to lupapiste domain model"
+  (let [xml (application-xml local-legacy id)]
+    xml => truthy
+    (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
+
+(fact "converting poikkeamis verdict krysp to lupapiste domain model"
+  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-legacy id)]
+    xml => truthy
+    (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
+
+
+(fact "converting ya-verdict krysp to lupapiste domain model"
+  (let [xml (ya-application-xml local-legacy id)]
+    xml => truthy
+    (count (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)) => 1))
+

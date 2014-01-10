@@ -1,5 +1,5 @@
 (ns lupapalvelu.i18n
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [ontodev.excel :as xls]
@@ -27,9 +27,9 @@
           data    (->> wb (map (partial read-sheet headers)) (apply concat))]
       (reduce (partial process-row langs) {} data))))
 
-(def ^:private excel-data (load-excel))
+(def ^:private excel-data (future (load-excel)))
 
-(defn get-localizations [] excel-data)
+(defn get-localizations [] @excel-data)
 
 (defn get-terms
   "Return localization temrs for given language. If language is not supported returns terms for default language (\"fi\")"
@@ -43,6 +43,9 @@
     (do
       (errorf "unknown localization term '%s'" term)
       "")))
+
+(defn has-term? [lang & terms]
+  (not (nil? (get (get-terms (keyword lang)) (s/join \. terms)))))
 
 (defn localize [lang & terms]
   (let [term (s/join \. terms)]
@@ -91,4 +94,4 @@
         (read-lines (line-seq in)))))
 
   (defn get-localizations []
-    (assoc excel-data :fi (merge (get excel-data :fi) (load-add-ons)))))
+    (assoc @excel-data :fi (merge (get @excel-data :fi) (load-add-ons)))))

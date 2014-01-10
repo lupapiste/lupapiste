@@ -26,3 +26,17 @@ Mikko adds an operation
 Application contains two operations
   Wait Until  Page Should Contain  Asuinrakennuksen rakentaminen
   Wait Until  Page Should Contain  Muun rakennuksen rakentaminen
+
+Add another operation
+  Click enabled by test id  add-operation
+  Wait Until  Element Should Be Visible  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Julkisen rakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
+  Click enabled by test id  add-operation-to-application
+
+Application contains three operations
+  Wait Until  Page Should Contain  Asuinrakennuksen rakentaminen
+  Wait Until  Page Should Contain  Muun rakennuksen rakentaminen
+  Wait Until  Page Should Contain  Julkisen rakennuksen rakentaminen

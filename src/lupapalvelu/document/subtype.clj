@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.subtype
-  (:use [clojure.string :only [blank?]])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.util :refer [->int fn->]]
+            [clojure.string :refer [blank?]]
             [clj-time.format :as tf]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -70,6 +70,12 @@
     (re-matches #"^\d{5}$" v) nil
     :else [:warn "illegal-zip"]))
 
+(defmethod subtype-validation :rakennusnumero [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^\d{3}$" v) nil
+    :else [:warn "illegal-rakennusnumero"]))
+
 (defn- validate-hetu-date [hetu]
   (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
         yy (last (butlast dateparsts))
@@ -105,6 +111,12 @@
     (blank? v) nil
     (re-matches #"^([\p{L}\(\)\-/ &\.,:\*\d]+)$" v) nil
     :else [:warn "illegal-address"]))
+
+(defmethod subtype-validation :maaraala-tunnus [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^[0-9]{4}$" v) nil
+    :else [:warn "illegal-maaraala-tunnus"]))
 
 (defmethod subtype-validation nil [_ _]
   nil)

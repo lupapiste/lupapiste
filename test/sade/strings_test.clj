@@ -1,7 +1,6 @@
 (ns sade.strings-test
-  (:use sade.strings
-        clojure.test
-        midje.sweet))
+  (:require [sade.strings :refer :all]
+            [midje.sweet :refer [facts fact => truthy falsey]]))
 
 (facts "Test last-n"
   (fact "Nil-safe"
@@ -57,9 +56,34 @@
   (fact (starts-with "foo" nil)    => falsey)
   (fact (starts-with nil "ba")     => falsey))
 
-(fact (numeric? ["0"]) => false)
+(facts
+  (fact (starts-with-i "Foo" "f")    => truthy)
+  (fact (starts-with-i "foo" "Fo")   => truthy)
+  (fact (starts-with-i "foO" "fOo")  => truthy)
+  (fact (starts-with-i "foo" "fooo") => falsey)
+  (fact (starts-with-i "foo" "ba")   => falsey)
+  (fact (starts-with-i "foo" nil)    => falsey)
+  (fact (starts-with-i nil "ba")     => falsey))
 
 (facts
+  (fact (ends-with "foo" "o")    => truthy)
+  (fact (ends-with "foo" "oo")   => truthy)
+  (fact (ends-with "foo" "foo")  => truthy)
+  (fact (ends-with "foo" "fooo") => falsey)
+  (fact (ends-with "foo" "ba")   => falsey)
+  (fact (ends-with "foo" nil)    => falsey)
+  (fact (ends-with nil "ba")     => falsey))
+
+(facts
+  (fact (ends-with-i "foo" "O")    => truthy)
+  (fact (ends-with-i "foO" "Oo")   => truthy)
+  (fact (ends-with-i "fOO" "foo")  => truthy)
+  (fact (ends-with-i "foo" nil)    => falsey)
+  (fact (ends-with-i nil "ba")     => falsey))
+
+(fact (numeric? ["0"]) => false)
+
+(facts "decimal-number?"
   (fact (decimal-number? "1") => true)
   (fact (decimal-number? "1.1") => true)
   (fact (decimal-number? "a") => false)
@@ -69,3 +93,17 @@
   (fact (decimal-number? ".0") => false)
   (fact (decimal-number? "..0") => false)
   (fact (decimal-number? "123123132.456465465465464") => true))
+
+(fact "lower-case"
+  (lower-case nil)   => nil
+  (lower-case "")    => ""
+  (lower-case "a")   => "a"
+  (lower-case "A")   => "a")
+
+(fact "trim"
+  (trim nil)    => nil
+  (trim "")     => ""
+  (trim "a")    => "a"
+  (trim " a")   => "a"
+  (trim "a ")   => "a"
+  (trim " a ")  => "a")

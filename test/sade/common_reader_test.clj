@@ -25,6 +25,20 @@
   (to-boolean "false") => false
   (to-boolean "truthy") => "truthy")
 
+(facts "convert-keys-to-ints"
+  (convert-keys-to-ints {:a "0" :b "1"} [:a]) => {:a 0, :b "1"}
+  (convert-keys-to-ints {:a "0" :b "1"} [:c]) => {:a "0", :b "1"}
+  (convert-keys-to-ints {:a "0" :b "1"} [:a :b]) => {:a 0, :b 1}
+  (convert-keys-to-ints {:a "0" :b {:c "1"}} [:a :b]) => {:a 0, :b {:c "1"}}
+  (convert-keys-to-ints {:a "0" :b {:c "1"}} [:a :c]) => {:a 0, :b {:c 1}}
+  (convert-keys-to-ints nil nil) => nil)
+
+(facts "convert-keys-to-timestamps"
+  (convert-keys-to-timestamps {:a "1970-01-01"} [:a]) => {:a 0}
+  (convert-keys-to-timestamps {:a "1970-01-01" :b "1970-01-02"} [:b]) => {:a "1970-01-01" :b (* 24 60 60 1000)}
+  (convert-keys-to-timestamps {:a "1970-01-01" :b "1970-01"} [:b]) => {:a "1970-01-01" :b "1970-01"}
+  (convert-keys-to-timestamps nil nil => nil))
+
 (facts "strip-booleans"
   (convert-booleans {:a "true" :b {:c "false" :d "falsey"}}) => {:a true :b {:c false :d "falsey"}})
 

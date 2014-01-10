@@ -20,7 +20,7 @@ var hub = (function() {
   }
 
   function subscribe(filter, listener, oneshot) {
-    if (!_.isFunction(listener)) { throw "Parameter 'listener' must be a function"; }
+    if (!(listener && listener.call)) { throw "Parameter 'listener' must be a function"; }
     var id = nextId;
     nextId += 1;
     if (_.isString(filter)) { filter = { type: filter }; }

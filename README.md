@@ -12,7 +12,7 @@ lein deps
 lein run
 
 # testing
-lein test
+lein midje
 
 # development
 
@@ -20,7 +20,7 @@ lein eclipse
 
 # packaging
 
-lein uberjar
+lein with-profile uberjar uberjar
 
 # moving it to da Pilvi
 

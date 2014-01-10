@@ -16,8 +16,8 @@
     (fact (get-document-by-id application -1) => nil)))
 
 (facts
-  (let [application {:documents [{:id 1 :data "jee" :schema {:info {:name "kukka"}}}]}]
-    (fact (get-document-by-name application "kukka") => {:id 1 :data "jee" :schema {:info {:name "kukka"}}})
+  (let [application {:documents [{:id 1 :data "jee" :schema-info {:name "kukka"}}]}]
+    (fact (get-document-by-name application "kukka") => {:id 1 :data "jee" :schema-info {:name "kukka"}})
     (fact (get-document-by-name application "") => nil)))
 
 (facts "invites"

@@ -43,10 +43,14 @@ var ajax = (function() {
 
     self.successHandler = function(e) { };
     self.errorHandler = function(e) {
-      error("AJAX: ERROR", self.request.url, e.text);
-      notify.error("error",e);
+      error("AJAX: ERROR", self.request.url, e);
+      notify.error(loc("error.dialog.title"), loc(e.text));
       };
-    self.failHandler = function(jqXHR, textStatus, errorThrown) {error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);};
+    self.failHandler = function(jqXHR, textStatus, errorThrown) {
+      if (jqXHR && jqXHR.status > 0 && jqXHR.readyState > 0) {
+        error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
+      }
+    };
     self.completeHandler = function() { };
     self.headers = {};
 
@@ -170,12 +174,17 @@ var ajax = (function() {
     return new Call("/api/query/" + name, "GET").params(data);
   }
 
+  function datatables(name, data) {
+    return new Call("/api/datatables/" + name, "POST").json(data);
+  }
+
   return {
     post:      post,
     postJson:  postJson,
     get:       get,
     command:   command,
-    query:     query
+    query:     query,
+    datatables: datatables
   };
 
 })();

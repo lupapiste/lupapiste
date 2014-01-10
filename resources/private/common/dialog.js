@@ -165,10 +165,12 @@ LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesButton, noB
 LUPAPISTE.ModalDialog.showDynamicOk = function(title, content, okButton, renderOptions) {
   "use strict";
   var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicOkId);
-  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, okButton, null, renderOptions);
+  var button = okButton || {title: loc("button.ok"), fn: function() { LUPAPISTE.ModalDialog.close(); }};
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, button, null, renderOptions);
   LUPAPISTE.ModalDialog.open(dialog$);
   return dialog$;
 };
+
 /**
  * Initializes modal dialog elements
  */

@@ -1,16 +1,27 @@
 (ns sade.common-reader
-  (:use sade.xml)
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
+            [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
-            [clj-http.client :as http]))
+            [sade.http :as http]
+            [sade.env :as env]
+            [sade.xml :refer :all]
+            [sade.strings :as ss]))
 
 ;;
 ;; parsing time (TODO: might be copy-pasted from krysp)
 ;;
 
-(defn parse-datetime [s]
-  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss'Z'") s))
+(defn parse-date
+  "Parses date using given format. Defaults to the one used by CGI's KRYSP implementation"
+  ([format ^String s]
+    (assert (keyword? format))
+    (timeformat/parse (timeformat/formatters format) s))
+  ([^String s]
+    (timeformat/parse (timeformat/formatter "YYYY-MM-dd'Z'") s)))
+
+(defn parse-datetime [^String s]
+  (timeformat/parse (timeformat/formatters :date-time-parser) s))
 
 (defn unparse-datetime [format dt]
   (timeformat/unparse (timeformat/formatters format) dt))
@@ -50,9 +61,44 @@
         "false" false
         v))
 
+(defn to-int
+  "Converts strings looking like decimal numbers to ints"
+  [v] (if (ss/numeric? v) (Integer/parseInt v 10) v))
+
+(defn to-timestamp
+  "Parses yyyy-mm-dd date and converts to timestamp"
+  [v] (cond
+        (nil? v) nil
+        (re-matches #"^\d{4}-\d{2}-\d{2}Z$" v) (coerce/to-long (parse-date v))
+        (re-matches #"^\d{4}-\d{2}-\d{2}$" v)  (coerce/to-long (parse-date :year-month-day v))
+        (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$" v) (coerce/to-long (parse-datetime v))
+        :else v))
+
+(defn convert-values
+  "Runs a recursive conversion"
+  ([m f]
+    (postwalk-map (partial map (fn [[k v]] [k (f v)])) m))
+  ([m pred f]
+    (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
+
 (defn convert-booleans
-  "changes recursively all stringy boolean values to booleans"
-  [m] (postwalk-map (partial map (fn [[k v]] [k (to-boolean v)])) m))
+  "Changes recursively all stringy boolean values to booleans"
+  [m] (convert-values m to-boolean))
+
+(defn convert-values-of-keys [m keys converter]
+  (convert-values m (fn [k _] ((set keys) k)) converter))
+
+(defn convert-keys-to-ints
+  "Changes recursively all decimal integer string values to ints"
+  [m keys] (convert-values-of-keys m keys to-int))
+
+(defn convert-keys-to-timestamps
+  "Changes recursively all string values to timestamps (longs)"
+  [m keys] (convert-values-of-keys m keys to-timestamp))
+
+(defn ensure-sequental
+  "Makes sure that the value of key k in map m is sequental"
+  [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
 
 (defn strip-xml-namespaces
   "strips namespace-part of xml-element-keys"
@@ -87,10 +133,24 @@
   ([url]
     (get-xml url nil))
   ([url credentials]
-    (let [raw (:body (if credentials (http/get url {:basic-auth credentials
-                                                    :socket-timeout 1000
-                                                    :conn-timeout 1000}) (http/get url)))
+    (let [raw (:body (if credentials
+                       (http/get url :basic-auth credentials)
+                       (http/get url)))
           xml (parse raw)]
       xml)))
 
+(defn get-xml-with-post
+  ([url options]
+    (get-xml-with-post url options nil))
+  ([url options credentials]
+    (let [raw (:body (if credentials
+                       (http/post url (assoc options :basic-auth credentials))
+                       (http/post url options)))
+          xml (parse raw)]
+      xml)))
+
+
+(defn get-boolean [xml & selector] (to-boolean (apply get-text xml selector)))
+
+(defn get-date [xml & selector] (to-timestamp (apply get-text xml selector)))
 

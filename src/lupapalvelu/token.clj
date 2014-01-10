@@ -1,11 +1,11 @@
 (ns lupapalvelu.token
-  (:use [monger.operators]
-        [sade.security :only [random-password]])
-  (:require [taoensso.timbre :as timbre :refer (errorf)]
+  (:require [taoensso.timbre :as timbre :refer [errorf]]
+            [monger.operators :refer :all]
+            [noir.request :as request]
             [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
-            [noir.request :as request]))
+            [lupapalvelu.user :as user]
+            [lupapalvelu.security :as security]))
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))
 
@@ -14,7 +14,7 @@
 
 (def ^:private default-ttl (* 24 60 60 1000))
 
-(def make-token-id (partial random-password 48))
+(def make-token-id (partial security/random-password 48))
 
 (defn make-token [token-type data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
   (let [token-id (make-token-id)
@@ -28,7 +28,7 @@
                           :created now
                           :expires (+ now ttl)
                           :ip (:remote-addr request)
-                          :user-id (:id (security/current-user))})
+                          :user-id (:id (user/current-user))})
     token-id))
 
 (defn get-token [id & {:keys [consume] :or {consume false}}]
