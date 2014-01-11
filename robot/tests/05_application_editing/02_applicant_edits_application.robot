@@ -12,7 +12,7 @@ Mikko opens an application
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-416-17-15
-  Create application the fast way  ${appname}  753  ${propertyId}
+  Create application the fast way  ${appname}  753  ${propertyId}  asuinrakennus
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]

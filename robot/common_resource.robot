@@ -258,8 +258,8 @@ Click enabled by test id
 #
 
 Create application the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${operation}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest the fast way

@@ -10,7 +10,7 @@ Mikko want to build Olutteltta
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Olutteltta${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30
+  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
 
 Application does not have verdict
   Open tab  verdict

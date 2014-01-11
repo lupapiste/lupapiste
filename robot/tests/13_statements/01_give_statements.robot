@@ -31,7 +31,7 @@ New applications does not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22
+  Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
   Add comment  Salibandyhalli FTW!
 
   Open tab  statement
