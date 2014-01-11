@@ -249,8 +249,8 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait until  Page should contain element  ${path}
-  Wait Until  Element should be enabled  ${path}
+  Wait until  Page Should Contain Element  ${path}
+  Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
 #
@@ -488,7 +488,7 @@ Add neighbor
 Go to give new verdict
   Open tab  verdict
   Click enabled by test id  give-verdict
-  Wait until  element should be visible  verdict-id
+  Wait Until  Element Should Be Visible  verdict-id
   Wait Until  Element Should Be Enabled  verdict-id
 
 Input verdict
