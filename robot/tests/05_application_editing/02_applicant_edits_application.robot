@@ -17,8 +17,7 @@ Mikko opens an application
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
   Execute Javascript  $("span[data-test-class='delete-schemas.huoneistot']").click();
-  Wait Until  Element Should Be Visible  xpath=//button[@data-test-id='confirm-yes']
-  Click enabled by test id  confirm-yes
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element Should Not Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
 
 Mikko goes to parties tab of an application
@@ -29,8 +28,7 @@ Mikko decides to delete maksaja
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
   Execute Javascript  $("span[data-test-class='delete-schemas.maksaja']").click();
-  Click enabled by test id   confirm-yes
-  Wait Until  Element Should Not Be Visible  dynamic-yes-no-confirm-dialog
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  0
 
 Mikko adds party maksaja using dialog
