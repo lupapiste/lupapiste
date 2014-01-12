@@ -11,18 +11,6 @@ Authority admin goes to the authority admin page
   Sipoo logs in
   Wait until page contains  Organisaation viranomaiset
 
-Password minimum length is 8
-  [Tags]  fail
-  Click element  test-create-user
-  Wait until  Element should be visible  user-email
-  Input text  user-email  short.password@example.com
-  Input text  user-firstName  Short
-  Input text  user-lastName  Password
-  Input text  user-password  1234567
-  Element Should Be Disabled  test-create-user-save
-  Input text  user-password  12345678
-  Element Should Be Enabled  test-create-user-save
-
 Authority admin creates two users
   [Tags]  fail
   Wait Until  Element Should Be Visible  //tr[@class="user-row"]
