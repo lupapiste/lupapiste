@@ -21,7 +21,15 @@ Authority admin creates two users
   User count is  ${userCountAfter}
   Logout
 
+Hessu activates account via email
+  Go to  ${SERVER}/api/last-email
+  Page Should Contain  hessu.kesa@example.com
+  ## First link
+  Click link  xpath=//a
+  Fill in new password  hessu123
 
+Hessu can login
+  User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa
 
 *** Keywords ***
 
