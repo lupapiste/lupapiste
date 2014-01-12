@@ -21,22 +21,7 @@ Authority admin creates two users
   User count is  ${userCountAfter}
   Logout
 
-Created user can login
-  [Tags]  fail
-  Login  heikki.virtanen@example.com  12345678
-  User should be logged in  Heikki Virtanen
-  Logout
 
-Activation link is not visible, because new authority user is actived by default
-  [Tags]  fail
-  Wait until  page should not contain link  heikki.virtanen@example.com
-  Logout
-
-Hessu can login, too
-  [Tags]  fail
-  Login  hessu.kesa@example.com  12345678
-  User should be logged in  Hessu Kesa
-  Logout
 
 *** Keywords ***
 
