@@ -19,6 +19,15 @@ Authority admin creates two users
   Create user  hessu.kesa@example.com  Hessu  Kesa
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
+
+Authority admin removes Heikki
+  ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
+  Element should be visible  xpath=//div[@class='admin-users-table']//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Click element  xpath=//div[@class='admin-users-table']//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Confirm  dynamic-yes-no-confirm-dialog
+  ${userCountAfter} =  Evaluate  ${userCount} - 1
+  User count is  ${userCountAfter}
+  Page should not contain  heikki.virtanen@example.com
   Logout
 
 Hessu activates account via email
@@ -35,7 +44,7 @@ Hessu can login
 
 User count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  ${userRowXpath}  ${amount}
+  Wait Until  Xpath Should Match X Times  ${userRowXpath}  ${amount}
 
 Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}
