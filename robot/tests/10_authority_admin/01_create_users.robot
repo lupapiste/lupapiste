@@ -39,12 +39,26 @@ Hessu activates account via email
 
 Hessu can login
   User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa
+  [Teardown]  Logout
+
+Authority admin adds existing authority as a statement person
+  Sipoo logs in
+  Set Suite Variable  ${statementPersonRowXpath}  //tr[@class='statement-person-row']
+  ${userCount} =  Get Matching Xpath Count  ${statementPersonRowXpath}
+  Create statement person  ronja.sibbo@sipoo.fi  Asiantuntija
+  ${userCountAfter} =  Evaluate  ${userCount} + 1
+  Statement person count is  ${userCountAfter}
+  Wait Until  Page should contain  Asiantuntija
 
 *** Keywords ***
 
 User count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  ${userRowXpath}  ${amount}
+
+Statement person count is
+  [Arguments]  ${amount}
+  Wait Until  Xpath Should Match X Times  ${statementPersonRowXpath}  ${amount}
 
 Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}
@@ -57,3 +71,11 @@ Create user
   Click enabled by test id  authadmin-add-authority-ok
   Wait Until  Element Should Not Be Visible  add-user-to-organization-dialog
   Wait Until  Page Should Contain  ${email}
+
+Create statement person
+  [Arguments]  ${email}  ${text}
+  Click enabled by test id  create-statement-person
+  Wait until  Element should be visible  //label[@for='statement-person-email']
+  Input text  statement-person-email  ${email}
+  Input text  statement-person-text  ${text}
+  Click enabled by test id  create-statement-person-save
