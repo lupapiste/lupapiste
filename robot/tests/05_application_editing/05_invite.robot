@@ -37,8 +37,7 @@ Teppo declines invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
   Click by test id  decline-invite-button
-  Wait until  Element should be visible  xpath=//*[@data-test-id='confirm-yes']
-  Click by test id  confirm-yes
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  xpath=//*[@data-test-id='decline-invite-button']
   [Teardown]  logout
 
@@ -49,7 +48,7 @@ Mikko reinvites Teppo
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Invite Teppo
   [Teardown]  logout
-  
+
 Teppo accepts invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
@@ -144,4 +143,3 @@ Invite Teppo
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
-  

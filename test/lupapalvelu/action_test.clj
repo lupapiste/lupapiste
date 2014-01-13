@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.env :as env]
+            [lupapalvelu.server]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
@@ -102,11 +103,11 @@
   (fact  (missing-parameters {:action "test-command" :data {:id 1}})      => nil)
   (fact  (missing-parameters {:action "test-command" :data {:id 1 :_ 2}}) => nil))
 
-(facts "Custom validator is run"
+(facts "Custom pre-check is run"
  (against-background
-   (get-actions) => {:test-command1 {:validators [(constantly (fail "FAIL"))]}
-                     :test-command2 {:validators [(constantly nil)]}
-                     :test-command3 {:validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
+   (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))]}
+                     :test-command2 {:pre-checks [(constantly nil)]}
+                     :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
    (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"})
  (fact (execute {:action "test-command1" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
  (fact (execute {:action "test-command2" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok true})
@@ -204,4 +205,5 @@
   (get-post-fns fail-status {:on-complete [...c1... ...c2...] :on-success [...s1... ...s2...] :on-fail [...f1... ...f2...]})
     => [...c1... ...c2... ...f1... ...f2...])
 
-
+(fact "None of the actions contain the outdated :validators definition"
+  (map :validators (get-actions)) => (has every? nil?))
