@@ -14,8 +14,7 @@
             <p data-bind ="lhtml: dialogHelpParagraph"></p>
 
             <label class="form-label" data-bind="ltext: dateSelectorLabel"></label><br/>
-            <input type="text" class="form-input long" id="modal-datepicker-date"
-                   data-test-id="test-modal-datepicker-date"
+            <input type="text" class="form-input long" id="modal-datepicker-date" data-test-id="modal-datepicker-date"
                    data-bind="datepicker: dateObservable"></input>
             <br>
 
@@ -24,10 +23,8 @@
             </div>
 
             <button class="btn btn-primary btn-dialog"
-                    data-test-id="button-modal-datepicker-submit"
-                    data-bind="click: confirm, disable: !ok() || processing()">
-              <span data-bind="ltext: dialogButtonSend"></span>
-              <em data-bind="visible: pending" class="button-loader"></em>
+                    data-bind="ltext: dialogButtonSend, click: confirm, enable: ok"
+                    data-test-id="modal-datepicker-continue">
             </button>
 
             <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>

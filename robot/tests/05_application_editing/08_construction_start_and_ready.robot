@@ -44,6 +44,6 @@ Sets construction started/ready via modal datepicker dialog
   Wait until  element should be visible  dialog-modal-datepicker
   Wait Until  Element Should Be Enabled  modal-datepicker-date
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text by test id  test-modal-datepicker-date  ${date}
-  Click enabled by test id  button-modal-datepicker-submit
+  Input text by test id  modal-datepicker-date  ${date}
+  Click enabled by test id  modal-datepicker-continue
   Confirm  dynamic-yes-no-confirm-dialog

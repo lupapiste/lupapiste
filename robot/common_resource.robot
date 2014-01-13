@@ -102,8 +102,9 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
+  Wait for jQuery
   ${secs} =  Get Time  epoch
-  Go to  ${LOGOUT URL}?s=${secs}
+  Execute JavaScript  window.location="${LOGOUT URL}?s=${secs}";
 
 #
 # Login stuff
@@ -232,7 +233,7 @@ Input text by test id
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change().blur();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -261,11 +262,13 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${operation}
   Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Kill dev-box
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
@@ -519,6 +522,18 @@ Throw in a verdict
   Wait until  Application state should be  verdictGiven
   Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
   Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
+
+# User management
+
+Fill in new password
+  [Arguments]  ${password}
+  Wait Until  Page Should Contain  Salasanan vaihtaminen
+  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='setpw']//button
+  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
+  Click Element  xpath=//section[@id='setpw']//button
+  Go to login page
 
 
 #
