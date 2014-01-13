@@ -147,36 +147,60 @@
 ;; TODO: Miten mongon link-permit-tietojen muutokset tarkastetaan?  Vain ftest-puolella?
 ;;
 (fact* "A change permit can be created based on current R application after verdict has been given."
-  (let [application-id         (create-app-id sonja
+  (let [apikey                 sonja
+        application-id         (create-app-id apikey
                                  :municipality sonja-muni
                                  :address "Paatoskuja 12")
-        application            (query-application sonja application-id) => truthy
-        _                      (generate-documents application sonja)
-        application            (query-application sonja application-id) => truthy
-        submit-resp            (command sonja :submit-application :id application-id) => ok?
-        approve-resp           (command sonja :approve-application :id application-id :lang "fi") => ok?
-        changepermit-resp-fail (command sonja :create-change-permit :id application-id) => (partial expected-failure? "error.command-illegal-state")
-        verdict-resp           (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-        application            (query-application sonja application-id) => truthy
-        app-state              (:state application) => "verdictGiven"
-;        changepermit-resp      (command sonja :create-change-permit :id application-id) => ok?
-;        application            (query-application sonja application-id) => truthy
-        ]
+        application            (query-application apikey application-id) => truthy]
+    (generate-documents application apikey)
+    (command apikey :submit-application :id application-id) => ok?
+    (command apikey :approve-application :id application-id :lang "fi") => ok?
+    (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.command-illegal-state")
+    (command apikey :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
 
-    sonja => (allowed? :create-change-permit :id application-id)
-    ))
+    (let [application (query-application apikey application-id)]
+      (:state application) => "verdictGiven")
+;     (command apikey :create-change-permit :id application-id) => ok?
+;     (query-application apikey application-id) => truthy
+    apikey => (allowed? :create-change-permit :id application-id)))
 
 (fact* "Change permit can only be applied for an R type of application."
-  (let [application            (create-and-submit-application sonja
-                                 :municipality sonja-muni
+  (let [apikey                 sonja
+        municipality           sonja-muni
+        application            (create-and-submit-application apikey
+                                 :municipality municipality
                                  :address "Paatoskuja 13"
                                  :operation "ya-katulupa-vesi-ja-viemarityot")
-        application-id         (:id application)
-        approve-resp           (command sonja :approve-application :id application-id :lang "fi") => ok?
-        verdict-resp           (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-        application            (query-application sonja application-id) => truthy
-        app-state              (:state application) => "verdictGiven"]
-    (command sonja :create-change-permit :id application-id) => (partial expected-failure? "error.invalid-permit-type")))
+        application-id         (:id application)]
+    (generate-documents application apikey)
+    (command apikey :approve-application :id application-id :lang "fi") => ok?
+    (command apikey :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+    (let [application (query-application apikey application-id) => truthy]
+      (:state application) => "verdictGiven")
+    (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.invalid-permit-type")))
+
+
+;; Link permit
+
+;(fact* "Link permit creation and removal"
+;  (let [apikey                 sonja
+;        municipality           sonja-muni
+;        application            (create-and-submit-application apikey
+;                                 :municipality municipality
+;                                 :address "Paatoskuja 13"
+;                                 :operation "ya-katulupa-vesi-ja-viemarityot")
+;        application-id         (:id application)]
+;    apikey => (allowed? :add-link-permit :id application-id)
+;
+;    ;; TODO: Testaa tassa valissa "defquery app-matches-for-link-permits"
+;
+;    (command apikey :approve-application :id application-id :lang "fi") => ok?
+;    (command apikey :add-link-permit :id application-id) => (partial expected-failure? "error.command-illegal-state")
+;    (command apikey :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+;    (let [application (query-application apikey application-id) => truthy]
+;      (:state application) => "verdictGiven")
+;    ))
+
 
 
 
