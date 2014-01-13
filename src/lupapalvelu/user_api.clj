@@ -56,7 +56,7 @@
 
 (defn- validate-create-new-user! [caller user-data]
   (when-let [missing (util/missing-keys user-data [:email :role])]
-    (fail! :missing-required-key :missing missing))
+    (fail! :error.missing-parameters :parameters missing))
 
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
@@ -77,13 +77,10 @@
       (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
 
     (when (and (= user-role :authorityAdmin) (not (:organization user-data)))
-      (fail! :missing-required-key :desc "new authorityAdmin user must have organization" :missing :organization))
+      (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
 
-    (when (and (= user-role :authority) (not (:organization user-data)))
-      (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
-
-    (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
-      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only"))
+    (when (and (= user-role :authority) (and (:organization user-data) (every? (partial not= (:organization user-data)) (:organizations caller))))
+      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
 
     (when (and (= user-role :dummy) (:organization user-data))
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
@@ -159,12 +156,13 @@
             (fail! :cant-insert)))))))
 
 (defcommand create-user
-  {:parameters [:email :role :organization]
+  {:parameters [:email role]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
-  (let [user (create-new-user caller user-data :send-email false)
+  (let [send-email (not= role "authorityAdmin") ; Usually the email address for authorityAdmin is not actually working.
+        user (create-new-user caller user-data :send-email send-email)
         token (token/make-token :password-reset {:email (:email user)})]
-    (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
+    (infof "Added a new user: role=%s, email=%s, organizations=%s" (:role user) (:email user) (:organizations user))
     (ok :id (:id user)
         :user user
         :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
