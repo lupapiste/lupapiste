@@ -77,5 +77,6 @@ Create statement person
   Click enabled by test id  create-statement-person
   Wait until  Element should be visible  //label[@for='statement-person-email']
   Input text  statement-person-email  ${email}
+  Input text  statement-person-email2  ${email}
   Input text  statement-person-text  ${text}
   Click enabled by test id  create-statement-person-save
