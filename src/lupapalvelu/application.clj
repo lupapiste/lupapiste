@@ -575,12 +575,9 @@
                            :schema-version      (schemas/get-latest-schema-version)})
 
           application   (merge application
-                          (if info-request?
-                            {}
+                          (when-not info-request?
                             {:attachments            (make-attachments created op organization-id)
-                             :documents              (make-documents user created op application)}))
-
-          application   (domain/set-software-version application)]
+                             :documents              (make-documents user created op application)}))]
 
       application)))
 
