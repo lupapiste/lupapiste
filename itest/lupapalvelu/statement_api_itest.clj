@@ -50,6 +50,10 @@
 
           ; TODO facts about what Veikko can and can not do to application
 
-          )))
-        )
-      )
+          ))))
+
+  (let [new-email "kirjaamo@museovirasto.example.com"]
+    (fact "User does not exist before so she can not be added as a statement person"
+      (command sipoo :create-statement-person :email new-email :text "hello") => (partial expected-failure? "error.user-not-found")))
+
+  )
