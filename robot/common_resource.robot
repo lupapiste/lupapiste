@@ -484,6 +484,18 @@ Add neighbor
   Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
   Wait Until  Page Should Contain  ${email}
 
+# User management
+
+Fill in new password
+  [Arguments]  ${password}
+  Wait Until  Page Should Contain  Salasanan vaihtaminen
+  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='setpw']//button
+  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
+  Click Element  xpath=//section[@id='setpw']//button
+  Go to login page
+
 
 #
 # Mock Ajax calls: jquery.mockjax

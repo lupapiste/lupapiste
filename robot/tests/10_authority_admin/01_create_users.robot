@@ -11,60 +11,71 @@ Authority admin goes to the authority admin page
   Sipoo logs in
   Wait until page contains  Organisaation viranomaiset
 
-Password minimum length is 8
-  [Tags]  fail
-  Click element  test-create-user
-  Wait until  Element should be visible  user-email
-  Input text  user-email  short.password@example.com
-  Input text  user-firstName  Short
-  Input text  user-lastName  Password
-  Input text  user-password  1234567
-  Element Should Be Disabled  test-create-user-save
-  Input text  user-password  12345678
-  Element Should Be Enabled  test-create-user-save
-
 Authority admin creates two users
-  [Tags]  fail
-  Wait Until  Element Should Be Visible  //tr[@class="user-row"]
-  ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
-  Create user  heikki.virtanen@example.com  Heikki  Virtanen  12345678
-  Create user  hessu.kesa@example.com  Hessu  Kesa  12345678
+  Set Suite Variable  ${userRowXpath}  //div[@class='admin-users-table']//table/tbody/tr
+  Wait Until  Element Should Be Visible  ${userRowXpath}
+  ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
+  Create user  heikki.virtanen@example.com  Heikki  Virtanen
+  Create user  hessu.kesa@example.com  Hessu  Kesa
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
+
+Authority admin removes Heikki
+  ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
+  Element should be visible  xpath=//div[@class='admin-users-table']//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Click element  xpath=//div[@class='admin-users-table']//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Confirm  dynamic-yes-no-confirm-dialog
+  ${userCountAfter} =  Evaluate  ${userCount} - 1
+  User count is  ${userCountAfter}
+  Page should not contain  heikki.virtanen@example.com
   Logout
 
-Created user can login
-  [Tags]  fail
-  Login  heikki.virtanen@example.com  12345678
-  User should be logged in  Heikki Virtanen
-  Logout
+Hessu activates account via email
+  Go to  ${SERVER}/api/last-email
+  Page Should Contain  hessu.kesa@example.com
+  ## First link
+  Click link  xpath=//a
+  Fill in new password  hessu123
 
-Activation link is not visible, because new authority user is actived by default
-  [Tags]  fail
-  Wait until  page should not contain link  heikki.virtanen@example.com
-  Logout
+Hessu can login
+  User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa
+  [Teardown]  Logout
 
-Hessu can login, too
-  [Tags]  fail
-  Login  hessu.kesa@example.com  12345678
-  User should be logged in  Hessu Kesa
-  Logout
+Authority admin adds existing authority as a statement person
+  Sipoo logs in
+  Set Suite Variable  ${statementPersonRowXpath}  //tr[@class='statement-person-row']
+  ${userCount} =  Get Matching Xpath Count  ${statementPersonRowXpath}
+  Create statement person  ronja.sibbo@sipoo.fi  Asiantuntija
+  ${userCountAfter} =  Evaluate  ${userCount} + 1
+  Statement person count is  ${userCountAfter}
+  Wait Until  Page should contain  Asiantuntija
 
 *** Keywords ***
 
 User count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //tr[@class="user-row"]  ${amount}
+  Wait Until  Xpath Should Match X Times  ${userRowXpath}  ${amount}
+
+Statement person count is
+  [Arguments]  ${amount}
+  Wait Until  Xpath Should Match X Times  ${statementPersonRowXpath}  ${amount}
 
 Create user
-  [Arguments]  ${email}  ${firstName}  ${lastName}  ${password}
-  Wait until  Element should be visible  test-create-user
-  Click element  test-create-user
-  Wait until  Element should be visible  //label[@for='user-email']
-  Input text  user-email  ${email}
-  Input text  user-firstName  ${firstName}
-  Input text  user-lastName  ${lastName}
-  Input text  user-password  ${password}
-  Click element  test-create-user-save
-  Wait Until  Element Should Not Be Visible  dialog-add-user
+  [Arguments]  ${email}  ${firstName}  ${lastName}
+  Click enabled by test id  authadmin-add-authority
+  Wait until  Element should be visible  //label[@for='auth-admin.admins.add.email']
+  Input text  auth-admin.admins.add.email  ${email}
+  Input text  auth-admin.admins.add.firstName  ${firstName}
+  Input text  auth-admin.admins.add.lastName  ${lastName}
+  Click enabled by test id  authadmin-add-authority-continue
+  Click enabled by test id  authadmin-add-authority-ok
+  Wait Until  Element Should Not Be Visible  add-user-to-organization-dialog
   Wait Until  Page Should Contain  ${email}
+
+Create statement person
+  [Arguments]  ${email}  ${text}
+  Click enabled by test id  create-statement-person
+  Wait until  Element should be visible  //label[@for='statement-person-email']
+  Input text  statement-person-email  ${email}
+  Input text  statement-person-text  ${text}
+  Click enabled by test id  create-statement-person-save

@@ -35,16 +35,8 @@ Email was send
   ## First link
   Click link  xpath=//a
 
-Reset password page opens
-  Wait Until  Page Should Contain  Salasanan vaihtaminen
-
-Fill in the new password
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  teppo123
-  Element Should Be Disabled  xpath=//section[@id='setpw']//button
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  teppo123
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
-  Click Element  xpath=//section[@id='setpw']//button
-  Go to login page
+Reset password
+  Fill in new password  teppo123
 
 Can not login with the old password
   Login fails  teppo@example.com  teppo69
