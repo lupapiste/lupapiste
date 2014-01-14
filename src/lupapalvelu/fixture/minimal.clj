@@ -357,7 +357,7 @@
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]
                                               :poikkeamis [[:paapiirustus :asemapiirros]]}
-                     :krysp {:R {:url local-krysp
+                     :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "sipoo"}
                              :P {:ftpUser "poik_sipoo"}}
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
@@ -388,7 +388,7 @@
                      :scope [{:municipality "297" :permitType "YA"}]
                      :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                               :url "http://www.kuopio.fi"}]
-                     :krysp {:YA {:url local-krysp
+                     :krysp {:YA {:url local-krysp, :version "2.1.2"
                                   :ftpUser "ya_kuopio"}}
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -486,7 +486,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :krysp {:R {:url local-krysp
+                     :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "sipoo"}}
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -503,7 +503,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :krysp {:R {:url local-krysp
+                     :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "sipoo"}}
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
@@ -520,7 +520,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :krysp {:R {:url local-krysp
+                     :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "sipoo"}}
                      :statementPersons [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
