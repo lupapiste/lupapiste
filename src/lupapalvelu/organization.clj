@@ -7,6 +7,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
@@ -24,10 +25,15 @@
   (when (and (>= (count id) 3) (not (s/blank? id)))
     (subs id 0 3)))
 
-(defn get-legacy [organization-id]
+(defn get-krysp-wfs
+  "Returns a map containing :url and :version information for municipality's KRYSP WFS"
+  ([{:keys [organization permitType] :as application}]
+    (get-krysp-wfs organization permitType))
+  ([organization-id permit-type]
   (let [organization (mongo/select-one :organizations {:_id organization-id})
-        legacy       (:legacy organization)]
-    (when-not (s/blank? legacy) legacy)))
+        krysp-config (-> organization :krysp (keyword permitType))]
+    (when-not (s/blank? (:url krysp-config))
+      (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
   (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
@@ -194,23 +200,28 @@
     (mongo/update-by-id :organizations organization {$set {(str "operations-attachments." operation) attachments}})
     (ok)))
 
-(defquery legacy-system
+(defquery krysp-config
   {:roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization (first organizations)]
-    (if-let [result (mongo/select-one :organizations {:_id organization} {"legacy" 1})]
-      (ok :legacy (:legacy result))
+    (if-let [result (mongo/select-one :organizations {:_id organization} {"krysp" 1})]
+      (ok :krysp (:krysp result))
       (fail :error.unknown-organization))))
 
-(defcommand set-legacy-system
-  {:parameters [legacy]
+(defcommand set-krysp-endpoint
+  {:parameters [url permitType version]
    :roles      [:authorityAdmin]
+   :input-validators [(fn [{{permit-type :permitType} :data}]
+                        (when-not (contains? (permit/permit-types) permit-type)
+                          (warn "invalid permit type" permit-type)
+                          (fail :error.missing-parameters :parameters [:permitType])))]
    :verified   true}
   [{{:keys [organizations] :as user} :user}]
   (let [organization (first organizations)]
-    (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
-      (mongo/update-by-id :organizations organization {$set {:legacy legacy}})
+    (if (or (s/blank? url) (krysp/wfs-is-alive? url))
+      (mongo/update-by-id :organizations organization {$set {(str "krysp." permitType ".url") url
+                                                             (str "krysp." permitType ".version") version}})
       (fail :error.legacy_is_dead))))
 
 ;;
