@@ -204,9 +204,10 @@
   {:roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
-  (let [organization (first organizations)]
-    (if-let [result (mongo/select-one :organizations {:_id organization} {"krysp" 1})]
-      (ok :krysp (:krysp result))
+  (let [organization-id (first organizations)]
+    (if-let [organization (mongo/by-id :organizations organization-id {:krysp 1, :scope 1})]
+      (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
+        (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
@@ -222,7 +223,7 @@
     (if (or (s/blank? url) (krysp/wfs-is-alive? url))
       (mongo/update-by-id :organizations organization {$set {(str "krysp." permitType ".url") url
                                                              (str "krysp." permitType ".version") version}})
-      (fail :error.legacy_is_dead))))
+      (fail :auth-admin.legacyNotResponding))))
 
 ;;
 ;; Helpers
