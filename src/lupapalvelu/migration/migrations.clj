@@ -5,6 +5,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
             [lupapalvelu.operations :as op]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in]]
@@ -167,9 +168,12 @@
             [k d] keys-and-default-values]
       (mongo/update-by-query collection {k {$exists false}} {$set {k d}}))))
 
+(defmigration drop-pistesijanti-from-documents
+  (while (not-empty (mongo/select :applications {"documents.data.osoite.pistesijanti" {$exists true}}))
+    (mongo/update-by-query :applications {"documents" {$elemMatch {"data.osoite.pistesijanti" {$exists true}}}} {$unset {"documents.$.data.osoite.pistesijanti" 1}})))
+
 (defmigration kryps-config
   (doseq [organization (mongo/select :organizations)]
-
     (when-let [url (:legacy organization)]
       (doseq [permit-type (map :permitType (:scope organization))]
         (mongo/update-by-id :organizations (:id organization)
