@@ -30,8 +30,8 @@
   ([{:keys [organization permitType] :as application}]
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
-  (let [organization (mongo/select-one :organizations {:_id organization-id})
-        krysp-config (-> organization :krysp (keyword permit-type))]
+  (let [organization (mongo/by-id :organizations organization-id)
+        krysp-config (get-in organization [:krysp (keyword permit-type)])]
     (when-not (s/blank? (:url krysp-config))
       (select-keys krysp-config [:url :version])))))
 
