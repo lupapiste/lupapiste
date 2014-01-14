@@ -13,26 +13,25 @@
                           :name "ya-sijoituslupa-maalampoputkien-sijoittaminen"})
 
 (def ^:private  hankkeen-kuvaus-sijoituslupa
-  {:id "523ae9ba94a7542b3520e64a",
-   :created 1379592634015,
-   :schema-info {:order 65,
-                 :version 1,
-                 :repeating false,
-                 :removable false,
-                 :name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa",
-                 :op operation},
-   :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
-          :kaivuLuvanTunniste {:value "1234567890"}}})
+  {:id "523ae9ba94a7542b3520e64a"
+   :created 1379592634015
+   :schema-info {:order 65
+                 :version 1
+                 :repeating false
+                 :removable false
+                 :name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+                 :op operation}
+   :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}}})
 
 (def ^:private sijoituksen-tarkoitus
-  {:id "523ae9ba94a7542b3520e64c",
-   :created 1379592634015,
-   :schema-info {:name "sijoituslupa-sijoituksen-tarkoitus",
-                 :removable false,
-                 :repeating false,
-                 :version 1,
-                 :order 66},
-   :data {:lisatietoja-sijoituskohteesta {:value "Lis\u00e4tietoja."},
+  {:id "523ae9ba94a7542b3520e64c"
+   :created 1379592634015
+   :schema-info {:name "sijoituslupa-sijoituksen-tarkoitus"
+                 :removable false
+                 :repeating false
+                 :version 1
+                 :order 66}
+   :data {:lisatietoja-sijoituskohteesta {:value "Lis\u00e4tietoja."}
           :sijoituksen-tarkoitus {:value "other"},
           ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
           :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}}})
@@ -114,8 +113,6 @@
         loppuPvm (-> Sijoituslupa :loppuPvm) => truthy
 
         lupaAsianKuvaus (:lupaAsianKuvaus Sijoituslupa) => truthy
-
-        Sijoituslupaviite (-> Sijoituslupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
 
         rooliKoodi-Hakija "hakija"
         hakija-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
@@ -233,6 +230,4 @@
     (fact "loppuPvm" loppuPvm => truthy)
 
     ;; Hankkeen kuvaus
-    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus-sijoituslupa :data :kayttotarkoitus :value))
-    (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
-    (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus-sijoituslupa :data :kaivuLuvanTunniste :value))))
+    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus-sijoituslupa :data :kayttotarkoitus :value))))

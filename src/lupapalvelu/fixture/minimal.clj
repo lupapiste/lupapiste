@@ -48,7 +48,7 @@
     :private {:password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
               :apikey "5051ba0caa2480f374dcfefg"}}
    {:id "77777777777777777700669"
-    :email "sakari.viranomainen@tampere.fi"
+    :email "sakari.viranomainen@kuopio.fi"
     :enabled true
     :role "authority"
     :username "sakari"
