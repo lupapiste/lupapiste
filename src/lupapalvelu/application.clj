@@ -51,7 +51,7 @@
 
 (defn- validate-owner-or-writer
   "Validator: current user must be owner or writer.
-   To be used in commands' :validators vector."
+   To be used in commands' :pre-checks vector."
   [command application]
   (when-not (domain/owner-or-writer? application (-> command :user :id))
     (fail :error.unauthorized)))
@@ -238,13 +238,13 @@
 
 (defcommand can-target-comment-to-authority
   {:roles [:authority]
-   :validators  [not-open-inforequest-user-validator]
+   :pre-checks  [not-open-inforequest-user-validator]
    :description "Dummy command for UI logic"})
 
 (defcommand add-comment
   {:parameters [id text target]
    :roles      [:applicant :authority]
-   :validators [applicant-cant-set-to]
+   :pre-checks [applicant-cant-set-to]
    :notified   true
    :on-success [(notify :new-comment)
                 (fn [{data :data :as command} _]
@@ -303,7 +303,7 @@
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
-   :validators  [not-open-inforequest-user-validator]
+   :pre-checks  [not-open-inforequest-user-validator]
    :roles       [:authority]}
   [{user :user :as command}]
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
@@ -402,7 +402,7 @@
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :validators [validate-jatkolupa-one-link-permit]
+   :pre-checks [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
   (try
@@ -420,7 +420,7 @@
    :states     [:draft :info :open :complement-needed]
    :notified   true
    :on-success (notify :application-state-change)
-   :validators [validate-owner-or-writer]}
+   :pre-checks [validate-owner-or-writer]}
   [{:keys [application created] :as command}]
   (update-application command
     {$set {:state     :submitted
@@ -438,7 +438,7 @@
   {:parameters [:id]
    :roles      [:authority]
    :states     [:draft :open :submitted :complement-needed]
-   :validators [validate-owner-or-writer]}
+   :pre-checks [validate-owner-or-writer]}
   [{:keys [application]}]
   (try (autofill-rakennuspaikka application (now))
     (catch Exception e (error e "KTJ data was not updated"))))
@@ -575,12 +575,9 @@
                            :schema-version      (schemas/get-latest-schema-version)})
 
           application   (merge application
-                          (if info-request?
-                            {}
+                          (when-not info-request?
                             {:attachments            (make-attachments created op organization-id)
-                             :documents              (make-documents user created op application)}))
-
-          application   (domain/set-software-version application)]
+                             :documents              (make-documents user created op application)}))]
 
       application)))
 
@@ -614,7 +611,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
-   :validators [(permit/validate-permit-type-is permit/R)]}
+   :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
@@ -628,7 +625,7 @@
   {:parameters [id permitSubtype]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
-   :validators [permit/validate-permit-has-subtypes]}
+   :pre-checks [permit/validate-permit-has-subtypes]}
   [{:keys [application created] :as command}]
   (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
     validation-errors
@@ -716,7 +713,7 @@
   {:parameters ["id" linkPermitId]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
-   :validators [validate-jatkolupa-zero-link-permits]
+   :pre-checks [validate-jatkolupa-zero-link-permits]
    :input-validators [(partial non-blank-parameters [:linkPermitId])]}
   [{application :application}]
   (do-add-link-permit application linkPermitId))
@@ -739,7 +736,7 @@
   {:parameters ["id"]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionStarted]
-   :validators [(permit/validate-permit-type-is permit/R)]}
+   :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
         muutoslupa-app (merge application
@@ -788,7 +785,7 @@
   {:parameters ["id"]
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionStarted]
-   :validators [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
+   :pre-checks [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
 
   (let [continuation-app (do-create-application
@@ -833,7 +830,7 @@
    :states     [:verdictGiven]
    :notified   true
    :on-success (notify :application-state-change)
-   :validators [(permit/validate-permit-type-is permit/YA)]
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
   [{:keys [created application] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
@@ -846,7 +843,7 @@
    :roles      [:applicant :authority]
    :states     [:verdictGiven :constructionStarted]
    :notified   true
-   :validators [(permit/validate-permit-type-is permit/R)]
+   :pre-checks [(permit/validate-permit-type-is permit/R)]
    :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
   [{:keys [user created application] :as command}]
   (let [building  (or
@@ -872,7 +869,7 @@
    :roles      [:applicant :authority]
    :states     [:constructionStarted]
    :on-success (notify :application-state-change)
-   :validators [(permit/validate-permit-type-is permit/YA)]
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
@@ -904,7 +901,7 @@
   {:parameters [id]
    :roles      [:applicant]
    :states     [:draft :info :answered]
-   :validators [validate-new-applications-enabled]}
+   :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]
