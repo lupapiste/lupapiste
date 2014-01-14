@@ -287,11 +287,8 @@
                                           (when (:mainostus-viitoitus-lisatiedot config)
                                             (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
 
-        sijoituslupaviitetieto-key (if (= permit-name-key :Sijoituslupa)
-                                     :kaivuLuvanTunniste
-                                     :sijoitusLuvanTunniste)
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 (when-let [tunniste (-> hankkeen-kuvaus sijoituslupaviitetieto-key :value)]
+                                 (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste :value)]
                                    {:Sijoituslupaviite {:vaadittuKytkin false
                                                         :tunniste tunniste}}))
 

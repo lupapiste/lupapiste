@@ -405,10 +405,10 @@
                                    :required ["maksaja"]
                                    :attachments []}
 
-     :aloitusoikeus     {:schema "aloitusoikeus"
-                         :permit-type "R"
-                         :required ["maksaja"]
-                         :attachments []}
+     :aloitusoikeus               {:schema "aloitusoikeus"
+                                   :permit-type "R"
+                                   :required ["maksaja"]
+                                   :attachments []}
      }
     ya-operations))
 
