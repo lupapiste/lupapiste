@@ -160,12 +160,11 @@
 
 (def hankkeen-kuvaus-sijoituslupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType?
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}))   ;; LupaAsianKuvaus
 
 (def sijoituslupa-sijoituksen-tarkoitus
   (body
-    (update-in tyon-tarkoitus-dropdown [0 :body] conj {:name "kunnallistekniset-liittymat"})                                                  ;; lupakohtainenLisatietotieto
+    (update-in tyon-tarkoitus-dropdown [0 :body] conj {:name "kunnallistekniset-liittymat"})  ;; lupakohtainenLisatietotieto
     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}))   ;; lupakohtainenLisatietotieto
 
 (defschemas
