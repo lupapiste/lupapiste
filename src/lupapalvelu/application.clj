@@ -1046,7 +1046,7 @@
       (ok))
     (fail :error.no-legacy-available)))
 
-(defcommand get-building-info-from-legacy
+(defcommand get-building-info-from-wfs
   {:parameters [id]
    :roles      [:applicant :authority]}
   [{{:keys [organization propertyId] :as application} :application}]

@@ -601,7 +601,7 @@ var docgen = (function () {
       select.appendChild(option);
 
       ajax
-        .command("get-building-info-from-legacy", { id: self.appId })
+        .command("get-building-info-from-wfs", { id: self.appId })
         .success(function (data) {
           $.each(data.data, function (i, building) {
             var name = building.buildingId;

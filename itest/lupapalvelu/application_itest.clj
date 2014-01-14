@@ -260,7 +260,7 @@
         rakmuu-doc      (domain/get-document-by-name app "rakennuksen-muuttaminen")
         resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
         updated-app     (query-application pena application-id)
-        building-info   (command pena :get-building-info-from-legacy :id application-id)
+        building-info   (command pena :get-building-info-from-wfs :id application-id)
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
         resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id) => ok?
