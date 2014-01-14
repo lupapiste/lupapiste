@@ -986,7 +986,7 @@
                       (:paatokset verdict))))
 
 (defn- get-application-xml [{:keys [id permitType] :as application}]
-  (if-let [{:url url} (organization/get-krysp-wfs application)]
+  (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [fetch (permit/get-application-xml-getter permitType)]
       (fetch url id))
     (fail! :error.no-legacy-available)))
@@ -1033,7 +1033,7 @@
    :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (if-let [{:url url} (organization/get-krysp-wfs application)]
+  (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
           kryspxml     (krysp/building-xml url propertyId)
@@ -1050,7 +1050,7 @@
   {:parameters [id]
    :roles      [:applicant :authority]}
   [{{:keys [organization propertyId] :as application} :application}]
-  (if-let [{:url url} (organization/get-krysp-wfs application)]
+  (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [kryspxml  (krysp/building-xml url propertyId)
           buildings (krysp/->buildings-summary kryspxml)]
       (ok :data buildings))
