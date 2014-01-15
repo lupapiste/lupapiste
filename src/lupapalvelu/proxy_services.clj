@@ -75,11 +75,11 @@
   (let [{wkt :wkt} (:params request)
         type (re-find #"^POINT|^LINESTRING|^POLYGON" wkt)
         coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
-        features (case type 
-                   "POINT" (let [[x y] (s/split (re-find #"\d+ \d+" coords) #" ")] 
+        features (case type
+                   "POINT" (let [[x y] (s/split (re-find #"\d+ \d+" coords) #" ")]
                              (wfs/property-info-by-point x y))
                    "LINESTRING" (wfs/property-info-by-line (s/split (s/replace coords #"[\(\)]" "") #","))
-                   "POLYGON" (let [outterring (first (s/split coords #"\)" 1))] ;;; pudotetaan reiät pois
+                   "POLYGON" (let [outterring (first (s/split coords #"\)" 1))] ;;; pudotetaan reiat pois
                                (wfs/property-info-by-polygon (s/split (s/replace outterring #"[\(\)]" "") #",")))
                    nil)]
     (if features
