@@ -26,6 +26,31 @@
      maasto         [(:username (:maasto conf))     (:password (:maasto conf))]
      nearestfeature [(:username (:maasto conf))     (:password (:maasto conf))]}))
 
+(def rekisteriyksikkolaji {"0" {:fi "(Tuntematon)" :sv "(Okänd)"}
+                           "1" {:fi "Tila" :sv "Lägenhet"}
+                           "3" {:fi "Valtion metsämaa" :sv "Statens skogsmark"}
+                           "4" {:fi "Lunastusyksikkö" :sv "Inlösningsenhet"}
+                           "5" {:fi "Kruununkalastus" :sv "Kronofiske"}
+                           "6" {:fi "Yleiseen tarpeeseen erotettu alue" :sv "Område avskilt för allmänt behov"}
+                           "7" {:fi "Erillinen vesijättö" :sv "Fristående tillandning"}
+                           "8" {:fi "Yleinen vesialue" :sv "Allmänt vattenområde"}
+                           "9" {:fi "Yhteinen alue" :sv "Samfällt område"}
+                           "10" {:fi "Yhteismetsä" :sv "Samfälld skog"}
+                           "11" {:fi "Tie- tai liitännäisalue" :sv "Väg- eller biområde"}
+                           "12" {:fi "Lakkautettu tie- tai liitännäisalue" :sv "Indraget väg- eller biområde"}
+                           "13" {:fi "Tontti" :sv "Tomt"}
+                           "14" {:fi "Yleinen alue" :sv "Allmänt område"}
+                           "15" {:fi "Selvittämätön yhteinen alue" :sv "Outrett samfällt område"}
+                           "17" {:fi "Yhteinen vesialue" :sv "Samfällt vattenområde"}
+                           "18" {:fi "Yhteinen maa-alue" :sv "Samfällt jordområde"}
+                           "19" {:fi "Suojelualuekiinteistö" :sv "Skyddsområdesfastighet"}
+                           "21" {:fi "Tie- tai liitännäisalue tieoikeudella" :sv "Väg- eller biområde med vägrätt"}
+                           "22" {:fi "Tie- tai liitännäisalue omistusoikeudella" :sv "Väg- eller biområde med äganderätt"}
+                           "23" {:fi "Yleisen alueen lisäosa" :sv "Allmänna områdets tilläggsområde"}
+                           "24" {:fi "Tuntematon kunnan rekisteriyksikkö" :sv "Okänd kommunens registerenhet"}
+                           "25" {:fi "Yhteinen erityinen etuus" :sv "Gemensam särskild förmån"}
+                           "99" {:fi "Selvittämätön alue" :sv "Outrett område"}})
+
 ;;
 ;; DSL to WFS queries:
 ;;
@@ -69,6 +94,12 @@
 
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
+
+(defn line [c]
+  (format "<gml:LineString><gml:posList srsDimension='2'>%s</gml:posList></gml:LineString>" (s/join " " c)))
+
+(defn polygon [c]
+  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
 (defn property-name [n]
   (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
@@ -147,6 +178,16 @@
      :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
             :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
 
+(defn feature-to-property-info [feature]
+  (when feature
+    (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikonPalstanTietoja :ktjkiiwfs:RekisteriyksikonPalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
+    {:rekisteriyksikkolaji (let [id (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikkolaji text))]
+                             {:id id
+                              :selite (rekisteriyksikkolaji id)})
+     :kiinttunnus (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kiinteistotunnus text))
+     :x x
+     :y y})))
+
 (defn response->features [input-xml]
   (when input-xml
     (let [features (-> input-xml
@@ -220,6 +261,38 @@
       (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
+(defn property-info-by-point [x y]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (point x y))))))
+
+(defn property-info-by-line [l]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (line l))))))
+
+(defn property-info-by-polygon [p]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (polygon p))))))
 ;;
 ;; Raster images:
 ;;
