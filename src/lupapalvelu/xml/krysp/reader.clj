@@ -14,11 +14,11 @@
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
-;; Read the Krysp from Legacy
+;; Read the Krysp from municipality Web Feature Service
 ;;
 
-(defn legacy-is-alive?
-  "checks if the legacy system is Web Feature Service -enabled. kindof."
+(defn wfs-is-alive?
+  "checks if the given system is Web Feature Service -enabled. kindof."
   [url]
   (when-not (s/blank? url)
     (try
@@ -27,7 +27,7 @@
          (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml version=\"1.0\""))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
      (catch Exception e
-       (warn (str "Could not connect to legacy: " url ", exception was " e))))))
+       (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
 (def building-type  "typeName=rakval%3AValmisRakennus")

@@ -172,3 +172,28 @@
   (while (not-empty (mongo/select :applications {"documents.data.osoite.pistesijanti" {$exists true}}))
     (mongo/update-by-query :applications {"documents" {$elemMatch {"data.osoite.pistesijanti" {$exists true}}}} {$unset {"documents.$.data.osoite.pistesijanti" 1}})))
 
+(defmigration kryps-config
+  (doseq [organization (mongo/select :organizations)]
+    (when-let [url (:legacy organization)]
+      (doseq [permit-type (map :permitType (:scope organization))]
+        (mongo/update-by-id :organizations (:id organization)
+          {$set {(str "krysp." permit-type ".url") url
+                 (str "krysp." permit-type ".version") "2.1.2"}
+           $unset {:legacy 1}})))
+
+    (when-let [ftp (:rakennus-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.R.ftpUser ftp}
+         $unset {:rakennus-ftp-user 1}}))
+
+    (when-let [ftp (:yleiset-alueet-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.YA.ftpUser ftp}
+         $unset {:yleiset-alueet-ftp-user 1}}))
+
+    (when-let [ftp (:poikkari-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.P.ftpUser ftp}
+         $unset {:poikkari-ftp-user 1}}))
+    )
+  )
