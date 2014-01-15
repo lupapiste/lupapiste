@@ -16,7 +16,7 @@ Inputting invalid wfs gives an error
   There should be error
 
 Legacy can be empty
-  Input wfs  ${EMPTY}
+  Input WFS URL  ${EMPTY}
   Legacy should not be set
 
 Setting valid wfs set the wfs
@@ -26,23 +26,23 @@ Setting valid wfs set the wfs
 *** Keywords ***
 
 Submit wfs
-  [Arguments]  ${wfs}
-  Click element  edit-wfs-link
+  [Arguments]  ${url}
+  Click element  edit-wfs-for-R
   Wait until  element should be visible  edit-wfs
-  Input Legacy  ${wfs}
+  Input WFS URL  ${url}
 
-Input wfs
-  [Arguments]  ${wfs}
-  Input Text  edit-wfs  ${wfs}
+Input WFS URL
+  [Arguments]  ${url}
+  Input Text  edit-wfs  ${url}
   Click button  wfs-submit
 
 There should be error
   Wait until  element should be visible  wfs-error
 
 Legacy should be
-  [Arguments]  ${wfs}
-  Wait until  Element Text Should Be  wfs  ${wfs}
+  [Arguments]  ${url}
+  Wait until  Element Text Should Be  wfs-for-R  ${url}
 
 Legacy should not be set
-  Wait until  Element should not be visible  wfs
+  Wait until  Element should not be visible  wfs-for-R
   Element should be visible  wfs-not-set
