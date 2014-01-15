@@ -4,12 +4,15 @@
 (declare element-to-xml)
 
 (defn- create-element-hierarcy [data model ns]
-  (element (if ns
-             (str ns (:tag model))
-             (:tag model)) (:attr model)
-           (if (:child model)
-             (map #(element-to-xml data % ns) (:child model))
-             (str data))))
+  (when-not (and (map? data) (empty? data))
+    (element
+      (if ns
+        (str ns (:tag model))
+        (:tag model))
+      (:attr model)
+      (if (:child model)
+        (map #(element-to-xml data % ns) (:child model))
+        (str data)))))
 
 (defn element-to-xml
   ([data model] (element-to-xml data model nil))

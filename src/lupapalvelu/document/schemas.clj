@@ -26,8 +26,8 @@
 (defn get-schema
   ([{:keys [version name]}] (get-schema version name))
   ([schema-version schema-name]
-  {:pre [schema-version schema-name]}
-  (get-in @registered-schemas [schema-version (name schema-name)])))
+    {:pre [schema-version schema-name]}
+    (get-in @registered-schemas [schema-version (name schema-name)])))
 
 
 
@@ -67,8 +67,12 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}
-                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero}])
+(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
+
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro"}
+                                {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
@@ -88,8 +92,7 @@
                           {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
                           {:name "postinumero" :type :string :subtype :zip :size "s"}
-                          {:name "postitoimipaikannimi" :type :string :size "m"}
-                          {:name "pistesijanti" :type :string}]}])
+                          {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
@@ -103,9 +106,12 @@
                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
-(def henkilotiedot
-  (update-in henkilotiedot-minimal [:body]
-    conj {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}))
+(def henkilotiedot {:name "henkilotiedot"
+                            :type :group
+                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                   {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
                henkilo-valitsin
@@ -222,12 +228,20 @@
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
+(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
+                              :type :group
+                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
+                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    vastattavat-tyotehtavat-tyonjohtaja
+                   vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
+
+(def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
 (def muutostapa {:name "muutostapa" :type :select :required true
                  :body [{:name "poisto"}
@@ -237,7 +251,7 @@
 (def huoneisto [muutostapa
                 {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                        {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
@@ -349,7 +363,7 @@
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select
+                                 {:name "kayttotarkoitus" :type :select :size "l"
                                   :body rakennuksen-kayttotarkoitus}]}
                          {:name "mitat"
                           :type :group
@@ -461,7 +475,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true
+                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true :size "l"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -573,8 +587,8 @@
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-    {:info {:name "uusiRakennus" :approvable true}
-     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+   {:info {:name "uusiRakennus" :approvable true}
+    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
     {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
@@ -645,6 +659,9 @@
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+    {:info {:name "aloitusoikeus" :removable false :approvable true}
+     :body aloitusoikeus}
 
     {:info {:name "lisatiedot"
             :order 100}

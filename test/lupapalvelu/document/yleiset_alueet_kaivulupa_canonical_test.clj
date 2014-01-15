@@ -5,12 +5,12 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [sade.util :refer [contains-value?]]))
+            [sade.util :refer :all]))
 
 
 (def ^:private operation {:id "51cc1cab23e74941fee4f495",
                           :created 1372331179008,
-                          :name "ya-kaivuulupa"})
+                          :name "ya-katulupa-vesi-ja-viemarityot"})
 
 (def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                                 :created 1379404904514,
@@ -21,7 +21,7 @@
                                               :type "group",
                                               :order 60},
                                 :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
-                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
+                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00002"}
                                        :sijoituksen-tarkoitus {:value "other"},
                                        ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
                                        :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
@@ -35,22 +35,22 @@
                           hankkeen-kuvaus
                           tyoaika])
 
-(def kaivulupa-application {:id "LP-753-2013-00001",
-                            :permitType "YA",
-                            :created 1372331179008,
-                            :opened 1372331643985,
-                            :modified 1372342070624,
-                            :submitted 1379405092649,
-                            :authority sonja,
-                            :state "submitted",
-                            :title "Latokuja 1",
-                            :address "Latokuja 1",
-                            :location location,
-                            :attachments [],
-                            :operations [operation],
-                            :propertyId "75341600550007",
-                            :documents documents,
-                            :municipality municipality,
+(def kaivulupa-application {:id "LP-753-2013-00001"
+                            :permitType "YA"
+                            :created 1372331179008
+                            :opened 1372331643985
+                            :modified 1372342070624
+                            :submitted 1379405092649
+                            :authority sonja
+                            :state "submitted"
+                            :title "Latokuja 1"
+                            :address "Latokuja 1"
+                            :location location
+                            :attachments []
+                            :operations [operation]
+                            :propertyId "75341600550007"
+                            :documents documents
+                            :municipality municipality
                             :statements statements})
 
 
@@ -74,11 +74,11 @@
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
 
-        Sijainti-osoite (-> Tyolupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Tyolupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Tyolupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (:osapuolitieto Tyolupa) => truthy
         vastuuhenkilot-vec (:vastuuhenkilotieto Tyolupa) => truthy
@@ -131,8 +131,12 @@
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
 
+        pinta-ala (:pintaala Tyolupa) => truthy
+
         ;; Lisatiedot
-        sijoituksen-tark (-> Tyolupa :lupakohtainenLisatietotieto :LupakohtainenLisatieto :arvo) => truthy
+        lupakohtainenLisatietotieto (-> Tyolupa :lupakohtainenLisatietotieto) => truthy
+        lisatietoja-filter-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
+        sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
         sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
@@ -153,7 +157,7 @@
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
-      (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
+      (fact "Muu tunnus" (:tunnus MuuTunnus) => (:id kaivulupa-application))
       (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
 
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => ((keyword (:name operation)) ya-operation-type-to-usage-description))
@@ -258,4 +262,5 @@
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
       (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :sijoituksen-tarkoitus :value))
-      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")))
+      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
+      (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))

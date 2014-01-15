@@ -5,34 +5,33 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [sade.util :refer [contains-value?]]))
+            [sade.util :refer :all]))
 
 
 (def ^:private operation {:id "523ae9ba94a7542b3520e649",
                           :created 1379592634015,
-                          :name "ya-sijoituslupa-pysyvien-maanalaisten-rakenteiden-sijoittaminen"})
+                          :name "ya-sijoituslupa-maalampoputkien-sijoittaminen"})
 
 (def ^:private  hankkeen-kuvaus-sijoituslupa
-  {:id "523ae9ba94a7542b3520e64a",
-   :created 1379592634015,
-   :schema-info {:order 65,
-                 :version 1,
-                 :repeating false,
-                 :removable false,
-                 :name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa",
-                 :op operation},
-   :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
-          :kaivuLuvanTunniste {:value "1234567890"}}})
+  {:id "523ae9ba94a7542b3520e64a"
+   :created 1379592634015
+   :schema-info {:order 65
+                 :version 1
+                 :repeating false
+                 :removable false
+                 :name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+                 :op operation}
+   :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}}})
 
 (def ^:private sijoituksen-tarkoitus
-  {:id "523ae9ba94a7542b3520e64c",
-   :created 1379592634015,
-   :schema-info {:name "sijoituslupa-sijoituksen-tarkoitus",
-                 :removable false,
-                 :repeating false,
-                 :version 1,
-                 :order 66},
-   :data {:lisatietoja-sijoituskohteesta {:value "Lis\u00e4tietoja."},
+  {:id "523ae9ba94a7542b3520e64c"
+   :created 1379592634015
+   :schema-info {:name "sijoituslupa-sijoituksen-tarkoitus"
+                 :removable false
+                 :repeating false
+                 :version 1
+                 :order 66}
+   :data {:lisatietoja-sijoituskohteesta {:value "Lis\u00e4tietoja."}
           :sijoituksen-tarkoitus {:value "other"},
           ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
           :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}}})
@@ -60,7 +59,6 @@
                                :operations [operation],
                                :propertyId "75342300010054",
                                :documents documents,
-                               ; :allowedAttachmentTypes allowedAttachmentTypes,
                                ; :neighbors neighbors,
                                :municipality municipality,
                                :statements statements})
@@ -84,11 +82,11 @@
 
         Sijoituslupa-kayttotarkoitus (:kayttotarkoitus Sijoituslupa) => truthy
 
-        Sijainti-osoite (-> Sijoituslupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-osoite (-> Sijoituslupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-piste (-> Sijoituslupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Sijoituslupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (-> Sijoituslupa :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Sijoituslupa :vastuuhenkilotieto) => truthy
@@ -115,8 +113,6 @@
         loppuPvm (-> Sijoituslupa :loppuPvm) => truthy
 
         lupaAsianKuvaus (:lupaAsianKuvaus Sijoituslupa) => truthy
-
-        Sijoituslupaviite (-> Sijoituslupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
 
         rooliKoodi-Hakija "hakija"
         hakija-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
@@ -147,7 +143,9 @@
 
         match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :selitysteksti))
         lisatietoja-sijoituskohteesta-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy]
+        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy
+
+        pinta-ala (:pintaala Sijoituslupa) => falsey]
 
 ;    (println "\n canonical:")
 ;    (clojure.pprint/pprint canonical)
@@ -232,6 +230,4 @@
     (fact "loppuPvm" loppuPvm => truthy)
 
     ;; Hankkeen kuvaus
-    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus-sijoituslupa :data :kayttotarkoitus :value))
-    (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
-    (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus-sijoituslupa :data :kaivuLuvanTunniste :value))))
+    (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus-sijoituslupa :data :kayttotarkoitus :value))))

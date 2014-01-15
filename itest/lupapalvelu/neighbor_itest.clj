@@ -15,7 +15,7 @@
   (let [application-id (create-app-id pena :municipality sonja-muni)]
     (command pena :add-comment :id application-id :text "foo" :target "application") => ok?
     (fact "no name" (command sonja "neighbor-add" :id application-id :propertyId "p" :street "s" :city "c" :zip "z" :email "e") => ok?)
-    (fact "no streen" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
+    (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
     (fact "no city" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"  :zip "z" :email "e") => ok?)
     (fact "no zip" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :email "e") => ok?)
     (fact "no email" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
@@ -37,6 +37,9 @@
         neighbor (find-by-id neighborId neighbors)]
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
+                                           :businessID nil
+                                           :nameOfDeceased nil
+                                           :type nil
                                            :address {:street "s" :city "c" :zip "z"}
                                            :email "e"}})
     (fact (count (:status neighbor)) => 1)
@@ -52,6 +55,9 @@
     (fact (count neighbors) => 1)
     (fact (:neighbor neighbor) => {:propertyId "p2"
                                    :owner {:name "n2"
+                                           :businessID nil
+                                           :nameOfDeceased nil
+                                           :type nil
                                            :address {:street "s2" :city "c2" :zip "z2"}
                                            :email "e2"}})
     (fact (count (:status neighbor)) => 1)

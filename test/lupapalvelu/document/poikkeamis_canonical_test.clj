@@ -47,17 +47,30 @@
                               :_selected {:value "henkilo"}}})
 
 (def ^:private uusi {:created 1379419361123
-                     :data {:toimenpiteet {:0 {:Toimenpide {:value "uusi"}
+                     :data {:toimenpiteet  {:Toimenpide {:value "uusi"}
                                                :huoneistoja {:value "1"}
                                                :kayttotarkoitus {:value "011 yhden asunnon talot"}
                                                :kerroksia {:value "2"}
                                                :kerrosala {:value "200"}
                                                :kokonaisala {:value "220"}}
-                                           :1 {:Toimenpide {:value "uusi"}
-                                               :kayttotarkoitus {:value "941 talousrakennukset"}
-                                               :kerroksia {:value "1"}
-                                               :kerrosala {:value "25"}
-                                               :kokonaisala {:value "30"}}}}
+                                        }
+                     :id "523844e1da063788effc1c57"
+                     :schema-info {:order 50
+                                   :version 1
+                                   :name "rakennushanke"
+                                   :op {:id "523844e1da063788effc1c56"
+                                        :name "poikkeamis"
+                                        :created 1379419361123}
+                                   :removable true}})
+
+(def ^:private uusi2 {:created 1379419361123
+                      :data {:toimenpiteet  {:Toimenpide {:value "uusi"}
+                                             :kayttotarkoitus {:value "941 talousrakennukset"}
+                                             :kerroksia {:value "1"}
+                                             :kerrosala {:value "25"}
+                                             :kokonaisala {:value "30"}}
+
+                             }
                      :id "523844e1da063788effc1c57"
                      :schema-info {:order 50
                                    :version 1
@@ -68,14 +81,15 @@
                                    :removable true}})
 
 
+
 (def ^:private laajennus {:created 1379419361123
                           :data {:kaytettykerrosala {:kayttotarkoitusKoodi {:value "013 muut erilliset talot"}
                                                      :pintaAla {:value "99"}}
-                                 :toimenpiteet {:0 {:Toimenpide {:value "laajennus"}
-                                                    :kayttotarkoitus {:value "941 talousrakennukset"}
-                                                    :kerroksia {:value "1"}
-                                                    :kerrosala {:value "25"}
-                                                    :kokonaisala {:value "30"}}}}
+                                 :toimenpiteet {:Toimenpide {:value "laajennus"}
+                                                :kayttotarkoitus {:value "941 talousrakennukset"}
+                                                :kerroksia {:value "1"}
+                                                :kerrosala {:value "25"}
+                                                :kokonaisala {:value "30"}}}
                           :id "523844e1da063788effc1c57"
                           :schema-info {:order 50
                                         :version 1
@@ -198,7 +212,8 @@
                                :vaikutukset_yhdyskuntakehykselle {:etaisyys_kauppaan {:value "12"}
                                                                   :etaisyys_kuntakeskuksen_palveluihin {:value "12"}
                                                                   :etaisyys_paivakotiin {:value "11"}
-                                                                  :etaisyyys_kouluun {:value "10"}
+                                                                  :etaisyyys_alakouluun {:value "10"}
+                                                                  :etaisyyys_ylakouluun {:value "20"}
                                                                   :muita_vaikutuksia {:value "Maisemallisesti talo tulee sijoittumaan m\u00e4en harjalle."}}
                                :virkistys_tarpeet {:ulkoilu_ja_virkistysaluetta_varattu {:value true}}}
               :id "523844e1da063788effc1c5f"
@@ -206,32 +221,9 @@
                             :version 1
                             :order 52}})
 
-(def ^:private allowedAttachmentTypes
-  [["hakija" ["valtakirja" "ote_kauppa_ja_yhdistysrekisterista" "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]]
-   ["rakennuspaikan_hallinta" ["jaljennos_myonnetyista_lainhuudoista" "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta" "rasitustodistus" "todistus_erityisoikeuden_kirjaamisesta" "jaljennos_vuokrasopimuksesta" "jaljennos_perunkirjasta"]]
-   ["rakennuspaikka" ["ote_alueen_peruskartasta" "ote_asemakaavasta_jos_asemakaava_alueella" "ote_kiinteistorekisteristerista" "tonttikartta_tarvittaessa" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista" "kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma"]]
-   ["paapiirustus" ["asemapiirros" "pohjapiirros" "leikkauspiirros" "julkisivupiirros"]]
-   ["ennakkoluvat_ja_lausunnot" ["naapurien_suostumukset" "selvitys_naapurien_kuulemisesta" "elyn_tai_kunnan_poikkeamapaatos" "suunnittelutarveratkaisu" "ymparistolupa"]]
-   ["muut" ["selvitys_rakennuspaikan_terveellisyydesta" "selvitys_rakennuspaikan_korkeusasemasta"
-            "selvitys_liittymisesta_ymparoivaan_rakennuskantaan" "julkisivujen_varityssuunnitelma"
-            "selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta" "piha_tai_istutussuunnitelma"
-            "selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta"
-            "selvitys_rakennuksen_kosteusteknisesta_toimivuudesta"
-            "selvitys_rakennuksen_aaniteknisesta_toimivuudesta"
-            "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"
-            "energiataloudellinen_selvitys" "paloturvallisuussuunnitelma"
-            "liikkumis_ja_esteettomyysselvitys" "kerrosalaselvitys" "vaestonsuojasuunnitelma"
-            "rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo"
-            "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"
-            "selvitys_kiinteiston_jatehuollon_jarjestamisesta" "rakennesuunnitelma" "ilmanvaihtosuunnitelma"
-            "lammityslaitesuunnitelma" "radontekninen_suunnitelma" "kalliorakentamistekninen_suunnitelma"
-            "paloturvallisuusselvitys" "suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta"
-            "merkki_ja_turvavalaistussuunnitelma" "sammutusautomatiikkasuunnitelma" "rakennusautomaatiosuunnitelma"
-            "valaistussuunnitelma" "selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta"
-            "selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta" "muu"]]])
-
 (def ^:private documents [hakija
                 uusi
+                uusi2
                 hanke
                 maksaja
                 rakennuspaikka
@@ -291,7 +283,6 @@
                        :_statements-seen-by {:777777777777777777000023 1379423134104}
                        :_software_version "1.0.5"
                        :modified 1379423133065
-                       :allowedAttachmentTypes allowedAttachmentTypes
                        :comments [{:text ""
                                    :target {:type "attachment"
                                             :id "52385207da063788effc1e24"
@@ -490,7 +481,7 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        laajennus-tp (c/get-toimenpiteet laajennus)
+        laajennus-tp (c/get-toimenpiteet [laajennus])
         laajennus-tp (:Toimenpide (first laajennus-tp))
         rakennustunnus (:rakennustunnus laajennus-tp) => nil
         _ (:liitetieto laajennus-tp) => nil
@@ -531,7 +522,7 @@
         suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
 
         ;end of abstarctPoikkeamistype
-        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi hakemus"
+        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
 
         asianTiedot (:asianTiedot Poikkeamisasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
@@ -686,10 +677,9 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        laajennus-tp (c/get-toimenpiteet laajennus)
+        laajennus-tp (c/get-toimenpiteet [laajennus])
         laajennus-tp (:Toimenpide (first laajennus-tp))
         rakennustunnus (:rakennustunnus laajennus-tp) => nil
-        _ (:liitetieto laajennus-tp) => nil
         kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
         kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
         kerrosala (:kerrosala kerrosalatieto) => truthy
@@ -727,7 +717,7 @@
         suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
 
         ;end of abstarctPoikkeamistype
-        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi hakemus"
+        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
 
         asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy

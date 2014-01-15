@@ -7,9 +7,12 @@
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
+            [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.core :refer [fail fail!]]))
+            [lupapalvelu.core :refer [fail fail!]]
+            [clj-time.core :as time]
+            [clj-time.coerce :refer [to-date]]
+            [lupapalvelu.security :as security]))
 
 ;;
 ;; ==============================================================================
@@ -108,6 +111,29 @@
      :display  query-total
      :echo     (str (util/->int (str (:sEcho params))))}))
 
+;;
+;; ==============================================================================
+;; Login throttle
+;; ==============================================================================
+;;
+
+(defn- logins-lock-expires-date []
+  (to-date (time/minus (time/now) (time/seconds (env/value :login :throttle-expires)))))
+
+(defn throttle-login? [username]
+  (mongo/any? :logins {:_id (ss/lower-case username)
+                       :failed-logins {$gte (env/value :login :allowed-failures)}
+                       :locked {$gt (logins-lock-expires-date)}}))
+
+(defn login-failed [username]
+  (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
+  (mongo/update :logins {:_id (ss/lower-case username)}
+                {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
+                :multi false
+                :upsert true))
+
+(defn clear-logins [username]
+  (mongo/remove :logins (ss/lower-case username)))
 
 ;;
 ;; ==============================================================================
@@ -180,7 +206,7 @@
 ;;
 
 (defn create-apikey
-  "Add or replcae users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
+  "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
         n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
@@ -197,10 +223,16 @@
   "Update users password. Returns nil. If user is not found, raises an exception."
   [email password]
   (let [salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)]
-    (when-not (= 1 (mongo/update-n :users
-                                   {:email (ss/lower-case email)}
-                                   {$set {:private.password hashed-password}}))
+        hashed-password   (security/get-hash password salt)
+        email             (ss/lower-case email)
+        updated-user      (mongo/update-one-and-return :users
+                            {:email email}
+                            {$set {:private.password hashed-password
+                                   :enabled true}})]
+    (if updated-user
+      (do
+        (mongo/remove-many :activation {:email email})
+        (clear-logins (:username updated-user)))
       (fail! :unknown-user :email email))
     nil))
 

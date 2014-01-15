@@ -53,19 +53,6 @@
     (info "blank parameters:" (s/join ", " missing))
     (fail :error.missing-parameters :parameters (vec missing))))
 
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-applicant-document app))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
-
-(defn get-application-operation [app]
-  (first (:operations app)))
-
 (defn update-application
   "get current application from command (or fail) and run changes into it."
   ([command changes]
@@ -89,7 +76,7 @@
 (defn serializable-actions []
   (into {} (for [[k v] (get-actions)]
              [k (-> v
-                  (dissoc :handler :validators :input-validators :on-success)
+                  (dissoc :handler :pre-checks :input-validators :on-success)
                   (assoc :name k))])))
 
 ;;
@@ -151,9 +138,9 @@
       (when-not (.contains valid-states (keyword state))
         (fail :error.command-illegal-state)))))
 
-(defn validators-fail [command application]
-  (when-let [validators (:validators (meta-data command))]
-    (reduce #(or %1 (%2 command application)) nil validators)))
+(defn pre-checks-fail [command application]
+  (when-let [pre-checks (:pre-checks (meta-data command))]
+    (reduce #(or %1 (%2 command application)) nil pre-checks)))
 
 (defn masked [command]
   (letfn [(strip-field [command field]
@@ -206,7 +193,7 @@
       (fail :error.unauthorized)
       (or
         (invalid-state-in-application command application)
-        (validators-fail command application)))))
+        (pre-checks-fail command application)))))
 
 (defn- response? [r]
   (and (map? r) (:status r)))

@@ -102,10 +102,9 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
+  Wait for jQuery
   ${secs} =  Get Time  epoch
-  Go to  ${LOGOUT URL}?s=${secs}
-  Wait until  Title Should Be  Lupapiste
-  Wait until page contains element  xpath=//div[@id='login-form']//input[@id='login-username']
+  Execute JavaScript  window.location="${LOGOUT URL}?s=${secs}";
 
 #
 # Login stuff
@@ -234,7 +233,7 @@ Input text by test id
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change().blur();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -263,11 +262,13 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Kill dev-box
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Kill dev-box
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
@@ -285,6 +286,7 @@ Create inforequest
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
+  Confirm  dynamic-ok-confirm-dialog
   Wait Until  Element should be visible  inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
@@ -317,24 +319,26 @@ Select operations path R
   Click tree item by text  "Asuinrakennuksen rakentaminen"
 
 Select operations path YA kayttolupa
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Yleisillä alueilla kuten kaduilla ja puistoissa työskenteleminen (katutyöt)"
-  Click tree item by text  "Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Yleisten alueiden käyttö (tapahtumat, mainokset, yms.)"
+  Click tree item by text  "Terassin sijoittaminen"
 
 Select operations path YA kayttolupa kaivu
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Yleisillä alueilla kuten kaduilla ja puistoissa työskenteleminen (katutyöt)"
-  Click tree item by text  "Kaivaminen yleisellä alueella (kadut ja puistot)"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
+  Click tree item by text  "Kaivaminen yleisellä alueella"
+  Click tree item by text  "Vesi- ja viemäritöiden tekeminen"
 
 Select operations path YA kayttolupa mainostus-viitoitus
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Yleisillä alueilla kuten kaduilla ja puistoissa työskenteleminen (katutyöt)"
-  Click tree item by text  "Mainoslaitteiden ja opasteviittojen sijoittaminen"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Yleisten alueiden käyttö (tapahtumat, mainokset, yms.)"
+  Click tree item by text  "Mainoksien sijoittaminen"
 
 Select operations path YA sijoituslupa
-  Click tree item by text  "Yleisten alueiden käyttö"
-  Click tree item by text  "Rakenteiden sijoittaminen"
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Rakenteiden sijoittaminen yleiselle alueelle (Sijoittamissopimus)"
   Click tree item by text  "Pysyvien maanalaisten rakenteiden sijoittaminen"
+  Click tree item by text  "Vesi- ja viemärijohtojen sijoittaminen"
 
 Click tree item by text
   [Arguments]  ${itemName}
@@ -399,7 +403,7 @@ Request should not be visible
 Add comment
   [Arguments]  ${message}
   Open tab  conversation
-  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//table[@data-test-id='comments-table']//span[text()='${message}']
 
@@ -479,3 +483,39 @@ Add neighbor
   Click by test id  neighbors.edit.ok
   Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
   Wait Until  Page Should Contain  ${email}
+
+# User management
+
+Fill in new password
+  [Arguments]  ${password}
+  Wait Until  Page Should Contain  Salasanan vaihtaminen
+  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='setpw']//button
+  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
+  Click Element  xpath=//section[@id='setpw']//button
+  Go to login page
+
+
+#
+# Mock Ajax calls: jquery.mockjax
+#
+
+Mock query
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: ${jsonResponse}});
+
+Mock query error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', status:500});
+
+Mock proxy
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', responseText: ${jsonResponse}});
+
+Mock proxy error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/proxy/${name}', dataType:'json', status:500});
+
+Clear mocks
+  Execute Javascript  $.mockjaxClear();

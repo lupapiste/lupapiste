@@ -1,5 +1,7 @@
 (ns sade.util
-  (:use [sade.strings :only [numeric? decimal-number?]]))
+  (:require [sade.strings :refer [numeric? decimal-number?]]
+            [clj-time.format :as timeformat]
+            [clj-time.coerce :as tc]))
 
 ; from clojure.contrib/core
 
@@ -109,3 +111,55 @@
          (fn [missing k] (if (nil? (get src-map k)) (cons k missing) missing))
          ()
          required-keys)))
+
+
+(defn to-local-date [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "dd.MM.YYYY") dt))))
+
+(defn to-xml-date [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") dt))))
+
+(defn to-xml-datetime [^Long timestamp]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") dt))))
+
+(defn to-xml-date-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
+
+(defn to-xml-datetime-from-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
+
+(defn to-millis-from-local-date-string [^String date-as-string]
+  (when date-as-string
+    (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (tc/to-long d))))
+
+
+(defn sequable? [x] 
+  "Returns true if x can be converted to sequence."
+  (or (seq? x)
+      (instance? clojure.lang.Seqable x)
+      (instance? Iterable x)
+      (instance? java.util.Map x)
+      (string? x)
+      (nil? x)
+      (-> x .getClass .isArray)))
+
+(defn empty-or-nil? [x]
+  "Returns true if x is either nil or empty if it's sequable."
+  (or (nil? x) (and (sequable? x) (empty? x))))
+
+(defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
+
+(defn assoc-when [m & kvs]
+  "Assocs entries with not-empty-or-nil values into m."
+  (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))

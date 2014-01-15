@@ -51,8 +51,20 @@
     (fact "Inforequest is an open inforequest"
       (:openInfoRequest application) => true)
 
-    (let [email          (last-email)
-          [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain]))]
-      (:to email) => "erajorma@takahikia.fi"
-      (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
-      (count token) => pos?)))
+    (fact "Auhtority receives email about the new oir"
+      (let [email          (last-email)
+           [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
+       (:to email) => "erajorma@takahikia.fi"
+       (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
+       (count token) => pos?))
+
+    (comment-application application-id pena)
+
+    (fact "Auhtority receives email about the comment"
+      (let [email          (last-email)
+           [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
+       (:to email) => "erajorma@takahikia.fi"
+       (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
+       (count token) => pos?)))
+
+  )
