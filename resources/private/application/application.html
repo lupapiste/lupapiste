@@ -116,6 +116,7 @@
                 <a data-bind="visible: !_.contains(['sent', 'verdictGiven', 'closed'], $root.application.state()),
                               ltext: 'application.linkPermitRemoveSelected',
                               click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                   data-test-id="test-remove-link-permit"
                    href="#" class="remove-link-permit"></a>
               </span>
 
