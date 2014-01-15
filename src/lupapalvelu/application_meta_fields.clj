@@ -57,13 +57,13 @@
     0))
 
 (defn- count-document-modifications-per-doc [user app]
-  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
+  (if (= (:role user) "authority")
     (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
     {}))
 
 
 (defn- count-document-modifications [user app]
-  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
+  (if (= (:role user) "authority") (not (:infoRequest app))
     (reduce + 0 (vals (:documentModificationsPerDoc app)))
     0))
 
