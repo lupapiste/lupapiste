@@ -124,7 +124,7 @@
   (vector
     operation-tree-for-R
     operation-tree-for-environment-R
-    (when (env/feature? :poikkari) operation-tree-for-P)
+    operation-tree-for-P
     (when (env/feature? :ymparisto) operation-tree-for-Y)
     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
 
