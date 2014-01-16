@@ -247,7 +247,7 @@
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]
-    (when (every? #(not (= % new-organization)) old-orgs)
+    (when (every? #(not= % new-organization) old-orgs)
       (update-user-by-email email {:organizations (merge old-orgs new-organization)}))))
 
 

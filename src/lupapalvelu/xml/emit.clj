@@ -21,7 +21,7 @@
           ns (if (:ns model)
                (:ns model)
                prev-ns)]
-      (when (not (nil? current-data))
+      (when-not (nil? current-data)
         (if (sequential? current-data)
           (for [item current-data]
             (create-element-hierarcy item model ns))
