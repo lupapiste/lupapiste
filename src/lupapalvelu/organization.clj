@@ -41,12 +41,6 @@
       (for [{id :id scopes :scope} id-and-scopes
             {:keys [municipality]} scopes] municipality))))
 
-(defn- find-user-organizations [user]
-  (mongo/select :organizations {:_id {$in (:organizations user)}}))
-
-(defn- find-user-municipalities [user]
-  (distinct (reduce into [] (map :municipalities (find-user-organizations user)))))
-
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
   [{scope :scope}]
@@ -77,7 +71,7 @@
    :roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations] :as user} :user}]
-  (let [orgs (find-user-organizations user)
+  (let [orgs (mongo/select :organizations {:_id {$in (:organizations user)}})
         organization (first orgs)
         ops (organization-operations organization)]
     (ok :organization (assoc organization :operations-attachments ops)
