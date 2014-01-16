@@ -35,7 +35,7 @@
 ;    (clojure.pprint/pprint mapping)
 ;    (println "\n")
 
-    (mapping-to-krysp/save-jatkoaika-as-krysp jatkoaika-application "fi" {:yleiset-alueet-ftp-user "sipoo"})
+    (mapping-to-krysp/save-jatkoaika-as-krysp jatkoaika-application "fi" {:krysp {:YA {:ftpUser "sipoo"}}})
 
     (fact "xml exist" xml => truthy)
 

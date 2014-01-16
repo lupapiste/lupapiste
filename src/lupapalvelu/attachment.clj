@@ -59,15 +59,9 @@
                                                      :suunnittelutarveratkaisu
                                                      :ymparistolupa]]
 
-        attachment-tree
-        (if (env/feature? :rakentamisen-aikaiset-erityissuunnitelmat)
-          (conj attachment-tree :rakentamisen_aikaiset [:erityissuunnitelma])
-          attachment-tree)
+        attachment-tree (conj attachment-tree :rakentamisen_aikaiset [:erityissuunnitelma])
 
-        attachment-tree
-        (if (env/feature? :architect-info)
-          (conj attachment-tree :osapuolet attachment-types-osapuoli)
-          attachment-tree)
+        attachment-tree (conj attachment-tree :osapuolet attachment-types-osapuoli)
 
         attachment-tree
         (conj attachment-tree :muut [:energiataloudellinen_selvitys

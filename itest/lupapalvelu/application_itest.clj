@@ -252,17 +252,17 @@
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
 
-(fact "Merging building information from KRYSP does not overwrite the rest of the document"
+(fact* "Merging building information from KRYSP does not overwrite the rest of the document"
   (let [application-id  (create-app-id pena :municipality "753")
         resp            (command pena :add-operation :id application-id :operation "kayttotark-muutos")
         app             (query-application pena application-id)
         rakmuu-doc      (domain/get-document-by-name app "rakennuksen-muuttaminen")
         resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
         updated-app     (query-application pena application-id)
-        building-info   (command pena :get-building-info-from-legacy :id application-id)
+        building-info   (command pena :get-building-info-from-wfs :id application-id)
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
-        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id)
+        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id) => ok?
         merged-app      (query-application pena application-id)
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"

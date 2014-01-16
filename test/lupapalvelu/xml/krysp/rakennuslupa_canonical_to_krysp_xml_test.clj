@@ -31,7 +31,7 @@
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     ;; TODO: own test
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo"}}})
 
     ;(clojure.pprint/pprint application)
 

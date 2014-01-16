@@ -19,7 +19,7 @@
 
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     ;; TODO: own test
-    (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:poikkari-ftp-user "sipoo"})
+    (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "sipoo"}}})
 
 
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)

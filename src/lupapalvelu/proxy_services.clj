@@ -71,6 +71,21 @@
       (resp/json (wfs/feature-to-address-details (first features)))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn property-info-by-wkt-proxy [request]
+  (let [{wkt :wkt} (:params request)
+        type (re-find #"^POINT|^LINESTRING|^POLYGON" wkt)
+        coords (s/replace wkt #"^POINT|^LINESTRING|^POLYGON" "")
+        features (case type
+                   "POINT" (let [[x y] (s/split (re-find #"\d+ \d+" coords) #" ")]
+                             (wfs/property-info-by-point x y))
+                   "LINESTRING" (wfs/property-info-by-line (s/split (s/replace coords #"[\(\)]" "") #","))
+                   "POLYGON" (let [outterring (first (s/split coords #"\)" 1))] ;;; pudotetaan reiat pois
+                               (wfs/property-info-by-polygon (s/split (s/replace outterring #"[\(\)]" "") #",")))
+                   nil)]
+    (if features
+      (resp/json (map wfs/feature-to-property-info features))
+      (resp/status 503 "Service temporarily unavailable"))))
+
 ;
 ; Utils:
 ;
@@ -100,4 +115,6 @@
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
-               "get-address" get-addresses-proxy})
+               "get-address" get-addresses-proxy
+               "property-info-by-wkt" property-info-by-wkt-proxy})
+

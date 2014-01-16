@@ -42,7 +42,7 @@
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
     ;; TODO: own test
     (mapping-to-krysp/save-application-as-krysp
-      application "fi" application {:yleiset-alueet-ftp-user "sipoo"})
+      application "fi" application {:krysp {:YA {:ftpUser "sipoo"}}})
 
     (fact "xml exist" xml => truthy)
 
