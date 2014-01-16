@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Adding and removing of link permits
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
