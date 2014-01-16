@@ -45,7 +45,7 @@
   (mongo/select :organizations {:_id {$in (:organizations user)}}))
 
 (defn- find-user-municipalities [user]
-  (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+  (distinct (reduce into [] (map :municipalities (find-user-organizations user)))))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
@@ -179,7 +179,7 @@
       (when-not result (fail! :error.unknown-organization :municipality municipality :permitType permit-type))
       (let [inforequests-enabled (:inforequest-enabled result)
             new-applications-enabled (:new-application-enabled result)
-            name-map (-> result :name)
+            name-map (:name result)
             ;; if name of the organization is not set in current language, then use the name that is set for it
             org-name (if ((keyword lang) name-map)
                        ((keyword lang) name-map)

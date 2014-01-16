@@ -294,7 +294,7 @@
 (defn attachment-latest-file-id
   "Gets latest file-id from attachment."
   [application attachmentId]
-  (->> (attachment-file-ids application attachmentId) last))
+  (last (attachment-file-ids application attachmentId)))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"

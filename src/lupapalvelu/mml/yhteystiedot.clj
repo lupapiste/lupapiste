@@ -21,7 +21,7 @@
     ((keyword abbrev) translation)))
 
 (defn- ->henkilo [henkilo-xml]
-  (if (empty? henkilo-xml) nil
+  (when-not (empty? henkilo-xml)
     (assoc-when
       {}
       ;; OL=omaan lukuun (oletus), PA=perustettavan asunto-osakeyhtion lukuun, PY=perustettavan yhtion lukuun

@@ -251,11 +251,11 @@
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
-        osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}
+        osapuolitieto (vec (filter :Osapuoli [{:Osapuoli hakija}
                                                   (:osapuolitieto tyomaasta-vastaava)]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
-                             (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
+                             (vec (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
                                                               (:vastuuhenkilotieto maksaja)])))
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (->
@@ -273,7 +273,7 @@
 
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
                                       (flatten
-                                        (conj []
+                                        (vector
                                           (when-let [erikoiskuvaus-operaatiosta (ya-operation-type-to-additional-usage-description operation-name-key)]
                                             {:LupakohtainenLisatieto {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta"
                                                                       :arvo erikoiskuvaus-operaatiosta}})
@@ -345,8 +345,8 @@
                    (to-xml-date (:submitted application)))
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
         maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
-        osapuolitieto (into [] (filter :Osapuoli [{:Osapuoli hakija}]))
-        vastuuhenkilotieto (into [] (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))
+        osapuolitieto (vec (filter :Osapuoli [{:Osapuoli hakija}]))
+        vastuuhenkilotieto (vec (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus :value)
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false

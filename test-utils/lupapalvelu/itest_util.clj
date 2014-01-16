@@ -47,7 +47,7 @@
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
 (defn decode-response [resp]
-  (assoc resp :body (-> (:body resp) json/decode keywordize-keys)))
+  (update-in resp [:body] -> json/decode keywordize-keys))
 
 (defn printed [x] (println x) x)
 

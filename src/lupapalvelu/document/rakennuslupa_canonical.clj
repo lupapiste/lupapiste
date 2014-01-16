@@ -247,9 +247,8 @@
                       :asianTiedot (get-asian-tiedot documents)
                       :lisatiedot (get-lisatiedot documents lang)}}}}
         canonical (if link-permit-data
-                    (-> canonical
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                        (get-viitelupatieto link-permit-data)))
+                    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
+                      (get-viitelupatieto link-permit-data))
                     canonical)
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
                             (= operation-name "suunnittelijan-nimeaminen")
