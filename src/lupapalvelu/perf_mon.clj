@@ -16,7 +16,7 @@
 ;;
 
 (defn instrument [f v]
-  (alter-var-root v f (str (. v ns) \/ (. v sym))))
+  (alter-var-root v f (str (.ns v) \/ (.sym v))))
 
 (defn instrument-ns [f & namespaces]
   (doseq [n namespaces
@@ -60,12 +60,12 @@
     (if (bypass? request)
       (handler request)
       (binding [*perf-context* (atom [])]
-        (let [start (System/nanoTime)] 
+        (let [start (System/nanoTime)]
           (try
             (handler request)
             (finally
               (let [end (System/nanoTime)]
-                (mc/insert "perf-mon" 
+                (mc/insert "perf-mon"
                            {:ts (System/currentTimeMillis)
                             :duration (- end start)
                             :uri (get request :uri)
@@ -129,7 +129,7 @@
 
 (defpage [:post "/perfmon/browser-timing"] {timing :timing}
   (let [user-agent (-> (request/ring-request) :headers (get "user-agent"))]
-    (mc/insert "perf-mon-timing" 
+    (mc/insert "perf-mon-timing"
       {:ts (System/currentTimeMillis)
        :ua user-agent
        :timing timing}
