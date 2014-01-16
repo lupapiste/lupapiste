@@ -26,13 +26,11 @@
 
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
-   :sftp-user-key    :rakennus-ftp-user
    :sftp-directory   "/rakennus"
    :case-xml-element :RakennusvalvontaAsia})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes         []
-   :sftp-user-key    :yleiset-alueet-ftp-user
    :sftp-directory   "/yleiset_alueet"
    :case-xml-element :yleinenAlueAsiatieto})
 
@@ -44,7 +42,6 @@
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
-   :sftp-user-key    :poikkari-ftp-user
    :sftp-directory   "/poikkeusasiat"
    :case-xml-element :Popast})
 
@@ -61,9 +58,6 @@
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
-
-(defn get-sftp-user-key [permit-type]
-  (get-metadata permit-type :sftp-user-key))
 
 (defn get-case-xml-element [permit-type]
   (get-metadata permit-type :case-xml-element))

@@ -985,10 +985,10 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defn- get-application-xml [{:keys [id organization permitType]}]
-  (if-let [legacy   (organization/get-legacy organization)]
+(defn- get-application-xml [{:keys [id permitType] :as application}]
+  (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [fetch (permit/get-application-xml-getter permitType)]
-      (fetch legacy id))
+      (fetch url id))
     (fail! :error.no-legacy-available)))
 
 (defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
@@ -1033,10 +1033,10 @@
    :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (if-let [legacy (organization/get-legacy organization)]
+  (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
-          kryspxml     (krysp/building-xml legacy propertyId)
+          kryspxml     (krysp/building-xml url propertyId)
           updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
           ; Path should exist in schema!
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
@@ -1046,12 +1046,12 @@
       (ok))
     (fail :error.no-legacy-available)))
 
-(defcommand get-building-info-from-legacy
+(defcommand get-building-info-from-wfs
   {:parameters [id]
    :roles      [:applicant :authority]}
   [{{:keys [organization propertyId] :as application} :application}]
-  (if-let [legacy   (organization/get-legacy organization)]
-    (let [kryspxml  (krysp/building-xml legacy propertyId)
+  (if-let [{url :url} (organization/get-krysp-wfs application)]
+    (let [kryspxml  (krysp/building-xml url propertyId)
           buildings (krysp/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
