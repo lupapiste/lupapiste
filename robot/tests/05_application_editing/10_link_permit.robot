@@ -6,17 +6,6 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-# TODO:
-# Lisays:
-# - tyyppi on Lupapistetunnus tai Kuntalupatunnus
-# - Kuntalupatunnus ei nay linkkina
-#
-# Poisto:
-# - Poista-linkki nakyy
-# -
-# Viiteluvalla nakyy linkki oikein
-
-
 Sonja prepares the application that will later act as link permit
   Sonja logs in
   ${secs} =  Get Time  epoch
