@@ -12,6 +12,7 @@
             [noir.session :as session]
             [noir.cookies :as cookies]
             [sade.env :as env]
+            [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
             [lupapalvelu.core :refer [ok fail now] :as core]
@@ -104,9 +105,17 @@
 ;; Status
 ;;
 
+(defn remove-sensitive-keys [m]
+  (util/postwalk-map
+    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(password.*|key)$" (name k))) true)))
+    m))
+
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
 (status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
 (status/defstatus :mode  env/mode)
+(status/defstatus :system-env (remove-sensitive-keys (System/getenv)))
+(status/defstatus :system-properties (remove-sensitive-keys (System/getProperties)))
+(status/defstatus :sade-env (remove-sensitive-keys (env/get-config)))
 
 ;;
 ;; Commands

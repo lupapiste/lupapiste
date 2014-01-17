@@ -1,7 +1,17 @@
 (ns sade.util
-  (:require [sade.strings :refer [numeric? decimal-number?]]
+  (:require [clojure.walk :refer [postwalk prewalk]]
+            [sade.strings :refer [numeric? decimal-number?]]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]))
+
+
+(defn postwalk-map
+  "traverses m and applies f to all maps within"
+  [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
+
+(defn prewalk-map
+  "traverses m and applies f to all maps within"
+  [f m] (prewalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
 
 ; from clojure.contrib/core
 
@@ -144,7 +154,7 @@
       (tc/to-long d))))
 
 
-(defn sequable? [x] 
+(defn sequable? [x]
   "Returns true if x can be converted to sequence."
   (or (seq? x)
       (instance? clojure.lang.Seqable x)
