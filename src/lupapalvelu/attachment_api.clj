@@ -42,7 +42,7 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :validators [(partial if-not-authority-states-must-match #{:verdictGiven})
+   :pre-checks [(partial if-not-authority-states-must-match #{:verdictGiven})
                 (permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven]
    :description "Sends such attachments to backing system that are not yet sent."}
@@ -242,7 +242,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked
+   :pre-checks [attachment-is-not-locked
                 (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
@@ -370,7 +370,7 @@
 (defcommand stamp-attachments
   {:parameters [:id files xMargin yMargin]
    :roles      [:authority]
-   :states     [:open :submitted :complement-needed :verdictGiven]
+   :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (ok :job (make-stamp-job

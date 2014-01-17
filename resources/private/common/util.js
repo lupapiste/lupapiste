@@ -54,13 +54,20 @@ var util = (function() {
     return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
   }
 
-  function zp(e) { return zeropad.apply(null, e); }
-
   function propertyIdToDbFormat(id) {
     if (!id) { return null; }
     if (propertyIdDbFormat.test(id)) { return id; }
     if (!propertyIdHumanFormat.test(id)) { throw "Invalid property ID: " + id; }
     return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
+  }
+
+  function zp(e) { return zeropad.apply(null, e); }
+
+  function buildingName(building) {
+    var buildingObj = (typeof building.index === "function") ? ko.mapping.toJS(building) : building;
+    var usage = buildingObj.usage ? " (" + buildingObj.usage + ")" : "";
+    var area = (buildingObj.area || "?") + " " + loc("unit.m2");
+    return buildingObj.index + usage + " - " + area;
   }
 
   function makeAjaxMask() {
@@ -115,6 +122,7 @@ var util = (function() {
       toHumanFormat: propertyIdToHumanFormat,
       toDbFormat: propertyIdToDbFormat
     },
+    buildingName: buildingName,
     nop: nop,
     constantly: function(value) { return function() { return value; }; },
     isNum: isNum,

@@ -8,10 +8,10 @@
 
 (def id "75300301050006")
 
-(def local-legacy  (str (server-address) "/dev/krysp"))
+(def local-krysp  (str (server-address) "/dev/krysp"))
 
 (fact "two buildings can be extracted"
-  (let [xml (building-xml local-legacy id)]
+  (let [xml (building-xml local-krysp id)]
     xml => truthy
 
     (let [buildings (->buildings-summary xml)]
@@ -37,7 +37,7 @@
                                :created    "1998"}))))
 
 (fact "converting building krysp to lupapiste domain model"
-  (let [xml (building-xml local-legacy id)]
+  (let [xml (building-xml local-krysp id)]
     xml => truthy
 
     (fact "invalid buildingid returns nil"
@@ -121,12 +121,18 @@
                               :yritysnimi "Testiyritys 11477"}})))))
 
 (fact "converting verdict krysp to lupapiste domain model"
-  (let [xml (application-xml local-legacy id)]
+  (let [xml (application-xml local-krysp id)]
     xml => truthy
-    (->verdicts xml :RakennusvalvontaAsia ->verdict)))
+    (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
+
+(fact "converting poikkeamis verdict krysp to lupapiste domain model"
+  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-krysp id)]
+    xml => truthy
+    (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
+
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
-  (let [xml (ya-application-xml local-legacy id)]
+  (let [xml (ya-application-xml local-krysp id)]
     xml => truthy
-    (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)))
+    (count (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)) => 1))
 

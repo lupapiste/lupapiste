@@ -40,8 +40,8 @@
                                                    :rasitesopimus
                                                    :rasitustodistus
                                                    :todistus_erityisoikeuden_kirjaamisesta]
-                         :rakennuspaikka [:kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma 
-                                          :ote_alueen_peruskartasta 
+                         :rakennuspaikka [:kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma
+                                          :ote_alueen_peruskartasta
                                           :ote_asemakaavasta_jos_asemakaava_alueella
                                           :ote_kiinteistorekisteristerista
                                           :ote_ranta-asemakaavasta
@@ -53,28 +53,22 @@
                                         :pohjapiirros
                                         :leikkauspiirros
                                         :julkisivupiirros]
-                         :ennakkoluvat_ja_lausunnot [:elyn_tai_kunnan_poikkeamapaatos 
+                         :ennakkoluvat_ja_lausunnot [:elyn_tai_kunnan_poikkeamapaatos
                                                      :naapurien_suostumukset
                                                      :selvitys_naapurien_kuulemisesta
                                                      :suunnittelutarveratkaisu
                                                      :ymparistolupa]]
 
-        attachment-tree
-        (if (env/feature? :rakentamisen-aikaiset-erityissuunnitelmat)
-          (conj attachment-tree :rakentamisen_aikaiset [:erityissuunnitelma])
-          attachment-tree)
+        attachment-tree (conj attachment-tree :rakentamisen_aikaiset [:erityissuunnitelma])
+
+        attachment-tree (conj attachment-tree :osapuolet attachment-types-osapuoli)
 
         attachment-tree
-        (if (env/feature? :architect-info)
-          (conj attachment-tree :osapuolet attachment-types-osapuoli)
-          attachment-tree)
-
-        attachment-tree
-        (conj attachment-tree :muut [:energiataloudellinen_selvitys 
-                                     :ilmanvaihtosuunnitelma 
-                                     :ilmoitus_vaestonsuojasta 
-                                     :jatevesijarjestelman_rakennustapaseloste 
-                                     :julkisivujen_varityssuunnitelma 
+        (conj attachment-tree :muut [:energiataloudellinen_selvitys
+                                     :ilmanvaihtosuunnitelma
+                                     :ilmoitus_vaestonsuojasta
+                                     :jatevesijarjestelman_rakennustapaseloste
+                                     :julkisivujen_varityssuunnitelma
                                      :kalliorakentamistekninen_suunnitelma
                                      :kerrosalaselvitys
                                      :liikkumis_ja_esteettomyysselvitys
@@ -269,7 +263,7 @@
     (let [[type-group type-id] (->> match (drop 1) (map keyword))]
       {:type-group type-group :type-id type-id})))
 
-(defn allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
+(defn- allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
   (let [type-group (keyword type-group)
         type-id (keyword type-id)]
     (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
@@ -277,7 +271,7 @@
 
 (defn allowed-attachment-type-for-application? [application attachment-type]
   (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
-    (allowed-attachment-type-for? allowedAttachmentTypes attachment-type)))
+    (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type)))
 
 (defn get-attachment-info
   "gets an attachment from application or nil"

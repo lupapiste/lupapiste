@@ -26,6 +26,31 @@
      maasto         [(:username (:maasto conf))     (:password (:maasto conf))]
      nearestfeature [(:username (:maasto conf))     (:password (:maasto conf))]}))
 
+(def rekisteriyksikkolaji {"0" {:fi "(Tuntematon)" :sv "(Ok\u00e4nd)"}
+                           "1" {:fi "Tila" :sv "L\u00e4genhet"}
+                           "3" {:fi "Valtion mets\u00e4maa" :sv "Statens skogsmark"}
+                           "4" {:fi "Lunastusyksikk\u00f6" :sv "Inl\u00f6sningsenhet"}
+                           "5" {:fi "Kruununkalastus" :sv "Kronofiske"}
+                           "6" {:fi "Yleiseen tarpeeseen erotettu alue" :sv "Omr\u00e5de avskilt f\u00f6r allm\u00e4nt behov"}
+                           "7" {:fi "Erillinen vesij\u00e4tt\u00f6" :sv "Frist\u00e5ende tillandning"}
+                           "8" {:fi "Yleinen vesialue" :sv "Allm\u00e4nt vattenomr\u00e5de"}
+                           "9" {:fi "Yhteinen alue" :sv "Samf\u00e4llt omr\u00e5de"}
+                           "10" {:fi "Yhteismets\u00e4" :sv "Samf\u00e4lld skog"}
+                           "11" {:fi "Tie- tai liit\u00e4nn\u00e4isalue" :sv "V\u00e4g- eller biomr\u00e5de"}
+                           "12" {:fi "Lakkautettu tie- tai liit\u00e4nn\u00e4isalue" :sv "Indraget v\u00e4g- eller biomr\u00e5de"}
+                           "13" {:fi "Tontti" :sv "Tomt"}
+                           "14" {:fi "Yleinen alue" :sv "Allm\u00e4nt omr\u00e5de"}
+                           "15" {:fi "Selvitt\u00e4m\u00e4t\u00f6n yhteinen alue" :sv "Outrett samf\u00e4llt omr\u00e5de"}
+                           "17" {:fi "Yhteinen vesialue" :sv "Samf\u00e4llt vattenomr\u00e5de"}
+                           "18" {:fi "Yhteinen maa-alue" :sv "Samf\u00e4llt jordomr\u00e5de"}
+                           "19" {:fi "Suojelualuekiinteist\u00f6" :sv "Skyddsomr\u00e5desfastighet"}
+                           "21" {:fi "Tie- tai liit\u00e4nn\u00e4isalue tieoikeudella" :sv "V\u00e4g- eller biomr\u00e5de med v\u00e4gr\u00e4tt"}
+                           "22" {:fi "Tie- tai liit\u00e4nn\u00e4isalue omistusoikeudella" :sv "V\u00e4g- eller biomr\u00e5de med \u00e4gander\u00e4tt"}
+                           "23" {:fi "Yleisen alueen lis\u00e4osa" :sv "Allm\u00e4nna omr\u00e5dets till\u00e4ggsomr\u00e5de"}
+                           "24" {:fi "Tuntematon kunnan rekisteriyksikk\u00f6" :sv "Ok\u00e4nd kommunens registerenhet"}
+                           "25" {:fi "Yhteinen erityinen etuus" :sv "Gemensam s\u00e4rskild f\u00f6rm\u00e5n"}
+                           "99" {:fi "Selvitt\u00e4m\u00e4t\u00f6n alue" :sv "Outrett omr\u00e5de"}})
+
 ;;
 ;; DSL to WFS queries:
 ;;
@@ -69,6 +94,12 @@
 
 (defn point [x y]
   (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
+
+(defn line [c]
+  (format "<gml:LineString><gml:posList srsDimension='2'>%s</gml:posList></gml:LineString>" (s/join " " c)))
+
+(defn polygon [c]
+  (format "<gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:posList srsDimension='2'>%s</gml:posList></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>" (s/join " " c)))
 
 (defn property-name [n]
   (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
@@ -147,6 +178,16 @@
      :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
             :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
 
+(defn feature-to-property-info [feature]
+  (when feature
+    (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikonPalstanTietoja :ktjkiiwfs:RekisteriyksikonPalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
+    {:rekisteriyksikkolaji (let [id (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikkolaji text))]
+                             {:id id
+                              :selite (rekisteriyksikkolaji id)})
+     :kiinttunnus (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kiinteistotunnus text))
+     :x x
+     :y y})))
+
 (defn response->features [input-xml]
   (when input-xml
     (let [features (-> input-xml
@@ -220,19 +261,52 @@
       (filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
+(defn property-info-by-point [x y]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (point x y))))))
+
+(defn property-info-by-line [l]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (line l))))))
+
+(defn property-info-by-polygon [p]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (property-name "ktjkiiwfs:kiinteistotunnus")
+      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+          (polygon p))))))
 ;;
 ;; Raster images:
 ;;
 (defn raster-images [request service]
-  (let [layer (get-in request [:params "LAYERS"])]
+  (let [layer (get-in request [:params "LAYERS"])
+        {:keys [host path]} (env/value :geoserver :wms)
+        wms-url (str host path)]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :basic-auth (:raster auth)
                  :as :stream})
-      ;; TODO: get GeoServer URL from conf
-      "wms" (http/get "http://geoserver-qa.lupapiste.fi:8080/geoserver/lupapiste/wms"
+      "wms" (http/get wms-url
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :as :stream}))))

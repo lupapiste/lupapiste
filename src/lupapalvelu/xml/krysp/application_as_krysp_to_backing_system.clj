@@ -8,11 +8,16 @@
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]))
 
 (defn- get-output-directory [permit-type organization]
-  (let [sftp-user-key (permit/get-sftp-user-key permit-type)]
-    (str (env/value :outgoing-directory) "/" (get organization sftp-user-key) (permit/get-sftp-directory permit-type))))
+  (let [sftp-user (get-in organization [:krysp (keyword permit-type) :ftpUser])]
+    (str (env/value :outgoing-directory) "/" sftp-user (permit/get-sftp-directory permit-type))))
 
 (defn- get-begin-of-link [permit-type]
   (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
+
+(defn resolve-output-directory [application]
+  (let [permit-type (permit/permit-type application)
+        organization (organization/get-organization (:organization application))]
+    (get-output-directory permit-type organization)))
 
 (defn save-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")

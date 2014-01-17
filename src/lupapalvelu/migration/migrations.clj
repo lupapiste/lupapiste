@@ -5,6 +5,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
             [lupapalvelu.operations :as op]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in]]
@@ -160,15 +161,39 @@
 (defmigration vetuma-token-cleanup-LUPA-976
   (mongo/drop-collection :vetuma))
 
-
-(defmigration set-missing-default-values-for-keys-in-applications-LUPA-1172
-  (let [missing-keys-in-mongo [:submitted :authority :neighbors :verdicts :tasks :statements]
-        keys-and-default-values (map identity
-                                  (select-keys
-                                    (lupapalvelu.domain/application-skeleton)
-                                    missing-keys-in-mongo))]
+(defmigration set-missing-default-values-for-keys-in-applications-LUPA-642
+  (let [missing-keys-in-mongo [:buildings :shapes]
+        keys-and-default-values (select-keys domain/application-skeleton missing-keys-in-mongo)]
     (doseq [collection [:applications :submitted-applications]
             [k d] keys-and-default-values]
       (mongo/update-by-query collection {k {$exists false}} {$set {k d}}))))
 
+(defmigration drop-pistesijanti-from-documents
+  (while (not-empty (mongo/select :applications {"documents.data.osoite.pistesijanti" {$exists true}}))
+    (mongo/update-by-query :applications {"documents" {$elemMatch {"data.osoite.pistesijanti" {$exists true}}}} {$unset {"documents.$.data.osoite.pistesijanti" 1}})))
 
+(defmigration kryps-config
+  (doseq [organization (mongo/select :organizations)]
+    (when-let [url (:legacy organization)]
+      (doseq [permit-type (map :permitType (:scope organization))]
+        (mongo/update-by-id :organizations (:id organization)
+          {$set {(str "krysp." permit-type ".url") url
+                 (str "krysp." permit-type ".version") "2.1.2"}
+           $unset {:legacy 1}})))
+
+    (when-let [ftp (:rakennus-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.R.ftpUser ftp}
+         $unset {:rakennus-ftp-user 1}}))
+
+    (when-let [ftp (:yleiset-alueet-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.YA.ftpUser ftp}
+         $unset {:yleiset-alueet-ftp-user 1}}))
+
+    (when-let [ftp (:poikkari-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.P.ftpUser ftp}
+         $unset {:poikkari-ftp-user 1}}))
+    )
+  )

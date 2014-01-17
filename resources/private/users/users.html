@@ -14,15 +14,24 @@
       <div class="filters" data-bind="visible: show.filters">
         <span data-bind="visible: show.roleFilter">
           <span data-bind="ltext: 'users.filters.role'"></span>
-          <select data-bind="options: availableRoles, value: filters.role, optionsText: 'name', optionsValue: 'id'"></select>
+          <select
+            data-bind="options: availableRoles, value: filters.role, optionsText: 'name', optionsValue: 'id'"
+            data-test-id="users-list-select-role">
+          </select>
         </span>
         <span data-bind="visible: show.enabledFilter">
           <span data-bind="ltext: 'users.filters.enabled'"></span>
-          <select data-bind="options: availableEnableds, value: filters.enabled, optionsText: 'name', optionsValue: 'id'"></select>
+          <select
+            data-bind="options: availableEnableds, value: filters.enabled, optionsText: 'name', optionsValue: 'id'"
+            data-test-id="users-list-select-enabled">
+          </select>
         </span>
-        <span data-bind="visible: show.search">
+        <span data-bind="visible: show.search" data-test-id="users-list-filter-role">
           <span data-bind="ltext: 'users.filters.search'"></span>
-          <input data-bind="value: filters.search, valueUpdate: 'afterkeydown'" type="text"></input>
+          <input
+            data-bind="value: filters.search, valueUpdate: 'afterkeydown'"
+            type="text"
+            data-test-id="users-list-input-search"/>
         </span>
       </div>
     

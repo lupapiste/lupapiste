@@ -92,8 +92,7 @@
                           {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
                           {:name "postinumero" :type :string :subtype :zip :size "s"}
-                          {:name "postitoimipaikannimi" :type :string :size "m"}
-                          {:name "pistesijanti" :type :string}]}])
+                          {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
@@ -241,6 +240,8 @@
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
+
+(def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
 (def muutostapa {:name "muutostapa" :type :select :required true
                  :body [{:name "poisto"}
@@ -586,8 +587,8 @@
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-    {:info {:name "uusiRakennus" :approvable true}
-     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+   {:info {:name "uusiRakennus" :approvable true}
+    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
     {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
@@ -658,6 +659,9 @@
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+    {:info {:name "aloitusoikeus" :removable false :approvable true}
+     :body aloitusoikeus}
 
     {:info {:name "lisatiedot"
             :order 100}

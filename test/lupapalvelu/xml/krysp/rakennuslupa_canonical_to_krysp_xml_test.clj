@@ -5,6 +5,7 @@
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
+                                                                      aloitusoikeus-hakemus
                                                                       ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
                                                                 save-aloitusilmoitus-as-krysp
@@ -30,7 +31,7 @@
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     ;; TODO: own test
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo"}}})
 
     ;(clojure.pprint/pprint application)
 
@@ -74,7 +75,10 @@
     (do-test application-tyonjohtajan-nimeaminen))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen)))
+    (do-test application-suunnittelijan-nimeaminen))
+
+  (fact "aloitusilmoitus -> canonical -> xml"
+    (do-test aloitusoikeus-hakemus)))
 
 (let [application (assoc application-rakennuslupa :state "verdictGiven")
       user        {:id "777777777777777777000017"

@@ -14,11 +14,11 @@
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
-;; Read the Krysp from Legacy
+;; Read the Krysp from municipality Web Feature Service
 ;;
 
-(defn legacy-is-alive?
-  "checks if the legacy system is Web Feature Service -enabled. kindof."
+(defn wfs-is-alive?
+  "checks if the given system is Web Feature Service -enabled. kindof."
   [url]
   (when-not (s/blank? url)
     (try
@@ -27,17 +27,20 @@
          (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml version=\"1.0\""))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
      (catch Exception e
-       (warn (str "Could not connect to legacy: " url ", exception was " e))))))
+       (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
-(def building-type "typeName=rakval%3AValmisRakennus")
-(def case-type     "typeName=rakval%3ARakennusvalvontaAsia")
-(def ya-type       "typeName=yak%3AYleisetAlueet")
+(def building-type  "typeName=rakval%3AValmisRakennus")
+(def case-type      "typeName=rakval%3ARakennusvalvontaAsia")
+(def poik-case-type "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
+(def ya-type        "typeName=yak%3AYleisetAlueet")
 
 ;; For building filters
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 (def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
 (def yleisten-alueiden-lp-lupatunnus "yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def poik-lp-lupatunnus "ppst:luvanTunnistetiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+
 
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
@@ -76,19 +79,21 @@
     (debug "Get building: " url)
     (cr/get-xml url)))
 
-(defn application-xml [server id]
-  (let [url (wfs-krysp-url-with-service server case-type (property-equals asian-lp-lupatunnus id))]
-    (debug "Get application: " url)
-    (cr/get-xml url)))
-
-(permit/register-function permit/R :xml-from-krysp application-xml)
-(permit/register-function permit/P :xml-from-krysp application-xml)
+(defn application-xml
+  ([server id]
+    (application-xml case-type asian-lp-lupatunnus server id))
+  ([ct tunnus-path server id ]
+    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))]
+      (debug "Get application: " url)
+      (cr/get-xml url))))
 
 (defn ya-application-xml [server id]
   (let [options (post-body-for-ya-application id)]
     (debug "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options)))
 
+(permit/register-function permit/R  :xml-from-krysp application-xml)
+(permit/register-function permit/P  :xml-from-krysp (partial application-xml poik-case-type poik-lp-lupatunnus))
 (permit/register-function permit/YA :xml-from-krysp ya-application-xml)
 
 (defn- ->building-ids [id-container xml-no-ns]

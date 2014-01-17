@@ -96,7 +96,7 @@
 
 (defcommand give-statement
   {:parameters  [id statementId status text]
-   :validators  [statement-exists statement-owner #_statement-not-given]
+   :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
    :description "authrority-roled statement owners can give statements - notifies via comment."}

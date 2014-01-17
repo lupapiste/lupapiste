@@ -13,7 +13,7 @@
           </div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span>
+          <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
              data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
@@ -92,7 +92,7 @@
             <p data-bind="ltext: 'application.permitSubtypes'"></p>
             <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
-                               attr: { disabled: !$root.authorization.ok('change-permit-sub-type') },
+                               enable: $root.authorization.ok('change-permit-sub-type'),
                                optionsText: function(item) {return loc('permitSubtype.' + item); }">
             </select>
             </span>
@@ -237,7 +237,7 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state()) && features.enabled('rakentamisen-aikaiset-tabi')">
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state())">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
@@ -733,14 +733,46 @@
         </div>
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
+
+          <div data-bind="if: buildings() && buildings().length && $root.authorization.ok('inform-building-construction-started')">
+
+            <table>
+              <thead>
+                <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
+                <tr>
+                  <th data-bind="ltext: 'application.buildingStatus'"></th>
+                  <th data-bind="ltext: 'application.buildingOperation'"></th>
+                  <th data-bind="ltext: 'application.building'"></th>
+                  <th data-bind="ltext: 'application.buildingStartedDate'"></th>
+                  <th data-bind="ltext: 'application.buildingStartedBy'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: buildings">
+                <tr>
+                  <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
+                  <td data-bind="text: util.buildingName($data)"></td>
+                  <td data-bind="text: $data.buildingId"></td>
+                  <td>
+                    <span data-bind="if: !$data.constructionStarted">
+                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
+                    <span data-bind="if: $data.constructionStarted">
+                      <span data-bind="dateString: $data.constructionStarted"></span>
+                    </span>
+                  </td>
+                  <td data-bind="fullName: $data.startedBy"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <div>
             <table data-bind="foreach: taskGroups">
               <thead>
-                <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
+                <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
                 <tr>
-                  <td data-bind="ltext: 'application.taskState'"></td>
-                  <td data-bind="ltext: 'application.taskDisplayName'"></td>
-                  <td data-bind="ltext: 'application.taskClosed'"></td>
+                  <th data-bind="ltext: 'application.taskState'"></th>
+                  <th data-bind="ltext: 'application.taskDisplayName'"></th>
+                  <th data-bind="ltext: 'application.taskClosed'"></th>
                 </tr>
               </thead>
               <tbody data-bind="foreach: tasks">

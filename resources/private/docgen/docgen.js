@@ -200,7 +200,7 @@ var docgen = (function () {
       var span = document.createElement("span");
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       span.className = "form-entry " + sizeClass;
-      
+
 
       // Display text areas in a wide container
       if (subSchema.type === "text") {
@@ -601,7 +601,7 @@ var docgen = (function () {
       select.appendChild(option);
 
       ajax
-        .command("get-building-info-from-legacy", { id: self.appId })
+        .command("get-building-info-from-wfs", { id: self.appId })
         .success(function (data) {
           $.each(data.data, function (i, building) {
             var name = building.buildingId;
@@ -683,13 +683,11 @@ var docgen = (function () {
 
       $.each(self.application.buildings, function (i, building) {
             var name = building.index;
-            var usage = building.usage ? " (" + building.usage + ")" : "";
-            var area = (building.area || "?") + " " + loc("unit.m2");
             var option = document.createElement("option");
             option.value = name;
             option.setAttribute("data-propertyid", building.propertyId);
             option.setAttribute("data-buildingid", building.buildingId);
-            option.appendChild(document.createTextNode(name + usage + " - "+ area));
+            option.appendChild(document.createTextNode(util.buildingName(building)));
             if (selectedOption === name) {
               option.selected = "selected";
             }
@@ -817,7 +815,7 @@ var docgen = (function () {
           elem.setAttribute("data-repeating-id", repeatingId);
           elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-          if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
+          if (subSchema.repeating && !isDisabled(options) && authorizationModel.ok('remove-document-data')) {
             var removeButton = document.createElement("span");
             removeButton.className = "icon remove-grey inline-right";
             removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);

@@ -14,7 +14,9 @@
 (def default-description "operations.tree.default-description")
 
 (def ^:private operation-tree-for-R
-  (let [treepart [["Uuden rakennuksen rakentaminen"
+    {:permit-type permit/R
+     :tree ["Rakentaminen ja purkaminen"
+            [["Uuden rakennuksen rakentaminen"
                    [["Asuinrakennus" :asuinrakennus]
                     ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
                     ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
@@ -38,20 +40,11 @@
                     ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
                     ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
                     ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-                  ["Rakennuksen purkaminen" :purkaminen]]
-        ]
-    {:permit-type permit/R
-     :tree ["Rakentaminen ja purkaminen"
-            (let [treepart (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja)
-                             (conj treepart ["Tyonjohtaja" :tyonjohtajan-nimeaminen])
-                             treepart)
-                  treepart (if (env/feature? :rakentamisen-aikaiset-suunnittelija)
-                             (conj treepart ["Suunnittelija" :suunnittelijan-nimeaminen])
-                             treepart)
-                  treepart (if (env/feature? :jatkoaika)
-                             (conj treepart ["Jatkoaika" :jatkoaika])
-                             treepart)]
-              treepart)]}))
+                  ["Rakennuksen purkaminen" :purkaminen]
+                  ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+                  ["Suunnittelija" :suunnittelijan-nimeaminen]
+                  ["Jatkoaika" :jatkoaika]
+                  ["Aloitusoikeus" :aloitusoikeus]]]})
 
 (def ^:private operation-tree-for-environment-R
   {:permit-type permit/R
@@ -121,7 +114,7 @@
   (vector
     operation-tree-for-R
     operation-tree-for-environment-R
-    (when (env/feature? :poikkari) operation-tree-for-P)
+    operation-tree-for-P
     (when (env/feature? :ymparisto) operation-tree-for-Y)
     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
 
@@ -138,10 +131,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas (let [sc ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"]]
-                                (if (env/feature? :rakentamisen-aikaiset-tyonjohtaja-osapuoli)
-                                  (conj sc "tyonjohtaja")
-                                  sc)))
+(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija" "tyonjohtaja"])
 
 (def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka" "lisatiedot"])
 
@@ -398,6 +388,11 @@
                                    :attachments []}
 
      :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type "R"
+                                   :required ["maksaja"]
+                                   :attachments []}
+
+     :aloitusoikeus               {:schema "aloitusoikeus"
                                    :permit-type "R"
                                    :required ["maksaja"]
                                    :attachments []}
