@@ -7,42 +7,30 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Sonja prepares the application
-#  [Tags]  fail
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Start_ready_app_${secs}
-#  Create application  ${appname}  753  753-416-25-23  YA-kaivulupa  # Vaaditut kentät tarvii täyttää!
   Create application the fast way   ${appname}  753  753-416-25-23  ya-katulupa-vesi-ja-viemarityot
 
 Sonja fills in the application fields required by krysp
-#  [Tags]  fail
   Fill tyoaika fields
   Open tab  parties
   Fill required fields for the parties
 
 Sonja submits the application, approves it and gives it a verdict
-#  [Tags]  fail
   Submit application
   Click enabled by test id  approve-application
   Throw in a verdict
   Wait Until  Element should not be visible  application-inform-construction-ready-btn
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
-#  [Tags]  fail
   Open tab  tasks
   Sets construction started/ready via modal datepicker dialog  application-inform-construction-started-btn  02.06.2018
   Wait until  Application state should be  constructionStarted
   Wait until  Element should be visible  //*[@data-test-id='application-inform-construction-ready-btn']
 
 Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
-#  [Tags]  fail
   Sets construction started/ready via modal datepicker dialog  application-inform-construction-ready-btn  02.07.2018
-  #
-  # TODO: The obligatory values in application would need to be filled before these would work.
-  #       Currently, krysp sending is failing on application approval, and thus e.g. app states are not correct.
-  #       Would need e.g. a new fixture that creates a ready-filled application.
-  #       How much should be done in ftest, versus itest?
-  #
   Wait until  Element should not be visible  //*[@data-test-id='application-inform-construction-ready-btn']
   Wait until  Application state should be  closed
 
