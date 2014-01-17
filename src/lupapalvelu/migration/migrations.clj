@@ -8,8 +8,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.operations :as op]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in]]
-            [sade.common-reader :refer [strip-nils postwalk-map]]))
+            [sade.util :refer [dissoc-in postwalk-map]]
+            [sade.common-reader :refer [strip-nils]]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
