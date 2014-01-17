@@ -75,9 +75,9 @@ Fill tyoaika fields
 
 Fill required fields for the parties
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-parties-tab']
-  Execute Javascript  $("input[value='yritys']").click();
+  Execute Javascript  $("input[value='henkilo']").click();
   # Maksaja's default is Henkilo, that is why we have to wait its type has changed to Yritys.
-  Wait until  Element should be visible  //section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yritysnimi']
+  Wait until  Element should be visible  //section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
   Fill in yritys info  hakija-ya
   Fill in yritys info  yleiset-alueet-maksaja
   Fill in yritys info  tyomaastaVastaava
@@ -87,9 +87,21 @@ Fill in yritys info
   [Arguments]  ${dataDocType}
   ## NOTE: When using another variable (i.e. ${dataDocType}) to set the value of a variable, the keyword "Set Variable" must be used.
   ${docSectionPath} =  Set Variable  //section[@data-doc-type='${dataDocType}']
-  Element should be visible  ${docSectionPath}//input[@data-docgen-path='yritys.yritysnimi']
-  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yritysnimi']  Firma Oy
-  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']  John
-  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
-  Wait until  Textfield Value Should Be  xpath=${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
+  Element should be visible  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  John
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Rambo
+  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Rambo
+  ## tyomaastaVastaava goes to vastuuhenkilotieto in krysp, which has more required fields. Let's fill them up.
+  Run Keyword If  '${dataDocType}' == 'tyomaastaVastaava'  Fill in additional yritys info for tyomaasta vastaava
+
+
+Fill in additional yritys info for tyomaasta vastaava
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.osoite.katu']  Katu
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.osoite.postinumero']  98765
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.osoite.postitoimipaikannimi']  Sipoo
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.puhelin']  0401234567
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.email']  john.rambo@cia.com
+## TODO: Miksi tama ei toimi ?
+#  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.email']  john.rambo@cia.com
+
 
