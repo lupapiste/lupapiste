@@ -55,6 +55,14 @@
   (or (has-auth-role? application user-id "owner")
       (has-auth-role? application user-id "writer")))
 
+(defn validate-owner-authority-or-writer
+  "Validator: current user must be owner, authority or writer.
+   To be used in commands' :pre-checks vector."
+  [command application]
+  (when-not (or (domain/owner-or-writer? application (-> command :user :id))
+                ((set (-> command :user :organizations)) (:organization application)))
+    (fail :error.unauthorized)))
+
 ;;
 ;; documents
 ;;
