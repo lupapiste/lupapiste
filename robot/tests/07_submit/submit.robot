@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  submit-app  753  753-416-25-30
+  Create application the fast way  submit-app  753  753-416-25-30  asuinrakennus
   Add comment  huba huba
   Logout
 

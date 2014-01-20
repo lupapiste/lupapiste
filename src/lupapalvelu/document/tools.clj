@@ -46,12 +46,11 @@
 ;;
 
 (defn- ^{:testable true} flattened [col]
-  (->> col
-    (walk/postwalk
-      (fn [x]
-        (if (and (sequential? x) (-> x first map?))
-          (into {} x)
-          x)))))
+  (walk/postwalk
+    #(if (and (sequential? %) (-> % first map?))
+       (into {} %)
+       %)
+    col))
 
 (defn- ^{:testable true} group [x]
   (if (:repeating x)
@@ -61,14 +60,13 @@
     (:body x)))
 
 (defn- ^{:testable true} create [{body :body} f]
-  (->> body
-    (walk/prewalk
-      (fn [x]
-        (if (map? x)
-          (let [k (-> x :name keyword)
-                v (if (= :group (-> x :type keyword)) (group x) (f x))]
-            {k v})
-          x)))))
+  (walk/prewalk
+    #(if (map? %)
+       (let [k (-> % :name keyword)
+             v (if (= :group (-> % :type keyword)) (group %) (f %))]
+         {k v})
+       %)
+    body))
 
 ;;
 ;; Public api
@@ -101,7 +99,7 @@
     m)))
 
 (defn create-document-data
-  "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
+  "Creates document data from schema using function f as input-creator. f defaults to 'nil-values'"
   ([schema]
     (create-document-data schema nil-values))
   ([schema f]
@@ -142,7 +140,7 @@
 (defn schema-without-element-by-name
   "returns a copy of a schema with all elements with name of element-name stripped of."
   [schema element-name]
-  (assoc schema :body (schema-body-without-element-by-name (:body schema) element-name)))
+  (update-in schema [:body] schema-body-without-element-by-name element-name))
 
 (defn deep-find
   "Finds 0..n locations in the m structured where target is found.

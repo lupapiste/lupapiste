@@ -111,9 +111,8 @@
                  "Hakemukselle lis\u00e4tty lausunto.")]
     ; FIXME combine mongo writes
     (executed "add-comment"
-      (-> command
-        (assoc :data {:id id
-                      :text   text
-                      :type   :system
-                      :target {:type :statement
-                               :id   statementId}})))))
+      (assoc command :data {:id id
+                            :text   text
+                            :type   :system
+                            :target {:type :statement
+                                     :id   statementId}}))))

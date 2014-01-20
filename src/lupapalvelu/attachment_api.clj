@@ -54,8 +54,8 @@
                                            (or
                                              (not (:sent %))
                                              (> (-> % :versions last :created) (:sent %)))
-                                           (not (= "statement" (-> % :target :type)))
-                                           (not (= "verdict" (-> % :target :type))))
+                                           (not= "statement" (-> % :target :type))
+                                           (not= "verdict" (-> % :target :type)))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
 
@@ -268,15 +268,14 @@
                                              :created created})]
     ; FIXME try to combine mongo writes
     (executed "add-comment"
-      (-> command
-        (assoc :data {:id id
-                      :text text,
-                      :type :system
-                      :target {:type :attachment
-                               :id (:id attachment-version)
-                               :version (:version attachment-version)
-                               :filename (:filename attachment-version)
-                               :fileId (:fileId attachment-version)}})))
+      (assoc command :data {:id id
+                            :text text
+                            :type :system
+                            :target {:type :attachment
+                                     :id (:id attachment-version)
+                                     :version (:version attachment-version)
+                                     :filename (:filename attachment-version)
+                                     :fileId (:fileId attachment-version)}}))
     (fail :error.unknown)))
 
 

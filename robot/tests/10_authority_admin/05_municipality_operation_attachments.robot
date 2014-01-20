@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
   Mikko logs in
   Apply minimal fixture now
-  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30
+  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30  asuinrakennus
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
@@ -35,10 +35,10 @@ Admin removes Pohjapiirros template and adds Rasitustodistus template
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.ok']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-edit-attachments']
   Logout
-    
+
 Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
   Mikko logs in
-  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30
+  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30  asuinrakennus
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
@@ -52,7 +52,7 @@ Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
 Attachment template is visible
   [Arguments]  ${id}
   Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']//a[@data-test-type='${id}']
-  
+
 Attachment template is not visible
   [Arguments]  ${id}
   Element Should Not Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']//a[@data-test-type='${id}']

@@ -9,7 +9,7 @@ Mikko creates an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30
+  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
   Execute Javascript  $("textarea[name='kuvaus']").val('Hieno hanke...').change();
   Execute Javascript  $("textarea[name='poikkeamat']").val('poikkeuksetta!').change();
 
