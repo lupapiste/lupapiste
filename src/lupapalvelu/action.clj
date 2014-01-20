@@ -187,12 +187,23 @@
   [{{id :id} :data user :user application :application}]
   (and id (or application (domain/get-application-as id user))))
 
+(defn- user-is-not-allowed-to-access?
+  "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
+  [command application]
+  (let [user-id (-> command :user :id)
+        meta-data (meta-data command)]
+    (when-not (or (domain/owner-or-writer? application user-id)
+                  ((set (-> command :user :organizations)) (:organization application))
+                  (some #(domain/has-auth-role? application user-id %) (:extra-auth-roles meta-data)))
+      (fail :error.unauthorized))))
+
 (defn- authorized-to-application [command application]
   (when-let [id (-> command :data :id)]
     (if-not application
       (fail :error.unauthorized)
       (or
         (invalid-state-in-application command application)
+        (user-is-not-allowed-to-access? command application)
         (pre-checks-fail command application)))))
 
 (defn- response? [r]

@@ -92,7 +92,7 @@
   (fact "with correct authority command is executed"
         (execute {:action "test-command-auth" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}})
         => { :ok true})
-
+;;FIXME
   (fact "with incorred authority error is returned"
         (execute {:action "test-command-auth" :user {:id "user123" :municipality "hanhivaara" :role :authority} :data {:id "123"}})
         => { :ok false :text "error.unauthorized"}))
@@ -109,6 +109,7 @@
                      :test-command2 {:pre-checks [(constantly nil)]}
                      :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
    (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"})
+;;FIXME
  (fact (execute {:action "test-command1" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
  (fact (execute {:action "test-command2" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok true})
  (fact (execute {:action "test-command3" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
@@ -119,6 +120,7 @@
                      :test-command2 {:input-validators [(constantly nil)]}
                      :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
    (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"})
+;;FIXME
  (fact (execute {:action "test-command1" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
  (fact (execute {:action "test-command2" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok true})
  (fact (execute {:action "test-command3" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
