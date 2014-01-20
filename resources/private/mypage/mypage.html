@@ -30,9 +30,7 @@
               id="phone" type="text" class="form-input"></input>
           </div>
 
-          
-          <div data-bind="if: features.enabled('architect-info')">
-            <div class="form-entry feature">
+            <div class="form-entry">
               <label
                 data-bind="ltext: 'userinfo.architect.company.name'"
                 for="architect.company.name" class="form-label"></label>
@@ -40,7 +38,7 @@
                 id="architect.company.name" type="text"
                 class="form-input"></input>
             </div>
-            <div class="form-entry feature">
+            <div class="form-entry">
               <label
                 data-bind="ltext: 'userinfo.architect.company.id'"
                 for="architect.company.id" class="form-label"></label>
@@ -48,8 +46,8 @@
                 id="architect.company.id" type="text"
                 class="form-input"></input>
             </div>
-          </div>
-                    
+
+
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.street'" for="street"
               class="form-label"></label> <input
@@ -68,29 +66,26 @@
               data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'"
               id="city" type="text" class="form-input"></input>
           </div>
-          
-          <div data-bind="if: features.enabled('architect-info')">
-            <div class="form-entry architect-toggle feature">
+
+            <div class="form-entry architect-toggle">
               <input data-bind="checked: architect" id="architect"
                 type="checkbox" class="form-input"></input> <label
                 data-bind="ltext: 'userinfo.architect'" for="architect"
                 class="form-label"></label>
             </div>
           </div>
-        </div>
 
         <div data-bind="visible: architect">
-          <div data-bind="if: features.enabled('architect-info')">
-            <div class="architect-info form-group feature">
+            <div class="architect-info form-group">
               <h2 data-bind="ltext: 'architect.experience.title'"></h2>
-              
+
               <div class="form-entry">
                 <label data-bind="ltext: 'userinfo.architect.degree'"
                   for="architect.degree" class="form-label"></label> <input
                   data-bind="value: degree" id="architect.degree"
                   type="text" class="form-input"></input>
               </div>
-              
+
               <div class="form-entry">
                 <label data-bind="ltext: 'userinfo.architect.graduatingYear'"
                   for="architect.graduatingYear" class="form-label"></label> <input
@@ -143,9 +138,7 @@
                   data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="add-attachment"></button>
               </div>
             </div>
-          </div>
         </div>
-        <!-- feature flagging -->
 
         <button data-bind="ltext: 'save', enable: ok, click: save"
           type="button" class="btn btn-primary"

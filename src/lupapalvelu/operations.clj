@@ -14,7 +14,9 @@
 (def default-description "operations.tree.default-description")
 
 (def ^:private operation-tree-for-R
-  (let [treepart [["Uuden rakennuksen rakentaminen"
+    {:permit-type permit/R
+     :tree ["Rakentaminen ja purkaminen"
+            [["Uuden rakennuksen rakentaminen"
                    [["Asuinrakennus" :asuinrakennus]
                     ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
                     ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
@@ -38,20 +40,11 @@
                     ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
                     ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
                     ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-                  ["Rakennuksen purkaminen" :purkaminen]]
-        ]
-    {:permit-type permit/R
-     :tree ["Rakentaminen ja purkaminen"
-            (let [treepart (conj treepart ["Tyonjohtaja" :tyonjohtajan-nimeaminen])
-
-                  treepart (conj treepart ["Suunnittelija" :suunnittelijan-nimeaminen])
-
-                  treepart (conj treepart ["Jatkoaika" :jatkoaika])
-
-                  treepart (if (env/feature? :aloitusoikeus) ;Kun poistat taman nii refactori conjit pois
-                             (conj treepart ["Aloitusoikeus" :aloitusoikeus])
-                             treepart)]
-              treepart)]}))
+                  ["Rakennuksen purkaminen" :purkaminen]
+                  ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+                  ["Suunnittelija" :suunnittelijan-nimeaminen]
+                  ["Jatkoaika" :jatkoaika]
+                  ["Aloitusoikeus" :aloitusoikeus]]]})
 
 (def ^:private operation-tree-for-environment-R
   {:permit-type permit/R

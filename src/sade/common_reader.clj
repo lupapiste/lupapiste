@@ -1,10 +1,10 @@
 (ns sade.common-reader
   (:require [clojure.string :as s]
-            [clojure.walk :refer [postwalk prewalk]]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
             [sade.http :as http]
             [sade.env :as env]
+            [sade.util :refer [prewalk-map postwalk-map]]
             [sade.xml :refer :all]
             [sade.strings :as ss]))
 
@@ -29,14 +29,6 @@
 ;;
 ;; Common
 ;;
-
-(defn postwalk-map
-  "traverses m and applies f to all maps within"
-  [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
-
-(defn prewalk-map
-  "traverses m and applies f to all maps within"
-  [f m] (prewalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
 
 (defn strip-key
   "removes namespacey part of a keyword key"
