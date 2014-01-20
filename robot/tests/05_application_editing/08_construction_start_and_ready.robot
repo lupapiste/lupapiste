@@ -75,8 +75,7 @@ Fill in yritys info
   [Arguments]  ${dataDocType}
   ## NOTE: When using another variable (i.e. ${dataDocType}) to set the value of a variable, the keyword "Set Variable" must be used.
   ${docSectionPath} =  Set Variable  //section[@data-doc-type='${dataDocType}']
-  Element should be visible  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
-  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  John
+  Element should be visible  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Rambo
   Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Rambo
   ## tyomaastaVastaava goes to vastuuhenkilotieto in krysp, which has more required fields. Let's fill them up.
@@ -84,12 +83,14 @@ Fill in yritys info
 
 
 Fill in additional yritys info for tyomaasta vastaava
+  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  John
   Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.osoite.katu']  Katu
   Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.osoite.postinumero']  98765
   Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.osoite.postitoimipaikannimi']  Sipoo
   Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.puhelin']  0401234567
-  Input text  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.email']  john.rambo@cia.com
+#
 ## TODO: Miksi tama ei toimi ?
-#  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.email']  john.rambo@cia.com
+#
+#  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='henkilo.yhteystiedot.puhelin']  0401234567
 
 
