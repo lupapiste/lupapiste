@@ -601,7 +601,7 @@ var docgen = (function () {
       select.appendChild(option);
 
       ajax
-        .command("get-building-info-from-legacy", { id: self.appId })
+        .command("get-building-info-from-wfs", { id: self.appId })
         .success(function (data) {
           $.each(data.data, function (i, building) {
             var name = building.buildingId;
@@ -815,7 +815,7 @@ var docgen = (function () {
           elem.setAttribute("data-repeating-id", repeatingId);
           elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-          if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
+          if (subSchema.repeating && !isDisabled(options) && authorizationModel.ok('remove-document-data')) {
             var removeButton = document.createElement("span");
             removeButton.className = "icon remove-grey inline-right";
             removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);

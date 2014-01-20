@@ -5,10 +5,11 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
             [lupapalvelu.operations :as op]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in]]
-            [sade.common-reader :refer [strip-nils postwalk-map]]))
+            [sade.util :refer [dissoc-in postwalk-map]]
+            [sade.common-reader :refer [strip-nils]]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -167,4 +168,32 @@
             [k d] keys-and-default-values]
       (mongo/update-by-query collection {k {$exists false}} {$set {k d}}))))
 
+(defmigration drop-pistesijanti-from-documents
+  (while (not-empty (mongo/select :applications {"documents.data.osoite.pistesijanti" {$exists true}}))
+    (mongo/update-by-query :applications {"documents" {$elemMatch {"data.osoite.pistesijanti" {$exists true}}}} {$unset {"documents.$.data.osoite.pistesijanti" 1}})))
 
+(defmigration kryps-config
+  (doseq [organization (mongo/select :organizations)]
+    (when-let [url (:legacy organization)]
+      (doseq [permit-type (map :permitType (:scope organization))]
+        (mongo/update-by-id :organizations (:id organization)
+          {$set {(str "krysp." permit-type ".url") url
+                 (str "krysp." permit-type ".version") "2.1.2"}
+           $unset {:legacy 1}})))
+
+    (when-let [ftp (:rakennus-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.R.ftpUser ftp}
+         $unset {:rakennus-ftp-user 1}}))
+
+    (when-let [ftp (:yleiset-alueet-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.YA.ftpUser ftp}
+         $unset {:yleiset-alueet-ftp-user 1}}))
+
+    (when-let [ftp (:poikkari-ftp-user organization)]
+      (mongo/update-by-id :organizations (:id organization)
+        {$set {:krysp.P.ftpUser ftp}
+         $unset {:poikkari-ftp-user 1}}))
+    )
+  )

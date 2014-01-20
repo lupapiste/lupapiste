@@ -194,19 +194,11 @@
 
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first (:lisatiedot documents)))
-        aloitusoikeus (:data (first (:aloitusoikeus documents)))
-        vakuus (when aloitusoikeus
-                 {:vakuus {:vakuudenLaji (-> aloitusoikeus :vakuudenLaji :value)
-                           :voimassaolopvm (to-xml-date-from-string (-> aloitusoikeus :voimassaolopvm :value))
-                           :vakuudenmaara (-> aloitusoikeus :vakuudenMaara :value)
-                           :Vakuuspaatospykala (-> aloitusoikeus :Vakuuspaatospykala :value)
-                           }})]
-    {:Lisatiedot (merge
-                   {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
-                    :asioimiskieli (if (= lang "sv")
-                                     "ruotsi"
-                                     "suomi")}
-                   vakuus)}))
+        aloitusoikeus (:data (first (:aloitusoikeus documents)))]
+    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
+                  :asioimiskieli (if (= lang "sv")
+                                   "ruotsi"
+                                   "suomi")}}))
 
 (defn- get-asian-tiedot [documents]
   (let [maisematyo_documents (:maisematyo documents)
