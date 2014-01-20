@@ -8,8 +8,6 @@
             [clojure.string :as str])
   (:import [java.net URLEncoder]))
 
-(defn- get-yhteystiedot-url-template [] (env/value :mml :yhteystiedot :uri-template))
-
 (defn- path [& p] (interpose :> (concat [enlive/root] p)))
 
 (defn- ->henkilolaji [abbrev]
@@ -42,6 +40,8 @@
       :jakeluosoite (get-text henkilo-xml (path :Osoite :jakeluosoite))
       :postinumero (get-text henkilo-xml (path :Osoite :postinumero))
       :paikkakunta (get-text henkilo-xml (path :Osoite :paikkakunta)))))
+
+(defn- get-yhteystiedot-url-template [] (env/value :mml :yhteystiedot :uri-template))
 
 (defn- get-yhteystiedot [id]
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" (URLEncoder/encode id "UTF-8"))
