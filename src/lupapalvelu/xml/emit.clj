@@ -24,7 +24,3 @@
           (for [item current-data]
             (create-element-hierarcy item model ns))
           (create-element-hierarcy current-data model ns))))))
-
-
-
-
