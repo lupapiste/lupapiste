@@ -241,7 +241,7 @@ var docgen = (function () {
       var rejectButton$ = null;
       var cmdArgs = { id: self.appId, doc: self.docId, path: path.join("."), collection: self.getCollection() };
 
-      if (_.isEmpty(model) || !features.enabled('docIndicators')) {
+      if (_.isEmpty(model)) {
         return approvalContainer$[0];
       }
 
