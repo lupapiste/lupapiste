@@ -8,93 +8,116 @@
             [cljts.io :as jts]))
 
 (defn- get-henkilo [henkilo]
-  {:nimi {:etunimi (-> henkilo :henkilotiedot :etunimi :value)
-          :sukunimi (-> henkilo :henkilotiedot :sukunimi :value)}
-   :osoite {:osoitenimi {:teksti (-> henkilo :osoite :katu :value)}
-            :postinumero (-> henkilo :osoite :postinumero :value)
-            :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi :value)}
-   :sahkopostiosoite (-> henkilo :yhteystiedot :email :value)
-   :puhelin (-> henkilo :yhteystiedot :puhelin :value)
-   :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)})
+  (let [nimi (assoc-when {}
+               :etunimi (-> henkilo :henkilotiedot :etunimi :value)
+               :sukunimi (-> henkilo :henkilotiedot :sukunimi :value))
+        teksti (assoc-when {} :teksti (-> henkilo :osoite :katu :value))
+        osoite (assoc-when {}
+                 :osoitenimi teksti
+                 :postinumero (-> henkilo :osoite :postinumero :value)
+                 :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi :value))]
+    (not-empty
+      (assoc-when {}
+        :nimi nimi
+        :osoite osoite
+        :sahkopostiosoite (-> henkilo :yhteystiedot :email :value)
+        :puhelin (-> henkilo :yhteystiedot :puhelin :value)
+        :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)))))
 
 (defn- get-henkilo-reduced [henkilo]
   (dissoc (get-henkilo henkilo) :osoite :henkilotunnus))
 
 (defn- get-yritys [yritys]
-  (merge
-    {:nimi (-> yritys :yritysnimi :value)
-     :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
-     :postiosoitetieto {:Postiosoite {:osoitenimi {:teksti (-> yritys :osoite :katu :value)}
-                                      :postinumero (-> yritys :osoite :postinumero :value)
-                                      :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)}}}))
+  (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
+        postiosoite (not-empty
+                      (assoc-when {}
+                        :osoitenimi teksti
+                        :postinumero (-> yritys :osoite :postinumero :value)
+                        :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)))]
+    (not-empty
+      (assoc-when {}
+        :nimi (-> yritys :yritysnimi :value)
+        :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
+        :postiosoitetieto (when postiosoite {:Postiosoite postiosoite})))))
 
 (defn- get-yritys-maksaja [yritys]
-  (merge
-    {:nimi (-> yritys :yritysnimi :value)
-     :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
-     :postiosoite {:osoitenimi {:teksti (-> yritys :osoite :katu :value)}
-                   :postinumero (-> yritys :osoite :postinumero :value)
-                   :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)}}))
+  (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
+        postiosoite (assoc-when {}
+                      :osoitenimi teksti
+                      :postinumero (-> yritys :osoite :postinumero :value)
+                      :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value))]
+    (not-empty
+      (assoc-when {}
+        :nimi (-> yritys :yritysnimi :value)
+        :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
+        :postiosoite postiosoite))))
 
 (defn- get-hakija [hakija-doc]
   ;; Yritys-tyyppisella hakijalla tiedot jaetaan yritystietoon ja henkilotieto,
   ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
-  (merge
-    {:rooliKoodi "hakija"}
-    (if (= (-> hakija-doc :_selected :value) "yritys")
-      {:yritystieto  {:Yritys (get-yritys (:yritys hakija-doc))}
-       :henkilotieto {:Henkilo (get-henkilo-reduced (-> hakija-doc :yritys :yhteyshenkilo))}}
-      {:henkilotieto {:Henkilo (get-henkilo (:henkilo hakija-doc))}})))
+  (let [hakija (not-empty
+                 (if (= (-> hakija-doc :_selected :value) "yritys")
+                   (let [yritys (assoc-when {} :Yritys (get-yritys (:yritys hakija-doc)))
+                         henkilo (assoc-when {} :Henkilo (get-henkilo-reduced (-> hakija-doc :yritys :yhteyshenkilo)))]
+                     (assoc-when {} :yritystieto  yritys :henkilotieto henkilo))
+                   (let [henkilo (assoc-when {} :Henkilo (get-henkilo (:henkilo hakija-doc)))]
+                     (assoc-when {} :henkilotieto henkilo))))]
+    (when hakija
+      (merge hakija {:rooliKoodi "hakija"}))))
 
 (defn- get-vastuuhenkilo-osoitetieto [osoite]
-  {:osoite {:osoitenimi {:teksti (-> osoite :katu :value)}
-            :postinumero (-> osoite :postinumero :value)
-            :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)}})
+  (let [osoitenimi (assoc-when {} :teksti (-> osoite :katu :value))
+        osoite (not-empty
+                 (assoc-when {}
+                   :osoitenimi osoitenimi
+                   :postinumero (-> osoite :postinumero :value)
+                   :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)))]
+    (when osoite {:osoite osoite})))
 
 (defn- get-vastuuhenkilo [vastuuhenkilo type roolikoodi]
-  (merge
-    {:rooliKoodi roolikoodi}
-    (if (= type :yritys)
-      ;; yritys-tyyppinen vastuuhenkilo
-      {:sukunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :sukunimi :value)
-       :etunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :etunimi :value)
-       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :yritys :osoite))
-       :puhelinnumero (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :puhelin :value)
-       :sahkopostiosoite (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email :value)}
-      ;; henkilo-tyyppinen vastuuhenkilo
-      {:sukunimi (-> vastuuhenkilo :henkilo :henkilotiedot :sukunimi :value)
-       :etunimi (-> vastuuhenkilo :henkilo :henkilotiedot :etunimi :value)
-       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :henkilo :osoite))
-       :puhelinnumero (-> vastuuhenkilo :henkilo :yhteystiedot :puhelin :value)
-       :sahkopostiosoite (-> vastuuhenkilo :henkilo :yhteystiedot :email :value)})))
+  (let [content (not-empty
+                  (if (= type :yritys)
+                    ;; yritys-tyyppinen vastuuhenkilo
+                    (assoc-when {}
+                      :sukunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :sukunimi :value)
+                      :etunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :etunimi :value)
+                      :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :yritys :osoite))
+                      :puhelinnumero (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :puhelin :value)
+                      :sahkopostiosoite (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email :value))
+                    ;; henkilo-tyyppinen vastuuhenkilo
+                    (assoc-when {}
+                      :sukunimi (-> vastuuhenkilo :henkilo :henkilotiedot :sukunimi :value)
+                      :etunimi (-> vastuuhenkilo :henkilo :henkilotiedot :etunimi :value)
+                      :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :henkilo :osoite))
+                      :puhelinnumero (-> vastuuhenkilo :henkilo :yhteystiedot :puhelin :value)
+                      :sahkopostiosoite (-> vastuuhenkilo :henkilo :yhteystiedot :email :value))))]
+    (when content
+      (merge content {:rooliKoodi roolikoodi}))))
 
 (defn- get-tyomaasta-vastaava [tyomaasta-vastaava]
-  (if (= (-> tyomaasta-vastaava :_selected :value) "yritys")
-    ;; yritys-tyyppinen tyomaasta-vastaava, siirretaan yritysosa omaksi osapuolekseen
-    {:osapuolitieto {:Osapuoli {:yritystieto {:Yritys (get-yritys (:yritys tyomaasta-vastaava))}
-                                :rooliKoodi "ty\u00f6nsuorittaja"}}
-     :vastuuhenkilotieto {:Vastuuhenkilo (get-vastuuhenkilo
-                                           tyomaasta-vastaava
-                                           :yritys
-                                           "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")}}
-    ;; henkilo-tyyppinen tyomaasta-vastaava
-    {:vastuuhenkilotieto {:Vastuuhenkilo (get-vastuuhenkilo
-                                           tyomaasta-vastaava
-                                           :henkilo
-                                           "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")}}))
+  (let [type (-> tyomaasta-vastaava :_selected :value)
+        vastuuhenkilo (get-vastuuhenkilo tyomaasta-vastaava type "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")]
+    (when vastuuhenkilo
+      (merge
+        {:vastuuhenkilotieto {:Vastuuhenkilo vastuuhenkilo}}
+        (when (= "yritys" type)
+          (when-let [yritys (get-yritys (:yritys tyomaasta-vastaava))]
+            {:osapuolitieto {:Osapuoli {:yritystieto yritys
+                                        :rooliKoodi "ty\u00f6nsuorittaja"}}}))))))
 
 (defn- get-maksaja [maksaja-doc]
-  (merge
-    (if (= (-> maksaja-doc :_selected :value) "yritys")
-      ;; yritys-tyyppinen maksaja, siirretaan yritysosa omaksi osapuolekseen
-      {:vastuuhenkilotieto {:Vastuuhenkilo (get-vastuuhenkilo               ;; vastuuhenkilotieto
-                                             maksaja-doc
-                                             :yritys
-                                             "maksajan vastuuhenkil\u00f6")}
-       :yritystieto {:Yritys (get-yritys-maksaja (:yritys maksaja-doc))}}    ;; maksajatieto
-      ;; henkilo-tyyppinen maksaja
-      {:henkilotieto {:Henkilo (get-henkilo (:henkilo maksaja-doc))}})       ;; maksajatieto
-    {:laskuviite (-> maksaja-doc :laskuviite :value)}))
+  (let [maksaja-info (if (= (-> maksaja-doc :_selected :value) "yritys")
+                       ;; yritys-tyyppinen maksaja, siirretaan yritysosa omaksi osapuolekseen
+                       (let [vastuuhenkilo (get-vastuuhenkilo maksaja-doc "yritys" "maksajan vastuuhenkil\u00f6")
+                             yritys-maksaja (get-yritys-maksaja (:yritys maksaja-doc))]
+                         (when (and vastuuhenkilo yritys-maksaja)
+                           {:vastuuhenkilotieto {:Vastuuhenkilo vastuuhenkilo}
+                            :yritystieto {:Yritys yritys-maksaja}}))
+                       ;; henkilo-tyyppinen maksaja
+                       (when-let [henkilo (get-henkilo (:henkilo maksaja-doc))]
+                         {:henkilotieto {:Henkilo henkilo}}))]
+    (when maksaja-info
+      (merge maksaja-info {:laskuviite (-> maksaja-doc :laskuviite :value)}))))
 
 (defn- get-handler [application]
   (let [handler (:authority application)]
