@@ -248,15 +248,16 @@
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
                   (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
+        maksajatieto (when maksaja {:Maksaja (dissoc maksaja :vastuuhenkilotieto)})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
         osapuolitieto (vec (filter :Osapuoli [{:Osapuoli hakija}
-                                                  (:osapuolitieto tyomaasta-vastaava)]))
+                                              (:osapuolitieto tyomaasta-vastaava)]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
                              (vec (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
-                                                              (:vastuuhenkilotieto maksaja)])))
+                                                          (:vastuuhenkilotieto maksaja)])))
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (->
                             (or
@@ -306,7 +307,7 @@
                                  :pintaala pinta-ala
                                  :osapuolitieto osapuolitieto
                                  :vastuuhenkilotieto vastuuhenkilotieto
-                                 :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
+                                 :maksajatieto maksajatieto
                                  :lausuntotieto (get-statements (:statements application))
                                  :lupaAsianKuvaus lupaAsianKuvaus
                                  :lupakohtainenLisatietotieto lupakohtainenLisatietotieto
@@ -345,9 +346,14 @@
                    (to-xml-date (:submitted application)))
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
         maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
+        maksajatieto (when maksaja {:Maksaja (dissoc maksaja :vastuuhenkilotieto)})
         osapuolitieto (vec (filter :Osapuoli [{:Osapuoli hakija}]))
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus :value)
+        lisaaikatieto (when alku-pvm loppu-pvm hankkeen-kuvaus
+                        {:Lisaaika {:alkuPvm alku-pvm
+                                    :loppuPvm loppu-pvm
+                                    :perustelu hankkeen-kuvaus}})
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
                                   {:Johtoselvitysviite {:vaadittuKytkin false
                                                         ;:tunniste "..."
@@ -362,10 +368,8 @@
                               :sijaintitieto (get-sijaintitieto application)
                               :osapuolitieto osapuolitieto
                               :vastuuhenkilotieto vastuuhenkilotieto
-                              :maksajatieto {:Maksaja (dissoc maksaja :vastuuhenkilotieto)}
-                              :lisaaikatieto {:Lisaaika {:alkuPvm alku-pvm
-                                                         :loppuPvm loppu-pvm
-                                                         :perustelu hankkeen-kuvaus}}
+                              :maksajatieto maksajatieto
+                              :lisaaikatieto lisaaikatieto
                               :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                               :johtoselvitysviitetieto johtoselvitysviitetieto
                               }}}}))
