@@ -76,7 +76,7 @@
 
 (defn- get-vastuuhenkilo [vastuuhenkilo type roolikoodi]
   (let [content (not-empty
-                  (if (= type :yritys)
+                  (if (= type "yritys")
                     ;; yritys-tyyppinen vastuuhenkilo
                     (assoc-when {}
                       :sukunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :sukunimi :value)
@@ -102,7 +102,7 @@
         {:vastuuhenkilotieto {:Vastuuhenkilo vastuuhenkilo}}
         (when (= "yritys" type)
           (when-let [yritys (get-yritys (:yritys tyomaasta-vastaava))]
-            {:osapuolitieto {:Osapuoli {:yritystieto yritys
+            {:osapuolitieto {:Osapuoli {:yritystieto {:Yritys yritys}
                                         :rooliKoodi "ty\u00f6nsuorittaja"}}}))))))
 
 (defn- get-maksaja [maksaja-doc]
