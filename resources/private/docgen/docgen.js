@@ -84,6 +84,7 @@ var docgen = (function () {
     self.showHelp = function (e) {
       var element = self.findHelpElement(e);
       if (element) {
+        element.stop();
         element.fadeIn("slow").css("display", "block");
         var st = $(window).scrollTop(); // Scroll Top
         var y = element.offset().top;
@@ -96,6 +97,7 @@ var docgen = (function () {
     self.hideHelp = function (e) {
       var element = self.findHelpElement(e);
       if (element) {
+        element.stop();
         element.fadeOut("slow").css("display", "none");
       }
       self.hideError(e);
@@ -104,6 +106,7 @@ var docgen = (function () {
     self.showError = function (e) {
       var element = self.findErrorElement(e);
       if (element.children().size()) {
+        element.stop();
         element.fadeIn("slow").css("display", "block");
       }
     };
@@ -111,6 +114,7 @@ var docgen = (function () {
     self.hideError = function (e) {
       var element = self.findErrorElement(e);
       if (element) {
+        element.stop();
         element.fadeOut("slow").css("display", "none");
       }
     };
@@ -334,22 +338,22 @@ var docgen = (function () {
       span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
 
       if (subSchema.subtype === "maaraala-tunnus" ) {
-          var kiitunAndInput = document.createElement("span");
-          var kiintun = document.createElement("span");
+        var kiitunAndInput = document.createElement("span");
+        var kiintun = document.createElement("span");
 
-          kiitunAndInput.className = "kiintun-and-maaraalatunnus";
+        kiitunAndInput.className = "kiintun-and-maaraalatunnus";
 
-          kiintun.className = "form-maaraala";
-          kiintun.appendChild(document.createTextNode(util.prop.toHumanFormat(self.propertyId) + "-M"));
+        kiintun.className = "form-maaraala";
+        kiintun.appendChild(document.createTextNode(util.prop.toHumanFormat(self.propertyId) + "-M"));
 
-          input.onfocus = self.showHelp;
-          input.onblur = self.hideHelp;
-          input.onmouseover = self.showHelp;
-          input.onmouseout = self.hideHelp;
+        input.onfocus = self.showHelp;
+        input.onblur = self.hideHelp;
+        input.onmouseover = self.showHelp;
+        input.onmouseout = self.hideHelp;
 
-          kiitunAndInput.appendChild(kiintun);
-          kiitunAndInput.appendChild(input);
-          span.appendChild(kiitunAndInput);
+        kiitunAndInput.appendChild(kiintun);
+        kiitunAndInput.appendChild(input);
+        span.appendChild(kiitunAndInput);
 
       }
       else if (subSchema.unit) {
