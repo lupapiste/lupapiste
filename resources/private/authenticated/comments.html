@@ -4,14 +4,18 @@
   <section class="page container" id="comments">
     <script type="text/html" id="comment-template">
       <div data-bind="with: $data.comment">
-        <input type="checkbox" id="show-attachment-comments"></>
-        <label for="show-attachment-comments">Piilota liitteiden lisaykset</label>
+        <div class="comment-toggle">
+          <input type="checkbox" id="show-attachment-comments" data-bind="checked: hideAttachmentComments"></>
+          <label for="show-attachment-comments" data-bind="ltext: 'conversation.attachment.toggle'"></label>
+        </div>
+        
         <table class="table table-striped conversation" data-test-id="comments-table">
           <tbody data-bind="foreach: comments()">
             <tr data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
                                  'comment-for-me':     $parent.isForMe($data),
                                  'authority-comment':   $parent.isAuthorityComment($data),
-                                 'comment':            true}">
+                                 'comment':            true},
+                           visible: !($parent.isForNewAttachment($data) && $parent.hideAttachmentComments())">
               <td class="comment-party commenttd">
                 <span class="date" data-bind="dateTimeString: created"></span>
                 <br />

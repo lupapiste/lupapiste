@@ -11,6 +11,7 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
+    self.hideAttachmentComments = ko.observable(false);
 
     self.refresh = function(application, target) {
       self
@@ -67,6 +68,17 @@ var comments = (function() {
     self.isAuthorityComment = function(model) {
       return model.user && model.user.role && model.user.role() === "authority";
     };
+
+    
+    
+    /*self.toggleVisibility = function() {
+      alert(self.hideAttachmentComments());
+      if (self.hideAttachmentComments()) {
+        $('.attachment-comment').hide();
+      } else {
+        $('.attachment-comment').show();
+      }
+    };*/
   }
 
   return {
