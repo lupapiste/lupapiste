@@ -677,9 +677,9 @@
                                  (:id r))))
                            results)
         same-property-id-fn #(= propertyId (:propertyId %))
-        with-same-property-id (into [] (filter same-property-id-fn enriched-results))
-        without-same-property-id (sort-by :text #(compare %1 %2)
-                                   (into [] (filter (comp not same-property-id-fn) enriched-results)))
+        with-same-property-id (vec (filter same-property-id-fn enriched-results))
+        without-same-property-id (sort-by :text
+                                   (vec (filter (comp not same-property-id-fn) enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
         final-results (map #(select-keys % [:id :text]) organized-results)]
     (ok :app-links final-results)))
@@ -894,8 +894,7 @@
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
   (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
-    (if (= (:new-application-enabled org) true)
-      nil
+    (when-not (= (:new-application-enabled org) true)
       (fail :error.new-applications.disabled))))
 
 (defcommand convert-to-application

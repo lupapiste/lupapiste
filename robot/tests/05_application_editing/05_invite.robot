@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753  753-416-25-25
+  Create application the fast way  invite-app  753  753-416-25-25  asuinrakennus
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-416-25-25
 
 Mikko can see invite paasuunnittelija button

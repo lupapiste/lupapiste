@@ -1,15 +1,18 @@
 (ns lupapalvelu.itest-util
   (:require [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.core :refer [fail!]]
-            [clojure.walk :refer [keywordize-keys]]
-            [swiss-arrows.core :refer [-<>>]]
-            [midje.sweet :refer :all]
-            [sade.http :as http]
-            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.vetuma :as vetuma]
-            [clojure.java.io :as io]
+            [sade.util :refer [fn-> fn->>]]
+            [sade.http :as http]
+            [midje.sweet :refer :all]
             [cheshire.core :as json]
-            [sade.util :refer [fn-> fn->>]])
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.java.io :as io]
+            [clojure.string :as s]
+            [swiss-arrows.core :refer [-<>>]]
+            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -44,7 +47,7 @@
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
 (defn decode-response [resp]
-  (assoc resp :body (-> (:body resp) json/decode keywordize-keys)))
+  (update-in resp [:body] (comp keywordize-keys json/decode)))
 
 (defn printed [x] (println x) x)
 
@@ -221,7 +224,8 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        resp  (command apikey :submit-application :id id) => ok?]
+        resp  (command apikey :submit-application :id id)]
+    resp => ok?
     (query-application apikey id)))
 
 (defn allowed? [action & args]
@@ -314,6 +318,18 @@
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
     (upload-attachment pena (:id application) attachment true)))
+
+
+(defn generate-documents [application apikey]
+  (doseq [document (:documents application)]
+    (let [data    (tools/create-document-data (model/get-document-schema document) tools/dummy-values)
+          updates (tools/path-vals data)
+          updates (map (fn [[p v]] [(butlast p) v]) updates)
+          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]
+      (command apikey :update-doc
+        :id (:id application)
+        :doc (:id document)
+        :updates updates) => ok?)))
 
 ;;
 ;; Vetuma

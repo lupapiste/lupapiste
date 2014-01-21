@@ -64,7 +64,7 @@
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
-    (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
+    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)

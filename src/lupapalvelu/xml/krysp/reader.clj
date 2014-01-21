@@ -118,9 +118,7 @@
 (def ...notimplemented... nil)
 
 (defn- str-or-nil [& v]
-  (if (some nil? v)
-    nil
-    (reduce str v)))
+  (when-not (some nil? v) (reduce str v)))
 
 (defn- get-updated-if [current to-add]
    (if to-add
@@ -275,7 +273,7 @@
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
-    (#(assoc % :liite  (->liite (:liite %))))))
+    (#(update-in % [:liite] ->liite))))
 
 (defn- ->verdict [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)

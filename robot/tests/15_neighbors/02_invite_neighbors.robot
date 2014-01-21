@@ -10,7 +10,7 @@ Mikko wants to build a water slide
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22
+  Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
   Add comment  Lapsille vesiliuku
 
 Mikko sets turvakielto for himself
@@ -50,7 +50,7 @@ Sonja corrects the email address of neighbor c
   Click by test id  neighbors.edit.ok
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-remove']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
-  
+
 Sonja adds owners - luonnollinen henkilo
 #  Set selenium speed  ${SLOW_SPEED}
   Mock proxy  property-id-by-point  "75341600380013"
@@ -62,7 +62,7 @@ Sonja adds owners - luonnollinen henkilo
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='neighbors.select.ok']
   Click element  xpath=//*[@data-test-id='neighbors.select.ok']
   Clear mocks
-  
+
 Sonja adds owners - kuolinpesä
   Mock proxy  property-id-by-point  "75341600380013"
   Mock query  owners  {"ok":true,"owners":[{"kuolinpvm":799372800000,"sukunimi":"Palm","ulkomaalainen":false,"henkilolaji":"kuolinpesa","etunimet":"Paul Olavi","syntymapvm":-1642982400000,"yhteyshenkilo":{"postinumero":"70620","sukunimi":"Ruhtinas","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Birgitta","syntymapvm":-599097600000,"paikkakunta":"KUOPIO","jakeluosoite":"Saastamoisenkatu 17"}}]}
@@ -74,7 +74,7 @@ Sonja adds owners - kuolinpesä
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='neighbors.select.ok']
   Click element  xpath=//*[@data-test-id='neighbors.select.ok']
   Clear mocks
-  
+
 Property-id-by-point error
   Mock proxy error  property-id-by-point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20

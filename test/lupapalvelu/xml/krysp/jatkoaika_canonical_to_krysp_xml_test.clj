@@ -15,7 +15,7 @@
 
 (facts "Jatkolupa to canonical and then to jatkolupa xml with schema validation"
   (let [operation-name-key (-> jatkoaika-application :linkPermitData first :operation keyword)
-        lupa-name-key (operation-name-key ya-operation-type-to-schema-name-key)
+        lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         canonical (jatkoaika-to-canonical jatkoaika-application "fi")
         mapping (get-yleiset-alueet-krysp-mapping lupa-name-key)
         xml (element-to-xml canonical mapping)

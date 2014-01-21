@@ -24,7 +24,7 @@
                                      {:tag :postitoimipaikannimi}])
 
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
-(def postiosoite-children-ns-yht (into [] (map (fn [m] (assoc m :ns "yht")) postiosoite-children)))
+(def postiosoite-children-ns-yht (vec (map (fn [m] (assoc m :ns "yht")) postiosoite-children)))
 
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
@@ -97,7 +97,7 @@
                               {:tag :henkilotunnus}])
 
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
-(def henkilo-child-ns-yht (into [] (map (fn [m] (assoc m :ns "yht")) henkilo-child)))
+(def henkilo-child-ns-yht (vec (map (fn [m] (assoc m :ns "yht")) henkilo-child)))
 
 (def yritys-child [{:tag :nimi}
                    {:tag :liikeJaYhteisotunnus}

@@ -11,7 +11,7 @@ New applications does not have neighbors
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Jalkapesula_${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22
+  Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
   Add comment  Jalkapesulaa rakentaisin
 
   Open tab  statement

@@ -38,12 +38,13 @@
 
             <button class="btn btn-primary btn-dialog"
                     data-bind="click: addLinkPermit, enable: ok, disable: processing"
-                    data-test-id="button-add-link-permit">
+                    data-test-id="button-link-permit-dialog-add">
               <span data-bind="ltext: 'linkPermit.dialog.continue'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
 
-            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"
+               data-test-id="button-link-permit-dialog-cancel"></a>
 
           </div>
         </div>

@@ -17,7 +17,7 @@
                                                                                :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)}}}}}))
 
 (defn get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
-  (let [kaytettykerrosala-canonical (when (not (s/blank? (-> kaytettykerrosala :pintaAla :value)))
+  (let [kaytettykerrosala-canonical (when-not (s/blank? (-> kaytettykerrosala :pintaAla :value))
                                       {:kerrosalatieto {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla :value)
                                                                     :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi :value)}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))

@@ -119,7 +119,7 @@
     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
 
 (defn all-operations []
-  (->> operation-tree (keep :tree)))
+  (keep :tree operation-tree))
 
 (defn operations-for-permit-type [permit-type]
   (->> operation-tree

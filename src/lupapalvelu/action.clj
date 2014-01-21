@@ -88,14 +88,14 @@
 
 (defn- has-required-role [command meta-data]
   (let [user-role      (-> command :user :role keyword)
-        roles-required (-> meta-data :roles)]
+        roles-required (:roles meta-data)]
     (or (empty? roles-required) (some #{user-role} roles-required))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
 
 (defn missing-command [command]
-  (when (not (meta-data command))
+  (when-not (meta-data command)
     (warnf "command '%s' not found" (:action command))
     (fail :error.invalid-command)))
 
@@ -109,13 +109,13 @@
       (fail :error.missing-feature))))
 
 (defn invalid-type [{type :type :as command}]
-  (when (and type (not (= type (:type (meta-data command)))))
+  (when (and type (not= type (:type (meta-data command))))
     (info "invalid type:" (name type))
     (fail :error.invalid-type)))
 
 (defn missing-roles [command]
-  (when (not (has-required-role command (meta-data command)))
-    (tracef "command '%s' is unauthorized for role '%s'" (-> command :action) (-> command :user :role))
+  (when-not (has-required-role command (meta-data command))
+    (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
     (fail :error.unauthorized)))
 
 (defn impersonation [command]
