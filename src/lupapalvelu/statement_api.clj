@@ -101,6 +101,7 @@
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
+   :extra-auth-roles [:statementPerson]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{:keys [application] :as command}]
   (update-application command
