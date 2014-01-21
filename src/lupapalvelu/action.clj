@@ -192,9 +192,6 @@
   [command application]
   (let [user-id (-> command :user :id)
         meta-data (meta-data command)]
-    (clojure.pprint/pprint meta-data)
-    (clojure.pprint/pprint application)
-    (clojure.pprint/pprint user-id)
     (when-not (or (domain/owner-or-writer? application user-id)
                   ((set (-> command :user :organizations)) (:organization application))
                   (some #(domain/has-auth-role? application user-id %) (:extra-auth-roles meta-data)))
