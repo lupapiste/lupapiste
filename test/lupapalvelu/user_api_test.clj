@@ -27,8 +27,8 @@
 
 (facts validate-create-new-user!
 
-  (fact (validate-create-new-user! nil nil) => (fails-with :missing-required-key))
-  (fact (validate-create-new-user! nil {})  => (fails-with :missing-required-key))
+  (fact (validate-create-new-user! nil nil) => (fails-with :error.missing-parameters))
+  (fact (validate-create-new-user! nil {})  => (fails-with :error.missing-parameters))
   (fact (validate-create-new-user! {:role "admin"} {:role "applicant" :email "x"}) => forbidden)
 
   (fact "only known roles are accepted"
@@ -37,7 +37,7 @@
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authorityAdmin"} {:role "authorityAdmin" :email "x"}) => forbidden)
-  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => (fails-with :missing-required-key))
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => (fails-with :error.missing-parameters))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authority" :email "x"}) => forbidden)
