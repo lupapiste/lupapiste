@@ -82,19 +82,19 @@
 (facts "Test authority"
   (against-background
     (get-actions) => {:test-command-auth {:parameters [:id] :roles [:authority]}}
-    (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"}
-    (domain/get-application-as "123" {:id "user123" :municipality "hanhivaara" :role :authority}) =>  nil)
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"}
+    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :role :authority}) =>  nil)
 
   (fact "regular user is not authority"
         (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}})
         => { :ok false :text "error.unauthorized"})
 
   (fact "with correct authority command is executed"
-        (execute {:action "test-command-auth" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}})
+        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}})
         => { :ok true})
 ;;FIXME
   (fact "with incorred authority error is returned"
-        (execute {:action "test-command-auth" :user {:id "user123" :municipality "hanhivaara" :role :authority} :data {:id "123"}})
+        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}})
         => { :ok false :text "error.unauthorized"}))
 
 (facts "Parameter validation"
@@ -108,28 +108,28 @@
    (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))]}
                      :test-command2 {:pre-checks [(constantly nil)]}
                      :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
-   (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"})
+   (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
 ;;FIXME
- (fact (execute {:action "test-command1" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok true})
- (fact (execute {:action "test-command3" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
+ (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
+ (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+ (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Custom input-validator is run"
  (against-background
    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]}
                      :test-command2 {:input-validators [(constantly nil)]}
                      :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
-   (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"})
+   (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
 ;;FIXME
- (fact (execute {:action "test-command1" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok true})
- (fact (execute {:action "test-command3" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
+ (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
+ (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+ (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Input-validator is not run during auth check"
   (against-background
    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]}}
-   (domain/get-application-as "123" {:id "user123" :municipality "ankkalinna" :role :authority}) =>  {:municipality "ankkalinna"})
-  (validate {:action "test-command1" :user {:id "user123" :municipality "ankkalinna" :role :authority} :data {:id "123"}}) => {:ok true})
+   (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
+  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
 
 (facts "Defined querys work only in query pipelines"
   (against-background (get-actions) => {:test-command {:type :query}})
