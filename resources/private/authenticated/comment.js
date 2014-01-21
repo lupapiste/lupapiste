@@ -64,6 +64,9 @@ var comments = (function() {
     self.isForNewAttachment = function(model) {
       return model && model.target && model.target.version && true;
     };
+    self.isAuthorityComment = function(model) {
+      return model.user && model.user.role && model.user.role() === "authority";
+    };
   }
 
   return {
