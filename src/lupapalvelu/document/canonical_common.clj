@@ -38,7 +38,7 @@
   (group-by (comp keyword :name :schema-info) documents))
 
 (defn empty-strings-to-nil [v]
-  (if (and (string? v) (s/blank? v)) nil v))
+  (when-not (and (string? v) (s/blank? v)) v))
 
 (defn documents-by-type-without-blanks
   "Converts blank strings to nils and groups documents by schema name"
@@ -95,7 +95,7 @@
    :ya-kayttolupa-muu-liikennealuetyo "muu kaytt\u00f6lupa"
    :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
-   :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t "
+   :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
@@ -341,7 +341,7 @@
       joined)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
-  (let [foremans (-> (get-suunnittelija-data tyonjohtaja party-type) (dissoc :suunnittelijaRoolikoodi))
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys tyonjohtaja)]
     (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
                      :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
@@ -387,9 +387,9 @@
 
 (defn get-viitelupatieto [link-permit-data]
   (when link-permit-data
-    (->
+    (assoc-in
       (if (= (:type link-permit-data) "lupapistetunnus")
         (lupatunnus (:id link-permit-data))
         {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
-      (assoc-in [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia"))))
+      [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 

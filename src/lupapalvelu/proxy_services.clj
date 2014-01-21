@@ -97,13 +97,13 @@
   [f service]
   (fn [request]
     (let [response (f request service)]
-      (assoc response :headers (dissoc (:headers response) "set-cookie" "server")))))
+      (update-in response [:headers] dissoc "set-cookie" "server"))))
 
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
     (fn [request]
       (let [response (f request)]
-        (assoc response :headers (merge (:headers response) cache-control))))))
+        (update-in response [:headers] merge cache-control)))))
 
 ;;
 ;; Proxy services by name:

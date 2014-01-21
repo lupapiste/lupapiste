@@ -31,7 +31,7 @@ New applications does not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22
+  Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
   Add comment  Salibandyhalli FTW!
 
   Open tab  statement
@@ -148,11 +148,11 @@ Statement person count is
 Create statement person
   [Arguments]  ${email}  ${text}
   ${count} =  Get Matching Xpath Count  //tr[@class="statement-person-row"]
-  Wait and click  xpath=//a[@data-test-id='create-statement-person']
-  Wait until  Element should be visible  statement-person-email
-  Input text       statement-person-email  ${email}
-  Input text       statement-person-text  ${text}
-  Click element    statement-person-save
+  Click enabled by test id  create-statement-person
+  Wait until  Element should be visible  //label[@for='statement-person-email']
+  Input text  statement-person-email  ${email}
+  Input text  statement-person-text  ${text}
+  Click enabled by test id  create-statement-person-save
   Wait Until  Element Should Not Be Visible  statement-person-save
   Wait Until  Page Should Contain  ${email}
   ${countAfter} =  Evaluate  ${count} + 1

@@ -1,7 +1,8 @@
 (ns lupapalvelu.verdict-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet  :refer :all]))
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.domain :as domain]))
 
 (fact* "Authority is able to add an attachment to an application after verdict has been given for it"
   (doseq [user [sonja pena]]
@@ -10,7 +11,7 @@
     (let [application-id  (create-app-id user :municipality sonja-muni :address "Paatoskuja 9")
           resp            (command user :submit-application :id application-id) => ok?
           application     (query-application user application-id)
-          email           (last-email)]
+          email           (last-email) => truthy]
       (:state application) => "submitted"
       (:to email) => (email-for-key user)
       (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
@@ -42,7 +43,7 @@
         (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
         email => (partial contains-application-link-with-tab? application-id "verdict")))))
 
-(fact "Applicant receives email after verdict has been fetched from KRYPS backend"
+(fact "Applicant receives email after verdict has been fetched from KRYSP backend"
   (last-email) ; Inbox zero
 
   (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
@@ -54,7 +55,7 @@
       (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
       email => (partial contains-application-link-with-tab? application-id "verdict"))))
 
-(facts "Rakennus & rakennelma"
+(fact "Rakennus & rakennelma"
   (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
         application-id (:id application)
         _ (command sonja :check-for-verdict :id application-id) => ok?
