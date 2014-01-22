@@ -69,7 +69,14 @@
        </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
-  (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
+  (let [server (if (.contains server "?")
+                 (if (.endsWith server "&")
+                   server
+                   (str server "&"))
+                 (str server "?"))]
+    (str server "request=GetFeature&" object-type "&filter=" filter)))
+
+    ;&outputFormat=KRYSP
 
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
@@ -118,9 +125,7 @@
 (def ...notimplemented... nil)
 
 (defn- str-or-nil [& v]
-  (if (some nil? v)
-    nil
-    (reduce str v)))
+  (when-not (some nil? v) (reduce str v)))
 
 (defn- get-updated-if [current to-add]
    (if to-add
@@ -275,7 +280,7 @@
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
-    (#(assoc % :liite  (->liite (:liite %))))))
+    (#(update-in % [:liite] ->liite))))
 
 (defn- ->verdict [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)

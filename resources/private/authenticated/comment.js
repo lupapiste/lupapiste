@@ -11,16 +11,12 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-    self.markAnswered = ko.observable();
-
-    self.to.subscribe(function(value) { if (value) self.markAnswered(false); });
 
     self.refresh = function(application, target) {
       self
         .applicationId(application.id)
         .target(target || {type: "application"})
-        .text("")
-        .markAnswered(false);
+        .text("");
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
@@ -36,24 +32,33 @@ var comments = (function() {
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(self.text());
     });
-
-    self.submit = function(model) {
-      var id = self.applicationId();
-      ajax.command("add-comment", {
-          id: id,
-          text: model.text(),
-          target: self.target(),
-          to: self.to(),
-          "mark-answered": self.markAnswered()
+    
+    
+    var doAddComment = function(markAnswered) {
+        var id = self.applicationId();
+        ajax.command("add-comment", {
+            id: id,
+            text: self.text(),
+            target: self.target(),
+            to: self.to(),
+            "mark-answered": markAnswered
         })
         .processing(self.processing)
         .pending(self.pending)
         .success(function() {
-          model.text("").to(undefined).markAnswered(true);
-          repository.load(id);
+            self.text("").to(undefined);
+            repository.load(id);
         })
         .call();
-      return false;
+        return false;
+    };
+    
+    self.markAnswered = function() {
+        return doAddComment(true);
+    };
+
+    self.submit = function() {
+        return doAddComment(false);
     };
 
     self.isForNewAttachment = function(model) {

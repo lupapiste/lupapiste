@@ -108,7 +108,7 @@
   (some->> x (re-matches #"(\d+) .*") last keyword ))
 
 (defn ->huoneistoala [huoneistot]
-  (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
+  (apply + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
 
 (defn ->count [m]
   (-> m keys count))
@@ -382,7 +382,7 @@
    :fields  [tilavuus [:mitat :tilavuus ->int]]
    :facts   {:ok   [[10]]
              :fail [[0]]}}
-  (= tilavuus 0))
+  (zero? tilavuus))
 
 (defvalidator :vrk:CR333:kerrosala
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
@@ -395,7 +395,7 @@
                     [0 "611 voimalaitosrakennukset"]]
              :fail [[0 "032 luhtitalot"]]}}
   (and
-    (= kerrosala 0)
+    (zero? kerrosala)
     (not (#{162 163 169 611 613 712 719 722 941} kayttotarkoitus))))
 
 (defvalidator :vrk:CR333:kokonaisala
@@ -410,7 +410,7 @@
              :fail [[0 "032 luhtitalot"]
                     [0 "729 muut palo- ja pelastustoimen rakennukset"]]}}
   (and
-    (= kokonaisala 0)
+    (zero? kokonaisala)
     (<= kayttotarkoitus 729)))
 
 (defvalidator :vrk:CR333:kerrosluku
@@ -425,7 +425,7 @@
                     [0 "611 voimalaitosrakennukset"]]
              :fail [[0 "729 muut palo- ja pelastustoimen rakennukset"]]}}
   (and
-    (= kerrosluku 0)
+    (zero? kerrosluku)
     (not (#{162 163 169 611 613 712 719 722} kayttotarkoitus))
     (<= kayttotarkoitus 729)))
 
@@ -452,8 +452,8 @@
                    [3300 800 40 "931 saunarakennukset"]] ; 165m
             :fail [[3300 800 40 "342 seurakuntatalot"]]}} ; 165m
   (and
-    (> kerrosluku 0)
-    (> kerrosala 0)
+    (pos? kerrosluku)
+    (pos? kerrosala)
     (not (#{162 163 169 722 611 613 699 712 719} kayttotarkoitus))
     (<= kayttotarkoitus 799)
     (> (/ tilavuus (/ kerrosala kerrosluku)) 150)))

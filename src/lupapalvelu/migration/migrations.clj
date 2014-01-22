@@ -44,10 +44,10 @@
                                                                               (= target-document-name (get-in d [:schema-info :name])))
                                                                             d)) documents)
                                          updated (when document-to-update
-                                                   (assoc document-to-update :schema-info
-                                                     (merge (:schema-info document-to-update)
-                                                       {:op o
-                                                        :removable (= "R" (:permitType application))})))
+                                                   (update-in document-to-update [:schema-info]
+                                                     merge
+                                                     {:op o
+                                                      :removable (= "R" (:permitType application))}))
                                          ]
                                      updated)))
         unmatched-operations (filter
@@ -69,8 +69,11 @@
                                                                                          (< created (:created d))
                                                                                          (= target-document-name (get-in d [:schema-info :name])))
                                                                                        d)) documents)
-                                                          updated (when document-to-update (assoc document-to-update :schema-info  (merge (:schema-info document-to-update) {:op o
-                                                                                                                                                                             :removable (= "R" (:permitType application))})))]
+                                                          updated (when document-to-update
+                                                                    (update-in document-to-update [:schema-info]
+                                                                      merge
+                                                                      {:op o
+                                                                       :removable (= "R" (:permitType application))}))]
                                                       updated)))
         result (map
                  (fn [{id :id :as d}]
@@ -86,8 +89,10 @@
                                  d))
                              result))
                          operations)]
-
-    (assoc (assoc application :documents (into [] result)) :operations new-operations)))
+    (-> application
+      (assoc :documents (vec result))
+      (assoc :operations new-operations)
+      )))
 
 (defmigration invalid-schema-infos-validation
   (doseq [collection [:applications :submitted-applications]]
@@ -194,6 +199,12 @@
     (when-let [ftp (:poikkari-ftp-user organization)]
       (mongo/update-by-id :organizations (:id organization)
         {$set {:krysp.P.ftpUser ftp}
-         $unset {:poikkari-ftp-user 1}}))
-    )
-  )
+         $unset {:poikkari-ftp-user 1}}))))
+
+(defmigration wfs-url-to-support-parameters
+  (doseq [organization (mongo/select :organizations)]
+    (doseq [[permit-type krysp-data] (:krysp organization)]
+      (when-let [url (:url krysp-data)]
+        (when (or (= (name permit-type) lupapalvelu.permit/R) (= (name permit-type) lupapalvelu.permit/P))
+          (mongo/update-by-id :organizations (:id organization)
+                              {$set {(str "krysp." (name permit-type) ".url") (str url "?outputFormat=KRYSP")}}))))))

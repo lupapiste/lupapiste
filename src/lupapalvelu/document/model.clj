@@ -208,7 +208,7 @@
   ([document path value]
     (if (map? value)
       (apply-updates document (map2updates path value))
-      (let [data-path (into [] (flatten [:data path]))]
+      (let [data-path (vec (flatten [:data path]))]
         (-> document
           (assoc-in (conj data-path :value) value)
           (assoc-in (conj data-path :modified) (current-timestamp)))))))
@@ -304,7 +304,7 @@
                                  (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
                                  (strip body current-path))])))))
                   schema-body)))]
-      (let [path (into [] initial-path)
+      (let [path (vec initial-path)
             schema (get-document-schema document)
             schema-body (:body (if (seq path) (find-by-name (:body schema) path) schema))]
         (assoc-in document (concat [:data] path)

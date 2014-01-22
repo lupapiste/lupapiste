@@ -68,7 +68,7 @@
     0))
 
 (defn- indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
+  (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :neighbors :fn neighbors/normalize-neighbors}
@@ -92,7 +92,7 @@
       (let [convert-fn (fn [link-data]
                          (let [link-array (:link link-data)
                                app-index (.indexOf link-array app-id)
-                               link-permit-id (link-array (if (= 0 app-index) 1 0))
+                               link-permit-id (link-array (if (zero? app-index) 1 0))
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
                            (if (= (:type ((keyword app-id) link-data)) "application")
 
@@ -109,12 +109,10 @@
             apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
 
         (-> app
-          (assoc :linkPermitData (if (seq our-link-permits)
-                                   (into [] (map convert-fn our-link-permits))
-                                   nil))
-          (assoc :appsLinkingToUs (if (seq apps-linking-to-us)
-                                    (into [] (map convert-fn apps-linking-to-us))
-                                    nil))))
+          (assoc :linkPermitData (when (seq our-link-permits)
+                                   (vec (map convert-fn our-link-permits))))
+          (assoc :appsLinkingToUs (when (seq apps-linking-to-us)
+                                    (vec (map convert-fn apps-linking-to-us))))))
       ;; No link permit data found
       (-> app
         (assoc :linkPermitData nil)
