@@ -97,6 +97,38 @@
         (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}})
         => { :ok false :text "error.unauthorized"}))
 
+(facts "Access based on extra-auth-roles"
+  (against-background
+    (get-actions) => {:test-command-auth {:parameters [:id]
+                                          :roles [:authority]
+                                          :extra-auth-roles [:someRole]}
+                      :without-extra-roles {:parameters [:id]
+                                            :roles [:authority]}}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
+                                                                                                  :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                              :auth [{:id "user123" :role "someRole"}]}
+
+    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                              :auth [{:id "user234" :role "otherRole"}]}
+
+    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                              :auth [{:id "user345" :role "writer"}]}
+    )
+
+  (fact "Authority from same org has access"
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => {:ok true})
+
+  (fact "Authority with no org but correct role has access"
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+
+  (fact "Authority with no org and incorrect role has no access"
+    (execute {:action "test-command-auth" :user {:id "user234" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+
+  (fact "Authority with no org and writer role in auth array has access"
+    (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+  )
+
 (facts "Parameter validation"
   (against-background (get-actions) => {:test-command {:parameters [:id]}})
   (fact  (missing-parameters {:action "test-command" :data {}})           => { :ok false :parameters ["id"] :text "error.missing-parameters"})
