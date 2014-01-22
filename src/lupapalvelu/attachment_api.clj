@@ -264,26 +264,17 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (if-let [attachment-version (attach-file! {:application-id id
-                                             :filename filename
-                                             :size size
-                                             :content tempfile
-                                             :attachment-id attachmentId
-                                             :attachment-type attachmentType
-                                             :target target
-                                             :locked locked
-                                             :user user
-                                             :created created})]
-    ; FIXME try to combine mongo writes
-    (executed "add-comment"
-      (assoc command :data {:id id
-                            :text text
-                            :type :system
-                            :target {:type :attachment
-                                     :id (:id attachment-version)
-                                     :version (:version attachment-version)
-                                     :filename (:filename attachment-version)
-                                     :fileId (:fileId attachment-version)}}))
+  (when-not (attach-file! {:application-id id
+                           :filename filename
+                           :size size
+                           :content tempfile
+                           :attachment-id attachmentId
+                           :attachment-type attachmentType
+                           :comment-text text
+                           :target target
+                           :locked locked
+                           :user user
+                           :created created})
     (fail :error.unknown)))
 
 
@@ -346,7 +337,7 @@
     (mongo/upload new-file-id filename contentType temp-file :application application-id)
     (let [new-version (if re-stamp?
                         (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
-                        (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true))]
+                        (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) nil created user true))]
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
