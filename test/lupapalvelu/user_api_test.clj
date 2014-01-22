@@ -72,10 +72,10 @@
     (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => truthy
     (provided (security/valid-password? "z") => true))
 
-  (fact "only admin can create enabled users"
+  (fact "admin and authorityAdmin can create enabled users"
     (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :enabled "true"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "false"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "true"}) => forbidden))
+    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled false}) => truthy)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled true}) => truthy))
 
   (fact "only admin can create users with apikeys"
     (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :apikey "true"}) => truthy)
