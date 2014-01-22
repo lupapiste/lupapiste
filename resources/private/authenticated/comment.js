@@ -47,6 +47,9 @@ var comments = (function() {
         .pending(self.pending)
         .success(function() {
             self.text("").to(undefined);
+            if (markAnswered) {
+                LUPAPISTE.ModalDialog.showDynamicOk(loc('comment-request-mark-answered-label'), loc('comment-request-mark-answered.ok'));
+            }
             repository.load(id);
         })
         .call();

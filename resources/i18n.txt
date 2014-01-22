@@ -1,1 +1,2 @@
 statementGiver: Lausunnonantaja
+comment-request-mark-answered.ok: Neuvontapyyntö on merkitty vastatuksi
