@@ -339,11 +339,18 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-(defn- validate-jatkolupa-one-link-permit [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
-            (not= 1 (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
+(defn is-link-permit-required [application]
+  (or (= :muutoslupa (:permitSubtype application))
+      (some #(contains? operations/link-permit-required-operations (keyword (:name %))) (:operations application))) )
+
+(defn- validate-link-permits [_ application]
+  (fail :thisistest)
+  ;(let [application (meta-fields/enrich-with-link-permit-data application)
+   ;     linkPermits (-> application :linkPermitData count)]
+    ;(if (and (= :ya-jatkoaika (-> application :operations first :name keyword)) (not= 1 linkPermits))
+     ; (fail :error.jatkolupa-must-have-exactly-one-link-permit)
+      ;(when (and (is-link-permit-required application) (= 0 linkPermits))
+       ; (fail :error.permit-must-have-link-permit)))))
 
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
@@ -403,7 +410,7 @@
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [validate-jatkolupa-one-link-permit]
+   :pre-checks [validate-link-permits]
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
   (try
@@ -418,10 +425,11 @@
 (defcommand submit-application
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :complement-needed]
+   :states     [:draft :info :open]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [validate-owner-or-writer]}
+   :pre-checks [validate-owner-or-writer]
+   :input-validators [validate-link-permits]}
   [{:keys [application created] :as command}]
   (update-application command
     {$set {:state     :submitted

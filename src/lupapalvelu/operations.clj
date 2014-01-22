@@ -395,7 +395,8 @@
      :aloitusoikeus               {:schema "aloitusoikeus"
                                    :permit-type "R"
                                    :required ["maksaja"]
-                                   :attachments []}
+                                   :attachments []
+                                   :link-permit-required true}
      }
     ya-operations))
 
@@ -405,6 +406,12 @@
 (doseq [[op {:keys [permit-type]}] operations]
   (when-not permit-type
     (throw (Exception. (format "Operation %s does not have permit-type set." op)))))
+
+(def link-permit-required-operations
+  (reduce (fn [result [operation metadata]]
+            (if (:link-permit-required metadata)
+              (conj result operation)
+              result)) #{} operations))
 
 ;;
 ;; Actions
