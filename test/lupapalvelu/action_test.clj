@@ -103,7 +103,9 @@
                                           :roles [:authority]
                                           :extra-auth-roles [:someRole]}
                       :without-extra-roles {:parameters [:id]
-                                            :roles [:authority]}}
+                                            :roles [:authority]}
+                      :with-any-extra-role {:parameters [:id]
+                                            :extra-auth-roles [:any]}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
                                                                                                   :auth [{:id "user123" :role "someRole"}]}
     (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
@@ -133,6 +135,9 @@
 
   (fact "Authority with no org and non-writer role in auth array has no access"
     (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+
+  (fact "Any extra-auth-role allowed"
+    (execute {:action "with-any-extra-role" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
   )
 
 (facts "Parameter validation"
