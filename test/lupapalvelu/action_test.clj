@@ -109,7 +109,7 @@
                      :test-command2 {:pre-checks [(constantly nil)]}
                      :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
-;;FIXME
+
  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
@@ -120,7 +120,7 @@
                      :test-command2 {:input-validators [(constantly nil)]}
                      :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
-;;FIXME
+
  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
@@ -159,10 +159,6 @@
 (fact "exception details are not returned"
   (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh")))}})
   (execute {:action "failing"}) => {:ok false :text "error.unknown"})
-
-;; FIXME: these should fail!
-;(fact (executed "ping" {:action "ping"}) => {:ok true :text "pong"})
-;(fact (executed {:action "ping"}) => {:ok true :text "pong"})
 
 (facts "non-blank-parameters"
   (non-blank-parameters nil {}) => nil
