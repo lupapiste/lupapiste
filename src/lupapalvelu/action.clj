@@ -194,7 +194,8 @@
         extra-auth-roles (set (:extra-auth-roles meta-data))]
     (when-not (or (extra-auth-roles :any)
                   (domain/owner-or-writer? application (:id user))
-                  (and (= :authority (:role user)) ((set (:organizations user)) (:organization application)))
+                  ;((set (:organizations user)) (:organization application))
+                  (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       (fail :error.unauthorized))))
 

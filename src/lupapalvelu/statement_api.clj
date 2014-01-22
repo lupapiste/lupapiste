@@ -95,7 +95,7 @@
    :states     [:draft :info :open :submitted :complement-needed]
    :roles      [:authority]}
   [command]
-  (update-application command {$pull {:statements {:id statementId}}}))
+  (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand give-statement
   {:parameters  [id statementId status text]
