@@ -69,7 +69,14 @@
        </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
-  (str server "?request=GetFeature&outputFormat=KRYSP&" object-type "&filter=" filter))
+  (let [server (if (.contains server "?")
+                 (if (.endsWith server "&")
+                   server
+                   (str server "&"))
+                 (str server "?"))]
+    (str server "request=GetFeature&" object-type "&filter=" filter)))
+
+    ;&outputFormat=KRYSP
 
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
