@@ -20,7 +20,7 @@ Mikko uploads CV
 Mikko copies his attachments to application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30
+  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
   Open tab  attachments
   Click enabled by test id  attachments-copy-own
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}

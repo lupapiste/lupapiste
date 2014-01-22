@@ -9,7 +9,7 @@
 (defn- add-term [row result lang]
   (let [k (get row "key")
         t (get row lang)]
-    (if (and k t (> (.length t) 0))
+    (if (and k t (pos? (.length t)))
       (assoc-in result [(keyword lang) k] (s/trim t))
       result)))
 
@@ -94,4 +94,4 @@
         (read-lines (line-seq in)))))
 
   (defn get-localizations []
-    (assoc @excel-data :fi (merge (get @excel-data :fi) (load-add-ons)))))
+    (update-in @excel-data [:fi] merge (load-add-ons))))

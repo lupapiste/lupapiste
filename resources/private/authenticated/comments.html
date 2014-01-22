@@ -50,9 +50,13 @@
 
           <div data-bind="with: $parent.authorities, visible: $root.authorization.ok('can-target-comment-to-authority')" class="comment-controls">
             <div class="mark-answered" data-bind="visible: $root.application.infoRequest">
-              <input type="checkbox" data-bind="checked: $parent.markAnswered" data-test-id="comment-request-mark-answered" id="mark-answered" />
-              <label data-bind="ltext: 'comment-request-mark-answered-label'" for="mark-answered"></label>
-
+              <button
+                data-bind="visible: $root.authorization.ok('add-comment'), click: $parent.markAnswered"
+                data-test-id="comment-request-mark-answered"
+                type="submit"
+                class="btn btn-primary">
+                <span data-bind="ltext: 'comment-request-mark-answered-label'"></span>
+              </button>
             </div>
             <div class="comment-request">
               <label data-bind="ltext: 'comment-request-label'"></label>

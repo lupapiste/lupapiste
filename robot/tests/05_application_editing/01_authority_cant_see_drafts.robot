@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 
 Mikko creates application
   Mikko logs in
-  Create application the fast way  authority-cant-see-drafts  753  753-416-25-30
+  Create application the fast way  authority-cant-see-drafts  753  753-416-25-30  asuinrakennus
   [Teardown]  logout
 
 Sonja should not see applications at this stage

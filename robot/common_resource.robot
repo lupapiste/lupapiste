@@ -250,8 +250,8 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait until  Page should contain element  ${path}
-  Wait Until  Element should be enabled  ${path}
+  Wait until  Page Should Contain Element  ${path}
+  Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
 #
@@ -259,8 +259,8 @@ Click enabled by test id
 #
 
 Create application the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${operation}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&y=6610000&x=10000.1
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
@@ -412,6 +412,12 @@ Input comment
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
+  
+Input comment and mark answered
+  [Arguments]  ${section}  ${message}
+  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='${section}']//button[@data-test-id='comment-request-mark-answered']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
 
 Comment count is
   [Arguments]  ${section}  ${amount}
@@ -483,6 +489,45 @@ Add neighbor
   Click by test id  neighbors.edit.ok
   Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
   Wait Until  Page Should Contain  ${email}
+
+#
+# Verdict
+#
+
+Go to give new verdict
+  Open tab  verdict
+  Click enabled by test id  give-verdict
+  Wait Until  Element Should Be Visible  verdict-id
+  Wait Until  Element Should Be Enabled  verdict-id
+
+Input verdict
+  [Arguments]  ${verdict-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text  verdict-id  ${verdict-id}
+  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
+  Input text  verdict-given  ${verdict-given-date}
+  Input text  verdict-official  ${verdict-official-date}
+  Input text  verdict-name  ${verdict-giver-name}
+  ## Trigger change manually
+  Execute JavaScript  $("#verdict-id").change();
+  Execute JavaScript  $("#verdict-type-select").change();
+  Execute JavaScript  $("#verdict-given").change();
+  Execute JavaScript  $("#verdict-official").change();
+  Execute JavaScript  $("#verdict-name").change();
+
+Submit verdict
+  Focus  verdict-submit
+  Wait Until  Element Should Be Enabled  verdict-submit
+  Click button  verdict-submit
+
+Throw in a verdict
+  Go to give new verdict
+  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
+  Submit verdict
+  Wait until  Application state should be  verdictGiven
+  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
+  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
 
 # User management
 

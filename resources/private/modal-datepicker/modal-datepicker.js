@@ -15,7 +15,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.areYouSureMessage = ko.observable("");
 
 
-  self.ok = ko.computed( function() {return self.dateObservable();} );
+  self.ok = ko.computed( function() { return self.dateObservable() !== null; });
 
   self.onError = function(resp) {
     self.errorMessage(resp.text);
