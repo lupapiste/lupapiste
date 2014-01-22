@@ -151,6 +151,7 @@ Create statement person
   Click enabled by test id  create-statement-giver
   Wait until  Element should be visible  //label[@for='statement-giver-email']
   Input text  statement-giver-email  ${email}
+  Input text  statement-giver-email2  ${email}
   Input text  statement-giver-text  ${text}
   Click enabled by test id  create-statement-giver-save
   Wait Until  Element Should Not Be Visible  statement-giver-save

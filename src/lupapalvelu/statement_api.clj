@@ -60,7 +60,8 @@
 ;;
 
 (defcommand should-see-unsubmitted-statements
-  {:roles [:authority]} [_])
+  {:description "Pseudo command for UI authorization logic"
+   :roles [:authority] :extra-auth-roles [:statementGiver]} [_])
 
 (defcommand request-for-statement
   {:parameters  [id personIds]
