@@ -131,7 +131,6 @@
   (fact "Authority with no org and writer role in auth array has access"
     (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
 
-  ; TODO should this fail or not?
   (fact "Authority with no org and non-writer role in auth array has no access"
     (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
   )

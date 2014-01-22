@@ -190,10 +190,12 @@
 (defn- user-is-not-allowed-to-access?
   "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
   [{user :user :as command} application]
-  (let [meta-data (meta-data command)]
-    (when-not (or (domain/owner-or-writer? application (:id user))
+  (let [meta-data (meta-data command)
+        extra-auth-roles (set (:extra-auth-roles meta-data))]
+    (when-not (or (extra-auth-roles :any)
+                  (domain/owner-or-writer? application (:id user))
                   ((set (:organizations user)) (:organization application))
-                  (some #(domain/has-auth-role? application (:id user) %) (:extra-auth-roles meta-data)))
+                  (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       (fail :error.unauthorized))))
 
 (defn- authorized-to-application [command application]
