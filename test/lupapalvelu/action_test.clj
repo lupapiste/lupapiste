@@ -108,6 +108,9 @@
                                             :extra-auth-roles [:any]}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
                                                                                                   :auth [{:id "user123" :role "someRole"}]}
+    
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :applicant}) => {:organization "999-R" :auth []}
+    
     (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
                                                                                               :auth [{:id "user123" :role "someRole"}]}
 
@@ -123,6 +126,9 @@
 
   (fact "Authority from same org has access"
     (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => {:ok true})
+
+  (fact "Non-authority from same org has no access"
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :applicant} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
 
   (fact "Authority with no org but correct role has access"
     (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
