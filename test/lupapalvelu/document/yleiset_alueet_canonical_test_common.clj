@@ -18,7 +18,7 @@
             :lastName "Sibbo",
             :username "sonja"})
 
-(def statement-person {:id "516560d6c2e6f603beb85147"
+(def statement-giver {:id "516560d6c2e6f603beb85147"
                        :text "Paloviranomainen"
                        :name "Sonja Sibbo"
                        :email "sonja.sibbo@sipoo.fi"})
@@ -158,6 +158,6 @@
                   :given 1379415837074
                   :requested 1379413226349
                   :status "yes"
-                  :person statement-person
+                  :person statement-giver
                   :text "Annanpa luvan."}])
 

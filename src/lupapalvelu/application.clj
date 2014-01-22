@@ -102,7 +102,7 @@
 
 (defquery application
   {:authenticated true
-   :extra-auth-roles [:statementPerson]
+   :extra-auth-roles [:statementGiver]
    :parameters [:id]}
   [{app :application user :user}]
   (if app
@@ -245,6 +245,7 @@
 (defcommand add-comment
   {:parameters [id text target]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :pre-checks [applicant-cant-set-to]
    :notified   true
    :on-success [(notify :new-comment)

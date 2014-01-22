@@ -9,8 +9,8 @@
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
         application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobulevardi 1 A 1")
-        resp (command sipoo :create-statement-person :email (email-for "ronja") :text "<b>bold</b>") => ok?
-        statement-person-ronja (:id resp)
+        resp (command sipoo :create-statement-giver :email (email-for "ronja") :text "<b>bold</b>") => ok?
+        statement-giver-ronja (:id resp)
         email (last-email)]
 
     (fact "new statement person receives email which contains the (html escaped) input text"
@@ -20,8 +20,8 @@
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))
 
     (fact "Statement person can be added from another organization"
-      (let [resp (command sipoo :create-statement-person :email veikko-email :text "<b>bold</b>") => ok?
-            statement-person-veikko (:id resp)]
+      (let [resp (command sipoo :create-statement-giver :email veikko-email :text "<b>bold</b>") => ok?
+            statement-giver-veikko (:id resp)]
 
         ; Inbox zero
         (last-email) => truthy
@@ -30,7 +30,7 @@
           (query veikko :application :id application-id) => unauthorized?)
 
         (let [application-before (query-application sonja application-id)
-              resp (command sonja :request-for-statement :id application-id :personIds [statement-person-veikko]) => ok?
+              resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-veikko]) => ok?
               application-after  (query-application sonja application-id)
               emails (sent-emails)
               email (first emails)]
@@ -54,6 +54,6 @@
 
   (let [new-email "kirjaamo@museovirasto.example.com"]
     (fact "User does not exist before so she can not be added as a statement person"
-      (command sipoo :create-statement-person :email new-email :text "hello") => (partial expected-failure? "error.user-not-found")))
+      (command sipoo :create-statement-giver :email new-email :text "hello") => (partial expected-failure? "error.user-not-found")))
 
   )

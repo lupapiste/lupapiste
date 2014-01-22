@@ -42,11 +42,11 @@ Hessu can login
   [Teardown]  Logout
 
 ## TODO muutetaan testi sellaiseksi etta lisataan henkilo joka ei ole organsisaatiossa
-## (feature/statementPerson)
+## (feature/statementGiver)
 Authority admin adds existing authority as a statement person
   Sipoo logs in
-  Set Suite Variable  ${statementPersonRowXpath}  //tr[@class='statement-person-row']
-  ${userCount} =  Get Matching Xpath Count  ${statementPersonRowXpath}
+  Set Suite Variable  ${statementGiverRowXpath}  //tr[@class='statement-giver-row']
+  ${userCount} =  Get Matching Xpath Count  ${statementGiverRowXpath}
   Create statement person  ronja.sibbo@sipoo.fi  Asiantuntija
   ${userCountAfter} =  Evaluate  ${userCount} + 1
   Statement person count is  ${userCountAfter}
@@ -60,7 +60,7 @@ User count is
 
 Statement person count is
   [Arguments]  ${amount}
-  Wait Until  Xpath Should Match X Times  ${statementPersonRowXpath}  ${amount}
+  Wait Until  Xpath Should Match X Times  ${statementGiverRowXpath}  ${amount}
 
 Create user
   [Arguments]  ${email}  ${firstName}  ${lastName}
@@ -76,9 +76,9 @@ Create user
 
 Create statement person
   [Arguments]  ${email}  ${text}
-  Click enabled by test id  create-statement-person
-  Wait until  Element should be visible  //label[@for='statement-person-email']
-  Input text  statement-person-email  ${email}
-  Input text  statement-person-email2  ${email}
-  Input text  statement-person-text  ${text}
-  Click enabled by test id  create-statement-person-save
+  Click enabled by test id  create-statement-giver
+  Wait until  Element should be visible  //label[@for='statement-giver-email']
+  Input text  statement-giver-email  ${email}
+  Input text  statement-giver-email2  ${email}
+  Input text  statement-giver-text  ${text}
+  Click enabled by test id  create-statement-giver-save

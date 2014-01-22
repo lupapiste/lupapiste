@@ -13,7 +13,7 @@ Authority admin goes to admin page
 
 Statement person can be deleted - no questions asked
   Statement person count is  1
-  Wait and click  xpath=//a[@data-test-id='remove-statement-person']
+  Wait and click  xpath=//a[@data-test-id='remove-statement-giver']
   Statement person count is  0
 
 Authorities from own municipality can be added as statement persons
@@ -47,14 +47,14 @@ Sonja adds four statement persons to application
   Open tab  statement
   Element should be visible  xpath=//*[@data-test-id='application-no-statements']
   Wait and click   xpath=//button[@data-test-id="add-statement"]
-  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-person']
-  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='check-statement-person-3']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-person-0']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-person-1']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-person-2']
-  Select Checkbox  xpath=//*[@data-test-id='check-statement-person-3']
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-person']
-  Wait and click  xpath=//*[@data-test-id='add-statement-person']
+  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='check-statement-giver-3']
+  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-0']
+  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-1']
+  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-2']
+  Select Checkbox  xpath=//*[@data-test-id='check-statement-giver-3']
+  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
   Statement count is  4
 
 Sonja can delete statement
@@ -143,17 +143,17 @@ Statement is not disabled
 
 Statement person count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //tr[@class="statement-person-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //tr[@class="statement-giver-row"]  ${amount}
 
 Create statement person
   [Arguments]  ${email}  ${text}
-  ${count} =  Get Matching Xpath Count  //tr[@class="statement-person-row"]
-  Click enabled by test id  create-statement-person
-  Wait until  Element should be visible  //label[@for='statement-person-email']
-  Input text  statement-person-email  ${email}
-  Input text  statement-person-text  ${text}
-  Click enabled by test id  create-statement-person-save
-  Wait Until  Element Should Not Be Visible  statement-person-save
+  ${count} =  Get Matching Xpath Count  //tr[@class="statement-giver-row"]
+  Click enabled by test id  create-statement-giver
+  Wait until  Element should be visible  //label[@for='statement-giver-email']
+  Input text  statement-giver-email  ${email}
+  Input text  statement-giver-text  ${text}
+  Click enabled by test id  create-statement-giver-save
+  Wait Until  Element Should Not Be Visible  statement-giver-save
   Wait Until  Page Should Contain  ${email}
   ${countAfter} =  Evaluate  ${count} + 1
   Statement person count is  ${countAfter}

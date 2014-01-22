@@ -202,3 +202,12 @@
          $unset {:poikkari-ftp-user 1}}))
     )
   )
+
+
+(defmigration statementPersons-to-statementGivers
+  {:apply-when (pos? (mongo/count  :organizations {:statementPersons {$exists true}}))}
+  (doseq [organization (mongo/select :organizations {:statementPerson {$exists true}})]
+    (mongo/update-by-id :organizations (:id organization) 
+                        {$set {:statementGivers (:statementPersons organization)}
+                         $unset {:statementPersons 1}})))
+
