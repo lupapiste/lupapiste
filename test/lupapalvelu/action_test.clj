@@ -92,7 +92,7 @@
   (fact "with correct authority command is executed"
         (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}})
         => { :ok true})
-;;FIXME
+
   (fact "with incorred authority error is returned"
         (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}})
         => { :ok false :text "error.unauthorized"}))
