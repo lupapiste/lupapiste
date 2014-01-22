@@ -84,6 +84,7 @@
 
 (defquery attachment-types
   {:parameters [:id]
+   :extra-auth-roles [:statementGiver]
    :roles      [:applicant :authority]}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
@@ -91,6 +92,7 @@
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application] :as command}]
   (let [attachment-type (parse-attachment-type attachmentType)]
@@ -149,6 +151,7 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
+   :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed]}
   [{:keys [application]}]
   (delete-attachment application attachmentId)
@@ -157,6 +160,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
+   :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application]}]
   (if (file-id-in-application? application attachmentId fileId)
@@ -175,12 +179,14 @@
      :body "401 Unauthorized"}))
 
 (defraw "view-attachment"
-  {:parameters [:attachment-id]}
+  {:parameters [:attachment-id]
+   :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
   (output-attachment-if-logged-in attachment-id false user))
 
 (defraw "download-attachment"
-  {:parameters [:attachment-id]}
+  {:parameters [:attachment-id]
+   :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
   (output-attachment-if-logged-in attachment-id true user))
 
@@ -223,7 +229,8 @@
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defraw "download-all-attachments"
-  {:parameters [:id]}
+  {:parameters [:id]
+   :extra-auth-roles [:statementGiver]}
   [{:keys [application lang]}]
   (if application
     {:status 200
@@ -242,6 +249,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
                 (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
