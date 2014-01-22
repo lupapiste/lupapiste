@@ -114,6 +114,9 @@
 
     (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority}) =>  {:organization "999-R"
                                                                                               :auth [{:id "user345" :role "writer"}]}
+
+    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                              :auth [{:id "user456" :role "3rdRole"}]}
     )
 
   (fact "Authority from same org has access"
@@ -127,6 +130,10 @@
 
   (fact "Authority with no org and writer role in auth array has access"
     (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+
+  ; TODO should this fail or not?
+  (fact "Authority with no org and non-writer role in auth array has no access"
+    (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
   )
 
 (facts "Parameter validation"
