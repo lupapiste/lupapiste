@@ -5,8 +5,7 @@
             [lupapalvelu.factlet  :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.schemas :as schemas]))
 
 (apply-remote-minimal)
 

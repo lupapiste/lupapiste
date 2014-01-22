@@ -206,4 +206,4 @@
     => [...c1... ...c2... ...f1... ...f2...])
 
 (fact "None of the actions contain the outdated :validators definition"
-  (map :validators (get-actions)) => (has every? nil?))
+  (map :validators (vals (get-actions))) => (has every? nil?))

@@ -57,7 +57,7 @@ The contents of unsent inforequest's message field is resetted properly when mov
 Mikko creates new application
   Go to page  applications
   Wait until  Element should be visible  xpath=//*[@data-test-id='applications-create-new']
-  Create application the fast way  create-app-2  753  753-416-25-22
+  Create application the fast way  create-app-2  753  753-416-25-22  asuinrakennus
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
@@ -74,7 +74,7 @@ Mikko closes application at Latokuja 3 and logs out
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application the fast way  create-veikko-auth-app  837  837-416-17-15
+  Create application the fast way  create-veikko-auth-app  837  837-416-17-15  asuinrakennus
   Wait until  Application state should be  open
   It is possible to add operation
 

@@ -37,7 +37,7 @@
                                              :expires {$gt (core/now)}})]
     (when (or consume (:auto-consume token))
       (mongo/update-by-id :token id {$set {:used (core/now)}}))
-    (assoc token :token-type (keyword (:token-type token)))))
+    (update-in token [:token-type] keyword)))
 
 (defn consume-token [id params & {:keys [consume] :or {consume false}}]
   (when-let [token-data (get-token id :consume consume)]

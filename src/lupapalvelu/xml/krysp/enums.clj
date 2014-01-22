@@ -5,9 +5,9 @@
             [sade.xml :as xml]))
 
 (defn extract [schema name mapper]
-  (->>
-    (e/select schema [(e/attr= :name name) :xs:restriction :xs:enumeration])
-    (map (fn-> :attrs :value mapper))))
+  (map
+    (fn-> :attrs :value mapper)
+    (e/select schema [(e/attr= :name name) :xs:restriction :xs:enumeration])))
 
 (defn ->keyword-value [x]
   [(some->> x (re-matches #"(\d+) .*") last keyword)

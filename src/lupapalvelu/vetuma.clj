@@ -53,7 +53,7 @@
 
 (defn- timestamp [] (format/unparse time-format (local-now)))
 
-(defn- generate-stamp [] (apply str (take 20 (repeatedly #(rand-int 10)))))
+(defn- generate-stamp [] (apply str (repeatedly 20 #(rand-int 10))))
 
 (defn- keys-as [f m] (into {} (for [[k v] m] [(f k) v])))
 (defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
@@ -221,7 +221,7 @@
 
 (defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
-        user (-> data :user)]
+        user (:user data)]
     (json user)))
 
 ;;

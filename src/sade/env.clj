@@ -73,7 +73,7 @@
   [& keys]
   (->
     (get-config)
-    (get-in (cons :feature (into [] keys)))
+    (get-in (cons :feature (vec keys)))
     str
     read-value
     true?))

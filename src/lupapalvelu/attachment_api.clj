@@ -44,7 +44,7 @@
    :roles      [:authority]
    :pre-checks [(partial if-not-authority-states-must-match #{:verdictGiven})
                 (permit/validate-permit-type-is permit/R)]
-   :states     [:verdictGiven]
+   :states     [:verdictGiven :constructionStarted]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created application] :as command}]
 
@@ -54,8 +54,8 @@
                                            (or
                                              (not (:sent %))
                                              (> (-> % :versions last :created) (:sent %)))
-                                           (not (= "statement" (-> % :target :type)))
-                                           (not (= "verdict" (-> % :target :type))))
+                                           (not= "statement" (-> % :target :type))
+                                           (not= "verdict" (-> % :target :type)))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
 
@@ -91,7 +91,7 @@
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :submitted :complement-needed]}
+   :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application] :as command}]
   (let [attachment-type (parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? application attachment-type)
@@ -110,7 +110,7 @@
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -121,7 +121,7 @@
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -136,7 +136,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
   [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application-id attachment-types created)]
     (ok :applicationId application-id :attachmentIds attachment-ids)
@@ -157,7 +157,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
-   :states      [:draft :info :open :submitted :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application]}]
   (if (file-id-in-application? application attachmentId fileId)
     (delete-attachment-version application attachmentId fileId)
@@ -246,7 +246,7 @@
                 (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven]
+   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
@@ -268,15 +268,14 @@
                                              :created created})]
     ; FIXME try to combine mongo writes
     (executed "add-comment"
-      (-> command
-        (assoc :data {:id id
-                      :text text,
-                      :type :system
-                      :target {:type :attachment
-                               :id (:id attachment-version)
-                               :version (:version attachment-version)
-                               :filename (:filename attachment-version)
-                               :fileId (:fileId attachment-version)}})))
+      (assoc command :data {:id id
+                            :text text
+                            :type :system
+                            :target {:type :attachment
+                                     :id (:id attachment-version)
+                                     :version (:version attachment-version)
+                                     :filename (:filename attachment-version)
+                                     :fileId (:fileId attachment-version)}}))
     (fail :error.unknown)))
 
 

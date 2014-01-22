@@ -41,6 +41,8 @@ Hessu can login
   User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa
   [Teardown]  Logout
 
+## TODO muutetaan testi sellaiseksi etta lisataan henkilo joka ei ole organsisaatiossa
+## (feature/statementPerson)
 Authority admin adds existing authority as a statement person
   Sipoo logs in
   Set Suite Variable  ${statementPersonRowXpath}  //tr[@class='statement-person-row']

@@ -11,7 +11,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Taskitesti${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30
+  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
   Submit application
   Open tab  verdict
   Click enabled by test id  fetch-verdict

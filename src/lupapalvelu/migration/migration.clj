@@ -48,8 +48,7 @@
   (printf "Executing migration '%s': " migration-name)
   (let [result (execute-migration! migration-name)]
     (if (:ok result)
-      (do
-        (println "Successful"))
+      (println "Successful")
       (do
         (println "Failure:")
         (println result)

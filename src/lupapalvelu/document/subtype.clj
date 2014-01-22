@@ -55,7 +55,7 @@
                 (map * [7 9 10 5 8 4 2])
                 (reduce +))
           mod (mod sum 11)
-          chk (if (= mod 0) 0 (- 11 mod))]
+          chk (if (zero? mod) 0 (- 11 mod))]
       (= (str chk) checksum))))
 
 (defmethod subtype-validation :y-tunnus [_ v]
