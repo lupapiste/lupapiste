@@ -102,7 +102,7 @@
 
 (defquery application
   {:authenticated true
-   :extra-auth-roles [:statementGiver]
+   :extra-auth-roles [:any]
    :parameters [:id]}
   [{app :application user :user}]
   (if app
