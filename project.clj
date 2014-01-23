@@ -38,7 +38,7 @@
                  [cljts "0.2.0"]]
   :profiles {:dev {:dependencies [[midje "1.6.0"]
                                   [ring-mock "0.1.5"]
-                                  [clj-ssh "0.5.6"]]
+                                  [clj-ssh "0.5.7"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]
