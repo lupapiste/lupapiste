@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application executed]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for-application? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
             [lupapalvelu.organization :as organization]
