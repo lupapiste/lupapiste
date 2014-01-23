@@ -222,7 +222,7 @@
                               :version next-version
                               :filename filename
                               :fileId file-id}
-              comment-model (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now)
+
               result-count (mongo/update-by-query
                              :applications
                              {:_id application-id
@@ -230,12 +230,13 @@
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
                              (deep-merge
-                               comment-model
+                               (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now)
                                {$set {:modified now
-                                     :attachments.$.modified now
-                                     :attachments.$.state  :requires_authority_action
-                                     :attachments.$.latestVersion version-model}
-                               $push {:attachments.$.versions version-model}}))]
+                                      :attachments.$.modified now
+                                      :attachments.$.state  :requires_authority_action
+                                      :attachments.$.latestVersion version-model}
+                                $push {:attachments.$.versions version-model}})
+                             )]
           ; Check return value and try again with new version number
           (if (pos? result-count)
             (assoc version-model :id attachment-id)
@@ -261,12 +262,12 @@
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application-id attachment-id attachment-type file-id filename content-type size text created user target locked]}]
+  [{:keys [application-id attachment-id attachment-type file-id filename content-type size comment-text created user target locked]}]
   (let [attachment-id (cond
                         (ss/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
                         :else (create-attachment application-id attachment-type created target locked attachment-id))]
-    (set-attachment-version application-id attachment-id file-id filename content-type size text created user false)))
+    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text created user false)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
