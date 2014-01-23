@@ -251,7 +251,9 @@
         (when execute? (log/log-event :error command))
         (fail text (dissoc all :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))))
     (catch response? resp
-      resp)
+      (do 
+        (warnf "%s -> proxy fail: %s" (:action command) resp)
+        (fail :error.unknown)))
     (catch Object e
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))

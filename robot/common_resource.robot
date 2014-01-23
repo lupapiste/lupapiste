@@ -552,7 +552,7 @@ Mock query
 
 Mock query error
   [Arguments]  ${name}
-  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', status:500});
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
 
 Mock proxy
   [Arguments]  ${name}  ${jsonResponse}
