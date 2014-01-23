@@ -13,16 +13,16 @@
       => [{:henkilolaji :luonnollinen
            :etunimet "Ahma Ky\u00F6sti Jaakkima"
            :sukunimi "Voller"
-           :syntymapvm (to-date "1975-01-08")
-           :ulkomaalainen false
+           ;:syntymapvm (to-date "1975-01-08")
+           ;:ulkomaalainen false
            :jakeluosoite "Valli & kuja I/X:s Gaatta"
            :postinumero "00100"
            :paikkakunta "Helsinki"} 
           {:henkilolaji :luonnollinen
            :etunimet "Jaakko Jaakkima Jorma"
            :sukunimi "Pakkanen"
-           :syntymapvm (to-date "1979-12-12")
-           :ulkomaalainen true
+           ;:syntymapvm (to-date "1979-12-12")
+           ;:ulkomaalainen true
            :jakeluosoite "Valli & kuja I/X:s Gaatta"
            :postinumero "00100"
            :paikkakunta "Helsinki"
@@ -39,14 +39,14 @@
       => [{:henkilolaji :kuolinpesa
            :etunimet "Pjotr Seppo Risto"
            :sukunimi "Yl\u00E4m\u00E4rssy"
-           :syntymapvm (to-date "1917-12-09")
+           ;:syntymapvm (to-date "1917-12-09")
            :kuolinpvm (to-date "1995-05-02")
-           :ulkomaalainen false
+           ;:ulkomaalainen false
            :yhteyshenkilo {:henkilolaji :luonnollinen
                            :etunimet "Seppo Matias Unto"
                            :sukunimi "Lahti"
-                           :syntymapvm (to-date "1951-01-07")
-                           :ulkomaalainen false
+                           ;:syntymapvm (to-date "1951-01-07")
+                           ;:ulkomaalainen false
                            :jakeluosoite "Valli & kuja I/X:s Gaatta"
                            :postinumero "00100"
                            :paikkakunta "Helsinki"
@@ -54,14 +54,14 @@
           {:henkilolaji :kuolinpesa
            :etunimet "Legolas Kalervo Jalmari"
            :sukunimi "Niinist\u00F6"
-           :syntymapvm (to-date "1922-07-20")
+           ;:syntymapvm (to-date "1922-07-20")
            :kuolinpvm (to-date "1988-06-09")
-           :ulkomaalainen false
+           ;:ulkomaalainen false
            :yhteyshenkilo {:henkilolaji :luonnollinen
                            :etunimet "Seppo Matias Unto"
                            :sukunimi "Lahti"
-                           :syntymapvm (to-date "1951-01-07")
-                           :ulkomaalainen false
+                           ;:syntymapvm (to-date "1951-01-07")
+                           ;:ulkomaalainen false
                            :jakeluosoite "Valli & kuja I/X:s Gaatta"
                            :postinumero "00100"
                            :paikkakunta "Helsinki"
