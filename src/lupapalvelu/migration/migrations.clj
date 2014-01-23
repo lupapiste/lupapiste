@@ -199,9 +199,7 @@
     (when-let [ftp (:poikkari-ftp-user organization)]
       (mongo/update-by-id :organizations (:id organization)
         {$set {:krysp.P.ftpUser ftp}
-         $unset {:poikkari-ftp-user 1}}))
-    )
-  )
+         $unset {:poikkari-ftp-user 1}}))))
 
 
 (defmigration statementPersons-to-statementGivers
@@ -211,3 +209,10 @@
                         {$set {:statementGivers (:statementPersons organization)}
                          $unset {:statementPersons 1}})))
 
+(defmigration wfs-url-to-support-parameters
+  (doseq [organization (mongo/select :organizations)]
+    (doseq [[permit-type krysp-data] (:krysp organization)]
+      (when-let [url (:url krysp-data)]
+        (when (or (= (name permit-type) lupapalvelu.permit/R) (= (name permit-type) lupapalvelu.permit/P))
+          (mongo/update-by-id :organizations (:id organization)
+                              {$set {(str "krysp." (name permit-type) ".url") (str url "?outputFormat=KRYSP")}}))))))
