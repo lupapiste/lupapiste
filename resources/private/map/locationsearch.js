@@ -40,10 +40,10 @@ var locationSearch = (function() {
 
   var searchOwnersByPropertyId = function(requestContext, propertyId, onSuccess, onFail) {
       ajax
-      .get("/api/query/owners")
+      .query("owners")
       .param("propertyId", propertyId)
       .success(requestContext.onResponse(onSuccess))
-      .fail(requestContext.onResponse(onFail))
+      .error(requestContext.onResponse(onFail))
       .call();
   };
   
