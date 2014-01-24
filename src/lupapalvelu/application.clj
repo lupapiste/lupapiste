@@ -339,12 +339,6 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-(defn- validate-jatkolupa-one-link-permit [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
-            (not= 1 (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
-
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
@@ -398,22 +392,6 @@
               (when (empty? (:authority application))
                 {:authority (user/summary user)}))})))
 
-(defcommand approve-application
-  {:parameters [id lang]
-   :roles      [:authority]
-   :notified   true
-   :on-success (notify :application-state-change)
-   :pre-checks [validate-jatkolupa-one-link-permit]
-   :states     [:submitted :complement-needed]}
-  [{:keys [application] :as command}]
-  (try
-    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-      (do-approve-jatkoaika-app command id lang)
-      (do-approve-regular-app command id lang))
-    (catch org.xml.sax.SAXParseException e
-      (info e "Invalid KRYSP XML message")
-      (fail (.getMessage e)))))
-
 (defn is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
       (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
@@ -425,6 +403,23 @@
       (fail :error.jatkolupa-must-have-exactly-one-link-permit)
       (when (and (is-link-permit-required application) (= 0 linkPermits))
         (fail :error.permit-must-have-link-permit)))))
+
+
+(defcommand approve-application
+  {:parameters [id lang]
+   :roles      [:authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:submitted :complement-needed]}
+  [{:keys [application] :as command}]
+  (or (validate-link-permits application)
+      (try
+        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+          (do-approve-jatkoaika-app command id lang)
+          (do-approve-regular-app command id lang))
+        (catch org.xml.sax.SAXParseException e
+      (info e "Invalid KRYSP XML message")
+      (fail (.getMessage e))))))
 
 (defn- do-submit [command application created]
   (update-application command
