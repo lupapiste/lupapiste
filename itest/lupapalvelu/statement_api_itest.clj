@@ -56,8 +56,6 @@
         (get-in statement [:person :email]) => veikko-email
         (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
 
-        (println (:auth application))
-
         (fact "Sonja got email"
           (let [emails (sent-emails)
                 email  (first emails)]
