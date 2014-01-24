@@ -95,9 +95,9 @@
          :new-comment                  {:tab            "/conversation"
                                         :pred-fn        (fn [{user :user}] (user/authority? user))}
          :invite                       {:recipients-fn  from-data}
-         :add-statement-giver         {:recipients-fn  from-user
-                                        :subject-key    "application.statements"
-                                        :model-fn       statement-giver-model}
+         :add-statement-giver          {:recipients-fn  from-user
+                                         :subject-key    "application.statements"
+                                         :model-fn       statement-giver-model}
          :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
                                         :subject-key    "statement-request"}
          :neighbor                     {:recipients-fn  from-data
