@@ -460,8 +460,7 @@
    :authenticated true
    :roles [:applicant]
    :states     [:draft :open :submitted :complement-needed]
-   :pre-checks [(fn [command application] (not (-> command :user :architect)))]
-   :feature [:architect-info]}
+   :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
   [{user :user}]
   (doseq [attachment (:attachments user)]
     (let [
