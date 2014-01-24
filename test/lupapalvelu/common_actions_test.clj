@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [midje.checking.core :as checking]
+            [midje.checking.checkers.defining :only [as-checker]]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.common-actions :as ca]))
@@ -11,15 +12,16 @@
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
-(defn- with-action [actual]
-  (checking/as-data-laden-falsehood {:notes [(:action (meta actual))]}))
+(defn doc-result [result doc]
+  (with-meta [result] {:doc doc}))
 
-(defn- is-ok [actual] 
-  (or (nil? (first actual)) (with-action actual)))
+(defn- doc-failure [actual]
+  (checking/as-data-laden-falsehood {:notes [(:doc (meta actual))]}))
 
-(defn- unauthorized [actual] 
-  (or (= (first actual) {:ok false, :text "error.unauthorized"}) 
-      (with-action actual)))
+(defmacro doc-check [cmpr expected]
+ `(fn [actual#] 
+     (or (~cmpr (first actual#) ~expected) 
+         (doc-failure actual#))))
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
@@ -40,8 +42,7 @@
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)
             :let [action (keyword (:action command))
-                  result (user-is-not-allowed-to-access? command application)
-                  meta-result (with-meta [result] {:action action})]]
+                  result (doc-result (user-is-not-allowed-to-access? command application) action)]]
       (if (allowed-actions action)
-        meta-result => is-ok
-        meta-result => unauthorized))))
+        result => (doc-check = nil)
+        result => (doc-check = {:ok false, :text "error.unauthorized"})))))
