@@ -811,7 +811,7 @@
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
           <p data-bind="html: loc('help.' + $root.application.permitType() + '.conversationDesc')" class="tab-info"></p>
-          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: 'true'}}"></div>
+          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
           <div class="process-nav"></div>
         </div>
 

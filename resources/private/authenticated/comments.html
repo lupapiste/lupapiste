@@ -4,7 +4,7 @@
   <section class="page container" id="comments">
     <script type="text/html" id="comment-template">
       <div data-bind="with: $data.comment">
-        <div class="comment-toggle">
+        <div class="comment-toggle" data-bind="if: $parent.mainConversation">
           <input type="checkbox" id="show-attachment-comments" data-bind="checked: hideAttachmentComments"></>
           <label for="show-attachment-comments" data-bind="ltext: 'conversation.attachment.toggle'"></label>
         </div>
@@ -27,12 +27,12 @@
                 <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
               </td>
               <td class="comment-text">
-                <span data-bind="if: $parent.mainConversation">
-                <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
-                  <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + target.id()}">
-                    <span data-bind="text: $parent.mainConversation()"></span>
-                  </a>
-                </span>
+                <span data-bind="if: $parents[1].mainConversation">
+                  <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
+                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + target.id()}">
+                      <span data-bind="text: target.attachmentType"></span>
+                    </a>
+                  </span>
                 </span>
                 <span data-bind="if: $parent.isForNewAttachment($data)" class="new-attachment-version-details">
                   <span data-bind="ltext: 'newAttachmentVersion'"></span>

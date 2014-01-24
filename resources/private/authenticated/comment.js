@@ -12,7 +12,6 @@ var comments = (function() {
     self.pending = ko.observable();
     self.to = ko.observable();
     self.hideAttachmentComments = ko.observable(false);
-    self.mainConversation = ko.observable(true);
 
     self.refresh = function(application, target) {
       self
