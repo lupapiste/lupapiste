@@ -1,1 +1,2 @@
 conversation.attachment.toggle: Piilota liitteiden lisäykset
+footer.sito.help: Pilottikuntien palvelutuki
