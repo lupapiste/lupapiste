@@ -18,6 +18,7 @@
 (defn- doc-failure [actual]
   (checking/as-data-laden-falsehood {:notes [(:doc (meta actual))]}))
 
+; TODO: "& args" instead of "expected"
 (defmacro doc-check [cmpr expected]
  `(fn [actual#] 
      (or (~cmpr (first actual#) ~expected) 
