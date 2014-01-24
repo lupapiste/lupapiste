@@ -415,8 +415,8 @@
       (fail (.getMessage e)))))
 
 (defn is-link-permit-required [application]
-  (or (= (name :muutoslupa) (:permitSubtype application))
-      (some #(contains? operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
 
 (defn- validate-link-permits [application]
   (let [application (meta-fields/enrich-with-link-permit-data application)
