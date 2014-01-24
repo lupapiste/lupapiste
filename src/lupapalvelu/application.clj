@@ -339,12 +339,6 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-(defn- validate-jatkolupa-one-link-permit [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
-            (not= 1 (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
-
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
@@ -398,42 +392,57 @@
               (when (empty? (:authority application))
                 {:authority (user/summary user)}))})))
 
+(defn is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+
+(defn- validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (if (and (= :ya-jatkoaika (-> application :operations first :name keyword)) (not= 1 linkPermits))
+      (fail :error.jatkolupa-must-have-exactly-one-link-permit)
+      (when (and (is-link-permit-required application) (= 0 linkPermits))
+        (fail :error.permit-must-have-link-permit)))))
+
+
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
-  (try
-    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-      (do-approve-jatkoaika-app command id lang)
-      (do-approve-regular-app command id lang))
-    (catch org.xml.sax.SAXParseException e
+  (or (validate-link-permits application)
+      (try
+        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+          (do-approve-jatkoaika-app command id lang)
+          (do-approve-regular-app command id lang))
+        (catch org.xml.sax.SAXParseException e
       (info e "Invalid KRYSP XML message")
-      (fail (.getMessage e)))))
+      (fail (.getMessage e))))))
 
+(defn- do-submit [command application created]
+  (update-application command
+                      {$set {:state     :submitted
+                             :opened    (or (:opened application) created)
+                             :submitted (or (:submitted application) created)}})
+  (try
+    (mongo/insert :submitted-applications
+                  (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
+    (catch com.mongodb.MongoException$DuplicateKey e
+      ; This is ok. Only the first submit is saved.
+      )))
 
 (defcommand submit-application
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :complement-needed]
+   :states     [:draft :info :open]
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [validate-owner-or-writer]}
   [{:keys [application created] :as command}]
-  (update-application command
-    {$set {:state     :submitted
-           :opened    (or (:opened application) created)
-           :submitted created}})
-
-  (try
-    (mongo/insert :submitted-applications
-      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
-    (catch com.mongodb.MongoException$DuplicateKey e
-      ; This is ok. Only the first submit is saved.
-      )))
+  (or (validate-link-permits application)
+      (do-submit command application created)))
 
 (defcommand refresh-ktj
   {:parameters [:id]
