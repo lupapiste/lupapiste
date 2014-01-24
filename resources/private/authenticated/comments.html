@@ -9,14 +9,14 @@
           <label for="show-attachment-comments" data-bind="ltext: 'conversation.attachment.toggle'"></label>
         </div>
         
-        <table class="table table-striped conversation" data-test-id="comments-table">
-          <tbody data-bind="foreach: comments()">
-            <tr data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
+        <div class="table table-striped conversation" data-test-id="comments-table">
+          <div data-bind="foreach: comments()">
+            <div data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
                                  'comment-for-me':     $parent.isForMe($data),
                                  'authority-comment':  $parent.isAuthorityComment($data),
                                  'comment':            true},
                            visible: !($parent.isForNewAttachment($data) && $parent.hideAttachmentComments())">
-              <td class="comment-party commenttd">
+              <div class="comment-party commenttd">
                 <span class="date" data-bind="dateTimeString: created"></span>
                 <br />
                 <span class="author" data-bind="fullName: user"></span>
@@ -25,8 +25,8 @@
                 </span>
                 <br />
                 <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-              </td>
-              <td class="comment-text">
+              </div>
+              <div class="comment-text">
                 <span data-bind="if: $parents[1].mainConversation">
                   <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
                     <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + target.id()}">
@@ -40,10 +40,10 @@
                   <a data-bind="text: target.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + target.fileId()}"></a>
                 </span>
                 <span data-bind="text: text"></span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
+        </div>
         <form>
           <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
           <textarea
