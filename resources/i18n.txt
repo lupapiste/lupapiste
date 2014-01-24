@@ -1,2 +1,4 @@
 statementGiver: Lausunnonantaja
 comment-request-mark-answered.ok: Neuvontapyyntö on merkitty vastatuksi
+statement.updated: Hakemuksen lausuntoa on päivitetty.
+statement.given: Hakemukselle lisätty lausunto.
