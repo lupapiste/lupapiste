@@ -301,7 +301,8 @@
 (permit/register-function permit/YA :verdict-krysp-reader ->ya-verdict)
 
 (defn- ->kuntalupatunnus [asia]
-  {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])})
+  {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+                        (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
 
 (defn ->verdicts [xml for-elem ->function]
   (map
