@@ -257,7 +257,6 @@
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:organizations 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
-  (mc/ensure-index :users {:personId 1} {:unique true :sparse true})
   (mc/ensure-index :applications {:municipality 1})
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
@@ -270,7 +269,12 @@
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1}))
+  (mc/ensure-index :app-links {:link 1})
+  (try
+    (mc/drop-index :users "personId_1")
+    (catch Exception e
+      (warn "Unable to drop personId_1 index" (.getMessage e))))
+  )
 
 (defn clear! []
   (if-let [mode (db-mode)]

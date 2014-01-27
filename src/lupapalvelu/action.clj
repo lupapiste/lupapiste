@@ -187,12 +187,24 @@
   [{{id :id} :data user :user application :application}]
   (and id (or application (domain/get-application-as id user))))
 
+(defn- user-is-not-allowed-to-access?
+  "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
+  [{user :user :as command} application]
+  (let [meta-data (meta-data command)
+        extra-auth-roles (set (:extra-auth-roles meta-data))]
+    (when-not (or (extra-auth-roles :any)
+                  (domain/owner-or-writer? application (:id user))
+                  (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
+                  (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
+      (fail :error.unauthorized))))
+
 (defn- authorized-to-application [command application]
   (when-let [id (-> command :data :id)]
     (if-not application
       (fail :error.unauthorized)
       (or
         (invalid-state-in-application command application)
+        (user-is-not-allowed-to-access? command application)
         (pre-checks-fail command application)))))
 
 (defn- response? [r]
@@ -238,7 +250,9 @@
         (when execute? (log/log-event :error command))
         (fail text (dissoc all :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))))
     (catch response? resp
-      resp)
+      (do 
+        (warnf "%s -> proxy fail: %s" (:action command) resp)
+        (fail :error.unknown)))
     (catch Object e
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))

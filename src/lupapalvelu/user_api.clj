@@ -54,9 +54,23 @@
 ;; ==============================================================================
 ;;
 
+;; Emails
+(def ^:private base-email-conf
+  {:recipients-fn notifications/from-data
+   :model-fn      (fn [{{token :token} :data} _]
+                    {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+                     :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
+
+(notifications/defemail :invite-authority (assoc base-email-conf :subject-key "authority-invite.title"))
+(notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
+
+(defn- notify-new-authority [new-user created-by]
+  (let [token (token/make-token :authority-invitation (merge new-user {:caller-email (:email created-by)}))]
+    (notifications/notify! :invite-authority {:data {:email (:email new-user) :token token}})))
+
 (defn- validate-create-new-user! [caller user-data]
   (when-let [missing (util/missing-keys user-data [:email :role])]
-    (fail! :missing-required-key :missing missing))
+    (fail! :error.missing-parameters :parameters missing))
 
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
@@ -64,7 +78,7 @@
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
-    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
+    (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)
@@ -77,13 +91,10 @@
       (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
 
     (when (and (= user-role :authorityAdmin) (not (:organization user-data)))
-      (fail! :missing-required-key :desc "new authorityAdmin user must have organization" :missing :organization))
+      (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
 
-    (when (and (= user-role :authority) (not (:organization user-data)))
-      (fail! :missing-required-key :desc "new authority user must have organization" :missing :organization))
-
-    (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
-      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only"))
+    (when (and (= user-role :authority) (and (:organization user-data) (every? (partial not= (:organization user-data)) (:organizations caller))))
+      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
 
     (when (and (= user-role :dummy) (:organization user-data))
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
@@ -91,8 +102,8 @@
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
 
-    (when (and (= "true" (:enabled user-data)) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create enabled users"))
+    (when (and (boolean (:enabled user-data)) (not admin?) (not authorityAdmin?))
+      (fail! :error.unauthorized :desc "only admin and authorityAdmin can create enabled users"))
 
     (when (and (:apikey user-data) (not admin?))
       (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
@@ -158,17 +169,32 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
+(defn- create-authority-user-with-organization [caller new-organization email firstName lastName]
+  (let [new-user (create-new-user
+                   caller
+                   {:email email :role :authority :organization new-organization :enabled true
+                    :firstName firstName :lastName lastName}
+                   :send-email false)
+        ]
+    (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
+    (notify-new-authority new-user caller)
+    (ok :operation "invited")))
+
 (defcommand create-user
-  {:parameters [:email :role :organization]
+  {:parameters [:email role]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
-  (let [user (create-new-user caller user-data :send-email false)
-        token (token/make-token :password-reset {:email (:email user)})]
-    (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
-    (ok :id (:id user)
-        :user user
-        :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-        :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
+  (let [user (create-new-user caller user-data :send-email false)]
+    (infof "Added a new user: role=%s, email=%s, organizations=%s" (:role user) (:email user) (:organizations user))
+    (if (= role "authority")
+      (do
+        (notify-new-authority user caller)
+        (ok :id (:id user) :user user))
+      (let [token (token/make-token :password-reset {:email (:email user)})]
+        (ok :id (:id user)
+          :user user
+          :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+          :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
 (defn get-or-create-user-by-email [email]
   (let [email (ss/lower-case email)]
@@ -181,16 +207,6 @@
 ;; Updating user data:
 ;; ==============================================================================
 ;;
-
-;; Emails
-(def ^:private base-email-conf
-  {:recipients-fn notifications/from-data
-   :model-fn      (fn [{{token :token} :data} _]
-                    {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-                     :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
-
-(notifications/defemail :invite-authority (assoc base-email-conf :subject-key "authority-invite.title"))
-(notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
 
 ;;
 ;; General changes:
@@ -231,17 +247,6 @@
 (defn- valid-organization-operation? [{data :data}]
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
-
-(defn- create-authority-user-with-organization [caller new-organization email firstName lastName]
-  (let [new-user (create-new-user
-                   caller
-                   {:email email :role :authority :organization new-organization :enabled true
-                    :firstName firstName :lastName lastName}
-                   :send-email false)
-        token (token/make-token :authority-invitation (merge new-user {:caller-email (:email caller)}))]
-    (infof "invitation for new authority user: email=%s, organization=%s, token=%s" email new-organization token)
-    (notifications/notify! :invite-authority {:data {:email email :token token}})
-    (ok :operation "invited")))
 
 (defcommand update-user-organization
   {:parameters       [operation email firstName lastName]

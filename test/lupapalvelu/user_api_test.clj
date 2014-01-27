@@ -27,8 +27,8 @@
 
 (facts validate-create-new-user!
 
-  (fact (validate-create-new-user! nil nil) => (fails-with :missing-required-key))
-  (fact (validate-create-new-user! nil {})  => (fails-with :missing-required-key))
+  (fact (validate-create-new-user! nil nil) => (fails-with :error.missing-parameters))
+  (fact (validate-create-new-user! nil {})  => (fails-with :error.missing-parameters))
   (fact (validate-create-new-user! {:role "admin"} {:role "applicant" :email "x"}) => forbidden)
 
   (fact "only known roles are accepted"
@@ -37,7 +37,7 @@
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authorityAdmin" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authorityAdmin"} {:role "authorityAdmin" :email "x"}) => forbidden)
-  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => (fails-with :missing-required-key))
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x"}) => (fails-with :error.missing-parameters))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authority" :email "x"}) => forbidden)
@@ -72,10 +72,10 @@
     (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => truthy
     (provided (security/valid-password? "z") => true))
 
-  (fact "only admin can create enabled users"
+  (fact "admin and authorityAdmin can create enabled users"
     (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :enabled "true"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "false"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled "true"}) => forbidden))
+    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled false}) => truthy)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :enabled true}) => truthy))
 
   (fact "only admin can create users with apikeys"
     (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :apikey "true"}) => truthy)

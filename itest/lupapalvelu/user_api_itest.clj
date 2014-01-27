@@ -55,7 +55,18 @@
   (fact (command admin :create-user :email "x" :role "authorityAdmin" :enabled true
           :organization "753-R" :password "foobarbozbiz") => ok?)
   ; Check that user was created
-  (fact (-> (query admin :users :email "x") :users first) => (contains {:role "authorityAdmin" :email "x" :enabled true})))
+  (fact (-> (query admin :users :email "x") :users first) => (contains {:role "authorityAdmin" :email "x" :enabled true}))
+
+  ; Inbox zero
+  (last-email)
+
+  (fact "authority without organization, i.e., a statement giver, can be created"
+    (command sipoo :create-user :email "foo@example.com" :role "authority" :enabled true) => ok?)
+  (fact "newly created authority receives mail"
+    (let [email (last-email)]
+      (:to email) => "foo@example.com"
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 ;;
 ;; ==============================================================================
@@ -198,69 +209,69 @@
 ;; ==============================================================================
 ;;
 (facts* "impersonating"
-  (let [store        (atom {})
-        params       {:cookie-store (->cookie-store store)
-                      :follow-redirects false
-                      :throw-exceptions false}
-        login        (http/post
-                       (str (server-address) "/api/login")
-                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
-        csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
-        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
-        sipoo-rakval (-> "sipoo" find-user-from-minimal :organizations first)
-        impersonate  (fn [password]
-                       (-> (http/post
-                             (str (server-address) "/api/command/impersonate-authority")
-                             (assoc params
-                               :form-params (merge {:organizationId sipoo-rakval} (when password {:password password}))
-                               :content-type :json))
-                         decode-response :body))
-        role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
-        actions      (fn [] (-> (http/get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
+ (let [store        (atom {})
+       params       {:cookie-store (->cookie-store store)
+                     :follow-redirects false
+                     :throw-exceptions false}
+       login        (http/post
+                      (str (server-address) "/api/login")
+                      (assoc params :form-params {:username "admin" :password "admin"})) => http200?
+       csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
+       params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
+       sipoo-rakval (-> "sipoo" find-user-from-minimal :organizations first)
+       impersonate  (fn [password]
+                      (-> (http/post
+                            (str (server-address) "/api/command/impersonate-authority")
+                            (assoc params
+                              :form-params (merge {:organizationId sipoo-rakval} (when password {:password password}))
+                              :content-type :json))
+                        decode-response :body))
+       role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
+       actions      (fn [] (-> (http/get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
 
-    (fact "impersonation action is available"
-      (:impersonate-authority (actions)) => ok?)
+   (fact "impersonation action is available"
+     (:impersonate-authority (actions)) => ok?)
 
-    (fact "fails without password"
-      (impersonate nil) => fail?)
+   (fact "fails without password"
+     (impersonate nil) => fail?)
 
-    (fact "fails with wrong password"
-      (impersonate "nil") => fail?)
+   (fact "fails with wrong password"
+     (impersonate "nil") => fail?)
 
-    (fact "role remains admin"
-      (role) => "admin")
+   (fact "role remains admin"
+     (role) => "admin")
 
-    (let [application (create-and-submit-application pena :municipality sonja-muni) => truthy
-          application-id (:id application)
-          query-as-admin (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
+   (let [application (create-and-submit-application pena :municipality sonja-muni) => truthy
+         application-id (:id application)
+         query-as-admin (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
 
-      (fact "sonja sees the application"
-        (query-application sonja application-id) => truthy)
+     (fact "sonja sees the application"
+       (query-application sonja application-id) => truthy)
 
-      (fact "but admin doesn't"
-        (-> query-as-admin decode-response :body) => unauthorized?)
+     (fact "but admin doesn't"
+       (-> query-as-admin decode-response :body) => unauthorized?)
 
-      (fact "succeeds with correct password"
-        (impersonate "admin") => ok?)
+     (fact "succeeds with correct password"
+       (impersonate "admin") => ok?)
 
-      (fact "but not again (as we're now impersonating)"
-        (impersonate "admin") => fail?)
+     (fact "but not again (as we're now impersonating)"
+       (impersonate "admin") => fail?)
 
-      (fact "instead, application is visible"
-        (let [query-as-imposter (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
-              body (-> query-as-imposter decode-response :body) => ok?
-              application (:application body)]
-          (:id application) => application-id)))
+     (fact "instead, application is visible"
+       (let [query-as-imposter (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
+             body (-> query-as-imposter decode-response :body) => ok?
+             application (:application body)]
+         (:id application) => application-id)))
 
-    (fact "role has changed to authority"
-      (role) => "authority")
+   (fact "role has changed to authority"
+     (role) => "authority")
 
-    (fact "every available action is a query or raw, i.e. not a command
+   (fact "every available action is a query or raw, i.e. not a command
           (or any other mutating action type we might have in the future)"
-      (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
-        ; Make sure we have required all the actions
-        (require 'lupapalvelu.server)
-        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
+     (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
+       ; Make sure we have required all the actions
+       (require 'lupapalvelu.server)
+       (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero

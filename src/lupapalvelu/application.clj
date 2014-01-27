@@ -12,12 +12,13 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -102,6 +103,7 @@
 
 (defquery application
   {:authenticated true
+   :extra-auth-roles [:any]
    :parameters [:id]}
   [{app :application user :user}]
   (if app
@@ -131,21 +133,21 @@
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
-     (when-let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")]
-       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
-         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                        [[:kiinteisto :rekisterointipvm] (or (try
-                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-           (commands/persist-model-updates
-             (:id application)
-             "documents"
-             rakennuspaikka
-             updates
-             time))))))
+  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka") (domain/get-document-by-name application "poikkeusasian-rakennuspaikka"))]
+      (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+        (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                       [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                       [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                       [[:kiinteisto :rekisterointipvm] (or (try
+                                                              (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+          (commands/persist-model-updates
+            (:id application)
+            "documents"
+            rakennuspaikka
+            updates
+            time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -244,6 +246,7 @@
 (defcommand add-comment
   {:parameters [id text target]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :pre-checks [applicant-cant-set-to]
    :notified   true
    :on-success [(notify :new-comment)
@@ -254,27 +257,8 @@
                 open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
-    (println (str "mark-answered=" mark-answered))
     (update-application command
-      (util/deep-merge
-        {$set  {:modified created}
-         $push {:comments {:text    text
-                           :target  target
-                           :created created
-                           :to      (user/summary to-user)
-                           :user    (user/summary user)}}}
-
-        (case (keyword (:state application))
-          ;; LUPA-XYZ (was: open-application)
-          :draft  (when-not (blank? text) {$set {:state :open, :opened created}})
-
-          ;; LUPA-371, LUPA-745
-          :info (when (and mark-answered (user/authority? user)) {$set {:state :answered}})
-
-          ;; LUPA-371 (was: mark-inforequest-answered)
-          :answered (when (user/applicant? user) {$set {:state :info}})
-
-          nil)))))
+      (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -339,12 +323,6 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-(defn- validate-jatkolupa-one-link-permit [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
-            (not= 1 (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
-
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
@@ -398,42 +376,57 @@
               (when (empty? (:authority application))
                 {:authority (user/summary user)}))})))
 
+(defn is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+
+(defn- validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (if (and (= :ya-jatkoaika (-> application :operations first :name keyword)) (not= 1 linkPermits))
+      (fail :error.jatkolupa-must-have-exactly-one-link-permit)
+      (when (and (is-link-permit-required application) (= 0 linkPermits))
+        (fail :error.permit-must-have-link-permit)))))
+
+
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
-  (try
-    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-      (do-approve-jatkoaika-app command id lang)
-      (do-approve-regular-app command id lang))
-    (catch org.xml.sax.SAXParseException e
+  (or (validate-link-permits application)
+      (try
+        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+          (do-approve-jatkoaika-app command id lang)
+          (do-approve-regular-app command id lang))
+        (catch org.xml.sax.SAXParseException e
       (info e "Invalid KRYSP XML message")
-      (fail (.getMessage e)))))
+      (fail (.getMessage e))))))
 
+(defn- do-submit [command application created]
+  (update-application command
+                      {$set {:state     :submitted
+                             :opened    (or (:opened application) created)
+                             :submitted (or (:submitted application) created)}})
+  (try
+    (mongo/insert :submitted-applications
+                  (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
+    (catch com.mongodb.MongoException$DuplicateKey e
+      ; This is ok. Only the first submit is saved.
+      )))
 
 (defcommand submit-application
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :complement-needed]
+   :states     [:draft :info :open]
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [validate-owner-or-writer]}
   [{:keys [application created] :as command}]
-  (update-application command
-    {$set {:state     :submitted
-           :opened    (or (:opened application) created)
-           :submitted created}})
-
-  (try
-    (mongo/insert :submitted-applications
-      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
-    (catch com.mongodb.MongoException$DuplicateKey e
-      ; This is ok. Only the first submit is saved.
-      )))
+  (or (validate-link-permits application)
+      (do-submit command application created)))
 
 (defcommand refresh-ktj
   {:parameters [:id]

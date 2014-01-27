@@ -201,6 +201,14 @@
         {$set {:krysp.P.ftpUser ftp}
          $unset {:poikkari-ftp-user 1}}))))
 
+
+(defmigration statementPersons-to-statementGivers
+  {:apply-when (pos? (mongo/count  :organizations {:statementPersons {$exists true}}))}
+  (doseq [organization (mongo/select :organizations {:statementPersons {$exists true}})]
+    (mongo/update-by-id :organizations (:id organization)
+                        {$set {:statementGivers (:statementPersons organization)}
+                         $unset {:statementPersons 1}})))
+
 (defmigration wfs-url-to-support-parameters
   (doseq [organization (mongo/select :organizations)]
     (doseq [[permit-type krysp-data] (:krysp organization)]

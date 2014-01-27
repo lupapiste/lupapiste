@@ -279,8 +279,7 @@ var docgen = (function () {
           if (!timestamp) {
             return true;
           }
-
-          if (model.value) {
+          if (_.has(model, "value")) {
             // Leaf
             return model.modified && model.modified > timestamp;
           }
