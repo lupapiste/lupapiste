@@ -164,7 +164,7 @@
   [{user-data :data caller :user}]
   (let [token-ttl (* 7 24 60 60 1000)
         user (create-new-user caller user-data :send-email false)
-        token (token/make-token :password-reset {:email (:email user)}) {:ttl token-ttl}]
+        token (token/make-token :password-reset {:email (:email user)} {:ttl token-ttl})]
     (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
     (ok :id (:id user)
         :user user
