@@ -90,7 +90,19 @@
         (approve-attachment application-id (first attachment-ids)))
 
       (fact "Veikko can still reject attachment"
-        (reject-attachment application-id (first attachment-ids))))))
+        (reject-attachment application-id (first attachment-ids)))
+
+      (fact "Veikko upload a new version, Pena receives email pointing to comment page"
+        (last-email) ; Inbox zero
+
+        (upload-attachment veikko application-id (first (:attachments (query-application veikko application-id))) true)
+
+        (let [emails (sent-emails)
+              email  (first emails)
+              pena-email  (email-for "pena")]
+          (count emails) => 1
+          email => (partial contains-application-link-with-tab? application-id "conversation")
+          (:to email) => pena-email)))))
 
 (fact "pdf does not work with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")

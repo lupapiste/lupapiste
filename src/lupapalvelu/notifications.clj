@@ -57,7 +57,7 @@
    :state-fi (i18n/localize :fi (str (:state application)))
    :state-sv (i18n/localize :sv (str (:state application)))})
 
-(defn- statement-person-model [{{:keys [text organization]} :data} _]
+(defn- statement-giver-model [{{:keys [text organization]} :data} _]
   {:text text
    :organization-fi (:fi (:name organization))
    :organization-sv (:sv (:name organization))})
@@ -95,9 +95,9 @@
          :new-comment                  {:tab            "/conversation"
                                         :pred-fn        (fn [{user :user}] (user/authority? user))}
          :invite                       {:recipients-fn  from-data}
-         :add-statement-person         {:recipients-fn  from-user
-                                        :subject-key    "application.statements"
-                                        :model-fn       statement-person-model}
+         :add-statement-giver          {:recipients-fn  from-user
+                                         :subject-key    "application.statements"
+                                         :model-fn       statement-giver-model}
          :request-statement            {:recipients-fn  (fn [{{users :users} :data}] (map :email users))
                                         :subject-key    "statement-request"}
          :neighbor                     {:recipients-fn  from-data
