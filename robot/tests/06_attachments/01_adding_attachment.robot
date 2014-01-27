@@ -158,4 +158,4 @@ Attachment state should be
 
 Comment count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='attachment']//tr[contains(@class, 'comment')]  ${amount}
+  Xpath Should Match X Times  //section[@id='attachment']//div[contains(@class, 'comment')]  ${amount}

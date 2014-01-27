@@ -48,4 +48,4 @@ Veikko should see only zero (Tampere) applications
 
 Comment count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='application']//div[@data-test-id='comments-table']//div  ${amount}
+  Xpath Should Match X Times  //section[@id='application']//div[@data-test-id='comments-table']//div[contains(@class, 'comment')]  ${amount}
