@@ -18,10 +18,9 @@
 (defn- doc-failure [actual]
   (checking/as-data-laden-falsehood {:notes [(:doc (meta actual))]}))
 
-; TODO: "& args" instead of "expected"
-(defmacro doc-check [cmpr expected]
+(defmacro doc-check [cmpr & args]
  `(fn [actual#] 
-     (or (~cmpr (first actual#) ~expected) 
+     (or (apply ~cmpr (conj '~args (first actual#))) 
          (doc-failure actual#))))
 
 (facts "Allowed actions for statementGiver"
@@ -45,5 +44,5 @@
             :let [action (keyword (:action command))
                   result (doc-result (user-is-not-allowed-to-access? command application) action)]]
       (if (allowed-actions action)
-        result => (doc-check = nil)
+        result => (doc-check nil?)
         result => (doc-check = {:ok false, :text "error.unauthorized"})))))
