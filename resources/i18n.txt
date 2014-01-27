@@ -2,5 +2,6 @@ statementGiver: Lausunnonantaja
 comment-request-mark-answered.ok: Neuvontapyyntö on merkitty vastatuksi
 statement.updated: Hakemuksen lausuntoa on päivitetty.
 statement.given: Hakemukselle lisätty lausunto.
+conversation.attachment.toggle: Piilota liitteiden lisäykset
 footer.sito.help: Pilottikuntien palvelutuki
 error.permit-must-have-link-permit: Hakemuksesi vaatii viitteenä alkuperäisen luvan. Voit lisätä viittauksen "lisää viitelupa"-painikkeella.

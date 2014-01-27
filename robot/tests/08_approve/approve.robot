@@ -44,8 +44,8 @@ Sonja sees that some completion is needed
   Wait Until  Application state should be  complement-needed
   [Teardown]  logout
 
-Mikko comes back, fills in missing parts and makes a resubmit
+Mikko comes back, fills in missing parts and no submit button enabled
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Submit application
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   [Teardown]  logout
