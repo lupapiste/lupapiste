@@ -131,21 +131,21 @@
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
-     (when-let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")]
-       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
-         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                        [[:kiinteisto :rekisterointipvm] (or (try
-                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-           (commands/persist-model-updates
-             (:id application)
-             "documents"
-             rakennuspaikka
-             updates
-             time))))))
+  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka") (domain/get-document-by-name application "poikkeusasian-rakennuspaikka"))]
+      (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+        (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                       [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                       [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                       [[:kiinteisto :rekisterointipvm] (or (try
+                                                              (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+          (commands/persist-model-updates
+            (:id application)
+            "documents"
+            rakennuspaikka
+            updates
+            time))))))
 
 (defquery party-document-names
   {:parameters [:id]
