@@ -45,11 +45,12 @@ var repository = (function() {
         _.each(application.tasks || [], setSchema);
         _.each(application.comments || [], function(comment) {
           if (comment.target && comment.target.type === 'attachment' && comment.target.fileId) {
-            var targetAttachments = _.find(application.attachments || [], function(attachment) {
+            var targetAttachment = _.find(application.attachments || [], function(attachment) {
               return _.some(attachment.versions || [], function(ver) {return comment.target.fileId === ver.fileId;});
             });
-            if (targetAttachments) {
-              comment.target.attachmentType = loc('attachmentType.' + targetAttachments.type['type-group'] + '.' + targetAttachments.type['type-id']);
+            if (targetAttachment) {
+              comment.target.attachmentType = loc('attachmentType.' + targetAttachment.type['type-group'] + '.' + targetAttachment.type['type-id']);
+              comment.target.attachmentId = targetAttachment.id;
             }
           }
         });
