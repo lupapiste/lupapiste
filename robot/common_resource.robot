@@ -405,14 +405,14 @@ Add comment
   Open tab  conversation
   Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//div[@data-test-id='comments-table']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
 
 Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
-  
+
 Input comment and mark answered
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
