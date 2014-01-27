@@ -3,12 +3,15 @@
             [monger.operators :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.comment :as comment]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.statement :refer :all]))
@@ -98,25 +101,25 @@
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand give-statement
-  {:parameters  [id statementId status text]
+  {:parameters  [id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
+   :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
    :extra-auth-roles [:statementGiver]
+   :notified    true
+   :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{:keys [application] :as command}]
-  (update-application command
-    {:statements {$elemMatch {:id statementId}}}
-    {$set {:statements.$.status status
-           :statements.$.given (now)
-           :statements.$.text text}})
-  (let [text (if (statement-given? application statementId)
-                 "Hakemuksen lausuntoa on p\u00e4ivitetty." ; TODO localize?
-                 "Hakemukselle lis\u00e4tty lausunto.")]
-    ; FIXME combine mongo writes
-    (executed "add-comment"
-      (assoc command :data {:id id
-                            :text   text
-                            :type   :system
-                            :target {:type :statement
-                                     :id   statementId}}))))
+  [{:keys [application user created] :as command}]
+  (let [comment-text   (if (statement-given? application statementId)
+                         (i18n/loc "statement.updated")
+                         (i18n/loc "statement.given"))
+        comment-target {:type :statement :id statementId}
+        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil created)]
+    (update-application command
+      {:statements {$elemMatch {:id statementId}}}
+      (util/deep-merge
+        comment-model
+        {$set {:statements.$.status status
+               :statements.$.given created
+               :statements.$.text text}}))))

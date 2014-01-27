@@ -12,6 +12,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
@@ -255,6 +257,9 @@
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
+   :notified   true
+   :on-success [(fn [command _] (notifications/notify! :new-comment command))
+                open-inforequest/notify-on-comment]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 

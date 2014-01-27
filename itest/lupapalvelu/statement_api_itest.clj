@@ -46,11 +46,26 @@
             (count (filter #(= (:username %) "ronja") (:auth application-after))) => 0)
 
           (fact "Veikko really has access to application"
-            (query veikko :application :id application-id) => ok?)
+            (query veikko :application :id application-id) => ok?))))
 
-          ; TODO facts about what Veikko can and can not do to application
+    (fact "Veikko gives a statement"
+      (last-email) ; Inbox zero
+      (let [application (query-application veikko application-id)
+            statement   (first (:statements application))
+            sonja-email (email-for "sonja")]
+        (get-in statement [:person :email]) => veikko-email
+        (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
 
-          ))))
+        (fact "Sonja got email"
+          (let [emails (sent-emails)
+                email  (first emails)]
+          (count emails) => 1
+          (:to email) => sonja-email
+          email => (partial contains-application-link-with-tab? application-id "conversation")))
+        ))
+
+    ; TODO facts about what Veikko can and can not do to application
+    )
 
   (let [new-email "kirjaamo@museovirasto.example.com"]
     (fact "User does not exist before so she can not be added as a statement person"
