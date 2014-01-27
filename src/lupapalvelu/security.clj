@@ -29,4 +29,5 @@
     (BCrypt/hashpw password salt)))
 
 (defn check-password [candidate hashed]
-  (BCrypt/checkpw candidate hashed))
+  (when (and candidate hashed)
+    (BCrypt/checkpw candidate hashed)))

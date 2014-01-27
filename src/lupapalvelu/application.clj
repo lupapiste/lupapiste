@@ -12,12 +12,13 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -102,6 +103,7 @@
 
 (defquery application
   {:authenticated true
+   :extra-auth-roles [:any]
    :parameters [:id]}
   [{app :application user :user}]
   (if app
@@ -244,6 +246,7 @@
 (defcommand add-comment
   {:parameters [id text target]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :pre-checks [applicant-cant-set-to]
    :notified   true
    :on-success [(notify :new-comment)
@@ -254,27 +257,8 @@
                 open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
-    (println (str "mark-answered=" mark-answered))
     (update-application command
-      (util/deep-merge
-        {$set  {:modified created}
-         $push {:comments {:text    text
-                           :target  target
-                           :created created
-                           :to      (user/summary to-user)
-                           :user    (user/summary user)}}}
-
-        (case (keyword (:state application))
-          ;; LUPA-XYZ (was: open-application)
-          :draft  (when-not (blank? text) {$set {:state :open, :opened created}})
-
-          ;; LUPA-371, LUPA-745
-          :info (when (and mark-answered (user/authority? user)) {$set {:state :answered}})
-
-          ;; LUPA-371 (was: mark-inforequest-answered)
-          :answered (when (user/applicant? user) {$set {:state :info}})
-
-          nil)))))
+      (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
