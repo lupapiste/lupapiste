@@ -43,6 +43,13 @@ var repository = (function() {
       if (application) {
         _.each(application.documents || [], setSchema);
         _.each(application.tasks || [], setSchema);
+        _.each(application.comments || [], function(comment) {if (comment.target && comment.target.type === 'attachment') {
+          
+          var matches = _.find(application.attachments || [], function(attachment) {
+            return comment.target.id === attachment.id;
+          });
+          comment.target.attachmentType = loc('attachmentType.' + matches.type['type-group'] + '.' + matches.type['type-id']);
+        }});
         hub.send("application-loaded", {applicationDetails: loading});
       };
     });

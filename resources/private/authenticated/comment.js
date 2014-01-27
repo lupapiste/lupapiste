@@ -11,6 +11,7 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
+    self.hideAttachmentComments = ko.observable(false);
 
     self.refresh = function(application, target) {
       self
@@ -63,6 +64,13 @@ var comments = (function() {
 
     self.isForNewAttachment = function(model) {
       return model && model.target && model.target.version && true;
+    };
+    self.isAuthorityComment = function(model) {
+      return model.user && model.user.role && model.user.role() === "authority";
+    };
+    self.isForAttachment = function(model) {
+      
+      return model && model.target && model.target.type() === "attachment";
     };
   }
 

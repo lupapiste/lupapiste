@@ -1,2 +1,3 @@
+conversation.attachment.toggle: Piilota liitteiden lisäykset
 footer.sito.help: Pilottikuntien palvelutuki
 error.permit-must-have-link-permit: Hakemuksesi vaatii viitteenä alkuperäisen luvan. Voit lisätä viittauksen "lisää viitelupa"-painikkeella.
