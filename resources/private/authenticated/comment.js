@@ -72,10 +72,6 @@ var comments = (function() {
       
       return model && model.target && model.target.type() === "attachment";
     };
-    self.isMainConversation = function(model) {
-      console.log(self.mainConversation());
-      return model && model.mainConversation;
-    }
   }
 
   return {
