@@ -162,8 +162,9 @@
   {:parameters [:email :role :organization]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
-  (let [user (create-new-user caller user-data :send-email false)
-        token (token/make-token :password-reset {:email (:email user)})]
+  (let [token-ttl (* 7 24 60 60 1000)
+        user (create-new-user caller user-data :send-email false)
+        token (token/make-token :password-reset {:email (:email user)} :ttl token-ttl)]
     (infof "Added a new user: role=%s, email=%s, organization=%s" (:role user) (:email user) (:organization user-data))
     (ok :id (:id user)
         :user user
@@ -296,7 +297,8 @@
   (let [email (ss/lower-case email)]
     (infof "Password reset request: email=%s" email)
     (if (mongo/select-one :users {:email email})
-      (let [token (token/make-token :password-reset {:email email})]
+      (let [token-ttl (* 24 60 60 1000)
+            token (token/make-token :password-reset {:email email} :ttl token-ttl)]
         (infof "password reset request: email=%s, token=%s" email token)
         (notifications/notify! :reset-password {:data {:email email :token token}})
         (ok))
