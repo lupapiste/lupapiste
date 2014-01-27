@@ -43,7 +43,7 @@ Mikko comes back and sees his application and inforequest
 
 Mikko inspects inforequest and sees his initial comments
   Open inforequest  create-info  753-416-25-22
-  Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//span[text()='Hoblaa']  1
+  Wait until  Xpath Should Match X Times  //section[@id='inforequest']//div[@data-test-id='comments-table']//span[text()='Hoblaa']  1
 
 #LUPA-585
 The contents of unsent inforequest's message field is resetted properly when moving to another inforequest

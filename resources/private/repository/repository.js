@@ -43,13 +43,17 @@ var repository = (function() {
       if (application) {
         _.each(application.documents || [], setSchema);
         _.each(application.tasks || [], setSchema);
-        _.each(application.comments || [], function(comment) {if (comment.target && comment.target.type === 'attachment') {
-          
-          var matches = _.find(application.attachments || [], function(attachment) {
-            return comment.target.id === attachment.id;
-          });
-          comment.target.attachmentType = loc('attachmentType.' + matches.type['type-group'] + '.' + matches.type['type-id']);
-        }});
+        _.each(application.comments || [], function(comment) {
+          if (comment.target && comment.target.type === 'attachment' && comment.target.fileId) {
+            var targetAttachment = _.find(application.attachments || [], function(attachment) {
+              return _.some(attachment.versions || [], function(ver) {return comment.target.fileId === ver.fileId;});
+            });
+            if (targetAttachment) {
+              comment.target.attachmentType = loc('attachmentType.' + targetAttachment.type['type-group'] + '.' + targetAttachment.type['type-id']);
+              comment.target.attachmentId = targetAttachment.id;
+            }
+          }
+        });
         hub.send("application-loaded", {applicationDetails: loading});
       };
     });
