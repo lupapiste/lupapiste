@@ -96,9 +96,9 @@
     (when (and (= user-role :authority) (and (:organization user-data) (every? (partial not= (:organization user-data)) (:organizations caller))))
       (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
 
-;XXX: IS THIS DEPRECATED?!?!?
-    (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
-      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only"))
+;XXX: IS THIS OK OR DEPRECATED?
+;    (when (and (= user-role :authority) (every? (partial not= (:organization user-data)) (:organizations caller)))
+;      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only"))
 
     (when (and (= user-role :dummy) (:organization user-data))
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
