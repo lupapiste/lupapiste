@@ -1,8 +1,7 @@
 (ns lupapalvelu.common-actions-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [midje.checking.core :as checking]
-            [midje.checking.checkers.defining :only [as-checker]]
+            [lupapalvelu.test-util :refer :all]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.common-actions :as ca]))
@@ -11,17 +10,6 @@
 (fact (executed {:action "ping"}) => {:ok true :text "pong"})
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
-
-(defn doc-result [result doc]
-  (with-meta [result] {:doc doc}))
-
-(defn- doc-failure [actual]
-  (checking/as-data-laden-falsehood {:notes [(:doc (meta actual))]}))
-
-(defmacro doc-check [cmpr & args]
- `(fn [actual#] 
-     (or (apply ~cmpr (conj '~args (first actual#))) 
-         (doc-failure actual#))))
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
