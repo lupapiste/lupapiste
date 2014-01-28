@@ -1,1 +1,0 @@
-error.add-operation-not-allowed: Toimenpiteen lisääminen ei ole sallitu
