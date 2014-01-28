@@ -195,7 +195,7 @@
 (defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first (:lisatiedot documents)))
         aloitusoikeus (:data (first (:aloitusoikeus documents)))]
-    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
+    {:Lisatiedot {:suoramarkkinointikieltoKytkin false
                   :asioimiskieli (if (= lang "sv")
                                    "ruotsi"
                                    "suomi")}}))
