@@ -312,6 +312,17 @@
   (mongo/remove-many :app-links {:link {$in [id]}})
   (ok))
 
+(defcommand open-application
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:draft]}
+  [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified  created
+           :state     :open}}))
+
 (defcommand request-for-complement
   {:parameters [:id]
    :roles      [:authority]
