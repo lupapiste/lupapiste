@@ -71,7 +71,7 @@
                                                     :repeating true}}}))
 
 (facts "is-link-permit-required works correctly"
-  (fact "Jatkolupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
+  (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
   (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
   (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
 
