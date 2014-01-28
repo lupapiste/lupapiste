@@ -612,7 +612,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
-   :pre-checks [(permit/validate-permit-type-is permit/R) add-operation-allowed?]}
+   :pre-checks [add-operation-allowed?]}
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)

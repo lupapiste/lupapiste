@@ -81,10 +81,12 @@
 (facts "Add operation allowed"
   (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen}
         error {:ok false :text "error.add-operation-not-allowed"}]
-    (doseq [op (keys lupapalvelu.operations/operations)]
-      (let [application {:operations [{:name (name op)}] :permitSubtype nil}
+    (doseq [operation lupapalvelu.operations/operations]
+      (let [op (first operation)
+            type (-> operation second :permit-type) 
+            application {:operations [{:name (name op)}] :permitSubtype nil}
             operation-allowed (doc-result (add-operation-allowed? nil application) op)]
-        (if (not-allowed-for op)
+        (if (or (not= type "R") (not-allowed-for op))
           (fact "Add operation not allowed" operation-allowed => (doc-check = error))
           (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
     (fact "Add operation not allowed for :muutoslupa"

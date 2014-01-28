@@ -171,7 +171,7 @@
                                                 "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                                 "tyoaika")
                                     :attachments []
-                                    :add-operation-allowed true
+                                    :add-operation-allowed false
                                     :link-permit-required false})
 
 (def ^:private ya-kayttolupa-general {:schema "tyoaika"
@@ -179,7 +179,7 @@
                                       :required (conj common-yleiset-alueet-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                                       :attachments []
-                                      :add-operation-allowed true
+                                      :add-operation-allowed false
                                       :link-permit-required false})
 
 (def ^:private ya-kayttolupa-with-tyomaastavastaava
@@ -190,7 +190,7 @@
                                         :required (conj common-yleiset-alueet-schemas
                                                     "sijoituslupa-sijoituksen-tarkoitus")
                                         :attachments []
-                                        :add-operation-allowed true
+                                        :add-operation-allowed false
                                         :link-permit-required false})
 
 (def ya-operations
@@ -205,7 +205,7 @@
                                            :permit-type "YA"
                                            :required common-yleiset-alueet-schemas
                                            :attachments []
-                                           :add-operation-allowed true
+                                           :add-operation-allowed false
                                            :link-permit-required false}
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
@@ -235,7 +235,7 @@
                                            :required (conj common-yleiset-alueet-schemas
                                                        "tyo-aika-for-jatkoaika")
                                            :attachments []
-                                           :add-operation-allowed true
+                                           :add-operation-allowed false
                                            :link-permit-required true}})
 
 (def operations
@@ -431,7 +431,7 @@
                                    :permit-type "P"
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
                                    :attachments [:paapiirustus [:asemapiirros]]
-                                   :add-operation-allowed true
+                                   :add-operation-allowed false
                                    :link-permit-required false}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type "R"
