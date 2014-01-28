@@ -600,12 +600,19 @@
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id (:id created-application))))
 
+(defn- add-operation-allowed? [_ application]
+  (let [op (-> application :operations first :name keyword)
+        permitSubType (keyword (:permitSubtype application))]
+    (when-not (and (:add-operation-allowed (op operations/operations))
+                   (not= permitSubType :muutoslupa))
+      (fail :error.add-operation-not-allowed))))
+
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
-   :pre-checks [(permit/validate-permit-type-is permit/R)]}
+   :pre-checks [add-operation-allowed?]}
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
