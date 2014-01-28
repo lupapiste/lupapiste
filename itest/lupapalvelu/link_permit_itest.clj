@@ -21,18 +21,15 @@
         ;; App 2 - with same permit type, verdict given
         verdict-given-application (create-and-submit-application apikey
                                     :municipality municipality
-                                    :address "Paatoskuja 13"
+                                    :address "Paatoskuja 14"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         verdict-given-application-id (:id verdict-given-application)
         _                         (generate-documents verdict-given-application apikey)
         _                         (command apikey :approve-application :id verdict-given-application-id :lang "fi") => ok?
         _                         (command apikey :give-verdict
                                     :id verdict-given-application-id
-                                    :verdictId "aaa"
-                                    :status 42
-                                    :name "Paatoksen antaja"
-                                    :given 123
-                                    :official 124) => ok?
+                                    :verdictId "aaa" :status 42 :name "Paatoksen antaja"
+                                    :given 123 :official 124) => ok?
 
         ;; App 3 - with same permit type, verdict given, of operation "ya-jatkoaika"
         create-jatkoaika-resp     (command apikey :create-continuation-period-permit :id verdict-given-application-id) => ok?
@@ -41,25 +38,27 @@
         _                         (command apikey :submit-application :id jatkoaika-application-id) => ok?
         _                         (generate-documents jatkoaika-application apikey)
         _                         (command apikey :approve-application :id jatkoaika-application-id :lang "fi") => ok?
+        jatkoaika-application     (query-application apikey jatkoaika-application-id) => truthy
+        _                         (:state jatkoaika-application) => "closed"
 
         ;; App that gets a link permit attached to it
         test-application          (create-and-submit-application apikey
                                     :municipality municipality
-                                    :address "Paatoskuja 13"
+                                    :address "Paatoskuja 15"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
-        test-application-id       (:id test-application)]
+        test-application-id       (:id test-application)
 
+        ;; The "matches", i.e. the contents of the dropdown selection component in the link-permit dialog
+        ;; is allowed to have only these kind of applications:
+        ;;    - different id than current application has, but same permit-type
+        ;;    - is in "verdictGiven"- or "constructionStarted" state
+        ;;    - whose operation is not of type "ya-jatkoaika"
+        ;;
+        matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
+        matches (:app-links matches-resp)]
 
-    ;; The "matches", i.e. the contents of the dropdown selection component in the link-permit dialog
-    ;; is allowed to have only these kind of applications:
-    ;;    - different id than current application has, but same permit-type
-    ;;    - is in "verdictGiven"- or "constructionStarted" state
-    ;;    - whose operation is not of type "ya-jatkoaika"
-    ;;
-    (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
-          matches (:app-links matches-resp)]
-      (count matches) => 1
-      (-> matches first :id) => verdict-given-application-id)
+    (count matches) => 1
+    (-> matches first :id) => verdict-given-application-id
 
     (command apikey :add-link-permit :id test-application-id :linkPermitId verdict-given-application-id) => ok?
     (generate-documents test-application apikey)
