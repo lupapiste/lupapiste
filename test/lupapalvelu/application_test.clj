@@ -86,7 +86,6 @@
             operation-allowed (doc-result (add-operation-allowed? nil application) op)]
         (if (not-allowed-for op)
           (fact "Add operation not allowed" operation-allowed => (doc-check = error))
-          (fact "Add operation allowed" operation-allowed => (doc-check nil?))
-          )))
+          (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
     (fact "Add operation not allowed for :muutoslupa"
           (add-operation-allowed? nil {:operations [{:name "asuinrakennus"}] :permitSubtype :muutoslupa}) => error)))

@@ -601,7 +601,7 @@
       (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [x application]
-  (let [op (keyword (:name (first (:operations application))))
+  (let [op (-> application :operations first :name keyword)
         permitSubType (keyword (:permitSubtype application))]
     (when-not (and (:add-operation-allowed (op operations/operations))
                    (not= permitSubType :muutoslupa))
