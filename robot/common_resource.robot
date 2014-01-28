@@ -1,4 +1,4 @@
-*** Settings ***
+c*** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
@@ -405,6 +405,13 @@ Add comment
   Open tab  conversation
   Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
+  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+
+Open to authorities
+  [Arguments]  ${message}
+  Open tab  conversation
+  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click by test id  application-open-application-btn
   Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
 
 Input comment
