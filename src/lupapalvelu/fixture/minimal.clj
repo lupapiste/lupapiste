@@ -359,7 +359,7 @@
                                               :poikkeamis [[:paapiirustus :asemapiirros]]}
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "sipoo"}
-                             :P {:ftpUser "poik_sipoo"}}
+                             :P {:ftpUser "poik_sipoo" :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -373,7 +373,7 @@
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :krysp {:YA {:ftpUser "ya_sipoo"}}
+                     :krysp {:YA {:ftpUser "ya_sipoo" :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -428,7 +428,7 @@
                                           :text "Paloviranomainen"
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
-                      :krysp {:YA {:ftpUser "ya_tampere"}}
+                      :krysp {:YA {:ftpUser "ya_tampere" :version "2.1.2"}}
                       :operations-attachments ya-default-attachments-for-operations}
 
                     {:id "638-R"

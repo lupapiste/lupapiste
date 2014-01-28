@@ -31,7 +31,7 @@
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     ;; TODO: own test
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo" :version "2.1.2"}}})
 
     ;(clojure.pprint/pprint application)
 
@@ -40,7 +40,7 @@
     ;    (emit xml out-file))
     (fact "xml exist" xml => truthy)
 
-    (validator/validate xml-s)
+    (validator/validate xml-s (:permitType application) "2.1.2")
 
     #_(save-aloitusilmoitus-as-krysp
       (assoc application :state "verdictGiven")
@@ -111,6 +111,7 @@
         "kuvaus"
         "Tiivi Taavi, Hipsu ja Lala"
         "Ei poikkeamisia"
+        "2.1.2"
         "begin-of-link"
         {:type "task" :id "123"}) => nil)
     (save-katselmus-as-krysp
@@ -136,5 +137,6 @@
                           :tila {:value "pidetty"}}}}
       user
       "fi"
+      "2.1.2"
       "target"
       "begin-of-link") => nil ))
