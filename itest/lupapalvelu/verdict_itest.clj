@@ -84,6 +84,6 @@
     (:buildingId building3) => "103"
     (:propertyId building3) => "18601234567892"
     (:index building3) => "3"
-    (:usage building3) => nil
+    (fact "kayttotarkoitus is never nil" (:usage building3) => "")
     (:area building3) => "22"
     (:created building3) => "2013"))
