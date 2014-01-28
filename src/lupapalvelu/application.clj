@@ -600,7 +600,7 @@
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id (:id created-application))))
 
-(defn- add-operation-allowed? [x application]
+(defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
         permitSubType (keyword (:permitSubtype application))]
     (when-not (and (:add-operation-allowed (op operations/operations))
