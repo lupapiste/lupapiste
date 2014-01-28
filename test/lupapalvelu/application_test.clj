@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.operations :as operations]
@@ -74,3 +75,18 @@
        (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
        (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
 
+
+(testable-privates lupapalvelu.application add-operation-allowed?)
+
+(facts "Add operation allowed"
+  (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen}
+        error {:ok false :text "error.add-operation-not-allowed"}]
+    (doseq [op (keys lupapalvelu.operations/operations)]
+      (let [application {:operations [{:name (name op)}] :permitSubtype nil}
+            operation-allowed (doc-result (add-operation-allowed? nil application) op)]
+        (if (not-allowed-for op)
+          (fact "Add operation not allowed" operation-allowed => (doc-check = error))
+          (fact "Add operation allowed" operation-allowed => (doc-check nil?))
+          )))
+    (fact "Add operation not allowed for :muutoslupa"
+          (add-operation-allowed? nil {:operations [{:name "asuinrakennus"}] :permitSubtype :muutoslupa}) => error)))
