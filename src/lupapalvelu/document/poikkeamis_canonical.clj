@@ -44,8 +44,7 @@
        :lausuntotieto (get-statements (:statements application))
        :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
                                                      "ruotsi"
-                                                     "suomi")
-                                    :suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}
+                                                     "suomi")}}
        :kayttotapaus kayttotapaus
        :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat :value)
                                    kuvaus-avain (-> hanke :kuvaus :value)}}})))
