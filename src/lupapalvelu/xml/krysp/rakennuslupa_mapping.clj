@@ -190,7 +190,11 @@
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
 (def rakennuslupa_to_krysp_213
-  rakennuslupa_to_krysp_212)
+  (-> rakennuslupa_to_krysp_212
+    (assoc-in [:attr :xsi:schemaLocation]
+      "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
+       http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd")
+    ))
 
 (defn- get-mapping [krysp-version]
   (case (name krysp-version)
