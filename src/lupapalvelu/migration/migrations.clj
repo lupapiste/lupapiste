@@ -216,3 +216,21 @@
         (when (or (= (name permit-type) lupapalvelu.permit/R) (= (name permit-type) lupapalvelu.permit/P))
           (mongo/update-by-id :organizations (:id organization)
                               {$set {(str "krysp." (name permit-type) ".url") (str url "?outputFormat=KRYSP")}}))))))
+
+(defmigration default-krysp-R-version
+  {:apply-when (pos? (mongo/count :organizations {$and [{:krysp.R {$exists true}} {:krysp.R.version {$exists false}}]}))}
+  (mongo/update-by-query :organizations
+    {$and [{:krysp.R {$exists true}} {:krysp.R.version {$exists false}}]}
+    {$set {:krysp.R.version "2.1.2"}}))
+
+(defmigration default-krysp-P-version
+  {:apply-when (pos? (mongo/count :organizations {$and [{:krysp.P {$exists true}} {:krysp.P.version {$exists false}}]}))}
+  (mongo/update-by-query :organizations
+    {$and [{:krysp.P {$exists true}} {:krysp.P.version {$exists false}}]}
+    {$set {:krysp.P.version "2.1.2"}}))
+
+(defmigration default-krysp-YA-version
+  {:apply-when (pos? (mongo/count :organizations {$and [{:krysp.YA {$exists true}} {:krysp.YA.version {$exists false}}]}))}
+  (mongo/update-by-query :organizations
+    {$and [{:krysp.YA {$exists true}} {:krysp.YA.version {$exists false}}]}
+    {$set {:krysp.YA.version "2.1.2"}}))

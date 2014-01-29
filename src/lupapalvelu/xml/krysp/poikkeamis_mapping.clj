@@ -73,7 +73,7 @@
                 (assoc-in c krysp-polku-lausuntoon paivitetty))
               ) canonical statement-attachments)))
 
-(defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
+(defn save-application-as-krysp [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [subtype    (keyword (:permitSubtype application))
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)
@@ -94,6 +94,6 @@
                     attachments)
         xml (element-to-xml canonical poikkeamis_to_krysp)]
 
-    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
+    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
 (permit/register-function permit/P :app-krysp-mapper save-application-as-krysp)

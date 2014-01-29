@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.verdict)
 
+; TODO Enumeration has changed in new KRYSP. Fuck.
 (def ^:private verdict-map {:1 "my\u00f6nnetty"
                             :2 "hyv\u00e4ksytty"
                             :3 "osittain my\u00f6nnetty"
