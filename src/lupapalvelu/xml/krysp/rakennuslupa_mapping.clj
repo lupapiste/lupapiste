@@ -227,7 +227,10 @@
       "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
        http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd")
 
-    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)))
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)
+    ; TODO liitettyJatevesijarjestelmaanKytkin
+    ))
+
 
 (defn- get-mapping [krysp-version]
   (case (name krysp-version)
@@ -247,7 +250,7 @@
                            output-dir
                            task-id
                            started
-                           building-ids
+                           buildings
                            user
                            katselmuksen-nimi
                            tyyppi
@@ -261,7 +264,7 @@
                            begin-of-link
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
-        canonical-without-attachments (katselmus-canonical application lang task-id started building-ids user
+        canonical-without-attachments (katselmus-canonical application lang task-id started buildings user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
                                                            huomautukset lasnaolijat poikkeamat)
         canonical (assoc-in canonical-without-attachments
@@ -276,7 +279,7 @@
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset :kuvaus)
-        buildings    (map :rakennus (-> data :rakennus vals))]
+        buildings    (-> data :rakennus vals)]
     (save-katselmus-xml
       application
       lang
@@ -300,9 +303,9 @@
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index buildingId propertyId] :as building} user krysp-version]
-  (let [building-id {:jarjestysnumero index
-                     :kiinttun        propertyId
-                     :rakennusnro     buildingId}]
+  (let [building-id {:rakennus {:jarjestysnumero index
+                                :kiinttun        propertyId
+                                :rakennusnro     buildingId}}]
     (save-katselmus-xml application lang output-dir nil started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
   )
 

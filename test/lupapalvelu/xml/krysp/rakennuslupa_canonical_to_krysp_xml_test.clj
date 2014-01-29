@@ -75,7 +75,7 @@
         "target"
         "123"
         "2.5.1974"
-        [{:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}]
+        [{:rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
         user
         "pohjakatselmus" ; katselmuksen-nimi
         :katselmus ;tyyppi

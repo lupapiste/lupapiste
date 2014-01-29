@@ -308,8 +308,12 @@
                        :poikkeamat poikkeamat}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
-                        {:rakennustunnus (select-keys (first buildings) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
-                         :katselmuksenRakennustieto (map #(when % {:KatselmuksenRakennus (select-keys % [:jarjestysnumero :kiinttun :rakennusnro])}) buildings)}) ; v2.1.3
+                        {:rakennustunnus (select-keys (:rakennus (first buildings)) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
+                         :katselmuksenRakennustieto {:KatselmuksenRakennus (map #(merge
+                                                                                   (select-keys (:rakennus %) [:jarjestysnumero :kiinttun :rakennusnro])
+                                                                                   {:katselmusOsittainen (get-in % [:tila :tila])
+                                                                                    :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])
+                                                                                    }) buildings)}}) ; v2.1.3
                       (when huomautukset {:huomautukset {:huomautus {:kuvaus huomautukset}}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)

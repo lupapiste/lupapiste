@@ -869,10 +869,11 @@
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
            (let [canonical (katselmus-canonical
                              (assoc application-rakennuslupa :state "verdictGiven")
-                             "123"
                              "sv"
+                             "123"
                              1354532324658
-                             [{:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}]
+                             [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
+                              {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
                              authority-user-jussi
                              "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -914,8 +915,15 @@
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
                  katselmuksenLaji (:katselmuksenLaji Katselmus)
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
-                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]))
+                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]
 
+             (fact "KRYSP 2.1.3 data is present"
+               (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
+               (let [rakennukset (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus])]
+                 (fact "has 2 buildings" (count rakennukset) => 2)
+                 (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
+                 (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
+                 (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
            (let [canonical (unsent-attachments-to-canonical
@@ -1029,7 +1037,8 @@
                              "fi"
                              "123"
                              1354532324658
-                             [{:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}]
+                             [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
+                               :tila     {:tila nil :kayttoonottava nil}}] ; TODO test these
                              authority-user-jussi
                              "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
 Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
