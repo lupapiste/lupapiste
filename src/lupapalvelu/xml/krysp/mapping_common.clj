@@ -170,10 +170,10 @@
            {:tag :tila}
            {:tag :kasittelija :child [henkilo]}]})
 
+(def muu-tunnustieto {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]})
+
 (def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :kuntalupatunnus}
-                                                    {:tag :muuTunnustieto
-                                                     :child [{:tag :MuuTunnus :child [{:tag :tunnus}
-                                                                                      {:tag :sovellus}]}]}
+                                                    muu-tunnustieto
                                                     {:tag :saapumisPvm}
                                                     {:tag :viittaus}]})
 
@@ -208,6 +208,28 @@
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
+(defn update-child-element
+  "Utility for updating mappings: replace child in a given path with v.
+     children: sequence of :tag, :child maps
+     path: keyword sequence
+     v: the new value"
+  [children path v]
+  (map
+    #(if (= (:tag %) (first path))
+      (if (seq (rest path))
+        (update-in % [:child] update-child-element (rest path) v)
+        v)
+      %)
+    children))
+
+(defn get-child-element [mapping path]
+  (let [children (if (map? mapping) (:child mapping) mapping)]
+    (some
+      #(when (= (:tag %) (first path))
+         (if (seq (rest path))
+           (get-child-element % (rest path))
+           %))
+      children)))
 
 (defn get-file-name-on-server [file-id file-name]
   (str file-id "_" (ss/encode-filename file-name)))

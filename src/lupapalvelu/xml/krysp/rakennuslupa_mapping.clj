@@ -37,6 +37,11 @@
    {:tag :kiinttun}
    {:tag :rakennusnro}])
 
+(def ^:private rakennustunnus_213
+  (conj rakennustunnus
+    {:tag :katselmusOsittainen}
+    {:tag :kayttoonottoKytkin}))
+
 (def ^:private yht-rakennus
   [{:tag :yksilointitieto :ns "yht"}
    {:tag :alkuHetki :ns "yht"}
@@ -96,6 +101,27 @@
 
 (def ^:private rakennus {:tag :Rakennus :child yht-rakennus})
 
+(def ^:private katselmustieto
+  {:tag :katselmustieto
+   :child [{:tag :Katselmus
+            :child [{:tag :rakennustunnus :child rakennustunnus}
+                    {:tag :tilanneKoodi}
+                    {:tag :pitoPvm}
+                    {:tag :osittainen}
+                    {:tag :pitaja}
+                    {:tag :katselmuksenLaji}
+                    {:tag :vaadittuLupaehtonaKytkin}
+                    {:tag :huomautukset
+                     :child [{:tag :huomautus
+                              :child [{:tag :kuvaus}
+                                      {:tag :maaraAika}
+                                      {:tag :toteamisHetki}
+                                      {:tag :toteaja}]}]}
+                    {:tag :katselmuspoytakirja}
+                    {:tag :tarkastuksenTaiKatselmuksenNimi}
+                    {:tag :lasnaolijat}
+                    {:tag :poikkeamat}]}]})
+
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
@@ -145,21 +171,7 @@
                                                                                   mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
-                             {:tag :katselmustieto :child [{:tag :Katselmus :child [{:tag :rakennustunnus :child rakennustunnus}
-                                                                                    {:tag :tilanneKoodi}
-                                                                                    {:tag :pitoPvm}
-                                                                                    {:tag :osittainen}
-                                                                                    {:tag :pitaja}
-                                                                                    {:tag :katselmuksenLaji}
-                                                                                    {:tag :vaadittuLupaehtonaKytkin}
-                                                                                    {:tag :huomautukset :child [{:tag :huomautus :child [{:tag :kuvaus}
-                                                                                                                                         {:tag :maaraAika}
-                                                                                                                                         {:tag :toteamisHetki}
-                                                                                                                                         {:tag :toteaja}]}]}
-                                                                                    {:tag :katselmuspoytakirja}
-                                                                                    {:tag :tarkastuksenTaiKatselmuksenNimi}
-                                                                                    {:tag :lasnaolijat}
-                                                                                    {:tag :poikkeamat}]}]}
+                             katselmustieto
                              {:tag :lausuntotieto :child [mapping-common/lausunto]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
@@ -189,19 +201,39 @@
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
+(def ^:private katselmus_213
+  {:tag :katselmustieto
+   :child [{:tag :Katselmus
+            :child [{:tag :katselmuksenRakennustieto :child [{:tag :KatselmuksenRakennus :child rakennustunnus_213}]}
+                    mapping-common/muu-tunnustieto
+                    {:tag :tilanneKoodi}
+                    {:tag :pitoPvm}
+                    {:tag :osittainen}
+                    {:tag :pitaja}
+                    {:tag :katselmuksenLaji}
+                    {:tag :vaadittuLupaehtonaKytkin}
+                    {:tag :huomautukset :child [{:tag :huomautus :child [{:tag :kuvaus}
+                                                                         {:tag :maaraAika}
+                                                                         {:tag :toteamisHetki}
+                                                                         {:tag :toteaja}]}]}
+                    {:tag :katselmuspoytakirja}
+                    {:tag :tarkastuksenTaiKatselmuksenNimi}
+                    {:tag :lasnaolijat}
+                    {:tag :poikkeamat}]}]})
+
 (def rakennuslupa_to_krysp_213
-  (-> rakennuslupa_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation]
+  (->
+    (assoc-in rakennuslupa_to_krysp_212 [:attr :xsi:schemaLocation]
       "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
        http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd")
-    ))
+
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)))
 
 (defn- get-mapping [krysp-version]
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
     "2.1.3" rakennuslupa_to_krysp_213
-    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))
-    ))
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
