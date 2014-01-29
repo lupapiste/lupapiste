@@ -24,9 +24,6 @@
         :puhelin (-> henkilo :yhteystiedot :puhelin :value)
         :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)))))
 
-(defn- get-henkilo-reduced [henkilo]
-  (dissoc (get-henkilo henkilo) :osoite :henkilotunnus))
-
 (defn- get-yritys [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
         postiosoite (not-empty
@@ -58,7 +55,7 @@
   (let [hakija (not-empty
                  (if (= (-> hakija-doc :_selected :value) "yritys")
                    (let [yritys (assoc-when {} :Yritys (get-yritys (:yritys hakija-doc)))
-                         henkilo (assoc-when {} :Henkilo (get-henkilo-reduced (-> hakija-doc :yritys :yhteyshenkilo)))]
+                         henkilo (assoc-when {} :Henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo)))]
                      (assoc-when {} :yritystieto  yritys :henkilotieto henkilo))
                    (let [henkilo (assoc-when {} :Henkilo (get-henkilo (:henkilo hakija-doc)))]
                      (assoc-when {} :henkilotieto henkilo))))]
