@@ -164,7 +164,6 @@
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
                                       {:tag :asioimiskieli}
-                                      {:tag :suoramarkkinointikieltoKytkin}
                                       {:tag :vakuus
                                        :child [{:tag :vakuudenLaji}
                                                {:tag :voimassaolopvm}

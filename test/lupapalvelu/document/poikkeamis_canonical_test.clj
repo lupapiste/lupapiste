@@ -509,7 +509,7 @@
         lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
         asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
-        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => falsey
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
@@ -704,7 +704,7 @@
         lisatietotieto (:lisatietotieto Suunnittelutarveasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
         asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
-        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => falsey
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
