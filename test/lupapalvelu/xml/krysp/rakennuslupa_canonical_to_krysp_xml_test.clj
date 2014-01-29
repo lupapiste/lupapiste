@@ -73,20 +73,23 @@
         application
         "fi"
         "target"
+        "123"
         "2.5.1974"
-        {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}
+        [{:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}]
         user
-        "pohjakatselmus"
-        :katselmus
-        "pidetty"
-        "pitaja"
-        true
-        "kuvaus"
-        "Tiivi Taavi, Hipsu ja Lala"
-        "Ei poikkeamisia"
-        "2.1.2"
-        "begin-of-link"
-        {:type "task" :id "123"}) => nil)
+        "pohjakatselmus" ; katselmuksen-nimi
+        :katselmus ;tyyppi
+        "pidetty" ;osittainen
+        "pitaja" ;pitaja
+        true ;lupaehtona
+        "kuvaus" ;huomautukset
+        "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
+        "Ei poikkeamisia" ;poikkeamat
+        "2.1.2" ;krysp-version
+        "begin-of-link" ;begin-of-link
+        {:type "task" :id "123"} ;attachment-target
+        ) => nil)
+
     (save-katselmus-as-krysp
       application
       {:id "123"

@@ -869,9 +869,10 @@
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
            (let [canonical (katselmus-canonical
                              (assoc application-rakennuslupa :state "verdictGiven")
+                             "123"
                              "sv"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}
+                             [{:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}]
                              authority-user-jussi
                              "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -1026,8 +1027,9 @@
            (let [canonical (katselmus-canonical
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "fi"
+                             "123"
                              1354532324658
-                             {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
+                             [{:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}]
                              authority-user-jussi
                              "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
 Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")

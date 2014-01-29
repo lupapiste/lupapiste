@@ -117,7 +117,7 @@
                                       {:tag :maaraAika}
                                       {:tag :toteamisHetki}
                                       {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja}
+                    {:tag :katselmuspoytakirja :child mapping-common/liite-children}
                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
@@ -216,7 +216,7 @@
                                                                          {:tag :maaraAika}
                                                                          {:tag :toteamisHetki}
                                                                          {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja}
+                    {:tag :katselmuspoytakirja :child mapping-common/liite-children}
                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
@@ -245,8 +245,9 @@
 (defn- save-katselmus-xml [application
                            lang
                            output-dir
+                           task-id
                            started
-                           building-id
+                           building-ids
                            user
                            katselmuksen-nimi
                            tyyppi
@@ -260,7 +261,7 @@
                            begin-of-link
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
-        canonical-without-attachments (katselmus-canonical application lang started building-id user
+        canonical-without-attachments (katselmus-canonical application lang task-id started building-ids user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
                                                            huomautukset lasnaolijat poikkeamat)
         canonical (assoc-in canonical-without-attachments
@@ -275,22 +276,26 @@
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset :kuvaus)
-        building     (-> data :rakennus vals first :rakennus)]
-    (save-katselmus-xml application lang output-dir
-                               pitoPvm
-                               building
-                               user
-                               katselmuksenLaji
-                               :katselmus
-                               tila
-                               pitaja
-                               vaadittuLupaehtona
-                               huomautukset
-                               lasnaolijat
-                               poikkeamat
-                               krysp-version
-                               begin-of-link
-                               {:type "task" :id (:id katselmus)})))
+        buildings    (map :rakennus (-> data :rakennus vals))]
+    (save-katselmus-xml
+      application
+      lang
+      output-dir
+      (:id katselmus)
+      pitoPvm
+      buildings
+      user
+      katselmuksenLaji
+      :katselmus
+      tila
+      pitaja
+      vaadittuLupaehtona
+      huomautukset
+      lasnaolijat
+      poikkeamat
+      krysp-version
+      begin-of-link
+      {:type "task" :id (:id katselmus)})))
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
@@ -298,7 +303,7 @@
   (let [building-id {:jarjestysnumero index
                      :kiinttun        propertyId
                      :rakennusnro     buildingId}]
-    (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
+    (save-katselmus-xml application lang output-dir nil started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
   )
 
 (defn save-unsent-attachments-as-krysp [application lang krysp-version output-dir begin-of-link]

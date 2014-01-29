@@ -294,7 +294,7 @@
 ;                                                            kirjautunut kayttaja
 ;                                                                 lisaa skeemaan (muu-muu)
 ;                                                                                          lopullinen-tila
-(defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application lang task-id pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [documents (documents-by-type-without-blanks application)
         katselmus (cr/strip-nils
                     (merge
@@ -306,7 +306,10 @@
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat}
-                      (when building {:rakennustunnus (select-keys building [:jarjestysnumero :kiinttun :rakennusnro])})
+                      (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
+                      (when (seq buildings)
+                        {:rakennustunnus (select-keys (first buildings) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
+                         :katselmuksenRakennustieto (map #(when % {:KatselmuksenRakennus (select-keys % [:jarjestysnumero :kiinttun :rakennusnro])}) buildings)}) ; v2.1.3
                       (when huomautukset {:huomautukset {:huomautus {:kuvaus huomautukset}}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
