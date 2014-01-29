@@ -71,9 +71,9 @@
                                                     :repeating true}}}))
 
 (facts "is-link-permit-required works correctly"
-       (fact "Jatkolupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
-       (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
-       (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
+  (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
+  (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
+  (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
 
 
 (testable-privates lupapalvelu.application add-operation-allowed?)
@@ -83,7 +83,7 @@
         error {:ok false :text "error.add-operation-not-allowed"}]
     (doseq [operation lupapalvelu.operations/operations]
       (let [op (first operation)
-            type (-> operation second :permit-type) 
+            type (-> operation second :permit-type)
             application {:operations [{:name (name op)}] :permitSubtype nil}
             operation-allowed (doc-result (add-operation-allowed? nil application) op)]
         (if (or (not= type "R") (not-allowed-for op))
