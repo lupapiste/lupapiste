@@ -32,70 +32,71 @@
                                            {:tag :jakokirjain}]}]})
 
 
-(def rakennustunnus [{:tag :jarjestysnumero}
-                     {:tag :kiinttun}
-                     {:tag :rakennusnro}])
+(def ^:private rakennustunnus
+  [{:tag :jarjestysnumero}
+   {:tag :kiinttun}
+   {:tag :rakennusnro}])
 
-(def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
-                   {:tag :alkuHetki :ns "yht"}
-                   mapping-common/sijantitieto
-                   {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child rakennustunnus}
-                            {:tag :kayttotarkoitus}
-                            {:tag :tilavuus}
-                            {:tag :kokonaisala}
-                            {:tag :kellarinpinta-ala}
-                            {:tag :BIM :child []}
-                            {:tag :kerrosluku}
-                            {:tag :kerrosala}
-                            {:tag :rakentamistapa}
-                            {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
-                                                               {:tag :rakennusaine}]}
-                            {:tag :julkisivu
-                             :child [{:tag :muuMateriaali}
-                                     {:tag :julkisivumateriaali}]}
-                            {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
-                                                             {:tag :vesijohtoKytkin}
-                                                             {:tag :sahkoKytkin}
-                                                             {:tag :maakaasuKytkin}
-                                                             {:tag :kaapeliKytkin}]}
-                            {:tag :energialuokka}
-                            {:tag :energiatehokkuusluku}
-                            {:tag :energiatehokkuusluvunYksikko}
-                            {:tag :paloluokka}
-                                 {:tag :lammitystapa}
-                                 {:tag :lammonlahde :child [{:tag :polttoaine}
-                                                            {:tag :muu}]}
-                                 {:tag :varusteet
-                                  :child [{:tag :sahkoKytkin}
-                                          {:tag :kaasuKytkin}
-                                          {:tag :viemariKytkin}
-                                          {:tag :vesijohtoKytkin}
-                                          {:tag :lamminvesiKytkin}
-                                          {:tag :aurinkopaneeliKytkin}
-                                          {:tag :hissiKytkin}
-                                          {:tag :koneellinenilmastointiKytkin}
-                                          {:tag :saunoja}
-                                          {:tag :uima-altaita}
-                                          {:tag :vaestonsuoja}]}
-                                 {:tag :jaahdytysmuoto}
-                                 {:tag :asuinhuoneistot :child [huoneisto]}
-                                 ]}
-                   {:tag :rakentajatyyppi}
-                   {:tag :omistajatieto
-                    :child [{:tag :Omistaja
-                             :child [{:tag :kuntaRooliKoodi :ns "yht"}
-                                     {:tag :VRKrooliKoodi :ns "yht"}
-                                     mapping-common/henkilo
-                                     mapping-common/yritys
-                                     {:tag :omistajalaji :ns "rakval"
-                                      :child [{:tag :muu}
-                                              {:tag :omistajalaji}]}]}]}])
+(def ^:private yht-rakennus
+  [{:tag :yksilointitieto :ns "yht"}
+   {:tag :alkuHetki :ns "yht"}
+   mapping-common/sijantitieto
+   {:tag :rakennuksenTiedot
+    :child [{:tag :rakennustunnus :child rakennustunnus}
+            {:tag :kayttotarkoitus}
+            {:tag :tilavuus}
+            {:tag :kokonaisala}
+            {:tag :kellarinpinta-ala}
+            {:tag :BIM :child []}
+            {:tag :kerrosluku}
+            {:tag :kerrosala}
+            {:tag :rakentamistapa}
+            {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
+                                               {:tag :rakennusaine}]}
+            {:tag :julkisivu
+             :child [{:tag :muuMateriaali}
+                     {:tag :julkisivumateriaali}]}
+            {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
+                                             {:tag :vesijohtoKytkin}
+                                             {:tag :sahkoKytkin}
+                                             {:tag :maakaasuKytkin}
+                                             {:tag :kaapeliKytkin}]}
+            {:tag :energialuokka}
+            {:tag :energiatehokkuusluku}
+            {:tag :energiatehokkuusluvunYksikko}
+            {:tag :paloluokka}
+                 {:tag :lammitystapa}
+                 {:tag :lammonlahde :child [{:tag :polttoaine}
+                                            {:tag :muu}]}
+                 {:tag :varusteet
+                  :child [{:tag :sahkoKytkin}
+                          {:tag :kaasuKytkin}
+                          {:tag :viemariKytkin}
+                          {:tag :vesijohtoKytkin}
+                          {:tag :lamminvesiKytkin}
+                          {:tag :aurinkopaneeliKytkin}
+                          {:tag :hissiKytkin}
+                          {:tag :koneellinenilmastointiKytkin}
+                          {:tag :saunoja}
+                          {:tag :uima-altaita}
+                          {:tag :vaestonsuoja}]}
+                 {:tag :jaahdytysmuoto}
+                 {:tag :asuinhuoneistot :child [huoneisto]}
+                 ]}
+   {:tag :rakentajatyyppi}
+   {:tag :omistajatieto
+    :child [{:tag :Omistaja
+             :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                     {:tag :VRKrooliKoodi :ns "yht"}
+                     mapping-common/henkilo
+                     mapping-common/yritys
+                     {:tag :omistajalaji :ns "rakval"
+                      :child [{:tag :muu}
+                              {:tag :omistajalaji}]}]}]}])
 
-(def rakennus {:tag :Rakennus
-               :child yht-rakennus})
+(def ^:private rakennus {:tag :Rakennus :child yht-rakennus})
 
-(def rakennuslupa_to_krysp
+(def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
    :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
@@ -188,6 +189,16 @@
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
+(def rakennuslupa_to_krysp_213
+  rakennuslupa_to_krysp_212)
+
+(defn- get-mapping [krysp-version]
+  (case (name krysp-version)
+    "2.1.2" rakennuslupa_to_krysp_212
+    "2.1.3" rakennuslupa_to_krysp_213
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))
+    ))
+
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
         submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
@@ -219,7 +230,7 @@
         canonical (assoc-in canonical-without-attachments
                             [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                             attachments)
-        xml (element-to-xml canonical rakennuslupa_to_krysp)]
+        xml (element-to-xml canonical (get-mapping krysp-version))]
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
@@ -262,7 +273,7 @@
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments)
 
-        xml (element-to-xml canonical rakennuslupa_to_krysp)]
+        xml (element-to-xml canonical (get-mapping krysp-version))]
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
@@ -291,7 +302,7 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
-        xml (element-to-xml canonical rakennuslupa_to_krysp)]
+        xml (element-to-xml canonical (get-mapping krysp-version))]
 
     (mapping-common/write-to-disk
       application attachments
