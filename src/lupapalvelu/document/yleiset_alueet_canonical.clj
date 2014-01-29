@@ -54,11 +54,13 @@
   ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
   (let [hakija (not-empty
                  (if (= (-> hakija-doc :_selected :value) "yritys")
-                   (let [yritys (assoc-when {} :Yritys (get-yritys (:yritys hakija-doc)))
-                         henkilo (assoc-when {} :Henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo)))]
-                     (assoc-when {} :yritystieto  yritys :henkilotieto henkilo))
-                   (let [henkilo (assoc-when {} :Henkilo (get-henkilo (:henkilo hakija-doc)))]
-                     (assoc-when {} :henkilotieto henkilo))))]
+                   (let [yritys (get-yritys (:yritys hakija-doc))
+                         henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo))]
+                     (when (and yritys henkilo)
+                       {:yritystieto {:Yritys yritys}
+                        :henkilotieto {:Henkilo henkilo}}))
+                   (when-let [henkilo (get-henkilo (:henkilo hakija-doc))]
+                     {:henkilotieto {:Henkilo henkilo}})))]
     (when hakija
       (merge hakija {:rooliKoodi "hakija"}))))
 
