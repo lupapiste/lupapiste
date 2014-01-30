@@ -230,6 +230,20 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
+  (or (not attachmentId) 
+      (let [attachment (get-attachment-info application attachmentId)
+            attachmentApplicationState (keyword (:applicationState attachment))
+            currentState (keyword (:state application))]
+  (println currentState)
+  (println attachmentApplicationState)
+  (println userRole)
+        (or (not (post-verdict-states currentState))
+            (post-verdict-states attachmentApplicationState)
+            (= (keyword userRole) :authority)))))
+
 (defraw "download-all-attachments"
   {:parameters [:id]
    :extra-auth-roles [:statementGiver]}
@@ -263,12 +277,16 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (when-not (allowed-attachment-type-for-application? application attachmentType) (fail! :error.illegal-attachment-type))
+  (when-not (allowed-attachment-type-for-application? application attachmentType) 
+    (fail! :error.illegal-attachment-type))
 
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (when (= (:type target) "statement")
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
-
+  
   (when-not (attach-file! {:application-id id
                            :filename filename
                            :size size

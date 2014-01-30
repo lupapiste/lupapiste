@@ -1,1 +1,2 @@
 userinfo.allowDirectMarketing: Annan suostumukseni luovuttaa henkilötietojani suoramarkkinointia sekä mielipide- ja markkinatutkimusta varten.
+error.pre-verdict-attachment: Hakemuksen aikaista liitettä ei saa muokata
