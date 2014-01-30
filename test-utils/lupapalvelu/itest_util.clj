@@ -17,11 +17,23 @@
            org.apache.http.cookie.Cookie))
 
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
+(defn find-user-from-minimal-by-apikey [apikey] (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
 (defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (defn email-for [username] (:email (find-user-from-minimal username)))
 (defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
+
+(defn organization-from-minimal-by-id [org-id]
+  (some #(when (= (:id %) org-id) %) minimal/organizations))
+
+(defn- muni-for-user [user]
+  (let [org (organization-from-minimal-by-id (first (:organizations user)))]
+    (-> org :scope first :municipality)))
+
+(defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
+(defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
+
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
@@ -31,18 +43,18 @@
 (def teppo-id    (id-for "teppo@example.com"))
 (def veikko      (apikey-for "veikko"))
 (def veikko-id   (id-for "veikko"))
-;TODO should get this through organization
-(def veikko-muni "837")
+(def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
 (def ronja-id    (id-for "ronja"))
-;TODO should get this through organization
-(def sonja-muni  "753")
+(def sonja-muni  (muni-for "sonja"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def dummy       (apikey-for "dummy"))
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))
+(def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
+(def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
