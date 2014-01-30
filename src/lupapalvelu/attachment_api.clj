@@ -253,7 +253,7 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
+                (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
@@ -278,6 +278,7 @@
                            :comment-text text
                            :target target
                            :locked locked
+                           :applicationState (:state application)
                            :user user
                            :created created})
     (fail :error.unknown)))
