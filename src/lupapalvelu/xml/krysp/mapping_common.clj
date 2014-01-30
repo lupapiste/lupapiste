@@ -170,10 +170,8 @@
            {:tag :tila}
            {:tag :kasittelija :child [henkilo]}]})
 
-(def muu-tunnustieto {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]})
-
 (def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :kuntalupatunnus}
-                                                    muu-tunnustieto
+                                                    {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]}
                                                     {:tag :saapumisPvm}
                                                     {:tag :viittaus}]})
 

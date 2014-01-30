@@ -204,7 +204,7 @@
   {:tag :katselmustieto
    :child [{:tag :Katselmus
             :child [{:tag :katselmuksenRakennustieto :child [{:tag :KatselmuksenRakennus :child rakennustunnus_213}]}
-                    mapping-common/muu-tunnustieto
+                    {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus :ns "yht"} {:tag :sovellus :ns "yht"}]}]}
                     {:tag :tilanneKoodi}
                     {:tag :pitoPvm}
                     {:tag :osittainen}
