@@ -320,10 +320,11 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
+                      ; Osapuoli is not required in KRYSP 2.1.3
                       :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
                                                                               :henkilo {:nimi {:etunimi (:firstName user)
                                                                                                :sukunimi (:lastName user)}
-                                                                                        :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                        :osoite {:osoitenimi {:teksti (or (:street user) "")}
                                                                                                  :postitoimipaikannimi (:city user)
                                                                                                  :postinumero (:zip user)}
                                                                                          :sahkopostiosoite (:email user)
