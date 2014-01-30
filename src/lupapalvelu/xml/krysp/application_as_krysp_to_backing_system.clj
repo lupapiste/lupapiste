@@ -8,14 +8,21 @@
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]))
 
 (defn- get-begin-of-link [permit-type]
+  {:pre  [permit-type]
+   :post [%]}
   (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
 
 (defn resolve-output-directory [organization permit-type]
+  {:pre  [organization permit-type]
+   :post [%]}
   (let [sftp-user (get-in organization [:krysp (keyword permit-type) :ftpUser])]
     (str (env/value :outgoing-directory) "/" sftp-user (permit/get-sftp-directory permit-type))))
 
 (defn resolve-krysp-version [organization permit-type]
-  (get-in organization [:krysp (keyword permit-type) :version]))
+  {:pre [organization permit-type]}
+  (if-let [krysp-version (get-in organization [:krysp (keyword permit-type) :version])]
+    krysp-version
+    (throw (IllegalStateException. (str "KRYSP version not found for organization " (:id organization) ", permit-type " permit-type)))))
 
 (defn save-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
