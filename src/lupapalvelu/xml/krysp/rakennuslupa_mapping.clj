@@ -230,6 +230,7 @@
 
 
 (defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
     "2.1.3" rakennuslupa_to_krysp_213
