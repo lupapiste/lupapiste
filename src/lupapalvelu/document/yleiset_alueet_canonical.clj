@@ -24,43 +24,27 @@
         :puhelin (-> henkilo :yhteystiedot :puhelin :value)
         :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)))))
 
-(defn- get-yritys [yritys]
-  (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
-        postiosoite (not-empty
-                      (assoc-when {}
-                        :osoitenimi teksti
-                        :postinumero (-> yritys :osoite :postinumero :value)
-                        :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)))]
+(defn- get-postiosoite [yritys]
+  (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))]
     (not-empty
       (assoc-when {}
-        :nimi (-> yritys :yritysnimi :value)
-        :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
-        :postiosoitetieto (when postiosoite {:Postiosoite postiosoite})))))
+        :osoitenimi teksti
+        :postinumero (-> yritys :osoite :postinumero :value)
+        :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value)))))
 
-(defn- get-yritys-maksaja [yritys]
-  (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
-        postiosoite (assoc-when {}
-                      :osoitenimi teksti
-                      :postinumero (-> yritys :osoite :postinumero :value)
-                      :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi :value))]
-    (not-empty
-      (assoc-when {}
-        :nimi (-> yritys :yritysnimi :value)
-        :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)
-        :postiosoite postiosoite))))
-
-(defn- get-hakija [hakija-doc]
-  ;; Yritys-tyyppisella hakijalla tiedot jaetaan yritystietoon ja henkilotieto,
-  ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
-  (let [hakija (not-empty
-                 (if (= (-> hakija-doc :_selected :value) "yritys")
-                   (let [yritys (assoc-when {} :Yritys (get-yritys (:yritys hakija-doc)))
-                         henkilo (assoc-when {} :Henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo)))]
-                     (assoc-when {} :yritystieto  yritys :henkilotieto henkilo))
-                   (let [henkilo (assoc-when {} :Henkilo (get-henkilo (:henkilo hakija-doc)))]
-                     (assoc-when {} :henkilotieto henkilo))))]
-    (when hakija
-      (merge hakija {:rooliKoodi "hakija"}))))
+(defn- get-yritys [yritys is-maksaja-doc]
+  (let [postiosoite (get-postiosoite yritys)
+        yritys-basic (not-empty
+                       (assoc-when {}
+                         :nimi (-> yritys :yritysnimi :value)
+                         :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)))]
+    (if postiosoite
+      (merge
+        yritys-basic
+        (if is-maksaja-doc
+          {:postiosoite postiosoite}
+          {:postiosoitetieto {:Postiosoite postiosoite}}))
+      yritys-basic)))
 
 (defn- get-vastuuhenkilo-osoitetieto [osoite]
   (let [osoitenimi (assoc-when {} :teksti (-> osoite :katu :value))
@@ -96,25 +80,29 @@
         vastuuhenkilo (get-vastuuhenkilo tyomaasta-vastaava type "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")]
     (when vastuuhenkilo
       (merge
-        {:vastuuhenkilotieto {:Vastuuhenkilo vastuuhenkilo}}
+        {:Vastuuhenkilo vastuuhenkilo}
         (when (= "yritys" type)
-          (when-let [yritys (get-yritys (:yritys tyomaasta-vastaava))]
-            {:osapuolitieto {:Osapuoli {:yritystieto {:Yritys yritys}
-                                        :rooliKoodi "ty\u00f6nsuorittaja"}}}))))))
+          (when-let [yritys (get-yritys (:yritys tyomaasta-vastaava) false)]
+            {:Osapuoli {:yritystieto {:Yritys yritys}
+                        :rooliKoodi "ty\u00f6nsuorittaja"}}))))))
 
-(defn- get-maksaja [maksaja-doc]
-  (let [maksaja-info (if (= (-> maksaja-doc :_selected :value) "yritys")
-                       ;; yritys-tyyppinen maksaja, siirretaan yritysosa omaksi osapuolekseen
-                       (let [vastuuhenkilo (get-vastuuhenkilo maksaja-doc "yritys" "maksajan vastuuhenkil\u00f6")
-                             yritys-maksaja (get-yritys-maksaja (:yritys maksaja-doc))]
-                         (when (and vastuuhenkilo yritys-maksaja)
-                           {:vastuuhenkilotieto {:Vastuuhenkilo vastuuhenkilo}
-                            :yritystieto {:Yritys yritys-maksaja}}))
-                       ;; henkilo-tyyppinen maksaja
-                       (when-let [henkilo (get-henkilo (:henkilo maksaja-doc))]
-                         {:henkilotieto {:Henkilo henkilo}}))]
-    (when maksaja-info
-      (merge maksaja-info {:laskuviite (-> maksaja-doc :laskuviite :value)}))))
+(defn- get-yritys-and-henkilo [doc doc-type]
+  (let [is-maksaja-doc (true? (= "maksaja" doc-type))
+        info (if (= (-> doc :_selected :value) "yritys")
+               ;; yritys-tyyppinen hakija/maksaja, siirretaan yritysosa omaksi osapuolekseen
+               (let [vastuuhenkilo-roolikoodi (if is-maksaja-doc "maksajan vastuuhenkil\u00f6" "hankkeen vastuuhenkil\u00f6")
+                     vastuuhenkilo (get-vastuuhenkilo doc "yritys" vastuuhenkilo-roolikoodi)
+                     yritys (get-yritys (:yritys doc) is-maksaja-doc)]
+                 (when (and vastuuhenkilo yritys)
+                   {:Vastuuhenkilo vastuuhenkilo
+                    :Osapuoli {:yritystieto {:Yritys yritys}}}))
+               ;; henkilo-tyyppinen hakija/maksaja
+               (when-let [henkilo (get-henkilo (:henkilo doc))]
+                 {:Osapuoli {:henkilotieto {:Henkilo henkilo}}}))]
+    (when info
+      (update-in info [:Osapuoli] merge (if is-maksaja-doc
+                                          {:laskuviite (-> doc :laskuviite :value)}
+                                          {:rooliKoodi "hakija"})))))
 
 (defn- get-handler [application]
   (let [handler (:authority application)]
@@ -247,7 +235,7 @@
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
-        hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
+        hakija (get-yritys-and-henkilo (-> documents-by-type :hakija-ya first :data) "hakija")
         tyoaika-doc (when (:tyoaika config)
                       (-> documents-by-type :tyoaika first :data))
         mainostus-viitoitus-tapahtuma-doc (or
@@ -266,18 +254,19 @@
                       (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))))
         maksaja (if (:dummy-maksaja config)
-                  {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
-                  (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data)))
-        maksajatieto (when maksaja {:Maksaja (dissoc maksaja :vastuuhenkilotieto)})
+                  (merge (:Osapuoli hakija) {:laskuviite "0000000000"})
+                  (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja"))
+        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
-        osapuolitieto (vec (filter :Osapuoli [{:Osapuoli hakija}
-                                              (:osapuolitieto tyomaasta-vastaava)]))
+        osapuolitieto (vec (filter :Osapuoli [hakija
+                                              tyomaasta-vastaava]))
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
-                             (vec (filter :Vastuuhenkilo [(:vastuuhenkilotieto tyomaasta-vastaava)
-                                                          (:vastuuhenkilotieto maksaja)])))
+                             (vec (filter :Vastuuhenkilo [hakija
+                                                          tyomaasta-vastaava
+                                                          maksaja])))
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
                           (->
                             (or
@@ -359,16 +348,17 @@
 
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
-        hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
+        hakija (get-yritys-and-henkilo (-> documents-by-type :hakija-ya first :data) "hakija")
         tyoaika-doc (-> documents-by-type :tyo-aika-for-jatkoaika first :data)
         alku-pvm (if-let [tyoaika-alkaa-value (-> tyoaika-doc :tyoaika-alkaa-pvm :value)]
                    (to-xml-date-from-string tyoaika-alkaa-value)
                    (to-xml-date (:submitted application)))
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))
-        maksaja (get-maksaja (-> documents-by-type :yleiset-alueet-maksaja first :data))
-        maksajatieto (when maksaja {:Maksaja (dissoc maksaja :vastuuhenkilotieto)})
-        osapuolitieto (vec (filter :Osapuoli [{:Osapuoli hakija}]))
-        vastuuhenkilotieto (vec (filter :Vastuuhenkilo [(:vastuuhenkilotieto maksaja)]))
+        maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
+        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        osapuolitieto (vec (filter :Osapuoli [hakija]))
+        vastuuhenkilotieto (vec (filter :Vastuuhenkilo [hakija
+                                                        maksaja]))
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus :value)
         lisaaikatieto (when alku-pvm loppu-pvm hankkeen-kuvaus
                         {:Lisaaika {:alkuPvm alku-pvm
