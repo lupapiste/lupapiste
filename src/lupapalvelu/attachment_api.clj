@@ -237,9 +237,6 @@
       (let [attachment (get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
             currentState (keyword (:state application))]
-  (println currentState)
-  (println attachmentApplicationState)
-  (println userRole)
         (or (not (post-verdict-states currentState))
             (post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
