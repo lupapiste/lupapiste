@@ -213,13 +213,15 @@
   "Utility for updating mappings: replace child in a given path with v.
      children: sequence of :tag, :child maps
      path: keyword sequence
-     v: the new value"
+     v: the new value or a function that produces the new value from the old"
   [children path v]
   (map
     #(if (= (:tag %) (first path))
       (if (seq (rest path))
         (update-in % [:child] update-child-element (rest path) v)
-        v)
+        (if (fn? v)
+          (v %)
+          v))
       %)
     children))
 

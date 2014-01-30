@@ -30,7 +30,8 @@
 (facts "update-child-element"
   (let [sample-children [{:tag :a :child [{:tag :b  :child [{:tag :c}]}]}
                          {:tag :other1 :child [{:tag :other2}]}
-                         {:tag :other3}]]
+                         {:tag :other3}]
+        small-mapping [{:tag :a :child [{:tag :b :attr 1}]}]]
     (fact "replace leaf"
       (update-child-element sample-children [:a :b :c] {:tag :d}) => [{:tag :a :child [{:tag :b  :child [{:tag :d}]}]}
                                                                       {:tag :other1 :child [{:tag :other2}]}
@@ -50,7 +51,11 @@
                                                                      {:tag :other3}]
       (update-child-element sample-children [:other3] {:tag :d}) => [{:tag :a :child [{:tag :b  :child [{:tag :c}]}]}
                                                                      {:tag :other1 :child [{:tag :other2}]}
-                                                                     {:tag :d}])))
+                                                                     {:tag :d}])
+
+    (fact "function produces the new value"
+      (update-child-element small-mapping [:a :b] #(update-in % [:attr] inc))           => [{:tag :a :child [{:tag :b :attr 2}]}]
+      (update-child-element small-mapping [:a :b] (fn [elem] (assoc elem :meta "foo"))) => [{:tag :a :child [{:tag :b :attr 1 :meta "foo"}]}])))
 
 (facts "get-child-element"
   (let [sample-mapping {:tag :top
