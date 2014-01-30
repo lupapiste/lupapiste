@@ -338,7 +338,8 @@
                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                               :url "http://www.jarvenpaa.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                              :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+                              :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
+                     :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "jarvenpaa"}}}
 
                     {:id "753-R"
                      :inforequest-enabled true
