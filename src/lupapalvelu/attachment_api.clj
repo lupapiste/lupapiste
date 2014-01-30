@@ -96,7 +96,11 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [application] :as command}]
+  [{:keys [application user] :as command}]
+
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+
   (let [attachment-type (parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? application attachment-type)
       (update-application command
@@ -155,7 +159,11 @@
    :parameters  [id attachmentId]
    :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
+  [{:keys [application user]}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (delete-attachment application attachmentId)
   (ok))
 
@@ -164,7 +172,11 @@
    :parameters  [:id attachmentId fileId]
    :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [application]}]
+  [{:keys [application user]}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (if (file-id-in-application? application attachmentId fileId)
     (delete-attachment-version application attachmentId fileId)
     (fail :file_not_linked_to_the_document)))
