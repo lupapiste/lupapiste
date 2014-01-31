@@ -42,11 +42,11 @@
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
     ;; TODO: own test
     (mapping-to-krysp/save-application-as-krysp
-      application "fi" application {:krysp {:YA {:ftpUser "sipoo"}}})
+      application "fi" application {:krysp {:YA {:ftpUser "sipoo" :version "2.1.2"}}})
 
     (fact "xml exist" xml => truthy)
 
-    (validator/validate xml-s)))
+    (validator/validate xml-s (:permitType application) "2.1.2")))
 
 
 (facts "YA permits to canonical and then to xml with schema validation"

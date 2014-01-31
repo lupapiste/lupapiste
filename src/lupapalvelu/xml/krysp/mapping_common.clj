@@ -5,6 +5,7 @@
             [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
 
@@ -304,13 +305,17 @@
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing."
-  [application attachments statement-attachments xml output-dir & [extra-emitter]]
+  [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
+  {:pre [(string? output-dir)]}
+  (when-not (re-matches #"\d+\.\d+\.\d+" (or krysp-version "nil"))
+    (throw (IllegalAccessException. (str \' krysp-version "' does not look like a KRYSP version"))))
+
   (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
 
-    (validator/validate xml-s)
+    (validator/validate xml-s (permit/permit-type application) krysp-version)
 
     (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below)
     (with-open [out-file-stream (io/writer tempfile)]

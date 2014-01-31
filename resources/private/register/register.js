@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'confirmEmail', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'confirmEmail', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city', 'allowDirectMarketing'];
   var model;
   var confirmModel = {
     email: ko.observable("")
@@ -70,6 +70,7 @@
     city: ko.observable("").extend({required: true}),
     zip: ko.observable("").extend({required: true, number: true, maxLength: 5}),
     phone: ko.observable("").extend({required: true}),
+    allowDirectMarketing: ko.observable(false),
     email: ko.observable("").extend({email: true}),
     password: ko.observable("").extend({validPassword: true}),
     acceptTerms: ko.observable(false),

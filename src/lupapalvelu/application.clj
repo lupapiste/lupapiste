@@ -858,8 +858,11 @@
                           (when (= "verdictGiven" (:state application))
                             {:started created
                              :state  :constructionStarted}))}
-        output-dir (mapping-to-krysp/resolve-output-directory application)]
-    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user)
+        permit-type (permit/permit-type application)
+        organization (organization/get-organization (:organization application))
+        krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
+        output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)]
+    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
     (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
       (notifications/notify! :application-state-change command)))

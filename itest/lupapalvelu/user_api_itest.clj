@@ -135,6 +135,7 @@
                 :zip "33200"
                 :phone "0505503171"
                 :architect true
+                :allowDirectMarketing true
                 :degree "d"
                 :graduatingYear 2000
                 :fise "f"

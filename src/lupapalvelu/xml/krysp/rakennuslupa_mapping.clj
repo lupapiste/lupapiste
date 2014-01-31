@@ -164,7 +164,6 @@
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
                                       {:tag :asioimiskieli}
-                                      {:tag :suoramarkkinointikieltoKytkin}
                                       {:tag :vakuus
                                        :child [{:tag :vakuudenLaji}
                                                {:tag :voimassaolopvm}
@@ -209,6 +208,7 @@
                            huomautukset
                            lasnaolijat
                            poikkeamat
+                           krysp-version
                            begin-of-link
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
@@ -220,9 +220,9 @@
                             attachments)
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
-    (mapping-common/write-to-disk application attachments nil xml output-dir)))
+    (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
-(defn save-katselmus-as-krysp [application katselmus user lang output-dir begin-of-link]
+(defn save-katselmus-as-krysp [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
@@ -240,19 +240,20 @@
                                huomautukset
                                lasnaolijat
                                poikkeamat
+                               krysp-version
                                begin-of-link
                                {:type "task" :id (:id katselmus)})))
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index buildingId propertyId] :as building} user]
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index buildingId propertyId] :as building} user krysp-version]
   (let [building-id {:jarjestysnumero index
                      :kiinttun        propertyId
                      :rakennusnro     buildingId}]
-    (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil nil))
+    (save-katselmus-xml application lang output-dir started building-id user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
   )
 
-(defn save-unsent-attachments-as-krysp [application lang output-dir begin-of-link]
+(defn save-unsent-attachments-as-krysp [application lang krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
@@ -262,9 +263,9 @@
 
         xml (element-to-xml canonical rakennuslupa_to_krysp)]
 
-    (mapping-common/write-to-disk application attachments nil xml output-dir)))
+    (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
-(defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
+(defn save-application-as-krysp [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments  (application-to-canonical application lang)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
@@ -295,6 +296,7 @@
       application attachments
       statement-attachments
       xml
+      krysp-version
       output-dir
       #(write-application-pdf-versions output-dir application submitted-application lang))))
 

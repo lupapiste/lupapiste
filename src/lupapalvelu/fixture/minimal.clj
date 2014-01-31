@@ -203,7 +203,8 @@
     :zip "010203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}} ;; tampere
-   ;;Kuopio ya paakayttaja
+   ;; Kuopio ya paakayttaja
+   ;; kuopio-ya / kuopio-ya
    {:id "297-YA"
     :enabled true
     :lastName "Kuopio"
@@ -359,7 +360,7 @@
                                               :poikkeamis [[:paapiirustus :asemapiirros]]}
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "sipoo"}
-                             :P {:ftpUser "poik_sipoo"}}
+                             :P {:ftpUser "poik_sipoo" :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -373,7 +374,7 @@
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :krysp {:YA {:ftpUser "ya_sipoo"}}
+                     :krysp {:YA {:ftpUser "ya_sipoo" :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -420,16 +421,16 @@
 
                     {:id "837-YA",
                      :inforequest-enabled true
-                      :name {:fi "Tampere yleiset alueet"
-                             :sv "Tammerfors yleiset alueet"}
-                      :new-application-enabled true
-                      :scope [{:municipality "837" :permitType "YA"}]
-                      :statementGivers [{:id "521f1e82e4b0d14f5a87f179"
-                                          :text "Paloviranomainen"
-                                          :email "jussi.viranomainen@tampere.fi"
-                                          :name "Jussi Viranomainen"}]
-                      :krysp {:YA {:ftpUser "ya_tampere"}}
-                      :operations-attachments ya-default-attachments-for-operations}
+                     :name {:fi "Tampere yleiset alueet"
+                            :sv "Tammerfors yleiset alueet"}
+                     :new-application-enabled true
+                     :scope [{:municipality "837" :permitType "YA"}]
+                     :statementGivers [{:id "521f1e82e4b0d14f5a87f179"
+                                        :text "Paloviranomainen"
+                                        :email "jussi.viranomainen@tampere.fi"
+                                        :name "Jussi Viranomainen"}]
+                     :krysp {:YA {:ftpUser "ya_tampere" :version "2.1.2"}}
+                     :operations-attachments ya-default-attachments-for-operations}
 
                     {:id "638-R"
                      :inforequest-enabled true
