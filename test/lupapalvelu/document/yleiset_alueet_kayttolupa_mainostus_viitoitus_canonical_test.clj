@@ -5,6 +5,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]))
 
 
@@ -106,7 +107,8 @@
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota yksityisella maksajalla ("henkilo"-tyyppinen maksaja)
-        maksaja-yksityinen (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja")
+        maksaja-yksityinen (tools/unwrapped
+                             (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja"))
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
         maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy

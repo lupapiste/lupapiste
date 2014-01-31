@@ -5,6 +5,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]))
 
 
@@ -94,7 +95,8 @@
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota yksityisella maksajalla ("henkilo"-tyyppinen maksaja)
-        maksaja-yksityinen (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja")
+        maksaja-yksityinen (tools/unwrapped
+                             (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja"))
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
         maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
@@ -117,8 +119,9 @@
         Vastuuhenkilo-henkilo-osoite (-> Vastuuhenkilo-henkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota myos henkilo-tyyppisella tyomaasta-vastaavalla
-        tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
-                                     (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo")) => truthy
+        tyomaasta-vastaava-henkilo (tools/unwrapped
+                                     (get-tyomaasta-vastaava
+                                       (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo"))) => truthy
         tyomaasta-vastaava-Vastuuhenkilo (-> tyomaasta-vastaava-henkilo :Vastuuhenkilo) => truthy
         tyomaasta-vastaava-Vastuuhenkilo-osoite (-> tyomaasta-vastaava-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
@@ -135,7 +138,8 @@
         hakija-Vastuuhenkilo-osoite (-> hakija-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota yksityisella hakijalla ("henkilo"-tyyppinen hakija)
-        hakija-yksityinen (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "hakija")
+        hakija-yksityinen (tools/unwrapped
+                            (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "hakija"))
         hakija-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
         hakija-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         hakija-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
@@ -148,10 +152,11 @@
         sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
-        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
-                                        (assoc-in (:data hankkeen-kuvaus)
-                                          [:sijoituksen-tarkoitus :value]
-                                          "liikennevalo")) => truthy]
+        sijoituksen-tark-liikennevalo (tools/unwrapped
+                                        (get-sijoituksen-tarkoitus
+                                          (assoc-in (:data hankkeen-kuvaus)
+                                            [:sijoituksen-tarkoitus :value]
+                                            "liikennevalo"))) => truthy]
 
 ;      (println "\n canonical: ")
 ;      (clojure.pprint/pprint canonical)
@@ -277,6 +282,6 @@
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
-      (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :sijoituksen-tarkoitus :value))
+      (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :muu-sijoituksen-tarkoitus :value))
       (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
       (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))
