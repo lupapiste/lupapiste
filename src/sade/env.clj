@@ -52,12 +52,12 @@
 
 (defn- read-all-configs []
   (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
-    (reduce merge (map (partial read-config password)
-                    [(io/resource "lupapiste.properties")
-                     (io/resource (str (s/lower-case target-env) ".properties"))
-                     (io/file "lupapiste.properties")
-                     (io/file (System/getProperty "lupapiste.properties"))
-                     (io/file (System/getenv "LUPAPISTE_PROPERTIES"))]))))
+    (reduce deep-merge (map (partial read-config password)
+                         [(io/resource "lupapiste.properties")
+                          (io/resource (str (s/lower-case target-env) ".properties"))
+                          (io/file "lupapiste.properties")
+                          (io/file (System/getProperty "lupapiste.properties"))
+                          (io/file (System/getenv "LUPAPISTE_PROPERTIES"))]))))
 
 (def ^:private config (atom (read-all-configs)))
 
