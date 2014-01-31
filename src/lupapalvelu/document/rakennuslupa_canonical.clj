@@ -253,13 +253,11 @@
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
                             (= operation-name "suunnittelijan-nimeaminen")
                             (= operation-name "jatkoaika"))
-                    (-> canonical
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
-                        (get-bulding-places (:rakennuspaikka documents) application))
-                      (assoc-in-no-nil [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
-                        toimenpiteet)
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-                        (get-statements (:statements application))))
+                    (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                      assoc-when
+                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
+                      :toimenpidetieto toimenpiteet
+                      :lausuntotieto (get-statements (:statements application)))
                     canonical)]
     canonical))
 
