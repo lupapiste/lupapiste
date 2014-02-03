@@ -383,10 +383,8 @@
 (defn- validate-link-permits [application]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         linkPermits (-> application :linkPermitData count)]
-    (if (and (= :ya-jatkoaika (-> application :operations first :name keyword)) (not= 1 linkPermits))
-      (fail :error.jatkolupa-must-have-exactly-one-link-permit)
-      (when (and (is-link-permit-required application) (= 0 linkPermits))
-        (fail :error.permit-must-have-link-permit)))))
+    (when (and (is-link-permit-required application) (= 0 linkPermits))
+      (fail :error.permit-must-have-link-permit))))
 
 
 (defcommand approve-application
@@ -412,7 +410,7 @@
                              :submitted (or (:submitted application) created)}})
   (try
     (mongo/insert :submitted-applications
-                  (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
+      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
     (catch com.mongodb.MongoException$DuplicateKey e
       ; This is ok. Only the first submit is saved.
       )))
