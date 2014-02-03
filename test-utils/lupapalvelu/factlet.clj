@@ -39,8 +39,15 @@
         x))
     form))
 
-(defmacro fact* [& form]
-  `(fact (do ~@(checkables-to-facts-in-lets form))))
+(defmacro fact* [& forms]
+  (with-meta `(fact (do ~@(checkables-to-facts-in-lets forms))) (meta &form)))
 
 (defmacro facts* [& forms]
   (with-meta `(fact* ~@forms) (meta &form)))
+
+;(facts* (let [a :b => :c
+;             b a => :d
+;             _ b => :d] 
+;         b => :c)
+; (= 5 5)
+; :e => :f)
