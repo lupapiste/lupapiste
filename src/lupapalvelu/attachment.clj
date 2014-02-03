@@ -160,16 +160,22 @@
   [now applicationState attachement-types]
   (map (partial make-attachment now nil false applicationState nil) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target locked applicationState & [attachment-id]]
-  (let [attachment (make-attachment now target locked applicationState nil attachement-type attachment-id)]
+(defn create-attachment [application attachement-type now target locked & [attachment-id]]
+  {:pre [application]}
+  (let [application-id (:id application)
+        applicationState (:state application)
+        attachment (make-attachment now target locked applicationState nil attachement-type attachment-id)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
        $push {:attachments attachment}})
     (:id attachment)))
 
-(defn create-attachments [application-id attachement-types now applicationState]
-  (let [attachments (make-attachments now applicationState attachement-types)]
+(defn create-attachments [application attachement-types now]
+  {:pre [application]}
+  (let [application-id (:id application)
+        applicationState (:state application)
+        attachments (make-attachments now applicationState attachement-types)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -263,11 +269,13 @@
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application-id attachment-id attachment-type file-id filename content-type size comment-text created user target locked applicationState]}]
-  (let [attachment-id (cond
-                        (ss/blank? attachment-id) (create-attachment application-id attachment-type created target locked applicationState)
+  [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked]}]
+  {:pre [application]}
+  (let [application-id (:id application)
+        attachment-id (cond
+                        (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
-                        :else (create-attachment application-id attachment-type created target locked applicationState attachment-id))]
+                        :else (create-attachment application attachment-type created target locked attachment-id))]
     (set-attachment-version application-id attachment-id file-id filename content-type size comment-text created user false)))
 
 (defn parse-attachment-type [attachment-type]
@@ -374,8 +382,9 @@
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
+  {:pre [(:application options)]}
   (let [file-id (mongo/create-id)
-        application-id (:application-id options)
+        application-id (-> options :application :id)
         filename (:filename options)
         content (:content options)
         user (:user options)

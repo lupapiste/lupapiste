@@ -24,7 +24,6 @@
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
-
 ;; Validators
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
@@ -36,6 +35,17 @@
           (not= (:role user) "authority")
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
+
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
+  (or (not attachmentId) 
+      (let [attachment (get-attachment-info application attachmentId)
+            attachmentApplicationState (keyword (:applicationState attachment))
+            currentState (keyword (:state application))]
+        (or (not (post-verdict-states currentState))
+            (post-verdict-states attachmentApplicationState)
+            (= (keyword userRole) :authority)))))
 
 ;;
 ;; KRYSP
@@ -145,9 +155,9 @@
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
-  [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (create-attachments application-id attachment-types created)]
-    (ok :applicationId application-id :attachmentIds attachment-ids)
+  [{application :application {attachment-types :attachmentTypes} :data created :created}]
+  (if-let [attachment-ids (create-attachments application attachment-types created)]
+    (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
 ;;
@@ -242,17 +252,6 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
-
-(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
-  (or (not attachmentId) 
-      (let [attachment (get-attachment-info application attachmentId)
-            attachmentApplicationState (keyword (:applicationState attachment))
-            currentState (keyword (:state application))]
-        (or (not (post-verdict-states currentState))
-            (post-verdict-states attachmentApplicationState)
-            (= (keyword userRole) :authority)))))
-
 (defraw "download-all-attachments"
   {:parameters [:id]
    :extra-auth-roles [:statementGiver]}
@@ -296,7 +295,7 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
   
-  (when-not (attach-file! {:application-id id
+  (when-not (attach-file! {:application application
                            :filename filename
                            :size size
                            :content tempfile
@@ -305,7 +304,6 @@
                            :comment-text text
                            :target target
                            :locked locked
-                           :applicationState (:state application)
                            :user user
                            :created created})
     (fail :error.unknown)))

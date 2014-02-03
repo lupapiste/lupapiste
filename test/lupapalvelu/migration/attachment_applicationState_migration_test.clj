@@ -5,7 +5,7 @@
 
 (testable-privates lupapalvelu.migration.migrations attachments-with-applicationState)
 
-(defn- get-first-applicationState [application] 
+(defn- get-applicationState [application] 
   (-> application attachments-with-applicationState first :applicationState))
 
 (defn- get-applicationStates [application] 
