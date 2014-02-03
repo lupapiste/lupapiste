@@ -37,7 +37,7 @@
   {:roles [:admin :authorityAdmin]}
   [{{:keys [role organizations]} :user data :data}]
   (ok :users (map user/non-private (-> data
-                                     (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled])
+                                     (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
                                      (as-> data (if (= role :authorityAdmin)
                                                   (assoc data :organizations {$in [organizations]})
                                                   data))
@@ -114,7 +114,7 @@
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization])
+                    :phone :city :street :zip :enabled :organization :allowDirectMarketing])
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
@@ -214,7 +214,7 @@
 
 (def ^:private user-data-editable-fields [:firstName :lastName :street :city :zip :phone
                                           :architect :degree :graduatingYear :fise
-                                          :companyName :companyId])
+                                          :companyName :companyId :allowDirectMarketing])
 
 (defn- validate-update-user! [caller user-data]
   (let [admin?          (= (-> caller :role keyword) :admin)

@@ -121,18 +121,18 @@
                               :yritysnimi "Testiyritys 11477"}})))))
 
 (fact "converting verdict krysp to lupapiste domain model"
-  (let [xml (application-xml local-krysp id)]
+  (let [xml (application-xml local-krysp id false)]
     xml => truthy
     (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-krysp id)]
+  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-krysp id false)]
     xml => truthy
     (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
-  (let [xml (ya-application-xml local-krysp id)]
+  (let [xml (ya-application-xml local-krysp id false)]
     xml => truthy
     (count (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)) => 1))
 

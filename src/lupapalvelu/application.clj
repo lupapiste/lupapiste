@@ -613,7 +613,7 @@
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id (:id created-application))))
 
-(defn- add-operation-allowed? [x application]
+(defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
         permitSubType (keyword (:permitSubtype application))]
     (when-not (and (:add-operation-allowed (op operations/operations))
@@ -625,7 +625,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
-   :pre-checks [(permit/validate-permit-type-is permit/R) add-operation-allowed?]}
+   :pre-checks [add-operation-allowed?]}
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
@@ -871,8 +871,11 @@
                           (when (= "verdictGiven" (:state application))
                             {:started created
                              :state  :constructionStarted}))}
-        output-dir (mapping-to-krysp/resolve-output-directory application)]
-    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user)
+        permit-type (permit/permit-type application)
+        organization (organization/get-organization (:organization application))
+        krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
+        output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)]
+    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
     (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
       (notifications/notify! :application-state-change command)))
@@ -998,10 +1001,13 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defn- get-application-xml [{:keys [id permitType] :as application}]
+(defn get-application-xml [{:keys [id permitType] :as application} & [raw?]]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [fetch (permit/get-application-xml-getter permitType)]
-      (fetch url id))
+    (if-let [fetch (permit/get-application-xml-getter permitType)]
+      (fetch url id raw?)
+      (do
+        (error "No fetch function for" permitType (:organization application))
+        (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
 
 (defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
