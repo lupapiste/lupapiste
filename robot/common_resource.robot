@@ -1,4 +1,4 @@
-c*** Settings ***
+*** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
@@ -418,6 +418,12 @@ Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+
+Input comment and open to authorities
+  [Arguments]  ${section}  ${message}
+  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-open-application-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Input comment and mark answered

@@ -48,6 +48,9 @@ Mikko deletes attachment
 Mikko adds txt attachment with comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}
+
+Mikko opens application to authorities
+  Open to authorities  pliip
   Wait Until  Application state should be  open
 
 Mikko see that attachment is for authority
@@ -139,6 +142,7 @@ Add attachment
 
 Open attachment details
   [Arguments]  ${type}
+  Open tab  attachments
   Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
