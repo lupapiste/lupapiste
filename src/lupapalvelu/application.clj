@@ -804,9 +804,9 @@
         ;; ************
         ;;
         tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
-
-        tyo-aika-for-jatkoaika-doc (domain/get-document-by-name continuation-app "tyo-aika-for-jatkoaika")
-        tyo-aika-for-jatkoaika-doc (assoc-in tyo-aika-for-jatkoaika-doc [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm)
+        tyo-aika-for-jatkoaika-doc (-> continuation-app
+                                     (domain/get-document-by-name "tyo-aika-for-jatkoaika")
+                                     (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))
 
         continuation-app (assoc continuation-app
                            :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
