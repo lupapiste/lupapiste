@@ -73,8 +73,8 @@
         application
         "fi"
         "target"
-        "123"
-        "Pohjakatselmus 1"
+        "123" ; task id
+        "Pohjakatselmus 1" ; task name
         "2.5.1974"
         [{:tila {:tila "osittainen" :kayttoonottava true}
          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]

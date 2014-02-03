@@ -296,7 +296,7 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0)))))
 
-(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type]
+(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
@@ -307,7 +307,7 @@
                        :multipart (filter identity
                                     [{:name "applicationId"  :content application-id}
                                      {:name "Content/type"   :content "text/plain"}
-                                     {:name "attachmentType" :content "muut.muu"}
+                                     {:name "attachmentType" :content (or attachment-type "muut.muu")}
                                      (when attachment-id {:name "attachmentId"   :content attachment-id})
                                      {:name "upload"         :content uploadfile}
                                      {:name "targetId"       :content target-id}
@@ -317,10 +317,9 @@
       (facts "Statement upload succesfully"
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
-      ;(facts "Statement upload should fail"
-      ;  (fact "Status code" (:status resp) => 302)
-      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0))
-      )))
+      (facts "Statement upload should fail"
+        (fact "Status code" (:status resp) => 302)
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
