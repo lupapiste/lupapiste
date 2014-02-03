@@ -35,7 +35,7 @@
   (prewalk
     (fn [x]
       (if (let? x)
-        `(let ~(checkables-to-facts-in-let-bindings (with-meta (second x) {:line (-> x meta :line)})) ~@(nnext x))
+        `(let ~(checkables-to-facts-in-let-bindings (with-meta (second x) (meta x))) ~@(nnext x))
         x))
     form))
 
