@@ -87,17 +87,19 @@
     (cr/get-xml url)))
 
 (defn application-xml
-  ([server id]
-    (application-xml case-type asian-lp-lupatunnus server id))
-  ([ct tunnus-path server id ]
-    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))]
+  ([server id raw?]
+    (application-xml case-type asian-lp-lupatunnus server id raw?))
+  ([ct tunnus-path server id raw?]
+    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))
+          credentials nil]
       (debug "Get application: " url)
-      (cr/get-xml url))))
+      (cr/get-xml url credentials raw?))))
 
-(defn ya-application-xml [server id]
-  (let [options (post-body-for-ya-application id)]
+(defn ya-application-xml [server id raw?]
+  (let [options (post-body-for-ya-application id)
+        credentials nil]
     (debug "Get application: " server " with post body: " options )
-    (cr/get-xml-with-post server options)))
+    (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R  :xml-from-krysp application-xml)
 (permit/register-function permit/P  :xml-from-krysp (partial application-xml poik-case-type poik-lp-lupatunnus))

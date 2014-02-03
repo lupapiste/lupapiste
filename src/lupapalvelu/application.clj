@@ -988,10 +988,13 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defn- get-application-xml [{:keys [id permitType] :as application}]
+(defn get-application-xml [{:keys [id permitType] :as application} & [raw?]]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [fetch (permit/get-application-xml-getter permitType)]
-      (fetch url id))
+    (if-let [fetch (permit/get-application-xml-getter permitType)]
+      (fetch url id raw?)
+      (do
+        (error "No fetch function for" permitType (:organization application))
+        (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
 
 (defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
