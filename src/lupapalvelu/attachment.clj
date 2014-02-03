@@ -71,6 +71,7 @@
                                      :jatevesijarjestelman_rakennustapaseloste
                                      :julkisivujen_varityssuunnitelma
                                      :kalliorakentamistekninen_suunnitelma
+                                     :katselmuksen_tai_tarkastuksen_poytakirja
                                      :kerrosalaselvitys
                                      :liikkumis_ja_esteettomyysselvitys
                                      :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta
