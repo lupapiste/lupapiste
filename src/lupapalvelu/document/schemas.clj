@@ -665,6 +665,6 @@
 
     {:info {:name "lisatiedot"
             :order 100}
-     :body [{:name "suoramarkkinointikielto"
+     :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
              :type :checkbox
              :layout :full-width}]}])

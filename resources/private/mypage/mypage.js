@@ -36,6 +36,7 @@
     self.fise = ko.observable();
     self.companyName = ko.observable();
     self.companyId = ko.observable();
+    self.allowDirectMarketing = ko.observable();
     self.attachments = ko.observable();
     self.hasAttachments = ko.computed(function() {
       var a = self.attachments();
@@ -60,6 +61,7 @@
         .fise(u.fise)
         .companyName(u.companyName)
         .companyId(u.companyId)
+        .allowDirectMarketing(u.allowDirectMarketing)
         .updateAttachments();
     };
 
@@ -85,7 +87,8 @@
          "street", "city", "zip", "phone",
          "architect",
          "degree", "graduatingYear", "fise", 
-         "companyName", "companyId"]);
+         "companyName", "companyId",
+         "allowDirectMarketing"]);
 
     self.updateUserName = function() {
       $("#user-name")

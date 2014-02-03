@@ -294,11 +294,6 @@
     (assoc-in hankkeen-kuvaus-minimum [:data :poikkeamat] {:value "Ei poikkeamisia"})
     (assoc-in [:schema-info :name] "hankkeen-kuvaus")))
 
-
-(def ^:private lisatieto {:id "lisatiedot" :schema-info {:name "lisatiedot"
-                                                         :version 1}
-                          :data {:suoramarkkinointikielto {:value true}}})
-
 (def ^:private link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
 (def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00002" :type "lupapistetunnus"})
 (def ^:private app-linking-to-us {:id "LP-753-2013-00008"})
@@ -322,7 +317,7 @@
    aidan-rakentaminen
    puun-kaataminen
    purku
-   lisatieto])
+   ])
 
 (fact "Meta test: hakija-henkilo"   hakija-henkilo   => valid-against-current-schema?)
 (fact "Meta test: hakija-yritys"    hakija-yritys    => valid-against-current-schema?)
@@ -334,7 +329,6 @@
 (fact "Meta test: tyonjohtaja"      tyonjohtaja      => valid-against-current-schema?)
 (fact "Meta test: rakennuspaikka"   rakennuspaikka   => valid-against-current-schema?)
 (fact "Meta test: uusi-rakennus"    uusi-rakennus    => valid-against-current-schema?)
-(fact "Meta test: lisatieto"        lisatieto        => valid-against-current-schema?)
 (fact "Meta test: hankkeen-kuvaus"  hankkeen-kuvaus  => valid-against-current-schema?)
 (fact "Meta test: hankkeen-kuvaus-minimum"  hankkeen-kuvaus-minimum  => valid-against-current-schema?)
 
@@ -720,7 +714,7 @@
     (fact "rakennuksen omistajalaji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
     (fact "KuntaRooliKoodi" (:kuntaRooliKoodi rakennuksen-omistajatieto) => "Rakennuksen omistaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
-    (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
+    (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => nil?)
     (fact "vakuus" (:vakuus Lisatiedot) => nil)
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")

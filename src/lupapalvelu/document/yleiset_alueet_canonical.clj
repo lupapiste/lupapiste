@@ -240,20 +240,26 @@
         hakija (get-yritys-and-henkilo (-> documents-by-type :hakija-ya first :data) "hakija")
         tyoaika-doc (when (:tyoaika config)
                       (-> documents-by-type :tyoaika first :data))
-        mainostus-viitoitus-tapahtuma-doc (or
-                                            (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
-                                            {})
-        mainostus-viitoitus-tapahtuma-name (-> mainostus-viitoitus-tapahtuma-doc :_selected)
-        mainostus-viitoitus-tapahtuma (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name))
+
+        main-viit-tapahtuma-doc (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
+        ;; If user has manually selected the mainostus/viitoitus type, the _selected key exists.
+        ;; Otherwise the type is the first key in the map.
+        main-viit-tapahtuma-name (when main-viit-tapahtuma-doc
+                                   (or
+                                     (-> main-viit-tapahtuma-doc :_selected)
+                                     (-> main-viit-tapahtuma-doc first key)))
+        main-viit-tapahtuma (when main-viit-tapahtuma-doc
+                             (main-viit-tapahtuma-doc (keyword main-viit-tapahtuma-name)))
+
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                     (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-alkaa-pvm))
+                     (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm))
                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm))))
         loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
                     (to-xml-date (:modified application))
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                      (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm))
+                      (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
         maksaja (if (:dummy-maksaja config)
                   (merge (:Osapuoli hakija) {:laskuviite "0000000000"})
@@ -297,7 +303,7 @@
                                                 [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                                  {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])))
                                           (when (:mainostus-viitoitus-lisatiedot config)
-                                            (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
+                                            (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
 
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
                                  (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
@@ -325,8 +331,8 @@
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
-                                (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
-                                  {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
+                                (when (= "mainostus-tapahtuma-valinta" main-viit-tapahtuma-name)
+                                  {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
     (cr/strip-nils body)))

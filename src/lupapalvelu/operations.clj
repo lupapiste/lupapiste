@@ -131,9 +131,9 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija" "tyonjohtaja"])
+(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "tyonjohtaja"])
 
-(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka" "lisatiedot"])
+(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
 
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
