@@ -167,7 +167,7 @@
 
           (facts "random testing about content"
             (:comments application) => nil
-            (count (:documents application)) => 5 ; evil
+            (count (:documents application)) => 4 ; evil
 
             (fact "attachments"
               (fact "there are some attachments"

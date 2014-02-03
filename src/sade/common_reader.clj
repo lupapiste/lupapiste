@@ -4,7 +4,7 @@
             [clj-time.format :as timeformat]
             [sade.http :as http]
             [sade.env :as env]
-            [sade.util :refer [prewalk-map postwalk-map]]
+            [sade.util :refer [prewalk-map postwalk-map boolean?]]
             [sade.xml :refer :all]
             [sade.strings :as ss]))
 
@@ -123,23 +123,30 @@
 
 (defn get-xml
   ([url]
-    (get-xml url nil))
-  ([url credentials]
+    (get-xml url nil false))
+  ([url credentials raw?]
+    {:pre [url
+           (or (nil? credentials) (= (count credentials) 2))
+           (or (nil? raw?) (boolean? raw?))]}
     (let [raw (:body (if credentials
                        (http/get url :basic-auth credentials)
                        (http/get url)))
           xml (parse raw)]
-      xml)))
+      (if raw? raw xml))))
 
 (defn get-xml-with-post
   ([url options]
-    (get-xml-with-post url options nil))
-  ([url options credentials]
+    (get-xml-with-post url options nil false))
+  ([url options credentials raw?]
+    {:pre [url
+           (or (nil? options) (map? options))
+           (or (nil? credentials) (= (count credentials) 2))
+           (or (nil? raw?) (boolean? raw?))]}
     (let [raw (:body (if credentials
                        (http/post url (assoc options :basic-auth credentials))
                        (http/post url options)))
           xml (parse raw)]
-      xml)))
+      (if raw? raw xml))))
 
 
 (defn get-boolean [xml & selector] (to-boolean (apply get-text xml selector)))

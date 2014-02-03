@@ -142,13 +142,6 @@
                                            :version 1
                                            :order 2}})
 
-(def ^:private lisatieto {:id "523844e1da063788effc1c5c"
-                :schema-info {:name "lisatiedot"
-                              :version 1
-                              :order 100}
-                :created 1379419361123
-                :data {:suoramarkkinointikielto {:value true}}})
-
 (def ^:private paasuunnittelija {:created 1379419361123
                                  :data {:henkilotiedot {:etunimi {:value "Pena"}
                                  :sukunimi {:value "Panaani"}
@@ -227,7 +220,6 @@
                 hanke
                 maksaja
                 rakennuspaikka
-                lisatieto
                 paasuunnittelija
                 suunnittelija
                 lisaosa])
@@ -237,7 +229,6 @@
                 hanke
                 maksaja
                 rakennuspaikka
-                lisatieto
                 paasuunnittelija
                 suunnittelija
                 lisaosa])
@@ -246,7 +237,6 @@
 (fact "Meta test: uusi"            uusi             => valid-against-current-schema?)
 (fact "Meta test: maksaja"         maksaja          => valid-against-current-schema?)
 (fact "Meta test: rakennusapikka"  rakennuspaikka   => valid-against-current-schema?)
-(fact "Meta test: lisatieto"       lisatieto        => valid-against-current-schema?)
 (fact "Meta test: paasunnitelija"  paasuunnittelija => valid-against-current-schema?)
 (fact "Meta test: suunnittelija"   suunnittelija    => valid-against-current-schema?)
 (fact "Meta test: lisaosa"         lisaosa          => valid-against-current-schema?)
@@ -519,7 +509,7 @@
         lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
         asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
-        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
@@ -714,7 +704,7 @@
         lisatietotieto (:lisatietotieto Suunnittelutarveasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
         asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
-        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => true
+        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
         kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
