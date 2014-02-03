@@ -200,7 +200,7 @@
     :phone "0102030405"
     :email "tampere-ya"
     :role "authorityAdmin"
-    :zip "010203"
+    :zip "10203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}} ;; tampere
    ;; Kuopio ya paakayttaja
@@ -215,7 +215,7 @@
     :phone "0102030405"
     :email "kuopio-ya"
     :role "authorityAdmin"
-    :zip "010203"
+    :zip "10203"
     :organizations ["297-YA"]
     :private {:password "$2a$10$YRYlyCbgAAD9XS8O8KJPaux1Yh7b/McBr7d8Ih8EXG/xaNNdJ/atW" }}
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
@@ -269,7 +269,7 @@
     :lastName "Panaani"
     :email "pena@example.com"
     :street "Paapankuja 12"
-    :zip "010203"
+    :zip "10203"
     :city "Piippola"
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
