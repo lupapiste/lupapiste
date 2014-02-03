@@ -7,7 +7,8 @@
 (def ^:private local-krysp "http://localhost:8000/dev/krysp")
 
 (def users
-  [{:id "777777777777777777000099" ;; admin
+  ;; Solita admin:  admin / admin
+  [{:id "777777777777777777000099"
     :email "admin@solita.fi"
     :enabled true
     :role :admin
@@ -18,8 +19,7 @@
     :username "admin"
     :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
               :apikey "5087ba34c2e667024fbd5992"}}
-   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
-   ;; veikko / veikko
+   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
@@ -29,10 +29,9 @@
     :lastName "Viranomainen"
     :phone "03121991"
     :username "veikko"
-    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG" ;; veikko
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
               :apikey "5051ba0caa2480f374dcfeff"}}
-   ;; Jussi Viranomainen - tamperelainen YA-lupa-arkkitehti
-   ;; jussi / jussi
+   ;; Jussi Viranomainen - tamperelainen YA-lupa-arkkitehti:  jussi / jussi
    {:id "777777777777777777000017"
     :email "jussi.viranomainen@tampere.fi"
     :enabled true
@@ -45,7 +44,7 @@
     :street "Katuosoite 1 a 1"
     :zip "33456"
     :city "Tampere"
-    :private {:password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
+    :private {:password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq"
               :apikey "5051ba0caa2480f374dcfefg"}}
    {:id "77777777777777777700669"
     :email "sakari.viranomainen@kuopio.fi"
@@ -62,8 +61,7 @@
     :private {:password "$2a$10$VnwROer5dhRJCQxoZusOney/hyN7Vk4ILQMSVqT8iZMO4XiQz.8Cm" ;; sakari
               }}
 
-   ;; Sonja Sibbo - Sipoon lupa-arkkitehti
-   ;; sonja / sonja
+   ;; Sonja Sibbo - Sipoon lupa-arkkitehti:  sonja / sonja
    {:id "777777777777777777000023"
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
@@ -78,8 +76,7 @@
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9d1"}}
-   ;; Ronja Sibbo - Sipoon lupa-arkkitehti
-   ;; ronja / sonja
+   ;; Ronja Sibbo - Sipoon lupa-arkkitehti:  ronja / sonja
    {:id "777777777777777777000024"
     :email "ronja.sibbo@sipoo.fi"
     :enabled true
@@ -117,17 +114,17 @@
     :username "olli"
     :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
               :apikey "7634919923210010829057754770828315568705"}}
-    ;; sipoo / sipoo
-   {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
-    :email "admin@sipoo.fi"
-    :enabled true
-    :role :authorityAdmin
-    :organizations ["753-R"]
-    :firstName "Simo"
-    :lastName "Suurvisiiri"
-    :username "sipoo"
-    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
-              :apikey "50ac788ec2e6c2ea6e73f83f"}}
+  ;; Simo Sippo:  sipoo / sipoo
+  {:id "50ac77ecc2e6c2ea6e73f83e"
+   :email "admin@sipoo.fi"
+   :enabled true
+   :role :authorityAdmin
+   :organizations ["753-R"]
+   :firstName "Simo"
+   :lastName "Suurvisiiri"
+   :username "sipoo"
+   :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
+             :apikey "50ac788ec2e6c2ea6e73f83f"}}
    {:id "50ac77ecd2e6c2ea6e73f83f" ;; naantali
     :email "admin@naantali.fi"
     :enabled true
@@ -188,8 +185,7 @@
     :username "lupasihteeri@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
-   ;; Tampere YA paakayttaja
-   ;; tampere-ya / tampere
+   ;; Tampere YA paakayttaja:  tampere-ya / tampere
    {:id "837-YA"
     :enabled true
     :lastName "Tampere"
@@ -203,8 +199,7 @@
     :zip "010203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}} ;; tampere
-   ;; Kuopio ya paakayttaja
-   ;; kuopio-ya / kuopio-ya
+   ;; Kuopio ya paakayttaja:  kuopio-ya / kuopio
    {:id "297-YA"
     :enabled true
     :lastName "Kuopio"
@@ -217,15 +212,17 @@
     :role "authorityAdmin"
     :zip "010203"
     :organizations ["297-YA"]
-    :private {:password "$2a$10$YRYlyCbgAAD9XS8O8KJPaux1Yh7b/McBr7d8Ih8EXG/xaNNdJ/atW" }}
-   {:id "505718b0aa24a1c901e6ba24" ;; Admin
+    :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
+   ;; Admin
+   {:id "505718b0aa24a1c901e6ba24"
     :enabled true
     :firstName "Judge"
     :lastName "Dread"
     :email "judge.dread@example.com"
     :role :admin
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
-   {:lastName "Nieminen" ;; Mikkos neighbour
+   ;; Mikko's neighbour
+   {:lastName "Nieminen"
     :firstName "Teppo"
     :enabled true
     :postalCode "33200"
@@ -240,7 +237,8 @@
     :street "Mutakatu 7"
     :zip "33560"
     :city "Tampere"}
-   {:id "777777777777777777000010" ;; Mikko Intonen
+   ;; Mikko Intonen
+   {:id "777777777777777777000010"
     :username "mikko@example.com"
     :enabled true
     :role "applicant"
@@ -260,7 +258,8 @@
     :fise "f"
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
               :apikey "502cb9e58426c613c8b85abc"}}
-   {:id "777777777777777777000020" ;; pena
+   ;; Hakija: pena / pena
+   {:id "777777777777777777000020"
     :username "pena"
     :enabled true
     :role "applicant"
@@ -274,30 +273,33 @@
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "502cb9e58426c613c8b85abd"}}
+   ;; Dummy 1: pena / pena
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
     :username  "dummy"
     :firstName "Duff"
     :lastName "Dummy"
     :email  "dummy@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
     :role  "applicant"}
+   ;; Dummy 2: pena / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :username  "dummy2"
     :firstName "Duff"
     :lastName "Dummy2"
     :email  "dummy2@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"} ; pena
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role  "applicant"}
+   ;; Dummy 3: pena / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :username  "dummy3"
     :firstName "Duff"
     :lastName "Dummy3"
     :email  "dummy3@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"} ; pena
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role  "applicant"}
    ])
 

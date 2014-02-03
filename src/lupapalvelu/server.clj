@@ -18,6 +18,7 @@
             [lupapalvelu.attachment-api]
             [lupapalvelu.statement-api]
             [lupapalvelu.tasks-api]
+            [lupapalvelu.admin]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
