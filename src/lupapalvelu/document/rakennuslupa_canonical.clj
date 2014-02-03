@@ -300,7 +300,7 @@
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                        :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
                        :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi
+                       :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi ; TODO alkup. nimi
                        :osittainen osittainen
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
@@ -308,11 +308,11 @@
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (select-keys (:rakennus (first buildings)) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
-                         :katselmuksenRakennustieto {:KatselmuksenRakennus (map #(merge
-                                                                                   (select-keys (:rakennus %) [:jarjestysnumero :kiinttun :rakennusnro])
-                                                                                   {:katselmusOsittainen (get-in % [:tila :tila])
-                                                                                    :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])
-                                                                                    }) buildings)}}) ; v2.1.3
+                         :katselmuksenRakennustieto (map #(let [building-canonical (merge
+                                                                                     (select-keys (:rakennus %) [:jarjestysnumero :kiinttun :rakennusnro])
+                                                                                     {:katselmusOsittainen (get-in % [:tila :tila])
+                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})]
+                                                            {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when huomautukset {:huomautukset {:huomautus {:kuvaus huomautukset}}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)

@@ -913,7 +913,7 @@
 
              (fact "KRYSP 2.1.3 data is present"
                (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
-               (let [rakennukset (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus])]
+               (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
                  (fact "has 2 buildings" (count rakennukset) => 2)
                  (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
                  (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
@@ -1135,7 +1135,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
                                  :sukunimi {:modified 1388660303335, :value "Panaani"}},
                                 :osoite
                                 {:katu {:modified 1388660303335, :value "Paapankuja 12"},
-                                 :postinumero {:modified 1388660303335, :value "010203"},
+                                 :postinumero {:modified 1388660303335, :value "10203"},
                                  :postitoimipaikannimi
                                  {:modified 1388660303335, :value "Piippola"}},
                                 :userId
