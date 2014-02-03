@@ -223,37 +223,37 @@
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
 (defn- get-simple-osoite [osoite]
-  (when (-> osoite :katu :value)  ;; required field in krysp (i.e. "osoitenimi")
-    {:osoitenimi {:teksti (-> osoite :katu :value)}
-     :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)
-     :postinumero (-> osoite :postinumero :value)}))
+  (when (-> osoite :katu)  ;; required field in krysp (i.e. "osoitenimi")
+    {:osoitenimi {:teksti (-> osoite :katu)}
+     :postitoimipaikannimi (-> osoite :postitoimipaikannimi)
+     :postinumero (-> osoite :postinumero)}))
 
 (defn- get-name [henkilotiedot]
-  {:nimi {:etunimi (-> henkilotiedot :etunimi :value)
-          :sukunimi (-> henkilotiedot :sukunimi :value)}})
+  {:nimi {:etunimi (-> henkilotiedot :etunimi)
+          :sukunimi (-> henkilotiedot :sukunimi)}})
 
 (defn- get-yhteystiedot-data [yhteystiedot]
-  {:sahkopostiosoite (-> yhteystiedot :email :value)
-   :puhelin (-> yhteystiedot :puhelin :value)})
+  {:sahkopostiosoite (-> yhteystiedot :email)
+   :puhelin (-> yhteystiedot :puhelin)})
 
 (defn- get-simple-yritys [yritys]
-  {:nimi (-> yritys :yritysnimi :value)
-   :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus :value)})
+  {:nimi (-> yritys :yritysnimi)
+   :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus)})
 
 (defn- get-yritys-data [yritys]
   (let [yhteystiedot (get-in yritys [:yhteyshenkilo :yhteystiedot])]
     (merge (get-simple-yritys yritys)
            {:postiosoite (get-simple-osoite (:osoite yritys))
-            :puhelin (-> yhteystiedot :puhelin :value)
-            :sahkopostiosoite (-> yhteystiedot :email :value)})))
+            :puhelin (-> yhteystiedot :puhelin)
+            :sahkopostiosoite (-> yhteystiedot :email)})))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)
-    (let [code (or (get-in party [:kuntaRoolikoodi :value])
+    (let [code (or (get-in party [:kuntaRoolikoodi])
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
-                   (get-in party [:patevyys :kuntaRoolikoodi :value])
+                   (get-in party [:patevyys :kuntaRoolikoodi])
                    default-role)]
       (if (s/blank? code) default-role code))))
 
@@ -263,24 +263,25 @@
    :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
 
 (defn get-osapuoli-data [osapuoli party-type]
-  (let [yritys-type-osapuoli? (= (-> osapuoli :_selected :value) "yritys")
+  (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
+        yritys-type-osapuoli? (= "yritys" selected-value)
         henkilo        (if yritys-type-osapuoli?
                          (get-in osapuoli [:yritys :yhteyshenkilo])
                          (:henkilo osapuoli))]
-    (when (-> henkilo :henkilotiedot :sukunimi :value)
+    (when (-> henkilo :henkilotiedot :sukunimi)
       (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
             omistajalaji   (muu-select-map
-                             :muu (-> osapuoli :muu-omistajalaji :value)
-                             :omistajalaji (-> osapuoli :omistajalaji :value))]
+                             :muu (-> osapuoli :muu-omistajalaji)
+                             :omistajalaji (-> osapuoli :omistajalaji))]
         (merge
           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
            :kuntaRooliKoodi kuntaRoolicode
-           :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin :value))
+           :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
            :henkilo (merge
                       (get-name (:henkilotiedot henkilo))
                       (get-yhteystiedot-data (:yhteystiedot henkilo))
                       (when-not yritys-type-osapuoli?
-                        {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu :value)
+                        {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu)
                          :osoite (get-simple-osoite (:osoite henkilo))}))}
           (when yritys-type-osapuoli?
             {:yritys  (get-yritys-data (:yritys osapuoli))})
@@ -299,7 +300,7 @@
       (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
-  (when (-> suunnittelija :henkilotiedot :sukunimi :value)
+  (when (-> suunnittelija :henkilotiedot :sukunimi)
     (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
           codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                  :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
@@ -307,16 +308,16 @@
           osoite (get-simple-osoite (:osoite suunnittelija))
           henkilo (merge (get-name (:henkilotiedot suunnittelija))
                     {:osoite osoite}
-                    {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu :value)}
+                    {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
-        {:koulutus (-> patevyys :koulutus :value)
-         :patevyysvaatimusluokka (-> patevyys :patevyysluokka :value)
-         :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
-         :kokemusvuodet (-> patevyys :kokemus :value)}
+        {:koulutus (-> patevyys :koulutus)
+         :patevyysvaatimusluokka (-> patevyys :patevyysluokka)
+         :valmistumisvuosi (-> patevyys :valmistumisvuosi)
+         :kokemusvuodet (-> patevyys :kokemus)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
-        (when (-> suunnittelija :yritys :yritysnimi :value s/blank? not)
+        (when (-> suunnittelija :yritys :yritysnimi s/blank? not)
           {:yritys (merge
                      (get-simple-yritys (:yritys suunnittelija))
                      {:postiosoite osoite})})))))
@@ -331,13 +332,13 @@
   (let [joined (clojure.string/join ","
                  (reduce
                    (fn [r [k v]]
-                     (if (true? (:value v))
+                     (if (true? v)
                        (conj r (name k))
                        r))
                    []
                    (-> (dissoc selections :muuMika))))]
-    (if (-> selections :muuMika :value s/blank? not)
-      (str joined "," (-> selections :muuMika :value))
+    (if (-> selections :muuMika s/blank? not)
+      (str joined "," (-> selections :muuMika))
       joined)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
@@ -345,13 +346,13 @@
         patevyys (:patevyys tyonjohtaja)]
     (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
                      :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                     :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka :value)
-                     :valmistumisvuosi (-> patevyys :valmistumisvuosi :value)
-                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm :value))
-                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm :value))
-                     :kokemusvuodet (-> patevyys :kokemusvuodet :value)
-                     :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara :value)
-                     :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin :value)))})))
+                     :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
+                     :valmistumisvuosi (-> patevyys :valmistumisvuosi)
+                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm))
+                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm))
+                     :kokemusvuodet (-> patevyys :kokemusvuodet)
+                     :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
+                     :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))})))
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
@@ -375,15 +376,15 @@
     {:Rakennuspaikka
      {:yksilointitieto id
       :alkuHetki (to-xml-datetime (now))
-      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste :value) "eiKaavaa" "ei kaavaa")
+      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste) "eiKaavaa" "ei kaavaa")
       :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
-                                      {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
-                                       :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
-                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi :value)
+                                      {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
+                                       :hallintaperuste (-> rakennuspaikka :hallintaperuste)
+                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi)
                                                                              :kiinteistotunnus (:propertyId application)
-                                                                             :rantaKytkin (true? (-> kiinteisto :rantaKytkin :value))}
-                                                         (when (-> kiinteisto :maaraalaTunnus :value)
-                                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus :value))}))}}}}}))
+                                                                             :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
+                                                         (when (-> kiinteisto :maaraalaTunnus)
+                                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}))
 
 (defn get-viitelupatieto [link-permit-data]
   (when link-permit-data
