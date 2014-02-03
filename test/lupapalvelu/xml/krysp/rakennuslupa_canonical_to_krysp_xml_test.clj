@@ -74,15 +74,20 @@
         "fi"
         "target"
         "123"
+        "Pohjakatselmus 1"
         "2.5.1974"
-        [{:rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
+        [{:tila {:tila "osittainen" :kayttoonottava true}
+         :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
         user
         "pohjakatselmus" ; katselmuksen-nimi
         :katselmus ;tyyppi
         "pidetty" ;osittainen
         "pitaja" ;pitaja
-        true ;lupaehtona
-        "kuvaus" ;huomautukset
+        false ;lupaehtona
+        {:kuvaus "kuvaus"
+         :maaraAika "3.5.1974"
+         :toteaja "toteaja"
+         :toteamisHetki "1.5.1974"} ;huomautukset
         "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
         "Ei poikkeamisia" ;poikkeamat
         "2.1.2" ;krysp-version
@@ -93,21 +98,21 @@
     (save-katselmus-as-krysp
       application
       {:id "123"
+       :taskname "Pohjakatselmus 1"
        :schema-info {:name "task-katselmus"}
        :data {:katselmuksenLaji {:value "pohjakatselmus"},
-              :vaadittuLupaehtona {:value true} ; missing
-              :rakennus
-              {:0
-               {:rakennus
-                {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
-                :tila {:tila {:value "osittainen"} ; missing
-                       :kayttoonottava {:value true}}}} ; missing
+              :vaadittuLupaehtona {:value false}
+              :rakennus {:0
+                        {:rakennus
+                         {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
+                         :tila {:tila {:value "osittainen"}
+                                :kayttoonottava {:value true}}}}
               :katselmus {:pitoPvm {:value "2.5.1974"}
                           :pitaja {:value "pitaja"}
                           :huomautukset {:kuvaus {:value "kuvaus"}
-                                         :maaraAika {:value "3.5.1974"}; missing
-                                         :toteaja {:value "toteaja"} ; missing
-                                         :toteamisHetki {:value "1.5.1974"}} ; missing
+                                         :maaraAika {:value "3.5.1974"}
+                                         :toteaja {:value "toteaja"}
+                                         :toteamisHetki {:value "1.5.1974"}}
                           :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
                           :poikkeamat {:value "Ei poikkeamisia"}
                           :tila {:value "pidetty"}}}}

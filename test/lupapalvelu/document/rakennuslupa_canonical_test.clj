@@ -861,63 +861,68 @@
                                      :city "Tampere"})
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [canonical (katselmus-canonical
-                             (assoc application-rakennuslupa :state "verdictGiven")
-                             "sv"
-                             "123"
-                             1354532324658
-                             [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
-                              {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
-                             authority-user-jussi
-                             "Aloitusilmoitus" :katselmus nil nil nil nil nil nil)
-                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
-                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
-                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
-                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
-                 tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+  (let [canonical (katselmus-canonical
+                    (assoc application-rakennuslupa :state "verdictGiven")
+                    "sv"
+                    "123"
+                    "Aloitusilmoitus 1"
+                    1354532324658
+                    [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
+                     {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
+                    authority-user-jussi
+                    "Aloitusilmoitus"
+                    :katselmus
+                    ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
+                    nil         nil    nil        nil          nil         nil)
+        Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+        RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+        kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
-                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
-                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-                 mt (:MuuTunnus muuTunnustieto) => truthy
+        luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        mt (:MuuTunnus muuTunnustieto) => truthy
 
-                 tunnus (:tunnus mt) => "LP-753-2013-00001"
-                 sovellus (:sovellus mt) => "Lupapiste"
+        tunnus (:tunnus mt) => "LP-753-2013-00001"
+        sovellus (:sovellus mt) => "Lupapiste"
 
-                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
-                 Osapuolet (:Osapuolet osapuolettieto) => truthy
-                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
-                 Osapuoli (:Osapuoli osapuolitieto) => truthy
-                 kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
-                 henkilo (:henkilo Osapuoli) => truthy
-                 nimi (:nimi henkilo) => truthy
-                 etunimi (:etunimi nimi) => "Jussi"
-                 sukunimi (:sukunimi nimi) => "Viranomainen"
-                 osoite (:osoite henkilo) => truthy
-                 osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
-                 puhelin (:puhelin henkilo) => "1231234567"
+        osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+        Osapuolet (:Osapuolet osapuolettieto) => truthy
+        osapuolitieto (:osapuolitieto Osapuolet) => truthy
+        Osapuoli (:Osapuoli osapuolitieto) => truthy
+        kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+        henkilo (:henkilo Osapuoli) => truthy
+        nimi (:nimi henkilo) => truthy
+        etunimi (:etunimi nimi) => "Jussi"
+        sukunimi (:sukunimi nimi) => "Viranomainen"
+        osoite (:osoite henkilo) => truthy
+        osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+        puhelin (:puhelin henkilo) => "1231234567"
 
-                 katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
-                 Katselmus (:Katselmus katselmustieto) => truthy
-                 rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
-                 rakennusnumero (:rakennusnro rakennustunnus) => "002"
-                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"
-                 pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
-                 katselmuksenLaji (:katselmuksenLaji Katselmus)
-                 tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus)
-                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"]
+        katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+        Katselmus (:Katselmus katselmustieto) => truthy
+        rakennustunnus (:rakennustunnus Katselmus) => truthy
+        jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
+        rakennusnumero (:rakennusnro rakennustunnus) => "002"
+        kiinttun (:kiinttun rakennustunnus) => "21111111111111"]
 
-             (fact "KRYSP 2.1.3 data is present"
-               (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
-               (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
-                 (fact "has 2 buildings" (count rakennukset) => 2)
-                 (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
-                 (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
-                 (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
+    (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
+    (:katselmuksenLaji Katselmus)  => "ei tiedossa"
+    (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1"
+    (:pitoPvm Katselmus) => "2012-12-03"
+
+    (fact "KRYSP 2.1.3 data is present"
+      (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
+      (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
+        (fact "has 2 buildings" (count rakennukset) => 2)
+        (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
+        (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
+        (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
            (let [canonical (unsent-attachments-to-canonical
@@ -1030,12 +1035,22 @@
                              (assoc application-rakennuslupa :state "verdictGiven")
                              "fi"
                              "123"
+                             "Pohjakatselmus 1"
                              1354532324658
                              [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
                                :tila     {:tila nil :kayttoonottava nil}}] ; TODO test these
                              authority-user-jussi
-                             "pohjakatselmus" :katselmus "pidetty" "Sonja Silja" true "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
-Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" "Ei poikkeamisia")
+                             "pohjakatselmus"
+                             :katselmus
+                             "pidetty"
+                             "Sonja Silja"
+                             true
+                             {:kuvaus "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
+                              :maaraAika "05.5.2014"
+                              :toteaja "Jussi"
+                              :toteamisHetki "4.04.2014"}
+                             "Tiivi Taavi, Hipsu ja Lala"
+                             "Ei poikkeamisia")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -1076,13 +1091,17 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti." "Tiivi Taavi, Hipsu ja Lala" 
                  pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
                  osittainen (:osittainen Katselmus) => "pidetty"
                  pitaja (:pitaja Katselmus) => "Sonja Silja"
-                 huomautukset (-> Katselmus :huomautukset :huomautus :kuvaus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.
-Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
+                 huomautus (-> Katselmus :huomautukset :huomautus)
                  katselmuksenLaji (:katselmuksenLaji Katselmus) => "pohjakatselmus"
                  lasnaolijat (:lasnaolijat Katselmus ) => "Tiivi Taavi, Hipsu ja Lala"
                  poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
-                 tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "pohjakatselmus"
-                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"]))
+                 tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Pohjakatselmus 1"
+                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"]
+
+             (:kuvaus huomautus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
+             (:maaraAika huomautus) => "2014-05-05"
+             (:toteamisHetki huomautus) => "2014-04-04"
+             (:toteaja huomautus) => "Jussi"))
 
 
 ;Aloitusoikeus(Takuu)(tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta

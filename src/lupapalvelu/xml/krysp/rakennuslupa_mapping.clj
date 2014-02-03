@@ -247,6 +247,7 @@
                            lang
                            output-dir
                            task-id
+                           task-name
                            started
                            buildings
                            user
@@ -262,7 +263,8 @@
                            begin-of-link
                            attachment-target]
   (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
-        canonical-without-attachments (katselmus-canonical application lang task-id started buildings user
+        ;poytakirja  (some muut.katselmuksen_tai_tarkastuksen_poytakirja)
+        canonical-without-attachments (katselmus-canonical application lang task-id task-name started buildings user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
                                                            huomautukset lasnaolijat poikkeamat)
         canonical (assoc-in canonical-without-attachments
@@ -276,13 +278,14 @@
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
-        huomautukset (-> data :katselmus :huomautukset :kuvaus)
+        huomautukset (-> data :katselmus :huomautukset)
         buildings    (-> data :rakennus vals)]
     (save-katselmus-xml
       application
       lang
       output-dir
       (:id katselmus)
+      (:taskname katselmus)
       pitoPvm
       buildings
       user
@@ -304,7 +307,7 @@
   (let [building-id {:rakennus {:jarjestysnumero index
                                 :kiinttun        propertyId
                                 :rakennusnro     buildingId}}]
-    (save-katselmus-xml application lang output-dir nil started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
+    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
   )
 
 (defn save-unsent-attachments-as-krysp [application lang krysp-version output-dir begin-of-link]

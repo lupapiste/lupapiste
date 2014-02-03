@@ -265,19 +265,18 @@
 (defn katselmusnimi-to-type [nimi tyyppi]
   (if (= :tarkastus tyyppi)
     "muu tarkastus"
-    (condp = nimi
-    "Aloitusilmoitus" "ei tiedossa"
-    "muu katselmus" "muu katselmus"
-    "aloituskokous" "aloituskokous"
-    "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
-    "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
-    "pohjakatselmus" "pohjakatselmus"
-    "rakennekatselmus" "rakennekatselmus"
-    "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
-    "osittainen loppukatselmus" "osittainen loppukatselmus"
-    "loppukatselmus" ; XXX tarkoituksella ei defaulttia?
-    "ei tiedossa"))
-  )
+    (case nimi
+      "Aloitusilmoitus" "ei tiedossa"
+      "muu katselmus" "muu katselmus"
+      "aloituskokous" "aloituskokous"
+      "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
+      "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
+      "pohjakatselmus" "pohjakatselmus"
+      "rakennekatselmus" "rakennekatselmus"
+      "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+      "osittainen loppukatselmus" "osittainen loppukatselmus"
+      "loppukatselmus" "loppukatselmus"
+      "ei tiedossa")))
 
 (defn katselmus-kayttotapaus [nimi tyyppi]
   (if (= nimi "Aloitusilmoitus")
@@ -286,21 +285,14 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
-
-;; TODO: Voisiko tahan tehda YA-canonicalin tyyppisen config-systeemin? Ei tarvitsisi nain montaa parametria.
-;; TODO: Yhdistele taman namespacen canonical-funktiota.
-;                                                   paatokselta (refaktoroidaan building selector)
-;                                                            kirjautunut kayttaja
-;                                                                 lisaa skeemaan (muu-muu)
-;                                                                                          lopullinen-tila
-(defn katselmus-canonical [application lang task-id pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [documents (documents-by-type-without-blanks application)
         katselmus (cr/strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                        :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
                        :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi ; TODO alkup. nimi
+                       :tarkastuksenTaiKatselmuksenNimi task-name
                        :osittainen osittainen
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
@@ -313,7 +305,10 @@
                                                                                      {:katselmusOsittainen (get-in % [:tila :tila])
                                                                                       :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
-                      (when huomautukset {:huomautukset {:huomautus {:kuvaus huomautukset}}})))
+                      (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
+                                                                                (fn [m k v] (assoc m k (to-xml-date-from-string v)))
+                                                                                (select-keys huomautukset [:kuvaus :toteaja])
+                                                                                (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
