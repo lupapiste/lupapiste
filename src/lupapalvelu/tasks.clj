@@ -13,7 +13,7 @@
 
 (schemas/defschemas
   task-schemas-version
-  [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji" :i18npath ["katselmuksenLaji"]}
+  [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
     :body [{:name "katselmuksenLaji"
             :type :select
             :required true
