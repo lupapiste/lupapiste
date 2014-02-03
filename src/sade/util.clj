@@ -170,6 +170,8 @@
 
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
 
+(defn boolean? [x] (instance? Boolean x))
+
 (defn assoc-when [m & kvs]
   "Assocs entries with not-empty-or-nil values into m."
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
