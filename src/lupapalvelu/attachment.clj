@@ -161,7 +161,7 @@
   (map (partial make-attachment now nil false applicationState nil) attachement-types))
 
 (defn create-attachment [application attachement-type now target locked & [attachment-id]]
-  {:pre [application]}
+  {:pre [(map? application)]}
   (let [application-id (:id application)
         applicationState (:state application)
         attachment (make-attachment now target locked applicationState nil attachement-type attachment-id)]
@@ -172,7 +172,7 @@
     (:id attachment)))
 
 (defn create-attachments [application attachement-types now]
-  {:pre [application]}
+  {:pre [(map? application)]}
   (let [application-id (:id application)
         applicationState (:state application)
         attachments (make-attachments now applicationState attachement-types)]
@@ -270,7 +270,7 @@
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked]}]
-  {:pre [application]}
+  {:pre [(map? application)]}
   (let [application-id (:id application)
         attachment-id (cond
                         (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
@@ -382,7 +382,7 @@
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
-  {:pre [(:application options)]}
+  {:pre [(map? (:application options))]}
   (let [file-id (mongo/create-id)
         application-id (-> options :application :id)
         filename (:filename options)
