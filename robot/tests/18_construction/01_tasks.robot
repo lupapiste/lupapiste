@@ -106,6 +106,12 @@ Add katselmus
   Task count is  task-katselmus  3
   Open task  uus muu tarkastus
 
+Verify post-verdict attachmens - Aloituskokous
+  Click by test id  back-to-application-from-task
+  Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
+  Open tab  attachments
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
 *** Keywords ***
 
 Task count is
