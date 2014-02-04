@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.canonical-test-common :refer :all]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.rakennuslupa_canonical :refer :all]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [lupapalvelu.factlet :as fl]
@@ -234,9 +235,11 @@
    :schema-info {:name "rakennuksen-muuttaminen"
                  :version 1
                  :op {:name "muu-laajentaminen"}}
-   :data (conj {:rakennusnro {:value "001"}
+   :data (conj
+           common-rakennus
+           {:rakennusnro {:value "001"}
                 :perusparannuskytkin {:value true}
-                :muutostyolaji {:value "muut muutosty\u00f6t"}} common-rakennus)})
+           :muutostyolaji {:value "muut muutosty\u00f6t"}})})
 
 (def ^:private laajentaminen
   {:id "laajennus"
@@ -244,7 +247,9 @@
    :schema-info {:name "rakennuksen-laajentaminen"
                  :version 1
                  :op {:name "laajentaminen"}}
-   :data (conj {:rakennusnro {:value "001"}
+   :data (conj
+           common-rakennus
+           {:rakennusnro {:value "001"}
                 :manuaalinen_rakennusnro {:value "002"}
                 :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                       :mitat {:tilavuus {:value "1500"}
@@ -253,7 +258,7 @@
                                               :huoneistoala {:0 {:pintaAla {:value "150"}
                                                                  :kayttotarkoitusKoodi {:value "asuntotilaa(ei vapaa-ajan asunnoista)"}}
                                                              :1 {:pintaAla {:value "10"}
-                                                                 :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}} common-rakennus)})
+                                                             :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
 
 (def ^:private purku {:id "purku"
@@ -261,9 +266,11 @@
                       :schema-info {:name "purku"
                                     :version 1
                                     :op {:name "purkaminen"}}
-                      :data (conj {:rakennusnro {:value "001"}
+                      :data (conj
+                              common-rakennus
+                              {:rakennusnro {:value "001"}
                                    :poistumanAjankohta {:value "17.04.2013"},
-                                   :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
+                               :poistumanSyy {:value "tuhoutunut"}})})
 
 (def ^:private aidan-rakentaminen {:data {:kokonaisala {:value "0"}
                                           :kuvaus { :value "Aidan rakentaminen rajalle"}}
@@ -290,12 +297,12 @@
                                         :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}}})
 
 (def ^:private hankkeen-kuvaus
-  (->
-    (assoc-in hankkeen-kuvaus-minimum [:data :poikkeamat] {:value "Ei poikkeamisia"})
+  (-> hankkeen-kuvaus-minimum
+    (assoc-in [:data :poikkeamat] {:value "Ei poikkeamisia"})
     (assoc-in [:schema-info :name] "hankkeen-kuvaus")))
 
 (def ^:private link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
-(def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00002" :type "lupapistetunnus"})
+(def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
 (def ^:private app-linking-to-us {:id "LP-753-2013-00008"})
 
 ;TODO LIITETIETO
@@ -436,7 +443,8 @@
   (fact "sahkopostiosoite" (:sahkopostiosoite company) => "solita@solita.fi"))
 
 (facts "Canonical hakija/henkilo model is correct"
-  (let [hakija-model (get-osapuoli-data (:data hakija-henkilo) :hakija)
+  (let [osapuoli (tools/unwrapped (:data hakija-henkilo))
+        hakija-model (get-osapuoli-data osapuoli :hakija)
         henkilo (:henkilo hakija-model)
         ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
@@ -448,7 +456,8 @@
     (fact "yritys is nil" yritys => nil)))
 
 (facts "Canonical hakija/yritys model is correct"
-  (let [hakija-model (get-osapuoli-data (:data hakija-yritys) :hakija)
+  (let [osapuoli (tools/unwrapped (:data hakija-yritys))
+        hakija-model (get-osapuoli-data osapuoli :hakija)
         henkilo (:henkilo hakija-model)
         yritys (:yritys hakija-model)]
     (fact "model" hakija-model => truthy)
@@ -463,7 +472,8 @@
     {"paasuunnittelija" [{:data {}}]} :Suunnittelija ["paasuunnittelija"] get-suunnittelija-data)) => truthy)
 
 (facts "Canonical paasuunnittelija/henkilo+yritys model is correct"
-  (let [suunnittelija-model (get-suunnittelija-data (:data paasuunnittelija) :paasuunnittelija)
+  (let [suunnittelija (tools/unwrapped (:data paasuunnittelija))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :paasuunnittelija)
         henkilo (:henkilo suunnittelija-model)
         yritys (:yritys suunnittelija-model)]
     (fact "model" suunnittelija-model => truthy)
@@ -477,7 +487,8 @@
     (validate-minimal-company yritys)))
 
 (facts "Canonical suunnittelija1 model is correct"
-  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija1) :suunnittelija)]
+  (let [suunnittelija (tools/unwrapped (:data suunnittelija1))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
@@ -489,7 +500,8 @@
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
 (facts "Canonical suunnittelija2 model is correct"
-  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija2) :suunnittelija)]
+  (let [suunnittelija (tools/unwrapped (:data suunnittelija2))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
@@ -501,7 +513,8 @@
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
 (facts "Transforming old sunnittelija schema to canonical model is correct"
-  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-old-schema-LUPA-771) :suunnittelija)]
+  (let [suunnittelija (tools/unwrapped (:data suunnittelija-old-schema-LUPA-771))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
@@ -511,13 +524,15 @@
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
 
 (facts "Canonical suunnittelija-blank-role model is correct"
-  (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija-blank-role) :suunnittelija)]
+  (let [suunnittelija (tools/unwrapped (:data suunnittelija-blank-role))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "ei tiedossa")))
 
 (facts "Canonical tyonjohtaja model is correct"
-  (let [tyonjohtaja-model (get-tyonjohtaja-data (:data tyonjohtaja) :tyonjohtaja)
+  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
+        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)]
     (fact "model" tyonjohtaja-model => truthy)
@@ -539,7 +554,8 @@
     (validate-minimal-company yritys)))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
-  (let [tyonjohtaja-model (get-tyonjohtaja-data (:data tyonjohtaja-blank-role-and-blank-qualification) :tyonjohtaja)]
+  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
+        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
@@ -547,7 +563,8 @@
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => false)))
 
 (facts "Canonical maksaja/henkilo model is correct"
-  (let [maksaja-model (get-osapuoli-data (:data maksaja-henkilo) :maksaja)
+  (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))
+        maksaja-model (get-osapuoli-data osapuoli :maksaja)
         henkilo (:henkilo maksaja-model)
         yritys (:yritys maksaja-model)]
     (fact "model" maksaja-model => truthy)
@@ -558,7 +575,8 @@
     (fact "yritys is nil" yritys => nil)))
 
 (facts "Canonical maksaja/yritys model is correct"
-  (let [maksaja-model (get-osapuoli-data (:data maksaja-yritys) :maksaja)
+  (let [osapuoli (tools/unwrapped (:data maksaja-yritys))
+        maksaja-model (get-osapuoli-data osapuoli :maksaja)
         henkilo (:henkilo maksaja-model)
         yritys (:yritys maksaja-model)]
     (fact "model" maksaja-model => truthy)
@@ -579,7 +597,7 @@
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-operations)
 
 (facts "Toimenpiteet"
-  (let [documents (by-type (:documents application-rakennuslupa))
+  (let [documents (tools/unwrapped (by-type (:documents application-rakennuslupa)))
         actions (get-operations documents application-rakennuslupa)]
     ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)))
@@ -587,7 +605,10 @@
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-huoneisto-data)
 
 (facts "Huoneisto is correct"
-  (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
+  (let [huoneistot (-> uusi-rakennus
+                     (get-in [:data :huoneistot])
+                     tools/unwrapped
+                     get-huoneisto-data)
         h2 (first huoneistot), h1 (last huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
@@ -623,21 +644,22 @@
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
-  (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
+  (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "turve"}
-                                           :muu-lammonlahde {:value nil}} }
-                               {:id "123" :created nil} application-rakennuslupa)]
+                                                :muu-lammonlahde {:value nil}}})
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (facts "When muu-lammonlahde is specified, it is used"
-  (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
+  (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "other"}
-                                           :muu-lammonlahde {:value "fuusioenergialla"}} }
-                               {:id "123" :created nil} application-rakennuslupa)]
+                                                :muu-lammonlahde {:value "fuusioenergialla"}}})
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (fl/facts* "Canonical model is correct"
-  (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
+  (let [application (tools/unwrapped application-rakennuslupa)
+        canonical (application-to-canonical application "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -738,7 +760,8 @@
 
 
 (fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"
-  (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi") => truthy
+  (let [application (tools/unwrapped application-tyonjohtajan-nimeaminen)
+        canonical (application-to-canonical application "fi") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -752,7 +775,6 @@
                                         :LupaTunnus
                                         :muuTunnustieto
                                         :MuuTunnus) => truthy
-
 
         osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
 
@@ -780,17 +802,17 @@
     (facts "\"kuntalupatunnus\" type of link permit data"
       (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => falsey)
       (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => falsey)
-      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => "123-123-123-123")
+      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => (:id link-permit-data-kuntalupatunnus))
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
 
     (facts "\"lupapistetunnus\" type of link permit data"
-      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
-      (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
-      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
-      (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
+      (fact "viitelupatieto-2-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :tunnus) => (:id link-permit-data-lupapistetunnus))
+      (fact "viitelupatieto-2-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
+      (fact "viitelupatieto-2-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
+      (fact "viitelupatieto-2-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
 
 
-    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00002")
+    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => (:id application-tyonjohtajan-nimeaminen))
     (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
 
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
@@ -798,7 +820,8 @@
 
 
 (fl/facts* "Canonical model for suunnittelijan nimeaminen is correct"
-  (let [canonical (application-to-canonical application-suunnittelijan-nimeaminen "fi") => truthy
+  (let [application (tools/unwrapped application-suunnittelijan-nimeaminen)
+        canonical (application-to-canonical application "fi") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -835,7 +858,7 @@
       (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
     (facts "\"lupapistetunnus\" type of link permit data"
-      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
+      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => (:id link-permit-data-lupapistetunnus))
       (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
       (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => falsey)
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
@@ -861,54 +884,55 @@
                                      :city "Tampere"})
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-  (let [canonical (katselmus-canonical
-                    (assoc application-rakennuslupa :state "verdictGiven")
-                    "sv"
+           (let [application (tools/unwrapped (assoc application-rakennuslupa :state "verdictGiven"))
+                 canonical (katselmus-canonical
+                             application
+                             "sv"
                     "123"
                     "Aloitusilmoitus 1"
-                    1354532324658
+                             1354532324658
                     [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
                      {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
-                    authority-user-jussi
+                             authority-user-jussi
                     "Aloitusilmoitus"
                     :katselmus
                     ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
                     nil         nil    nil        nil          nil         nil)
-        Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-        toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
-        rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
-        RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
-        kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
-        tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
-        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        mt (:MuuTunnus muuTunnustieto) => truthy
+                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+                 mt (:MuuTunnus muuTunnustieto) => truthy
 
-        tunnus (:tunnus mt) => "LP-753-2013-00001"
-        sovellus (:sovellus mt) => "Lupapiste"
+                 tunnus (:tunnus mt) => "LP-753-2013-00001"
+                 sovellus (:sovellus mt) => "Lupapiste"
 
-        osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
-        Osapuolet (:Osapuolet osapuolettieto) => truthy
-        osapuolitieto (:osapuolitieto Osapuolet) => truthy
-        Osapuoli (:Osapuoli osapuolitieto) => truthy
-        kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
-        henkilo (:henkilo Osapuoli) => truthy
-        nimi (:nimi henkilo) => truthy
-        etunimi (:etunimi nimi) => "Jussi"
-        sukunimi (:sukunimi nimi) => "Viranomainen"
-        osoite (:osoite henkilo) => truthy
-        osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
-        puhelin (:puhelin henkilo) => "1231234567"
+                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+                 Osapuolet (:Osapuolet osapuolettieto) => truthy
+                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
+                 Osapuoli (:Osapuoli osapuolitieto) => truthy
+                 kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+                 henkilo (:henkilo Osapuoli) => truthy
+                 nimi (:nimi henkilo) => truthy
+                 etunimi (:etunimi nimi) => "Jussi"
+                 sukunimi (:sukunimi nimi) => "Viranomainen"
+                 osoite (:osoite henkilo) => truthy
+                 osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+                 puhelin (:puhelin henkilo) => "1231234567"
 
-        katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
-        Katselmus (:Katselmus katselmustieto) => truthy
-        rakennustunnus (:rakennustunnus Katselmus) => truthy
-        jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
-        rakennusnumero (:rakennusnro rakennustunnus) => "002"
+                 katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+                 Katselmus (:Katselmus katselmustieto) => truthy
+                 rakennustunnus (:rakennustunnus Katselmus) => truthy
+                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
+                 rakennusnumero (:rakennusnro rakennustunnus) => "002"
         kiinttun (:kiinttun rakennustunnus) => "21111111111111"]
 
     (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
@@ -925,9 +949,8 @@
         (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
-           (let [canonical (unsent-attachments-to-canonical
-                             (assoc application-rakennuslupa :state "verdictGiven")
-                             "sv")
+           (let [application (tools/unwrapped (assoc application-rakennuslupa :state "verdictGiven"))
+                 canonical (unsent-attachments-to-canonical application "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -968,8 +991,7 @@
 
 (def jatkolupa-application
   {:schema-version 1,
-   :auth
-   [{:lastName "Panaani",
+   :auth [{:lastName "Panaani",
      :firstName "Pena",
      :username "pena",
      :type "owner",
@@ -982,8 +1004,7 @@
    :attachments [],
    :organization "753-R",
    :title "It\u00e4inen Hangelbyntie 163",
-   :operations
-   [{:id "5280b764420622588b2f04fc",
+   :operations [{:id "5280b764420622588b2f04fc",
      :name "jatkoaika",
      :created 1384167268234}],
    :infoRequest false,
@@ -991,21 +1012,16 @@
    :opened 1384167310181,
    :created 1384167268234,
    :propertyId "75340800010051",
-   :documents
-   [{:created 1384167268234,
-     :data
-     {:kuvaus
-      {:modified 1384167309006,
+   :documents [{:created 1384167268234,
+                :data {:kuvaus {:modified 1384167309006,
        :value
        "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
      :id "5280b764420622588b2f04fd",
-     :schema-info
-     {:order 1,
+                :schema-info {:order 1,
       :version 1,
       :name "hankkeen-kuvaus-minimum",
       :approvable true,
-      :op
-      {:id "5280b764420622588b2f04fc",
+                              :op {:id "5280b764420622588b2f04fc",
        :name "jatkoaika",
        :created 1384167268234},
       :removable true}}
@@ -1022,17 +1038,19 @@
                :firstName "Sonja"
                :lastName "Sibbo"
                :role "authority"}
-  :linkPermitData [{:id "LP-753-2013-00001", :type "lupapistetunnus"}]})
+  :linkPermitData [link-permit-data-lupapistetunnus]})
 
 (fl/facts* "Canonical model for jatkoaika is correct"
-  (let [canonical (application-to-canonical jatkolupa-application "sv")]
+  (let [application (tools/unwrapped jatkolupa-application)
+        canonical (application-to-canonical application "sv")]
     ;(clojure.pprint/pprint canonical)
     ;TODO tests
     ))
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [canonical (katselmus-canonical
-                             (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application (tools/unwrapped (assoc application-rakennuslupa :state "verdictGiven"))
+                 canonical (katselmus-canonical
+                             application
                              "fi"
                              "123"
                              "Pohjakatselmus 1"
@@ -1105,13 +1123,14 @@
 
 
 ;Aloitusoikeus(Takuu)(tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta
-(def aloitusoikeus-hakemus {:sent nil,
-                            :linkPermitData {0 {:type "kuntalupatunnus", :id "8333-1231"}},
+(def aloitusoikeus-hakemus
+  (tools/unwrapped
+    {:sent nil,
+     :linkPermitData [link-permit-data-kuntalupatunnus],
                             :neighbors {},
                             :schema-version 1,
                             :authority {},
-                            :auth
-                            [{:lastName "Panaani",
+     :auth [{:lastName "Panaani",
                               :firstName "Pena",
                               :username "pena",
                               :type "owner",
@@ -1131,8 +1150,7 @@
                             :title "Vainuddintie 92",
                             :started nil,
                             :closed nil,
-                            :operations
-                            [{:id "52c5461042065cf9f379de8b",
+     :operations [{:id "52c5461042065cf9f379de8b",
                               :name "aloitusoikeus",
                               :created 1388660240013}],
                             :infoRequest false,
@@ -1142,8 +1160,7 @@
                             :_comments-seen-by {},
                             :propertyId "75341900080007",
                             :verdicts [],
-                            :documents
-                            [{:created 1388660240013,
+     :documents [{:created 1388660240013,
                               :data
                               {:_selected {:value "henkilo"},
                                :henkilo
@@ -1152,19 +1169,14 @@
                                  :hetu {:modified
                                         1388660303335, :value "010203-0405"},
                                  :sukunimi {:modified 1388660303335, :value "Panaani"}},
-                                :osoite
-                                {:katu {:modified 1388660303335, :value "Paapankuja 12"},
+                    :osoite {:katu {:modified 1388660303335, :value "Paapankuja 12"},
                                  :postinumero {:modified 1388660303335, :value "10203"},
-                                 :postitoimipaikannimi
-                                 {:modified 1388660303335, :value "Piippola"}},
-                                :userId
-                                {:modified 1388660303402, :value "777777777777777777000020"},
-                                :yhteystiedot
-                                {:email {:modified 1388660303335, :value "pena@example.com"},
+                             :postitoimipaikannimi {:modified 1388660303335, :value "Piippola"}},
+                    :userId {:modified 1388660303402, :value "777777777777777777000020"},
+                    :yhteystiedot {:email {:modified 1388660303335, :value "pena@example.com"},
                                  :puhelin {:modified 1388660303335, :value "0102030405"}}}},
                               :id "52c5461042065cf9f379de8d",
-                              :schema-info
-                              {:approvable true,
+                  :schema-info {:approvable true,
                                :subtype "hakija",
                                :name "hakija",
                                :removable true,
@@ -1173,23 +1185,18 @@
                                :type "party",
                                :order 3}}
                              {:created 1388660240013,
-                              :data
-                              {:kuvaus
-                               {:modified 1388667082757,
+                  :data {:kuvaus {:modified 1388667082757,
                                 :value "Tarttis aloitta asp rakentaminen."}},
                               :id "52c5461042065cf9f379de8c",
-                              :schema-info
-                              {:version 1,
+                  :schema-info {:version 1,
                                :name "aloitusoikeus",
                                :approvable true,
-                               :op
-                               {:id "52c5461042065cf9f379de8b",
+                                :op {:id "52c5461042065cf9f379de8b",
                                 :name "aloitusoikeus",
                                 :created 1388660240013},
                                :removable false}}
                              {:id "52c5461042065cf9f379de8e",
-                              :schema-info
-                              {:approvable true,
+                  :schema-info {:approvable true,
                                :name "maksaja",
                                :removable true,
                                :repeating true,
@@ -1205,10 +1212,11 @@
                             :address "Vainuddintie 92",
                             :permitType "R",
                             :id "LP-753-2014-00001",
-                            :municipality "753"})
+     :municipality "753"}))
 
 (fl/facts* "Canonical model is correct"
-           (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
+  (let [application (tools/unwrapped aloitusoikeus-hakemus)
+        canonical (application-to-canonical application "sv") => truthy
                  rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
                  rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy

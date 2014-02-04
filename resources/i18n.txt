@@ -1,1 +1,2 @@
 attachmentType.muut.katselmuksen_tai_tarkastuksen_poytakirja: Katselmuksen tai tarkastuksen pöytäkirja
+error.kuntalupatunnus-not-available-from-verdict: "Viiteluvan kuntalupatunnusta ei saatavilla"
