@@ -24,9 +24,6 @@
         :puhelin (-> henkilo :yhteystiedot :puhelin :value)
         :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)))))
 
-(defn- get-henkilo-reduced [henkilo]
-  (dissoc (get-henkilo henkilo) :osoite :henkilotunnus))
-
 (defn- get-yritys [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
         postiosoite (not-empty
@@ -57,11 +54,13 @@
   ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
   (let [hakija (not-empty
                  (if (= (-> hakija-doc :_selected :value) "yritys")
-                   (let [yritys (assoc-when {} :Yritys (get-yritys (:yritys hakija-doc)))
-                         henkilo (assoc-when {} :Henkilo (get-henkilo-reduced (-> hakija-doc :yritys :yhteyshenkilo)))]
-                     (assoc-when {} :yritystieto  yritys :henkilotieto henkilo))
-                   (let [henkilo (assoc-when {} :Henkilo (get-henkilo (:henkilo hakija-doc)))]
-                     (assoc-when {} :henkilotieto henkilo))))]
+                   (let [yritys (get-yritys (:yritys hakija-doc))
+                         henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo))]
+                     (when (and yritys henkilo)
+                       {:yritystieto {:Yritys yritys}
+                        :henkilotieto {:Henkilo henkilo}}))
+                   (when-let [henkilo (get-henkilo (:henkilo hakija-doc))]
+                     {:henkilotieto {:Henkilo henkilo}})))]
     (when hakija
       (merge hakija {:rooliKoodi "hakija"}))))
 
@@ -253,20 +252,26 @@
         hakija (get-hakija (-> documents-by-type :hakija-ya first :data))
         tyoaika-doc (when (:tyoaika config)
                       (-> documents-by-type :tyoaika first :data))
-        mainostus-viitoitus-tapahtuma-doc (or
-                                            (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
-                                            {})
-        mainostus-viitoitus-tapahtuma-name (-> mainostus-viitoitus-tapahtuma-doc :_selected :value)
-        mainostus-viitoitus-tapahtuma (mainostus-viitoitus-tapahtuma-doc (keyword mainostus-viitoitus-tapahtuma-name))
+
+        main-viit-tapahtuma-doc (-> documents-by-type :mainosten-tai-viitoitusten-sijoittaminen first :data)
+        ;; If user has manually selected the mainostus/viitoitus type, the _selected key exists.
+        ;; Otherwise the type is the first key in the map.
+        main-viit-tapahtuma-name (when main-viit-tapahtuma-doc
+                                   (or
+                                     (-> main-viit-tapahtuma-doc :_selected :value)
+                                     (-> main-viit-tapahtuma-doc first key)))
+        main-viit-tapahtuma (when main-viit-tapahtuma-doc
+                             (main-viit-tapahtuma-doc (keyword main-viit-tapahtuma-name)))
+
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                     (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-alkaa-pvm :value))
+                     (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm :value))
                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm :value))))
         loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
                     (to-xml-date (:modified application))
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                      (to-xml-date-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
+                      (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm :value))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm :value))))
         maksaja (if (:dummy-maksaja config)
                   {:henkilotieto (:henkilotieto hakija) :laskuviite "0000000000"}
@@ -309,7 +314,7 @@
                                                 [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
                                                  {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])))
                                           (when (:mainostus-viitoitus-lisatiedot config)
-                                            (get-mainostus-viitoitus-lisatiedot mainostus-viitoitus-tapahtuma)))))
+                                            (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
 
         sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
                                  (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste :value)]
@@ -337,8 +342,8 @@
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
-                                (when (= "mainostus-tapahtuma-valinta" mainostus-viitoitus-tapahtuma-name)
-                                  {:toimintajaksotieto (get-mainostus-alku-loppu-hetki mainostus-viitoitus-tapahtuma)})
+                                (when (= "mainostus-tapahtuma-valinta" main-viit-tapahtuma-name)
+                                  {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
     (cr/strip-nils body)))
