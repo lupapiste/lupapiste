@@ -22,6 +22,7 @@ Mikko adds txt attachment without comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
   Application state should be  draft
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Download all attachments should be enabled
   Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
