@@ -389,8 +389,8 @@
 (defn get-viitelupatieto [link-permit-data]
   (when link-permit-data
     (assoc-in
-      (if (= (:type link-permit-data) "lupapistetunnus")
-        (lupatunnus (:id link-permit-data))
-        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
+      (if (= (:type link-permit-data) "kuntalupatunnus")
+        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}}
+        (lupatunnus (:id link-permit-data)))
       [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 

@@ -75,10 +75,7 @@
         Kasittelytieto (-> Sijoituslupa :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Sijoituslupa) => truthy
-        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        luvanTunnisteTiedot (:luvanTunnisteTiedot Sijoituslupa) => nil?
 
         Sijoituslupa-kayttotarkoitus (:kayttotarkoitus Sijoituslupa) => truthy
 
@@ -164,9 +161,6 @@
     (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened sijoituslupa-application)))
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
-
-    (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00003")
-    (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
 
     (fact "Sijoituslupa-kayttotarkoitus" Sijoituslupa-kayttotarkoitus => ((keyword (:name operation)) ya-operation-type-to-usage-description))
 

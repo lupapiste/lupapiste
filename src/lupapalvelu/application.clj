@@ -327,13 +327,20 @@
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
         kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
-    (-> application
-      (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
-      (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))))
+    (if kuntalupatunnus
+      (-> application
+         (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
+         (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
+      (do
+        (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it link permit's (" link-permit-app-id ") verdict.")
+        (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
 
 
 (defn do-approve-regular-app [{:keys [application created user] :as command} id lang]
   (let [application (meta-fields/enrich-with-link-permit-data application)
+        application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                      (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                      application)
         organization (organization/get-organization (:organization application))]
 
     (let [submitted-application (mongo/by-id :submitted-applications id)]
@@ -386,7 +393,6 @@
     (when (and (is-link-permit-required application) (= 0 linkPermits))
       (fail :error.permit-must-have-link-permit))))
 
-
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
@@ -400,8 +406,8 @@
           (do-approve-jatkoaika-app command id lang)
           (do-approve-regular-app command id lang))
         (catch org.xml.sax.SAXParseException e
-      (info e "Invalid KRYSP XML message")
-      (fail (.getMessage e))))))
+          (info e "Invalid KRYSP XML message")
+          (fail (.getMessage e))))))
 
 (defn- do-submit [command application created]
   (update-application command

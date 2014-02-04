@@ -232,6 +232,9 @@
   ;;
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
+
+        link-permit-data (-> application :linkPermitData first)
+
         operation-name-key (-> application :operations first :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
@@ -317,7 +320,7 @@
 
         body {permit-name-key (merge
                                 {:kasittelytietotieto (get-kasittelytieto application)
-                                 :luvanTunnisteTiedot (lupatunnus (:id application))
+                                 :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
                                  :sijaintitieto (get-sijaintitieto application)
@@ -351,6 +354,7 @@
         documents-by-type (documents-by-type-without-blanks application)
 
         link-permit-data (-> application :linkPermitData first)
+
         ;; When operation is missing, setting kaivulupa as the operation (app created via op tree)
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-katulupa-vesi-ja-viemarityot)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
