@@ -1,0 +1,1 @@
+error.kuntalupatunnus-not-available-from-verdict: "Viiteluvan kuntalupatunnusta ei saatavilla"

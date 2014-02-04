@@ -1,9 +1,11 @@
 (ns lupapalvelu.document.poikkeamis-canonical-test
   (:require [lupapalvelu.factlet :as fl]
-            [midje.sweet :refer :all]
             [lupapalvelu.document.canonical-test-common :refer :all]
-            [lupapalvelu.document.poikkeamis-canonical :as c]
-            [lupapalvelu.document.poikkeamis-schemas]))
+            [lupapalvelu.document.poikkeamis-canonical :refer :all]
+            [lupapalvelu.document.poikkeamis-schemas :refer :all]
+            [lupapalvelu.document.tools :as tools]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 
 (def ^:private statements [{:given 1379423133068
@@ -320,8 +322,12 @@
 
 (validate-all-documents documents)
 
+
+(testable-privates lupapalvelu.document.poikkeamis-canonical get-toimenpiteet)
+
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
+  (let [application (tools/unwrapped poikkari-hakemus)
+        canonical (poikkeus-application-to-canonical application "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
@@ -471,7 +477,7 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        laajennus-tp (c/get-toimenpiteet [laajennus])
+        laajennus-tp (get-toimenpiteet (tools/unwrapped [laajennus]))
         laajennus-tp (:Toimenpide (first laajennus-tp))
         rakennustunnus (:rakennustunnus laajennus-tp) => nil
         _ (:liitetieto laajennus-tp) => nil
@@ -523,7 +529,8 @@
 ;Suunnitelutarveratkaisu
 
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical suunnitelutarveratkaisu "fi" ) => truthy
+  (let [application (tools/unwrapped suunnitelutarveratkaisu)
+        canonical (poikkeus-application-to-canonical application "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
@@ -667,7 +674,7 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        laajennus-tp (c/get-toimenpiteet [laajennus])
+        laajennus-tp (get-toimenpiteet (tools/unwrapped [laajennus]))
         laajennus-tp (:Toimenpide (first laajennus-tp))
         rakennustunnus (:rakennustunnus laajennus-tp) => nil
         kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
