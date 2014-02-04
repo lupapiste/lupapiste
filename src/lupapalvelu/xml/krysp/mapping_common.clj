@@ -324,9 +324,11 @@
       statement-attachments)))
 
 (defn write-to-disk
-  "Writes XML string to disk and copies attachments from database. XML is validated before writing."
+  "Writes XML string to disk and copies attachments from database. XML is validated before writing.
+   Returns a sequence of attachemt fileIds that were written to disk."
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
-  {:pre [(string? output-dir)]}
+  {:pre [(string? output-dir)]
+   :post [%]}
   (when-not (re-matches #"\d+\.\d+\.\d+" (or krysp-version "nil"))
     (throw (IllegalAccessException. (str \' krysp-version "' does not look like a KRYSP version"))))
 
@@ -347,4 +349,9 @@
     (when (fn? extra-emitter) (extra-emitter))
 
     (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile)))
+    (fs/rename tempfile outfile))
+
+  (->>
+    (merge attachments statement-attachments)
+    (map #(get-in % [:Liite :fileId]))
+    (filter identity)))
