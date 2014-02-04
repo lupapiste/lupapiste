@@ -268,9 +268,12 @@
         canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
                                                         begin-of-link attachment-target))
-        canonical-pk (:Liite (first (mapping-common/get-attachments-as-canonical
+        canonical-pk-liite (first (mapping-common/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
-                                     begin-of-link attachment-target)))
+                                     begin-of-link attachment-target))
+        canonical-pk (:Liite canonical-pk-liite)
+
+        all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
 
         canonical-without-attachments (katselmus-canonical application lang task-id task-name started buildings user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
@@ -285,7 +288,7 @@
 
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (mapping-common/write-to-disk application canonical-attachments nil xml krysp-version output-dir)))
+    (mapping-common/write-to-disk application all-canonical-attachments nil xml krysp-version output-dir)))
 
 (defn save-katselmus-as-krysp [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [data (tools/unwrapped (:data katselmus))
