@@ -145,5 +145,20 @@
                  Ilmoitukset (:Ilmoitukset canonical) => truthy
                  toimutuksenTiedot (:toimutuksenTiedot Ilmoitukset) => truthy
                  aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
+
+                 melutarina (:melutarina Ilmoitukset) => truthy
+                 kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
+
+                 luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
+                 LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
+                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+                 MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+                 tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
+                 sovellus (:sovellus MuuTunnus) => "Lupapiste"
+
+
+                 toimintatieto (:toimintatieto melutarina) => truthy
+
+
                  ]
              (clojure.pprint/pprint canonical)))
