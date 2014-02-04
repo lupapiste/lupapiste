@@ -346,12 +346,12 @@
 
 
           <div class="tab-wrapper">
-            <div data-bind="if: postAttachmentsByGroup().length" data-test-id="application-attachments-table">
+            <div data-bind="if: postAttachmentsByGroup().length" data-test-id="application-post-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
             </div>
 
-            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-attachments-table">
+            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
