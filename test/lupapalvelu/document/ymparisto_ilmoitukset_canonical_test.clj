@@ -4,7 +4,17 @@
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.canonical-test-common :refer :all]))
 
-(def hakija {:created 1391415025497,
+(def ^:private statements [{:given 1379423133068
+                            :id "52385377da063788effc1e93"
+                            :person {:text "Paloviranomainen"
+                                     :name "Sonja Sibbo"
+                                     :email "sonja.sibbo@sipoo.fi"
+                                     :id "516560d6c2e6f603beb85147"}
+                            :requested 1379423095616
+                            :status "yes"
+                            :text "Lausunto liitteen\u00e4."}])
+
+(def ^:private hakija {:created 1391415025497,
              :data
              {:_selected {:value "henkilo"},
               :henkilo
@@ -34,7 +44,7 @@
               :type "party",
               :order 3}})
 
-(def kesto {:created 1391415025497,
+(def ^:private kesto {:created 1391415025497,
             :data
             {:kesto
              {:alku {:modified 1391415615718, :value "03.02.2014"},
@@ -46,7 +56,7 @@
             :id "52ef4ef14206428d3c0394b7",
             :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}})
 
-(def meluilmo {:created 1391415025497,
+(def ^:private meluilmo {:created 1391415025497,
                :data
                {:melu
                 {:melu10mdBa {:modified 1391415596372, :value "150"},
@@ -106,7 +116,7 @@
                                :_verdicts-seen-by {},
                                :location {:x 428195.77099609, :y 6686701.3931274},
                                :attachments [],
-                               :statements [],
+                               :statements statements,
                                :organization "638-R",
                                :buildings [],
                                :title "Londbölentie 97",
@@ -155,6 +165,17 @@
                  MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
                  tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
                  sovellus (:sovellus MuuTunnus) => "Lupapiste"
+
+                 lausuntotieto (:lausuntotieto melutarina) => truthy
+                 Lausunto (:Lausunto (first lausuntotieto)) => truthy
+                 viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+                 pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+                 lausuntotieto (:lausuntotieto Lausunto) => truthy
+                 annettu-lausunto (:Lausunto lausuntotieto) => truthy
+                 lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
+                 varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+                 lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+
 
 
                  ;toimintatieto (:toimintatieto melutarina) => truthy
