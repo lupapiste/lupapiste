@@ -277,20 +277,18 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [application begin-of-link & [target]]
-  (let [attachments (:attachments application)
-        canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment)
-                                            (not= "statement" (-> attachment :target :type))
-                                            (not= "verdict" (-> attachment :target :type))
-                                            (or (nil? target) (= target (:target attachment))))
-                                    :let [type (get-in attachment [:type :type-id])
-                                          title (str (:title application) ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-Liite title link attachment type file-id attachment-file-name)})]
-    (not-empty canonical-attachments)))
+(defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
+  (not-empty (for [attachment attachments
+                   :when (and (:latestVersion attachment)
+                           (not= "statement" (-> attachment :target :type))
+                           (not= "verdict" (-> attachment :target :type))
+                           (or (nil? target) (= target (:target attachment))))
+                   :let [type (get-in attachment [:type :type-id])
+                         attachment-title (str title ": " type "-" (:id attachment))
+                         file-id (get-in attachment [:latestVersion :fileId])
+                         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                         link (str begin-of-link attachment-file-name)]]
+               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name)})))
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
@@ -299,8 +297,7 @@
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
           attachment-file-name (str output-dir "/" filename)
-          attachment-file (io/file attachment-file-name)
-          ]
+          attachment-file (io/file attachment-file-name)]
       (with-open [out (io/output-stream attachment-file)
                   in (content)]
         (io/copy in out)))))
