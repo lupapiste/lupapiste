@@ -302,7 +302,7 @@
     (assoc-in [:schema-info :name] "hankkeen-kuvaus")))
 
 (def ^:private link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
-(def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00002" :type "lupapistetunnus"})
+(def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
 (def ^:private app-linking-to-us {:id "LP-753-2013-00008"})
 
 ;TODO LIITETIETO
@@ -776,7 +776,6 @@
                                         :muuTunnustieto
                                         :MuuTunnus) => truthy
 
-
         osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
 
         ;; henkilotyyppinen maksaja
@@ -803,17 +802,17 @@
     (facts "\"kuntalupatunnus\" type of link permit data"
       (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => falsey)
       (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => falsey)
-      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => "123-123-123-123")
+      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => (:id link-permit-data-kuntalupatunnus))
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
 
     (facts "\"lupapistetunnus\" type of link permit data"
-      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
-      (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
-      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
-      (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
+      (fact "viitelupatieto-2-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :tunnus) => (:id link-permit-data-lupapistetunnus))
+      (fact "viitelupatieto-2-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
+      (fact "viitelupatieto-2-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
+      (fact "viitelupatieto-2-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
 
 
-    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => "LP-753-2013-00002")
+    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => (:id application-tyonjohtajan-nimeaminen))
     (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
 
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
@@ -859,7 +858,7 @@
       (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
     (facts "\"lupapistetunnus\" type of link permit data"
-      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => "LP-753-2013-00002")
+      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => (:id link-permit-data-lupapistetunnus))
       (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
       (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => falsey)
       (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
@@ -1025,7 +1024,7 @@
                :firstName "Sonja"
                :lastName "Sibbo"
                :role "authority"}
-  :linkPermitData [{:id "LP-753-2013-00001", :type "lupapistetunnus"}]})
+  :linkPermitData [link-permit-data-lupapistetunnus]})
 
 (fl/facts* "Canonical model for jatkoaika is correct"
   (let [application (tools/unwrapped jatkolupa-application)
@@ -1097,7 +1096,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
 (def aloitusoikeus-hakemus
   (tools/unwrapped
     {:sent nil,
-     :linkPermitData {0 {:type "kuntalupatunnus", :id "8333-1231"}},
+     :linkPermitData [link-permit-data-kuntalupatunnus],
      :neighbors {},
      :schema-version 1,
      :authority {},
