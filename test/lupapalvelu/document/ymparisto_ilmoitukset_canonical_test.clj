@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as yic]
             [lupapalvelu.factlet :as fl]
-            [lupapalvelu.document.canonical-test-common :refer :all]))
+            [lupapalvelu.document.canonical-test-common :refer :all]
+            [lupapalvelu.document.ymparisto-schemas]))
 
 (def ^:private statements [{:given 1379423133068
                             :id "52385377da063788effc1e93"
@@ -15,46 +16,46 @@
                             :text "Lausunto liitteen\u00e4."}])
 
 (def ^:private hakija {:created 1391415025497,
-             :data
-             {:_selected {:value "henkilo"},
-              :henkilo
-              {:henkilotiedot
-               {:etunimi
-                {:modified 1391415662591, :value "Pekka"},
-                :hetu {:modified 1391415675117, :value "133450-2356"},
-                :sukunimi {:modified 1391415662591, :value "Borga"}},
-               :osoite
-               {:katu {:modified 1391415683882, :value "Murskaajankatu 5"},
-                :postinumero {:modified 1391415686665, :value "36570"},
-                :postitoimipaikannimi
-                {:modified 1391415696674, :value "Kaivonto"}},
-               :userId
-               {:modified 1391415662621, :value "777777777777777777000033"},
-               :yhteystiedot
-               {:email {:modified 1391415662591, :value "pekka.borga@porvoo.fi"},
-                :puhelin {:modified 1391415662591, :value "121212"}}}},
-             :id "52ef4ef14206428d3c0394b6",
-             :schema-info
-             {:approvable true,
-              :subtype "hakija",
-              :name "hakija",
-              :removable true,
-              :repeating true,
-              :version 1,
-              :type "party",
-              :order 3}})
+                       :data
+                       {:_selected {:value "henkilo"},
+                        :henkilo
+                        {:henkilotiedot
+                         {:etunimi
+                          {:modified 1391415662591, :value "Pekka"},
+                          :hetu {:modified 1391415675117, :value "210281-9988"},
+                          :sukunimi {:modified 1391415662591, :value "Borga"}},
+                         :osoite
+                         {:katu {:modified 1391415683882, :value "Murskaajankatu 5"},
+                          :postinumero {:modified 1391415686665, :value "36570"},
+                          :postitoimipaikannimi
+                          {:modified 1391415696674, :value "Kaivanto"}},
+                         :userId
+                         {:modified 1391415662621, :value "777777777777777777000033"},
+                         :yhteystiedot
+                         {:email {:modified 1391415662591, :value "pekka.borga@porvoo.fi"},
+                          :puhelin {:modified 1391415662591, :value "121212"}}}},
+                       :id "52ef4ef14206428d3c0394b6",
+                       :schema-info
+                       {:approvable true,
+                        :subtype "hakija",
+                        :name "hakija",
+                        :removable true,
+                        :repeating true,
+                        :version 1,
+                        :type "party",
+                        :order 3}})
 
 (def ^:private kesto {:created 1391415025497,
-            :data
-            {:kesto
-             {:alku {:modified 1391415615718, :value "03.02.2014"},
-              :kello
-              {:arkisin {:modified 1391415637288, :value "07.00 - 16:00"},
-               :lauantait {:modified 1391415639677, :value "-"},
-               :pyhat {:modified 1391415640276, :value "-"}},
-              :loppu {:modified 1391415618809, :value "07.02.2014"}}},
-            :id "52ef4ef14206428d3c0394b7",
-            :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}})
+                      :data
+                      {:kesto
+                       {:alku {:modified 1391415615718, :value "03.02.2014"},
+                        :kello
+                        {:arkisin {:modified 1391415637288, :value "07.00 - 16:00"},
+                         :lauantait {:modified 1391415639677, :value "-"},
+                         :pyhat {:modified 1391415640276, :value "-"}},
+                        :loppu {:modified 1391415618809, :value "07.02.2014"}}},
+                      :id "52ef4ef14206428d3c0394b7",
+                      :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}})
 
 (def ^:private meluilmo {:created 1391415025497,
                :data
@@ -82,9 +83,9 @@
                  :nimi {:modified 1391415570121, :value "Louhijouden saunailta"},
                  :ulkoilmakonsertti {:modified 1391415571551, :value true}}},
                :id "52ef4ef14206428d3c0394b5",
-                                 :schema-info
-                                 {:order 50,
-                                  :version 1,
+               :schema-info
+               {:order 50,
+                :version 1,
                                   :name "meluilmoitus",
                                   :op
                                   {:id "52ef4ef14206428d3c0394b4",
@@ -177,7 +178,7 @@
                  lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
                  ilmoittaja (:ilmoittaja melutarina) => truthy
-                 nimi (:nimi ilmoittaja) => "Yksityshenkil\u00f6"
+                 nimi (:nimi ilmoittaja) => "Yksityishenkil\u00f6"
                  postiosoite (:postiosoite ilmoittaja) => truthy
                  osoitenimi (:osoitenimi postiosoite) => truthy
                  teksti (:teksti osoitenimi) => "Murskaajankatu 5"
@@ -197,7 +198,8 @@
 
 
                  ]
-             (clojure.pprint/pprint canonical)))
+             ;(clojure.pprint/pprint canonical)
+             ))
 
 
 (println "TEE TESTI YRITYSILMOITTAJALLA")

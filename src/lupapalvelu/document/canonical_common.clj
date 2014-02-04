@@ -222,7 +222,7 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
-(defn- get-simple-osoite [osoite]
+(defn get-simple-osoite [osoite]
   (when (-> osoite :katu :value)  ;; required field in krysp (i.e. "osoitenimi")
     {:osoitenimi {:teksti (-> osoite :katu :value)}
      :postitoimipaikannimi (-> osoite :postitoimipaikannimi :value)
@@ -399,6 +399,25 @@
                     :asiatunnus (:id application)
                     :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
                     :kasittelija (get-handler application)}})
+
+(defn get-henkilo [henkilo]
+  (let [nimi (assoc-when {}
+               :etunimi (-> henkilo :henkilotiedot :etunimi :value)
+               :sukunimi (-> henkilo :henkilotiedot :sukunimi :value))
+        teksti (assoc-when {} :teksti (-> henkilo :osoite :katu :value))
+        osoite (assoc-when {}
+                 :osoitenimi teksti
+                 :postinumero (-> henkilo :osoite :postinumero :value)
+                 :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi :value))]
+    (not-empty
+      (assoc-when {}
+        :nimi nimi
+        :osoite osoite
+        :sahkopostiosoite (-> henkilo :yhteystiedot :email :value)
+        :puhelin (-> henkilo :yhteystiedot :puhelin :value)
+        :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)))))
+
+
 
 
 

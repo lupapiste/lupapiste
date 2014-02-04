@@ -7,23 +7,6 @@
             [cljts.geom :as geo]
             [cljts.io :as jts]))
 
-(defn- get-henkilo [henkilo]
-  (let [nimi (assoc-when {}
-               :etunimi (-> henkilo :henkilotiedot :etunimi :value)
-               :sukunimi (-> henkilo :henkilotiedot :sukunimi :value))
-        teksti (assoc-when {} :teksti (-> henkilo :osoite :katu :value))
-        osoite (assoc-when {}
-                 :osoitenimi teksti
-                 :postinumero (-> henkilo :osoite :postinumero :value)
-                 :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi :value))]
-    (not-empty
-      (assoc-when {}
-        :nimi nimi
-        :osoite osoite
-        :sahkopostiosoite (-> henkilo :yhteystiedot :email :value)
-        :puhelin (-> henkilo :yhteystiedot :puhelin :value)
-        :henkilotunnus (-> henkilo :henkilotiedot :hetu :value)))))
-
 (defn- get-yritys [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu :value))
         postiosoite (not-empty
