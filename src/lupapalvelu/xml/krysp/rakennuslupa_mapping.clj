@@ -290,7 +290,9 @@
 
     (mapping-common/write-to-disk application all-canonical-attachments nil xml krysp-version output-dir)))
 
-(defn save-katselmus-as-krysp [application katselmus user lang krysp-version output-dir begin-of-link]
+(defn save-katselmus-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
@@ -326,7 +328,9 @@
     (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
   )
 
-(defn save-unsent-attachments-as-krysp [application lang krysp-version output-dir begin-of-link]
+(defn save-unsent-attachments-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
@@ -338,7 +342,9 @@
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
-(defn save-application-as-krysp [application lang submitted-application krysp-version output-dir begin-of-link]
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments  (application-to-canonical application lang)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments

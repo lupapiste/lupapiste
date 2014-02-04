@@ -62,7 +62,7 @@
     (if (pos? (count attachments-wo-sent-timestamp))
 
       (let [organization (organization/get-organization (:organization application))]
-        (mapping-to-krysp/save-unsent-attachments-as-krysp
+        (mapping-to-krysp/save-unsent-attachments-as-krysp ; TODO returns fileIds, update sent dates in a common way
           (-> application
             (dissoc :attachments)
             (assoc :attachments attachments-wo-sent-timestamp))

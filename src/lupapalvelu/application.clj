@@ -344,7 +344,7 @@
         organization (organization/get-organization (:organization application))]
 
     (let [submitted-application (mongo/by-id :submitted-applications id)]
-      (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
+      (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)) ; TODO returns fileIds, update sent dates in a common way
 
     ;; The "sent" timestamp is updated to all attachments of the application,
     ;; also the ones that have no versions at all (have no latestVersion).
@@ -375,7 +375,7 @@
                          :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
         organization (organization/get-organization (:organization application))]
 
-    (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+    (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization) ; TODO returns fileIds, update sent dates
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set (merge
@@ -865,7 +865,7 @@
         organization (organization/get-organization (:organization application))
         krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
         output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)]
-    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
+    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version) ; TODO returns fileIds, update sent dates
     (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
       (notifications/notify! :application-state-change command)))
@@ -888,7 +888,7 @@
                          :neighbors :openInfoRequest :statements :tasks :verdicts
                          :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
         organization (organization/get-organization (:organization application))]
-    (mapping-to-krysp/save-application-as-krysp
+    (mapping-to-krysp/save-application-as-krysp ; TODO returns fileIds, update sent dates
       application
       lang
       application
