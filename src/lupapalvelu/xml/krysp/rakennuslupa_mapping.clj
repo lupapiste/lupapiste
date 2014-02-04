@@ -262,17 +262,27 @@
                            krysp-version
                            begin-of-link
                            attachment-target]
-  (let [attachments (when attachment-target (mapping-common/get-attachments-as-canonical application begin-of-link attachment-target))
-        ;poytakirja  (some muut.katselmuksen_tai_tarkastuksen_poytakirja)
+  (let [attachments (filter #(= attachment-target (:target %)) (:attachments application))
+        poytakirja  (some #(when (=  {:type-group "muut", :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %) ) %) attachments)
+        attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
+        canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
+                                                        {:attachments attachments-wo-pk :title (:title application)}
+                                                        begin-of-link attachment-target))
+
         canonical-without-attachments (katselmus-canonical application lang task-id task-name started buildings user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
                                                            huomautukset lasnaolijat poikkeamat)
-        canonical (assoc-in canonical-without-attachments
-                            [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                            attachments)
+        canonical (-> canonical-without-attachments
+                    (#(if (seq canonical-attachments)
+                      (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
+                      %))
+                    (#(if poytakirja
+                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] poytakirja)
+                       %)))
+
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
+    (mapping-common/write-to-disk application canonical-attachments nil xml krysp-version output-dir)))
 
 (defn save-katselmus-as-krysp [application katselmus user lang krysp-version output-dir begin-of-link]
   (let [data (tools/unwrapped (:data katselmus))
