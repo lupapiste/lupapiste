@@ -125,14 +125,6 @@
                                        :sukunimi (:lastName handler)}}}}
       empty-tag)))
 
-(defn- get-kasittelytieto [application]
-  {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
-                    :asiatunnus (:id application)
-                    :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
-                    :kasittelija (get-handler application)}})
-
-
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 

@@ -157,7 +157,7 @@
                  sovellus (:sovellus MuuTunnus) => "Lupapiste"
 
 
-                 toimintatieto (:toimintatieto melutarina) => truthy
+                 ;toimintatieto (:toimintatieto melutarina) => truthy
 
 
                  ]

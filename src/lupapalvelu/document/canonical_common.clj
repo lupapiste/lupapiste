@@ -393,3 +393,13 @@
         {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}})
       [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 
+(defn get-kasittelytieto [application]
+  {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
+                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+                    :asiatunnus (:id application)
+                    :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+                    :kasittelija (get-handler application)}})
+
+
+
+
