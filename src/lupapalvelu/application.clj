@@ -431,10 +431,9 @@
 (defcommand refresh-ktj
   {:parameters [:id]
    :roles      [:authority]
-   :states     [:draft :open :submitted :complement-needed]
-   :pre-checks [validate-owner-or-writer]}
-  [{:keys [application]}]
-  (try (autofill-rakennuspaikka application (now))
+   :states     [:draft :open :submitted :complement-needed]}
+  [{:keys [application created]}]
+  (try (autofill-rakennuspaikka application created)
     (catch Exception e (error e "KTJ data was not updated"))))
 
 (defcommand save-application-shape
