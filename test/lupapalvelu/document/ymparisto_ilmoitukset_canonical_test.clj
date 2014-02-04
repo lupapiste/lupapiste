@@ -176,6 +176,21 @@
                  varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
                  lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
+                 ilmoittaja (:ilmoittaja melutarina) => truthy
+                 nimi (:nimi ilmoittaja) => "Yksityshenkil\u00f6"
+                 postiosoite (:postiosoite ilmoittaja) => truthy
+                 osoitenimi (:osoitenimi postiosoite) => truthy
+                 teksti (:teksti osoitenimi) => "Murskaajankatu 5"
+                 postinumero (:postinumero postiosoite) => "36570"
+                 postitoimipaikannimi (:postitoimipaikannimi postiosoite) => "Kaivanto"
+
+                 sahkopostiosoite (:sahkopostiosoite ilmoittaja) => nil
+                 yhteyshenkilo (:yhteyshenkilo ilmoittaja) => truthy
+                 nimi (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
+                 sahkopostiosoite (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
+                 puhelin (:puhelin yhteyshenkilo) => "121212"
+
+                 liikeJaYhteisotunnus (:liikeJaYhteisotunnus ilmoittaja) => nil
 
 
                  ;toimintatieto (:toimintatieto melutarina) => truthy
@@ -183,3 +198,6 @@
 
                  ]
              (clojure.pprint/pprint canonical)))
+
+
+(println "TEE TESTI YRITYSILMOITTAJALLA")
