@@ -268,6 +268,9 @@
         canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
                                                         begin-of-link attachment-target))
+        canonical-pk (:Liite (first (mapping-common/get-attachments-as-canonical
+                                     {:attachments [poytakirja] :title (:title application)}
+                                     begin-of-link attachment-target)))
 
         canonical-without-attachments (katselmus-canonical application lang task-id task-name started buildings user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
@@ -277,7 +280,7 @@
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
                       %))
                     (#(if poytakirja
-                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] poytakirja)
+                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
                        %)))
 
         xml (element-to-xml canonical (get-mapping krysp-version))]
