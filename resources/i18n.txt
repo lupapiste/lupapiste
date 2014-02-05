@@ -1,1 +1,0 @@
-attachmentType.muut.katselmuksen_tai_tarkastuksen_poytakirja: Katselmuksen tai tarkastuksen pöytäkirja
