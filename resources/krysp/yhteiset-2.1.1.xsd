@@ -218,30 +218,30 @@
 			</xs:element>
 			<xs:element name="metatietotunniste" type="xs:string" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>Paikkatietohakemistossa aineiston yksilöivä
-metatietotunniste. Muita nimityksiä: UUID, tiedostotunniste,
+					<xs:documentation>Paikkatietohakemistossa aineiston yksilöivä 
+metatietotunniste. Muita nimityksiä: UUID, tiedostotunniste, 
 resurssitunniste, aineiston ID.  Esim: 924a68ba-665f-4ea0-a830-
 26e80112b5dc</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="metatietoXMLURL" type="xs:string" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>URL, joka palauttaa aineiston metatiedot XML
+					<xs:documentation>URL, joka palauttaa aineiston metatiedot XML 
 tiedostona ISO 19139 skeeman mukaisesti. Esim: http://geonetwork.nls.fi/geonetwork/srv/fi/iso19139.xml?uuid=924a68ba-
 665f-4ea0-a830-26e80112b5dc</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="metatietoURL" type="xs:string" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>URL www-sivulle, josta aineiston metatiedot ovat
-luettavissa ”selkokielisenä”. Esim:
+					<xs:documentation>URL www-sivulle, josta aineiston metatiedot ovat 
+luettavissa ”selkokielisenä”. Esim: 
 http://www.paikkatietoikkuna.fi/web/fi/paikkatietoaineisto?inspireMetadat
 aUIID=924a68ba-665f-4ea0-a830-26e80112b5dc</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="tietotuoteURL" type="xs:string" minOccurs="0">
 				<xs:annotation>
-					<xs:documentation>URL, josta saadaan aineistoon liittyvän tietotuotteen
+					<xs:documentation>URL, josta saadaan aineistoon liittyvän tietotuotteen 
 tiedot</xs:documentation>
 				</xs:annotation>
 			</xs:element>
