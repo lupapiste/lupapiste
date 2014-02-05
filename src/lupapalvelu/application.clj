@@ -363,25 +363,27 @@
                     {:authority (user/summary user)}))}))))
 
 (defn do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
-                      (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
-                      application)
-        application (merge application
-                      (select-keys
-                        domain/application-skeleton
-                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
-                         :neighbors :openInfoRequest :statements :tasks :verdicts
-                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
-        organization (organization/get-organization (:organization application))]
+  (let [application   (meta-fields/enrich-with-link-permit-data application)
+        application   (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                        (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                        application)
+        application   (merge application
+                        (select-keys
+                          domain/application-skeleton
+                          [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                           :neighbors :openInfoRequest :statements :tasks :verdicts
+                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
+        organization  (organization/get-organization (:organization application))
+        sent-file-ids (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
 
-    (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization) ; TODO returns fileIds, update sent dates
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set (merge
               {:sent created :state :closed :closed created}
               (when (empty? (:authority application))
-                {:authority (user/summary user)}))})))
+                {:authority (user/summary user)})
+              set-statement)})))
 
 (defn is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
@@ -850,26 +852,29 @@
    :pre-checks [(permit/validate-permit-type-is permit/R)]
    :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
   [{:keys [user created application] :as command}]
-  (let [building  (or
-                    (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
-                    (fail! :error.unknown-building))
-        timestamp (util/to-millis-from-local-date-string startedDate)
-        updates   {$set (merge
-                          {:modified created
-                           :buildings.$.constructionStarted timestamp
-                           :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
-                          (when (= "verdictGiven" (:state application))
-                            {:started created
-                             :state  :constructionStarted}))}
-        permit-type (permit/permit-type application)
-        organization (organization/get-organization (:organization application))
+  (let [building      (or
+                        (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
+                        (fail! :error.unknown-building))
+        timestamp     (util/to-millis-from-local-date-string startedDate)
+        permit-type   (permit/permit-type application)
+        organization  (organization/get-organization (:organization application))
         krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
-        output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)]
-    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version) ; TODO returns fileIds, update sent dates
+        output-dir    (mapping-to-krysp/resolve-output-directory organization permit-type)
+        sent-file-ids (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
+        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
+        updates       {$set
+                       (merge
+                         {:modified created
+                          :buildings.$.constructionStarted timestamp
+                          :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
+                         (when (= "verdictGiven" (:state application))
+                           {:started created
+                            :state  :constructionStarted})
+                         set-statement)}]
     (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
-      (notifications/notify! :application-state-change command)))
-  (ok))
+      (notifications/notify! :application-state-change command))
+    (ok)))
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
@@ -879,22 +884,18 @@
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
-        application (merge application
-                      {:closed timestamp}
-                      (select-keys
-                        domain/application-skeleton
-                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
-                         :neighbors :openInfoRequest :statements :tasks :verdicts
-                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
-        organization (organization/get-organization (:organization application))]
-    (mapping-to-krysp/save-application-as-krysp ; TODO returns fileIds, update sent dates
-      application
-      lang
-      application
-      organization)
-    (update-application command {$set {:closed timestamp
-                                       :state :closed}})
+  (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
+        application   (merge application
+                        {:closed timestamp}
+                        (select-keys
+                          domain/application-skeleton
+                          [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                           :neighbors :openInfoRequest :statements :tasks :verdicts
+                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
+        organization  (organization/get-organization (:organization application))
+        sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang application organization)
+        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+    (update-application command {$set (merge {:closed timestamp :state :closed}) set-statement})
     (ok)))
 
 

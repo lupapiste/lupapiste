@@ -131,12 +131,20 @@
 ;; Api
 ;;
 
+(defn by-file-ids [file-ids attachment]
+  (let [file-id-set (set file-ids)
+        attachment-file-ids (map :fileId (:versions attachment))]
+    (some #(file-id-set %) attachment-file-ids)))
+
 (defn create-update-statements
   "Returns a map of mongo updates to be used as $set value.
    E.g., {attachments.0.k v
           attachments.5.k v}"
   [attachments pred k v]
   (reduce (fn [m i] (assoc m (str "attachments." i \. k) v)) {} (util/positions pred attachments)))
+
+(defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
+  (create-update-statements attachments (partial by-file-ids file-ids) "sent" timestamp))
 
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"
@@ -296,11 +304,6 @@
   "gets an attachment from application or nil"
   [{:keys [attachments]} attachmentId]
   (first (filter #(= (:id %) attachmentId) attachments)))
-
-(defn by-file-ids [file-ids attachment]
-  (let [file-id-set (set file-ids)
-        attachment-file-ids (map :fileId (:versions attachment))]
-    (some #(file-id-set %) attachment-file-ids)))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
