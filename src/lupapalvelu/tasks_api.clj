@@ -1,11 +1,14 @@
 (ns lupapalvelu.tasks-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
+            [sade.util :as util]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
@@ -19,10 +22,12 @@
       (fail! :error.command-illegal-state))
     (fail! :error.task-not-found)))
 
-(defn- set-state [{created :created :as command} task-id state]
+(defn- set-state [{created :created :as command} task-id state & [updates]]
   (update-application command
     {:tasks {$elemMatch {:id task-id}}}
-    {$set {:tasks.$.state state :modified created}}))
+    (util/deep-merge
+      {$set {:tasks.$.state state :modified created}}
+      updates)))
 
 ;; API
 
@@ -74,15 +79,17 @@
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
+   :pre-checks  [(permit/validate-permit-type-is permit/R)] ; KRYPS mapping currently implemented only for R
    :roles       [:authority]
    :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{application :application user :user :as command}]
+  [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)]
     (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
     (when-not (get-in task [:data :katselmuksenLaji :value]) (fail! :error.missing-parameters))
-    (mapping-to-krysp/save-review-as-krysp application task user lang)
-    (set-state command taskId :sent)))
+    (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+          set-statement  (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+      (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
 
 (defquery task-types-for-application
   {:description "Returns a list of allowed schema names for current application and user"

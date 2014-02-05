@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.subtype
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.util :refer [->int fn->]]
+            [sade.util :refer [->int]]
             [clojure.string :refer [blank?]]
             [clj-time.format :as tf]))
 

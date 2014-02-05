@@ -60,24 +60,12 @@
                                            (not= "verdict" (-> % :target :type)))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
-
-      (let [organization (organization/get-organization (:organization application))]
-        (mapping-to-krysp/save-unsent-attachments-as-krysp
-          (-> application
-            (dissoc :attachments)
-            (assoc :attachments attachments-wo-sent-timestamp))
-          lang
-          organization)
-        ;; The "sent" timastamp is updated to all attachments of the application, also the ones
-        ;; that were not sent this time, and the ones that have no versions at all (have no latestVersion).
-        (let [data-argument (reduce
-                              (fn [data-map attachment]
-                                (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-                              {}
-                              (:attachments application))]
-          (update-application command {$set data-argument}))
+      (let [organization  (organization/get-organization (:organization application))
+            sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
+            data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+        (println data-argument)
+        (update-application command {$set data-argument})
         (ok))
-
       (fail :error.sending-unsent-attachments-failed))))
 
 ;;
