@@ -12,26 +12,26 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 ;; Macro to get values from
-(defmacro value [m & path] `(-> ~m ~@path :value))
+;(defmacro value [m & path] `(-> ~m ~@path :value))
 
 (defn- get-huoneisto-data [huoneistot]
   (for [huoneisto (vals huoneistot)
         :let [tyyppi (:huoneistonTyyppi huoneisto)
               varusteet (:varusteet huoneisto)
-              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero :value)
-              huoneistoPorras (-> huoneisto :huoneistoTunnus :porras :value)
-              jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain :value)]
+              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero)
+              huoneistoPorras (-> huoneisto :huoneistoTunnus :porras)
+              jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain)]
         :when (seq huoneisto)]
-    (merge {:muutostapa (-> huoneisto :muutostapa :value)
-            :huoneluku (-> tyyppi :huoneluku :value)
-            :keittionTyyppi (-> huoneisto :keittionTyyppi :value)
-            :huoneistoala (-> tyyppi :huoneistoala :value)
-            :varusteet {:WCKytkin (true? (-> varusteet :WCKytkin :value))
-                        :ammeTaiSuihkuKytkin (true? (-> varusteet :ammeTaiSuihkuKytkin :value))
-                        :saunaKytkin (true? (-> varusteet :saunaKytkin :value))
-                        :parvekeTaiTerassiKytkin (true? (-> varusteet  :parvekeTaiTerassiKytkin :value))
-                        :lamminvesiKytkin (true? (-> varusteet :lamminvesiKytkin :value))}
-            :huoneistonTyyppi (-> tyyppi :huoneistoTyyppi :value)}
+    (merge {:muutostapa (-> huoneisto :muutostapa)
+            :huoneluku (-> tyyppi :huoneluku)
+            :keittionTyyppi (-> huoneisto :keittionTyyppi)
+            :huoneistoala (-> tyyppi :huoneistoala)
+            :varusteet {:WCKytkin (true? (-> varusteet :WCKytkin))
+                        :ammeTaiSuihkuKytkin (true? (-> varusteet :ammeTaiSuihkuKytkin))
+                        :saunaKytkin (true? (-> varusteet :saunaKytkin))
+                        :parvekeTaiTerassiKytkin (true? (-> varusteet  :parvekeTaiTerassiKytkin))
+                        :lamminvesiKytkin (true? (-> varusteet :lamminvesiKytkin))}
+            :huoneistonTyyppi (-> tyyppi :huoneistoTyyppi)}
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
@@ -49,58 +49,58 @@
          lammitys :lammitys
          luokitus :luokitus
          huoneistot :huoneistot} toimenpide
-        kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (-> rakenne :muuRakennusaine :value)
-                                                  :rakennusaine (-> rakenne :kantavaRakennusaine :value))
+        kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (-> rakenne :muuRakennusaine)
+                                                  :rakennusaine (-> rakenne :kantavaRakennusaine))
         lammonlahde-map (muu-select-map
-                          :muu (-> lammitys :muu-lammonlahde :value)
-                          :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde :value))
-                                          (str (-> lammitys :lammonlahde :value) ".")
-                                          (-> lammitys :lammonlahde :value)))
-        julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
-                                      :julkisivumateriaali (-> rakenne :julkisivu :value))
-        lammitystapa (-> lammitys :lammitystapa :value)
+                          :muu (-> lammitys :muu-lammonlahde)
+                          :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde))
+                                          (str (-> lammitys :lammonlahde) ".")
+                                          (-> lammitys :lammonlahde)))
+        julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali)
+                                      :julkisivumateriaali (-> rakenne :julkisivu))
+        lammitystapa (-> lammitys :lammitystapa)
         huoneistot {:huoneisto (get-huoneisto-data huoneistot)}]
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-     :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
+     :rakentajatyyppi (-> kaytto :rakentajaTyyppi)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
-     :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
-                                :tilavuus (-> mitat :tilavuus :value)
-                                :kokonaisala (-> mitat :kokonaisala :value)
-                                :kellarinpinta-ala (-> mitat :kellarinpinta-ala :value)
+     :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus)
+                                :tilavuus (-> mitat :tilavuus)
+                                :kokonaisala (-> mitat :kokonaisala)
+                                :kellarinpinta-ala (-> mitat :kellarinpinta-ala)
                                 ;:BIM empty-tag
-                                :kerrosluku (-> mitat :kerrosluku :value)
-                                :kerrosala (-> mitat :kerrosala :value)
-                                :rakentamistapa (-> rakenne :rakentamistapa :value)
-                                :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin :value))
-                                                    :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin :value))
-                                                    :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin :value))
-                                                    :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin :value))
-                                                    :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin :value))}
-                                :energialuokka (-> luokitus :energialuokka :value)
-                                :energiatehokkuusluku (-> luokitus :energiatehokkuusluku :value)
-                                :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko :value)
-                                :paloluokka (-> luokitus :paloluokka :value)
+                                :kerrosluku (-> mitat :kerrosluku)
+                                :kerrosala (-> mitat :kerrosala)
+                                :rakentamistapa (-> rakenne :rakentamistapa)
+                                :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
+                                                    :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
+                                                    :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
+                                                    :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
+                                                    :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                                :energialuokka (-> luokitus :energialuokka)
+                                :energiatehokkuusluku (-> luokitus :energiatehokkuusluku)
+                                :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko)
+                                :paloluokka (-> luokitus :paloluokka)
                                 :lammitystapa (cond (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
                                                     (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
                                                 :default lammitystapa)
-                                :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
-                                            :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin :value))
-                                            :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
-                                            :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin :value))
-                                            :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin :value))
-                                            :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin :value))
-                                            :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin :value))
-                                            :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
-                                            :saunoja (-> toimenpide :varusteet :saunoja :value)
-                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
-                               (cond (-> toimenpide :manuaalinen_rakennusnro :value)
-                                 {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro :value)
+                                :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                                            :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
+                                            :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                                            :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
+                                            :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
+                                            :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
+                                            :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
+                                            :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
+                                            :saunoja (-> toimenpide :varusteet :saunoja)
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}}
+                               (cond (-> toimenpide :manuaalinen_rakennusnro)
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro)
                                                      :jarjestysnumero nil
                                                     :kiinttun (:propertyId application)}}
-                                     (-> toimenpide :rakennusnro :value)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro :value)
+                                     (-> toimenpide :rakennusnro)
+                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro)
                                                      :jarjestysnumero nil
                                                      :kiinttun (:propertyId application)}}
                                      :default
@@ -109,8 +109,8 @@
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
-                               (when huoneistot (if (not-empty (:huoneisto huoneistot))
-                                                  {:asuinhuoneistot huoneistot})))}))
+                               (when (and huoneistot (not-empty (:huoneisto huoneistot)))
+                                 {:asuinhuoneistot huoneistot}))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
@@ -133,8 +133,8 @@
 (defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
   (let [toimenpide (:data rakennuksen-muuttaminen-doc)]
     {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
-                                      {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value))}
-                                      {:muutostyonLaji (fix-typo-in-kayttotarkotuksen-muutos (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value))})
+                                      {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin))}
+                                      {:muutostyonLaji (fix-typo-in-kayttotarkotuksen-muutos (-> rakennuksen-muuttaminen-doc :data :muutostyolaji))})
                   :rakennustieto (get-rakennus-data toimenpide application rakennuksen-muuttaminen-doc)}
      :created (:created rakennuksen-muuttaminen-doc)}))
 
@@ -142,21 +142,21 @@
   (let [toimenpide (:data laajentaminen-doc)
         mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
-                                   {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value))}
-                                   {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus :value)
-                                                         :kerrosala (-> mitat :kerrosala :value)
-                                                         :kokonaisala (-> mitat :kokonaisala :value)
+                                   {:perusparannusKytkin (true? (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin))}
+                                   {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus)
+                                                         :kerrosala (-> mitat :kerrosala)
+                                                         :kokonaisala (-> mitat :kokonaisala)
                                                          :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
-                                                                         {:pintaAla (-> huoneistoala :pintaAla :value)
-                                                                          :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi :value)})}})
+                                                                         {:pintaAla (-> huoneistoala :pintaAla)
+                                                                          :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi)})}})
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
 (defn- get-purku-toimenpide [purku-doc application]
   (let [toimenpide (:data purku-doc)]
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
-                                   {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
-                                   {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta :value))})
+                                   {:purkamisenSyy (-> toimenpide :poistumanSyy)}
+                                   {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta))})
                   :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
      :created (:created purku-doc)}))
 
@@ -166,8 +166,8 @@
                   :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
                                                  :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-                                                 :kokonaisala (-> toimenpide :kokonaisala :value)
-                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}
+                                                 :kokonaisala (-> toimenpide :kokonaisala)
+                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus)}
                                                  :tunnus {:jarjestysnumero nil}
                                                  :kiinttun (:propertyId application)}}}
      :created (:created kaupunkikuvatoimenpide-doc)}))
@@ -179,9 +179,7 @@
                             %) toimenpide))
 
 
-
 (defn- get-operations [documents application]
-  ;funkito
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
@@ -189,7 +187,6 @@
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
-
 
 
 (defn- get-lisatiedot [documents lang]
@@ -205,26 +202,23 @@
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
-                                 ":" (-> maisematyo_doc :data :kuvaus :value)))
-        r {:Asiantiedot {:rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value)
+                                 ":" (-> maisematyo_doc :data :kuvaus)))
+        r {:Asiantiedot {:rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus)
                                                         (apply str maisematyo_kuvaukset))}}]
     (if (:poikkeamat asian-tiedot)
-      (assoc-in r [:Asiantiedot :vahainenPoikkeaminen] (or (-> asian-tiedot :poikkeamat :value) empty-tag))
+      (assoc-in r [:Asiantiedot :vahainenPoikkeaminen] (or (-> asian-tiedot :poikkeamat) empty-tag))
       r)))
 
 (defn- get-kayttotapaus [documents toimenpiteet]
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
-(defn- assoc-in-no-nil [m ks v]
-  (if v
-    (assoc-in m ks v)
-    m))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
-  (let [link-permit-data (first (:linkPermitData application))
+  (let [application (tools/unwrapped application)
+        link-permit-data (first (:linkPermitData application))
         documents (documents-by-type-without-blanks application)
         toimenpiteet (get-operations documents application)
         operation-name (-> application :operations first :name)
@@ -252,13 +246,11 @@
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
                             (= operation-name "suunnittelijan-nimeaminen")
                             (= operation-name "jatkoaika"))
-                    (-> canonical
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
-                        (get-bulding-places (:rakennuspaikka documents) application))
-                      (assoc-in-no-nil [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
-                        toimenpiteet)
-                      (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-                        (get-statements (:statements application))))
+                    (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                      assoc-when
+                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)
+                      :toimenpidetieto toimenpiteet
+                      :lausuntotieto (get-statements (:statements application)))
                     canonical)]
     canonical))
 
@@ -294,7 +286,8 @@
 ;                                                                 lisaa skeemaan (muu-muu)
 ;                                                                                          lopullinen-tila
 (defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
-  (let [documents (documents-by-type-without-blanks application)
+  (let [application (tools/unwrapped application)
+        documents (documents-by-type-without-blanks application)
         katselmus (cr/strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
@@ -328,7 +321,8 @@
     canonical))
 
 (defn unsent-attachments-to-canonical [application lang]
-  (let [documents (documents-by-type-without-blanks application)
+  (let [application (tools/unwrapped application)
+        documents (documents-by-type-without-blanks application)
         hakija-info (-> (filter #(= (-> % :Osapuoli :VRKrooliKoodi) "hakija") (get-parties documents))
                       first
                       (assoc-in [:Osapuoli :kuntaRooliKoodi] "ei tiedossa"))

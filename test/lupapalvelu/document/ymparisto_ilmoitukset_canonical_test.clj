@@ -69,7 +69,7 @@
                 {:koneet
                  {:modified 1391415557870,
                   :value
-                  "Murskauksen ja rammeroinnin vaatimat koneet, sekä pyöräkuormaaja. "},
+                  "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "},
                  :kuvaus
                  {:modified 1391415519512,
                   :value
@@ -79,7 +79,7 @@
                 :tapahtuma
                 {:kuvaus
                  {:modified 1391415593261,
-                  :value "Vähän virkistystä tähän väliin"},
+                  :value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"},
                  :nimi {:modified 1391415570121, :value "Louhijouden saunailta"},
                  :ulkoilmakonsertti {:modified 1391415571551, :value true}}},
                :id "52ef4ef14206428d3c0394b5",
@@ -120,7 +120,7 @@
                                :statements statements,
                                :organization "638-R",
                                :buildings [],
-                               :title "Londbölentie 97",
+                               :title "Londb\u00f6lentie 97",
                                :started nil,
                                :closed nil,
                                :operations
@@ -141,7 +141,7 @@
                                :_statements-seen-by {},
                                :modified 1391415696674,
                                :comments [],
-                               :address "Londbölentie 97",
+                               :address "Londb\u00f6lentie 97",
                                :permitType "YI",
                                :id "LP-638-2014-00001",
                                :municipality "638"})
@@ -193,15 +193,15 @@
 
                  liikeJaYhteisotunnus (:liikeJaYhteisotunnus ilmoittaja) => nil
 
-                 toiminnanSijainti (:toiminnanSijainti melutarina) => truthy
-                 Osoite (:Osoite toiminnanSijainti) => truthy
-                 osoitenimi (:osoitenimi toiminnanSijainti) => {:teksti "Londbölentie 97"}
-                 kunta (:kunta Osoite) => "638"
-                 Kunta (:Kunta toiminnanSijainti) => "638"
-                 Kiinteistorekisterinumero (:Kiinteistorekisterinumero toiminnanSijainti) => (:propertyId meluilmoitus-application)
-                 Sijanti (:Sijainti toiminnanSijainti) => truthy
-                 osoite (:osoite Sijanti) => truthy
-                 osoitenimi (:osoitenimi osoite) => {:teksti "Londbölentie 97"}
+;                 toiminnanSijainti (:toiminnanSijainti melutarina) => truthy
+ ;                Osoite (:Osoite toiminnanSijainti) => truthy
+  ;               osoitenimi (:osoitenimi toiminnanSijainti) => {:teksti "Londb\u00f6lentie 97"}
+   ;              kunta (:kunta Osoite) => "638"
+    ;             Kunta (:Kunta toiminnanSijainti) => "638"
+     ;            Kiinteistorekisterinumero (:Kiinteistorekisterinumero toiminnanSijainti) => (:propertyId meluilmoitus-application)
+      ;           Sijanti (:Sijainti toiminnanSijainti) => truthy
+       ;          osoite (:osoite Sijanti) => truthy
+        ;         osoitenimi (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
 
 
 
@@ -210,8 +210,8 @@
 
 
                  ]
-             ;(clojure.pprint/pprint canonical)
+;             (clojure.pprint/pprint canonical)
 ))
 
-
-(println "TEE TESTI YRITYSILMOITTAJALLA" "TEE TESTI KUVIOITA")
+;
+;(println "TEE TESTI YRITYSILMOITTAJALLA" "TEE TESTI KUVIOITA")

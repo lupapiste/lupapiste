@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical
-  (:require [lupapalvelu.document.canonical-common :refer :all]))
+  (:require [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.tools :as tools]))
 
 (defn- ilmoittaja [hakijat]
   (assert (= 1 (count hakijat)))
@@ -11,7 +12,8 @@
        :yhteyshenkilo (get-henkilo (-> hakija :data :henkilo))})))
 
 (defn meluilmoitus-canonical [application lang]
-  (let [documents (documents-by-type-without-blanks application)
+  (let [application (tools/unwrapped application)
+        documents (documents-by-type-without-blanks application)
         ] {:Ilmoitukset {:toimutuksenTiedot (toimituksen-tiedot application lang)
                  :melutarina {:kasittelytietotieto (get-kasittelytieto application)
                               :luvanTunnistetiedot  (lupatunnus (:id application))
