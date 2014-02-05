@@ -99,8 +99,9 @@
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota yksityisella maksajalla ("henkilo"-tyyppinen maksaja)
-        maksaja-yksityinen (tools/unwrapped
-                             (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja"))
+        maksaja-yksityinen (get-yritys-and-henkilo
+                             (tools/unwrapped
+                               (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "maksaja")
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
         maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
@@ -124,8 +125,9 @@
 ;        hakija-Vastuuhenkilo-osoite (-> hakija-Vastuuhenkilo :osoitetieto :osoite) => truthy
 ;
 ;        ;; Testataan muunnosfunktiota yksityisella hakijalla ("henkilo"-tyyppinen hakija)
-;        hakija-yksityinen (tools/unwrapped
-;                            (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "hakija"))
+;        hakija-yksityinen (get-yritys-and-henkilo
+;                            (tools/unwrapped
+;                              (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "hakija")
 ;        hakija-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
 ;        hakija-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
 ;        hakija-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
@@ -153,11 +155,9 @@
         sijoituksen-tark (:arvo sijoituksen-tarkoitus-Lisatieto) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
-        sijoituksen-tark-liikennevalo (tools/unwrapped
-                                        (get-sijoituksen-tarkoitus
-                                         (assoc-in (:data sijoituksen-tarkoitus)
-                                           [:sijoituksen-tarkoitus :value]
-                                           "liikennevalo"))) => truthy
+        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
+                                       (tools/unwrapped
+                                         (assoc-in (:data sijoituksen-tarkoitus) [:sijoituksen-tarkoitus :value] "liikennevalo"))) => truthy
 
         match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :selitysteksti))
         lisatietoja-sijoituskohteesta-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy

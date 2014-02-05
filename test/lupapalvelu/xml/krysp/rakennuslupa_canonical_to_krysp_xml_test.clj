@@ -7,9 +7,9 @@
                                                                       jatkolupa-application
                                                                       aloitusoikeus-hakemus
                                                                       ]]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
+                                                                rakennuslupa_to_krysp_213
                                                                 save-aloitusilmoitus-as-krysp
-
                                                                 save-katselmus-as-krysp]]
             [lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
@@ -23,48 +23,21 @@
 
 (defn- do-test [application]
   (let [canonical (application-to-canonical application "fi")
-        xml (element-to-xml canonical rakennuslupa_to_krysp)
-        xml-s (indent-str xml)]
+        xml_212 (element-to-xml canonical rakennuslupa_to_krysp_212)
+        xml_213 (element-to-xml canonical rakennuslupa_to_krysp_213)]
 
-    (fact ":tag is set" (has-tag rakennuslupa_to_krysp) => true)
+    (fact "2.1.2: :tag is set" (has-tag rakennuslupa_to_krysp_212) => true)
+    (fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
 
-    ;(println xml-s)
-    ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    ;; TODO: own test
+    ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo" :version "2.1.2"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo" :version "2.1.3"}}})
 
-    ;(clojure.pprint/pprint application)
+    (fact "2.1.2: xml exist" xml_212 => truthy)
+    (fact "2.1.3: xml exist" xml_213 => truthy)
 
-    ;(clojure.pprint/pprint rakennuslupa_to_krysp)
-    ;(with-open [out-file (writer "/Users/terotu/jatkolupa_example.xml" )]
-    ;    (emit xml out-file))
-    (fact "xml exist" xml => truthy)
-
-    (validator/validate xml-s (:permitType application) "2.1.2")
-
-    #_(save-aloitusilmoitus-as-krysp
-      (assoc application :state "verdictGiven")
-      "fi"
-      ""
-      (lupapalvelu.core/now)
-      {:jarjestysnumero 1 :rakennusnro "123"}
-      {:id "777777777777777777000017"
-       :email "jussi.viranomainen@tampere.fi"
-       :enabled true
-       :role "authority"
-       :username "jussi"
-       :organizations ["837-YA"]
-       :firstName "Jussi"
-       :lastName "Viranomainen"
-       :street "Katuosoite 1 a 1"
-       :phone "1231234567"
-       :zip "33456"
-       :city "Tampere"
-       :private {:salt "$2a$10$Wl49diVWkO6UpBABzjYR4e"
-                 :password "$2a$10$Wl49diVWkO6UpBABzjYR4e8zTwIJBDKiEyvw1O2EMOtV9fqHaXPZq" ;; jussi
-                 :apikey "5051ba0caa2480f374dcfefg"}})
-
-    ))
+    (validator/validate (indent-str xml_212) (:permitType application) "2.1.2")
+    (validator/validate (indent-str xml_213) (:permitType application) "2.1.3")))
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
@@ -100,38 +73,46 @@
         application
         "fi"
         "target"
+        "123" ; task id
+        "Pohjakatselmus 1" ; task name
         "2.5.1974"
-        {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}
+        [{:tila {:tila "osittainen" :kayttoonottava true}
+         :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
         user
-        "pohjakatselmus"
-        :katselmus
-        "pidetty"
-        "pitaja"
-        true
-        "kuvaus"
-        "Tiivi Taavi, Hipsu ja Lala"
-        "Ei poikkeamisia"
-        "2.1.2"
-        "begin-of-link"
-        {:type "task" :id "123"}) => nil)
+        "pohjakatselmus" ; katselmuksen-nimi
+        :katselmus ;tyyppi
+        "pidetty" ;osittainen
+        "pitaja" ;pitaja
+        false ;lupaehtona
+        {:kuvaus "kuvaus"
+         :maaraAika "3.5.1974"
+         :toteaja "toteaja"
+         :toteamisHetki "1.5.1974"} ;huomautukset
+        "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
+        "Ei poikkeamisia" ;poikkeamat
+        "2.1.2" ;krysp-version
+        "begin-of-link" ;begin-of-link
+        {:type "task" :id "123"} ;attachment-target
+        ) => nil)
+
     (save-katselmus-as-krysp
       application
       {:id "123"
+       :taskname "Pohjakatselmus 1"
        :schema-info {:name "task-katselmus"}
        :data {:katselmuksenLaji {:value "pohjakatselmus"},
-              :vaadittuLupaehtona {:value true} ; missing
-              :rakennus
-              {:0
-               {:rakennus
-                {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
-                :tila {:tila {:value "osittainen"} ; missing
-                       :kayttoonottava {:value true}}}} ; missing
+              :vaadittuLupaehtona {:value false}
+              :rakennus {:0
+                        {:rakennus
+                         {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
+                         :tila {:tila {:value "osittainen"}
+                                :kayttoonottava {:value true}}}}
               :katselmus {:pitoPvm {:value "2.5.1974"}
                           :pitaja {:value "pitaja"}
                           :huomautukset {:kuvaus {:value "kuvaus"}
-                                         :maaraAika {:value "3.5.1974"}; missing
-                                         :toteaja {:value "toteaja"} ; missing
-                                         :toteamisHetki {:value "1.5.1974"}} ; missing
+                                         :maaraAika {:value "3.5.1974"}
+                                         :toteaja {:value "toteaja"}
+                                         :toteamisHetki {:value "1.5.1974"}}
                           :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
                           :poikkeamat {:value "Ei poikkeamisia"}
                           :tila {:value "pidetty"}}}}

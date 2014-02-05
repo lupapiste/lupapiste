@@ -141,8 +141,9 @@
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota myos yksityisella ("henkilo"-tyyppisella) maksajalla
-        maksaja-yksityinen (tools/unwrapped
-                             (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja"))
+        maksaja-yksityinen (get-yritys-and-henkilo
+                             (tools/unwrapped
+                               (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "maksaja")
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
         maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy

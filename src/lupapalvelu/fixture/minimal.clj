@@ -196,7 +196,7 @@
     :phone "0102030405"
     :email "tampere-ya"
     :role "authorityAdmin"
-    :zip "010203"
+    :zip "10203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}} ;; tampere
    ;; Kuopio ya paakayttaja:  kuopio-ya / kuopio
@@ -210,7 +210,7 @@
     :phone "0102030405"
     :email "kuopio-ya"
     :role "authorityAdmin"
-    :zip "010203"
+    :zip "10203"
     :organizations ["297-YA"]
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
    ;; Admin
@@ -268,7 +268,7 @@
     :lastName "Panaani"
     :email "pena@example.com"
     :street "Paapankuja 12"
-    :zip "010203"
+    :zip "10203"
     :city "Piippola"
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
@@ -340,7 +340,8 @@
                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                               :url "http://www.jarvenpaa.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                              :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+                              :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
+                     :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "jarvenpaa"}}}
 
                     {:id "753-R"
                      :inforequest-enabled true

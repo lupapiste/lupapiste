@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
-            [sade.util :refer [fn-> fn->> deep-merge]]
+            [sade.util :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.core :refer [fail fail!]]
@@ -71,6 +71,7 @@
                                      :jatevesijarjestelman_rakennustapaseloste
                                      :julkisivujen_varityssuunnitelma
                                      :kalliorakentamistekninen_suunnitelma
+                                     :katselmuksen_tai_tarkastuksen_poytakirja
                                      :kerrosalaselvitys
                                      :liikkumis_ja_esteettomyysselvitys
                                      :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta
@@ -129,6 +130,21 @@
 ;;
 ;; Api
 ;;
+
+(defn by-file-ids [file-ids attachment]
+  (let [file-id-set (set file-ids)
+        attachment-file-ids (map :fileId (:versions attachment))]
+    (some #(file-id-set %) attachment-file-ids)))
+
+(defn create-update-statements
+  "Returns a map of mongo updates to be used as $set value.
+   E.g., {attachments.0.k v
+          attachments.5.k v}"
+  [attachments pred k v]
+  (reduce (fn [m i] (assoc m (str "attachments." i \. k) v)) {} (util/positions pred attachments)))
+
+(defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
+  (create-update-statements attachments (partial by-file-ids file-ids) "sent" timestamp))
 
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"
@@ -229,7 +245,7 @@
                               :attachments {$elemMatch {:id attachment-id
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
-                             (deep-merge
+                             (util/deep-merge
                                (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now)
                                {$set {:modified now
                                       :attachments.$.modified now
@@ -294,7 +310,7 @@
   [{:keys [attachments]} file-id]
   (first
     (filter
-      (fn->> :versions (some (fn-> :fileId (= file-id))))
+      (partial by-file-ids #{file-id})
       attachments)))
 
 (defn attachment-file-ids
