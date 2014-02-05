@@ -61,7 +61,7 @@
 
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical
-  get-yritys-and-henkilo get-tyomaasta-vastaava get-sijoituksen-tarkoitus)
+  get-yritys-and-henkilo get-tyomaasta-vastaava get-sijoituksen-tarkoitus get-hakija)
 
 (facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical kaivulupa-application "fi")
@@ -97,8 +97,9 @@
         maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota yksityisella maksajalla ("henkilo"-tyyppinen maksaja)
-        maksaja-yksityinen (tools/unwrapped
-                             (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja"))
+        maksaja-yksityinen (get-yritys-and-henkilo
+                             (tools/unwrapped
+                               (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "maksaja")
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
         maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
@@ -121,30 +122,47 @@
         Vastuuhenkilo-henkilo-osoite (-> Vastuuhenkilo-henkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota myos henkilo-tyyppisella tyomaasta-vastaavalla
-        tyomaasta-vastaava-henkilo (tools/unwrapped
-                                     (get-tyomaasta-vastaava
+        tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
+                                     (tools/unwrapped
                                        (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo"))) => truthy
         tyomaasta-vastaava-Vastuuhenkilo (-> tyomaasta-vastaava-henkilo :Vastuuhenkilo) => truthy
         tyomaasta-vastaava-Vastuuhenkilo-osoite (-> tyomaasta-vastaava-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
-        ;; hakijan yritystieto-osa
+;        ;; hakijan yritystieto-osa
+;        rooliKoodi-Hakija "hakija"
+;        hakija-osapuoli-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
+;        hakija-Osapuoli (:Osapuoli (first (filter hakija-osapuoli-filter-fn osapuolet-vec)))
+;        hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
+;        hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
+;        ;; hakijan henkilotieto-osa
+;        rooliKoodi-hankkeen-vastuuhenkilo "hankkeen vastuuhenkil\u00f6"
+;        hakija-vastuuhenkilo-filter-fn #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-hankkeen-vastuuhenkilo)
+;        hakija-Vastuuhenkilo (:Vastuuhenkilo (first (filter hakija-vastuuhenkilo-filter-fn vastuuhenkilot-vec)))
+;        hakija-Vastuuhenkilo-osoite (-> hakija-Vastuuhenkilo :osoitetieto :osoite) => truthy
+;
+;        ;; Testataan muunnosfunktiota yksityisella hakijalla ("henkilo"-tyyppinen hakija)
+        hakija-yksityinen (get-yritys-and-henkilo
+                            (tools/unwrapped
+                              (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "hakija")
+;        hakija-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
+;        hakija-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
+;        hakija-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
+
         rooliKoodi-Hakija "hakija"
-        hakija-osapuoli-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
-        hakija-Osapuoli (:Osapuoli (first (filter hakija-osapuoli-filter-fn osapuolet-vec)))
+        hakija-filter-fn #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija)
+        hakija-Osapuoli (:Osapuoli (first (filter hakija-filter-fn osapuolet-vec)))
+        hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
         hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
+        hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
-        ;; hakijan henkilotieto-osa
-        rooliKoodi-hankkeen-vastuuhenkilo "hankkeen vastuuhenkil\u00f6"
-        hakija-vastuuhenkilo-filter-fn #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-hankkeen-vastuuhenkilo)
-        hakija-Vastuuhenkilo (:Vastuuhenkilo (first (filter hakija-vastuuhenkilo-filter-fn vastuuhenkilot-vec)))
-        hakija-Vastuuhenkilo-osoite (-> hakija-Vastuuhenkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota yksityisella hakijalla ("henkilo"-tyyppinen hakija)
-        hakija-yksityinen (tools/unwrapped
-                            (get-yritys-and-henkilo (assoc-in (:data maksaja) [:_selected :value] "henkilo") "hakija"))
-        hakija-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
-        hakija-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
-        hakija-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
+        hakija-yksityinen (get-hakija
+                            (tools/unwrapped
+                              (assoc-in (:data hakija) [:_selected :value] "henkilo")))
+        hakija-yksityinen-Henkilo (-> hakija-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
+        hakija-yksityinen-nimi (:nimi hakija-yksityinen-Henkilo) => truthy
+        hakija-yksityinen-osoite (:osoite hakija-yksityinen-Henkilo) => truthy
 
         pinta-ala (:pintaala Tyolupa) => truthy
 
@@ -154,11 +172,9 @@
         sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
 
         ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
-        sijoituksen-tark-liikennevalo (tools/unwrapped
-                                        (get-sijoituksen-tarkoitus
-                                          (assoc-in (:data hankkeen-kuvaus)
-                                            [:sijoituksen-tarkoitus :value]
-                                            "liikennevalo"))) => truthy]
+        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
+                                        (tools/unwrapped
+                                          (assoc-in (:data hankkeen-kuvaus) [:sijoituksen-tarkoitus :value] "liikennevalo"))) => truthy]
 
 ;      (println "\n canonical: ")
 ;      (clojure.pprint/pprint canonical)
@@ -211,26 +227,48 @@
       (fact "maksaja-yksityinen-puhelin" (:puhelin maksaja-yksityinen-Henkilo) => (-> yhteystiedot :puhelin :value))
       (fact "maksaja-yksityinen-henkilotunnus" (:henkilotunnus maksaja-yksityinen-Henkilo) => (-> henkilotiedot :hetu :value))
 
-      ;; Osapuoli: Hakija
-      (fact "hakija-vastuuhenkilo-rooliKoodi" (:rooliKoodi hakija-Vastuuhenkilo) => rooliKoodi-hankkeen-vastuuhenkilo)
-      (fact "hakija-henkilo-etunimi" (:etunimi hakija-Vastuuhenkilo) => (-> nimi :etunimi :value))
-      (fact "hakija-henkilo-sukunimi" (:sukunimi hakija-Vastuuhenkilo) => (-> nimi :sukunimi :value))
-      (fact "hakija-henkilo-sahkopostiosoite" (:sahkopostiosoite hakija-Vastuuhenkilo) => (-> yhteystiedot :email :value))
-      (fact "hakija-henkilo-puhelinnumero" (:puhelinnumero hakija-Vastuuhenkilo) => (-> yhteystiedot :puhelin :value))
-      (fact "hakija-henkilo-osoite-osoitenimi"
-        (-> hakija-Vastuuhenkilo-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
-      (fact "hakija-henkilo-osoite-postinumero"
-        (:postinumero hakija-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
-      (fact "hakija-henkilo-osoite-postitoimipaikannimi"
-        (:postitoimipaikannimi hakija-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
-      (fact "hakija-osapuoli-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => rooliKoodi-Hakija)
-      (fact "hakija-yritys-nimi" (:nimi hakija-Yritys) => (-> yritys-nimi-ja-tunnus :yritysnimi :value))
-      (fact "hakija-yritys-liikeJaYhteisotunnus" (:liikeJaYhteisotunnus hakija-Yritys) => (-> yritys-nimi-ja-tunnus :liikeJaYhteisoTunnus :value))
-      (fact "hakija-yritys-osoitenimi" (-> hakija-yritys-Postiosoite :osoitenimi :teksti) => (-> osoite :katu :value))
-      (fact "hakija-yritys-postinumero" (:postinumero hakija-yritys-Postiosoite) => (-> osoite :postinumero :value))
-      (fact "hakija-yritys-postitoimipaikannimi" (:postitoimipaikannimi hakija-yritys-Postiosoite) => (-> osoite :postitoimipaikannimi :value))
+;      ;; Osapuoli: Hakija
+;      (fact "hakija-vastuuhenkilo-rooliKoodi" (:rooliKoodi hakija-Vastuuhenkilo) => rooliKoodi-hankkeen-vastuuhenkilo)
+;      (fact "hakija-henkilo-etunimi" (:etunimi hakija-Vastuuhenkilo) => (-> nimi :etunimi :value))
+;      (fact "hakija-henkilo-sukunimi" (:sukunimi hakija-Vastuuhenkilo) => (-> nimi :sukunimi :value))
+;      (fact "hakija-henkilo-sahkopostiosoite" (:sahkopostiosoite hakija-Vastuuhenkilo) => (-> yhteystiedot :email :value))
+;      (fact "hakija-henkilo-puhelinnumero" (:puhelinnumero hakija-Vastuuhenkilo) => (-> yhteystiedot :puhelin :value))
+;      (fact "hakija-henkilo-osoite-osoitenimi"
+;        (-> hakija-Vastuuhenkilo-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
+;      (fact "hakija-henkilo-osoite-postinumero"
+;        (:postinumero hakija-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
+;      (fact "hakija-henkilo-osoite-postitoimipaikannimi"
+;        (:postitoimipaikannimi hakija-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
+;      (fact "hakija-osapuoli-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => rooliKoodi-Hakija)
+;      (fact "hakija-yritys-nimi" (:nimi hakija-Yritys) => (-> yritys-nimi-ja-tunnus :yritysnimi :value))
+;      (fact "hakija-yritys-liikeJaYhteisotunnus" (:liikeJaYhteisotunnus hakija-Yritys) => (-> yritys-nimi-ja-tunnus :liikeJaYhteisoTunnus :value))
+;      (fact "hakija-yritys-osoitenimi" (-> hakija-yritys-Postiosoite :osoitenimi :teksti) => (-> osoite :katu :value))
+;      (fact "hakija-yritys-postinumero" (:postinumero hakija-yritys-Postiosoite) => (-> osoite :postinumero :value))
+;      (fact "hakija-yritys-postitoimipaikannimi" (:postitoimipaikannimi hakija-yritys-Postiosoite) => (-> osoite :postitoimipaikannimi :value))
+;
+;      ;; Hakija, yksityinen henkilo -> Tama on testattu jo kohdassa "Maksaja, yksityinen henkilo" (muunnos on taysin sama)
 
-      ;; Hakija, yksityinen henkilo -> Tama on testattu jo kohdassa "Maksaja, yksityinen henkilo" (muunnos on taysin sama)
+      (fact "hakija-etunimi" (:etunimi hakija-henkilo-nimi) => (-> nimi :etunimi :value))
+      (fact "hakija-sukunimi" (:sukunimi hakija-henkilo-nimi) => (-> nimi :sukunimi :value))
+      (fact "hakija-sahkopostiosoite" (:sahkopostiosoite hakija-Henkilo) => (-> yhteystiedot :email :value))
+      (fact "hakija-puhelin" (:puhelin hakija-Henkilo) => (-> yhteystiedot :puhelin :value))
+      (fact "hakija-nimi" (:nimi hakija-Yritys) => (-> yritys-nimi-ja-tunnus :yritysnimi :value))
+      (fact "hakija-liikeJaYhteisotunnus" (:liikeJaYhteisotunnus hakija-Yritys) => (-> yritys-nimi-ja-tunnus :liikeJaYhteisoTunnus :value))
+      (fact "hakija-osoitenimi" (-> hakija-yritys-Postiosoite :osoitenimi :teksti) => (-> osoite :katu :value))
+      (fact "hakija-postinumero" (:postinumero hakija-yritys-Postiosoite) => (-> osoite :postinumero :value))
+      (fact "hakija-postitoimipaikannimi" (:postitoimipaikannimi hakija-yritys-Postiosoite) => (-> osoite :postitoimipaikannimi :value))
+      (fact "hakija-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => rooliKoodi-Hakija)
+
+      ;; Hakija, yksityinen henkilo
+      (fact "hakija-yksityinen-etunimi" (:etunimi hakija-yksityinen-nimi) => (-> nimi :etunimi :value))
+      (fact "hakija-yksityinen-sukunimi" (:sukunimi hakija-yksityinen-nimi) => (-> nimi :sukunimi :value))
+      (fact "hakija-yksityinen-osoitenimi" (-> hakija-yksityinen-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
+      (fact "hakija-yksityinen-postinumero" (:postinumero hakija-yksityinen-osoite) => (-> osoite :postinumero :value))
+      (fact "hakija-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi hakija-yksityinen-osoite) => (-> osoite :postitoimipaikannimi :value))
+      (fact "hakija-yksityinen-sahkopostiosoite" (:sahkopostiosoite hakija-yksityinen-Henkilo) => (-> yhteystiedot :email :value))
+      (fact "hakija-yksityinen-puhelin" (:puhelin hakija-yksityinen-Henkilo) => (-> yhteystiedot :puhelin :value))
+      (fact "hakija-yksityinen-henkilotunnus" (:henkilotunnus hakija-yksityinen-Henkilo) => (-> henkilotiedot :hetu :value))
+
 
       ;; Tyomaasta vastaava, yritys-tyyppia
       (fact "Vastuuhenkilo-henkilo-rooliKoodi"
