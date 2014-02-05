@@ -63,7 +63,6 @@
       (let [organization  (organization/get-organization (:organization application))
             sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
             data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-        (println data-argument)
         (update-application command {$set data-argument})
         (ok))
       (fail :error.sending-unsent-attachments-failed))))
