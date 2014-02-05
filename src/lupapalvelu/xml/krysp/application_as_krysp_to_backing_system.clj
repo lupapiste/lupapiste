@@ -8,16 +8,25 @@
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]))
 
 (defn- get-begin-of-link [permit-type]
+  {:pre  [permit-type]
+   :post [%]}
   (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
 
 (defn resolve-output-directory [organization permit-type]
+  {:pre  [organization permit-type]
+   :post [%]}
   (let [sftp-user (get-in organization [:krysp (keyword permit-type) :ftpUser])]
     (str (env/value :outgoing-directory) "/" sftp-user (permit/get-sftp-directory permit-type))))
 
 (defn resolve-krysp-version [organization permit-type]
-  (get-in organization [:krysp (keyword permit-type) :version]))
+  {:pre [organization permit-type]}
+  (if-let [krysp-version (get-in organization [:krysp (keyword permit-type) :version])]
+    krysp-version
+    (throw (IllegalStateException. (str "KRYSP version not found for organization " (:id organization) ", permit-type " permit-type)))))
 
-(defn save-application-as-krysp [application lang submitted-application organization]
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)
         krysp-fn      (permit/get-application-mapper permit-type)
@@ -26,7 +35,9 @@
         begin-of-link (get-begin-of-link permit-type)]
     (krysp-fn application lang submitted-application krysp-version output-dir begin-of-link)))
 
-(defn save-review-as-krysp [application task user lang]
+(defn save-review-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application task user lang]
   (let [permit-type   (permit/permit-type application)
         organization  (organization/get-organization (:organization application))
         krysp-fn      (permit/get-review-mapper permit-type)
@@ -35,7 +46,9 @@
         begin-of-link (get-begin-of-link permit-type)]
     (krysp-fn application task user lang krysp-version output-dir begin-of-link)))
 
-(defn save-unsent-attachments-as-krysp [application lang organization]
+(defn save-unsent-attachments-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
@@ -44,7 +57,9 @@
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
     (rl-mapping/save-unsent-attachments-as-krysp application lang krysp-version output-dir begin-of-link)))
 
-(defn save-jatkoaika-as-krysp [application lang organization]
+(defn save-jatkoaika-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)

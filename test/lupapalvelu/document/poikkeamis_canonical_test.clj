@@ -1,9 +1,11 @@
 (ns lupapalvelu.document.poikkeamis-canonical-test
   (:require [lupapalvelu.factlet :as fl]
-            [midje.sweet :refer :all]
             [lupapalvelu.document.canonical-test-common :refer :all]
-            [lupapalvelu.document.poikkeamis-canonical :as c]
-            [lupapalvelu.document.poikkeamis-schemas]))
+            [lupapalvelu.document.poikkeamis-canonical :refer :all]
+            [lupapalvelu.document.poikkeamis-schemas :refer :all]
+            [lupapalvelu.document.tools :as tools]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 
 (def ^:private statements [{:given 1379423133068
@@ -243,85 +245,90 @@
 (fact "Meta test: laajennus"       laajennus        => valid-against-current-schema?)
 
 
-(def poikkari-hakemus {:schema-version 1
-                       :auth [{:lastName "Panaani"
-                               :firstName "Pena"
-                               :username "pena"
-                               :type "owner"
-                               :role "owner"
-                               :id "777777777777777777000020"} {:id "777777777777777777000023"
-                                                                :username "sonja"
-                                                                :firstName "Sonja"
-                                                                :lastName "Sibbo"
-                                                                :role "writer"}]
-                       :submitted 1379422973832
-                       :state "submitted"
-                       :location {:x 404174.92749023
-                                  :y 6690687.4923706}
-                       :attachments []
-                       :statements statements
-                       :organization "753-P"
-                       :title "S\u00f6derkullantie 146"
-                       :operations [{:id "523844e1da063788effc1c56"
-                                     :name "poikkeamis"
-                                     :created 1379419361123}]
-                       :infoRequest false
-                       :opened 1379422973832
-                       :created 1379419361123
-                       :propertyId "75342700020063"
-                       :documents documents
-                       :_statements-seen-by {:777777777777777777000023 1379423134104}
-                       :_software_version "1.0.5"
-                       :modified 1379423133065
-                       :comments [{:text ""
-                                   :target {:type "attachment"
-                                            :id "52385207da063788effc1e24"
-                                            :version {:major 1
-                                                      :minor 0}
-                                            :filename "3171_001taksi.pdf"
-                                            :fileId "52385207da063788effc1e21"}
-                                   :created 1379422727372
-                                   :to nil
-                                   :user {:role "applicant"
-                                          :lastName "Panaani"
-                                          :firstName "Pena"
-                                          :username "pena"
-                                          :id "777777777777777777000020"}} {:text ""
-                                                                            :target {:type "attachment"
-                                                                                     :id "5238538dda063788effc1eb2"
-                                                                                     :version {:major 0
-                                                                                               :minor 1}
-                                                                                     :filename "3112_001.pdf"
-                                                                                     :fileId "5238538dda063788effc1eaf"}
-                                                                            :created 1379423117449
-                                                                            :to nil
-                                                                            :user {:role "authority"
-                                                                                   :lastName "Sibbo"
-                                                                                   :firstName "Sonja"
-                                                                                   :username "sonja"
-                                                                                   :id "777777777777777777000023"}} {:text "Hakemukselle lis\u00e4tty lausunto."
-                                                                                                                     :target {:type "statement"
-                                                                                                                              :id "52385377da063788effc1e93"}
-                                                                                                                     :created 1379423133065
-                                                                                                                     :to nil
-                                                                                                                     :user {:role "authority"
-                                                                                                                            :lastName "Sibbo"
-                                                                                                                            :firstName "Sonja"
-                                                                                                                            :username "sonja"
-                                                                                                                            :id "777777777777777777000023"}}]
-                       :address "S\u00f6derkullantie 146"
-                       :permitType "P"
-                       :permitSubtype "poikkeamislupa"
-                       :id "LP-753-2013-00001"
-                       :municipality "753"})
+(def poikkari-hakemus
+  (tools/unwrapped
+    {:schema-version 1
+     :auth [{:lastName "Panaani"
+             :firstName "Pena"
+             :username "pena"
+             :type "owner"
+             :role "owner"
+             :id "777777777777777777000020"} {:id "777777777777777777000023"
+                                              :username "sonja"
+                                              :firstName "Sonja"
+                                              :lastName "Sibbo"
+                                              :role "writer"}]
+     :submitted 1379422973832
+     :state "submitted"
+     :location {:x 404174.92749023
+                :y 6690687.4923706}
+     :attachments []
+     :statements statements
+     :organization "753-P"
+     :title "S\u00f6derkullantie 146"
+     :operations [{:id "523844e1da063788effc1c56"
+                   :name "poikkeamis"
+                   :created 1379419361123}]
+     :infoRequest false
+     :opened 1379422973832
+     :created 1379419361123
+     :propertyId "75342700020063"
+     :documents documents
+     :_statements-seen-by {:777777777777777777000023 1379423134104}
+     :_software_version "1.0.5"
+     :modified 1379423133065
+     :comments [{:text ""
+                 :target {:type "attachment"
+                          :id "52385207da063788effc1e24"
+                          :version {:major 1
+                                    :minor 0}
+                          :filename "3171_001taksi.pdf"
+                          :fileId "52385207da063788effc1e21"}
+                 :created 1379422727372
+                 :to nil
+                 :user {:role "applicant"
+                        :lastName "Panaani"
+                        :firstName "Pena"
+                        :username "pena"
+                        :id "777777777777777777000020"}} {:text ""
+                                                          :target {:type "attachment"
+                                                                   :id "5238538dda063788effc1eb2"
+                                                                   :version {:major 0
+                                                                             :minor 1}
+                                                                   :filename "3112_001.pdf"
+                                                                   :fileId "5238538dda063788effc1eaf"}
+                                                          :created 1379423117449
+                                                          :to nil
+                                                          :user {:role "authority"
+                                                                 :lastName "Sibbo"
+                                                                 :firstName "Sonja"
+                                                                 :username "sonja"
+                                                                 :id "777777777777777777000023"}} {:text "Hakemukselle lis\u00e4tty lausunto."
+                                                                                                   :target {:type "statement"
+                                                                                                            :id "52385377da063788effc1e93"}
+                                                                                                   :created 1379423133065
+                                                                                                   :to nil
+                                                                                                   :user {:role "authority"
+                                                                                                          :lastName "Sibbo"
+                                                                                                          :firstName "Sonja"
+                                                                                                          :username "sonja"
+                                                                                                          :id "777777777777777777000023"}}]
+     :address "S\u00f6derkullantie 146"
+     :permitType "P"
+     :permitSubtype "poikkeamislupa"
+     :id "LP-753-2013-00001"
+     :municipality "753"}))
 
 (def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
 
 
 (validate-all-documents documents)
 
+
+(testable-privates lupapalvelu.document.poikkeamis-canonical get-toimenpiteet)
+
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
+  (let [canonical (poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
@@ -471,7 +478,7 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        laajennus-tp (c/get-toimenpiteet [laajennus])
+        laajennus-tp (get-toimenpiteet (tools/unwrapped [laajennus]))
         laajennus-tp (:Toimenpide (first laajennus-tp))
         rakennustunnus (:rakennustunnus laajennus-tp) => nil
         _ (:liitetieto laajennus-tp) => nil
@@ -523,7 +530,8 @@
 ;Suunnitelutarveratkaisu
 
 (fl/fact*
-  (let [canonical (c/poikkeus-application-to-canonical suunnitelutarveratkaisu "fi" ) => truthy
+  (let [application (tools/unwrapped suunnitelutarveratkaisu)
+        canonical (poikkeus-application-to-canonical application "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
@@ -667,7 +675,7 @@
         pintala (:pintaAla kerrosala) => "25"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
 
-        laajennus-tp (c/get-toimenpiteet [laajennus])
+        laajennus-tp (get-toimenpiteet (tools/unwrapped [laajennus]))
         laajennus-tp (:Toimenpide (first laajennus-tp))
         rakennustunnus (:rakennustunnus laajennus-tp) => nil
         kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"

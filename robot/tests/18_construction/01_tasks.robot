@@ -40,8 +40,8 @@ Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
 
-Add attachment to Aloituskokous
-  Open task  Aloituskokous
+Add attachment to katselmus1
+  Open task  katselmus1
   Click enabled by test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
@@ -50,14 +50,14 @@ Add attachment to Aloituskokous
   Unselect Frame
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
-Aloituskokous requires action
+katselmus1 requires action
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_authority_action"]  1
 
-Reject Aloituskokous
+Reject katselmus1
   Click enabled by test id  reject-task
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
 
-Approve Aloituskokous
+Approve katselmus1
   Click enabled by test id  approve-task
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
 
@@ -66,7 +66,7 @@ Return to listing
   Tab should be visible  tasks
 
 Delete Muu tarkastus
-  Open task  Muu tarkastus
+  Open task  muu tarkastus
   Click enabled by test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 

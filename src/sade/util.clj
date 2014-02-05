@@ -35,6 +35,22 @@
   (when k
     (cons (get m k) (select m ks))))
 
+; From clojure.contrib/seq
+
+(defn indexed
+  "Returns a lazy sequence of [index, item] pairs, where items come
+  from 's' and indexes count up from zero.
+
+  (indexed '(a b c d))  =>  ([0 a] [1 b] [2 c] [3 d])"
+  [s]
+  (map vector (iterate inc 0) s))
+
+(defn positions
+  "Returns a lazy sequence containing the positions at which pred
+   is true for items in coll."
+  [pred coll]
+  (for [[idx elt] (indexed coll) :when (pred elt)] idx))
+
 ; From clojure.contrib/map-utils)
 (defn deep-merge-with
   "Like merge-with, but merges maps recursively, applying the given fn
@@ -169,6 +185,8 @@
   (or (nil? x) (and (sequable? x) (empty? x))))
 
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
+
+(defn boolean? [x] (instance? Boolean x))
 
 (defn assoc-when [m & kvs]
   "Assocs entries with not-empty-or-nil values into m."

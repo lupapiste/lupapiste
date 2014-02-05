@@ -1,34 +1,35 @@
 (ns lupapalvelu.document.poikkeamis-canonical
   (require [lupapalvelu.document.canonical-common :refer :all]
+           [lupapalvelu.document.tools :as tools]
            [clojure.string :as s]))
 
 (defn- root-element [application lang]
   {:Popast
    {:toimituksenTiedot (toimituksen-tiedot application lang)}})
 
-(defn get-toimenpide [{toimenpide :toimenpiteet} common]
-  ;(clojure.pprint/pprint toimenpide)
-  (merge common {:kuvausKoodi (-> toimenpide :Toimenpide :value)
-                 :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)
-                                                  :asuinhuoneitojenLkm (-> toimenpide :huoneistoja :value)
-                                                  :rakennuksenKerrosluku (-> toimenpide :kerroksia :value)
-                                                  :kokonaisala (-> toimenpide :kokonaisala :value)
-                                                  :kerrosalatieto {:kerrosala {:pintaAla (-> toimenpide :kerrosala :value)
-                                                                               :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus :value)}}}}}))
+(defn- get-toimenpide [{toimenpide :toimenpiteet} common]
+  (merge common {:kuvausKoodi (-> toimenpide :Toimenpide)
+                 :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus)
+                                                  :asuinhuoneitojenLkm (-> toimenpide :huoneistoja)
+                                                  :rakennuksenKerrosluku (-> toimenpide :kerroksia)
+                                                  :kokonaisala (-> toimenpide :kokonaisala)
+                                                  :kerrosalatieto {:kerrosala {:pintaAla (-> toimenpide :kerrosala)
+                                                                               :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus)}}}}}))
 
-(defn get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
-  (let [kaytettykerrosala-canonical (when-not (s/blank? (-> kaytettykerrosala :pintaAla :value))
-                                      {:kerrosalatieto {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla :value)
-                                                                    :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi :value)}}})]
+(defn- get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
+  (let [kaytettykerrosala-canonical (when-not (s/blank? (-> kaytettykerrosala :pintaAla))
+                                      {:kerrosalatieto {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla)
+                                                                    :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi)}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))
 
 
-(defn get-toimenpiteet [toimenpiteet]
+(defn- get-toimenpiteet [toimenpiteet]
   (map get-toimenpidefull toimenpiteet))
 
 
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain kayttotapaus]
-  (let [root (root-element application lang)
+  (let [application (tools/unwrapped application)
+        root (root-element application lang)
         documents (documents-by-type-without-blanks application)
         lisatiedot (:data (first (:lisatiedot documents)))
         hanke (:data (first (:hankkeen-kuvaus documents)))]
@@ -46,8 +47,8 @@
                                                      "ruotsi"
                                                      "suomi")}}
        :kayttotapaus kayttotapaus
-       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat :value)
-                                   kuvaus-avain (-> hanke :kuvaus :value)}}})))
+       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat)
+                                   kuvaus-avain (-> hanke :kuvaus)}}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 

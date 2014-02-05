@@ -47,7 +47,7 @@
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" (URLEncoder/encode id "UTF-8"))
         username (env/value :mml :yhteystiedot :username)
         password (env/value :mml :yhteystiedot :password)]
-    (cr/get-xml uri [username password])))
+    (cr/get-xml uri [username password] false)))
 
 (defn get-owners [id]
   (let [xml (cr/strip-xml-namespaces (get-yhteystiedot id))
