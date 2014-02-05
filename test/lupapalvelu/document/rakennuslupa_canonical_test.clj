@@ -343,39 +343,40 @@
 (validate-all-documents documents)
 
 (def application-rakennuslupa
-  {:id "LP-753-2013-00001"
-   :permitType "R"
-   :municipality municipality
-   :auth [{:lastName "Panaani"
-           :firstName "Pena"
-           :username "pena"
-           :type "owner"
-           :role "owner"
-           :id "777777777777777777000020"}]
-   :state "open"
-   :opened 1354532324658
-   :location {:x 408048, :y 6693225},
-   :attachments [],
-   :authority {:id "777777777777777777000023"
-               :username "sonja"
-               :firstName "Sonja"
-               :lastName "Sibbo"
-               :role "authority"}
-   :title "s"
-   :created 1354532324658
-   :documents documents
-   :propertyId "21111111111111"
-   :modified 1354532324691
-   :address "Katutie 54"
-   :statements [{:given 1368080324142
-                 :id "518b3ee60364ff9a63c6d6a1"
-                 :person {:text "Paloviranomainen"
-                          :name "Sonja Sibbo"
-                          :email "sonja.sibbo@sipoo.fi"
-                          :id "516560d6c2e6f603beb85147"}
-                 :requested 1368080102631
-                 :status "condition"
-                 :text "Savupiippu pit\u00e4\u00e4 olla."}]})
+  (tools/unwrapped
+    {:id "LP-753-2013-00001"
+     :permitType "R"
+     :municipality municipality
+     :auth [{:lastName "Panaani"
+             :firstName "Pena"
+             :username "pena"
+             :type "owner"
+             :role "owner"
+             :id "777777777777777777000020"}]
+     :state "open"
+     :opened 1354532324658
+     :location {:x 408048, :y 6693225},
+     :attachments [],
+     :authority {:id "777777777777777777000023"
+                 :username "sonja"
+                 :firstName "Sonja"
+                 :lastName "Sibbo"
+                 :role "authority"}
+     :title "s"
+     :created 1354532324658
+     :documents documents
+     :propertyId "21111111111111"
+     :modified 1354532324691
+     :address "Katutie 54"
+     :statements [{:given 1368080324142
+                   :id "518b3ee60364ff9a63c6d6a1"
+                   :person {:text "Paloviranomainen"
+                            :name "Sonja Sibbo"
+                            :email "sonja.sibbo@sipoo.fi"
+                            :id "516560d6c2e6f603beb85147"}
+                   :requested 1368080102631
+                   :status "condition"
+                   :text "Savupiippu pit\u00e4\u00e4 olla."}]}))
 
 (def application-tyonjohtajan-nimeaminen
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
@@ -597,7 +598,7 @@
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-operations)
 
 (facts "Toimenpiteet"
-  (let [documents (tools/unwrapped (by-type (:documents application-rakennuslupa)))
+  (let [documents (by-type (:documents application-rakennuslupa))
         actions (get-operations documents application-rakennuslupa)]
     ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)))
@@ -658,8 +659,7 @@
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (fl/facts* "Canonical model is correct"
-  (let [application (tools/unwrapped application-rakennuslupa)
-        canonical (application-to-canonical application "sv") => truthy
+  (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -760,8 +760,7 @@
 
 
 (fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"
-  (let [application (tools/unwrapped application-tyonjohtajan-nimeaminen)
-        canonical (application-to-canonical application "fi") => truthy
+  (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -820,8 +819,7 @@
 
 
 (fl/facts* "Canonical model for suunnittelijan nimeaminen is correct"
-  (let [application (tools/unwrapped application-suunnittelijan-nimeaminen)
-        canonical (application-to-canonical application "fi") => truthy
+  (let [canonical (application-to-canonical application-suunnittelijan-nimeaminen "fi") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
@@ -884,7 +882,7 @@
                                      :city "Tampere"})
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [application (tools/unwrapped (assoc application-rakennuslupa :state "verdictGiven"))
+           (let [application (assoc application-rakennuslupa :state "verdictGiven")
                  canonical (katselmus-canonical
                              application
                              "sv"
@@ -935,7 +933,7 @@
 
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
-           (let [application (tools/unwrapped (assoc application-rakennuslupa :state "verdictGiven"))
+           (let [application (assoc application-rakennuslupa :state "verdictGiven")
                  canonical (unsent-attachments-to-canonical application "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -976,65 +974,65 @@
 ;Jatkolupa
 
 (def jatkolupa-application
-  {:schema-version 1,
-   :auth [{:lastName "Panaani",
-           :firstName "Pena",
-           :username "pena",
-           :type "owner",
-           :role "owner",
-           :id "777777777777777777000020"}],
-   :submitted 1384167310181,
-   :state "submitted",
-   :permitSubtype nil,
-   :location {:x 411063.82824707, :y 6685145.8129883},
-   :attachments [],
-   :organization "753-R",
-   :title "It\u00e4inen Hangelbyntie 163",
-   :operations [{:id "5280b764420622588b2f04fc",
-                 :name "jatkoaika",
-                 :created 1384167268234}],
-   :infoRequest false,
-   :openInfoRequest false,
-   :opened 1384167310181,
-   :created 1384167268234,
-   :propertyId "75340800010051",
-   :documents [{:created 1384167268234,
-                :data {:kuvaus {:modified 1384167309006,
-                                :value
-                                "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
-                :id "5280b764420622588b2f04fd",
-                :schema-info {:order 1,
-                              :version 1,
-                              :name "hankkeen-kuvaus-minimum",
-                              :approvable true,
-                              :op {:id "5280b764420622588b2f04fc",
-                                   :name "jatkoaika",
-                                   :created 1384167268234},
-                              :removable true}}
-               hakija-henkilo],
-   :_software_version "1.0.5",
-   :modified 1384167309006,
-   :comments [],
-   :address "It\u00e4inen Hangelbyntie 163",
-   :permitType "R",
-   :id "LP-753-2013-00005",
-   :municipality "753"
-   :authority {:id "777777777777777777000023"
-               :username "sonja"
-               :firstName "Sonja"
-               :lastName "Sibbo"
-               :role "authority"}
-  :linkPermitData [link-permit-data-lupapistetunnus]})
+  (tools/unwrapped
+    {:schema-version 1,
+     :auth [{:lastName "Panaani",
+             :firstName "Pena",
+             :username "pena",
+             :type "owner",
+             :role "owner",
+             :id "777777777777777777000020"}],
+     :submitted 1384167310181,
+     :state "submitted",
+     :permitSubtype nil,
+     :location {:x 411063.82824707, :y 6685145.8129883},
+     :attachments [],
+     :organization "753-R",
+     :title "It\u00e4inen Hangelbyntie 163",
+     :operations [{:id "5280b764420622588b2f04fc",
+                   :name "jatkoaika",
+                   :created 1384167268234}],
+     :infoRequest false,
+     :openInfoRequest false,
+     :opened 1384167310181,
+     :created 1384167268234,
+     :propertyId "75340800010051",
+     :documents [{:created 1384167268234,
+                  :data {:kuvaus {:modified 1384167309006,
+                                  :value
+                                  "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
+                  :id "5280b764420622588b2f04fd",
+                  :schema-info {:order 1,
+                                :version 1,
+                                :name "hankkeen-kuvaus-minimum",
+                                :approvable true,
+                                :op {:id "5280b764420622588b2f04fc",
+                                     :name "jatkoaika",
+                                     :created 1384167268234},
+                                :removable true}}
+                 hakija-henkilo],
+     :_software_version "1.0.5",
+     :modified 1384167309006,
+     :comments [],
+     :address "It\u00e4inen Hangelbyntie 163",
+     :permitType "R",
+     :id "LP-753-2013-00005",
+     :municipality "753"
+     :authority {:id "777777777777777777000023"
+                 :username "sonja"
+                 :firstName "Sonja"
+                 :lastName "Sibbo"
+                 :role "authority"}
+     :linkPermitData [link-permit-data-lupapistetunnus]}))
 
 (fl/facts* "Canonical model for jatkoaika is correct"
-  (let [application (tools/unwrapped jatkolupa-application)
-        canonical (application-to-canonical application "sv")]
+  (let [canonical (application-to-canonical jatkolupa-application "sv")]
     ;(clojure.pprint/pprint canonical)
     ;TODO tests
     ))
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [application (tools/unwrapped (assoc application-rakennuslupa :state "verdictGiven"))
+           (let [application (assoc application-rakennuslupa :state "verdictGiven")
                  canonical (katselmus-canonical
                              application
                              "fi"
@@ -1185,8 +1183,7 @@ Piha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
      :municipality "753"}))
 
 (fl/facts* "Canonical model is correct"
-  (let [application (tools/unwrapped aloitusoikeus-hakemus)
-        canonical (application-to-canonical application "sv") => truthy
+  (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
