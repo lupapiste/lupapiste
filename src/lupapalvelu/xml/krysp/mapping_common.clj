@@ -302,11 +302,13 @@
                   in (content)]
         (io/copy in out)))))
 
-(defn write-statement-attachments [attachments output-dir]
-  (let [f (for [fi attachments]
-            (vals fi))
-        files (reduce concat (reduce concat f))]
-    (write-attachments files output-dir)))
+(defn- flatten-statement-attachments [statement-attachments]
+  (let [attachments (for [statement statement-attachments] (vals statement))]
+    (reduce concat (reduce concat attachments))))
+
+(defn write-statement-attachments [statement-attachments output-dir]
+  (let [attachments (flatten-statement-attachments statement-attachments)]
+    (write-attachments attachments output-dir)))
 
 (defn add-statement-attachments [canonical statement-attachments]
   (if (empty? statement-attachments)
@@ -352,6 +354,6 @@
     (fs/rename tempfile outfile))
 
   (->>
-    (merge attachments statement-attachments)
+    (concat attachments (flatten-statement-attachments statement-attachments))
     (map #(get-in % [:Liite :fileId]))
     (filter identity)))
