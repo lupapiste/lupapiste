@@ -8,6 +8,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
@@ -78,6 +79,7 @@
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
+   :pre-checks  [(permit/validate-permit-type-is permit/R)] ; KRYPS mapping currently implemented only for R
    :roles       [:authority]
    :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application user :user created :created :as command}]
