@@ -350,41 +350,52 @@
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
             </div>
-
+            <!-- ko if: !postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
+            <!-- /ko -->
+ 
+            <div class="attachment-actions">
+    
+              <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
+                <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
+              </div>
+              <button
+                  data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+                  data-window-id="upload-dialog"
+                  class="btn btn-primary modal"
+                  data-test-id="add-attachment">
+              </button>
+              <button
+                  data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+                  class="btn btn-primary"
+                  data-test-id="attachments-copy-own">
+              </button>
+              <button
+                  data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
+                  class="btn">
+              </button>
+              <button
+                  data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
+                             disable: application.sendUnsentAttachmentsButtonDisabled,
+                             visible: $root.authorization.ok('move-attachments-to-backing-system')"
+                  class="btn btn-primary modal"
+                  data-test-id="send-unsent-attachments">
+                  <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
+                  <em data-bind="visible: application.pending" class="button-loader"></em>
+              </button>
+            </div>
+            
+            <!-- ko if: postVerdict() -->
+            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+            </div>
+            <!-- /ko -->
 
             <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
-  
-            <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
-              <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
-            </div>
-            <button
-                data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
-                data-window-id="upload-dialog"
-                class="btn btn-primary modal"
-                data-test-id="add-attachment">
-            </button>
-            <button
-                data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
-                class="btn btn-primary"
-                data-test-id="attachments-copy-own">
-            </button>
-            <button
-                data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
-                class="btn">
-            </button>
-            <button
-                data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
-                           disable: application.sendUnsentAttachmentsButtonDisabled,
-                           visible: $root.authorization.ok('move-attachments-to-backing-system')"
-                class="btn btn-primary modal"
-                data-test-id="send-unsent-attachments">
-                <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
-                <em data-bind="visible: application.pending" class="button-loader"></em>
-            </button>
 
           </div>
           <div class="process-nav">
