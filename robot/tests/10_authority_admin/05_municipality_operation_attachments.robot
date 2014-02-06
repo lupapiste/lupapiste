@@ -11,7 +11,7 @@ New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
   Apply minimal fixture now
   Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30  asuinrakennus
   Open tab  attachments
-  Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']
+  Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
   Attachment template is visible  paapiirustus.pohjapiirros
   Attachment template is not visible  rakennuspaikan_hallinta.rasitustodistus
@@ -40,7 +40,7 @@ Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
   Mikko logs in
   Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30  asuinrakennus
   Open tab  attachments
-  Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']
+  Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
   Attachment template is not visible  paapiirustus.pohjapiirros
   Attachment template is visible  rakennuspaikan_hallinta.rasitustodistus
@@ -51,8 +51,8 @@ Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
 
 Attachment template is visible
   [Arguments]  ${id}
-  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']//a[@data-test-type='${id}']
+  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type='${id}']
 
 Attachment template is not visible
   [Arguments]  ${id}
-  Element Should Not Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']//a[@data-test-type='${id}']
+  Element Should Not Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type='${id}']

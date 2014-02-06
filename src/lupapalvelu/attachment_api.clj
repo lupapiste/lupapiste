@@ -24,7 +24,6 @@
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
-
 ;; Validators
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
@@ -36,6 +35,17 @@
           (not= (:role user) "authority")
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
+
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
+  (or (not attachmentId) 
+      (let [attachment (get-attachment-info application attachmentId)
+            attachmentApplicationState (keyword (:applicationState attachment))
+            currentState (keyword (:state application))]
+        (or (not (post-verdict-states currentState))
+            (post-verdict-states attachmentApplicationState)
+            (= (keyword userRole) :authority)))))
 
 ;;
 ;; KRYSP
@@ -83,7 +93,11 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [application] :as command}]
+  [{:keys [application user] :as command}]
+
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+
   (let [attachment-type (parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? application attachment-type)
       (update-application command
@@ -128,9 +142,9 @@
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
-  [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (create-attachments application-id attachment-types created)]
-    (ok :applicationId application-id :attachmentIds attachment-ids)
+  [{application :application {attachment-types :attachmentTypes} :data created :created}]
+  (if-let [attachment-ids (create-attachments application attachment-types created)]
+    (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
 ;;
@@ -142,7 +156,11 @@
    :parameters  [id attachmentId]
    :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
+  [{:keys [application user]}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (delete-attachment application attachmentId)
   (ok))
 
@@ -151,7 +169,11 @@
    :parameters  [:id attachmentId fileId]
    :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [application]}]
+  [{:keys [application user]}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (if (file-id-in-application? application attachmentId fileId)
     (delete-attachment-version application attachmentId fileId)
     (fail :file_not_linked_to_the_document)))
@@ -240,7 +262,7 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
+                (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
@@ -250,13 +272,17 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (when-not (allowed-attachment-type-for-application? application attachmentType) (fail! :error.illegal-attachment-type))
+  (when-not (allowed-attachment-type-for-application? application attachmentType) 
+    (fail! :error.illegal-attachment-type))
 
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (when (= (:type target) "statement")
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
-
-  (when-not (attach-file! {:application-id id
+  
+  (when-not (attach-file! {:application application
                            :filename filename
                            :size size
                            :content tempfile

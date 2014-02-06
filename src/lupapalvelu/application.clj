@@ -449,10 +449,10 @@
   (update-application command
     {$set {:drawings drawings}}))
 
-(defn make-attachments [created operation organization-id & {:keys [target]}]
+(defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-      (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
+      (attachment/make-attachment created target false applicationState operation {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data application]
   (reduce
@@ -565,7 +565,7 @@
 
           application   (merge application
                           (when-not info-request?
-                            {:attachments            (make-attachments created op organization-id)
+                            {:attachments            (make-attachments created op organization-id state)
                              :documents              (make-documents user created op application)}))]
 
       application)))
@@ -614,7 +614,7 @@
         new-docs   (make-documents nil created op application)]
     (update-application command {$push {:operations op}
                                  $pushAll {:documents new-docs
-                                           :attachments (make-attachments created op (:organization application))}
+                                           :attachments (make-attachments created op (:organization application) (:state application))}
                                  $set {:modified created}})))
 
 (defcommand change-permit-sub-type
@@ -907,7 +907,7 @@
              :state :open
              :documents (make-documents user created op application)
              :modified created}
-       $pushAll {:attachments (make-attachments created op (:organization application))}})
+       $pushAll {:attachments (make-attachments created op (:organization application) (:state application))}})
     (try (autofill-rakennuspaikka application (now))
       (catch Exception e (error e "KTJ data was not updated")))))
 
@@ -939,7 +939,8 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn verdict-attachments [id user timestamp verdict]
+(defn verdict-attachments [application user timestamp verdict]
+  {:pre [application]}
   (assoc verdict
          :timestamp timestamp
          :paatokset (map
@@ -966,7 +967,7 @@
                                          ; If the attachment-id, i.e., hash of the URL matches
                                          ; any old attachment, a new version will be added
                                          (if (= 200 (:status resp))
-                                           (attachment/attach-file! {:application-id id
+                                           (attachment/attach-file! {:application application
                                                                      :filename (or header-filename filename)
                                                                      :size content-length
                                                                      :content (:body resp)
@@ -991,11 +992,12 @@
         (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
 
-(defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
-  (let [reader (permit/get-verdict-reader permit-type)
+(defn- get-verdicts-with-attachments  [application user timestamp xml]
+  (let [permit-type (:permitType application)
+        reader (permit/get-verdict-reader permit-type)
         element (permit/get-case-xml-element permit-type)
         verdicts (krysp/->verdicts xml element reader)]
-    (map (partial verdict-attachments id user timestamp) verdicts)))
+    (map (partial verdict-attachments application user timestamp) verdicts)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.

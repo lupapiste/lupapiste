@@ -42,6 +42,8 @@
     return false;
   };
 
+  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
+
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
@@ -51,8 +53,25 @@
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-  var attachmentsByGroup = ko.observableArray();
-
+  var preAttachmentsByGroup = ko.observableArray();
+  var postAttachmentsByGroup = ko.observableArray();
+  var postVerdict = ko.observable(false);
+  
+  
+  function getPreAttachmentsByGroup(source) {
+    return getAttachmentsByGroup(
+      _.filter(source, function(attachment) {
+          return !postVerdictStates[attachment.applicationState];
+      }));
+  }
+  
+  function getPostAttachmentsByGroup(source) {
+    return getAttachmentsByGroup(
+      _.filter(source, function(attachment) {
+          return postVerdictStates[attachment.applicationState];
+      }));
+  }
+  
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
@@ -186,8 +205,11 @@
 
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      // Attachments:
-      attachmentsByGroup(getAttachmentsByGroup(app.attachments));
+      // Pre-verdict attachments:
+      preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
+
+      // Post-verdict attachments:
+      postAttachmentsByGroup(getPostAttachmentsByGroup(app.attachments));
 
       // Setting disable value for the "Send unsent attachments" button:
 
@@ -208,6 +230,9 @@
 
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
+      
+      // Post/pre verdict state?
+      postVerdict(!!postVerdictStates[app.state]);
 
       // Update map:
       var location = application.location();
@@ -459,7 +484,8 @@
       application: application,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
-      attachmentsByGroup: attachmentsByGroup,
+      preAttachmentsByGroup: preAttachmentsByGroup,
+      postAttachmentsByGroup: postAttachmentsByGroup,
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
@@ -475,7 +501,8 @@
       neighborStatusModel: neighborStatusModel,
       addLinkPermitModel: addLinkPermitModel,
       constructionStateChangeModel: constructionStateChangeModel,
-      createTaskModel: createTaskModel
+      createTaskModel: createTaskModel,
+      postVerdict: postVerdict
     };
 
     $("#application").applyBindings(bindings);

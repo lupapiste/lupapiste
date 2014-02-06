@@ -22,7 +22,8 @@
     (fn [form [k v]]
       (if (recognize/all-arrows (str k))
         (conj form '_ `(midje.sweet/fact
-                         ~(str (-> form butlast last) " " k " in let-bindings")
+                         ~(str (-> form butlast last) " " k 
+                               " in let-bindings at line #" (-> bindings meta :line))
                          ~(-> form butlast last) ~k ~v))
         (conj form k v)))
     [] (partition 2 bindings)))
@@ -34,12 +35,21 @@
   (prewalk
     (fn [x]
       (if (let? x)
-        `(let ~(checkables-to-facts-in-let-bindings (second x)) ~@(nnext x))
+        `(let ~(checkables-to-facts-in-let-bindings (with-meta (second x) (meta x))) ~@(nnext x))
         x))
     form))
 
-(defmacro fact* [& form]
-  `(fact (do ~@(checkables-to-facts-in-lets form))))
+(defmacro fact* [& forms]
+  (with-meta `(fact (do ~@(checkables-to-facts-in-lets forms))) (meta &form)))
 
-(defmacro facts* [& form]
-  `(fact* ~@form))
+(defmacro facts* [& forms]
+  (with-meta `(fact* ~@forms) (meta &form)))
+
+;(facts* (let [a :b => :c
+;             b a => :d
+;             _ b => :d] 
+;         b => :c)
+; (= 5 5)
+; :e => :f
+; (let [_ :g => :e])
+; (fact* :h => :i))
