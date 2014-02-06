@@ -120,24 +120,6 @@ Approve-button should be disabled
 
 *** Keywords ***
 
-Add attachment
-  [Arguments]  ${path}  ${description}
-
-  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
-  # Must I do everything manually??
-  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
-  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
-
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
-  Select From List  attachmentType  muut.muu
-  Input text       text  ${description}
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Click element    test-save-new-attachment
-  Unselect Frame
-  Wait Until Page Contains  Muu liite
-
 Open attachment details
   [Arguments]  ${type}
   Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
