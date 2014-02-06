@@ -199,9 +199,11 @@
                  kunta (:kunta Osoite) => "638"
                  Kunta (:Kunta toiminnanSijainti) => "638"
                  Kiinteistorekisterinumero (:Kiinteistorekisterinumero toiminnanSijainti) => (:propertyId meluilmoitus-application)
-                 Sijanti (:Sijainti toiminnanSijainti) => truthy
-                 osoite (:osoite Sijanti) => truthy
+                 Sijainti (:Sijainti toiminnanSijainti) => truthy
+                 osoite (:osoite Sijainti) => truthy
                  osoitenimi (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
+                 piste (:piste Sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}
+
 
 
 
@@ -210,7 +212,7 @@
 
 
                  ]
-             ;(clojure.pprint/pprint canonical)
+             (clojure.pprint/pprint canonical)
 ))
 
 
