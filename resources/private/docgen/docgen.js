@@ -302,17 +302,18 @@ var docgen = (function () {
       if (self.authorizationModel.ok("approve-doc")) {
         approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
         btnContainer$.append(approveButton$);
+
+        if (!allowApprove) {
+            approveButton$.hide();
+        }
       }
       if (self.authorizationModel.ok("reject-doc")) {
         rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
         btnContainer$.append(rejectButton$);
-      }
-      
-      if (!allowApprove) {
-          approveButton$.hide();
-      }
-      if (!allowReject) {
-          rejectButton$.hide();
+        
+        if (!allowReject) {
+            rejectButton$.hide();
+        }
       }
       
       if (allowApprove || allowReject) {
