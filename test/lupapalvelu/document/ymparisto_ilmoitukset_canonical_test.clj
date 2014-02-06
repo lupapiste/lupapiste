@@ -204,15 +204,43 @@
                  osoitenimi (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
                  piste (:piste Sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}
 
+                 toimintatieto (:toimintatieto melutarina) => truthy
+                 Toiminta (:Toiminta toimintatieto) => truthy
+                 yksilointitieto (:yksilointitieto Toiminta) => truthy
+                 alkuHetki (:alkuHetku Toiminta) => truthy
+                 rakentaminen (:rakentaminen Toiminta) => truthy
+                 louhinta (:louhinta rakentaminen) => "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"
+                 murskaus (:murskaus rakentaminen) => nil
+                 paalutus (:paalutus rakentaminen) => nil
+                 muu (:muu rakentaminen) => nil
+
+                 tapahtuma (:tapahtuma Toiminta) => truthy
+                 ulkoilmakonsertti (:ulkoilmakonsertti tapahtuma) => "Louhijouden saunailta - V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"
+                 muu (:muu tapahtuma) => nil
+
+                 toiminnanKesto (:toiminnanKesto Toiminta)
+                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-03-02"
+                 loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07"
+                 arkisin (:arkisin toimintatieto) => "07.00 - 16:00"
+                 lauantaisin (:lauantaisin toimintatieto) => "-"
+                 pyhisin (:pyhisin toimintatieto) => "-"
+
+                 melutiedot (:melutiedot Toiminta) => truthy
+                 koneidenLkm (:koneidenLkm melutiedot) => nil
+                 melutaso (:melutaso melutiedot) => truthy
+                 db (:db melutaso) => 150
+                 paiva (:paiva melutaso) => 150
+                 yo (:yo melutaso) => 0
+                 mittaaja (:mittaaja melutaso) => "dbsid?"
 
 
 
+                        :kello
+                        {:arkisin {:modified 1391415637288, :value "07.00 - 16:00"},
+                         :lauantait {:modified 1391415639677, :value "-"},
+                         :pyhat {:modified 1391415640276, :value "-"}},
 
-                 ;toimintatieto (:toimintatieto melutarina) => truthy
-
-
-                 ]
-             (clojure.pprint/pprint canonical)
+                 (clojure.pprint/pprint canonical)
 ))
 
 
