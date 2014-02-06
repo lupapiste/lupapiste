@@ -263,6 +263,7 @@ var docgen = (function () {
         var title = loc("document." + verb);
         return $(makeButton(self.docId + "_" + verb, title))
         .addClass(cssClass).addClass("btn-auto")
+        .attr("data-test-id", verb + "-doc-" + self.schemaName)
         .click(function () {
           ajax.command(cmd, cmdArgs)
           .success(function () {
