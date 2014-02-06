@@ -201,17 +201,19 @@
           (fail :invite.already-has-auth)
           (update-application command
             {:auth {$not {$elemMatch {:invite.user.username email}}}}
-            {$push {:auth auth}}))))))
+            {$push {:auth     auth}
+             $set  {:modified created}}))))))
 
 (defcommand approve-invite
   {:parameters [id]
    :roles      [:applicant]
    :verified   true}
-  [{user :user application :application created :created :as command}]
+  [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:auth.$ (user/user-in-role user :writer)}})
+      {$set  {:modified created
+              :auth.$ (user/user-in-role user :writer)}})
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
@@ -220,7 +222,8 @@
 (defn- do-remove-auth [command email]
   (update-application command
       {$pull {:auth {$and [{:username (ss/lower-case email)}
-                           {:type {$ne :owner}}]}}}))
+                           {:type {$ne :owner}}]}}
+       $set  {:modified (:created command)}}))
 
 (defcommand decline-invitation
   {:parameters [:id]
@@ -282,20 +285,22 @@
 (defcommand assign-to-me
   {:parameters [:id]
    :roles      [:authority]}
-  [{user :user :as command}]
+  [{:keys [user created] :as command}]
   (update-application command
-    {$set {:authority (user/summary user)}}))
+    {$set {:modified created
+           :authority (user/summary user)}}))
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
    :pre-checks  [not-open-inforequest-user-validator]
    :roles       [:authority]}
-  [{user :user :as command}]
+  [{:keys [user created] :as command}]
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
     (if (or assignee (nil? assigneeId))
       (update-application command
                           (if assignee
-                            {$set   {:authority (user/summary assignee)}}
+                            {$set   {:modified created
+                                     :authority (user/summary assignee)}}
                             {$unset {:authority ""}}))
       (fail "error.user.not.found" :id assigneeId))))
 
@@ -345,12 +350,15 @@
         submitted-application (mongo/by-id :submitted-applications id)
         sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
         attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+
     (update-application command
       {$set (merge
-              {:sent created :state :sent}
+              {:modified created
+               :sent created
+               :state :sent}
               attachments-argument
               (when (empty? (:authority application))
-                  {:authority (user/summary user)}))})))
+                {:authority (user/summary user)}))})))
 
 (defn do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang]
   (let [application   (meta-fields/enrich-with-link-permit-data application)
@@ -370,7 +378,10 @@
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set (merge
-              {:sent created :state :closed :closed created}
+              {:modified created
+               :sent created
+               :closed created
+               :state :closed}
               (when (empty? (:authority application))
                 {:authority (user/summary user)})
               set-statement)})))
@@ -404,6 +415,7 @@
 (defn- do-submit [command application created]
   (update-application command
                       {$set {:state     :submitted
+                             :modified  created
                              :opened    (or (:opened application) created)
                              :submitted (or (:submitted application) created)}})
   (try
@@ -436,18 +448,20 @@
   {:parameters [:id shape]
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :info]}
-  [command]
+  [{:keys [created] :as command}]
   (update-application command
-    {$set {:shapes [shape]}}))
+    {$set {:modified created
+           :shapes [shape]}}))
 
 
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :info]}
-  [command]
+  [{:keys [created] :as command}]
   (update-application command
-    {$set {:drawings drawings}}))
+    {$set {:modified created
+           :drawings drawings}}))
 
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
@@ -828,9 +842,10 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [created application] :as command}]
+  [{:keys [created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
-    (update-application command {$set {:started timestamp
+    (update-application command {$set {:modified created
+                                       :started timestamp
                                        :state  :constructionStarted}}))
   (ok))
 
@@ -876,7 +891,8 @@
   [{:keys [created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
         application   (merge application
-                        {:closed timestamp}
+                        {:modified created
+                         :closed timestamp}
                         (select-keys
                           domain/application-skeleton
                           [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
@@ -885,7 +901,11 @@
         organization  (organization/get-organization (:organization application))
         sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang application organization)
         set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-    (update-application command {$set (merge {:closed timestamp :state :closed} set-statement)})
+    (update-application command {$set (merge
+                                        {:modified created
+                                         :closed timestamp
+                                         :state :closed}
+                                        set-statement)})
     (ok)))
 
 
