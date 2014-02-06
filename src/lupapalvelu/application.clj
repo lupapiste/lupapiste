@@ -449,16 +449,6 @@
   (try (autofill-rakennuspaikka application created)
     (catch Exception e (error e "KTJ data was not updated"))))
 
-(defcommand save-application-shape
-  {:parameters [:id shape]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed :info]}
-  [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :shapes [shape]}}))
-
-
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
