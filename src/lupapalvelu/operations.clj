@@ -437,7 +437,7 @@
                                    :permit-type permit/YI
                                    :required common-ymp-schemas
                                    :attachments []
-                                   :add-operation-allowed true
+                                   :add-operation-allowed false
                                    :link-permit-required false}
      :pima                        {:schema "pima"
                                    :permit-type permit/R
