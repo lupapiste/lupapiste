@@ -56,22 +56,22 @@
   var preAttachmentsByGroup = ko.observableArray();
   var postAttachmentsByGroup = ko.observableArray();
   var postVerdict = ko.observable(false);
-  
-  
+
+
   function getPreAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
           return !postVerdictStates[attachment.applicationState];
       }));
   }
-  
+
   function getPostAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
           return postVerdictStates[attachment.applicationState];
       }));
   }
-  
+
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
@@ -136,7 +136,7 @@
     authorities(authorityInfos);
   }
 
-  // When Oskari map has initialized itself, draw shapes and marker
+  // When Oskari map has initialized itself, draw shapes and the marker
   hub.subscribe("oskari-map-initialized", function() {
 
     if (application.drawings && application.drawings().length) {
@@ -166,7 +166,7 @@
     });
   });
 
-  // When a shape is draw in Oskari map, save it to application
+  // When a shape is drawn in Oskari map, save it to application
   hub.subscribe("oskari-save-drawings", function(e) {
     ajax.command("save-application-drawings", {id: currentId, drawings: e.data.drawings})
     .success(function() {
@@ -180,11 +180,6 @@
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       var app = applicationDetails.application;
-
-      // Delete shapes
-      if (application.shapes) {
-        delete application.shapes;
-      }
 
       // Plain data
       application._js = app;
@@ -202,7 +197,6 @@
       verdictModel.refresh(app);
 
       // Operations:
-
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       // Pre-verdict attachments:
@@ -230,7 +224,7 @@
 
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
-      
+
       // Post/pre verdict state?
       postVerdict(!!postVerdictStates[app.state]);
 
@@ -248,8 +242,9 @@
       var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
 
-      if (application.shapes && application.shapes().length > 0) {
-        map.drawShape(application.shapes()[0]);
+
+      if (application.drawings && application.drawings().length > 0) {
+        map.drawDrawing(application.drawings()[0].geometry());
       }
 
       if (application.infoRequest() && authorizationModel.ok("mark-seen")) {
