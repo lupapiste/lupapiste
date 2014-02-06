@@ -31,6 +31,18 @@ Mikko still can't approve application
 Sonja logs in for approval
   Sonja logs in
   Open application  ${appname}  753-416-25-30
+  
+Sonja rejects hankkeen-kuvaus
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
+  Click enabled by test id  reject-doc-hankkeen-kuvaus
+  Wait Until  Element should not be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+
+Sonja approves hankkeen-kuvaus
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
+  Click enabled by test id  approve-doc-hankkeen-kuvaus
+  Wait Until  Element should not be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
 
 Sonja approves application
   Click enabled by test id  approve-application
