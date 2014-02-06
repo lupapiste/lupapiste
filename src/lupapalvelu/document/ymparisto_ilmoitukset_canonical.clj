@@ -13,10 +13,14 @@
 
 (defn meluilmoitus-canonical [application lang]
   (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)
-        ] {:Ilmoitukset {:toimutuksenTiedot (toimituksen-tiedot application lang)
-                 :melutarina {:kasittelytietotieto (get-kasittelytieto application)
-                              :luvanTunnistetiedot  (lupatunnus (:id application))
-                              :lausuntotieto (get-statements (:statements application))
-                              :ilmoittaja (ilmoittaja (:hakija documents))}}})
-  )
+        documents (documents-by-type-without-blanks application)]
+    {:Ilmoitukset {:toimutuksenTiedot (toimituksen-tiedot application lang)
+                   :melutarina {:kasittelytietotieto (get-kasittelytieto application)
+                                :luvanTunnistetiedot (lupatunnus (:id application))
+                                :lausuntotieto (get-statements (:statements application))
+                                :ilmoittaja (ilmoittaja (:hakija documents))
+                                :toiminnanSijainti {:Osoite {:osoitenimi {:teksti (:address application)}
+                                                            :kunta (:municipality application)}
+                                                   :Kunta (:municipality application)
+                                                   :Sijainti (:Sijainti (first (get-sijaintitieto application)))
+                                                   :Kiinteistorekisterinumero (:propertyId application)}}}}))

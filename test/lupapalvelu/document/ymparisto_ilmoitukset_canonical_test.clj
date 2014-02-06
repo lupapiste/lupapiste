@@ -193,15 +193,15 @@
 
                  liikeJaYhteisotunnus (:liikeJaYhteisotunnus ilmoittaja) => nil
 
-;                 toiminnanSijainti (:toiminnanSijainti melutarina) => truthy
- ;                Osoite (:Osoite toiminnanSijainti) => truthy
-  ;               osoitenimi (:osoitenimi toiminnanSijainti) => {:teksti "Londb\u00f6lentie 97"}
-   ;              kunta (:kunta Osoite) => "638"
-    ;             Kunta (:Kunta toiminnanSijainti) => "638"
-     ;            Kiinteistorekisterinumero (:Kiinteistorekisterinumero toiminnanSijainti) => (:propertyId meluilmoitus-application)
-      ;           Sijanti (:Sijainti toiminnanSijainti) => truthy
-       ;          osoite (:osoite Sijanti) => truthy
-        ;         osoitenimi (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
+                 toiminnanSijainti (:toiminnanSijainti melutarina) => truthy
+                 Osoite (:Osoite toiminnanSijainti) => truthy
+                 osoitenimi (:osoitenimi Osoite) => {:teksti "Londb\u00f6lentie 97"}
+                 kunta (:kunta Osoite) => "638"
+                 Kunta (:Kunta toiminnanSijainti) => "638"
+                 Kiinteistorekisterinumero (:Kiinteistorekisterinumero toiminnanSijainti) => (:propertyId meluilmoitus-application)
+                 Sijanti (:Sijainti toiminnanSijainti) => truthy
+                 osoite (:osoite Sijanti) => truthy
+                 osoitenimi (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
 
 
 
@@ -210,8 +210,8 @@
 
 
                  ]
-;             (clojure.pprint/pprint canonical)
+             ;(clojure.pprint/pprint canonical)
 ))
 
-;
-;(println "TEE TESTI YRITYSILMOITTAJALLA" "TEE TESTI KUVIOITA")
+
+(println "TEE TESTI YRITYSILMOITTAJALLA" "TEE TESTI KUVIOITA")
