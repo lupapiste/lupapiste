@@ -263,12 +263,18 @@ var docgen = (function () {
         var title = loc("document." + verb);
         return $(makeButton(self.docId + "_" + verb, title))
         .addClass(cssClass).addClass("btn-auto")
+        .attr("data-test-id", verb + "-doc-" + self.schemaName)
         .click(function () {
           ajax.command(cmd, cmdArgs)
           .success(function () {
-            approveButton$.hide();
-            rejectButton$.hide();
-            setStatus({ value: noun });
+              if (noun == "approved") {
+                  approveButton$.hide();
+                  rejectButton$.show();
+              } else {
+                  approveButton$.show();
+                  rejectButton$.hide();
+              }
+              setStatus({ value: noun });
           })
           .call();
         });
@@ -290,16 +296,32 @@ var docgen = (function () {
 
       var meta = self.getMeta(path);
       var approval = meta ? meta._approved : null;
+      var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
+      var allowApprove = requiresApproval || (approval && approval.value == "rejected");
+      var allowReject = requiresApproval || (approval && approval.value == "approved");
 
-      if (self.authorizationModel.ok("approve-doc") &&
-          self.authorizationModel.ok("reject-doc") &&
-          (!approval || modelModifiedSince(model, approval.timestamp))) {
+      if (self.authorizationModel.ok("approve-doc")) {
         approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
         btnContainer$.append(approveButton$);
+
+        if (!allowApprove) {
+            approveButton$.hide();
+        }
+      }
+      if (self.authorizationModel.ok("reject-doc")) {
         rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
         btnContainer$.append(rejectButton$);
-        approvalContainer$.removeClass("empty");
-      } else {
+        
+        if (!allowReject) {
+            rejectButton$.hide();
+        }
+      }
+      
+      if (allowApprove || allowReject) {
+          approvalContainer$.removeClass("empty");
+      }
+      
+      if (!requiresApproval) {
         setStatus(approval);
       }
       return approvalContainer$[0];

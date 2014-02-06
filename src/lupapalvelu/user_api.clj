@@ -461,7 +461,7 @@
    :roles [:applicant]
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
-  [{user :user}]
+  [{application :application user :user}]
   (doseq [attachment (:attachments user)]
     (let [
           application-id id
@@ -471,7 +471,7 @@
           attachment-id (str application-id "." user-id "." attachment-id)
           ]
       (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
-        (attachment/attach-file! {:application-id application-id
+        (attachment/attach-file! {:application application
                        :attachment-id attachment-id
                        :attachment-type attachment-type
                        :content ((:content attachment))
