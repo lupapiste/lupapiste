@@ -86,12 +86,12 @@
                :schema-info
                {:order 50,
                 :version 1,
-                                  :name "meluilmoitus",
-                                  :op
-                                  {:id "52ef4ef14206428d3c0394b4",
-                                   :name "meluilmoitus",
-                                   :created 1391415025497},
-                                  :removable true}})
+                :name "meluilmoitus",
+                :op
+                {:id "52ef4ef14206428d3c0394b4",
+                 :name "meluilmoitus",
+                 :created 1391415025497},
+                :removable true}})
 
 (def meluilmoitus-application {:sent nil,
                                :neighbors {},
@@ -207,7 +207,7 @@
                  toimintatieto (:toimintatieto melutarina) => truthy
                  Toiminta (:Toiminta toimintatieto) => truthy
                  yksilointitieto (:yksilointitieto Toiminta) => truthy
-                 alkuHetki (:alkuHetku Toiminta) => truthy
+                 alkuHetki (:alkuHetki Toiminta) => truthy
                  rakentaminen (:rakentaminen Toiminta) => truthy
                  louhinta (:louhinta rakentaminen) => "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"
                  murskaus (:murskaus rakentaminen) => nil
@@ -218,7 +218,7 @@
                  ulkoilmakonsertti (:ulkoilmakonsertti tapahtuma) => "Louhijouden saunailta - V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"
                  muu (:muu tapahtuma) => nil
 
-                 toiminnanKesto (:toiminnanKesto Toiminta)
+                 toiminnanKesto (:toiminnanKesto Toiminta) => truthy
                  alkuHetki (:alkuHetki toiminnanKesto) => "2014-03-02"
                  loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07"
                  arkisin (:arkisin toimintatieto) => "07.00 - 16:00"
@@ -231,14 +231,7 @@
                  db (:db melutaso) => 150
                  paiva (:paiva melutaso) => 150
                  yo (:yo melutaso) => 0
-                 mittaaja (:mittaaja melutaso) => "dbsid?"
-
-
-
-                        :kello
-                        {:arkisin {:modified 1391415637288, :value "07.00 - 16:00"},
-                         :lauantait {:modified 1391415639677, :value "-"},
-                         :pyhat {:modified 1391415640276, :value "-"}},
+                 mittaaja (:mittaaja melutaso) => "dbsid?"]
 
                  (clojure.pprint/pprint canonical)
 ))
