@@ -346,6 +346,10 @@
         application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
                       (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
                       application)
+        app-updates {:modified created
+                     :sent created
+                     :state :sent}
+        application (merge application app-updates)
         organization (organization/get-organization (:organization application))
         submitted-application (mongo/by-id :submitted-applications id)
         sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
@@ -353,9 +357,7 @@
 
     (update-application command
       {$set (merge
-              {:modified created
-               :sent created
-               :state :sent}
+              app-updates
               attachments-argument
               (when (empty? (:authority application))
                 {:authority (user/summary user)}))})))
@@ -365,12 +367,18 @@
         application   (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
                         (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
                         application)
-        application   (merge application
+        app-updates   {:modified created
+                       :sent created
+                       :closed created
+                       :state :closed}
+        application   (merge
+                        application
                         (select-keys
                           domain/application-skeleton
                           [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                            :neighbors :openInfoRequest :statements :tasks :verdicts
-                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
+                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
+                        app-updates)
         organization  (organization/get-organization (:organization application))
         sent-file-ids (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
         set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
@@ -378,13 +386,10 @@
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set (merge
-              {:modified created
-               :sent created
-               :closed created
-               :state :closed}
+              app-updates
+              set-statement
               (when (empty? (:authority application))
-                {:authority (user/summary user)})
-              set-statement)})))
+                {:authority (user/summary user)}))})))
 
 (defn is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
@@ -890,22 +895,21 @@
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
-        application   (merge application
-                        {:modified created
-                         :closed timestamp}
+        app-updates   {:modified created
+                       :closed timestamp
+                       :state :closed}
+        application   (merge
+                        application
                         (select-keys
                           domain/application-skeleton
                           [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
                            :neighbors :openInfoRequest :statements :tasks :verdicts
-                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
+                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
+                        app-updates)
         organization  (organization/get-organization (:organization application))
         sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang application organization)
         set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-    (update-application command {$set (merge
-                                        {:modified created
-                                         :closed timestamp
-                                         :state :closed}
-                                        set-statement)})
+    (update-application command {$set (merge app-updates set-statement)})
     (ok)))
 
 
