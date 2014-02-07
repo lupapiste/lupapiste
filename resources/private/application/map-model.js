@@ -52,6 +52,7 @@ LUPAPISTE.MapModel = function() {
 
   // When Oskari map has initialized itself, draw shapes and the marker
   hub.subscribe("oskari-map-initialized", function() {
+
     if (drawings && drawings.length > 0) {
       var oskariDrawings = _.map(drawings, function(d) {
         return {
@@ -71,8 +72,8 @@ LUPAPISTE.MapModel = function() {
       });
     }
 
-    var x = (location && location().x) ? location().x() : 0;
-    var y = (location && location().y) ? location().y() : 0;
+    var x = (location && location.x) ? location.x : 0;
+    var y = (location && location.y) ? location.y : 0;
     hub.send("oskari-center-map", {
       data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
       clear: true
@@ -81,7 +82,6 @@ LUPAPISTE.MapModel = function() {
 
   // When a shape is drawn in Oskari map, save it to application
   hub.subscribe("oskari-save-drawings", function(e) {
-    console.log("oskari-save-drawings, e: ", e);
     ajax.command("save-application-drawings", {id: currentAppId, drawings: e.data.drawings})
     .success(function() {
       repository.load(currentAppId);
