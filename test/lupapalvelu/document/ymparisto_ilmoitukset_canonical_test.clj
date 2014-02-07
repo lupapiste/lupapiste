@@ -15,6 +15,43 @@
                             :status "yes"
                             :text "Lausunto liitteen\u00e4."}])
 
+(def yrityshakija {:created 1391683428266,
+                   :data
+                   {:_selected {:modified 1391769554143, :value "yritys"},
+                    :yritys
+                    {:liikeJaYhteisoTunnus {:modified 1391770449943, :value "1060155-5"},
+                     :osoite
+                     {:katu {:modified 1391769571984, :value "Hämeenkatu 3 "},
+                      :postinumero {:modified 1391770395709, :value "43640"},
+                      :postitoimipaikannimi {:modified 1391769576504, :value "kuuva"}},
+                     :yhteyshenkilo
+                     {:henkilotiedot
+                      {:etunimi {:modified 1391769580313, :value "Pertti"},
+                       :sukunimi {:modified 1391769583050, :value "Yrittäjä"}},
+                      :yhteystiedot
+                      {:email {:modified 1391769600334, :value "tew@gjr.fi"},
+                       :puhelin {:modified 1391769589423, :value "060222155"}}},
+                     :yritysnimi {:modified 1391769558483, :value "Yrtti Oy"}}},
+                   :id "52f3676442067dc3ba4f1ba8",
+                   :meta
+                   {:_approved
+                    {:value "approved",
+                     :user
+                     {:lastName "Borga",
+                      :firstName "Pekka",
+                      :id "777777777777777777000033"},
+                     :timestamp 1391769601559}},
+                   :schema-info
+                   {:approvable true,
+                    :subtype "hakija",
+                    :name "hakija",
+                    :removable true,
+
+                    :repeating true,
+                    :version 1,
+                    :type "party",
+                    :order 3}})
+
 (def ^:private hakija {:created 1391415025497,
                        :data
                        {:_selected {:value "henkilo"},
@@ -146,6 +183,59 @@
                                :id "LP-638-2014-00001",
                                :municipality "638"})
 
+(def meluilmoitus-yritys-application {:sent nil,
+                               :neighbors {},
+                               :schema-version 1,
+                               :authority
+                               {:role "authority",
+                                :lastName "Borga",
+                                :firstName "Pekka",
+                                :username "pekka",
+                                :id "777777777777777777000033"},
+                               :auth
+                               [{:lastName "Borga",
+                                 :firstName "Pekka",
+                                 :username "pekka",
+                                 :type "owner",
+                                 :role "owner",
+                                 :id "777777777777777777000033"}],
+                               :drawings [],
+                               :submitted 1391415717396,
+                               :state "submitted",
+                               :permitSubtype nil,
+                               :tasks [],
+                               :_verdicts-seen-by {},
+                               :location {:x 428195.77099609, :y 6686701.3931274},
+                               :attachments [],
+                               :statements statements,
+                               :organization "638-R",
+                               :buildings [],
+                               :title "Londb\u00f6lentie 97",
+                               :started nil,
+                               :closed nil,
+                               :operations
+                               [{:id "52ef4ef14206428d3c0394b4",
+                                 :name "meluilmoitus",
+                                 :created 1391415025497}],
+                               :infoRequest false,
+                               :openInfoRequest false,
+                               :opened 1391415025497,
+                               :created 1391415025497,
+                               :_comments-seen-by {},
+                               :propertyId "63844900010004",
+                               :verdicts [],
+                               :documents
+                               [yrityshakija
+                                meluilmo
+                                kesto],
+                               :_statements-seen-by {},
+                               :modified 1391415696674,
+                               :comments [],
+                               :address "Londb\u00f6lentie 97",
+                               :permitType "YI",
+                               :id "LP-638-2014-00001",
+                               :municipality "638"})
+
 (fact "Meta test: hakija"          hakija         => valid-against-current-schema?)
 (fact "Meta test: kesto"           kesto          => valid-against-current-schema?)
 (fact "Meta test: meluilmo"        meluilmo       => valid-against-current-schema?)
@@ -236,5 +326,33 @@
 ;                 (clojure.pprint/pprint canonical)
 ))
 
+(fl/facts* "Meluilmoitus yrityshakija to canonical"
+           (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
+                 Ilmoitukset (:Ilmoitukset canonical) => truthy
+                 toimutuksenTiedot (:toimutuksenTiedot Ilmoitukset) => truthy
+                 aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
 
-(println "TEE TESTI YRITYSILMOITTAJALLA" "TEE TESTI KUVIOITA")
+                 melutarina (:melutarina Ilmoitukset) => truthy
+                 kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
+
+                 luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
+                 LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
+                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+                 MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+                 tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
+                 sovellus (:sovellus MuuTunnus) => "Lupapiste"
+                 ilmoittaja (:ilmoittaja melutarina) => {:nimi "Yrtti Oy",
+                                                         :postiosoite
+                                                         {:osoitenimi {:teksti "Hämeenkatu 3 "},
+                                                          :postitoimipaikannimi "kuuva",
+                                                          :postinumero "43640"},
+                                                         :sahkoposti nil,
+                                                         :yhteyshenkilo
+                                                         {:nimi {:sukunimi "Yrittäjä", :etunimi "Pertti"},
+                                                          :puhelin "060222155",
+                                                          :sahkopostiosoite "tew@gjr.fi"},
+                                                         :liikeJaYhteisoTunnus "1060155-5"}]))
+
+
+
+
