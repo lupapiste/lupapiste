@@ -1099,9 +1099,13 @@
       "inforequests" {:infoRequest true}
       "both"         nil)
     (condp = filter-state
-      "all"       {:state {$ne "canceled"}}
-      "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
-      "canceled"  {:state "canceled"})
+      ;"all"       {:state {$ne "canceled"}}
+      ;"active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
+      ;"canceled"  {:state "canceled"})
+      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed"]}}
+      "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+      "all"               {:state {$nin ["draft" "canceled"]}}
+      "canceled"          {:state "canceled"})
     (when-not (contains? #{nil "0"} filter-user)
       {$or [{"auth.id" filter-user}
             {"authority.id" filter-user}]})
