@@ -13,6 +13,8 @@ var gis = (function() {
 
   var defaultIcon = makeIcon("/img/map-marker.png", 21, 25);
 
+  // Map initialization
+
   function Map(element, zoomWheelEnabled) {
     var self = this;
 
@@ -26,6 +28,7 @@ var gis = (function() {
                   new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
 
+    // Layers
 
     // use the old proxy server to wms
     var wmsServer = LUPAPISTE.config.maps.proxyserver;
@@ -44,6 +47,8 @@ var gis = (function() {
     } else {
       self.map.addLayers([base, self.vectorLayer]);
     }
+
+    // Markers
 
     self.markerLayer = new OpenLayers.Layer.Markers("Markers");
     self.map.addLayer(self.markerLayer);
@@ -69,6 +74,8 @@ var gis = (function() {
       self.markers.push(marker);
       return self;
     };
+
+    // Map handling functions
 
     self.center = function(x, y, zoom) {
       self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
