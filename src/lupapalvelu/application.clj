@@ -1113,9 +1113,6 @@
       "inforequests" {:infoRequest true}
       "both"         nil)
     (condp = filter-state
-      ;"all"       {:state {$ne "canceled"}}
-      ;"active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
-      ;"canceled"  {:state "canceled"})
       "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
       "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
       "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
