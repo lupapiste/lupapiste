@@ -218,22 +218,22 @@
                  ulkoilmakonsertti (:ulkoilmakonsertti tapahtuma) => "Louhijouden saunailta - V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"
                  muu (:muu tapahtuma) => nil
 
-                 toiminnanKesto (:toiminnanKesto Toiminta) => truthy
-                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-03-02"
+                 toiminnanKesto (:toiminnanKesto melutarina) => truthy
+                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-02-03"
                  loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07"
-                 arkisin (:arkisin toimintatieto) => "07.00 - 16:00"
-                 lauantaisin (:lauantaisin toimintatieto) => "-"
-                 pyhisin (:pyhisin toimintatieto) => "-"
+                 arkisin (:arkisin toiminnanKesto) => "07.00 - 16:00"
+                 lauantaisin (:lauantaisin toiminnanKesto) => "-"
+                 pyhisin (:pyhisin toiminnanKesto) => "-"
 
-                 melutiedot (:melutiedot Toiminta) => truthy
+                 melutiedot (:melutiedot melutarina) => truthy
                  koneidenLkm (:koneidenLkm melutiedot) => nil
                  melutaso (:melutaso melutiedot) => truthy
-                 db (:db melutaso) => 150
-                 paiva (:paiva melutaso) => 150
-                 yo (:yo melutaso) => 0
+                 db (:db melutaso) => "150"
+                 paiva (:paiva melutaso) => "150"
+                 yo (:yo melutaso) => "0"
                  mittaaja (:mittaaja melutaso) => "dbsid?"]
 
-                 (clojure.pprint/pprint canonical)
+;                 (clojure.pprint/pprint canonical)
 ))
 
 
