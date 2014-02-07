@@ -42,8 +42,8 @@
    :moment         {:js ["moment.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
-   :init         {:js [conf "hub.js" "log.js"]
-                  :depends [:underscore]}
+   :init         {:depends [:underscore]
+                  :js [conf "hub.js" "log.js"]}
 
    ;; Components to be included in a SPA
 
@@ -64,9 +64,10 @@
                      :html ["screenmessage.html"]}
 
    :expanded-content  {:depends [:jquery]
-                  :js ["expanded-content.js"]}
+                       :js ["expanded-content.js"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm :licenses :expanded-content :mockjax]
+   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
+                            :licenses :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js"]
@@ -115,9 +116,9 @@
                   :html ["task.html"]}
 
    :application  {:depends [:common :repository :tree :task :modal-datepicker]
-                  :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js" "create-task-model.js"
-                       "application-model.js" "application.js"]
+                  :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
+                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
+                       "create-task-model.js" "application-model.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "create-task.html"]}
 
@@ -195,7 +196,8 @@
              :js ["admin.js"
                   "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
-                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html" "screenmessages-list.html"]}
+                    "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html"
+                    "screenmessages-list.html"]}
 
    :login-frame {:depends [:login]
                  :html    ["login-frame.html"]
