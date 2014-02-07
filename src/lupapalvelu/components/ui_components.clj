@@ -116,9 +116,9 @@
                   :html ["task.html"]}
 
    :application  {:depends [:common :repository :tree :task :modal-datepicker]
-                  :js ["add-link-permit.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js" "create-task-model.js"
-                       "application-model.js" "application.js"]
+                  :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
+                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
+                       "create-task-model.js" "application-model.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "create-task.html"]}
 

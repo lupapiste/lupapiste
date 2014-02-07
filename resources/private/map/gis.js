@@ -104,11 +104,16 @@ var gis = (function() {
       return self;
     };
 
-    self.drawDrawing = function(geometry) {
-      var drawAttributes = {};
-      var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"};
-      var vector = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(geometry), drawAttributes, drawStyle);
-      self.vectorLayer.addFeatures([vector]);
+    self.drawDrawings = function(drawings) {
+      var addFeatureFn = function(memo, drawing) {
+        var drawAttributes = {};
+        var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"};
+        var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(drawing.geometry), drawAttributes, drawStyle);
+        memo.push(newFeature);
+        return memo;
+      };
+      var featureArray = _.reduce(drawings || [], addFeatureFn, []);
+      if (featureArray.length > 0) self.vectorLayer.addFeatures(featureArray);
     };
 
     self.addClickHandler = function(handler) {
