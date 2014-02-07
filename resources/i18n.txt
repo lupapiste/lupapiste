@@ -1,7 +1,2 @@
-userinfo.allowDirectMarketing: Annan suostumukseni luovuttaa henkilötietojani suoramarkkinointia sekä mielipide- ja markkinatutkimusta varten.
-error.pre-verdict-attachment: Hakemuksen aikaista liitettä ei saa muokata
-application.attachments.pre-verdict: Hakemuksen aikaiset liitteet
-application.attachments.post-verdict: Rakentamisen aikaiset liitteet
-
 applications.filter.application: Luvan haku
 applications.filter.construction: Rakentaminen

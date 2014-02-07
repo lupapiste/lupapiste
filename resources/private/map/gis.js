@@ -97,8 +97,10 @@ var gis = (function() {
       return self;
     };
 
-    self.drawShape = function(shape) {
-      var vector = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(shape), {}, {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"});
+    self.drawDrawing = function(geometry) {
+      var drawAttributes = {};
+      var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"};
+      var vector = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(geometry), drawAttributes, drawStyle);
       self.vectorLayer.addFeatures([vector]);
     };
 
