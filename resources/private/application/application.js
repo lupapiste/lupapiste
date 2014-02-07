@@ -242,10 +242,10 @@
       var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
       map.clear().center(x, y, 10).add(x, y);
 
+      _.each(application.drawings() || [], function(drawing) {
+        map.drawDrawing(drawing.geometry());
+      });
 
-      if (application.drawings && application.drawings().length > 0) {
-        map.drawDrawing(application.drawings()[0].geometry());
-      }
 
       if (application.infoRequest() && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
