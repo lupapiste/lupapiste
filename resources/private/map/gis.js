@@ -114,6 +114,7 @@ var gis = (function() {
       };
       var featureArray = _.reduce(drawings || [], addFeatureFn, []);
       if (featureArray.length > 0) self.vectorLayer.addFeatures(featureArray);
+      return self;
     };
 
     self.addClickHandler = function(handler) {
