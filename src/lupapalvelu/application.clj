@@ -1091,7 +1091,7 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]}]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} {role :role}]
   (merge
     query
     (condp = filter-kind
@@ -1102,9 +1102,9 @@
       ;"all"       {:state {$ne "canceled"}}
       ;"active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
       ;"canceled"  {:state "canceled"})
-      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed"]}}
+      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
       "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-      "all"               {:state {$nin ["draft" "canceled"]}}
+      "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
       "canceled"          {:state "canceled"})
     (when-not (contains? #{nil "0"} filter-user)
       {$or [{"auth.id" filter-user}
@@ -1120,7 +1120,7 @@
 (defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params)
+        query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)
