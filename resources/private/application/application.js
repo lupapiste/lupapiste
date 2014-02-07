@@ -57,6 +57,7 @@
   var postAttachmentsByGroup = ko.observableArray();
   var postVerdict = ko.observable(false);
 
+  var accordian = function(data, event) { accordion.toggle(event); };
 
   function getPreAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
@@ -317,8 +318,6 @@
       }}, 1000);
   }
 
-  var accordian = function(data, event) { accordion.toggle(event); };
-
   var attachmentTemplatesModel = new function() {
     var self = this;
 
@@ -476,28 +475,31 @@
 
   $(function() {
     var bindings = {
+      // function to access accordion
+      accordian: accordian,
+      // observables
       application: application,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
+      postVerdict: postVerdict,
       preAttachmentsByGroup: preAttachmentsByGroup,
       postAttachmentsByGroup: postAttachmentsByGroup,
-      comment: commentModel,
-      invite: inviteModel,
-      authorization: authorizationModel,
-      accordian: accordian,
+      // models
+      addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
-      requestForStatementModel: requestForStatementModel,
-      verdictModel: verdictModel,
-      stampModel: stampModel,
+      authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
-      neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel,
-      neighborStatusModel: neighborStatusModel,
-      addLinkPermitModel: addLinkPermitModel,
+      comment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTaskModel: createTaskModel,
-      postVerdict: postVerdict
+      invite: inviteModel,
+      neighbor: neighborActions,
+      neighborStatusModel: neighborStatusModel,
+      requestForStatementModel: requestForStatementModel,
+      sendNeighborEmailModel: sendNeighborEmailModel,
+      stampModel: stampModel,
+      verdictModel: verdictModel
     };
 
     $("#application").applyBindings(bindings);
