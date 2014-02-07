@@ -71,23 +71,25 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 [:a :b]) => (just
-                                      [{:id "123"
-                                        :locked false
-                                        :modified 999
-                                        :op nil
-                                        :state :requires_user_action
-                                        :target nil
-                                        :type :a
-                                        :versions []}
-                                       {:id "123"
-                                        :locked false
-                                        :modified 999
-                                        :op nil
-                                        :state :requires_user_action
-                                        :target nil
-                                        :type :b
-                                        :versions []}])
+  (make-attachments 999 :draft [:a :b]) => (just
+                                             [{:id "123"
+                                               :locked false
+                                               :modified 999
+                                               :op nil
+                                               :state :requires_user_action
+                                               :target nil
+                                               :type :a
+                                               :applicationState :draft
+                                               :versions []}
+                                              {:id "123"
+                                               :locked false
+                                               :modified 999
+                                               :op nil
+                                               :state :requires_user_action
+                                               :target nil
+                                               :type :b
+                                               :applicationState :draft
+                                               :versions []}])
   (provided
     (mongo/create-id) => "123"))
 
@@ -97,3 +99,18 @@
                                                  {:versions [{:fileId "345"}
                                                              {:fileId "456"}]}]} "456") => {:versions [{:fileId "345"}
                                                                                                        {:fileId "456"}]})
+
+(let [attachments [{:id 1 :versions [{:fileId "11"} {:fileId "21"}]}
+                   {:id 2 :versions [{:fileId "12"} {:fileId "22"}]}
+                   {:id 3 :versions [{:fileId "13"} {:fileId "23"}]}]]
+
+  (facts "create-update-statements"
+    (create-update-statements attachments #(= (:id %) 1) "foo" "bar") => {"attachments.0.foo" "bar"}
+    (create-update-statements attachments #(#{1 3} (:id %)) "foo" "bar") => {"attachments.0.foo" "bar"
+                                                                             "attachments.2.foo" "bar"}
+    (create-update-statements attachments (partial by-file-ids ["22"]) "foo" "bar") => {"attachments.1.foo" "bar"}
+    (create-update-statements attachments (partial by-file-ids #{"21" "13"}) "foo" "bar") => {"attachments.0.foo" "bar"
+                                                                                              "attachments.2.foo" "bar"})
+  (facts "create-sent-timestamp-update-statements"
+    (create-sent-timestamp-update-statements attachments ["12" "23"] 123) => {"attachments.1.sent" 123
+                                                                              "attachments.2.sent" 123}))

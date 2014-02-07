@@ -304,6 +304,25 @@ Prepare new request
   Set animations on
 
 
+Add attachment
+  [Arguments]  ${path}  ${description}
+
+  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
+  # Must I do everything manually??
+  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
+  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
+
+  Select Frame     uploadFrame
+  Wait until       Element should be visible  test-save-new-attachment
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select From List  attachmentType  muut.muu
+  Input text       text  ${description}
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  Click element    test-save-new-attachment
+  Unselect Frame
+  Wait Until Page Contains  Muu liite
+
+
 Select operation path by permit type
   [Arguments]  ${permitType}
   Run Keyword If  '${permitType}' == 'R'  Select operations path R

@@ -73,7 +73,9 @@
                 (assoc-in c krysp-polku-lausuntoon paivitetty))
               ) canonical statement-attachments)))
 
-(defn save-application-as-krysp [application lang submitted-application krysp-version output-dir begin-of-link]
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [subtype    (keyword (:permitSubtype application))
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)

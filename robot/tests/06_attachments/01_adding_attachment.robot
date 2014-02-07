@@ -22,6 +22,7 @@ Mikko adds txt attachment without comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
   Application state should be  draft
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Download all attachments should be enabled
   Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
@@ -121,24 +122,6 @@ Approve-button should be disabled
   Wait until  Element should be disabled  test-attachment-approve
 
 *** Keywords ***
-
-Add attachment
-  [Arguments]  ${path}  ${description}
-
-  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
-  # Must I do everything manually??
-  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
-  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
-
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
-  Select From List  attachmentType  muut.muu
-  Input text       text  ${description}
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Click element    test-save-new-attachment
-  Unselect Frame
-  Wait Until Page Contains  Muu liite
 
 Open attachment details
   [Arguments]  ${type}
