@@ -19,20 +19,24 @@
              data-test-id="change-location-link"></a>
           </h1>
 
+          <!-- State: -->
+          <div class="state-indication" >
+            <div data-bind="attr: {'class': state}">
+              <span data-bind="ltext: 'draft'" class="draft-box"></span>
+              <span data-bind="ltext: 'open'" class="open-box"></span>
+              <span data-bind="ltext: 'submitted'" class="submitted-box"></span>
+              <span data-bind="ltext: 'complement-needed'" class="complement-needed-box"></span>
+              <span data-bind="ltext: 'sent'" class="sent-box"></span> 
+              <span data-bind="ltext: 'verdictGiven'" class="verdictGiven-box"></span>
+              <span data-bind="ltext: 'constructionStarted'" class="constructionStarted-box"></span>
+              <span data-bind="ltext: 'closed'" class="closed-box"></span>
+            </div> 
+          </div>
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
-          </div>
-
-          <!-- State: -->
-          <div>
-            <p data-bind="ltext: 'application.state'"></p>
-            <span
-              data-bind="ltext: state, attr: {'data-test-state': state}"
-              data-test-id="application-state"
-              class="application_summary_text">
-            </span>
           </div>
 
           <!-- Submitted: -->
