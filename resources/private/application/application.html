@@ -20,7 +20,7 @@
           </h1>
 
           <!-- State: -->
-          <div class="state-indication" >
+          <div class="state-indication" data-bind="attr: {'data-test-state': state}" data-test-id="application-state" >
             <div data-bind="attr: {'class': state}">
               <span data-bind="ltext: 'draft', attr: {'title' : loc('draft.title')}" class="draft-box"></span>
               <span data-bind="ltext: 'open', attr: {'title' : loc('open.title')}" class="open-box"></span>

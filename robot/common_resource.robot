@@ -470,7 +470,7 @@ Apply minimal fixture now
 
 Application state should be
   [Arguments]  ${state}
-  ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
+  ${s} =  Get Element Attribute  xpath=//div[@data-test-id='application-state']@data-test-state
   Should be equal  ${s}  ${state}
 
 Permit type should be
