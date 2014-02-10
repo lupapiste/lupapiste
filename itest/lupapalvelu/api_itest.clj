@@ -41,7 +41,7 @@
       (query teppo :application :id id) => unauthorized?)
 
     (fact "Mikko must be able to comment!"
-      (command mikko :add-comment :id id :text "mikko@example.com" :target "application") => ok?)
+      (command mikko :add-comment :id id :text "mikko@example.com" :target "application" :openApplication true) => ok?)
 
     (fact "Teppo must not be able to comment!"
       (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => unauthorized?)
