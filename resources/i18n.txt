@@ -1,3 +1,6 @@
 application.attachmentSentDate: Siirretty taustajärjestelmään
 # Korvaa vanhan:
 application.buildingOperation: Toimenpide ja rakennus
+integration.title: Taustajärjestelmäsiirto
+integration.success: Siirto onnistui.
+integration.fail: Siirto epäonnistui. Tarkasta että kaikki pakolliset tiedot on siirretty. Alla tekninen virheilmoitus:

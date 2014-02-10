@@ -77,8 +77,14 @@ var taskPageController = (function() {
     ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
-      .success(reload)
-      .error(reload)
+      .success(function() {
+        reload();
+        LUPAPISTE.ModalDialog.showDynamicOk(loc('integration.title'), loc('integration.success'));
+      })
+      .error(function(e){
+        console.log(e);
+        reload();
+      })
       .call();
   }
 
