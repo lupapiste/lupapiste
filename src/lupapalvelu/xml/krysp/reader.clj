@@ -115,9 +115,10 @@
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
-    (concat
-      (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
-      (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma])))))
+    (distinct
+      (concat
+        (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
+        (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma]))))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
