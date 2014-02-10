@@ -1,1 +1,3 @@
 application.attachmentSentDate: Siirretty taustajärjestelmään
+# Korvaa vanhan:
+application.buildingOperation: Toimenpide ja rakennus
