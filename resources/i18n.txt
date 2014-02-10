@@ -1,6 +1,4 @@
 application.conversationOpen: Kysy viranomaiselta
-applications.filter.application: Luvan haku
-applications.filter.construction: Rakentaminen
 draft.title: Luonnos-tilassa hakemus ei näy viranomaisille. Voit rauhassa valmistella hakemusta ja kutsua muita osapuolia hakemukselle. Voit julkaista hakemuksen viranomaiselle kysymällä neuvoa keskusteluketjussa tai jättämällä hakemuksen vireille.
 open.title: Valmisteilla-tilassa hakemuksesi näkyy viranomaiselle, mutta sitä ei ole vielä jätetty viranomaiselle käsiteltäväksi. Näin voitte keskustella hakemuksesta vapaasti viranomaisen kanssa ja valmistella hakemusta rauhassa.
 submitted.title: Hakemus siirtyy Vireillä-tilaan, kun se on jätetty viranomaisen käsiteltäväksi "Jätä hakemus" - toiminnolla. Hakemuksesi vireilletulopäivän näet kohdasta "Hakemus jätetty".
