@@ -17,6 +17,9 @@ Mikko changes his name and experience
   Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
+  Checkbox Should Not Be Selected  allowDirectMarketing
+  Select Checkbox  allowDirectMarketing
+  
   Save User Data
   User should be logged in  Mika Intola
 
@@ -24,6 +27,7 @@ Name should have changed in Swedish page too
   Click link  xpath=//*[@data-test-id='lang-sv']
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
+  Checkbox Should Be Selected  allowDirectMarketing
 
 Experience should have changed in Swedish page too
   Wait Until  Textfield Value Should Be  architect.fise  fise

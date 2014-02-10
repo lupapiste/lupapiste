@@ -35,8 +35,7 @@
                                                         mapping-common/henkilo
                                                         mapping-common/yritys]}
                                                {:tag :tyyppi :ns "yht"}]}]}
-                             {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}
-                                                                                    {:tag :suoramarkkinointikieltoKytkin}]}]}
+                             {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
                              {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
                                                                                    {:tag :poikkeamisasianKuvaus}
                                                                                    {:tag :suunnittelutarveasianKuvaus}]}]}
@@ -74,7 +73,9 @@
                 (assoc-in c krysp-polku-lausuntoon paivitetty))
               ) canonical statement-attachments)))
 
-(defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [subtype    (keyword (:permitSubtype application))
         krysp-polku (cond
                       (= subtype lupapalvelu.permit/poikkeamislupa)
@@ -95,6 +96,6 @@
                     attachments)
         xml (element-to-xml canonical poikkeamis_to_krysp)]
 
-    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
+    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
 (permit/register-function permit/P :app-krysp-mapper save-application-as-krysp)

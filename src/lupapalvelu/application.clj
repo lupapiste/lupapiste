@@ -12,12 +12,13 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand executed update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand update-application non-blank-parameters without-system-keys notify]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -102,6 +103,7 @@
 
 (defquery application
   {:authenticated true
+   :extra-auth-roles [:any]
    :parameters [:id]}
   [{app :application user :user}]
   (if app
@@ -131,21 +133,21 @@
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
 (defn- autofill-rakennuspaikka [application time]
-   (when (and (= "R" (:permitType application)) (not (:infoRequest application)))
-     (when-let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")]
-       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
-         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                        [[:kiinteisto :rekisterointipvm] (or (try
-                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-           (commands/persist-model-updates
-             (:id application)
-             "documents"
-             rakennuspaikka
-             updates
-             time))))))
+  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka") (domain/get-document-by-name application "poikkeusasian-rakennuspaikka"))]
+      (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
+        (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                       [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                       [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                       [[:kiinteisto :rekisterointipvm] (or (try
+                                                              (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+          (commands/persist-model-updates
+            (:id application)
+            "documents"
+            rakennuspaikka
+            updates
+            time))))))
 
 (defquery party-document-names
   {:parameters [:id]
@@ -199,17 +201,19 @@
           (fail :invite.already-has-auth)
           (update-application command
             {:auth {$not {$elemMatch {:invite.user.username email}}}}
-            {$push {:auth auth}}))))))
+            {$push {:auth     auth}
+             $set  {:modified created}}))))))
 
 (defcommand approve-invite
   {:parameters [id]
    :roles      [:applicant]
    :verified   true}
-  [{user :user application :application created :created :as command}]
+  [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:auth.$ (user/user-in-role user :writer)}})
+      {$set  {:modified created
+              :auth.$ (user/user-in-role user :writer)}})
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
@@ -218,7 +222,8 @@
 (defn- do-remove-auth [command email]
   (update-application command
       {$pull {:auth {$and [{:username (ss/lower-case email)}
-                           {:type {$ne :owner}}]}}}))
+                           {:type {$ne :owner}}]}}
+       $set  {:modified (:created command)}}))
 
 (defcommand decline-invitation
   {:parameters [:id]
@@ -244,6 +249,7 @@
 (defcommand add-comment
   {:parameters [id text target]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :pre-checks [applicant-cant-set-to]
    :notified   true
    :on-success [(notify :new-comment)
@@ -254,27 +260,8 @@
                 open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
-    (println (str "mark-answered=" mark-answered))
     (update-application command
-      (util/deep-merge
-        {$set  {:modified created}
-         $push {:comments {:text    text
-                           :target  target
-                           :created created
-                           :to      (user/summary to-user)
-                           :user    (user/summary user)}}}
-
-        (case (keyword (:state application))
-          ;; LUPA-XYZ (was: open-application)
-          :draft  (when-not (blank? text) {$set {:state :open, :opened created}})
-
-          ;; LUPA-371, LUPA-745
-          :info (when (and mark-answered (user/authority? user)) {$set {:state :answered}})
-
-          ;; LUPA-371 (was: mark-inforequest-answered)
-          :answered (when (user/applicant? user) {$set {:state :info}})
-
-          nil)))))
+      (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -298,20 +285,22 @@
 (defcommand assign-to-me
   {:parameters [:id]
    :roles      [:authority]}
-  [{user :user :as command}]
+  [{:keys [user created] :as command}]
   (update-application command
-    {$set {:authority (user/summary user)}}))
+    {$set {:modified created
+           :authority (user/summary user)}}))
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
    :pre-checks  [not-open-inforequest-user-validator]
    :roles       [:authority]}
-  [{user :user :as command}]
+  [{:keys [user created] :as command}]
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
     (if (or assignee (nil? assigneeId))
       (update-application command
                           (if assignee
-                            {$set   {:authority (user/summary assignee)}}
+                            {$set   {:modified created
+                                     :authority (user/summary assignee)}}
                             {$unset {:authority ""}}))
       (fail "error.user.not.found" :id assigneeId))))
 
@@ -339,132 +328,140 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
-(defn- validate-jatkolupa-one-link-permit [_ application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
-            (not= 1 (-> application :linkPermitData count)))
-      (fail :error.jatkolupa-must-have-exactly-one-link-permit))))
-
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
         kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
-    (-> application
-      (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
-      (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))))
+    (if kuntalupatunnus
+      (-> application
+         (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
+         (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
+      (do
+        (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it link permit's (" link-permit-app-id ") verdict.")
+        (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
 
 
 (defn do-approve-regular-app [{:keys [application created user] :as command} id lang]
   (let [application (meta-fields/enrich-with-link-permit-data application)
-        organization (organization/get-organization (:organization application))]
-
-    (let [submitted-application (mongo/by-id :submitted-applications id)]
-      (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
-
-    ;; The "sent" timestamp is updated to all attachments of the application,
-    ;; also the ones that have no versions at all (have no latestVersion).
-    (let [attachments-argument
-          (reduce
-            (fn [data-map attachment]
-              (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-            {}
-            (:attachments application))]
-      (update-application command
-        {:state {$in ["submitted" "complement-needed"]}}
-        {$set (merge
-                {:sent created :state :sent}
-                attachments-argument
-                (when (empty? (:authority application))
-                    {:authority (user/summary user)}))}))))
-
-(defn do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
                       (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
                       application)
-        application (merge application
-                      (select-keys
-                        domain/application-skeleton
-                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
-                         :neighbors :openInfoRequest :statements :tasks :verdicts
-                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
-        organization (organization/get-organization (:organization application))]
+        app-updates {:modified created
+                     :sent created
+                     :state :sent}
+        application (merge application app-updates)
+        organization (organization/get-organization (:organization application))
+        submitted-application (mongo/by-id :submitted-applications id)
+        sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
+        attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
 
-    (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+    (update-application command
+      {$set (merge
+              app-updates
+              attachments-argument
+              (when (empty? (:authority application))
+                {:authority (user/summary user)}))})))
+
+(defn do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang]
+  (let [application   (meta-fields/enrich-with-link-permit-data application)
+        application   (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
+                        (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
+                        application)
+        app-updates   {:modified created
+                       :sent created
+                       :closed created
+                       :state :closed}
+        application   (merge
+                        application
+                        (select-keys
+                          domain/application-skeleton
+                          [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                           :neighbors :openInfoRequest :statements :tasks :verdicts
+                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
+                        app-updates)
+        organization  (organization/get-organization (:organization application))
+        sent-file-ids (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+
     (update-application command
       {:state {$in ["submitted" "complement-needed"]}}
       {$set (merge
-              {:sent created :state :closed :closed created}
+              app-updates
+              set-statement
               (when (empty? (:authority application))
                 {:authority (user/summary user)}))})))
+
+(defn is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+
+(defn- validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (when (and (is-link-permit-required application) (= 0 linkPermits))
+      (fail :error.permit-must-have-link-permit))))
 
 (defcommand approve-application
   {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [validate-jatkolupa-one-link-permit]
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
-  (try
-    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-      (do-approve-jatkoaika-app command id lang)
-      (do-approve-regular-app command id lang))
-    (catch org.xml.sax.SAXParseException e
-      (info e "Invalid KRYSP XML message")
-      (fail (.getMessage e)))))
+  (or (validate-link-permits application)
+      (try
+        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+          (do-approve-jatkoaika-app command id lang)
+          (do-approve-regular-app command id lang))
+        (catch org.xml.sax.SAXParseException e
+          (info e "Invalid KRYSP XML message")
+          (fail (.getMessage e))))))
 
-
-(defcommand submit-application
-  {:parameters [id]
-   :roles      [:applicant :authority]
-   :states     [:draft :info :open :complement-needed]
-   :notified   true
-   :on-success (notify :application-state-change)
-   :pre-checks [validate-owner-or-writer]}
-  [{:keys [application created] :as command}]
+(defn- do-submit [command application created]
   (update-application command
-    {$set {:state     :submitted
-           :opened    (or (:opened application) created)
-           :submitted created}})
-
+                      {$set {:state     :submitted
+                             :modified  created
+                             :opened    (or (:opened application) created)
+                             :submitted (or (:submitted application) created)}})
   (try
     (mongo/insert :submitted-applications
-      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id id)))
+      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
     (catch com.mongodb.MongoException$DuplicateKey e
       ; This is ok. Only the first submit is saved.
       )))
 
+(defcommand submit-application
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :open]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :pre-checks [validate-owner-or-writer]}
+  [{:keys [application created] :as command}]
+  (or (validate-link-permits application)
+      (do-submit command application created)))
+
 (defcommand refresh-ktj
   {:parameters [:id]
    :roles      [:authority]
-   :states     [:draft :open :submitted :complement-needed]
-   :pre-checks [validate-owner-or-writer]}
-  [{:keys [application]}]
-  (try (autofill-rakennuspaikka application (now))
+   :states     [:draft :open :submitted :complement-needed]}
+  [{:keys [application created]}]
+  (try (autofill-rakennuspaikka application created)
     (catch Exception e (error e "KTJ data was not updated"))))
-
-(defcommand save-application-shape
-  {:parameters [:id shape]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed :info]}
-  [command]
-  (update-application command
-    {$set {:shapes [shape]}}))
-
 
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :info]}
-  [command]
+  [{:keys [created] :as command}]
   (update-application command
-    {$set {:drawings drawings}}))
+    {$set {:modified created
+           :drawings drawings}}))
 
-(defn make-attachments [created operation organization-id & {:keys [target]}]
+(defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-      (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
+      (attachment/make-attachment created target false applicationState operation {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data application]
   (reduce
@@ -577,7 +574,7 @@
 
           application   (merge application
                           (when-not info-request?
-                            {:attachments            (make-attachments created op organization-id)
+                            {:attachments            (make-attachments created op organization-id state)
                              :documents              (make-documents user created op application)}))]
 
       application)))
@@ -607,19 +604,26 @@
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id (:id created-application))))
 
+(defn- add-operation-allowed? [_ application]
+  (let [op (-> application :operations first :name keyword)
+        permitSubType (keyword (:permitSubtype application))]
+    (when-not (and (:add-operation-allowed (op operations/operations))
+                   (not= permitSubType :muutoslupa))
+      (fail :error.add-operation-not-allowed))))
+
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :input-validators [operation-validator]
-   :pre-checks [(permit/validate-permit-type-is permit/R)]}
+   :pre-checks [add-operation-allowed?]}
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
         new-docs   (make-documents nil created op application)]
     (update-application command {$push {:operations op}
                                  $pushAll {:documents new-docs
-                                           :attachments (make-attachments created op (:organization application))}
+                                           :attachments (make-attachments created op (:organization application) (:state application))}
                                  $set {:modified created}})))
 
 (defcommand change-permit-sub-type
@@ -806,9 +810,9 @@
         ;; ************
         ;;
         tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
-
-        tyo-aika-for-jatkoaika-doc (domain/get-document-by-name continuation-app "tyo-aika-for-jatkoaika")
-        tyo-aika-for-jatkoaika-doc (assoc-in tyo-aika-for-jatkoaika-doc [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm)
+        tyo-aika-for-jatkoaika-doc (-> continuation-app
+                                     (domain/get-document-by-name "tyo-aika-for-jatkoaika")
+                                     (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))
 
         continuation-app (assoc continuation-app
                            :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
@@ -833,9 +837,10 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [created application] :as command}]
+  [{:keys [created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
-    (update-application command {$set {:started timestamp
+    (update-application command {$set {:modified created
+                                       :started timestamp
                                        :state  :constructionStarted}}))
   (ok))
 
@@ -847,23 +852,29 @@
    :pre-checks [(permit/validate-permit-type-is permit/R)]
    :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
   [{:keys [user created application] :as command}]
-  (let [building  (or
-                    (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
-                    (fail! :error.unknown-building))
-        timestamp (util/to-millis-from-local-date-string startedDate)
-        updates   {$set (merge
-                          {:modified created
-                           :buildings.$.constructionStarted timestamp
-                           :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
-                          (when (= "verdictGiven" (:state application))
-                            {:started created
-                             :state  :constructionStarted}))}
-        output-dir (mapping-to-krysp/resolve-output-directory application)]
-    (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user)
+  (let [building      (or
+                        (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
+                        (fail! :error.unknown-building))
+        timestamp     (util/to-millis-from-local-date-string startedDate)
+        permit-type   (permit/permit-type application)
+        organization  (organization/get-organization (:organization application))
+        krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
+        output-dir    (mapping-to-krysp/resolve-output-directory organization permit-type)
+        sent-file-ids (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
+        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
+        updates       {$set
+                       (merge
+                         {:modified created
+                          :buildings.$.constructionStarted timestamp
+                          :buildings.$.startedBy (select-keys user [:id :firstName :lastName])}
+                         (when (= "verdictGiven" (:state application))
+                           {:started created
+                            :state  :constructionStarted})
+                         set-statement)}]
     (update-application command {:buildings {$elemMatch {:index (:index building)}}} updates)
     (when (= "verdictGiven" (:state application))
-      (notifications/notify! :application-state-change command)))
-  (ok))
+      (notifications/notify! :application-state-change command))
+    (ok)))
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
@@ -873,22 +884,22 @@
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
   [{:keys [created application] :as command}]
-  (let [timestamp (util/to-millis-from-local-date-string readyTimestampStr)
-        application (merge application
-                      {:closed timestamp}
-                      (select-keys
-                        domain/application-skeleton
-                        [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
-                         :neighbors :openInfoRequest :statements :tasks :verdicts
-                         :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))
-        organization (organization/get-organization (:organization application))]
-    (mapping-to-krysp/save-application-as-krysp
-      application
-      lang
-      application
-      organization)
-    (update-application command {$set {:closed timestamp
-                                       :state :closed}})
+  (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
+        app-updates   {:modified created
+                       :closed timestamp
+                       :state :closed}
+        application   (merge
+                        application
+                        (select-keys
+                          domain/application-skeleton
+                          [:allowedAttachmentTypes :attachments :comments :drawings :infoRequest
+                           :neighbors :openInfoRequest :statements :tasks :verdicts
+                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
+                        app-updates)
+        organization  (organization/get-organization (:organization application))
+        sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang application organization)
+        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+    (update-application command {$set (merge app-updates set-statement)})
     (ok)))
 
 
@@ -910,7 +921,7 @@
              :state :open
              :documents (make-documents user created op application)
              :modified created}
-       $pushAll {:attachments (make-attachments created op (:organization application))}})
+       $pushAll {:attachments (make-attachments created op (:organization application) (:state application))}})
     (try (autofill-rakennuspaikka application (now))
       (catch Exception e (error e "KTJ data was not updated")))))
 
@@ -942,7 +953,8 @@
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
-(defn verdict-attachments [id user timestamp verdict]
+(defn verdict-attachments [application user timestamp verdict]
+  {:pre [application]}
   (assoc verdict
          :timestamp timestamp
          :paatokset (map
@@ -969,7 +981,7 @@
                                          ; If the attachment-id, i.e., hash of the URL matches
                                          ; any old attachment, a new version will be added
                                          (if (= 200 (:status resp))
-                                           (attachment/attach-file! {:application-id id
+                                           (attachment/attach-file! {:application application
                                                                      :filename (or header-filename filename)
                                                                      :size content-length
                                                                      :content (:body resp)
@@ -985,17 +997,21 @@
                                  (:poytakirjat paatos))))
                       (:paatokset verdict))))
 
-(defn- get-application-xml [{:keys [id permitType] :as application}]
+(defn get-application-xml [{:keys [id permitType] :as application} & [raw?]]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [fetch (permit/get-application-xml-getter permitType)]
-      (fetch url id))
+    (if-let [fetch (permit/get-application-xml-getter permitType)]
+      (fetch url id raw?)
+      (do
+        (error "No fetch function for" permitType (:organization application))
+        (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
 
-(defn- get-verdicts-with-attachments  [{id :id permit-type :permitType} user timestamp xml]
-  (let [reader (permit/get-verdict-reader permit-type)
+(defn- get-verdicts-with-attachments  [application user timestamp xml]
+  (let [permit-type (:permitType application)
+        reader (permit/get-verdict-reader permit-type)
         element (permit/get-case-xml-element permit-type)
         verdicts (krysp/->verdicts xml element reader)]
-    (map (partial verdict-attachments id user timestamp) verdicts)))
+    (map (partial verdict-attachments application user timestamp) verdicts)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
@@ -1089,7 +1105,7 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]}]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} {role :role}]
   (merge
     query
     (condp = filter-kind
@@ -1097,9 +1113,10 @@
       "inforequests" {:infoRequest true}
       "both"         nil)
     (condp = filter-state
-      "all"       {:state {$ne "canceled"}}
-      "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
-      "canceled"  {:state "canceled"})
+      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
+      "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+      "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
+      "canceled"          {:state "canceled"})
     (when-not (contains? #{nil "0"} filter-user)
       {$or [{"auth.id" filter-user}
             {"authority.id" filter-user}]})
@@ -1114,7 +1131,7 @@
 (defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params)
+        query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)

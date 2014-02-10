@@ -11,6 +11,7 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
+    self.hideAttachmentComments = ko.observable(false);
 
     self.refresh = function(application, target) {
       self
@@ -47,6 +48,9 @@ var comments = (function() {
         .pending(self.pending)
         .success(function() {
             self.text("").to(undefined);
+            if (markAnswered) {
+                LUPAPISTE.ModalDialog.showDynamicOk(loc('comment-request-mark-answered-label'), loc('comment-request-mark-answered.ok'));
+            }
             repository.load(id);
         })
         .call();
@@ -63,6 +67,13 @@ var comments = (function() {
 
     self.isForNewAttachment = function(model) {
       return model && model.target && model.target.version && true;
+    };
+    self.isAuthorityComment = function(model) {
+      return model.user && model.user.role && model.user.role() === "authority";
+    };
+    self.isForAttachment = function(model) {
+      
+      return model && model.target && model.target.type() === "attachment";
     };
   }
 

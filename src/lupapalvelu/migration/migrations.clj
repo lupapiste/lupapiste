@@ -147,6 +147,30 @@
       (assoc doc :data {:henkilo (:data doc)}))
     doc))
 
+(defn- pre-verdict-applicationState [current-state]
+  (let [current-state (keyword current-state)]
+    (cond (#{:draft :open} current-state) current-state 
+          (= :cancelled current-state) :draft
+          :else :submitted)))
+
+(defn- post-verdict-applicationState [current-state] :verdictGiven)
+;  (let [current-state (keyword current-state)]
+;    (cond (= :closed current-state) :constructionStarted 
+;          (= :cancelled current-state) :verdictGiven
+;          :else current-state))
+
+(defn- set-applicationState-to-attachment [verdict-given state attachment]
+  (let [first-version      (-> attachment :versions first)
+        attachment-created (or (:created first-version) (:modified attachment))]
+    (if (and verdict-given (> attachment-created verdict-given))
+      (assoc attachment :applicationState (post-verdict-applicationState state))
+      (assoc attachment :applicationState (pre-verdict-applicationState state)))))
+
+(defn- attachments-with-applicationState [application]
+  (let [verdicts      (:verdicts application)
+        verdict-given (when (-> verdicts count pos?) (-> verdicts first :timestamp))]
+    (map (partial set-applicationState-to-attachment verdict-given (:state application)) (:attachments application))))
+
 (defmigration document-data-cleanup-rel-1.12
   (doseq [collection [:applications :submitted-applications]]
     (let [applications (mongo/select collection)]
@@ -201,6 +225,14 @@
         {$set {:krysp.P.ftpUser ftp}
          $unset {:poikkari-ftp-user 1}}))))
 
+
+(defmigration statementPersons-to-statementGivers
+  {:apply-when (pos? (mongo/count  :organizations {:statementPersons {$exists true}}))}
+  (doseq [organization (mongo/select :organizations {:statementPersons {$exists true}})]
+    (mongo/update-by-id :organizations (:id organization)
+                        {$set {:statementGivers (:statementPersons organization)}
+                         $unset {:statementPersons 1}})))
+
 (defmigration wfs-url-to-support-parameters
   (doseq [organization (mongo/select :organizations)]
     (doseq [[permit-type krysp-data] (:krysp organization)]
@@ -208,3 +240,27 @@
         (when (or (= (name permit-type) lupapalvelu.permit/R) (= (name permit-type) lupapalvelu.permit/P))
           (mongo/update-by-id :organizations (:id organization)
                               {$set {(str "krysp." (name permit-type) ".url") (str url "?outputFormat=KRYSP")}}))))))
+
+(defmigration default-krysp-R-version
+  {:apply-when (pos? (mongo/count :organizations {$and [{:krysp.R {$exists true}} {:krysp.R.version {$exists false}}]}))}
+  (mongo/update-by-query :organizations
+    {$and [{:krysp.R {$exists true}} {:krysp.R.version {$exists false}}]}
+    {$set {:krysp.R.version "2.1.2"}}))
+
+(defmigration default-krysp-P-version
+  {:apply-when (pos? (mongo/count :organizations {$and [{:krysp.P {$exists true}} {:krysp.P.version {$exists false}}]}))}
+  (mongo/update-by-query :organizations
+    {$and [{:krysp.P {$exists true}} {:krysp.P.version {$exists false}}]}
+    {$set {:krysp.P.version "2.1.2"}}))
+
+(defmigration default-krysp-YA-version
+  {:apply-when (pos? (mongo/count :organizations {$and [{:krysp.YA {$exists true}} {:krysp.YA.version {$exists false}}]}))}
+  (mongo/update-by-query :organizations
+    {$and [{:krysp.YA {$exists true}} {:krysp.YA.version {$exists false}}]}
+    {$set {:krysp.YA.version "2.1.2"}}))
+
+
+(defmigration attachment-applicationState
+  (doseq [application (mongo/select :applications {"attachments.0" {$exists true}})]
+    (mongo/update-by-id :applications (:id application)
+      {$set {:attachments (attachments-with-applicationState application)}})))

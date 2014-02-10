@@ -6,12 +6,14 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application executed]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for-application? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
@@ -21,7 +23,6 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
-
 
 ;; Validators
 
@@ -34,6 +35,17 @@
           (not= (:role user) "authority")
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
+
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(defn- attachment-editable-by-applicationState? [application attachmentId userRole]
+  (or (not attachmentId) 
+      (let [attachment (get-attachment-info application attachmentId)
+            attachmentApplicationState (keyword (:applicationState attachment))
+            currentState (keyword (:state application))]
+        (or (not (post-verdict-states currentState))
+            (post-verdict-states attachmentApplicationState)
+            (= (keyword userRole) :authority)))))
 
 ;;
 ;; KRYSP
@@ -58,24 +70,11 @@
                                            (not= "verdict" (-> % :target :type)))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
-
-      (let [organization (organization/get-organization (:organization application))]
-        (mapping-to-krysp/save-unsent-attachments-as-krysp
-          (-> application
-            (dissoc :attachments)
-            (assoc :attachments attachments-wo-sent-timestamp))
-          lang
-          organization)
-        ;; The "sent" timastamp is updated to all attachments of the application, also the ones
-        ;; that were not sent this time, and the ones that have no versions at all (have no latestVersion).
-        (let [data-argument (reduce
-                              (fn [data-map attachment]
-                                (conj data-map {(keyword (str "attachments." (count data-map) ".sent")) created}))
-                              {}
-                              (:attachments application))]
-          (update-application command {$set data-argument}))
+      (let [organization  (organization/get-organization (:organization application))
+            sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
+            data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+        (update-application command {$set data-argument})
         (ok))
-
       (fail :error.sending-unsent-attachments-failed))))
 
 ;;
@@ -84,6 +83,7 @@
 
 (defquery attachment-types
   {:parameters [:id]
+   :extra-auth-roles [:statementGiver]
    :roles      [:applicant :authority]}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
@@ -91,8 +91,13 @@
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [application] :as command}]
+  [{:keys [application user] :as command}]
+
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+
   (let [attachment-type (parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? application attachment-type)
       (update-application command
@@ -137,9 +142,9 @@
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
-  [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (create-attachments application-id attachment-types created)]
-    (ok :applicationId application-id :attachmentIds attachment-ids)
+  [{application :application {attachment-types :attachmentTypes} :data created :created}]
+  (if-let [attachment-ids (create-attachments application attachment-types created)]
+    (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
 ;;
@@ -149,16 +154,26 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
+   :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{:keys [application]}]
+  [{:keys [application user]}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (delete-attachment application attachmentId)
   (ok))
 
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
+   :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [application]}]
+  [{:keys [application user]}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (if (file-id-in-application? application attachmentId fileId)
     (delete-attachment-version application attachmentId fileId)
     (fail :file_not_linked_to_the_document)))
@@ -175,12 +190,14 @@
      :body "401 Unauthorized"}))
 
 (defraw "view-attachment"
-  {:parameters [:attachment-id]}
+  {:parameters [:attachment-id]
+   :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
   (output-attachment-if-logged-in attachment-id false user))
 
 (defraw "download-attachment"
-  {:parameters [:attachment-id]}
+  {:parameters [:attachment-id]
+   :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
   (output-attachment-if-logged-in attachment-id true user))
 
@@ -223,7 +240,8 @@
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defraw "download-all-attachments"
-  {:parameters [:id]}
+  {:parameters [:id]
+   :extra-auth-roles [:statementGiver]}
   [{:keys [application lang]}]
   (if application
     {:status 200
@@ -242,40 +260,39 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType filename tempfile size]
    :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-states-must-match #{:sent :verdictGiven})]
+                (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
+   :notified   true
+   :on-success [(fn [command _] (notifications/notify! :new-comment command))
+                open-inforequest/notify-on-comment]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (when-not (allowed-attachment-type-for-application? application attachmentType) (fail! :error.illegal-attachment-type))
+  (when-not (allowed-attachment-type-for-application? application attachmentType) 
+    (fail! :error.illegal-attachment-type))
 
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  
   (when (= (:type target) "statement")
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
-
-  (if-let [attachment-version (attach-file! {:application-id id
-                                             :filename filename
-                                             :size size
-                                             :content tempfile
-                                             :attachment-id attachmentId
-                                             :attachment-type attachmentType
-                                             :target target
-                                             :locked locked
-                                             :user user
-                                             :created created})]
-    ; FIXME try to combine mongo writes
-    (executed "add-comment"
-      (assoc command :data {:id id
-                            :text text
-                            :type :system
-                            :target {:type :attachment
-                                     :id (:id attachment-version)
-                                     :version (:version attachment-version)
-                                     :filename (:filename attachment-version)
-                                     :fileId (:fileId attachment-version)}}))
+  
+  (when-not (attach-file! {:application application
+                           :filename filename
+                           :size size
+                           :content tempfile
+                           :attachment-id attachmentId
+                           :attachment-type attachmentType
+                           :comment-text text
+                           :target target
+                           :locked locked
+                           :user user
+                           :created created})
     (fail :error.unknown)))
 
 
@@ -338,7 +355,7 @@
     (mongo/upload new-file-id filename contentType temp-file :application application-id)
     (let [new-version (if re-stamp?
                         (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
-                        (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true))]
+                        (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) nil created user true))]
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 

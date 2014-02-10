@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.operations :as operations]
@@ -56,7 +57,8 @@
 (fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
   (make-query {} {:filter-kind  "both"
                   :filter-state "all"
-                  :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+                  :filter-user  "123"}
+              {:role "authority"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
 
 (facts filter-repeating-party-docs
   (filter-repeating-party-docs 1 ["a" "b" "c"]) => (just "a")
@@ -69,3 +71,24 @@
                                         "d" {:info {:type :party
                                                     :repeating true}}}))
 
+(facts "is-link-permit-required works correctly"
+  (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
+  (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
+  (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
+
+
+(testable-privates lupapalvelu.application add-operation-allowed?)
+
+(facts "Add operation allowed"
+  (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen}
+        error {:ok false :text "error.add-operation-not-allowed"}]
+    (doseq [operation lupapalvelu.operations/operations]
+      (let [op (first operation)
+            type (-> operation second :permit-type)
+            application {:operations [{:name (name op)}] :permitSubtype nil}
+            operation-allowed (doc-result (add-operation-allowed? nil application) op)]
+        (if (or (not= type "R") (not-allowed-for op))
+          (fact "Add operation not allowed" operation-allowed => (doc-check = error))
+          (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
+    (fact "Add operation not allowed for :muutoslupa"
+          (add-operation-allowed? nil {:operations [{:name "asuinrakennus"}] :permitSubtype :muutoslupa}) => error)))

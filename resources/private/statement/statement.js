@@ -24,16 +24,16 @@
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ['yes', 'no', 'condition'];
+    self.statuses = ["yes", "no", "condition"];
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
     self.dirty = ko.observable(false);
     self.submitLtext = ko.computed(function() {
       if(self.data() && self.data().status()) {
-        return 'statement.submit-again';
+        return "statement.submit-again";
       } else {
-        return 'statement.submit';
+        return "statement.submit";
       }
     });
 
@@ -87,7 +87,7 @@
     self.submit = function() {
       self.submitting(true);
       ajax
-        .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text()})
+        .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text(), lang: loc.getCurrentLanguage()})
         .success(function() {
           window.location.hash = "!/application/"+applicationId+"/statement";
           repository.load(applicationId);

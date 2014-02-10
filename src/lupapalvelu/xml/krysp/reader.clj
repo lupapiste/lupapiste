@@ -87,17 +87,19 @@
     (cr/get-xml url)))
 
 (defn application-xml
-  ([server id]
-    (application-xml case-type asian-lp-lupatunnus server id))
-  ([ct tunnus-path server id ]
-    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))]
+  ([server id raw?]
+    (application-xml case-type asian-lp-lupatunnus server id raw?))
+  ([ct tunnus-path server id raw?]
+    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))
+          credentials nil]
       (debug "Get application: " url)
-      (cr/get-xml url))))
+      (cr/get-xml url credentials raw?))))
 
-(defn ya-application-xml [server id]
-  (let [options (post-body-for-ya-application id)]
+(defn ya-application-xml [server id raw?]
+  (let [options (post-body-for-ya-application id)
+        credentials nil]
     (debug "Get application: " server " with post body: " options )
-    (cr/get-xml-with-post server options)))
+    (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R  :xml-from-krysp application-xml)
 (permit/register-function permit/P  :xml-from-krysp (partial application-xml poik-case-type poik-lp-lupatunnus))
@@ -107,15 +109,16 @@
   {:propertyId (get-text xml-no-ns id-container :kiinttun)
   :buildingId  (get-text xml-no-ns id-container :rakennusnro)
   :index       (get-text xml-no-ns id-container :jarjestysnumero)
-  :usage       (get-text xml-no-ns :kayttotarkoitus)
+  :usage       (or (get-text xml-no-ns :kayttotarkoitus) "")
   :area        (get-text xml-no-ns :kokonaisala)
   :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
-    (concat
-      (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
-      (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma])))))
+    (distinct
+      (concat
+        (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
+        (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma]))))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
@@ -301,7 +304,8 @@
 (permit/register-function permit/YA :verdict-krysp-reader ->ya-verdict)
 
 (defn- ->kuntalupatunnus [asia]
-  {:kuntalupatunnus (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])})
+  {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+                        (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
 
 (defn ->verdicts [xml for-elem ->function]
   (map

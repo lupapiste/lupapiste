@@ -304,6 +304,25 @@ Prepare new request
   Set animations on
 
 
+Add attachment
+  [Arguments]  ${path}  ${description}
+
+  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
+  # Must I do everything manually??
+  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
+  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
+
+  Select Frame     uploadFrame
+  Wait until       Element should be visible  test-save-new-attachment
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select From List  attachmentType  muut.muu
+  Input text       text  ${description}
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  Click element    test-save-new-attachment
+  Unselect Frame
+  Wait Until Page Contains  Muu liite
+
+
 Select operation path by permit type
   [Arguments]  ${permitType}
   Run Keyword If  '${permitType}' == 'R'  Select operations path R
@@ -405,23 +424,23 @@ Add comment
   Open tab  conversation
   Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//table[@data-test-id='comments-table']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
 
 Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
-  
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+
 Input comment and mark answered
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='comment-request-mark-answered']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Comment count is
   [Arguments]  ${section}  ${amount}
-  Wait until  Xpath Should Match X Times  //section[@id='${section}']//td[contains(@class,'comment-text')]  ${amount}
+  Wait until  Xpath Should Match X Times  //section[@id='${section}']//div[contains(@class,'comment-text')]  ${amount}
 
 #
 # Quick, jettison the db...
@@ -552,7 +571,7 @@ Mock query
 
 Mock query error
   [Arguments]  ${name}
-  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', status:500});
+  Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
 
 Mock proxy
   [Arguments]  ${name}  ${jsonResponse}

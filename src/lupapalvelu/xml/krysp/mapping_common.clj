@@ -5,6 +5,7 @@
             [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
 
@@ -170,9 +171,7 @@
            {:tag :kasittelija :child [henkilo]}]})
 
 (def lupatunnus {:tag :LupaTunnus :ns "yht" :child [{:tag :kuntalupatunnus}
-                                                    {:tag :muuTunnustieto
-                                                     :child [{:tag :MuuTunnus :child [{:tag :tunnus}
-                                                                                      {:tag :sovellus}]}]}
+                                                    {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]}
                                                     {:tag :saapumisPvm}
                                                     {:tag :viittaus}]})
 
@@ -183,6 +182,17 @@
                         {:tag :kuntakoodi :ns "yht"}
                         {:tag :kielitieto :ns "yht"}])
 
+(def liite-children [{:tag :kuvaus :ns "yht"}
+                     {:tag :linkkiliitteeseen :ns "yht"}
+                     {:tag :muokkausHetki :ns "yht"}
+                     {:tag :versionumero :ns "yht"}
+                     {:tag :tekija :ns "yht"
+                      :child [{:tag :kuntaRooliKoodi}
+                              {:tag :VRKrooliKoodi}
+                              henkilo
+                              yritys]}
+                     {:tag :tyyppi :ns "yht"}])
+
 (def lausunto {:tag :Lausunto
                :child [{:tag :viranomainen :ns "yht"}
                        {:tag :pyyntoPvm :ns "yht"}
@@ -190,23 +200,37 @@
                         :child [{:tag :Lausunto
                                  :child [{:tag :viranomainen}
                                          {:tag :lausunto}
-                                         {:tag :liitetieto
-                                          :child [{:tag :Liite
-                                                   :child [{:tag :kuvaus :ns "yht"}
-                                                           {:tag :linkkiliitteeseen :ns "yht"}
-                                                           {:tag :muokkausHetki :ns "yht"}
-                                                           {:tag :versionumero :ns "yht"}
-                                                           {:tag :tekija :ns "yht"
-                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                    {:tag :VRKrooliKoodi}
-                                                                    henkilo
-                                                                    yritys]}
-                                                           {:tag :tyyppi :ns "yht"}]}]}
+                                         {:tag :liitetieto ; FIXME lausunnonliitetieto?
+                                          :child [{:tag :Liite :child liite-children}]}
                                          {:tag :lausuntoPvm}
                                          {:tag :puoltotieto
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
+(defn update-child-element
+  "Utility for updating mappings: replace child in a given path with v.
+     children: sequence of :tag, :child maps
+     path: keyword sequence
+     v: the new value or a function that produces the new value from the old"
+  [children path v]
+  (map
+    #(if (= (:tag %) (first path))
+      (if (seq (rest path))
+        (update-in % [:child] update-child-element (rest path) v)
+        (if (fn? v)
+          (v %)
+          v))
+      %)
+    children))
+
+(defn get-child-element [mapping path]
+  (let [children (if (map? mapping) (:child mapping) mapping)]
+    (some
+      #(when (= (:tag %) (first path))
+         (if (seq (rest path))
+           (get-child-element % (rest path))
+           %))
+      children)))
 
 (defn get-file-name-on-server [file-id file-name]
   (str file-id "_" (ss/encode-filename file-name)))
@@ -253,20 +277,18 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
-(defn get-attachments-as-canonical [application begin-of-link & [target]]
-  (let [attachments (:attachments application)
-        canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment)
-                                            (not= "statement" (-> attachment :target :type))
-                                            (not= "verdict" (-> attachment :target :type))
-                                            (or (nil? target) (= target (:target attachment))))
-                                    :let [type (get-in attachment [:type :type-id])
-                                          title (str (:title application) ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-Liite title link attachment type file-id attachment-file-name)})]
-    (not-empty canonical-attachments)))
+(defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
+  (not-empty (for [attachment attachments
+                   :when (and (:latestVersion attachment)
+                           (not= "statement" (-> attachment :target :type))
+                           (not= "verdict" (-> attachment :target :type))
+                           (or (nil? target) (= target (:target attachment))))
+                   :let [type (get-in attachment [:type :type-id])
+                         attachment-title (str title ": " type "-" (:id attachment))
+                         file-id (get-in attachment [:latestVersion :fileId])
+                         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                         link (str begin-of-link attachment-file-name)]]
+               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name)})))
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
@@ -275,17 +297,18 @@
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
           attachment-file-name (str output-dir "/" filename)
-          attachment-file (io/file attachment-file-name)
-          ]
+          attachment-file (io/file attachment-file-name)]
       (with-open [out (io/output-stream attachment-file)
                   in (content)]
         (io/copy in out)))))
 
-(defn write-statement-attachments [attachments output-dir]
-  (let [f (for [fi attachments]
-            (vals fi))
-        files (reduce concat (reduce concat f))]
-    (write-attachments files output-dir)))
+(defn- flatten-statement-attachments [statement-attachments]
+  (let [attachments (for [statement statement-attachments] (vals statement))]
+    (reduce concat (reduce concat attachments))))
+
+(defn write-statement-attachments [statement-attachments output-dir]
+  (let [attachments (flatten-statement-attachments statement-attachments)]
+    (write-attachments attachments output-dir)))
 
 (defn add-statement-attachments [canonical statement-attachments]
   (if (empty? statement-attachments)
@@ -303,14 +326,20 @@
       statement-attachments)))
 
 (defn write-to-disk
-  "Writes XML string to disk and copies attachments from database. XML is validated before writing."
-  [application attachments statement-attachments xml output-dir & [extra-emitter]]
+  "Writes XML string to disk and copies attachments from database. XML is validated before writing.
+   Returns a sequence of attachemt fileIds that were written to disk."
+  [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
+  {:pre [(string? output-dir)]
+   :post [%]}
+  (when-not (re-matches #"\d+\.\d+\.\d+" (or krysp-version "nil"))
+    (throw (IllegalAccessException. (str \' krysp-version "' does not look like a KRYSP version"))))
+
   (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
 
-    (validator/validate xml-s)
+    (validator/validate xml-s (permit/permit-type application) krysp-version)
 
     (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below)
     (with-open [out-file-stream (io/writer tempfile)]
@@ -322,4 +351,9 @@
     (when (fn? extra-emitter) (extra-emitter))
 
     (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile)))
+    (fs/rename tempfile outfile))
+
+  (->>
+    (concat attachments (flatten-statement-attachments statement-attachments))
+    (map #(get-in % [:Liite :fileId]))
+    (filter identity)))

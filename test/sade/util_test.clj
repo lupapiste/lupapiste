@@ -13,6 +13,8 @@
   (fact (select nil [:a :c]) => [nil nil])
   (fact (select {:a \a :b \b :c \c} nil) => nil))
 
+(fact (positions #{2} [1 2 3 4 1 2 3 4]) => [1 5])
+
 (facts "deep-merge-with"
   (fact
     (deep-merge-with + {:a {:b {:c 1 :d {:x 1 :y 2}} :e 3} :f 4}
@@ -113,28 +115,39 @@
 
 
 (facts sequable?
-       (sequable? [])        => true
-       (sequable? '())       => true
-       (sequable? {})        => true
-       (sequable? "")        => true
-       (sequable? nil)       => true
-       (sequable? (.toArray (java.util.ArrayList.))) => true
-       (sequable? 1)         => false
-       (sequable? true)      => false)
+  (sequable? [])        => true
+  (sequable? '())       => true
+  (sequable? {})        => true
+  (sequable? "")        => true
+  (sequable? nil)       => true
+  (sequable? (.toArray (java.util.ArrayList.))) => true
+  (sequable? 1)         => false
+  (sequable? true)      => false)
 
 (facts empty-or-nil?
-       (empty-or-nil? [])      => true
-       (empty-or-nil? [1])     => false
-       (empty-or-nil? {})      => true
-       (empty-or-nil? {:a :a}) => false
-       (empty-or-nil? '())     => true
-       (empty-or-nil? false)   => false
-       (empty-or-nil? true)    => false
-       (empty-or-nil? "")      => true
-       (empty-or-nil? nil)     => true)
+  (empty-or-nil? [])      => true
+  (empty-or-nil? [1])     => false
+  (empty-or-nil? {})      => true
+  (empty-or-nil? {:a :a}) => false
+  (empty-or-nil? '())     => true
+  (empty-or-nil? false)   => false
+  (empty-or-nil? true)    => false
+  (empty-or-nil? "")      => true
+  (empty-or-nil? nil)     => true)
+
+(facts boolean?
+  (boolean? true) => true
+  (boolean? false) => true
+  (boolean? (Boolean. true)) => true
+  (boolean? (Boolean. false)) => true
+  (boolean? nil) => false
+  (boolean? "") => false
+  (boolean? []) => false
+  (boolean? {}) => false)
 
 (facts assoc-when
-       (assoc-when {} :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
-       => {:a :a, :e [:e], :f {:f :f}}
-       (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
-       => {:a :a, :b :b, :c :c})
+  (assoc-when {} :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
+  => {:a :a, :e [:e], :f {:f :f}}
+  (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
+  => {:a :a, :b :b, :c :c})
+

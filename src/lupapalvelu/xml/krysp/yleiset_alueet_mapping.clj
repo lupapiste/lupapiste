@@ -201,10 +201,10 @@
       canonical
       statement-attachments)))
 
-;;
-;; TODO: Mihin submitted-applicationia kaytettiin ennen (_nyt ei mihinkaan_)?
-;;
-(defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
+   3rd parameter (submitted-application) is not used on YA applications."
+  [application lang _ krysp-version output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
@@ -223,11 +223,13 @@
                     attachments)
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
-    (mapping-common/write-to-disk application attachments statement-attachments xml output-dir)))
+    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
 (permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
 
-(defn save-jatkoaika-as-krysp [application lang organization output-dir begin-of-link]
+(defn save-jatkoaika-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang organization krysp-version output-dir begin-of-link]
     (let [lupa-name-key (ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)
@@ -235,4 +237,4 @@
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
 
-      (mapping-common/write-to-disk application nil nil xml output-dir)))
+      (mapping-common/write-to-disk application nil nil xml krysp-version output-dir)))

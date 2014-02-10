@@ -31,8 +31,8 @@
       ;; Luonnollinen henkilo (LU)
       :etunimet (get-text henkilo-xml (path :henkilonTiedot :etunimet))
       :sukunimi (get-text henkilo-xml (path :henkilonTiedot :sukunimi))
-      :ulkomaalainen (get-boolean henkilo-xml (path :henkilonTiedot :ulkomaalainen))
-      :syntymapvm (get-date henkilo-xml (path :henkilonTiedot :syntymapvm))
+      ;:ulkomaalainen (get-boolean henkilo-xml (path :henkilonTiedot :ulkomaalainen))
+      ;:syntymapvm (get-date henkilo-xml (path :henkilonTiedot :syntymapvm))
       ;; Juridinen henkilo (JU) or Tuntematon henkilo (TU) or Valtio (VA)
       :nimi (get-text henkilo-xml (path :henkilonTiedot :nimi))
       :ytunnus (get-text henkilo-xml (path :henkilonTiedot :ytunnus))
@@ -47,7 +47,7 @@
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" (URLEncoder/encode id "UTF-8"))
         username (env/value :mml :yhteystiedot :username)
         password (env/value :mml :yhteystiedot :password)]
-    (cr/get-xml uri [username password])))
+    (cr/get-xml uri [username password] false)))
 
 (defn get-owners [id]
   (let [xml (cr/strip-xml-namespaces (get-yhteystiedot id))

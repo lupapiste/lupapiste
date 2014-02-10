@@ -13,7 +13,7 @@
 
 (schemas/defschemas
   task-schemas-version
-  [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji" :i18npath ["katselmuksenLaji"]}
+  [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
     :body [{:name "katselmuksenLaji"
             :type :select
             :required true
@@ -44,8 +44,7 @@
              :body [{:name "kuvaus" :required true :type :text}
                     {:name "maaraAika" :type :date}
                     {:name "toteaja" :type :string}
-                    {:name "toteamisHetki" :type :date}
-                    ]}
+                    {:name "toteamisHetki" :type :date}]}
             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
             {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}

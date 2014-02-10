@@ -31,6 +31,18 @@ Mikko still can't approve application
 Sonja logs in for approval
   Sonja logs in
   Open application  ${appname}  753-416-25-30
+  
+Sonja rejects hankkeen-kuvaus
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
+  Click enabled by test id  reject-doc-hankkeen-kuvaus
+  Wait Until  Element should not be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
+
+Sonja approves hankkeen-kuvaus
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
+  Click enabled by test id  approve-doc-hankkeen-kuvaus
+  Wait Until  Element should not be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
 
 Sonja approves application
   Click enabled by test id  approve-application
@@ -44,8 +56,8 @@ Sonja sees that some completion is needed
   Wait Until  Application state should be  complement-needed
   [Teardown]  logout
 
-Mikko comes back, fills in missing parts and makes a resubmit
+Mikko comes back, fills in missing parts and no submit button enabled
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Submit application
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   [Teardown]  logout

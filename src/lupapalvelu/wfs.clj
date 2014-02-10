@@ -303,10 +303,10 @@
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
                 {:query-params (:params request)
-                 :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+                 :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                  :basic-auth (:raster auth)
                  :as :stream})
       "wms" (http/get wms-url
                 {:query-params (:params request)
-                 :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+                 :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                  :as :stream}))))
