@@ -449,16 +449,6 @@
   (try (autofill-rakennuspaikka application created)
     (catch Exception e (error e "KTJ data was not updated"))))
 
-(defcommand save-application-shape
-  {:parameters [:id shape]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed :info]}
-  [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :shapes [shape]}}))
-
-
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
@@ -1115,7 +1105,7 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]}]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} {role :role}]
   (merge
     query
     (condp = filter-kind
@@ -1123,9 +1113,10 @@
       "inforequests" {:infoRequest true}
       "both"         nil)
     (condp = filter-state
-      "all"       {:state {$ne "canceled"}}
-      "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
-      "canceled"  {:state "canceled"})
+      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
+      "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+      "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
+      "canceled"          {:state "canceled"})
     (when-not (contains? #{nil "0"} filter-user)
       {$or [{"auth.id" filter-user}
             {"authority.id" filter-user}]})
@@ -1140,7 +1131,7 @@
 (defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params)
+        query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)

@@ -3,11 +3,9 @@
 
   var isInitializing = true;
   var currentId = null;
-  var application = new LUPAPISTE.ApplicationModel();
+  var applicationModel = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
-  var applicationMap = null;
-  var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
@@ -31,14 +29,15 @@
        dialogButtonSend    : "constructionReady.dialog.continue",
        areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
   constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
-    constructionStateChangeModel.openWithConfig({commandName : "inform-building-construction-started",
-       dateParameter: "startedDate",
-       extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
-       dateSelectorLabel   : "building.constructionStarted.startedDate",
-       dialogHeader        : "application.beginConstructionOf",
-       dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
-       dialogButtonSend    : "constructionStarted.dialog.continue",
-       areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, application);
+    constructionStateChangeModel.openWithConfig(
+        {commandName : "inform-building-construction-started",
+          dateParameter: "startedDate",
+          extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
+          dateSelectorLabel   : "building.constructionStarted.startedDate",
+          dialogHeader        : "application.beginConstructionOf",
+          dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
+          dialogButtonSend    : "constructionStarted.dialog.continue",
+          areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, applicationModel);
     return false;
   };
 
@@ -50,28 +49,30 @@
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskModel = new LUPAPISTE.CreateTaskModel();
+  var mapModel = new LUPAPISTE.MapModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
   var preAttachmentsByGroup = ko.observableArray();
   var postAttachmentsByGroup = ko.observableArray();
   var postVerdict = ko.observable(false);
-  
-  
+
+  var accordian = function(data, event) { accordion.toggle(event); };
+
   function getPreAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
           return !postVerdictStates[attachment.applicationState];
       }));
   }
-  
+
   function getPostAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
           return postVerdictStates[attachment.applicationState];
       }));
   }
-  
+
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
@@ -121,8 +122,8 @@
     .call();
   }
 
-  application.assignee.subscribe(function(v) { updateAssignee(v); });
-  application.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.assignee.subscribe(function(v) { updateAssignee(v); });
+  applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
@@ -136,44 +137,6 @@
     authorities(authorityInfos);
   }
 
-  // When Oskari map has initialized itself, draw shapes and marker
-  hub.subscribe("oskari-map-initialized", function() {
-
-    if (application.drawings && application.drawings().length) {
-      var drawings = _.map(application.drawings(), function(d) {
-        return {
-          "id": d.id(),
-          "name": d.name? d.name() :"",
-          "desc": d.desc ? d.desc() : "",
-          "category": d.category ? d.category() : "",
-          "geometry": d.geometry ? d.geometry() : "",
-          "area": d.area? d.area() : "",
-          "height": d.height? d.height():""
-        }});
-
-      hub.send("oskari-show-shapes", {
-        drawings: drawings,
-        style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
-        clear: true
-      });
-    }
-
-    var x = (application.location && application.location().x) ? application.location().x() : 0;
-    var y = (application.location && application.location().y) ? application.location().y() : 0;
-    hub.send("oskari-center-map", {
-      data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
-      clear: true
-    });
-  });
-
-  // When a shape is draw in Oskari map, save it to application
-  hub.subscribe("oskari-save-drawings", function(e) {
-    ajax.command("save-application-drawings", {id: currentId, drawings: e.data.drawings})
-    .success(function() {
-      repository.load(currentId);
-    })
-    .call();
-  });
 
   function showApplication(applicationDetails) {
     isInitializing = true;
@@ -181,38 +144,34 @@
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       var app = applicationDetails.application;
 
-      // Delete shapes
-      if (application.shapes) {
-        delete application.shapes;
-      }
-
       // Plain data
-      application._js = app;
+      applicationModel._js = app;
 
-      // Update observebles
-      ko.mapping.fromJS(app, {}, application);
+      // Update observables
+      ko.mapping.fromJS(app, {}, applicationModel);
 
       // Invite
       inviteModel.setApplicationId(app.id);
 
-      // Comments:
+      // Comments
       commentModel.refresh(app);
 
       // Verdict details
       verdictModel.refresh(app);
 
-      // Operations:
+      // Map
+      mapModel.refresh(app);
 
-      application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
+      // Operations
+      applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      // Pre-verdict attachments:
+      // Pre-verdict attachments
       preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
 
-      // Post-verdict attachments:
+      // Post-verdict attachments
       postAttachmentsByGroup(getPostAttachmentsByGroup(app.attachments));
 
-      // Setting disable value for the "Send unsent attachments" button:
-
+      // Setting disable value for the "Send unsent attachments" button
       var unsentAttachmentFound =
         _.some(app.attachments, function(a) {
           var lastVersion = _.last(a.versions);
@@ -220,7 +179,7 @@
                  (!a.sent || lastVersion.created > a.sent) &&
                  (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
         });
-      application.unsentAttachmentsNotFound(!unsentAttachmentFound);
+      applicationModel.unsentAttachmentsNotFound(!unsentAttachmentFound);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -230,29 +189,12 @@
 
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
-      
+
       // Post/pre verdict state?
       postVerdict(!!postVerdictStates[app.state]);
 
-      // Update map:
-      var location = application.location();
-      var x = location.x();
-      var y = location.y();
-
-      if(x === 0 && y === 0) {
-        $('#application-map').css("display", "none");
-      } else {
-        $('#application-map').css("display", "inline-block");
-      }
-
-      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application");
-      map.clear().center(x, y, 10).add(x, y);
-
-      if (application.shapes && application.shapes().length > 0) {
-        map.drawShape(application.shapes()[0]);
-      }
-
-      if (application.infoRequest() && authorizationModel.ok("mark-seen")) {
+      // Mark-seen
+      if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
@@ -262,16 +204,17 @@
       docgen.displayDocuments("#applicationDocgen", app, nonpartyDocs, authorizationModel);
       docgen.displayDocuments("#partiesDocgen",     app, partyDocs, authorizationModel);
 
+      // Indicators
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
       }
-      application.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
-      application.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
+      applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
+      applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      // set the value behind assignee selection list
+      // Set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
       var assigneeId = assignee ? assignee.id : null;
-      application.assignee(assigneeId);
+      applicationModel.assignee(assigneeId);
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -311,9 +254,9 @@
     selectedTab = tab; // remove after tab-spike
 
     setTimeout(function() {
-      var tabMeta = {"conversation": {type: "comments",   model: application.unseenComments},
-                      "statement":   {type: "statements", model: application.unseenStatements},
-                      "verdict":     {type: "verdicts",   model: application.unseenVerdicts}};
+      var tabMeta = {"conversation": {type: "comments",   model: applicationModel.unseenComments},
+                      "statement":   {type: "statements", model: applicationModel.unseenStatements},
+                      "verdict":     {type: "verdicts",   model: applicationModel.unseenVerdicts}};
       // Mark comments seen after a second
       if (tabMeta[tab] && currentId && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
@@ -322,14 +265,12 @@
       }}, 1000);
   }
 
-  var accordian = function(data, event) { accordion.toggle(event); };
-
   var attachmentTemplatesModel = new function() {
     var self = this;
 
     self.ok = function(ids) {
-      ajax.command("create-attachments", {id: application.id(), attachmentTypes: ids})
-        .success(function() { repository.load(application.id()); })
+      ajax.command("create-attachments", {id: applicationModel.id(), attachmentTypes: ids})
+        .success(function() { repository.load(applicationModel.id()); })
         .complete(LUPAPISTE.ModalDialog.close)
         .call();
     };
@@ -341,7 +282,7 @@
     };
 
     self.show = function() {
-      var data = _.map(application.allowedAttachmentTypes(), function(g) {
+      var data = _.map(applicationModel.allowedAttachmentTypes(), function(g) {
         var groupId = g[0];
         var groupText = loc("attachmentType." + groupId + "._group_label");
         var attachemntIds = g[1];
@@ -358,27 +299,13 @@
     };
   }();
 
-  function createMap(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); }
-
-  function getOrCreateMap(kind) {
-    if (kind === "application") {
-      if (!applicationMap) applicationMap = createMap("application-map");
-      return applicationMap;
-    } else if (kind === "inforequest") {
-      if (!inforequestMap) inforequestMap = createMap("inforequest-map");
-      return inforequestMap;
-    } else {
-      throw "Unknown kind: " + kind;
-    }
-  }
-
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
     if (newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
-      getOrCreateMap(kind).updateSize();
+      mapModel.updateMapSize(kind);
       repository.load(currentId);
     }
     selectTab(tab || "info");
@@ -455,7 +382,7 @@
 
     self.open = function(neighbor) {
       self
-        .id(application.id())
+        .id(applicationModel.id())
         .neighborId(neighbor.neighborId())
         .propertyId(neighbor.neighbor.propertyId())
         .name(neighbor.neighbor.owner.name())
@@ -481,28 +408,32 @@
 
   $(function() {
     var bindings = {
-      application: application,
+      // function to access accordion
+      accordian: accordian,
+      // observables
+      application: applicationModel,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
+      postVerdict: postVerdict,
       preAttachmentsByGroup: preAttachmentsByGroup,
       postAttachmentsByGroup: postAttachmentsByGroup,
-      comment: commentModel,
-      invite: inviteModel,
-      authorization: authorizationModel,
-      accordian: accordian,
+      // models
+      addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
-      requestForStatementModel: requestForStatementModel,
-      verdictModel: verdictModel,
-      stampModel: stampModel,
+      authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
-      neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel,
-      neighborStatusModel: neighborStatusModel,
-      addLinkPermitModel: addLinkPermitModel,
+      comment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTaskModel: createTaskModel,
-      postVerdict: postVerdict
+      invite: inviteModel,
+      map: mapModel,
+      neighbor: neighborActions,
+      neighborStatusModel: neighborStatusModel,
+      requestForStatementModel: requestForStatementModel,
+      sendNeighborEmailModel: sendNeighborEmailModel,
+      stampModel: stampModel,
+      verdictModel: verdictModel
     };
 
     $("#application").applyBindings(bindings);

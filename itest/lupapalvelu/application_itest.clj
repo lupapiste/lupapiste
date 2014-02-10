@@ -99,13 +99,6 @@
     (empty? authority-before-assignation) => true
     (empty? authority-in-the-end) => true))
 
-(fact* "Applicaton shape is saved"
-  (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
-        application-id (create-app-id pena) => truthy
-        resp  (command pena :save-application-shape :id application-id :shape shape) => ok?
-        app   (query-application pena application-id)]
-    (first (:shapes app)) => shape))
-
 (fact "Authority is able to create an application to a municipality in own organization"
   (let [application-id  (create-app-id sonja :municipality sonja-muni)]
     (fact "Application is open"
