@@ -119,7 +119,7 @@ var taskPageController = (function() {
         t.sendTask = sendTask;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
         task(t);
-        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task"});
+        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task", validate: true});
       });
     }
   }
