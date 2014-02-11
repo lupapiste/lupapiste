@@ -4,3 +4,5 @@ application.buildingOperation: Toimenpide ja rakennus
 integration.title: Taustajärjestelmäsiirto
 integration.success: Siirto onnistui.
 error.integration.send: Siirto epäonnistui. Tarkasta että kaikki pakolliset tiedot on siirretty. Alla tekninen virheilmoitus:
+# Korvaa vanhan:
+verdict.verdicts-found-from-backend: Taustajärjestelmästä haettiin {0} kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin {1} uutta vaatimusta Rakentaminen-välilehdelle.
