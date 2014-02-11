@@ -1,2 +1,0 @@
-applications.filter.application: Luvan haku
-applications.filter.construction: Rakentaminen
