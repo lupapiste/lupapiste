@@ -1,3 +1,11 @@
+application.attachmentSentDate: Siirretty taustajärjestelmään
+# Korvaa vanhan:
+application.buildingOperation: Toimenpide ja rakennus
+integration.title: Taustajärjestelmäsiirto
+integration.success: Siirto onnistui.
+error.integration.send: Siirto epäonnistui. Tarkasta että kaikki pakolliset tiedot on siirretty. Alla tekninen virheilmoitus:
+# Korvaa vanhan:
+verdict.verdicts-found-from-backend: Taustajärjestelmästä haettiin {0} kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin {1} uutta vaatimusta Rakentaminen-välilehdelle.
 application.conversationOpen: Kysy viranomaiselta
 draft.title: Luonnos-tilassa hakemus ei näy viranomaisille. Voit rauhassa valmistella hakemusta ja kutsua muita osapuolia hakemukselle. Voit julkaista hakemuksen viranomaiselle kysymällä neuvoa keskusteluketjussa tai jättämällä hakemuksen vireille.
 open.title: Valmisteilla-tilassa hakemuksesi näkyy viranomaiselle, mutta sitä ei ole vielä jätetty viranomaiselle käsiteltäväksi. Näin voitte keskustella hakemuksesta vapaasti viranomaisen kanssa ja valmistella hakemusta rauhassa.

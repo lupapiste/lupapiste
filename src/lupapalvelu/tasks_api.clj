@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
@@ -86,9 +87,9 @@
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)]
     (when-not (= "task-katselmus" (-> task :schema-info :name)) (fail! :error.invalid-task-type))
-    (when-not (get-in task [:data :katselmuksenLaji :value]) (fail! :error.missing-parameters))
+    (when (ss/blank? (get-in task [:data :katselmuksenLaji :value])) (fail! :error.missing-parameters))
     (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-          set-statement  (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+          set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
       (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
 
 (defquery task-types-for-application

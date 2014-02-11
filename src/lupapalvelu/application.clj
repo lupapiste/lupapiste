@@ -421,14 +421,11 @@
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
-  (or (validate-link-permits application)
-      (try
-        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-          (do-approve-jatkoaika-app command id lang)
-          (do-approve-regular-app command id lang))
-        (catch org.xml.sax.SAXParseException e
-          (info e "Invalid KRYSP XML message")
-          (fail (.getMessage e))))))
+  (or
+    (validate-link-permits application)
+    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+      (do-approve-jatkoaika-app command id lang)
+      (do-approve-regular-app command id lang))))
 
 (defn- do-submit [command application created]
   (update-application command
@@ -873,7 +870,8 @@
         organization  (organization/get-organization (:organization application))
         krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
         output-dir    (mapping-to-krysp/resolve-output-directory organization permit-type)
-        sent-file-ids (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
+        sent-file-ids (mapping-to-krysp/try-krysp
+                        (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version))
         set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
         updates       {$set
                        (merge

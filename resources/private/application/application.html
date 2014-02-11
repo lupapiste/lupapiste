@@ -360,9 +360,9 @@
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
             <!-- /ko -->
- 
+
             <div class="attachment-actions">
-    
+
               <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
@@ -391,7 +391,7 @@
                   <em data-bind="visible: application.pending" class="button-loader"></em>
               </button>
             </div>
-            
+
             <!-- ko if: postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
@@ -768,7 +768,6 @@
                 <tr>
                   <th data-bind="ltext: 'application.buildingStatus'"></th>
                   <th data-bind="ltext: 'application.buildingOperation'"></th>
-                  <th data-bind="ltext: 'application.building'"></th>
                   <th data-bind="ltext: 'application.buildingStartedDate'"></th>
                   <th data-bind="ltext: 'application.buildingStartedBy'"></th>
                 </tr>
@@ -777,7 +776,6 @@
                 <tr>
                   <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
                   <td data-bind="text: util.buildingName($data)"></td>
-                  <td data-bind="text: $data.buildingId"></td>
                   <td>
                     <span data-bind="if: !$data.constructionStarted">
                       <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
