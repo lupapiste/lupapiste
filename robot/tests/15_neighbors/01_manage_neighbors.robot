@@ -12,7 +12,7 @@ New applications does not have neighbors
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Jalkapesula_${secs}
   Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
-  Add comment  Jalkapesulaa rakentaisin
+  Open to authorities  Jalkapesulaa rakentaisin
 
   Open tab  statement
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-no-neigbors']

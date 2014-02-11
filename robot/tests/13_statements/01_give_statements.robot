@@ -32,7 +32,7 @@ New applications does not have statements
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
   Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
-  Add comment  Salibandyhalli FTW!
+  Open to authorities  Salibandyhalli FTW!
 
   Open tab  statement
   Element should be visible  xpath=//*[@data-test-id='application-no-statements']
