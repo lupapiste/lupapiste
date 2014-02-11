@@ -233,6 +233,9 @@
    (fact "impersonation action is available"
      (:impersonate-authority (actions)) => ok?)
 
+   (fact "admin can not query property owners"
+     (-> (http/get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
+
    (fact "fails without password"
      (impersonate nil) => fail?)
 
@@ -272,7 +275,10 @@
      (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
        ; Make sure we have required all the actions
        (require 'lupapalvelu.server)
-       (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
+       (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
+
+   (fact "still can not query property owners"
+     (-> (http/get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero
