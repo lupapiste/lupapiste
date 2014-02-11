@@ -34,10 +34,12 @@ Open browser to login page
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
   Title should be  Lupapiste
+  Wait Until  Page should contain  Haluan kirjautua palveluun
 
 Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
+  Wait Until  Page should contain  Haluan kirjautua palveluun
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -76,7 +78,7 @@ Wait until
   Wait Until Keyword Succeeds  ${WAIT_DELAY}  0.1  ${keyword}  @{varargs}
 
 Wait for jQuery
-  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  15
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
@@ -104,7 +106,9 @@ Tab should be visible
 Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
-  Execute JavaScript  window.location="${LOGOUT URL}?s=${secs}";
+  Go to  ${LOGOUT URL}?s=${secs}
+  Run Keyword Unless  '${SERVER}'=='http://localhost:8000'  Wait Until  Page should contain  Etusivu
+  Go to login page
 
 #
 # Login stuff
@@ -117,7 +121,7 @@ User should not be logged in
 
 User is not logged in
   Location should be  ${LOGIN URL}
-  Title should be  Lupapiste
+  Page should contain  Haluan kirjautua palveluun
   # test that no data is bind.
 
 Login
