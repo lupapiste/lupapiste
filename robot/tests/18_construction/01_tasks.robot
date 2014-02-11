@@ -78,7 +78,7 @@ Three buildings, all not started
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  3
 
 Start constructing the first building
-  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1 (893 turkistarhat) - 501 m²
+  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (893 turkistarhat) - 501 m²
   Click Element  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//a
   Wait Until  Element should be visible  modal-datepicker-date
   Input text by test id  modal-datepicker-date  1.1.2014
