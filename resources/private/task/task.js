@@ -82,9 +82,8 @@ var taskPageController = (function() {
         LUPAPISTE.ModalDialog.showDynamicOk(loc('integration.title'), loc('integration.success'));
       })
       .error(function(e){
-        console.log(e);
-        LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
         reload();
+        LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
   }
