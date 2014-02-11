@@ -72,7 +72,7 @@
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => ok?)
+      (command teppo :add-comment :id id :text "teppo@example.com" :target "application" :openApplication true) => ok?)
 
     (let [actions (:actions (query teppo :allowed-actions :id id))]
       (fact "Teppo should be able to do stuff."

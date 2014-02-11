@@ -258,10 +258,12 @@
                     ;; LUPA-407
                     (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
                 open-inforequest/notify-on-comment]}
-  [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
+  [{{:keys [to mark-answered openApplication] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
-      (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created))))
+      (util/deep-merge
+        (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created)
+        (when openApplication {$set {:state :open, :opened created}})))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -316,6 +318,17 @@
            :state     :canceled}})
   (mongo/remove-many :app-links {:link {$in [id]}})
   (ok))
+
+(defcommand open-application
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:draft]}
+  [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified  created
+           :state     :open}}))
 
 (defcommand request-for-complement
   {:parameters [:id]

@@ -10,7 +10,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   Mikko logs in
   Create application the fast way  submit-app  753  753-416-25-30  asuinrakennus
-  Add comment  huba huba
+  Open to authorities  huba huba
   Logout
 
 Sonja can not submit application

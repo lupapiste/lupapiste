@@ -81,7 +81,7 @@ Mikko can't invite himself
   Invite count is  0
 
 Mikko adds comment so thate application will be visible to admin
-  Add comment  Woe to you, Oh Earth and Sea, for the Devil sends the beast with wrath, because he knows the time is short...
+  Open to authorities  Woe to you, Oh Earth and Sea, for the Devil sends the beast with wrath, because he knows the time is short...
 
 Mikko decides to go to the desert, put on his ipod, and listen some some British hard-rock band
   Logout
