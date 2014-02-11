@@ -491,12 +491,13 @@
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
       (when (= r "GetCapabilities")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
-    (defpage [:post "/dev/krysp"] {} (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
-                                           xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
-                                           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
-                                       (when (= typeName "yak:YleisetAlueet")
-                                         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/yleiset alueet/ya-verdict.xml"))))
-                                       )))
+
+  (defpage [:post "/dev/krysp"] {} (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
+                                         xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
+                                         typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
+                                     (when (= typeName "yak:YleisetAlueet")
+                                       (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/yleiset alueet/ya-verdict.xml"))))
+                                     )))
 
 (env/in-dev
   (defjson [:any "/dev/spy"] []
