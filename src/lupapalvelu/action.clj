@@ -198,14 +198,13 @@
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       (fail :error.unauthorized))))
 
-(defn- authorized-to-application [command application]
+(defn- not-authorized-to-application [command application]
   (when-let [id (-> command :data :id)]
     (if-not application
       (fail :error.unauthorized)
       (or
         (invalid-state-in-application command application)
-        (user-is-not-allowed-to-access? command application)
-        (pre-checks-fail command application)))))
+        (user-is-not-allowed-to-access? command application)))))
 
 (defn- response? [r]
   (and (map? r) (:status r)))
@@ -231,7 +230,8 @@
       (some #(% command) validators)
       (let [application (get-application command)]
         (or
-          (authorized-to-application command application)
+          (not-authorized-to-application command application)
+          (pre-checks-fail command application)
           (when execute?
             (let [command  (assoc command :application application) ;; cache the app
                   status   (executed command)
