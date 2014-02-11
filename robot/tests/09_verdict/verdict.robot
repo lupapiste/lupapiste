@@ -37,7 +37,7 @@ Stamping dialog opens and closes
 Sonja fetches verdict from municipality KRYSP service
   Click enabled by test id  fetch-verdict
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot.
+  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
   Confirm  dynamic-ok-confirm-dialog
   Verdict is given  2013-01
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10

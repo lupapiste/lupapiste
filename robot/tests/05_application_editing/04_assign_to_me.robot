@@ -12,7 +12,7 @@ Mikko creates an application
   Set Suite Variable  ${appname}  assign-to-me${secs}
   Set Suite Variable  ${propertyId}  753-416-25-30
   Create application the fast way  ${appname}  753  ${propertyId}  asuinrakennus
-  Add comment  hojo-hojo
+  Open to authorities  hojo-hojo
   Element should not be visible  applicationUnseenComments
 
 # LUPA-23

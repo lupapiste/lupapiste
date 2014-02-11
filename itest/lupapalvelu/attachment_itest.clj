@@ -20,7 +20,7 @@
 
     response => ok?
 
-    (comment-application application-id pena)
+    (comment-application application-id pena true)
 
     (let [resp (command veikko
                  :create-attachments

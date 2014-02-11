@@ -60,7 +60,7 @@
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (let [id (create-app-id pena :municipality sonja-muni)]
-    (comment-application id pena)
+    (comment-application id pena true)
     (let [query-resp   (query sonja :authorities-in-applications-organization :id id)]
       (success query-resp) => true
       (count (:authorityInfo query-resp)) => 2)))
@@ -68,7 +68,7 @@
 (fact "Assign application to an authority"
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment to change state to open
-        _ (comment-application application-id pena)
+        _ (comment-application application-id pena true)
         application (query-application sonja application-id)
         authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
@@ -87,7 +87,7 @@
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment change set state to open
-        _ (comment-application application-id pena)
+        _ (comment-application application-id pena true)
         application (query-application sonja application-id)
         authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
@@ -149,7 +149,7 @@
 
 (facts "Add operations"
   (let [application-id  (create-app-id mikko :municipality veikko-muni)]
-    (comment-application application-id mikko)
+    (comment-application application-id mikko true)
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"

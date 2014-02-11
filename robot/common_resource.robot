@@ -426,10 +426,23 @@ Add comment
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
 
+Open to authorities
+  [Arguments]  ${message}
+  Open tab  conversation
+  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click by test id  application-open-application-btn
+  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+
 Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+
+Input comment and open to authorities
+  [Arguments]  ${section}  ${message}
+  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-open-application-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Input comment and mark answered
@@ -457,7 +470,7 @@ Apply minimal fixture now
 
 Application state should be
   [Arguments]  ${state}
-  ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
+  ${s} =  Get Element Attribute  xpath=//div[@data-test-id='application-state']@data-test-state
   Should be equal  ${s}  ${state}
 
 Permit type should be

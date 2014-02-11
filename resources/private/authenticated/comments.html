@@ -63,6 +63,15 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
+          <button
+            data-bind="visible: $root.authorization.ok('open-application'), disable: disabled, click: stateOpenApplication"
+            data-test-id="application-open-application-btn"
+            type="submit"
+            class="btn btn-primary">
+            <span data-bind="ltext: 'application.conversationOpen'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+          </button>
+
           <div data-bind="with: $parent.authorities, visible: $root.authorization.ok('can-target-comment-to-authority')" class="comment-controls">
             <div class="mark-answered" data-bind="visible: $root.application.infoRequest">
               <button

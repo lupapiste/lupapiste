@@ -65,9 +65,10 @@ var util = (function() {
 
   function buildingName(building) {
     var buildingObj = (typeof building.index === "function") ? ko.mapping.toJS(building) : building;
-    var usage = buildingObj.usage ? " (" + buildingObj.usage + ")" : "";
+    var id = buildingObj.buildingId ? " " + buildingObj.buildingId : "";
+    var usage = buildingObj.usage ? " (" + buildingObj.usage + ")": "";
     var area = (buildingObj.area || "?") + " " + loc("unit.m2");
-    return buildingObj.index + usage + " - " + area;
+    return buildingObj.index + "." + id + usage + " - " + area;
   }
 
   function makeAjaxMask() {

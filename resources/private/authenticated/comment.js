@@ -35,14 +35,15 @@ var comments = (function() {
     });
     
     
-    var doAddComment = function(markAnswered) {
+    var doAddComment = function(markAnswered, openApplication) {
         var id = self.applicationId();
         ajax.command("add-comment", {
             id: id,
             text: self.text(),
             target: self.target(),
             to: self.to(),
-            "mark-answered": markAnswered
+            "mark-answered": markAnswered,
+            openApplication: openApplication 
         })
         .processing(self.processing)
         .pending(self.pending)
@@ -58,11 +59,15 @@ var comments = (function() {
     };
     
     self.markAnswered = function() {
-        return doAddComment(true);
+      return doAddComment(true, false);
     };
 
     self.submit = function() {
-        return doAddComment(false);
+      return doAddComment(false, false);
+    };
+
+    self.stateOpenApplication = function() {
+      return doAddComment(false, true);
     };
 
     self.isForNewAttachment = function(model) {
