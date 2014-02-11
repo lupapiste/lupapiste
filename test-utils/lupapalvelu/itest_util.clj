@@ -198,9 +198,9 @@
     id => truthy
     id))
 
-(defn comment-application [id apikey]
+(defn comment-application [id apikey open]
   (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
+    (command apikey :add-comment :id id :text "hello" :target "application" :openApplication open) => ok?))
 
 (defn query-application
   "Fetch application from server.
