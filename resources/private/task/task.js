@@ -83,6 +83,7 @@ var taskPageController = (function() {
       })
       .error(function(e){
         console.log(e);
+        LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
         reload();
       })
       .call();
