@@ -118,9 +118,12 @@
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
     (fail :error.unauthorized)))
 
-(defn impersonation [command]
+(defn- impersonation [command]
   (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
     (fail :error.unauthorized)))
+
+(defn disallow-impersonation [command _]
+  (when (get-in command [:user :impersonating]) (fail :error.unauthorized)))
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
@@ -250,7 +253,7 @@
         (when execute? (log/log-event :error command))
         (fail text (dissoc all :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))))
     (catch response? resp
-      (do 
+      (do
         (warnf "%s -> proxy fail: %s" (:action command) resp)
         (fail :error.unknown)))
     (catch Object e
