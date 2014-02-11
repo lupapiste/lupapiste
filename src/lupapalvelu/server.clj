@@ -58,7 +58,7 @@
     ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090))
   (let [jetty-opts (into
                      {:max-threads 250}
-                     (when (env/dev-mode?)
+                     (when (env/feature? :ssl)
                        {:ssl? true
                         :ssl-port 8443
                         :keystore "./keystore"
