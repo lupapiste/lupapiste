@@ -26,11 +26,11 @@
               <span data-bind="ltext: 'open', attr: {'title' : loc('open.title')}" class="open-box"></span>
               <span data-bind="ltext: 'submitted', attr: {'title' : loc('submitted.title')}" class="submitted-box"></span>
               <span data-bind="ltext: 'complement-needed', attr: {'title' : loc('complement-needed.title')}" id="complement-needed-box" class="complement-needed-box"></span>
-              <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span> 
+              <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span>
               <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
               <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
               <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
-            </div> 
+            </div>
           </div>
 
           <!-- Property ID: -->
@@ -545,9 +545,13 @@
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
                     <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
-                      <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label><span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span></div>
+                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label>
+                      <span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span>
+                    </div>
+                    <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label>
+                      <span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span>
+                    </div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
@@ -582,7 +586,7 @@
                       </table>
                     </div>
 
-                    <!-- /ko --> <!-- lupamaaraykset -->
+                    <!-- /ko --> <!-- /lupamaaraykset -->
 
                     <div data-bind="if: $data.poytakirjat">
                       <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
