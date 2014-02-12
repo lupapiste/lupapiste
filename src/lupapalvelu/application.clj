@@ -847,10 +847,11 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [created] :as command}]
+  [{:keys [user created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:modified created
                                        :started timestamp
+                                       :startedBy (select-keys user [:id :firstName :lastName])
                                        :state  :constructionStarted}}))
   (ok))
 
@@ -894,10 +895,11 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
-  [{:keys [created application] :as command}]
+  [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates   {:modified created
                        :closed timestamp
+                       :closedBy (select-keys user [:id :firstName :lastName])
                        :state :closed}
         application   (merge
                         application
