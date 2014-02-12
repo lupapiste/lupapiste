@@ -350,12 +350,12 @@
 
 
           <div class="">
-            <div data-bind="if: postAttachmentsByGroup().length" data-test-id="application-post-attachments-table">
+            <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"/></h1>
               <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
             </div>
             <!-- ko if: !postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h1>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
@@ -393,7 +393,7 @@
             </div>
 
             <!-- ko if: postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
@@ -588,7 +588,7 @@
 
                     <!-- /ko --> <!-- /lupamaaraykset -->
 
-                    <div data-bind="if: $data.poytakirjat && $data.poytakirjat.length != 0">
+                    <div data-bind="if: $data.poytakirjat && $data.poytakirjat.length > 0">
                       <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
                       <table class="table table-striped tablesorter" id="application-verdict-details">
                         <thead>
@@ -764,7 +764,7 @@
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
-          <div data-bind="if: buildings() && buildings().length && $root.authorization.ok('inform-building-construction-started')">
+          <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
             <table>
               <thead>
