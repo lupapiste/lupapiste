@@ -778,10 +778,9 @@
                   <td data-bind="text: util.buildingName($data)"></td>
                   <td>
                     <span data-bind="if: !$data.constructionStarted">
-                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
-                    <span data-bind="if: $data.constructionStarted">
-                      <span data-bind="dateString: $data.constructionStarted"></span>
+                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a>
                     </span>
+                    <span data-bind="if: $data.constructionStarted, dateString: $data.constructionStarted"></span>
                   </td>
                   <td data-bind="fullName: $data.startedBy"></td>
                 </tr>
