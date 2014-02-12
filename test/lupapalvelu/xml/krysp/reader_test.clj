@@ -239,7 +239,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-      cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
+        cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
@@ -255,16 +255,14 @@
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
         (:takuuaikaPaivat lupamaaraykset) => "760"
-        )
+        (:muutMaaraykset lupamaaraykset) => "Viheralueet rakennettava, J\u00e4lkity\u00f6t teht\u00e4v\u00e4")
 
       (facts "paivamaarat data is correct"
-        paivamaarat    => truthy
-        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2013-11-04")
-        )
+        paivamaarat => truthy
+        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2013-11-04"))
 
       (facts "p\u00f6yt\u00e4kirjat data is correct"
-        poytakirjat    => truthy
-        (count poytakirjat) => 0))))
+        poytakirjat => nil?))))
 
 
 (facts "Buildings from verdict message"
