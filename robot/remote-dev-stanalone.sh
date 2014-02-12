@@ -12,4 +12,4 @@ bianca='192.168.7.253'
 #remote=$bianca
 remote=$hubert
 
-pybot -d target --exclude fail --exclude integration --RunEmptySuite --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:http://lupadev.solita.fi common/setup $target common/teardown
+pybot -d target --exclude fail --exclude integration --RunEmptySuite --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:https://www-dev.lupapiste.fi common/setup $target common/teardown
