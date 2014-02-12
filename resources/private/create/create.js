@@ -309,24 +309,25 @@
         if (model.inforequestsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("new-applications-or-inforequests-disabled.inforequests-disabled"),
-              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
+              loc("new-applications-or-inforequests-disabled.inforequests-disabled"));
           return;
         }
         LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
-      } else {
-        if (model.newApplicationsDisabled()) {
-          LUPAPISTE.ModalDialog.showDynamicOk(
-              loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("new-applications-or-inforequests-disabled.new-applications-disabled"),
-              {title: loc("button.ok"), fn: function() {LUPAPISTE.ModalDialog.close();}});
-          return;
-        }
+      } else if (model.newApplicationsDisabled()) {
+        LUPAPISTE.ModalDialog.showDynamicOk(
+            loc("new-applications-or-inforequests-disabled.dialog.title"),
+            loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
+        return;
+      }
+
+      var op = self.operation();
+      if (!op) {
+        error("No operation!", {selected: tree.getSelected(), stack: tree.getStack()});
       }
 
       ajax.command("create-application", {
         infoRequest: infoRequest,
-        operation: self.operation(),
+        operation: op,
         y: self.y(),
         x: self.x(),
         address: self.addressString(),
@@ -390,9 +391,9 @@
       baseModel: model
     });
 
-    hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
-    hub.subscribe({type: "keyup", keyCode: 33}, tree.start);
-    hub.subscribe({type: "keyup", keyCode: 36}, tree.start);
+    hub.subscribe({type: "keyup", keyCode: 37}, tree.back);  // left arrow
+    hub.subscribe({type: "keyup", keyCode: 33}, tree.start); // page up
+    hub.subscribe({type: "keyup", keyCode: 36}, tree.start); // home
 
   });
 
