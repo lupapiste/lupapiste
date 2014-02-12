@@ -588,7 +588,7 @@
 
                     <!-- /ko --> <!-- /lupamaaraykset -->
 
-                    <div data-bind="if: $data.poytakirjat">
+                    <div data-bind="if: $data.poytakirjat && $data.poytakirjat.length != 0">
                       <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
                       <table class="table table-striped tablesorter" id="application-verdict-details">
                         <thead>
