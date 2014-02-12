@@ -26,11 +26,11 @@
               <span data-bind="ltext: 'open', attr: {'title' : loc('open.title')}" class="open-box"></span>
               <span data-bind="ltext: 'submitted', attr: {'title' : loc('submitted.title')}" class="submitted-box"></span>
               <span data-bind="ltext: 'complement-needed', attr: {'title' : loc('complement-needed.title')}" id="complement-needed-box" class="complement-needed-box"></span>
-              <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span> 
+              <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span>
               <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
               <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
               <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
-            </div> 
+            </div>
           </div>
 
           <!-- Property ID: -->
@@ -794,11 +794,12 @@
           <div data-bind="if: !buildings() || buildings.length == 0">
             <table>
               <thead>
-                <tr><td colspan="3"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
+                <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
                 <tr>
                   <th data-bind="ltext: 'application.constructionStateChangeOperation'"></th>
                   <th data-bind="ltext: 'application.constructionStateChangeDate'"></th>
                   <th data-bind="ltext: 'application.constructionStateChangedBy'"></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -806,6 +807,8 @@
                 <!-- Hanke aloitettu -->
                 <tr>
                   <td><span data-bind="ltext: 'constructionStarted'"></span></td>
+                  <td><span data-bind="if: $data.started, dateString: $data.started"></span></td>
+                  <td data-bind="fullName: $data.startedBy"></td>
                   <td>
                     <span data-bind="if: !$data.started || $data.started.length == 0">
                       <button class="btn btn-primary"
@@ -813,17 +816,16 @@
                               data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
                                          ltext: 'application.button.informConstructionStarted',
                                          visible: $root.authorization.ok('inform-construction-started'),
-                                         enable: $root.authorization.ok('inform-construction-started')"></button></span>
-                    <span data-bind="if: $data.started">
-                      <span data-bind="dateString: $data.started"></span>
+                                         enable: $root.authorization.ok('inform-construction-started')"></button>
                     </span>
                   </td>
-                  <td data-bind="fullName: $data.startedBy"></td>
                 </tr>
 
                 <!-- Hanke valmistunut -->
                 <tr>
                   <td><span data-bind="ltext: 'closed'"></span></td>
+                  <td><span data-bind="if: $data.closed, dateString: $data.closed"></span></td>
+                  <td data-bind="fullName: $data.closedBy"></td>
                   <td>
                     <span data-bind="if: !$data.closed || $data.closed.length == 0">
                       <button class="btn btn-primary"
@@ -831,12 +833,9 @@
                               data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
                                          ltext: 'application.button.informConstructionReady',
                                          visible: $root.authorization.ok('inform-construction-ready'),
-                                         enable: $root.authorization.ok('inform-construction-ready')"></button></span>
-                    <span data-bind="if: $data.closed">
-                      <span data-bind="dateString: $data.closed"></span>
+                                         enable: $root.authorization.ok('inform-construction-ready')"></button>
                     </span>
                   </td>
-                  <td data-bind="fullName: $data.closedBy"></td>
                 </tr>
 
               </tbody>
