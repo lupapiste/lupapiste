@@ -351,7 +351,7 @@
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
-                                (when (= "mainostus-tapahtuma-valinta" main-viit-tapahtuma-name)
+                                (when (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name))
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
