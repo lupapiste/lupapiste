@@ -168,6 +168,7 @@
    :authority                {}
    :buildings                []
    :closed                   nil
+   :closedBy                 {}
    :comments                 []
    :created                  nil
    :documents                []
@@ -187,6 +188,7 @@
    :schema-version           nil
    :sent                     nil
    :started                  nil
+   :startedBy                {}
    :state                    ""
    :statements               []
    :submitted                nil

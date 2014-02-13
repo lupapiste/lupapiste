@@ -11,8 +11,8 @@
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
-      {commandName : "inform-construction-started",
-       dateParameter: "startedTimestampStr",
+      {commandName         : "inform-construction-started",
+       dateParameter       : "startedTimestampStr",
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
        dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
@@ -20,9 +20,9 @@
        areYouSureMessage   : "constructionStarted.dialog.areyousure.message"});
   constructionStateChangeModel.openConstructionReadyDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
-      {commandName : "inform-construction-ready",
-       dateParameter: "readyTimestampStr",
-       extraParameters: {lang: loc.getCurrentLanguage()},
+      {commandName         : "inform-construction-ready",
+       dateParameter       : "readyTimestampStr",
+       extraParameters     : {lang: loc.getCurrentLanguage()},
        dateSelectorLabel   : "constructionReady.readyDate",
        dialogHeader        : "constructionReady.dialog.header",
        dialogHelpParagraph : "constructionReady.dialog.helpParagraph",
@@ -30,14 +30,14 @@
        areYouSureMessage   : "constructionReady.dialog.areyousure.message"});
   constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
     constructionStateChangeModel.openWithConfig(
-        {commandName : "inform-building-construction-started",
-          dateParameter: "startedDate",
-          extraParameters: {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
-          dateSelectorLabel   : "building.constructionStarted.startedDate",
-          dialogHeader        : "application.beginConstructionOf",
-          dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
-          dialogButtonSend    : "constructionStarted.dialog.continue",
-          areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, applicationModel);
+        {commandName         : "inform-building-construction-started",
+         dateParameter       : "startedDate",
+         extraParameters     : {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
+         dateSelectorLabel   : "building.constructionStarted.startedDate",
+         dialogHeader        : "application.beginConstructionOf",
+         dialogHelpParagraph : "building.constructionStarted.dialog.helpParagraph",
+         dialogButtonSend    : "constructionStarted.dialog.continue",
+         areYouSureMessage   : "building.constructionStarted.dialog.areyousure.message"}, applicationModel);
     return false;
   };
 
