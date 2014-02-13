@@ -266,10 +266,10 @@
         ;; Otherwise the type is the first key in the map.
         main-viit-tapahtuma-name (when main-viit-tapahtuma-doc
                                    (or
-                                     (-> main-viit-tapahtuma-doc :_selected)
+                                     (-> main-viit-tapahtuma-doc :_selected keyword)
                                      (-> main-viit-tapahtuma-doc first key)))
         main-viit-tapahtuma (when main-viit-tapahtuma-doc
-                             (main-viit-tapahtuma-doc (keyword main-viit-tapahtuma-name)))
+                             (main-viit-tapahtuma-doc main-viit-tapahtuma-name))
 
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
