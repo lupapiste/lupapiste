@@ -29,6 +29,13 @@ There are no comments yet
 Mikko adds a comment
   Add comment  huba huba
 
+Application is now in stage luonnos
+  Application state should be  draft
+  It is possible to add operation
+
+Mikko opens application to authorities
+  Open to authorities  hubati huba
+
 Application is now in stage valmisteilla
   Application state should be  open
   It is possible to add operation

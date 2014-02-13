@@ -10,12 +10,15 @@
           <table class="table" data-test-id="inforequest-attachments-table">
             <thead>
               <tr>
+                <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
                 <th data-bind="ltext: 'application.attachmentFile'"></th>
                 <th data-bind="ltext: 'application.attachmentEditDate'"></th>
+                <th data-bind="ltext: 'application.attachmentSentDate'"></th>
               </tr>
             </thead>
             <tbody data-bind="foreach: attachments">
               <tr data-bind="with: $data.latestVersion">
+                <td data-bind="text: loc(['attachmentType', $parent.type['type-group'], $parent.type['type-id']])"></td>
                 <td>
                   <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
                   <i data-bind="ltext: contentType"></i>
@@ -24,6 +27,9 @@
                 <td>
                   <span data-bind="dateString: $parent.modified"></span>
                   <span data-bind="fullName: user"></span>
+                </td>
+                <td>
+                  <span data-bind="dateString: $parent.sent"></span>
                 </td>
               </tr>
             </tbody>

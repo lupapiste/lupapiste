@@ -23,7 +23,7 @@ Sonja prepares the application
   Input Text  verdict-official  06.02.2014\t
   Wait Until  Element should be visible  verdict-submit
   Click enabled by test id  verdict-submit
-  Wait Until  Element Should Be Visible  xpath=//span[@data-test-state='verdictGiven']
+  Wait Until  Element Should Be Visible  xpath=//div[@data-test-state='verdictGiven']
 
 Add post-verdict attachment
   Open tab  attachments
