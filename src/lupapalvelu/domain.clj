@@ -140,10 +140,11 @@
   [{:keys [id timestamp name given status official]}]
   {:kuntalupatunnus id
    :timestamp timestamp
-   :paatokset [{:paivamaarat {:anto          given
-                              :lainvoimainen official}
+   :paatokset [{:paivamaarat {:anto             given
+                              :lainvoimainen    official}
                 :poytakirjat [{:paatoksentekija name
                                :status          status
+                               :paatospvm       given
                                :paatoskoodi     (verdict/verdict-name status)}]}]})
 
 ;;
