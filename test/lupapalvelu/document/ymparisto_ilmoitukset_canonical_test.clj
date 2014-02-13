@@ -21,13 +21,13 @@
                     :yritys
                     {:liikeJaYhteisoTunnus {:modified 1391770449943, :value "1060155-5"},
                      :osoite
-                     {:katu {:modified 1391769571984, :value "Hämeenkatu 3 "},
+                     {:katu {:modified 1391769571984, :value "H\u00e4meenkatu 3 "},
                       :postinumero {:modified 1391770395709, :value "43640"},
                       :postitoimipaikannimi {:modified 1391769576504, :value "kuuva"}},
                      :yhteyshenkilo
                      {:henkilotiedot
                       {:etunimi {:modified 1391769580313, :value "Pertti"},
-                       :sukunimi {:modified 1391769583050, :value "Yrittäjä"}},
+                       :sukunimi {:modified 1391769583050, :value "Yritt\u00e4j\u00e4"}},
                       :yhteystiedot
                       {:email {:modified 1391769600334, :value "tew@gjr.fi"},
                        :puhelin {:modified 1391769589423, :value "060222155"}}},
@@ -343,12 +343,12 @@
                  sovellus (:sovellus MuuTunnus) => "Lupapiste"
                  ilmoittaja (:ilmoittaja melutarina) => {:nimi "Yrtti Oy",
                                                          :postiosoite
-                                                         {:osoitenimi {:teksti "Hämeenkatu 3 "},
+                                                         {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
                                                           :postitoimipaikannimi "kuuva",
                                                           :postinumero "43640"},
                                                          :sahkoposti nil,
                                                          :yhteyshenkilo
-                                                         {:nimi {:sukunimi "Yrittäjä", :etunimi "Pertti"},
+                                                         {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
                                                           :puhelin "060222155",
                                                           :sahkopostiosoite "tew@gjr.fi"},
                                                          :liikeJaYhteisoTunnus "1060155-5"}]))

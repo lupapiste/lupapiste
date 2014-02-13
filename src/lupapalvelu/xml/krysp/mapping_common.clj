@@ -46,7 +46,8 @@
                             :child [{:tag :Polygon :ns "gml"
                                      :child [{:tag :exterior
                                               :child [{:tag :LinearRing
-                                                       :child [{:tag :pos}]}]} ]}]}]})
+                                                       :child [{:tag :pos}]}]} ]}]}
+                           {:tag :tyhja :ns "yht"}]})
 
 (def sijantitieto {:tag :sijaintitieto
                    :child [sijantiType]})
@@ -55,25 +56,6 @@
                                  :child [{:tag :kayttotarkoitus
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
-
-(def ^:private kiinteisto [{:tag :kiinteisto
-                            :child (conj [{:tag :kiinteisto
-                                           :child [{:tag :kylanimi}
-                                                   {:tag :tilannimi}
-                                                   {:tag :kiinteistotunnus}
-                                                   {:tag :maaraAlaTunnus}]}
-                                          {:tag :palsta}
-                                          {:tag :kokotilaKytkin}
-                                          {:tag :hallintaperuste}
-                                          {:tag :vuokraAluetunnus}
-                                          {:tag :kaavanaste}
-                                          {:tag :kerrosala}
-                                          {:tag :tasosijainti}
-                                          {:tag :rakennusoikeusYhteensa}
-                                          {:tag :uusiKytkin}]
-                                     osoite
-                                     sijantitieto
-                                     rakennusoikeudet)}])
 
 (def rakennuspaikka {:tag :Rakennuspaikka
                      :child [{:tag :yksilointitieto :ns "yht"}
