@@ -13,6 +13,8 @@
   (fact (select nil [:a :c]) => [nil nil])
   (fact (select {:a \a :b \b :c \c} nil) => nil))
 
+(fact (positions #{2} [1 2 3 4 1 2 3 4]) => [1 5])
+
 (facts "deep-merge-with"
   (fact
     (deep-merge-with + {:a {:b {:c 1 :d {:x 1 :y 2}} :e 3} :f 4}

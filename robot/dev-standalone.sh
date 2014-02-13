@@ -11,4 +11,4 @@ bianca='192.168.7.253'
 
 remote=$bianca
 
-pybot -d target --exclude fail --exclude integration --RunEmptySuite --variable SERVER:http://lupadev.solita.fi common/setup $target common/teardown
+pybot -d target --exclude fail --exclude integration --RunEmptySuite --variable SERVER:https://www-dev.lupapiste.fi common/setup $target common/teardown

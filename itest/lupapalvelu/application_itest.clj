@@ -60,7 +60,7 @@
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (let [id (create-app-id pena :municipality sonja-muni)]
-    (comment-application id pena)
+    (comment-application id pena true)
     (let [query-resp   (query sonja :authorities-in-applications-organization :id id)]
       (success query-resp) => true
       (count (:authorityInfo query-resp)) => 2)))
@@ -68,7 +68,7 @@
 (fact "Assign application to an authority"
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment to change state to open
-        _ (comment-application application-id pena)
+        _ (comment-application application-id pena true)
         application (query-application sonja application-id)
         authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
@@ -87,7 +87,7 @@
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment change set state to open
-        _ (comment-application application-id pena)
+        _ (comment-application application-id pena true)
         application (query-application sonja application-id)
         authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
@@ -98,13 +98,6 @@
         authority-in-the-end (:authority assigned-app)]
     (empty? authority-before-assignation) => true
     (empty? authority-in-the-end) => true))
-
-(fact* "Applicaton shape is saved"
-  (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
-        application-id (create-app-id pena) => truthy
-        resp  (command pena :save-application-shape :id application-id :shape shape) => ok?
-        app   (query-application pena application-id)]
-    (first (:shapes app)) => shape))
 
 (fact "Authority is able to create an application to a municipality in own organization"
   (let [application-id  (create-app-id sonja :municipality sonja-muni)]
@@ -156,7 +149,7 @@
 
 (facts "Add operations"
   (let [application-id  (create-app-id mikko :municipality veikko-muni)]
-    (comment-application application-id mikko)
+    (comment-application application-id mikko true)
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"

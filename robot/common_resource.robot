@@ -34,10 +34,12 @@ Open browser to login page
   Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
   Title should be  Lupapiste
+  Wait Until  Page should contain  Haluan kirjautua palveluun
 
 Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
+  Wait Until  Page should contain  Haluan kirjautua palveluun
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -76,7 +78,7 @@ Wait until
   Wait Until Keyword Succeeds  ${WAIT_DELAY}  0.1  ${keyword}  @{varargs}
 
 Wait for jQuery
-  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  15
 
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
@@ -104,7 +106,9 @@ Tab should be visible
 Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
-  Execute JavaScript  window.location="${LOGOUT URL}?s=${secs}";
+  Go to  ${LOGOUT URL}?s=${secs}
+  Run Keyword Unless  '${SERVER}'=='http://localhost:8000'  Wait Until  Page should contain  Etusivu
+  Go to login page
 
 #
 # Login stuff
@@ -117,7 +121,7 @@ User should not be logged in
 
 User is not logged in
   Location should be  ${LOGIN URL}
-  Title should be  Lupapiste
+  Page should contain  Haluan kirjautua palveluun
   # test that no data is bind.
 
 Login
@@ -304,6 +308,25 @@ Prepare new request
   Set animations on
 
 
+Add attachment
+  [Arguments]  ${path}  ${description}
+
+  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
+  # Must I do everything manually??
+  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
+  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
+
+  Select Frame     uploadFrame
+  Wait until       Element should be visible  test-save-new-attachment
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select From List  attachmentType  muut.muu
+  Input text       text  ${description}
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  Click element    test-save-new-attachment
+  Unselect Frame
+  Wait Until Page Contains  Muu liite
+
+
 Select operation path by permit type
   [Arguments]  ${permitType}
   Run Keyword If  '${permitType}' == 'R'  Select operations path R
@@ -407,10 +430,23 @@ Add comment
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
 
+Open to authorities
+  [Arguments]  ${message}
+  Open tab  conversation
+  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click by test id  application-open-application-btn
+  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+
 Input comment
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+
+Input comment and open to authorities
+  [Arguments]  ${section}  ${message}
+  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-open-application-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Input comment and mark answered
@@ -438,7 +474,7 @@ Apply minimal fixture now
 
 Application state should be
   [Arguments]  ${state}
-  ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
+  ${s} =  Get Element Attribute  xpath=//div[@data-test-id='application-state']@data-test-state
   Should be equal  ${s}  ${state}
 
 Permit type should be

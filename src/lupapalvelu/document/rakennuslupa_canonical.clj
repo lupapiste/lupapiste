@@ -257,7 +257,7 @@
 (defn katselmusnimi-to-type [nimi tyyppi]
   (if (= :tarkastus tyyppi)
     "muu tarkastus"
-    (condp = nimi
+    (case nimi
     "Aloitusilmoitus" "ei tiedossa"
     "muu katselmus" "muu katselmus"
     "aloituskokous" "aloituskokous"
@@ -267,9 +267,8 @@
     "rakennekatselmus" "rakennekatselmus"
     "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
     "osittainen loppukatselmus" "osittainen loppukatselmus"
-    "loppukatselmus" ; XXX tarkoituksella ei defaulttia?
-    "ei tiedossa"))
-  )
+      "loppukatselmus" "loppukatselmus"
+      "ei tiedossa")))
 
 (defn katselmus-kayttotapaus [nimi tyyppi]
   (if (= nimi "Aloitusilmoitus")
@@ -278,14 +277,7 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
-
-;; TODO: Voisiko tahan tehda YA-canonicalin tyyppisen config-systeemin? Ei tarvitsisi nain montaa parametria.
-;; TODO: Yhdistele taman namespacen canonical-funktiota.
-;                                                   paatokselta (refaktoroidaan building selector)
-;                                                            kirjautunut kayttaja
-;                                                                 lisaa skeemaan (muu-muu)
-;                                                                                          lopullinen-tila
-(defn katselmus-canonical [application lang pitoPvm building user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
         katselmus (cr/strip-nils
@@ -293,23 +285,34 @@
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                        :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
                        :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :tarkastuksenTaiKatselmuksenNimi katselmuksen-nimi
+                       :tarkastuksenTaiKatselmuksenNimi task-name
                        :osittainen osittainen
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat}
-                      (when building {:rakennustunnus (select-keys building [:jarjestysnumero :kiinttun :rakennusnro])})
-                      (when huomautukset {:huomautukset {:huomautus {:kuvaus huomautukset}}})))
+                      (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
+                      (when (seq buildings)
+                        {:rakennustunnus (select-keys (:rakennus (first buildings)) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
+                         :katselmuksenRakennustieto (map #(let [building-canonical (merge
+                                                                                     (select-keys (:rakennus %) [:jarjestysnumero :kiinttun :rakennusnro])
+                                                                                     {:katselmusOsittainen (get-in % [:tila :tila])
+                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})]
+                                                            {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
+                      (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
+                                                                                (fn [m k v] (assoc m k (to-xml-date-from-string v)))
+                                                                                (select-keys huomautukset [:kuvaus :toteaja])
+                                                                                (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
+                      ; Osapuoli is not required in KRYSP 2.1.3
                       :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
                                                                               :henkilo {:nimi {:etunimi (:firstName user)
                                                                                                :sukunimi (:lastName user)}
-                                                                                        :osoite {:osoitenimi {:teksti (:street user)}
+                                                                                        :osoite {:osoitenimi {:teksti (or (:street user) "")}
                                                                                                  :postitoimipaikannimi (:city user)
                                                                                                  :postinumero (:zip user)}
                                                                                          :sahkopostiosoite (:email user)

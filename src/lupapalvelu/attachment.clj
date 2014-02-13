@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
-            [sade.util :refer [fn-> fn->> deep-merge]]
+            [sade.util :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.core :refer [fail fail!]]
@@ -71,6 +71,7 @@
                                      :jatevesijarjestelman_rakennustapaseloste
                                      :julkisivujen_varityssuunnitelma
                                      :kalliorakentamistekninen_suunnitelma
+                                     :katselmuksen_tai_tarkastuksen_poytakirja
                                      :kerrosalaselvitys
                                      :liikkumis_ja_esteettomyysselvitys
                                      :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta
@@ -130,6 +131,21 @@
 ;; Api
 ;;
 
+(defn by-file-ids [file-ids attachment]
+  (let [file-id-set (set file-ids)
+        attachment-file-ids (map :fileId (:versions attachment))]
+    (some #(file-id-set %) attachment-file-ids)))
+
+(defn create-update-statements
+  "Returns a map of mongo updates to be used as $set value.
+   E.g., {attachments.0.k v
+          attachments.5.k v}"
+  [attachments pred k v]
+  (reduce (fn [m i] (assoc m (str "attachments." i \. k) v)) {} (util/positions pred attachments)))
+
+(defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
+  (create-update-statements attachments (partial by-file-ids file-ids) "sent" timestamp))
+
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
@@ -145,11 +161,12 @@
   [application]
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target locked op attachement-type & [attachment-id]]
+(defn make-attachment [now target locked applicationState op attachement-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
    :type attachement-type
    :modified now
    :locked locked
+   :applicationState applicationState
    :state :requires_user_action
    :target target
    :op op
@@ -157,19 +174,25 @@
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now attachement-types]
-  (map (partial make-attachment now nil false nil) attachement-types))
+  [now applicationState attachement-types]
+  (map (partial make-attachment now nil false applicationState nil) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target locked & [attachment-id]]
-  (let [attachment (make-attachment now target locked nil attachement-type attachment-id)]
+(defn create-attachment [application attachement-type now target locked & [attachment-id]]
+  {:pre [(map? application)]}
+  (let [application-id (:id application)
+        applicationState (:state application)
+        attachment (make-attachment now target locked applicationState nil attachement-type attachment-id)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
        $push {:attachments attachment}})
     (:id attachment)))
 
-(defn create-attachments [application-id attachement-types now]
-  (let [attachments (make-attachments now attachement-types)]
+(defn create-attachments [application attachement-types now]
+  {:pre [(map? application)]}
+  (let [application-id (:id application)
+        applicationState (:state application)
+        attachments (make-attachments now applicationState attachement-types)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -230,7 +253,7 @@
                               :attachments {$elemMatch {:id attachment-id
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
-                             (deep-merge
+                             (util/deep-merge
                                (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now)
                                {$set {:modified now
                                       :attachments.$.modified now
@@ -263,11 +286,13 @@
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application-id attachment-id attachment-type file-id filename content-type size comment-text created user target locked]}]
-  (let [attachment-id (cond
-                        (ss/blank? attachment-id) (create-attachment application-id attachment-type created target locked)
+  [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked]}]
+  {:pre [(map? application)]}
+  (let [application-id (:id application)
+        attachment-id (cond
+                        (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
-                        :else (create-attachment application-id attachment-type created target locked attachment-id))]
+                        :else (create-attachment application attachment-type created target locked attachment-id))]
     (set-attachment-version application-id attachment-id file-id filename content-type size comment-text created user false)))
 
 (defn parse-attachment-type [attachment-type]
@@ -295,7 +320,7 @@
   [{:keys [attachments]} file-id]
   (first
     (filter
-      (fn->> :versions (some (fn-> :fileId (= file-id))))
+      (partial by-file-ids #{file-id})
       attachments)))
 
 (defn attachment-file-ids
@@ -374,8 +399,9 @@
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
+  {:pre [(map? (:application options))]}
   (let [file-id (mongo/create-id)
-        application-id (:application-id options)
+        application-id (-> options :application :id)
         filename (:filename options)
         content (:content options)
         user (:user options)

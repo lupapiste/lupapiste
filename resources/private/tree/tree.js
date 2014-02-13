@@ -131,12 +131,15 @@ var tree = (function() {
       .append(navTemplate.clone())
       .applyBindings(_.extend({}, self.baseModel, self.model));
 
-    return util.fluentify({
-      reset:    self.reset,
-      back:     self.model.goBack,
-      start:    self.model.goStart,
-      selected: self.model.selected
-    });
+    return _.assign(
+        util.fluentify({
+          reset:    self.reset,
+          back:     self.model.goBack,
+          start:    self.model.goStart,
+          selected: self.model.selected
+        }),
+        {getSelected: function() {return self.model.selected();},
+         getStack:    function() {return self.model.stack();}});
 
   }
 

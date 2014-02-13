@@ -12,7 +12,7 @@ Mikko prepares the application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  VETUMA_${secs}
   Create application the fast way  ${appname}  753  753-416-25-22  asuinrakennus
-  Add comment  Lapsille vesiliuku eiku Vetuma-tunnukset
+  Open to authorities  Lapsille vesiliuku eiku Vetuma-tunnukset
   Logout
 
 Sonja adds a neighbor

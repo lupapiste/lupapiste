@@ -17,11 +17,23 @@
            org.apache.http.cookie.Cookie))
 
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
+(defn find-user-from-minimal-by-apikey [apikey] (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
 (defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (defn email-for [username] (:email (find-user-from-minimal username)))
 (defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
+
+(defn organization-from-minimal-by-id [org-id]
+  (some #(when (= (:id %) org-id) %) minimal/organizations))
+
+(defn- muni-for-user [user]
+  (let [org (organization-from-minimal-by-id (first (:organizations user)))]
+    (-> org :scope first :municipality)))
+
+(defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
+(defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
+
 
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
@@ -31,18 +43,18 @@
 (def teppo-id    (id-for "teppo@example.com"))
 (def veikko      (apikey-for "veikko"))
 (def veikko-id   (id-for "veikko"))
-;TODO should get this through organization
-(def veikko-muni "837")
+(def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
 (def ronja-id    (id-for "ronja"))
-;TODO should get this through organization
-(def sonja-muni  "753")
+(def sonja-muni  (muni-for "sonja"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def dummy       (apikey-for "dummy"))
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))
+(def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
+(def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
@@ -186,9 +198,9 @@
     id => truthy
     id))
 
-(defn comment-application [id apikey]
+(defn comment-application [id apikey open]
   (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
+    (command apikey :add-comment :id id :text "hello" :target "application" :openApplication open) => ok?))
 
 (defn query-application
   "Fetch application from server.
@@ -284,7 +296,7 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0)))))
 
-(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type]
+(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
@@ -295,7 +307,7 @@
                        :multipart (filter identity
                                     [{:name "applicationId"  :content application-id}
                                      {:name "Content/type"   :content "text/plain"}
-                                     {:name "attachmentType" :content "muut.muu"}
+                                     {:name "attachmentType" :content (or attachment-type "muut.muu")}
                                      (when attachment-id {:name "attachmentId"   :content attachment-id})
                                      {:name "upload"         :content uploadfile}
                                      {:name "targetId"       :content target-id}
@@ -305,10 +317,9 @@
       (facts "Statement upload succesfully"
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
-      ;(facts "Statement upload should fail"
-      ;  (fact "Status code" (:status resp) => 302)
-      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0))
-      )))
+      (facts "Statement upload should fail"
+        (fact "Status code" (:status resp) => 302)
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.13.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))

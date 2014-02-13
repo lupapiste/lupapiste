@@ -173,10 +173,10 @@
       canonical
       statement-attachments)))
 
-;;
-;; TODO: Mihin submitted-applicationia kaytettiin ennen (_nyt ei mihinkaan_)?
-;;
-(defn save-application-as-krysp [application lang submitted-application krysp-version output-dir begin-of-link]
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
+   3rd parameter (submitted-application) is not used on YA applications."
+  [application lang _ krysp-version output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
@@ -199,7 +199,9 @@
 
 (permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
 
-(defn save-jatkoaika-as-krysp [application lang organization krysp-version output-dir begin-of-link]
+(defn save-jatkoaika-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang organization krysp-version output-dir begin-of-link]
     (let [lupa-name-key (ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)

@@ -19,20 +19,24 @@
              data-test-id="change-location-link"></a>
           </h1>
 
+          <!-- State: -->
+          <div class="state-indication" data-bind="attr: {'data-test-state': state}" data-test-id="application-state" >
+            <div data-bind="attr: {'class': state}">
+              <span data-bind="ltext: 'draft', attr: {'title' : loc('draft.title')}" class="draft-box"></span>
+              <span data-bind="ltext: 'open', attr: {'title' : loc('open.title')}" class="open-box"></span>
+              <span data-bind="ltext: 'submitted', attr: {'title' : loc('submitted.title')}" class="submitted-box"></span>
+              <span data-bind="ltext: 'complement-needed', attr: {'title' : loc('complement-needed.title')}" id="complement-needed-box" class="complement-needed-box"></span>
+              <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span> 
+              <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
+              <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
+              <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
+            </div> 
+          </div>
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
-          </div>
-
-          <!-- State: -->
-          <div>
-            <p data-bind="ltext: 'application.state'"></p>
-            <span
-              data-bind="ltext: state, attr: {'data-test-state': state}"
-              data-test-id="application-state"
-              class="application_summary_text">
-            </span>
           </div>
 
           <!-- Submitted: -->
@@ -238,7 +242,7 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state())">
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
@@ -345,99 +349,120 @@
           </div>
 
 
-          <div class="tab-wrapper">
-            <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
-
-              <table class="table">
-                <tbody data-bind="foreach: attachmentsByGroup">
-                  <tr class="attachment-group-header">
-                    <td data-bind="text: loc(['attachmentType', group, '_group_label'])" colspan="6"></td>
-                  </tr>
-                  <tr>
-                    <th data-bind="ltext: 'application.attachmentState'">Tila</th>
-                    <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
-                    <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                    <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
-                    <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                    <th></th>
-                  </tr>
-
-                  <!-- ko foreach: attachments -->
-                  <tr style="cursor: pointer;">
-                    <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span> </td>
-                    <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
-                      <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
-                        <span data-bind="if: type">
-                          <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-                        </span>
-                        <span data-bind="if: !type">
-                          <i data-bind="ltext: 'attachment.noName'"></i>
-                        </span>
-                      </a>
-                    </td>
-                    <td>
-                      <span data-bind="if: $data.latestVersion">
-                        <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
-                        <i data-bind="ltext: latestVersion.contentType"></i>
-                        <i data-bind="size: latestVersion.size"></i>
-                      </span>
-                      <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAdd', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
-                    </td>
-                    <td>
-                      <span data-bind="if: $data.latestVersion">
-                        <span data-bind="version: latestVersion.version"></span>
-                      </span>
-                    </td>
-                    <td>
-                      <span data-bind="if: $data.latestVersion">
-                      <span data-bind="dateString: modified"></span>
-                        <span data-bind="fullName: latestVersion.user"></span>
-                      </span>
-                    </td>
-                    <td>
-                    </td>
-                  </tr>
-                  <!-- /ko -->
-
-                </tbody>
-              </table>
-
-              <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
-
+          <div class="">
+            <div data-bind="if: postAttachmentsByGroup().length" data-test-id="application-post-attachments-table">
+              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"/></h1>
+              <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
             </div>
-            <div data-bind="ifnot: attachmentsByGroup().length">
-              <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
+            <!-- ko if: !postVerdict() -->
+            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h1>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
-            <button
-                data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
-                data-window-id="upload-dialog"
-                class="btn btn-primary modal"
-                data-test-id="add-attachment">
-            </button>
-            <button
-                data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
-                class="btn btn-primary"
-                data-test-id="attachments-copy-own">
-            </button>
-            <button
-                data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
-                class="btn">
-            </button>
-            <button
-                data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
-                           disable: application.sendUnsentAttachmentsButtonDisabled,
-                           visible: $root.authorization.ok('move-attachments-to-backing-system')"
-                class="btn btn-primary modal"
-                data-test-id="send-unsent-attachments">
-                <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
-                <em data-bind="visible: application.pending" class="button-loader"></em>
-            </button>
+            <!-- /ko -->
+
+            <div class="attachment-actions">
+
+              <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
+                <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
+              </div>
+              <button
+                  data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+                  data-window-id="upload-dialog"
+                  class="btn btn-primary modal"
+                  data-test-id="add-attachment">
+              </button>
+              <button
+                  data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+                  class="btn btn-primary"
+                  data-test-id="attachments-copy-own">
+              </button>
+              <button
+                  data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
+                  class="btn">
+              </button>
+              <button
+                  data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
+                             disable: application.sendUnsentAttachmentsButtonDisabled,
+                             visible: $root.authorization.ok('move-attachments-to-backing-system')"
+                  class="btn btn-primary modal"
+                  data-test-id="send-unsent-attachments">
+                  <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
+                  <em data-bind="visible: application.pending" class="button-loader"></em>
+              </button>
+            </div>
+
+            <!-- ko if: postVerdict() -->
+            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+            </div>
+            <!-- /ko -->
+
+            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+
           </div>
           <div class="process-nav">
             <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="conversation"><span data-bind="ltext: 'application.next-tab'"></span><span class="icon drill-right-orange inline-right"></span></a>
             <a class="btn process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="parties"><span data-bind="ltext: 'application.previous-tab'"></span><span class="icon drill-left-black-bigger inline-left"></span></a>
           </div>
         </div>
+
+        <script type="text/html" id="attachments-template">
+          <table class="table">
+            <tbody data-bind="foreach: $data">
+              <tr class="attachment-group-header">
+                <td data-bind="text: loc(['attachmentType', group, '_group_label'])" colspan="6"></td>
+              </tr>
+              <tr>
+                <th data-bind="ltext: 'application.attachmentState'">Tila</th>
+                <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
+                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                <th></th>
+              </tr>
+
+              <!-- ko foreach: attachments -->
+              <tr style="cursor: pointer;">
+                <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span> </td>
+                <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+                  <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
+                    <span data-bind="if: type">
+                      <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+                    </span>
+                    <span data-bind="if: !type">
+                      <i data-bind="ltext: 'attachment.noName'"></i>
+                    </span>
+                  </a>
+                </td>
+                <td>
+                  <span data-bind="if: $data.latestVersion">
+                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
+                    <i data-bind="ltext: latestVersion.contentType"></i>
+                    <i data-bind="size: latestVersion.size"></i>
+                  </span>
+                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAdd', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                </td>
+                <td>
+                  <span data-bind="if: $data.latestVersion">
+                    <span data-bind="version: latestVersion.version"></span>
+                  </span>
+                </td>
+                <td>
+                  <span data-bind="if: $data.latestVersion">
+                  <span data-bind="dateString: modified"></span>
+                    <span data-bind="fullName: latestVersion.user"></span>
+                  </span>
+                </td>
+                <td>
+                </td>
+              </tr>
+              <!-- /ko -->
+
+            </tbody>
+          </table>
+        </script>
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
@@ -743,7 +768,6 @@
                 <tr>
                   <th data-bind="ltext: 'application.buildingStatus'"></th>
                   <th data-bind="ltext: 'application.buildingOperation'"></th>
-                  <th data-bind="ltext: 'application.building'"></th>
                   <th data-bind="ltext: 'application.buildingStartedDate'"></th>
                   <th data-bind="ltext: 'application.buildingStartedBy'"></th>
                 </tr>
@@ -752,7 +776,6 @@
                 <tr>
                   <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
                   <td data-bind="text: util.buildingName($data)"></td>
-                  <td data-bind="text: $data.buildingId"></td>
                   <td>
                     <span data-bind="if: !$data.constructionStarted">
                       <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
