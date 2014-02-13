@@ -118,9 +118,12 @@
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
     (fail :error.unauthorized)))
 
-(defn impersonation [command]
+(defn- impersonation [command]
   (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
     (fail :error.unauthorized)))
+
+(defn disallow-impersonation [command _]
+  (when (get-in command [:user :impersonating]) (fail :error.unauthorized)))
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
@@ -198,14 +201,13 @@
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       (fail :error.unauthorized))))
 
-(defn- authorized-to-application [command application]
+(defn- not-authorized-to-application [command application]
   (when-let [id (-> command :data :id)]
     (if-not application
       (fail :error.unauthorized)
       (or
         (invalid-state-in-application command application)
-        (user-is-not-allowed-to-access? command application)
-        (pre-checks-fail command application)))))
+        (user-is-not-allowed-to-access? command application)))))
 
 (defn- response? [r]
   (and (map? r) (:status r)))
@@ -231,7 +233,8 @@
       (some #(% command) validators)
       (let [application (get-application command)]
         (or
-          (authorized-to-application command application)
+          (not-authorized-to-application command application)
+          (pre-checks-fail command application)
           (when execute?
             (let [command  (assoc command :application application) ;; cache the app
                   status   (executed command)
@@ -250,7 +253,7 @@
         (when execute? (log/log-event :error command))
         (fail text (dissoc all :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))))
     (catch response? resp
-      (do 
+      (do
         (warnf "%s -> proxy fail: %s" (:action command) resp)
         (fail :error.unknown)))
     (catch Object e

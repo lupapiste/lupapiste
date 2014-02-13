@@ -162,7 +162,7 @@
    :verified true}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
-    (let [result (mongo/select-one
+    (if-let [result (mongo/select-one
                       :organizations
                       {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
                       {"name" 1
@@ -170,19 +170,13 @@
                        "operations-attachments" 1
                        "inforequest-enabled" 1
                        "new-application-enabled" 1})]
-      (when-not result (fail! :error.unknown-organization :municipality municipality :permitType permit-type))
-      (let [inforequests-enabled (:inforequest-enabled result)
-            new-applications-enabled (:new-application-enabled result)
-            name-map (:name result)
-            ;; if name of the organization is not set in current language, then use the name that is set for it
-            org-name (if ((keyword lang) name-map)
-                       ((keyword lang) name-map)
-                       (first (vals name-map)))]
-        (ok
-          :inforequests-disabled (not (:inforequest-enabled result))
-          :new-applications-disabled (not (:new-application-enabled result))
-          :links (:links result)
-          :attachmentsForOp (-> result :operations-attachments ((keyword operation))))))))
+      (ok
+        :inforequests-disabled (not (:inforequest-enabled result))
+        :new-applications-disabled (not (:new-application-enabled result))
+        :links (:links result)
+        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
+
+      (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]

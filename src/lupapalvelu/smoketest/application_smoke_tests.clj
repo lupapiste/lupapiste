@@ -1,7 +1,9 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.model :as model]))
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.server] ; ensure all namespaces are loaded
+            ))
 
 (def applications (delay (mongo/select :applications)))
 (def submitted-applications (delay (mongo/select :submitted-applications)))

@@ -8,7 +8,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Set variables
-  Set suite variable   ${VALID_LEGACY}    ${SERVER}/dev/krysp
+  Set suite variable   ${VALID_LEGACY}    http://127.0.0.1:8000/dev/krysp
   Set suite variable   ${INVALID_LEGACY}  BROKEN
 
 Inputting invalid wfs gives an error
