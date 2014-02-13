@@ -128,6 +128,9 @@
 ;; TODO: implement
 (defn municipality-operations [municipality] (all-operations))
 
+
+(def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
+
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
@@ -166,7 +169,7 @@
 
 (def ^:private ya-katulupa-general {:schema "tyomaastaVastaava"
                                     :permit-type "YA"
-                                    :schema-data [[["_selected" :value] "yritys"]]
+                                    :schema-data schema-data-yritys-selected
                                     :required (conj common-yleiset-alueet-schemas
                                                 "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                                 "tyoaika")
