@@ -30,13 +30,26 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
+(def sijantiType {:tag :Sijainti
+                   :child [{:tag :osoite :ns "yht"
+                            :child [{:tag :yksilointitieto}
+                                    {:tag :alkuHetki}
+                                    {:tag :osoitenimi
+                                     :child [{:tag :teksti}]}]}
+                           {:tag :piste :ns "yht"
+                            :child [{:tag :Point :ns "gml"
+                                     :child [{:tag :pos}]}]}
+                           {:tag :viiva :ns "yht"
+                            :child [{:tag :LineString :ns "gml"
+                                     :child [{:tag :pos}]}]}
+                           {:tag :alue :ns "yht"
+                            :child [{:tag :Polygon :ns "gml"
+                                     :child [{:tag :exterior
+                                              :child [{:tag :LinearRing
+                                                       :child [{:tag :pos}]}]} ]}]}]})
+
 (def sijantitieto {:tag :sijaintitieto
-                   :child [{:tag :Sijainti
-                            :child [{:tag :tyhja  :ns "yht"}
-                                     osoite
-                                     piste
-                                     {:tag :sijaintiepavarmuus  :ns "yht"}
-                                     {:tag :luontitapa  :ns "yht"}]}]})
+                   :child [sijantiType]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
@@ -207,6 +220,20 @@
                                          {:tag :puoltotieto
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
+
+(def kasittelytieto [{:tag :Kasittelytieto
+                                       :child [{:tag :muutosHetki :ns "yht"}
+                                               {:tag :hakemuksenTila :ns "yht"}
+                                               {:tag :asiatunnus :ns "yht"}
+;                                               {:tag :tilanMuutosHetki :ns "yht"}
+;                                               {:tag :kunnanYhteyshenkilo :ns "yht"}
+                                               {:tag :paivaysPvm :ns "yht"}
+                                               {:tag :kasittelija
+                                                :child [{:tag :henkilotieto
+                                                         :child [{:tag :Henkilo
+                                                                  :child [{:tag :nimi :ns "yht"
+                                                                           :child [{:tag :etunimi}
+                                                                                   {:tag :sukunimi}]}]}]}]}]}])
 
 
 (defn get-file-name-on-server [file-id file-name]
