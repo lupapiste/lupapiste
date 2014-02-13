@@ -485,21 +485,23 @@
 ;; TODO: permit-type splitting.
 (defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
+        op-schema-name        (:schema op-info)
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
         schema-version        (:schema-version application)
-        make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
-                                                 :created created
-                                                 :data (tools/timestamped
-                                                         (if (= schema-name (:schema op-info))
-                                                           (schema-data-to-body (:schema-data op-info) application)
-                                                           {})
-                                                         created)})
+        make                  (fn [schema-name]
+                                {:id (mongo/create-id)
+                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
+                                 :created created
+                                 :data (tools/timestamped
+                                         (condp = schema-name
+                                           op-schema-name           (schema-data-to-body (:schema-data op-info) application)
+                                           "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
+                                           {})
+                                         created)})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
-        op-schema-name        (:schema op-info)
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
@@ -847,10 +849,11 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [created] :as command}]
+  [{:keys [user created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:modified created
                                        :started timestamp
+                                       :startedBy (select-keys user [:id :firstName :lastName])
                                        :state  :constructionStarted}}))
   (ok))
 
@@ -894,10 +897,11 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
-  [{:keys [created application] :as command}]
+  [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates   {:modified created
                        :closed timestamp
+                       :closedBy (select-keys user [:id :firstName :lastName])
                        :state :closed}
         application   (merge
                         application
@@ -958,9 +962,9 @@
      $push {:verdicts (domain/->paatos
                         {:id verdictId      ; Kuntalupatunnus
                          :timestamp created ; tekninen Lupapisteen aikaleima
-                         :name name         ; poytakirja[] / paatoksentekija
+                         :name name         ; poytakirjat[] / paatoksentekija
                          :given given       ; paivamaarat / antoPvm
-                         :status status     ; poytakirja[] / paatoskoodi
+                         :status status     ; poytakirjat[] / paatoskoodi
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 

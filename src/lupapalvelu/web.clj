@@ -482,7 +482,7 @@
 ;; dev utils:
 ;;
 
-(when (or (env/dev-mode?) (env/test-build?))
+(when (env/feature? :dummy-krysp)
   (defpage "/dev/krysp" {typeName :typeName r :request}
     (if-not (s/blank? typeName)
       (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
