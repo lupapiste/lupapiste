@@ -230,8 +230,19 @@
 
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
                               :type :group
+                              :hidden true
                               :body [{:name "vastuuaika-alkaa-pvm" :type :date}
                                      {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
+(def sijaisuus-tyonjohtaja [{:name "sijaistus"
+                             :type :group
+                             :repeating true
+                             :initiallyEmpty true
+                             :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
+                                    {:name "sijaistettavaHloSukunimi" :type :string :required true}
+                                    ;{:name "sijaistettavaHlo" :type :personSelector :blacklist [:neighbor]}
+                                    {:name "alkamisPvm" :type :date :required true}
+                                    {:name "paattymisPvm" :type :date}]}])
 
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
@@ -239,7 +250,8 @@
                    vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
-                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
+                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
+                   sijaisuus-tyonjohtaja))
 
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
