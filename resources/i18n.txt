@@ -1,6 +1,0 @@
-building.constructionStarted.startedDate: Aloituspäivämäärä:
-
-application.constructionStateChangedBy: Tekijä
-application.constructionStateChangeDate: Päivämäärä
-application.constructionStateChangeOperation: Ilmoitus
-application.aloitusjavalmistumisilmoitukset: Aloitus- ja valmistumisilmoitukset
