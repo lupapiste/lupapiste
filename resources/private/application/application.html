@@ -791,8 +791,7 @@
           </div>
 
           <!-- YA: Info about construction started and construction ready occasions -->
-          <!-- *** TODO: Better YA recognition than !buildings() ? *** -->
-          <div data-bind="if: !buildings() || buildings.length == 0">
+          <div data-bind="if: $root.authorization.ok('inform-construction-started')">
             <table>
               <thead>
                 <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
