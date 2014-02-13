@@ -200,6 +200,14 @@
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
+(def ^:private sijaistus_213
+  {:tag :sijaistustieto
+                 :child [{:tag :Sijaistus
+                          :child [{:tag :sijaistettavaHlo}
+                                  {:tag :sijaistettavaRooli}
+                                  {:tag :alkamisPvm}
+                                  {:tag :paattymisPvm}]}]})
+
 (def ^:private katselmus_213
   {:tag :katselmustieto
    :child [{:tag :Katselmus
@@ -226,7 +234,10 @@
       "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
        http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd")
 
-    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)))
+    (update-in [:child] mapping-common/update-child-element 
+               [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)
+    (update-in [:child] mapping-common/update-child-element 
+               [:osapuolettieto :Osapuolet :osapuolitieto :tyonjohtajatieto :Tyonjohtaja :sijaistustieto] sijaistus_213)))
 
 
 (defn- get-mapping [krysp-version]

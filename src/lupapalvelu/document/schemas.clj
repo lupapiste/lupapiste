@@ -228,17 +228,18 @@
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
+;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
                               :type :group
                               :hidden true
                               :body [{:name "vastuuaika-alkaa-pvm" :type :date}
                                      {:name "vastuuaika-paattyy-pvm" :type :date}]}])
 
-(def sijaisuus-tyonjohtaja [{:name "sijaistus"
+(def sijaisuus-tyonjohtaja [{:name "sijaistukset"
                              :type :group
                              :repeating true
                              :initiallyEmpty true
-                             :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
+                             :body [{:name "sijaistettavaHloEtunim" :type :string :required true}
                                     {:name "sijaistettavaHloSukunimi" :type :string :required true}
                                     ;{:name "sijaistettavaHlo" :type :personSelector :blacklist [:neighbor]}
                                     {:name "alkamisPvm" :type :date :required true}

@@ -341,18 +341,28 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
+(defn get-sijaistukset [sijaistukset sijaistettavaRooli]
+  (reduce (fn [c sijaistus] 
+            (conj c {:sijaistettavaHenkilo (str (:sijaistettavaHloEtunimi sijaistus) " " 
+                                                (:sijaistettavaHloSukunimi sijaistus)) 
+                     :sijaistettavaRooli sijaistettavaRooli
+                     :alkamisPvm (:alkamisPvm sijaistus)
+                     :paattymisPvm (:paattymisPvm sijaistus)}))
+          [] sijaistukset))
+
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)]
-    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
-                     :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                     :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
-                     :valmistumisvuosi (-> patevyys :valmistumisvuosi)
-                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm))
-                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm))
-                     :kokemusvuodet (-> patevyys :kokemusvuodet)
-                     :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
-                     :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))})))
+        patevyys (:patevyys tyonjohtaja)
+        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
+    (merge foremans 
+           {:tyonjohtajaRooliKoodi rooli
+            :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+            :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
+            :valmistumisvuosi (-> patevyys :valmistumisvuosi)
+            :kokemusvuodet (-> patevyys :kokemusvuodet)
+            :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
+            :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))
+            :sijaistustieto (get-sijaistukset (:sijaistukset tyonjohtaja) rooli)})))
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))

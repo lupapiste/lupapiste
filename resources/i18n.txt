@@ -1,6 +1,6 @@
-tyonjohtaja.sijaistus._group_label: Sijaistus
-tyonjohtaja.sijaistus.sijaistettavaHloEtunimi: Sijaistettavan etunimi
-tyonjohtaja.sijaistus.sijaistettavaHloSukunimi: Sijaistettavan sukunimi
-tyonjohtaja.sijaistus.alkamisPvm: Alkaa
-tyonjohtaja.sijaistus.paattymisPvm: Päättyy
-tyonjohtaja.sijaistus._append_label: Lisää sijaistus
+tyonjohtaja.sijaistukset._group_label: Sijaistus
+tyonjohtaja.sijaistukset.sijaistettavaHloEtunimi: Sijaistettavan etunimi
+tyonjohtaja.sijaistukset.sijaistettavaHloSukunimi: Sijaistettavan sukunimi
+tyonjohtaja.sijaistukset.alkamisPvm: Alkaa
+tyonjohtaja.sijaistukset.paattymisPvm: Päättyy
+tyonjohtaja.sijaistukset._append_label: Lisää sijaistus

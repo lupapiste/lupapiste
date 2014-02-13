@@ -139,14 +139,26 @@
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
                        :kokemusvuodet {:value "3"}
                        :valvottavienKohteidenMaara {:value "9"}}
-            :vastuuaika {:vastuuaika-alkaa-pvm {:value "19.12.2013"},
-                         :vastuuaika-paattyy-pvm {:value "31.12.2013"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
                                      :rakennelmaTaiLaitos {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus})})
+
+(def ^:private tyonjohtajan-sijainen
+  {:id "tyonjohtaja"
+   :schema-info {:name "tyonjohtaja", :version 1}
+   :data (merge suunnittelija-henkilo
+           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
+            :sijaistukset [{:sijaistettavaHloEtunimi {:value "Jaska"}
+                            :sijaistettavaHloSukunimi {:value "Jokunen"}
+                            :alkamisPvm {:value "13.02.2014"}
+                            :paattymisPvm {:value "20.02.2014"}}
+                           {:sijaistettavaHloEtunimi {:value "Jaska"}
+                            :sijaistettavaHloSukunimi {:value "Jokunen"}
+                            :alkamisPvm {:value "13.03.2014"}
+                            :paattymisPvm {:value "20.03.2014"}}]})})
 
 (def ^:private tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
