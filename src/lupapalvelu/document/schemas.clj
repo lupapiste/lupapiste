@@ -239,7 +239,7 @@
                              :type :group
                              :repeating true
                              :initiallyEmpty true
-                             :body [{:name "sijaistettavaHloEtunim" :type :string :required true}
+                             :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
                                     {:name "sijaistettavaHloSukunimi" :type :string :required true}
                                     ;{:name "sijaistettavaHlo" :type :personSelector :blacklist [:neighbor]}
                                     {:name "alkamisPvm" :type :date :required true}

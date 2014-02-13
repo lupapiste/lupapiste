@@ -146,19 +146,18 @@
                                      :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus})})
 
-(def ^:private tyonjohtajan-sijainen
-  {:id "tyonjohtaja"
+(def ^:private sijainen
+  {:id "sijainen"
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
-           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
-            :sijaistukset [{:sijaistettavaHloEtunimi {:value "Jaska"}
-                            :sijaistettavaHloSukunimi {:value "Jokunen"}
-                            :alkamisPvm {:value "13.02.2014"}
-                            :paattymisPvm {:value "20.02.2014"}}
-                           {:sijaistettavaHloEtunimi {:value "Jaska"}
-                            :sijaistettavaHloSukunimi {:value "Jokunen"}
-                            :alkamisPvm {:value "13.03.2014"}
-                            :paattymisPvm {:value "20.03.2014"}}]})})
+           {:sijaistukset {:0 {:sijaistettavaHloEtunimi {:value "Jaska"}
+                                :sijaistettavaHloSukunimi {:value "Jokunen"}
+                                :alkamisPvm {:value "13.02.2014"}
+                                :paattymisPvm {:value "20.02.2014"}}
+                           :1 {:sijaistettavaHloEtunimi {:value "Jaska"}
+                                :sijaistettavaHloSukunimi {:value "Jokunen"}
+                                :alkamisPvm {:value "13.03.2014"}
+                                :paattymisPvm {:value "20.03.2014"}}}})})
 
 (def ^:private tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -346,6 +345,7 @@
 (fact "Meta test: maksaja-henkilo"  maksaja-henkilo  => valid-against-current-schema?)
 (fact "Meta test: maksaja-yritys"   maksaja-yritys   => valid-against-current-schema?)
 (fact "Meta test: tyonjohtaja"      tyonjohtaja      => valid-against-current-schema?)
+(fact "Meta test: sijainen"         sijainen         => valid-against-current-schema?)
 (fact "Meta test: rakennuspaikka"   rakennuspaikka   => valid-against-current-schema?)
 (fact "Meta test: uusi-rakennus"    uusi-rakennus    => valid-against-current-schema?)
 (fact "Meta test: hankkeen-kuvaus"  hankkeen-kuvaus  => valid-against-current-schema?)
