@@ -485,21 +485,23 @@
 ;; TODO: permit-type splitting.
 (defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
+        op-schema-name        (:schema op-info)
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
         schema-version        (:schema-version application)
-        make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
-                                                 :created created
-                                                 :data (tools/timestamped
-                                                         (if (= schema-name (:schema op-info))
-                                                           (schema-data-to-body (:schema-data op-info) application)
-                                                           {})
-                                                         created)})
+        make                  (fn [schema-name]
+                                {:id (mongo/create-id)
+                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
+                                 :created created
+                                 :data (tools/timestamped
+                                         (condp = schema-name
+                                           op-schema-name           (schema-data-to-body (:schema-data op-info) application)
+                                           "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
+                                           {})
+                                         created)})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
-        op-schema-name        (:schema op-info)
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
