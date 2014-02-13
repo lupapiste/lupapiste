@@ -958,9 +958,9 @@
      $push {:verdicts (domain/->paatos
                         {:id verdictId      ; Kuntalupatunnus
                          :timestamp created ; tekninen Lupapisteen aikaleima
-                         :name name         ; poytakirja[] / paatoksentekija
+                         :name name         ; poytakirjat[] / paatoksentekija
                          :given given       ; paivamaarat / antoPvm
-                         :status status     ; poytakirja[] / paatoskoodi
+                         :status status     ; poytakirjat[] / paatoskoodi
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 
