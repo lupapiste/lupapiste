@@ -1,5 +1,9 @@
 (ns lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping
-  (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
+  (:require
+    [lupapalvelu.xml.emit :refer [element-to-xml]]
+    [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+    [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ct]
+    [lupapalvelu.permit :as permit]))
 
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
@@ -44,3 +48,23 @@
                                                                      {:tag :mittaaja}]}]}
                    {:tag :koontikentta}]]}
   )
+
+(defn save-application-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang submitted-application krysp-version output-dir begin-of-link]
+  (let [krysp-polku-lausuntoon [:Ilmoitukset :melutarina :lausuntotieto]
+        canonical-without-attachments  (ct/meluilmoitus-canonical application lang)
+        statement-given-ids (mapping-common/statements-ids-with-status
+                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
+        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical (assoc-in
+                    canonical-with-statement-attachments
+                    [:Ilmoitukset :melutarina :liitetieto]
+                    attachments)
+        xml (element-to-xml canonical ilmoitus_to_krysp)]
+
+    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
+
+(permit/register-function permit/YI :app-krysp-mapper save-application-as-krysp)
