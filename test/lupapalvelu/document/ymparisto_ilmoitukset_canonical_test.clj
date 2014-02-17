@@ -244,20 +244,21 @@
 (fl/facts* "Meluilmoitus to canonical"
            (let [canonical (yic/meluilmoitus-canonical meluilmoitus-application "fi") => truthy
                  Ilmoitukset (:Ilmoitukset canonical) => truthy
-                 toimutuksenTiedot (:toimutuksenTiedot Ilmoitukset) => truthy
-                 aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
+                 toimituksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
+                 aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title meluilmoitus-application)
 
                  melutarina (:melutarina Ilmoitukset) => truthy
-                 kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
+                 Melutarina (:Melutarina melutarina)
+                 kasittelytietotieto (:kasittelytietotieto Melutarina) => truthy
 
-                 luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
+                 luvanTunnistetiedot (:luvanTunnistetiedot Melutarina) => truthy
                  LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
                  muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
                  MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
                  tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
                  sovellus (:sovellus MuuTunnus) => "Lupapiste"
 
-                 lausuntotieto (:lausuntotieto melutarina) => truthy
+                 lausuntotieto (:lausuntotieto Melutarina) => truthy
                  Lausunto (:Lausunto (first lausuntotieto)) => truthy
                  viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
                  pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
@@ -267,7 +268,7 @@
                  varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
                  lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
-                 ilmoittaja (:ilmoittaja melutarina) => truthy
+                 ilmoittaja (:ilmoittaja Melutarina) => truthy
                  nimi (:nimi ilmoittaja) => "Yksityishenkil\u00f6"
                  postiosoite (:postiosoite ilmoittaja) => truthy
                  osoitenimi (:osoitenimi postiosoite) => truthy
@@ -283,7 +284,7 @@
 
                  liikeJaYhteisotunnus (:liikeJaYhteisotunnus ilmoittaja) => nil
 
-                 toiminnanSijainti (:toiminnanSijainti melutarina) => truthy
+                 toiminnanSijainti (:toiminnanSijainti Melutarina) => truthy
                  Osoite (:Osoite toiminnanSijainti) => truthy
                  osoitenimi (:osoitenimi Osoite) => {:teksti "Londb\u00f6lentie 97"}
                  kunta (:kunta Osoite) => "638"
@@ -294,7 +295,7 @@
                  osoitenimi (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
                  piste (:piste Sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}
 
-                 toimintatieto (:toimintatieto melutarina) => truthy
+                 toimintatieto (:toimintatieto Melutarina) => truthy
                  Toiminta (:Toiminta toimintatieto) => truthy
                  yksilointitieto (:yksilointitieto Toiminta) => truthy
                  alkuHetki (:alkuHetki Toiminta) => truthy
@@ -308,14 +309,14 @@
                  ulkoilmakonsertti (:ulkoilmakonsertti tapahtuma) => "Louhijouden saunailta - V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"
                  muu (:muu tapahtuma) => nil
 
-                 toiminnanKesto (:toiminnanKesto melutarina) => truthy
-                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-02-03"
-                 loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07"
+                 toiminnanKesto (:toiminnanKesto Melutarina) => truthy
+                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-02-03T00:00:00"
+                 loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07T00:00:00"
                  arkisin (:arkisin toiminnanKesto) => "07.00 - 16:00"
                  lauantaisin (:lauantaisin toiminnanKesto) => "-"
                  pyhisin (:pyhisin toiminnanKesto) => "-"
 
-                 melutiedot (:melutiedot melutarina) => truthy
+                 melutiedot (:melutiedot Melutarina) => truthy
                  koneidenLkm (:koneidenLkm melutiedot) => nil
                  melutaso (:melutaso melutiedot) => truthy
                  db (:db melutaso) => "150"
@@ -329,10 +330,10 @@
 (fl/facts* "Meluilmoitus yrityshakija to canonical"
            (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
                  Ilmoitukset (:Ilmoitukset canonical) => truthy
-                 toimutuksenTiedot (:toimutuksenTiedot Ilmoitukset) => truthy
+                 toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
                  aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
 
-                 melutarina (:melutarina Ilmoitukset) => truthy
+                 melutarina (-> Ilmoitukset :melutarina :Melutarina) => truthy
                  kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
 
                  luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
