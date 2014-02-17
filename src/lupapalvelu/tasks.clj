@@ -88,13 +88,13 @@
        (concat
          (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
          (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
-           (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset )))
+           (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
          (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
            (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
              (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)")))
          ;; from YA verdict
          (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
-           (filter #(-> % s/blank? not) (s/split (:muutMaaraykset lupamaaraykset) #"(,\s*)"))))))
+           (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))
    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]

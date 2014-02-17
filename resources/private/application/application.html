@@ -544,9 +544,12 @@
                       <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
+
                     <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.muutMaaraykset'"></label>
-                      <span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span>
+                      <ul data-bind="foreach: lupamaaraykset.muutMaaraykset">
+                        <li data-bind='text: $data'></li>
+                      </ul>
                     </div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>

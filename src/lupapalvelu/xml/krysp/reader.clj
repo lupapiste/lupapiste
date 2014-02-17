@@ -265,6 +265,14 @@
                               :autopaikkojaKiinteistolla
                               :autopaikkojaUlkopuolella])))
 
+(defn ->lupamaaraukset-ya [paatos-xml-without-ns]
+  (let [lupaehdot (select paatos-xml-without-ns :lupaehdotJaMaaraykset)]
+    (when (not-empty lupaehdot)
+      (-> lupaehdot
+        (cleanup)
+        ((fn [maar] (map #(get-text % :lupaehdotJaMaaraykset) maar)))
+        (cr/ensure-sequental :lupaehdotJaMaaraykset)))))
+
 (defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
                    [% (cr/to-timestamp (get-text paatos xml-kw))]) v)))
@@ -294,8 +302,7 @@
 
 (defn- ->ya-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                    :muutMaaraykset (when (not-empty (select paatos-xml-without-ns :lupaehdotJaMaaraykset))
-                                      (reduce (fn [c v] (str c ", " v )) (map #(get-text % :lupaehdotJaMaaraykset)  (select paatos-xml-without-ns :lupaehdotJaMaaraykset))))}
+                    :muutMaaraykset (->lupamaaraukset-ya paatos-xml-without-ns)}
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
    :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
                      (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})
