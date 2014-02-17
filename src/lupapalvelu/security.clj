@@ -1,5 +1,6 @@
 (ns lupapalvelu.security
-  (:require [sade.env :as env])
+  (:require [sade.strings :as ss]
+            [sade.env :as env])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 ;;
@@ -29,5 +30,5 @@
     (BCrypt/hashpw password salt)))
 
 (defn check-password [candidate hashed]
-  (when (and candidate hashed)
+  (when (and candidate (not (ss/blank? hashed)))
     (BCrypt/checkpw candidate hashed)))
