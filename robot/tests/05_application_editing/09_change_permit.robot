@@ -22,8 +22,9 @@ Sonja prepares the application
 Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
-  Wait Until  Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
+  Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Throw in a verdict
+  Wait until  Element should not be visible  verdict-submit
 
 Sonja creates a change permit
   Wait Until  Element should be visible  xpath=//*[@data-test-id='change-permit-create-btn']
