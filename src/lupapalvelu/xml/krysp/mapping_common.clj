@@ -178,14 +178,14 @@
                         {:tag :kielitieto :ns "yht"}])
 
 (def liite-children [{:tag :kuvaus :ns "yht"}
-                                                           {:tag :linkkiliitteeseen :ns "yht"}
-                                                           {:tag :muokkausHetki :ns "yht"}
-                                                           {:tag :versionumero :ns "yht"}
-                                                           {:tag :tekija :ns "yht"
-                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                    {:tag :VRKrooliKoodi}
-                                                                    henkilo
-                                                                    yritys]}
+                     {:tag :linkkiliitteeseen :ns "yht"}
+                     {:tag :muokkausHetki :ns "yht"}
+                     {:tag :versionumero :ns "yht"}
+                     {:tag :tekija :ns "yht"
+                      :child [{:tag :kuntaRooliKoodi}
+                              {:tag :VRKrooliKoodi}
+                              henkilo
+                              yritys]}
                      {:tag :tyyppi :ns "yht"}])
 
 (def lausunto {:tag :Lausunto

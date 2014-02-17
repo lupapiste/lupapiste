@@ -436,7 +436,7 @@
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type permit/YI
                                    :required common-ymp-schemas
-                                   :attachments []
+                                   :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
      :pima                        {:schema "pima"

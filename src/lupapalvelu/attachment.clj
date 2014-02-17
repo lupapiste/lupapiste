@@ -153,8 +153,8 @@
     (condp = (keyword permit-type)
       :R  (attachment-types-R)
       :YA attachment-types-YA
-      :P (attachment-types-R)
-      :YI []
+      :P  (attachment-types-R)
+      :YI (attachment-types-R)
       (fail! "unsupported permit-type"))))
 
 (defn get-attachment-types-for-application

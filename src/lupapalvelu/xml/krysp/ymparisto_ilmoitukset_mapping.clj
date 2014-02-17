@@ -54,13 +54,14 @@
                                                                                {:tag :paiva}
                                                                                {:tag :yo}
                                                                                {:tag :mittaaja}]}]}
-                             {:tag :koontikentta}]}]}]})
+                             {:tag :koontikentta}
+                             {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]} ]}]}]})
 
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
-  (let [krysp-polku-lausuntoon [:Ilmoitukset :melutarina :lausuntotieto]
+  (let [krysp-polku-lausuntoon [:Ilmoitukset :melutarina :Melutarina :lausuntotieto]
         canonical-without-attachments  (ct/meluilmoitus-canonical application lang)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
@@ -69,7 +70,7 @@
         canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
-                    [:Ilmoitukset :melutarina :liitetieto]
+                    [:Ilmoitukset :melutarina :Melutarina :liitetieto]
                     attachments)
         xml (element-to-xml canonical ilmoitus_to_krysp)]
 
