@@ -263,7 +263,7 @@
                                                         }})
 
         body {permit-name-key (merge
-                                {:kasittelytietotieto (get-kasittelytieto application)
+                                {:kasittelytietotieto (get-kasittelytieto application :Kasittelytieto)
                                  :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
@@ -330,7 +330,7 @@
     {:YleisetAlueet
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
-                             {:kasittelytietotieto (get-kasittelytieto application)
+                             {:kasittelytietotieto (get-kasittelytieto application :Kasittelytieto)
                               :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
                               :alkuPvm alku-pvm
                               :loppuPvm loppu-pvm

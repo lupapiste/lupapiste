@@ -8,46 +8,54 @@
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
    :ns "ymi"
-   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
+   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
+                               http://www.paikkatietopalvelu.fi/gml/yhteiset
+                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
                                http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset
                                http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset/2.1.1/ilmoitukset.xsd"
           :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"
           :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
           :xmlns:xlink "http://www.w3.org/1999/xlink"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
-   :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-           :tag :melutarina
-           :child [{:tag :kasittelytietotieto
-                    :child mapping-common/kasittelytieto}
-                   {:tag :luvanTunnisteTiedot
-                    :child [mapping-common/lupatunnus]}
-                   {:tag :lausuntotieto
-                    :child mapping-common/lausunto}
-                   {:tag :ilmoittaja
-                    :child [{:tag :nimi}
-                            {:tag :postiosoite :child mapping-common/postiosoite-children-ns-yht}
-                            {:tag :sahkopostiosoite}
-                            {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht}]}
-                   {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
-                                                   {:tag :Kunta}
-                                                   mapping-common/sijantiType
-                                                   {:tag :Kiinteistorekisterinumero}]}
-                   {:tag :toimintatieto :child [{:tag :Toiminta :child [{:tag :rakentaminen :child [{:tag :louhinta}
-                                                                                                    {:tag :murskaus}
-                                                                                                    {:tag :paalutus}
-                                                                                                    {:tag :muu}]}
-                                                                        {:tag :tapahtuma :child [{:tag :ulkoilmakonsertti}
-                                                                                                 {:tag :muu}]}]}]}
-                   {:tag :toiminnanKesto :child [{:tag :alkuHetki}
-                                                 {:tag :loppuHetki}]}
-                   {:tag :melutiedot :child [{:tag :koneidenLkm}
-                                             {:tag :melutaso :child [{:tag :db}
-                                                                     {:tag :paiva}
-                                                                     {:tag :yo}
-                                                                     {:tag :mittaaja}]}]}
-                   {:tag :koontikentta}]]}
-  )
+          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"
+          :xmlns:gml "http://www.opengis.net/gml"}
+   :child [{:tag :toimituksenTiedot
+            :child mapping-common/toimituksenTiedot}
+           {:tag :melutarina
+            :child [{:tag :Melutarina
+                     :child [{:tag :yksilointitieto :ns "yht"}
+                             {:tag :alkuHetki :ns "yht"}
+                             {:tag :kasittelytietotieto
+                              :child mapping-common/ymp-kasittelytieto}
+                             {:tag :luvanTunnisteTiedot
+                              :child [mapping-common/lupatunnus]}
+                             {:tag :lausuntotieto
+                              :child [mapping-common/lausunto]}
+                             {:tag :ilmoittaja
+                              :child [{:tag :nimi}
+                                      {:tag :postiosoite :child mapping-common/postiosoite-children-ns-yht}
+                                      {:tag :sahkopostiosoite}
+                                      {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht}]}
+                             {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
+                                                              {:tag :Kunta}
+                                                              mapping-common/sijantiType
+                                                              {:tag :Kiinteistorekisterinumero}]}
+                             {:tag :toimintatieto :child [{:tag :Toiminta :child [{:tag :yksilointitieto :ns "yht"}
+                                                                                  {:tag :alkuHetki :ns "yht"}
+                                                                                  {:tag :rakentaminen :child [{:tag :louhinta}
+                                                                                                              {:tag :murskaus}
+                                                                                                              {:tag :paalutus}
+                                                                                                              {:tag :muu}]}
+                                                                          {:tag :tapahtuma :child [{:tag :ulkoilmakonsertti}
+                                                                                                   {:tag :muu}]}]}]}
+                             {:tag :toiminnanKesto :child [{:tag :alkuHetki}
+                                                           {:tag :loppuHetki}]}
+                             {:tag :melutiedot :child [{:tag :koneidenLkm}
+                                                       {:tag :melutaso :child [{:tag :db}
+                                                                               {:tag :paiva}
+                                                                               {:tag :yo}
+                                                                               {:tag :mittaaja}]}]}
+                             {:tag :koontikentta}]}]}]})
+
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

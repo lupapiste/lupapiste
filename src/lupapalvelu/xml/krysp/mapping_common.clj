@@ -202,19 +202,29 @@
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
+(def kt-common [{:tag :muutosHetki :ns "yht"}
+                {:tag :hakemuksenTila :ns "yht"}
+                {:tag :asiatunnus :ns "yht"}
+                {:tag :paivaysPvm :ns "yht"}
+                {:tag :kasittelija
+                 :child [{:tag :henkilotieto
+                          :child [{:tag :Henkilo
+                                   :child [{:tag :nimi :ns "yht"
+                                            :child [{:tag :etunimi}
+                                                    {:tag :sukunimi}]}]}]}]}])
+
 (def kasittelytieto [{:tag :Kasittelytieto
-                                       :child [{:tag :muutosHetki :ns "yht"}
-                                               {:tag :hakemuksenTila :ns "yht"}
-                                               {:tag :asiatunnus :ns "yht"}
-;                                               {:tag :tilanMuutosHetki :ns "yht"}
-;                                               {:tag :kunnanYhteyshenkilo :ns "yht"}
-                                               {:tag :paivaysPvm :ns "yht"}
-                                               {:tag :kasittelija
-                                                :child [{:tag :henkilotieto
-                                                         :child [{:tag :Henkilo
-                                                                  :child [{:tag :nimi :ns "yht"
-                                                                           :child [{:tag :etunimi}
-                                                                                   {:tag :sukunimi}]}]}]}]}]}])
+                                       :child kt-common}])
+
+(def ymp-kasittelytieto [{:tag :KasittelyTieto
+                          :child [{:tag :muutosHetki :ns "yht"}
+                                  {:tag :asiatunnus :ns "yht"}
+                                  {:tag :paivaysPvm :ns "yht"}
+                                  {:tag :kasittelija :ns "yht"
+                                   :child [{:tag :henkilo
+                                            :child [{:tag :nimi
+                                                     :child [{:tag :etunimi}
+                                                             {:tag :sukunimi}]}]}]}]}])
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
@@ -319,18 +329,18 @@
   (let [attachments (flatten-statement-attachments statement-attachments)]
     (write-attachments attachments output-dir)))
 
-(defn add-statement-attachments [canonical statement-attachments]
+(defn add-statement-attachments [canonical statement-attachments lausunto-path]
   (if (empty? statement-attachments)
     canonical
     (reduce
       (fn [c a]
-        (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+        (let [lausuntotieto (get-in c lausunto-path)
               lausunto-id (name (first (keys a)))
               paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
               paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
               paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-          (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty)))
+          (assoc-in c lausunto-path paivitetty)))
       canonical
       statement-attachments)))
 
