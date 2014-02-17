@@ -25,7 +25,7 @@
                  :name "mainosten-tai-viitoitusten-sijoittaminen"},
    :data {:_selected {:value "mainostus-tapahtuma-valinta"},
           :mainostus-tapahtuma-valinta {:mainostus-alkaa-pvm {:value "24.09.2013"},
-                                        :mainostus-paattyy-pvm {:value "29.09.2013"},
+                                        :mainostus-paattyy-pvm {:value "28.09.2013"},
                                         :tapahtuma-aika-alkaa-pvm {:value "27.09.2013"},
                                         :tapahtuma-aika-paattyy-pvm {:value "29.09.2013"},
                                         :tapahtuman-nimi {:value "Mainostettavan tapahtuman nimi"},

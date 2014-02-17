@@ -193,10 +193,10 @@
         ;; Otherwise the type is the first key in the map.
         main-viit-tapahtuma-name (when main-viit-tapahtuma-doc
                                    (or
-                                     (-> main-viit-tapahtuma-doc :_selected)
+                                     (-> main-viit-tapahtuma-doc :_selected keyword)
                                      (-> main-viit-tapahtuma-doc first key)))
         main-viit-tapahtuma (when main-viit-tapahtuma-doc
-                             (main-viit-tapahtuma-doc (keyword main-viit-tapahtuma-name)))
+                             (main-viit-tapahtuma-doc main-viit-tapahtuma-name))
 
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
@@ -278,7 +278,7 @@
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
-                                (when (= "mainostus-tapahtuma-valinta" main-viit-tapahtuma-name)
+                                (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
