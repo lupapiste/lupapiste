@@ -49,8 +49,13 @@
                                                        :child [{:tag :pos}]}]} ]}]}
                            {:tag :tyhja :ns "yht"}]})
 
-(def sijantitieto {:tag :sijaintitieto
-                   :child [sijantiType]})
+(defn sijaintitieto
+  "Takes an optional xml namespace for Sijainti element"
+  [& [xmlns]]
+  {:tag :sijaintitieto
+   :child [(merge
+             sijantiType
+             (when xmlns {:ns xmlns}))]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
