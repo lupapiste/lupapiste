@@ -40,6 +40,11 @@
    :sftp-directory nil
    :case-xml-element nil}) ;; TODO
 
+(defpermit YL  "Ymparistolupa"
+  {:subtypes       []
+   :sftp-directory "/ymparistolupa"
+   :case-xml-element :Ymparistolupa})
+
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
