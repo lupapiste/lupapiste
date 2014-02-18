@@ -127,6 +127,9 @@
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 
+(def attachment-types-YI [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
+                          :muut [:muu]])
+
 ;;
 ;; Api
 ;;
@@ -153,7 +156,8 @@
     (condp = (keyword permit-type)
       :R  (attachment-types-R)
       :YA attachment-types-YA
-      :P (attachment-types-R)
+      :P  (attachment-types-R)
+      :YI attachment-types-YI
       (fail! "unsupported permit-type"))))
 
 (defn get-attachment-types-for-application

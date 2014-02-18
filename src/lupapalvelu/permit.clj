@@ -34,11 +34,10 @@
    :sftp-directory   "/yleiset_alueet"
    :case-xml-element :yleinenAlueAsiatieto})
 
-(defpermit Y  "Ymparistoluvat"
+(defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
-   :sftp-user-key  nil
-   :sftp-directory nil
-   :case-xml-element nil}) ;; TODO
+   :sftp-directory "/ymparisto"
+   :case-xml-element :Ilmoitukset})
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []

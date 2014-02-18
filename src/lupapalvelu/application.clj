@@ -464,9 +464,10 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :info]}
   [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :drawings drawings}}))
+  (when (sequential? drawings)
+    (update-application command
+      {$set {:modified created
+             :drawings drawings}})))
 
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]

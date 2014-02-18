@@ -2,7 +2,9 @@
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
             [sade.util :refer :all]
-            [lupapalvelu.core :refer [now]]))
+            [lupapalvelu.core :refer [now]]
+            [cljts.geom :as geo]
+            [cljts.io :as jts]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -111,21 +113,21 @@
 
 (def ya-operation-type-to-additional-usage-description
   {;; Muu kayttolupa
-   :ya-kayttolupa-vaihtolavat                                    "vaihtolavat"
-   :ya-kayttolupa-kattolumien-pudotustyot                        "kattolumien pudotusty\u00f6t"
-   :ya-kayttolupa-muu-liikennealuetyo                            "muu liikennealuety\u00f6"
-   :ya-kayttolupa-muu-kayttolupa                                 "muu k\u00e4ytt\u00f6lupa"
+   :ya-kayttolupa-vaihtolavat                      "vaihtolavat"
+   :ya-kayttolupa-kattolumien-pudotustyot          "kattolumien pudotusty\u00f6t"
+   :ya-kayttolupa-muu-liikennealuetyo              "muu liikennealuety\u00f6"
+   :ya-kayttolupa-muu-kayttolupa                   "muu k\u00e4ytt\u00f6lupa"
    ;; Muut yleiselle alueelle kohdistuvat tilan kaytot
-   :ya-kayttolupa-harrastustoiminnan-jarjestaminen               "harrastustoiminnan j\u00e4rjest\u00e4minen"
-   :ya-kayttolupa-metsastys                                      "mets\u00e4stys"
-   :ya-kayttolupa-vesistoluvat                                   "vesistoluvat"
-   :ya-kayttolupa-terassit                                       "terassit"
-   :ya-kayttolupa-kioskit                                        "kioskit"
-   :ya-kayttolupa-muu-tyomaakaytto                               "muu ty\u00f6maak\u00e4ytt\u00f6"
+   :ya-kayttolupa-harrastustoiminnan-jarjestaminen "harrastustoiminnan j\u00e4rjest\u00e4minen"
+   :ya-kayttolupa-metsastys                        "mets\u00e4stys"
+   :ya-kayttolupa-vesistoluvat                     "vesistoluvat"
+   :ya-kayttolupa-terassit                         "terassit"
+   :ya-kayttolupa-kioskit                          "kioskit"
+   :ya-kayttolupa-muu-tyomaakaytto                 "muu ty\u00f6maak\u00e4ytt\u00f6"
    ;; Kaivu- tai katutyolupa
-   :ya-katulupa-vesi-ja-viemarityot                              "vesi-ja-viem\u00e4rity\u00f6t"
-   :ya-katulupa-kaukolampotyot                                   "kaukol\u00e4mp\u00f6ty\u00f6t"
-   :ya-katulupa-kaapelityot                                      "kaapelity\u00f6t"
+   :ya-katulupa-vesi-ja-viemarityot                "vesi-ja-viem\u00e4rity\u00f6t"
+   :ya-katulupa-kaukolampotyot                     "kaukol\u00e4mp\u00f6ty\u00f6t"
+   :ya-katulupa-kaapelityot                        "kaapelity\u00f6t"
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      "kiinteist\u00f6n johto-, kaapeli- ja putkiliitynn\u00e4t"
    ;; Pysyvien maanalaisten rakenteiden sijoittaminen
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        "vesi- ja viem\u00e4rijohtojen sijoittaminen"
@@ -222,7 +224,7 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
-(defn- get-simple-osoite [osoite]
+(defn get-simple-osoite [osoite]
   (when (-> osoite :katu)  ;; required field in krysp (i.e. "osoitenimi")
     {:osoitenimi {:teksti (-> osoite :katu)}
      :postitoimipaikannimi (-> osoite :postitoimipaikannimi)
@@ -394,3 +396,70 @@
         (lupatunnus (:id link-permit-data)))
       [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 
+(defn get-kasittelytieto-ymp [application kt-key]
+  {kt-key {:muutosHetki (to-xml-datetime (:modified application))
+           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+           :asiatunnus (:id application)
+           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+           :kasittelija (let [handler (:authority application)]
+                          (if (seq handler)
+                            {:henkilo
+                             {:nimi {:etunimi  (:firstName handler)
+                                     :sukunimi (:lastName handler)}}}
+                            empty-tag))}})
+
+(defn get-henkilo [henkilo]
+  (let [nimi (assoc-when {}
+                         :etunimi (-> henkilo :henkilotiedot :etunimi)
+                         :sukunimi (-> henkilo :henkilotiedot :sukunimi))
+        teksti (assoc-when {} :teksti (-> henkilo :osoite :katu))
+        osoite (assoc-when {}
+                           :osoitenimi teksti
+                           :postinumero (-> henkilo :osoite :postinumero)
+                           :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi))]
+    (not-empty
+      (assoc-when {}
+                  :nimi nimi
+                  :osoite osoite
+                  :sahkopostiosoite (-> henkilo :yhteystiedot :email)
+                  :puhelin (-> henkilo :yhteystiedot :puhelin)
+                   :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
+
+(defn- get-pos [coordinates]
+  {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
+
+(defn- point-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         p (jts/read-wkt-str geometry)
+         cord (.getCoordinate p)]
+    {:Sijainti
+     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
+
+(defn- linestring-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         ls (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}}))
+
+(defn- polygon-drawing [drawing]
+  (let  [geometry (:geometry drawing)
+         polygon (jts/read-wkt-str geometry)]
+    {:Sijainti
+     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
+
+(defn- drawing-type? [t drawing]
+  (.startsWith (:geometry drawing) t))
+
+(defn- drawings-as-krysp [drawings]
+   (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
+           (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
+           (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings))))
+
+
+(defn get-sijaintitieto [application]
+  (let [drawings (drawings-as-krysp (:drawings application))]
+    (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
+                               :alkuHetki (to-xml-datetime (now))
+                               :osoitenimi {:teksti (:address application)}}
+                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+      drawings)))

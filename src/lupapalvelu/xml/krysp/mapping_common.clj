@@ -30,46 +30,32 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
-(defn sijaintitieto
-  "Takes an optional xml namespace for Sijainti element"
-  [& [xmlns]]
-  {:tag :sijaintitieto
-   :child [(merge
-             {:tag :Sijainti
-              :child [{:tag :tyhja  :ns "yht"}
-                       osoite
-                       piste
-                       {:tag :sijaintiepavarmuus  :ns "yht"}
-                       {:tag :luontitapa  :ns "yht"}]}
-             (when xmlns {:ns xmlns}))]})
+(def sijantiType {:tag :Sijainti
+                   :child [{:tag :osoite :ns "yht"
+                            :child [{:tag :yksilointitieto}
+                                    {:tag :alkuHetki}
+                                    {:tag :osoitenimi
+                                     :child [{:tag :teksti}]}]}
+                           {:tag :piste :ns "yht"
+                            :child [{:tag :Point :ns "gml"
+                                     :child [{:tag :pos}]}]}
+                           {:tag :viiva :ns "yht"
+                            :child [{:tag :LineString :ns "gml"
+                                     :child [{:tag :pos}]}]}
+                           {:tag :alue :ns "yht"
+                            :child [{:tag :Polygon :ns "gml"
+                                     :child [{:tag :exterior
+                                              :child [{:tag :LinearRing
+                                                       :child [{:tag :pos}]}]} ]}]}
+                           {:tag :tyhja :ns "yht"}]})
+
+(def sijantitieto {:tag :sijaintitieto
+                   :child [sijantiType]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
-
-(def ^:private kiinteisto [{:tag :kiinteisto
-                            :child (conj [{:tag :kiinteisto
-                                           :child [{:tag :kylanimi}
-                                                   {:tag :tilannimi}
-                                                   {:tag :kiinteistotunnus}
-                                                   {:tag :maaraAlaTunnus}]}
-                                          {:tag :palsta}
-                                          {:tag :kokotilaKytkin}
-                                          {:tag :hallintaperuste}
-                                          {:tag :vuokraAluetunnus}
-                                          {:tag :kaavanaste}
-                                          {:tag :kerrosala}
-                                          {:tag :tasosijainti}
-                                          {:tag :rakennusoikeusYhteensa}
-                                          {:tag :uusiKytkin}]
-                                     osoite
-                                     (sijaintitieto)
-                                     rakennusoikeudet)}])
-
-(def yksilointitieto {:tag :yksilointitieto :ns "yht"})
-
-(def alkuHetki {:tag :alkuHetki :ns "yht"})
 
 (def rakennuspaikka {:tag :Rakennuspaikka
                      :child [yksilointitieto
@@ -216,6 +202,17 @@
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
+
+(def ymp-kasittelytieto [{:tag :KasittelyTieto
+                          :child [{:tag :muutosHetki :ns "yht"}
+                                  {:tag :asiatunnus :ns "yht"}
+                                  {:tag :paivaysPvm :ns "yht"}
+                                  {:tag :kasittelija :ns "yht"
+                                   :child [{:tag :henkilo
+                                            :child [{:tag :nimi
+                                                     :child [{:tag :etunimi}
+                                                             {:tag :sukunimi}]}]}]}]}])
+
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
      children: sequence of :tag, :child maps
@@ -319,18 +316,18 @@
   (let [attachments (flatten-statement-attachments statement-attachments)]
     (write-attachments attachments output-dir)))
 
-(defn add-statement-attachments [canonical statement-attachments]
+(defn add-statement-attachments [canonical statement-attachments lausunto-path]
   (if (empty? statement-attachments)
     canonical
     (reduce
       (fn [c a]
-        (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+        (let [lausuntotieto (get-in c lausunto-path)
               lausunto-id (name (first (keys a)))
               paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
               paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
               paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-          (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty)))
+          (assoc-in c lausunto-path paivitetty)))
       canonical
       statement-attachments)))
 
