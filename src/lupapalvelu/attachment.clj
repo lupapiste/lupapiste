@@ -128,7 +128,7 @@
    :muut [:muu]])
 
 (def attachment-types-YI [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
-                          :muu [:muut]])
+                          :muut [:muu]])
 
 ;;
 ;; Api
