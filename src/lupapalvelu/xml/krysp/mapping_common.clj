@@ -212,15 +212,14 @@
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
 
-(def ymp-kasittelytieto [{:tag :KasittelyTieto
-                          :child [{:tag :muutosHetki :ns "yht"}
+(def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
                                   {:tag :asiatunnus :ns "yht"}
                                   {:tag :paivaysPvm :ns "yht"}
                                   {:tag :kasittelija :ns "yht"
                                    :child [{:tag :henkilo
                                             :child [{:tag :nimi
                                                      :child [{:tag :etunimi}
-                                                             {:tag :sukunimi}]}]}]}]}])
+                                                             {:tag :sukunimi}]}]}]}])
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.

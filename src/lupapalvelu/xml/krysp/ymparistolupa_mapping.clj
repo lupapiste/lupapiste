@@ -1,9 +1,10 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-mapping
-  (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+  (:require [clojure.walk :as walk]
             [sade.util :as util]
             [lupapalvelu.core :refer [now]]
-            [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 (def toiminta-aika-children [{:tag :alkuHetki} ; time
@@ -20,7 +21,7 @@
                                 {:tag :kuvaus}]}); string
 
 (def ymparistolupaType
-  [{:tag :kasittelytietotieto :child [{:tag :Kasittelytieto :child []}]}
+  [{:tag :kasittelytietotieto :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    ; 0-n {:tag :valvontatapahtumattieto :child []}
    ;{:tag :paatostieto :child []}
@@ -68,7 +69,7 @@
           :xmlns:xlink "http://www.w3.org/1999/xlink"
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-           {:tag :Ymparistoluvat :child [{:tag :Ymparistolupa :child [ymparistolupaType]}]}
+           {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}
            ]})
 
 
@@ -78,7 +79,7 @@
   [application lang _ krysp-version output-dir begin-of-link]
   (let [attachments []
         statement-attachments []
-        canonical {}
+        canonical (ymparistolupa-canonical/ymparistolupa-canonical application lang)
         xml (element-to-xml canonical ymparistolupa_to_krysp)
         ]
 
