@@ -36,10 +36,10 @@
   {:tag :sijaintitieto
    :child [(merge
              {:tag :Sijainti
-                            :child [{:tag :tyhja  :ns "yht"}
-                                     osoite
-                                     piste
-                                     {:tag :sijaintiepavarmuus  :ns "yht"}
+              :child [{:tag :tyhja  :ns "yht"}
+                       osoite
+                       piste
+                       {:tag :sijaintiepavarmuus  :ns "yht"}
                        {:tag :luontitapa  :ns "yht"}]}
              (when xmlns {:ns xmlns}))]})
 
@@ -72,8 +72,8 @@
 (def alkuHetki {:tag :alkuHetki :ns "yht"})
 
 (def rakennuspaikka {:tag :Rakennuspaikka
-                     :child [{:tag :yksilointitieto :ns "yht"}
-                             {:tag :alkuHetki :ns "yht"}
+                     :child [yksilointitieto
+                             alkuHetki
                              {:tag :rakennuspaikanKiinteistotieto :ns "yht"
                               :child [{:tag :RakennuspaikanKiinteisto
                                        :child [{:tag :kiinteistotieto
