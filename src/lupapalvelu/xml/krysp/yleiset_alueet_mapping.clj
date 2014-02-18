@@ -83,6 +83,18 @@
                                            :child [{:tag :Puolto
                                                     :child [{:tag :puolto}]}]}]}]}]}])
 
+(def kasittelytieto [{:tag :Kasittelytieto
+                      :child [{:tag :muutosHetki :ns "yht"}
+                              {:tag :hakemuksenTila :ns "yht"}
+                              {:tag :asiatunnus :ns "yht"}
+                              {:tag :paivaysPvm :ns "yht"}
+                              {:tag :kasittelija
+                               :child [{:tag :henkilotieto
+                                        :child [{:tag :Henkilo
+                                                 :child [{:tag :nimi :ns "yht"
+                                                          :child [{:tag :etunimi}
+                                                                  {:tag :sukunimi}]}]}]}]}]}])
+
 (defn get-yleiset-alueet-krysp-mapping [lupa-name-key]
   {:tag :YleisetAlueet
    :ns "yak"
