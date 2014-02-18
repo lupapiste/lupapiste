@@ -60,12 +60,13 @@ LUPAPISTE.MapModel = function() {
       var oskariDrawings = _.map(drawings, function(d) {
         return {
           "id": d.id,
-          "name": d.name? d.name :"",
-          "desc": d.desc ? d.desc : "",
-          "category": d.category ? d.category : "",
-          "geometry": d.geometry ? d.geometry : "",
-          "area": d.area? d.area : "",
-          "height": d.height? d.height : ""
+          "name": d.name ||"",
+          "desc": d.desc || "",
+          "category": d.category || "",
+          "geometry": d.geometry || "",
+          "area": d.area || "",
+          "height": d.height || "",
+          "length": d.length || ""
         }});
 
       hub.send("oskari-show-shapes", {
