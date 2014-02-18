@@ -36,7 +36,7 @@ Sonja goes to the Rakentaminen tab and sets construction started via a dialog
 
   Wait until  Element should be visible  //*[@data-test-id='application-inform-construction-ready-btn']
   Element should not be visible  //*[@data-test-id='application-inform-construction-started-btn']
-  Element should be visible  //*[@data-test-id='construction-state-change-info-started']
+  Wait until  Element should be visible  //*[@data-test-id='construction-state-change-info-started']
   Element should not be visible  //*[@data-test-id='construction-state-change-info-closed']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Tab should be visible  tasks
@@ -47,7 +47,7 @@ Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
 
   Wait until  Element should not be visible  //*[@data-test-id='application-inform-construction-ready-btn']
   Element should not be visible  //*[@data-test-id='application-inform-construction-started-btn']
-  Element should be visible  //*[@data-test-id='construction-state-change-info-started']
+  Wait until  Element should be visible  //*[@data-test-id='construction-state-change-info-started']
   Element should be visible  //*[@data-test-id='construction-state-change-info-closed']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Tab should be visible  tasks
