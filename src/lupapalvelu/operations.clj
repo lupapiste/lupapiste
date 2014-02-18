@@ -14,8 +14,7 @@
 (def default-description "operations.tree.default-description")
 
 (def ^:private operation-tree-for-R
-    {:permit-type permit/R
-     :tree ["Rakentaminen ja purkaminen"
+    {:tree ["Rakentaminen ja purkaminen"
             [["Uuden rakennuksen rakentaminen"
                    [["Asuinrakennus" :asuinrakennus]
                     ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
@@ -47,8 +46,7 @@
                   ["Aloitusoikeus" :aloitusoikeus]]]})
 
 (def ^:private operation-tree-for-environment-R
-  {:permit-type permit/R
-   :tree ["Elinympariston muuttaminen"
+  {:tree ["Elinympariston muuttaminen"
           [["Maisemaa muutava toimenpide"
             [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
              ["Puun kaataminen" :puun-kaataminen]
@@ -60,8 +58,7 @@
              ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]})
 
 (def ^:private operation-tree-for-YA
-  {:permit-type permit/YA
-   :tree ["yleisten-alueiden-luvat"
+  {:tree ["yleisten-alueiden-luvat"
           [["sijoituslupa"
             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
               [["vesi-ja-viemarijohtojen-sijoittaminen" :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen]
@@ -100,12 +97,10 @@
           ["jatkoaika" :ya-jatkoaika]]]})
 
 (def ^:private operation-tree-for-P
-  {:permit-type permit/P
-   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
+  {:tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
 
 (def ^:private operation-tree-for-Y
-  {:permit-type permit/YI
-   :tree ["Ymp\u00e4rist\u00f6luvat"
+  {:tree ["Ymp\u00e4rist\u00f6luvat"
           [["Meluilmoitus" :meluilmoitus]
            ["Pima" :pima]
            ["maa-ainesten_ottaminen" :maa-aineslupa]]]})
@@ -120,10 +115,6 @@
 
 (defn all-operations []
   (keep :tree operation-tree))
-
-(defn operations-for-permit-type [permit-type]
-  (->> operation-tree
-    (filter (fn->> :permit-type (= permit-type))) (keep :tree)))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] (all-operations))
@@ -484,6 +475,9 @@
                                    :add-operation-allowed false
                                    :link-permit-required true}}
     ya-operations))
+
+(defn operations-for-permit-type [permit-type]
+  (keys (filter (fn [[k v]] (= (:permit-type v) permit-type)) operations)))
 
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
