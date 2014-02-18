@@ -7,7 +7,7 @@
             [sade.common-reader :as cr]))
 
 (defn get-kasittelytieto [application]
-  {kt-key {:muutosHetki (to-xml-datetime (:modified application))
+  {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
            :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
            :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
@@ -341,7 +341,7 @@
     {:YleisetAlueet
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
-                             {:kasittelytietotieto (get-kasittelytieto application :Kasittelytieto)
+                             {:kasittelytietotieto (get-kasittelytieto application)
                               :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
                               :alkuPvm alku-pvm
                               :loppuPvm loppu-pvm
