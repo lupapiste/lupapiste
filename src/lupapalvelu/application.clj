@@ -497,6 +497,7 @@
                                          (condp = schema-name
                                            op-schema-name           (schema-data-to-body (:schema-data op-info) application)
                                            "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
+                                           "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
                                            {})
                                          created)})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
