@@ -361,7 +361,7 @@
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]
                                               :poikkeamis [[:paapiirustus :asemapiirros]]
-                                              :meluilmoitus [[:paapiirustus :asemapiirros]
+                                              :meluilmoitus [[:kartat :kartta-melun-ja-tarinan-leviamisesta]
                                                              [:muut :muu]]}
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "dev_sipoo"}

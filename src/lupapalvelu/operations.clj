@@ -104,7 +104,7 @@
    :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
 
 (def ^:private operation-tree-for-Y
-  {:permit-type permit/YA
+  {:permit-type permit/YI
    :tree ["Ymp\u00e4rist\u00f6luvat"
           [["Meluilmoitus" :meluilmoitus]
            ["Pima" :pima]
@@ -439,7 +439,7 @@
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type permit/YI
                                    :required common-ymp-schemas
-                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
      :pima                        {:schema "pima"
