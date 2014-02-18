@@ -30,13 +30,18 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
-(def sijantitieto {:tag :sijaintitieto
-                   :child [{:tag :Sijainti
+(defn sijaintitieto
+  "Takes an optional xml namespace for Sijainti element"
+  [& [xmlns]]
+  {:tag :sijaintitieto
+   :child [(merge
+             {:tag :Sijainti
                             :child [{:tag :tyhja  :ns "yht"}
                                      osoite
                                      piste
                                      {:tag :sijaintiepavarmuus  :ns "yht"}
-                                     {:tag :luontitapa  :ns "yht"}]}]})
+                       {:tag :luontitapa  :ns "yht"}]}
+             (when xmlns {:ns xmlns}))]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
@@ -59,8 +64,12 @@
                                           {:tag :rakennusoikeusYhteensa}
                                           {:tag :uusiKytkin}]
                                      osoite
-                                     sijantitieto
+                                     (sijaintitieto)
                                      rakennusoikeudet)}])
+
+(def yksilointitieto {:tag :yksilointitieto :ns "yht"})
+
+(def alkuHetki {:tag :alkuHetki :ns "yht"})
 
 (def rakennuspaikka {:tag :Rakennuspaikka
                      :child [{:tag :yksilointitieto :ns "yht"}
