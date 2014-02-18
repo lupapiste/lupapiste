@@ -464,9 +464,10 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :info]}
   [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :drawings drawings}}))
+  (when (sequential? drawings)
+    (update-application command
+      {$set {:modified created
+             :drawings drawings}})))
 
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
@@ -497,6 +498,7 @@
                                          (condp = schema-name
                                            op-schema-name           (schema-data-to-body (:schema-data op-info) application)
                                            "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
+                                           "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
                                            {})
                                          created)})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
