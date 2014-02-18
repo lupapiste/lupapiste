@@ -396,17 +396,6 @@
         (lupatunnus (:id link-permit-data)))
       [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 
-(defn get-kasittelytieto [application kt-key]
-  {kt-key {:muutosHetki (to-xml-datetime (:modified application))
-           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
-           :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
-           :kasittelija (let [handler (:authority application)]
-                          (if (seq handler)
-                            {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                                             :sukunimi (:lastName handler)}}}}
-                            empty-tag))}})
-
 (defn get-kasittelytieto-ymp [application kt-key]
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
            :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
