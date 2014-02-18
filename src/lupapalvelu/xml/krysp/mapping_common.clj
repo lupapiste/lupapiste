@@ -62,6 +62,10 @@
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
 
+(def yksilointitieto {:tag :yksilointitieto :ns "yht"})
+
+(def alkuHetki {:tag :alkuHetki :ns "yht"})
+
 (def rakennuspaikka {:tag :Rakennuspaikka
                      :child [yksilointitieto
                              alkuHetki
