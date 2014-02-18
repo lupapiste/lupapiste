@@ -113,7 +113,7 @@
            {:tag :yleinenAlueAsiatieto
             :child [{:tag lupa-name-key
                      :child [{:tag :kasittelytietotieto
-                              :child mapping-common/kasittelytieto}
+                              :child kasittelytieto}
                              {:tag :luvanTunnisteTiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :alkuPvm}

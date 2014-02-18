@@ -202,19 +202,6 @@
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
-(def kt-common [{:tag :muutosHetki :ns "yht"}
-                {:tag :hakemuksenTila :ns "yht"}
-                {:tag :asiatunnus :ns "yht"}
-                {:tag :paivaysPvm :ns "yht"}
-                {:tag :kasittelija
-                 :child [{:tag :henkilotieto
-                          :child [{:tag :Henkilo
-                                   :child [{:tag :nimi :ns "yht"
-                                            :child [{:tag :etunimi}
-                                                    {:tag :sukunimi}]}]}]}]}])
-
-(def kasittelytieto [{:tag :Kasittelytieto
-                                       :child kt-common}])
 
 (def ymp-kasittelytieto [{:tag :KasittelyTieto
                           :child [{:tag :muutosHetki :ns "yht"}
