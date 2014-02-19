@@ -93,7 +93,8 @@
     :body party}
    {:info {:name "yl-hankkeen-kuvaus"
            :order 1}
-    :body [kuvaus]} ; TODO
+    :body [kuvaus
+           {:name "peruste" :type :text :max-len 4000 :required false :layout :full-width}]}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select
