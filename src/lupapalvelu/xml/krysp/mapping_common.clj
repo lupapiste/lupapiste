@@ -15,10 +15,6 @@
                       {:tag :rakennusnro}
                       {:tag :aanestysalue}])
 
-(def ^:private piste {:tag :piste  :ns "yht"
-                      :child [{:tag :Point
-                               :child [{:tag :pos}]}]})
-
 (def ^:private postiosoite-children [{:tag :kunta}
                                      {:tag :osoitenimi :child [{:tag :teksti}]}
                                      {:tag :postinumero}
