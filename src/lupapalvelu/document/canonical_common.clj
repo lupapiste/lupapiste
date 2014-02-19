@@ -430,7 +430,6 @@
     (let [yritys (-> unwrapped-party-doc :data :yritys)]
       {:nimi (-> yritys :yritysnimi)
        :postiosoite (get-simple-osoite (:osoite yritys))
-       :sahkoposti (-> yritys :yhteystiedot :email)
        :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
        :liikeJaYhteisoTunnus (:liikeJaYhteisoTunnus yritys)})
     (let [henkilo (-> unwrapped-party-doc :data :henkilo)]
