@@ -35,17 +35,15 @@
                    {:_selected {:modified 1391769554143, :value "yritys"},
                     :yritys
                     {:liikeJaYhteisoTunnus {:modified 1391770449943, :value "1060155-5"},
-                     :osoite
-                     {:katu {:modified 1391769571984, :value "H\u00e4meenkatu 3 "},
-                      :postinumero {:modified 1391770395709, :value "43640"},
-                      :postitoimipaikannimi {:modified 1391769576504, :value "kuuva"}},
-                     :yhteyshenkilo
-                     {:henkilotiedot
-                      {:etunimi {:modified 1391769580313, :value "Pertti"},
-                       :sukunimi {:modified 1391769583050, :value "Yritt\u00e4j\u00e4"}},
-                      :yhteystiedot
-                      {:email {:modified 1391769600334, :value "tew@gjr.fi"},
-                       :puhelin {:modified 1391769589423, :value "060222155"}}},
+                     :osoite {:katu {:modified 1391769571984, :value "H\u00e4meenkatu 3 "},
+                              :postinumero {:modified 1391770395709, :value "43640"},
+                              :postitoimipaikannimi {:modified 1391769576504, :value "kuuva"}},
+                     :yhteyshenkilo {:henkilotiedot
+                                     {:etunimi {:modified 1391769580313, :value "Pertti"},
+                                      :sukunimi {:modified 1391769583050, :value "Yritt\u00e4j\u00e4"}},
+                                     :yhteystiedot
+                                     {:email {:modified 1391769600334, :value "tew@gjr.fi"},
+                                      :puhelin {:modified 1391769589423, :value "060222155"}}},
                      :yritysnimi {:modified 1391769558483, :value "Yrtti Oy"}}},
                    :id "52f3676442067dc3ba4f1ba8",
                    :meta
