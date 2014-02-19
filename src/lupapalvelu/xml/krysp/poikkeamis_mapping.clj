@@ -59,20 +59,6 @@
            {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstractPoikkeamisType}]}]})
 
 
-(defn- add-statement-attachments [canonical statement-attachments krysp-polku-lausuntoon]
-  (if (empty? statement-attachments)
-    canonical
-    (reduce (fn [c a]
-              (let [
-                    lausuntotieto (get-in c krysp-polku-lausuntoon)
-                    lausunto-id (name (first (keys a)))
-                    paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
-                    index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-                    paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
-                    paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-                (assoc-in c krysp-polku-lausuntoon paivitetty))
-              ) canonical statement-attachments)))
-
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
@@ -89,7 +75,7 @@
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
-        canonical-with-statement-attachments  (add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical-with-statement-attachments  (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)

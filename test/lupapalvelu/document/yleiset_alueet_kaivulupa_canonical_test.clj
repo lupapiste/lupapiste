@@ -70,6 +70,7 @@
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
+        _ (clojure.pprint/pprint Kasittelytieto)
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
         luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => nil?
