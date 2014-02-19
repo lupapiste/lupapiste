@@ -5,73 +5,6 @@
             [lupapalvelu.document.canonical-test-common :refer :all]
             [lupapalvelu.document.ymparisto-schemas]))
 
-(def yrityshakija {:created 1391683428266,
-                   :data
-                   {:_selected {:modified 1391769554143, :value "yritys"},
-                    :yritys
-                    {:liikeJaYhteisoTunnus {:modified 1391770449943, :value "1060155-5"},
-                     :osoite
-                     {:katu {:modified 1391769571984, :value "H\u00e4meenkatu 3 "},
-                      :postinumero {:modified 1391770395709, :value "43640"},
-                      :postitoimipaikannimi {:modified 1391769576504, :value "kuuva"}},
-                     :yhteyshenkilo
-                     {:henkilotiedot
-                      {:etunimi {:modified 1391769580313, :value "Pertti"},
-                       :sukunimi {:modified 1391769583050, :value "Yritt\u00e4j\u00e4"}},
-                      :yhteystiedot
-                      {:email {:modified 1391769600334, :value "tew@gjr.fi"},
-                       :puhelin {:modified 1391769589423, :value "060222155"}}},
-                     :yritysnimi {:modified 1391769558483, :value "Yrtti Oy"}}},
-                   :id "52f3676442067dc3ba4f1ba8",
-                   :meta
-                   {:_approved
-                    {:value "approved",
-                     :user
-                     {:lastName "Borga",
-                      :firstName "Pekka",
-                      :id "777777777777777777000033"},
-                     :timestamp 1391769601559}},
-                   :schema-info
-                   {:approvable true,
-                    :subtype "hakija",
-                    :name "hakija",
-                    :removable true,
-
-                    :repeating true,
-                    :version 1,
-                    :type "party",
-                    :order 3}})
-
-(def ^:private hakija {:created 1391415025497,
-                       :data
-                       {:_selected {:value "henkilo"},
-                        :henkilo
-                        {:henkilotiedot
-                         {:etunimi
-                          {:modified 1391415662591, :value "Pekka"},
-                          :hetu {:modified 1391415675117, :value "210281-9988"},
-                          :sukunimi {:modified 1391415662591, :value "Borga"}},
-                         :osoite
-                         {:katu {:modified 1391415683882, :value "Murskaajankatu 5"},
-                          :postinumero {:modified 1391415686665, :value "36570"},
-                          :postitoimipaikannimi
-                          {:modified 1391415696674, :value "Kaivanto"}},
-                         :userId
-                         {:modified 1391415662621, :value "777777777777777777000033"},
-                         :yhteystiedot
-                         {:email {:modified 1391415662591, :value "pekka.borga@porvoo.fi"},
-                          :puhelin {:modified 1391415662591, :value "121212"}}}},
-                       :id "52ef4ef14206428d3c0394b6",
-                       :schema-info
-                       {:approvable true,
-                        :subtype "hakija",
-                        :name "hakija",
-                        :removable true,
-                        :repeating true,
-                        :version 1,
-                        :type "party",
-                        :order 3}})
-
 (def ^:private kesto {:created 1391415025497,
                       :data
                       {:kesto
@@ -162,7 +95,7 @@
                                :propertyId "63844900010004",
                                :verdicts [],
                                :documents
-                               [hakija
+                               [henkilohakija
                                 meluilmo
                                 kesto],
                                :_statements-seen-by {},
@@ -226,10 +159,8 @@
                                :id "LP-638-2014-00001",
                                :municipality "638"})
 
-(fact "Meta test: hakija"          hakija         => valid-against-current-schema?)
 (fact "Meta test: kesto"           kesto          => valid-against-current-schema?)
 (fact "Meta test: meluilmo"        meluilmo       => valid-against-current-schema?)
-
 
 (fl/facts* "Meluilmoitus to canonical"
            (let [canonical (yic/meluilmoitus-canonical meluilmoitus-application "fi") => truthy
