@@ -271,7 +271,7 @@
                                                          {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
                                                           :puhelin "060222155",
                                                           :sahkopostiosoite "tew@gjr.fi"},
-                                                         :liikeJaYhteisoTunnus "1060155-5"}]))
+                                                         :liikeJaYhteisotunnus "1060155-5"}]))
 
 
 
