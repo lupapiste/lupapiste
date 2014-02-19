@@ -446,7 +446,8 @@
                      :new-application-enabled true
                      :name {:fi "Porvoon rakennusvalvonta"}
                      :scope [{:municipality "638" :permitType "R"}
-                             {:municipality "638" :permitType "YI"}]
+                             {:municipality "638" :permitType "YI"}
+                             {:municipality "638" :permitType "YL"}]
                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
                               :url "http://www.porvoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
