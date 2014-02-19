@@ -226,7 +226,7 @@
    {:tag :postiosoite :child postiosoite-children-ns-yht}
    {:tag :sahkopostiosoite}
    {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
-   [:tag :liikeJaYhteisotunnus]])
+   {:tag :liikeJaYhteisotunnus}])
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
