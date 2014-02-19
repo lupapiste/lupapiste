@@ -197,7 +197,6 @@
                  postinumero (:postinumero postiosoite) => "36570"
                  postitoimipaikannimi (:postitoimipaikannimi postiosoite) => "Kaivanto"
 
-                 sahkopostiosoite (:sahkopostiosoite ilmoittaja) => nil
                  yhteyshenkilo (:yhteyshenkilo ilmoittaja) => truthy
                  nimi (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
                  sahkopostiosoite (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
@@ -268,7 +267,6 @@
                                                          {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
                                                           :postitoimipaikannimi "kuuva",
                                                           :postinumero "43640"},
-                                                         :sahkoposti nil,
                                                          :yhteyshenkilo
                                                          {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
                                                           :puhelin "060222155",
