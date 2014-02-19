@@ -31,6 +31,7 @@
                               yrityshakija]
                   :drawings []
                   :infoRequest false
+                  :linkPermitData [{:id "LP-638-2013-00099" :type "lupapistetunnus"} {:id "kuntalupa-123" :type "kuntalupatunnus"}]
                   :location {:x 428195.77099609 :y 6686701.3931274}
                   :neighbors {}
                   :modified 1391415696674
@@ -78,38 +79,46 @@
         lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
         hakijat (:hakija ymparistolupa) => seq
+        luvat (get-in ymparistolupa [:voimassaOlevatLuvat :luvat :lupa]) => seq
         ]
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
 
-    (count hakijat) => 2
+    (facts "hakijat"
+      (count hakijat) => 2
 
-    (let [hakija (first hakijat)
-          postiosoite (:postiosoite hakija) => truthy
-          osoitenimi (:osoitenimi postiosoite) => truthy
-          yhteyshenkilo (:yhteyshenkilo hakija) => truthy]
+      (let [hakija (first hakijat)
+            postiosoite (:postiosoite hakija) => truthy
+            osoitenimi (:osoitenimi postiosoite) => truthy
+            yhteyshenkilo (:yhteyshenkilo hakija) => truthy]
 
-      (:nimi hakija) => "Yksityishenkil\u00f6"
-      (:liikeJaYhteisotunnus hakija) => nil
-      (:teksti osoitenimi) => "Murskaajankatu 5"
-      (:postinumero postiosoite) => "36570"
-      (:postitoimipaikannimi postiosoite) => "Kaivanto"
-      (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
-      (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
-      (:puhelin yhteyshenkilo) => "121212")
+        (:nimi hakija) => "Yksityishenkil\u00f6"
+        (:liikeJaYhteisotunnus hakija) => nil
+        (:teksti osoitenimi) => "Murskaajankatu 5"
+        (:postinumero postiosoite) => "36570"
+        (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
+        (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
+        (:puhelin yhteyshenkilo) => "121212")
 
-    (second hakijat) => {:nimi "Yrtti Oy",
-                         :postiosoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                                       :postitoimipaikannimi "kuuva",
-                                       :postinumero "43640"},
-                         :yhteyshenkilo {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-                                         :puhelin "060222155",
-                                         :sahkopostiosoite "tew@gjr.fi"},
-                         :liikeJaYhteisotunnus "1060155-5"}
+      (second hakijat) => {:nimi "Yrtti Oy",
+                           :postiosoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                                         :postitoimipaikannimi "kuuva",
+                                         :postinumero "43640"},
+                           :yhteyshenkilo {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
+                                           :puhelin "060222155",
+                                           :sahkopostiosoite "tew@gjr.fi"},
+                           :liikeJaYhteisotunnus "1060155-5"})
 
-    (get-in ymparistolupa [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
-    (get-in ymparistolupa [:toiminta :peruste]) => "Hankkeen peruste"
+    (facts "kuvaus"
+      (get-in ymparistolupa [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
+      (get-in ymparistolupa [:toiminta :peruste]) => "Hankkeen peruste")
+
+    (facts "luvat"
+      (count luvat) => 2
+      (first luvat) => {:tunnistetieto "LP-638-2013-00099" :kuvaus "lupapistetunnus"}
+      (second luvat) => {:tunnistetieto "kuntalupa-123" :kuvaus "kuntalupatunnus"})
 
     ; (clojure.pprint/pprint canonical)
 ))

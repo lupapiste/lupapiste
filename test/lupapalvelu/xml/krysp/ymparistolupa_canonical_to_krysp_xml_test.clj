@@ -38,4 +38,8 @@
         (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
         (xml/get-text (second hakijat) [:liikeJaYhteisotunnus]) => "1060155-5")
 
-    )))
+      (let [luvat (xml/select lp-xml [:voimassaOlevatLuvat :lupa])]
+        (count luvat) => 2
+        (xml/get-text (first luvat) [:kuvaus]) => "lupapistetunnus"
+        (xml/get-text (second luvat) [:tunnistetieto]) => "kuntalupa-123"))))
+
