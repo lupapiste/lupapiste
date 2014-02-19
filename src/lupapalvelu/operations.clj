@@ -249,7 +249,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private common-ymparistolupa-schemas ["yl-hankkeen-kuvaus" "hakija" "maksaja"])
+(def ^:private common-ymparistolupa-schemas ["maksaja"])
 (def ^:private ymparistolupa-attachments [[:muut :muu]]) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
