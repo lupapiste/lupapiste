@@ -24,7 +24,6 @@
   [{:tag :kasittelytietotieto :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    ; 0-n {:tag :valvontatapahtumattieto :child []}
-   ;{:tag :paatostieto :child []}
    {:tag :lausuntotieto :child [mapping-common/lausunto]}
    {:tag :hakija :child mapping-common/ymp-osapuoli-children}
    {:tag :toiminta
@@ -49,7 +48,7 @@
                                                                                        {:tag :kaavoitustilanne :child mapping-common/liite-children}
                                                                                        {:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children}]}]}]}
 
-   {:tag :referenssiPiste :child []}
+   {:tag :referenssiPiste :child [mapping-common/gml-point]}
    {:tag :koontiKentta} ; String
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
    ]
@@ -69,8 +68,7 @@
           :xmlns:xlink "http://www.w3.org/1999/xlink"
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-           {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}
-           ]})
+           {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}]})
 
 
 (defn save-application-as-krysp
