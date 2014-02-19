@@ -347,7 +347,7 @@
                      :inforequest-enabled true
                      :new-application-enabled true
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"} {:municipality "753" :permitType "P"} {:municipality "753" :permitType "YI"}]
+                     :scope [{:municipality "753" :permitType "R"} {:municipality "753" :permitType "P"} {:municipality "753" :permitType "YI"} {:municipality "753" :permitType "YL"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -362,11 +362,14 @@
                                                                          [:muut :valaistussuunnitelma]]
                                               :poikkeamis [[:paapiirustus :asemapiirros]]
                                               :meluilmoitus [[:kartat :kartta-melun-ja-tarinan-leviamisesta]
-                                                             [:muut :muu]]}
+                                                             [:muut :muu]]
+                                              :yl-uusi-toiminta [[:muut :muu]]
+                                              }
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "dev_sipoo"}
                              :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
-                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
+                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
+                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",

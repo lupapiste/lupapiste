@@ -91,6 +91,9 @@
            :order 4
            :type :party}
     :body party}
+   {:info {:name "yl-hankkeen-kuvaus"
+           :order 1}
+    :body [kuvaus]} ; TODO
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select

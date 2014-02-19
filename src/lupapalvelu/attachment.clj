@@ -130,6 +130,8 @@
 (def attachment-types-YI [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
                           :muut [:muu]])
 
+(def attachment-types-YL [:muut [:muu]]) ; TODO helvetin pitka lista
+
 ;;
 ;; Api
 ;;
@@ -153,11 +155,12 @@
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
   (partition 2
-    (condp = (keyword permit-type)
+    (case (keyword permit-type)
       :R  (attachment-types-R)
       :YA attachment-types-YA
       :P  (attachment-types-R)
       :YI attachment-types-YI
+      :YL attachment-types-YI
       (fail! "unsupported permit-type"))))
 
 (defn get-attachment-types-for-application

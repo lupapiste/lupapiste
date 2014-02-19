@@ -51,7 +51,7 @@
 
    {:tag :referenssiPiste :child []}
    {:tag :koontiKentta :child []}
-   ; 0-n {:tag :liitetieto :child []}
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
    ]
   )
 
@@ -77,9 +77,18 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YL applications."
   [application lang _ krysp-version output-dir begin-of-link]
-  (let [attachments []
-        statement-attachments []
-        canonical (ymparistolupa-canonical/ymparistolupa-canonical application lang)
+  (let [krysp-polku-lausuntoon [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :lausuntotieto]
+        canonical-without-attachments  (ymparistolupa-canonical/ymparistolupa-canonical application lang)
+        statement-given-ids (mapping-common/statements-ids-with-status
+                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
+        _ (println "statement given" statement-given-ids)
+        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical (assoc-in
+                    canonical-with-statement-attachments
+                    [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
+                    attachments)
         xml (element-to-xml canonical ymparistolupa_to_krysp)
         ]
 

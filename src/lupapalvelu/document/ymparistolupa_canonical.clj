@@ -9,7 +9,8 @@
                     :ymparistolupatieto
                      {:Ymparistolupa
                       {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
-                       :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))}}
+                       :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+                       :lausuntotieto (canonical-common/get-statements (:statements application))}}
 
                     }})
 

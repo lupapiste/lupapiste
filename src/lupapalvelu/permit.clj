@@ -41,7 +41,7 @@
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
-   :sftp-directory "/ymparistolupa"
+   :sftp-directory "/ymparisto"
    :case-xml-element :Ymparistolupa})
 
 (defpermit P  "Poikkeusluvat"

@@ -108,7 +108,15 @@
    :tree ["Ymp\u00e4rist\u00f6luvat"
           [["Meluilmoitus" :meluilmoitus]
            ["Pima" :pima]
-           ["maa-ainesten_ottaminen" :maa-aineslupa]]]})
+           ["maa-ainesten_ottaminen" :maa-aineslupa]
+
+           ; FIXME oikeasti permit/YL
+           ["uusi toiminta" :yl-uusi-toiminta]
+           ["olemassa oleva toiminta" :yl-olemassa-oleva-toiminta]
+           ["toiminnan muutos" :yl-toiminnan-muutos]
+           ["lupam\u00e4\u00e4r\u00e4ysten tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
+           ["toiminnan aloittamislupa" :yl-toiminnan-aloittamislupa]
+           ]]})
 
 (def ^:private operation-tree
   (vector
@@ -240,6 +248,23 @@
                                            :attachments []
                                            :add-operation-allowed false
                                            :link-permit-required true}})
+
+(def ^:private common-ymparistolupa-schemas ["yl-hankkeen-kuvaus" "hakija" "maksaja"])
+(def ^:private ymparistolupa-attachments [[:muut :muu]]) ; TODO
+(def ^:private ymparistolupa-operation
+  {:schema "yl-hankkeen-kuvaus"
+   :permit-type permit/YL
+   :schema-data []
+   :required common-ymparistolupa-schemas
+   :attachments ymparistolupa-attachments
+   :link-permit-required false})
+
+(def yl-operations
+  {:yl-uusi-toiminta ymparistolupa-operation
+   :yl-olemassa-oleva-toiminta ymparistolupa-operation
+   :yl-toiminnan-muutos ymparistolupa-operation
+   :yl-lupamaaraysten-tarkistaminen ymparistolupa-operation
+   :yl-toiminnan-aloittamislupa ymparistolupa-operation})
 
 (def operations
   (merge
@@ -443,13 +468,13 @@
                                    :add-operation-allowed false
                                    :link-permit-required false}
      :pima                        {:schema "pima"
-                                   :permit-type permit/R
+                                   :permit-type permit/R ; TODO
                                    :required ["ymp-ilm-kesto-mini"]
                                    :attachments []
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "ottamismaara"
-                                   :permit-type permit/R
+                                   :permit-type permit/R ; TODO
                                    :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []
@@ -483,7 +508,8 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}}
-    ya-operations))
+    ya-operations
+    yl-operations))
 
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
