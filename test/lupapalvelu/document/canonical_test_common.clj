@@ -17,3 +17,15 @@
 
 (defn validate-all-documents [documents]
   (fact "Meta test: all documents in fixture are valid" documents => (has every? valid-against-current-schema?)))
+
+;; Fixture
+
+(def statements [{:given 1379423133068
+                  :id "52385377da063788effc1e93"
+                  :person {:text "Paloviranomainen"
+                           :name "Sonja Sibbo"
+                           :email "sonja.sibbo@sipoo.fi"
+                           :id "516560d6c2e6f603beb85147"}
+                  :requested 1379423095616
+                  :status "yes"
+                  :text "Lausunto liitteen\u00e4."}])

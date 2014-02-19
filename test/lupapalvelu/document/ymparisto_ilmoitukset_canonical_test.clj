@@ -5,16 +5,6 @@
             [lupapalvelu.document.canonical-test-common :refer :all]
             [lupapalvelu.document.ymparisto-schemas]))
 
-(def ^:private statements [{:given 1379423133068
-                            :id "52385377da063788effc1e93"
-                            :person {:text "Paloviranomainen"
-                                     :name "Sonja Sibbo"
-                                     :email "sonja.sibbo@sipoo.fi"
-                                     :id "516560d6c2e6f603beb85147"}
-                            :requested 1379423095616
-                            :status "yes"
-                            :text "Lausunto liitteen\u00e4."}])
-
 (def yrityshakija {:created 1391683428266,
                    :data
                    {:_selected {:modified 1391769554143, :value "yritys"},
