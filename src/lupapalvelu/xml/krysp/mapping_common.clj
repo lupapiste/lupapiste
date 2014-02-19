@@ -26,6 +26,8 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
+(def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
+
 (def sijantiType {:tag :Sijainti
                    :child [{:tag :osoite :ns "yht"
                             :child [{:tag :yksilointitieto}
@@ -33,8 +35,7 @@
                                     {:tag :osoitenimi
                                      :child [{:tag :teksti}]}]}
                            {:tag :piste :ns "yht"
-                            :child [{:tag :Point :ns "gml"
-                                     :child [{:tag :pos}]}]}
+                            :child [gml-point]}
                            {:tag :viiva :ns "yht"
                             :child [{:tag :LineString :ns "gml"
                                      :child [{:tag :pos}]}]}
