@@ -20,18 +20,22 @@
 
   (fact "Ymparistolupa yritys -> canonical -> xml"
     (let [canonical (ymparistolupa-canonical application "fi")
-        krysp-xml (element-to-xml canonical ymparistolupa_to_krysp)
-        xml-s     (indent-str krysp-xml)
-        lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
+          krysp-xml (element-to-xml canonical ymparistolupa_to_krysp)
+          xml-s     (indent-str krysp-xml)
+          lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
 
-    ;(clojure.pprint/pprint xml)
-    (println xml-s)
+      ;(println xml-s)
 
-    (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
+      (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
 
-    (xml/get-text lp-xml [:luvanTunnistetiedot :LupaTunnus :tunnus]) => (:id application)
+      (xml/get-text lp-xml [:luvanTunnistetiedot :LupaTunnus :tunnus]) => (:id application)
 
-    (xml/get-text lp-xml [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
-    (xml/get-text lp-xml [:toiminta :peruste]) => "Hankkeen peruste"
+      (xml/get-text lp-xml [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
+      (xml/get-text lp-xml [:toiminta :peruste]) => "Hankkeen peruste"
+
+      (let [hakijat (xml/select lp-xml [:hakija])]
+        (count hakijat) => 2
+        (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
+        (xml/get-text (second hakijat) [:liikeJaYhteisotunnus]) => "1060155-5")
 
     )))

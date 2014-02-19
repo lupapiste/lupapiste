@@ -431,7 +431,7 @@
       {:nimi (-> yritys :yritysnimi)
        :postiosoite (get-simple-osoite (:osoite yritys))
        :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
-       :liikeJaYhteisoTunnus (:liikeJaYhteisoTunnus yritys)})
+       :liikeJaYhteisotunnus (:liikeJaYhteisoTunnus yritys)})
     (let [henkilo (-> unwrapped-party-doc :data :henkilo)]
       {:nimi "Yksityishenkil\u00f6"
        :postiosoite (get-simple-osoite (:osoite henkilo))

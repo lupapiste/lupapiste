@@ -4,15 +4,15 @@
            ))
 
 (defn ymparistolupa-canonical [application lang]
-  (let [documents (canonical-common/documents-by-type-without-blanks application)
-        kuvaus    (-> documents :yl-hankkeen-kuvaus first :data tools/unwrapped)]
+  (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
+        kuvaus    (-> documents :yl-hankkeen-kuvaus first :data)]
     {:Ymparistoluvat {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
                      :ymparistolupatieto
                       {:Ymparistolupa
                        {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
                         :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
                         :lausuntotieto (canonical-common/get-statements (:statements application))
-                        ;:hakija nil
+                        :hakija (map canonical-common/->ymp-osapuoli (:hakija documents))
                         :toiminta (select-keys kuvaus [:kuvaus :peruste])
                         ; TODO:
                         ; - viiteluvat

@@ -26,7 +26,9 @@
                   :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
-                  :documents [kuvaus]
+                  :documents [kuvaus
+                              henkilohakija
+                              yrityshakija]
                   :drawings []
                   :infoRequest false
                   :location {:x 428195.77099609 :y 6686701.3931274}
@@ -74,10 +76,37 @@
         lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
         varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
         lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+
+        hakijat (:hakija ymparistolupa) => seq
         ]
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
+
+    (count hakijat) => 2
+
+    (let [hakija (first hakijat)
+          postiosoite (:postiosoite hakija) => truthy
+          osoitenimi (:osoitenimi postiosoite) => truthy
+          yhteyshenkilo (:yhteyshenkilo hakija) => truthy]
+
+      (:nimi hakija) => "Yksityishenkil\u00f6"
+      (:liikeJaYhteisotunnus hakija) => nil
+      (:teksti osoitenimi) => "Murskaajankatu 5"
+      (:postinumero postiosoite) => "36570"
+      (:postitoimipaikannimi postiosoite) => "Kaivanto"
+      (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
+      (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
+      (:puhelin yhteyshenkilo) => "121212")
+
+    (second hakijat) => {:nimi "Yrtti Oy",
+                         :postiosoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                                       :postitoimipaikannimi "kuuva",
+                                       :postinumero "43640"},
+                         :yhteyshenkilo {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
+                                         :puhelin "060222155",
+                                         :sahkopostiosoite "tew@gjr.fi"},
+                         :liikeJaYhteisotunnus "1060155-5"}
 
     (get-in ymparistolupa [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
     (get-in ymparistolupa [:toiminta :peruste]) => "Hankkeen peruste"
