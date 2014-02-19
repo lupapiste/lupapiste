@@ -31,10 +31,7 @@
                              {:tag :lausuntotieto
                               :child [mapping-common/lausunto]}
                              {:tag :ilmoittaja
-                              :child [{:tag :nimi}
-                                      {:tag :postiosoite :child mapping-common/postiosoite-children-ns-yht}
-                                      {:tag :sahkopostiosoite}
-                                      {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht}]}
+                              :child mapping-common/ymp-osapuoli-children}
                              {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
                                                               {:tag :Kunta}
                                                               mapping-common/sijantiType

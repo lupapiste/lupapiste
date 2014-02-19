@@ -26,7 +26,7 @@
    ; 0-n {:tag :valvontatapahtumattieto :child []}
    ;{:tag :paatostieto :child []}
    {:tag :lausuntotieto :child [mapping-common/lausunto]}
-   ; 0-n {:tag :hakija :child []}
+   {:tag :hakija :child mapping-common/ymp-osapuoli-children}
    {:tag :toiminta
     :child [{:tag :peruste} ; string
             {:tag :kuvaus} ;string
@@ -50,7 +50,7 @@
                                                                                        {:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children}]}]}]}
 
    {:tag :referenssiPiste :child []}
-   {:tag :koontiKentta :child []}
+   {:tag :koontiKentta} ; String
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
    ]
   )
