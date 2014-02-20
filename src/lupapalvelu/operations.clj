@@ -107,7 +107,7 @@
     ["Meluilmoitus" :meluilmoitus]
 
     ; at the moment permit/R
-           ["Pima" :pima]
+    ["Pima" :pima]
     ["maa-ainesten_ottaminen" :maa-aineslupa]
 
     ; permit/YL
