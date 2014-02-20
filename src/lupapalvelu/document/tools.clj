@@ -128,14 +128,15 @@
 
 (defn schema-body-without-element-by-name
   "returns a schema body with all elements with name of element-name stripped of."
-  [schema-body element-name]
-  (walk/postwalk
-    (fn [form]
-      (cond
-        (and (map? form) (= (:name form) element-name)) nil
-        (sequential? form) (->> form (filter identity) vec)
-        :else form))
-    schema-body))
+  [schema-body & element-names]
+  (let [names (set element-names)]
+    (walk/postwalk
+      (fn [form]
+        (cond
+          (and (map? form) (names (:name form))) nil
+          (sequential? form) (->> form (filter identity) vec)
+          :else form))
+      schema-body)))
 
 (defn schema-without-element-by-name
   "returns a copy of a schema with all elements with name of element-name stripped of."
