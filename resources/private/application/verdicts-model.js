@@ -46,7 +46,7 @@ LUPAPISTE.VerdictsModel = function() {
     .processing(self.processing)
     .pending(self.pending)
     .success(function(d) {
-      var content = loc("verdict.verdicts-found-from-backend", d.verdictCount);
+      var content = loc("verdict.verdicts-found-from-backend", d.verdictCount, d.taskCount);
       LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
       pageutil.showAjaxWait();
       repository.load(applicationId);

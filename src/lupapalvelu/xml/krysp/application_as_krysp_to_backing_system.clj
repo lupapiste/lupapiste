@@ -1,11 +1,22 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
-  (:require [sade.env :as env]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [sade.env :as env]
+            [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.xml.krysp.poikkeamis-mapping]
-            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]))
+            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
+            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]))
+
+
+(defmacro try-krysp [& body]
+  `(try
+     (do ~@body)
+     (catch org.xml.sax.SAXParseException e#
+       (info e# "Invalid KRYSP XML message")
+       (fail! :error.integration.send :details (.getMessage e#)))))
 
 (defn- get-begin-of-link [permit-type]
   {:pre  [permit-type]
@@ -33,7 +44,7 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)]
-    (krysp-fn application lang submitted-application krysp-version output-dir begin-of-link)))
+    (try-krysp (krysp-fn application lang submitted-application krysp-version output-dir begin-of-link))))
 
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -44,7 +55,7 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)]
-    (krysp-fn application task user lang krysp-version output-dir begin-of-link)))
+    (try-krysp (krysp-fn application task user lang krysp-version output-dir begin-of-link))))
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -55,7 +66,7 @@
         begin-of-link (get-begin-of-link permit-type)]
     (assert (= permit/R permit-type)
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
-    (rl-mapping/save-unsent-attachments-as-krysp application lang krysp-version output-dir begin-of-link)))
+    (try-krysp (rl-mapping/save-unsent-attachments-as-krysp application lang krysp-version output-dir begin-of-link))))
 
 (defn save-jatkoaika-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -66,4 +77,4 @@
         begin-of-link (get-begin-of-link permit-type)]
     (assert (= permit/YA permit-type)
       (str "Saving jatkoaika as krysp is not supported for " (name permit-type) " type of permits."))
-    (ya-mapping/save-jatkoaika-as-krysp application lang organization krysp-version output-dir begin-of-link)))
+    (try-krysp (ya-mapping/save-jatkoaika-as-krysp application lang organization krysp-version output-dir begin-of-link))))

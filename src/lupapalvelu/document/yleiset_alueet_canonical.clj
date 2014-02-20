@@ -4,26 +4,18 @@
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
             [clojure.walk :as walk]
-            [sade.common-reader :as cr]
-            [cljts.geom :as geo]
-            [cljts.io :as jts]))
+            [sade.common-reader :as cr]))
 
-(defn- get-henkilo [henkilo]
-  (let [nimi (assoc-when {}
-               :etunimi (-> henkilo :henkilotiedot :etunimi)
-               :sukunimi (-> henkilo :henkilotiedot :sukunimi))
-        teksti (assoc-when {} :teksti (-> henkilo :osoite :katu))
-        osoite (assoc-when {}
-                 :osoitenimi teksti
-                 :postinumero (-> henkilo :osoite :postinumero)
-                 :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi))]
-    (not-empty
-      (assoc-when {}
-        :nimi nimi
-        :osoite osoite
-        :sahkopostiosoite (-> henkilo :yhteystiedot :email)
-        :puhelin (-> henkilo :yhteystiedot :puhelin)
-        :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
+(defn get-kasittelytieto [application]
+  {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
+           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+           :asiatunnus (:id application)
+           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+           :kasittelija (let [handler (:authority application)]
+                          (if (seq handler)
+                            {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
+                                                             :sukunimi (:lastName handler)}}}}
+                            empty-tag))}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu))]
@@ -120,60 +112,6 @@
                                           {:laskuviite (-> doc :laskuviite)}
                                           {:rooliKoodi "hakija"})))))
 
-(defn- get-handler [application]
-  (let [handler (:authority application)]
-    (if (seq handler)
-      {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                       :sukunimi (:lastName handler)}}}}
-      empty-tag)))
-
-(defn- get-kasittelytieto [application]
-  {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
-                    :asiatunnus (:id application)
-                    :paivaysPvm (to-xml-date (application (state-timestamps (keyword (:state application)))))
-                    :kasittelija (get-handler application)}})
-
-
-(defn- get-pos [coordinates]
-  {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
-
-(defn- point-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         p (jts/read-wkt-str geometry)
-         cord (.getCoordinate p)]
-    {:Sijainti
-     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
-
-(defn- linestring-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         ls (jts/read-wkt-str geometry)]
-    {:Sijainti
-     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}}))
-
-(defn- polygon-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         polygon (jts/read-wkt-str geometry)]
-    {:Sijainti
-     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
-
-(defn- drawing-type? [t drawing]
-  (.startsWith (:geometry drawing) t))
-
-(defn- drawings-as-krysp [drawings]
-   (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
-           (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
-           (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings))))
-
-
-(defn- get-sijaintitieto [application]
-  (let [drawings (drawings-as-krysp (:drawings application))]
-    (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                               :alkuHetki (to-xml-datetime (now))
-                               :osoitenimi {:teksti (:address application)}}
-                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
-      drawings)))
-
 (defn- get-lisatietoja-sijoituskohteesta [data]
   (when-let [arvo (-> data :lisatietoja-sijoituskohteesta)]
     {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta" :arvo arvo}))
@@ -266,10 +204,10 @@
         ;; Otherwise the type is the first key in the map.
         main-viit-tapahtuma-name (when main-viit-tapahtuma-doc
                                    (or
-                                     (-> main-viit-tapahtuma-doc :_selected)
+                                     (-> main-viit-tapahtuma-doc :_selected keyword)
                                      (-> main-viit-tapahtuma-doc first key)))
         main-viit-tapahtuma (when main-viit-tapahtuma-doc
-                             (main-viit-tapahtuma-doc (keyword main-viit-tapahtuma-name)))
+                             (main-viit-tapahtuma-doc main-viit-tapahtuma-name))
 
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
@@ -351,7 +289,7 @@
                                  :sijoituslupaviitetieto sijoituslupaviitetieto
                                  :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
                                  :johtoselvitysviitetieto johtoselvitysviitetieto}
-                                (when (= "mainostus-tapahtuma-valinta" main-viit-tapahtuma-name)
+                                (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]

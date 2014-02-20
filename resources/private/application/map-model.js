@@ -7,6 +7,7 @@ LUPAPISTE.MapModel = function() {
   var inforequestMap = null;
   var location = null;
   var drawings = null;
+  var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
 
 
   var createMap = function(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); };
@@ -40,7 +41,10 @@ LUPAPISTE.MapModel = function() {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, 10).add(x, y).drawDrawings(drawings);
+    map.clear().center(x, y, 10).add(x, y);
+    if(drawings) {
+      map.drawDrawings(drawings, {}, drawStyle);
+    }
   };
 
   self.updateMapSize = function(kind) {
@@ -52,22 +56,22 @@ LUPAPISTE.MapModel = function() {
 
   // When Oskari map has initialized itself, draw shapes and the marker
   hub.subscribe("oskari-map-initialized", function() {
-
     if (drawings && drawings.length > 0) {
       var oskariDrawings = _.map(drawings, function(d) {
         return {
           "id": d.id,
-          "name": d.name? d.name :"",
-          "desc": d.desc ? d.desc : "",
-          "category": d.category ? d.category : "",
-          "geometry": d.geometry ? d.geometry : "",
-          "area": d.area? d.area : "",
-          "height": d.height? d.height : ""
+          "name": d.name ||"",
+          "desc": d.desc || "",
+          "category": d.category || "",
+          "geometry": d.geometry || "",
+          "area": d.area || "",
+          "height": d.height || "",
+          "length": d.length || ""
         }});
 
       hub.send("oskari-show-shapes", {
         drawings: oskariDrawings,
-        style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
+        style: drawStyle,
         clear: true
       });
     }
@@ -82,11 +86,13 @@ LUPAPISTE.MapModel = function() {
 
   // When a shape is drawn in Oskari map, save it to application
   hub.subscribe("oskari-save-drawings", function(e) {
-    ajax.command("save-application-drawings", {id: currentAppId, drawings: e.data.drawings})
-    .success(function() {
-      repository.load(currentAppId);
-    })
-    .call();
+    if (_.isArray(e.data.drawings)) {
+      ajax.command("save-application-drawings", {id: currentAppId, drawings: e.data.drawings})
+      .success(function() {
+        repository.load(currentAppId);
+      })
+      .call();
+    }
   });
 
 };

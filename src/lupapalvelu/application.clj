@@ -258,10 +258,12 @@
                     ;; LUPA-407
                     (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
                 open-inforequest/notify-on-comment]}
-  [{{:keys [to mark-answered] :or {mark-answered true}} :data :keys [user created application] :as command}]
+  [{{:keys [to mark-answered openApplication] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))]
     (update-application command
-      (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created))))
+      (util/deep-merge
+        (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created)
+        (when openApplication {$set {:state :open, :opened created}})))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
@@ -316,6 +318,17 @@
            :state     :canceled}})
   (mongo/remove-many :app-links {:link {$in [id]}})
   (ok))
+
+(defcommand open-application
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:draft]}
+  [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified  created
+           :state     :open}}))
 
 (defcommand request-for-complement
   {:parameters [:id]
@@ -408,14 +421,11 @@
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [{:keys [application] :as command}]
-  (or (validate-link-permits application)
-      (try
-        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-          (do-approve-jatkoaika-app command id lang)
-          (do-approve-regular-app command id lang))
-        (catch org.xml.sax.SAXParseException e
-          (info e "Invalid KRYSP XML message")
-          (fail (.getMessage e))))))
+  (or
+    (validate-link-permits application)
+    (if (= :ya-jatkoaika (-> application :operations first :name keyword))
+      (do-approve-jatkoaika-app command id lang)
+      (do-approve-regular-app command id lang))))
 
 (defn- do-submit [command application created]
   (update-application command
@@ -454,9 +464,10 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :info]}
   [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :drawings drawings}}))
+  (when (sequential? drawings)
+    (update-application command
+      {$set {:modified created
+             :drawings drawings}})))
 
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
@@ -475,21 +486,24 @@
 ;; TODO: permit-type splitting.
 (defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
+        op-schema-name        (:schema op-info)
         existing-documents    (:documents application)
         permit-type           (keyword (permit/permit-type application))
         schema-version        (:schema-version application)
-        make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
-                                                 :created created
-                                                 :data (tools/timestamped
-                                                         (if (= schema-name (:schema op-info))
-                                                           (schema-data-to-body (:schema-data op-info) application)
-                                                           {})
-                                                         created)})
+        make                  (fn [schema-name]
+                                {:id (mongo/create-id)
+                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
+                                 :created created
+                                 :data (tools/timestamped
+                                         (condp = schema-name
+                                           op-schema-name           (schema-data-to-body (:schema-data op-info) application)
+                                           "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
+                                           "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
+                                           {})
+                                         created)})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
-        op-schema-name        (:schema op-info)
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
@@ -837,10 +851,11 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [created] :as command}]
+  [{:keys [user created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:modified created
                                        :started timestamp
+                                       :startedBy (select-keys user [:id :firstName :lastName])
                                        :state  :constructionStarted}}))
   (ok))
 
@@ -860,7 +875,8 @@
         organization  (organization/get-organization (:organization application))
         krysp-version (mapping-to-krysp/resolve-krysp-version organization permit-type)
         output-dir    (mapping-to-krysp/resolve-output-directory organization permit-type)
-        sent-file-ids (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)
+        sent-file-ids (mapping-to-krysp/try-krysp
+                        (rakennuslupa-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version))
         set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
         updates       {$set
                        (merge
@@ -883,10 +899,11 @@
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
    :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
-  [{:keys [created application] :as command}]
+  [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates   {:modified created
                        :closed timestamp
+                       :closedBy (select-keys user [:id :firstName :lastName])
                        :state :closed}
         application   (merge
                         application
@@ -947,9 +964,9 @@
      $push {:verdicts (domain/->paatos
                         {:id verdictId      ; Kuntalupatunnus
                          :timestamp created ; tekninen Lupapisteen aikaleima
-                         :name name         ; poytakirja[] / paatoksentekija
+                         :name name         ; poytakirjat[] / paatoksentekija
                          :given given       ; paivamaarat / antoPvm
-                         :status status     ; poytakirja[] / paatoskoodi
+                         :status status     ; poytakirjat[] / paatoskoodi
                          :official official ; paivamaarat / lainvoimainenPvm
                          })}}))
 

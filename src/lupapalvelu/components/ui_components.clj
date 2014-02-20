@@ -179,8 +179,8 @@
 
    :authority    {:depends [:common :authenticated :map :applications :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
-                  :js ["authority.js"]
-                  :html ["index.html"]}
+                  :js ["authority.js" "integration-error.js"]
+                  :html ["index.html" "integration-error.html"]}
 
    :oir          {:depends [:common :authenticated :map :application :attachment
                             :docgen :debug]

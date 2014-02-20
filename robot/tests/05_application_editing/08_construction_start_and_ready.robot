@@ -21,18 +21,36 @@ Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
   Throw in a verdict
-  Wait Until  Element should not be visible  application-inform-construction-ready-btn
+  Wait until  Element should not be visible  verdict-submit
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
   Open tab  tasks
+
+  Element should be visible  //*[@data-test-id='application-inform-construction-started-btn']
+  Element should not be visible  //*[@data-test-id='application-inform-construction-ready-btn']
+  Element should not be visible  //*[@data-test-id='construction-state-change-info-started']
+  Element should not be visible  //*[@data-test-id='construction-state-change-info-closed']
+
   Sets construction started/ready via modal datepicker dialog  application-inform-construction-started-btn  02.06.2018
   Wait until  Application state should be  constructionStarted
+
   Wait until  Element should be visible  //*[@data-test-id='application-inform-construction-ready-btn']
+  Element should not be visible  //*[@data-test-id='application-inform-construction-started-btn']
+  Wait until  Element should be visible  //*[@data-test-id='construction-state-change-info-started']
+  Element should not be visible  //*[@data-test-id='construction-state-change-info-closed']
+  Element should be visible  //*[@data-test-id='application-open-tasks-tab']
+  Tab should be visible  tasks
 
 Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
   Sets construction started/ready via modal datepicker dialog  application-inform-construction-ready-btn  02.07.2018
-  Wait until  Element should not be visible  //*[@data-test-id='application-inform-construction-ready-btn']
   Wait until  Application state should be  closed
+
+  Wait until  Element should not be visible  //*[@data-test-id='application-inform-construction-ready-btn']
+  Element should not be visible  //*[@data-test-id='application-inform-construction-started-btn']
+  Wait until  Element should be visible  //*[@data-test-id='construction-state-change-info-started']
+  Element should be visible  //*[@data-test-id='construction-state-change-info-closed']
+  Element should be visible  //*[@data-test-id='application-open-tasks-tab']
+  Tab should be visible  tasks
 
 
 *** Keywords ***

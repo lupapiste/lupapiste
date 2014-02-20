@@ -19,20 +19,24 @@
              data-test-id="change-location-link"></a>
           </h1>
 
+          <!-- State: -->
+          <div class="state-indication" data-bind="attr: {'data-test-state': state}" data-test-id="application-state" >
+            <div data-bind="attr: {'class': state}">
+              <span data-bind="ltext: 'draft', attr: {'title' : loc('draft.title')}" class="draft-box"></span>
+              <span data-bind="ltext: 'open', attr: {'title' : loc('open.title')}" class="open-box"></span>
+              <span data-bind="ltext: 'submitted', attr: {'title' : loc('submitted.title')}" class="submitted-box"></span>
+              <span data-bind="ltext: 'complement-needed', attr: {'title' : loc('complement-needed.title')}" id="complement-needed-box" class="complement-needed-box"></span>
+              <span data-bind="ltext: 'sent', attr: {'title' : loc('sent.title')}" class="sent-box"></span>
+              <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
+              <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
+              <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
+            </div>
+          </div>
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
-          </div>
-
-          <!-- State: -->
-          <div>
-            <p data-bind="ltext: 'application.state'"></p>
-            <span
-              data-bind="ltext: state, attr: {'data-test-state': state}"
-              data-test-id="application-state"
-              class="application_summary_text">
-            </span>
           </div>
 
           <!-- Submitted: -->
@@ -238,7 +242,7 @@
                   <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted'], state())">
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
@@ -346,19 +350,19 @@
 
 
           <div class="">
-            <div data-bind="if: postAttachmentsByGroup().length" data-test-id="application-post-attachments-table">
+            <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"/></h1>
               <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
             </div>
             <!-- ko if: !postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h1>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
             <!-- /ko -->
- 
+
             <div class="attachment-actions">
-    
+
               <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
@@ -387,9 +391,9 @@
                   <em data-bind="visible: application.pending" class="button-loader"></em>
               </button>
             </div>
-            
+
             <!-- ko if: postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
@@ -447,7 +451,7 @@
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">
-                  <span data-bind="dateString: modified"></span>
+                    <span data-bind="dateString: modified"></span>
                     <span data-bind="fullName: latestVersion.user"></span>
                   </span>
                 </td>
@@ -540,10 +544,13 @@
                       <label data-bind="ltext: 'verdict.vaaditutTyonjohtajat'"></label>
                       <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                     </div>
-                    <div data-bind="if: lupamaaraykset.takuuaikaPaivat" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.takuuaikaPaivat'"></label><span class="value" data-bind="text: lupamaaraykset.takuuaikaPaivat"></span></div>
-                      <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label><span class="value" data-bind="text: lupamaaraykset.muutMaaraykset"></span></div>
+
+                    <div data-bind="if: lupamaaraykset.muutMaaraykset" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.muutMaaraykset'"></label>
+                      <ul data-bind="foreach: lupamaaraykset.muutMaaraykset">
+                        <li data-bind='text: $data'></li>
+                      </ul>
+                    </div>
 
                     <div data-bind='if: lupamaaraykset.vaaditutKatselmukset'>
                       <h3 class="form-label" data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
@@ -578,9 +585,9 @@
                       </table>
                     </div>
 
-                    <!-- /ko --> <!-- lupamaaraykset -->
+                    <!-- /ko --> <!-- /lupamaaraykset -->
 
-                    <div data-bind="if: $data.poytakirjat">
+                    <div data-bind="if: $data.poytakirjat && $data.poytakirjat.length > 0">
                       <h3 data-bind="ltext: 'verdict.poytakirjat'"></h3>
                       <table class="table table-striped tablesorter" id="application-verdict-details">
                         <thead>
@@ -756,7 +763,7 @@
 
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
-          <div data-bind="if: buildings() && buildings().length && $root.authorization.ok('inform-building-construction-started')">
+          <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
             <table>
               <thead>
@@ -764,7 +771,6 @@
                 <tr>
                   <th data-bind="ltext: 'application.buildingStatus'"></th>
                   <th data-bind="ltext: 'application.buildingOperation'"></th>
-                  <th data-bind="ltext: 'application.building'"></th>
                   <th data-bind="ltext: 'application.buildingStartedDate'"></th>
                   <th data-bind="ltext: 'application.buildingStartedBy'"></th>
                 </tr>
@@ -773,16 +779,74 @@
                 <tr>
                   <td><span data-bind="attr: {'class': ($data.constructionStarted ? 'ok': 'missing')  + ' icon'}"></span></td>
                   <td data-bind="text: util.buildingName($data)"></td>
-                  <td data-bind="text: $data.buildingId"></td>
                   <td>
                     <span data-bind="if: !$data.constructionStarted">
-                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a></span>
+                      <a data-bind="click: $root.constructionStateChangeModel.openBuildingConstructionStartDialog, ltext: 'application.beginConstructionOf'" href="#"></a>
+                    </span>
                     <span data-bind="if: $data.constructionStarted">
                       <span data-bind="dateString: $data.constructionStarted"></span>
                     </span>
                   </td>
                   <td data-bind="fullName: $data.startedBy"></td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- YA: Info about construction started and construction ready occasions -->
+          <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.contains(['constructionStarted', 'closed'], $data.state())">
+            <table>
+              <thead>
+                <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
+                <tr>
+                  <th data-bind="ltext: 'application.constructionStateChangeOperation'"></th>
+                  <th data-bind="ltext: 'application.constructionStateChangeDate'"></th>
+                  <th data-bind="ltext: 'application.constructionStateChangedBy'"></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- Hanke aloitettu -->
+                <tr>
+                  <td><span data-bind="ltext: 'constructionStarted'"></span></td>
+                  <td>
+                    <span data-bind="if: $data.started">
+                      <span data-bind="dateString: $data.started"
+                            data-test-id="construction-state-change-info-started"></span>
+                    </span>
+                  </td>
+                  <td data-bind="fullName: $data.startedBy"></td>
+                  <td>
+                    <button class="btn btn-primary"
+                            data-test-id="application-inform-construction-started-btn"
+                            data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
+                                       ltext: 'application.button.informConstructionStarted',
+                                       visible: $root.authorization.ok('inform-construction-started'),
+                                       enable: $root.authorization.ok('inform-construction-started')"></button>
+                  </td>
+                </tr>
+
+                <!-- Hanke valmistunut -->
+                <tr>
+                  <td><span data-bind="ltext: 'closed'"></span></td>
+                  <td>
+                    <span data-bind="if: $data.closed">
+                      <span data-bind="dateString: $data.closed"
+                            data-test-id="construction-state-change-info-closed"></span>
+                    </span>
+                  </td>
+                  <td data-bind="fullName: $data.closedBy"></td>
+                  <td>
+                    <button class="btn btn-primary"
+                            data-test-id="application-inform-construction-ready-btn"
+                            data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
+                                       ltext: 'application.button.informConstructionReady',
+                                       visible: $root.authorization.ok('inform-construction-ready'),
+                                       enable: $root.authorization.ok('inform-construction-ready')"></button>
+                  </td>
+                </tr>
+
               </tbody>
             </table>
           </div>
@@ -806,20 +870,6 @@
               </tbody>
             </table>
           </div>
-
-          <button class="btn btn-primary"
-                  data-test-id="application-inform-construction-started-btn"
-                  data-bind="click: $root.constructionStateChangeModel.openConstructionStartDialog,
-                             ltext: 'application.button.informConstructionStarted',
-                             visible: $root.authorization.ok('inform-construction-started'),
-                             enable: $root.authorization.ok('inform-construction-started')"></button>
-
-          <button class="btn btn-primary"
-                  data-test-id="application-inform-construction-ready-btn"
-                  data-bind="click: $root.constructionStateChangeModel.openConstructionReadyDialog,
-                             ltext: 'application.button.informConstructionReady',
-                             visible: $root.authorization.ok('inform-construction-ready'),
-                             enable: $root.authorization.ok('inform-construction-ready')"></button>
 
           <button class="btn btn-primary"
                   data-test-id="application-new-task"
