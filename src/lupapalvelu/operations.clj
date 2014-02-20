@@ -66,6 +66,7 @@
             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
               [["vesi-ja-viemarijohtojen-sijoittaminen" :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen]
                ["maalampoputkien-sijoittaminen" :ya-sijoituslupa-maalampoputkien-sijoittaminen]
+               ["kaukolampoputkien-sijoittaminen" :ya-sijoituslupa-kaukolampoputkien-sijoittaminen]
                ["sahko-data-ja-muiden-kaapelien-sijoittaminen" :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen]]]
              ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen"
               [["ilmajohtojen-sijoittaminen" :ya-sijoituslupa-ilmajohtojen-sijoittaminen]
@@ -76,6 +77,7 @@
            ["katulupa"
             [["kaivaminen-yleisilla-alueilla"
               [["vesi-ja-viemarityot" :ya-katulupa-vesi-ja-viemarityot]
+               ["maalampotyot" :ya-katulupa-maalampotyot]
                ["kaukolampotyot" :ya-katulupa-kaukolampotyot]
                ["kaapelityot" :ya-katulupa-kaapelityot]
                ["kiinteiston-johto-kaapeli-ja-putkiliitynnat" :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat]]]
@@ -218,11 +220,13 @@
    :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-with-tyomaastavastaava
    :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
+   :ya-katulupa-maalampotyot                                          ya-katulupa-general
    :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
    :ya-katulupa-kaapelityot                                           ya-katulupa-general
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             ya-sijoituslupa-general
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                     ya-sijoituslupa-general
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                   ya-sijoituslupa-general
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      ya-sijoituslupa-general
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        ya-sijoituslupa-general
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                        ya-sijoituslupa-general
