@@ -431,6 +431,18 @@
                   :puhelin (-> henkilo :yhteystiedot :puhelin)
                    :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
 
+(defn ->ymp-osapuoli [unwrapped-party-doc]
+  (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
+    (let [yritys (-> unwrapped-party-doc :data :yritys)]
+      {:nimi (-> yritys :yritysnimi)
+       :postiosoite (get-simple-osoite (:osoite yritys))
+       :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
+       :liikeJaYhteisotunnus (:liikeJaYhteisoTunnus yritys)})
+    (let [henkilo (-> unwrapped-party-doc :data :henkilo)]
+      {:nimi "Yksityishenkil\u00f6"
+       :postiosoite (get-simple-osoite (:osoite henkilo))
+       :yhteyshenkilo (get-henkilo henkilo)})))
+
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
