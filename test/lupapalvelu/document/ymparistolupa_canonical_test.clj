@@ -120,5 +120,16 @@
       (first luvat) => {:tunnistetieto "LP-638-2013-00099" :kuvaus "lupapistetunnus"}
       (second luvat) => {:tunnistetieto "kuntalupa-123" :kuvaus "kuntalupatunnus"})
 
+    (facts "sijainti"
+      (let [tiedot-sijainnista (get-in ymparistolupa [:tiedotToiminnanSijainnista :TiedotToiminnanSijainnista])
+            sijainti (get-in tiedot-sijainnista [:sijaintitieto :Sijainti])
+            osoite (:osoite sijainti)]
+
+        (:yksilointitieto tiedot-sijainnista) => (:propertyId application)
+        (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
+        (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}
+        )
+      )
+
     ; (clojure.pprint/pprint canonical)
 ))

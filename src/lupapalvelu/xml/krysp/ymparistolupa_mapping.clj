@@ -37,16 +37,18 @@
                                                      {:tag :liite :child mapping-common/liite-children}]}]}
             {:tag :vakuutukset :child [{:tag :vakuutus :child [{:tag :vakuutusyhtio} ; string
                                                                {:tag :vakuutusnumero}]}]}]} ; string
-   {:tag :alueJaYmparisto :child [{:tag :kiinteistonLaitokset :child [{:tag :kiinteistorekisteritunnus} ; string
-                                                                      {:tag :laitos}]}]} ; string
+;   {:tag :alueJaYmparisto :child [{:tag :kiinteistonLaitokset :child [{:tag :kiinteistorekisteritunnus} ; string
+;                                                                      {:tag :laitos}]}]} ; string
    {:tag :tiedotToiminnanSijainnista :child [{:tag :TiedotToiminnanSijainnista :child [mapping-common/yksilointitieto
                                                                                        mapping-common/alkuHetki
                                                                                        (mapping-common/sijaintitieto "yht")
-                                                                                       {:tag :ymparistoolosuhteet :child mapping-common/liite-children}
-                                                                                       {:tag :ymparistonLaatu :child mapping-common/liite-children}
-                                                                                       {:tag :asutus :child mapping-common/liite-children}
-                                                                                       {:tag :kaavoitustilanne :child mapping-common/liite-children}
-                                                                                       {:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children}]}]}]}
+                                                                                       ;{:tag :ymparistoolosuhteet :child mapping-common/liite-children}
+                                                                                       ;{:tag :ymparistonLaatu :child mapping-common/liite-children}
+                                                                                       ;{:tag :asutus :child mapping-common/liite-children}
+                                                                                       ;{:tag :kaavoitustilanne :child mapping-common/liite-children}
+                                                                                       ;{:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children}]}
+                                                                                       ]
+                                              }]}
 
    {:tag :referenssiPiste :child [mapping-common/gml-point]}
    {:tag :koontiKentta} ; String
