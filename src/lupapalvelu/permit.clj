@@ -39,6 +39,11 @@
    :sftp-directory "/ymparisto"
    :case-xml-element :Ilmoitukset})
 
+(defpermit YL  "Ymparistolupa"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :case-xml-element :Ymparistolupa})
+
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"

@@ -337,8 +337,8 @@ Select operation path by permit type
   ...  ELSE  Select operations path R
 
 Select operations path R
-  Click tree item by text  "Rakentaminen ja purkaminen"
-  Click tree item by text  "Uuden rakennuksen rakentaminen"
+  Click tree item by text  "Rakentaminen ja purkaminen (talot, grillikatokset, autotallit, remontointi)"
+  Click tree item by text  "Uuden rakennuksen rakentaminen (mökit, omakotitalot, saunat, julkiset rakennukset)"
   Click tree item by text  "Asuinrakennuksen rakentaminen"
 
 Select operations path YA kayttolupa
