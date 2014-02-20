@@ -52,9 +52,7 @@
 
    {:tag :referenssiPiste :child [mapping-common/gml-point]}
    {:tag :koontiKentta} ; String
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
-   ]
-  )
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}])
 
 (def ymparistolupa_to_krysp
   {:tag :Ymparistoluvat
@@ -81,7 +79,6 @@
         canonical-without-attachments  (ymparistolupa-canonical/ymparistolupa-canonical application lang)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
-        _ (println "statement given" statement-given-ids)
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
@@ -89,8 +86,7 @@
                     canonical-with-statement-attachments
                     [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
                     attachments)
-        xml (element-to-xml canonical ymparistolupa_to_krysp)
-        ]
+        xml (element-to-xml canonical ymparistolupa_to_krysp)]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
