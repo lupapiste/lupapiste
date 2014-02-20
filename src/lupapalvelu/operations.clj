@@ -489,8 +489,12 @@
                                    :link-permit-required true}}
     ya-operations))
 
-(defn permit-type-of-operation [operation]
-  (:permit-type (operations (keyword operation))))
+;(defn permit-type-of-operation [operation]
+ ; (:permit-type (operations (keyword operation))))
+
+(defn operations-for-permit-type [permit-type]
+  (set (keys (filter (fn [[k v]] (= (:permit-type v) permit-type)) operations))))
+
 
 (doseq [[op {:keys [permit-type]}] operations]
   (when-not permit-type
@@ -501,6 +505,15 @@
             (if (:link-permit-required metadata)
               (conj result operation)
               result)) #{} operations))
+
+(defn ho [tree vals-to-get current]
+  (or (when (coll? (first tree))
+        (map #(ho % vals-to-get current) tree))
+      (when (coll? (second tree))
+        (ho (second tree) vals-to-get (conj current (first tree))))
+      (when (get vals-to-get (second tree))
+        [current tree])))
+
 
 ;;
 ;; Actions
