@@ -99,11 +99,13 @@
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
    :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-maalampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "kaivu- tai katuty\u00f6lupa"
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muuntamoiden-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
@@ -126,12 +128,14 @@
    :ya-kayttolupa-muu-tyomaakaytto                 "muu ty\u00f6maak\u00e4ytt\u00f6"
    ;; Kaivu- tai katutyolupa
    :ya-katulupa-vesi-ja-viemarityot                "vesi-ja-viem\u00e4rity\u00f6t"
+   :ya-katulupa-maalampotyot                     "maal\u00e4mp\u00f6ty\u00f6t"
    :ya-katulupa-kaukolampotyot                     "kaukol\u00e4mp\u00f6ty\u00f6t"
    :ya-katulupa-kaapelityot                        "kaapelity\u00f6t"
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      "kiinteist\u00f6n johto-, kaapeli- ja putkiliitynn\u00e4t"
    ;; Pysyvien maanalaisten rakenteiden sijoittaminen
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        "vesi- ja viem\u00e4rijohtojen sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                "maal\u00e4mp\u00f6putkien sijoittaminen"
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                "kaukol\u00e4mp\u00f6putkien sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "s\u00e4hk\u00f6-, data- ja muiden kaapelien sijoittaminen"
    ;; pysyvien maanpaallisten rakenteiden sijoittaminen
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   "ilmajohtojen sijoittaminen"
@@ -156,11 +160,13 @@
    :ya-kayttolupa-talon-rakennustyot                             :Kayttolupa
    :ya-kayttolupa-muu-tyomaakaytto                               :Kayttolupa
    :ya-katulupa-vesi-ja-viemarityot                              :Tyolupa
+   :ya-katulupa-maalampotyot                                     :Tyolupa
    :ya-katulupa-kaukolampotyot                                   :Tyolupa
    :ya-katulupa-kaapelityot                                      :Tyolupa
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      :Tyolupa
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        :Sijoituslupa
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                :Sijoituslupa
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen              :Sijoituslupa
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen :Sijoituslupa
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   :Sijoituslupa
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                   :Sijoituslupa

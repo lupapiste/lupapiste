@@ -15,85 +15,87 @@
 
 (def ^:private operation-tree-for-R
   ["Rakentaminen ja purkaminen"
-   [["Uuden rakennuksen rakentaminen"
-     [["Asuinrakennus" :asuinrakennus]
-      ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
-      ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
-      ["Julkinen rakennus" :julkinen-rakennus]
-      ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
-    ["Rakennuksen korjaaminen tai muuttaminen"
-     [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
-      ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
-      ["Kayttotarkoituksen muutos" :kayttotark-muutos]
-      ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
-      ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
-      ["Markatilan laajentaminen" :markatilan-laajentaminen]
-      ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
-      ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
-      ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
-    ["Rakennelman rakentaminen"
-     [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
-      ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
-      ["Mainoslaite" :mainoslaite]
-      ["Aita" :aita]
-      ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
-      ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
-      ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-    ["Rakennuksen purkaminen" :purkaminen]
-    ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
-    ["Suunnittelija" :suunnittelijan-nimeaminen]
-    ["Jatkoaika" :jatkoaika]
+            [["Uuden rakennuksen rakentaminen"
+                   [["Asuinrakennus" :asuinrakennus]
+                    ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
+                    ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
+                    ["Julkinen rakennus" :julkinen-rakennus]
+                    ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
+                  ["Rakennuksen korjaaminen tai muuttaminen"
+                   [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
+                    ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
+                    ["Kayttotarkoituksen muutos" :kayttotark-muutos]
+                    ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
+                    ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
+                    ["Markatilan laajentaminen" :markatilan-laajentaminen]
+                    ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+                    ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
+                    ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
+                  ["Rakennelman rakentaminen"
+                   [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
+                    ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
+                    ["Mainoslaite" :mainoslaite]
+                    ["Aita" :aita]
+                    ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
+                    ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
+                    ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
+                  ["Rakennuksen purkaminen" :purkaminen]
+                  ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+                  ["Suunnittelija" :suunnittelijan-nimeaminen]
+                  ["Jatkoaika" :jatkoaika]
     ["Aloitusoikeus" :aloitusoikeus]]])
 
 (def ^:private operation-tree-for-environment-R
   ["Elinympariston muuttaminen"
-   [["Maisemaa muutava toimenpide"
-     [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-      ["Puun kaataminen" :puun-kaataminen]
-      ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-    ["Tontti tai korttelialueen jarjestelymuutos"
-     [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
-      ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
-      ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
+          [["Maisemaa muutava toimenpide"
+            [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
+             ["Puun kaataminen" :puun-kaataminen]
+             ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
+           ["Tontti tai korttelialueen jarjestelymuutos"
+            [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
+             ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
+             ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
       ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
 
 (def ^:private operation-tree-for-YA
   ["yleisten-alueiden-luvat"
-   [["sijoituslupa"
-     [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
-       [["vesi-ja-viemarijohtojen-sijoittaminen" :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen]
-        ["maalampoputkien-sijoittaminen" :ya-sijoituslupa-maalampoputkien-sijoittaminen]
-        ["sahko-data-ja-muiden-kaapelien-sijoittaminen" :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen]]]
-      ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen"
-       [["ilmajohtojen-sijoittaminen" :ya-sijoituslupa-ilmajohtojen-sijoittaminen]
-        ["muuntamoiden-sijoittaminen" :ya-sijoituslupa-muuntamoiden-sijoittaminen]
-        ["jatekatoksien-sijoittaminen" :ya-sijoituslupa-jatekatoksien-sijoittaminen]
-        ["leikkipaikan-tai-koiratarhan-sijoittaminen" :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen]]]
-     ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
-    ["katulupa"
-     [["kaivaminen-yleisilla-alueilla"
-       [["vesi-ja-viemarityot" :ya-katulupa-vesi-ja-viemarityot]
-        ["kaukolampotyot" :ya-katulupa-kaukolampotyot]
-        ["kaapelityot" :ya-katulupa-kaapelityot]
-        ["kiinteiston-johto-kaapeli-ja-putkiliitynnat" :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat]]]
-      ["liikennealueen-rajaaminen-tyokayttoon"
-       [["nostotyot" :ya-kayttolupa-nostotyot]
-        ["vaihtolavat" :ya-kayttolupa-vaihtolavat]
-        ["kattolumien-pudotustyot" :ya-kayttolupa-kattolumien-pudotustyot]
-        ["muu-liikennealuetyo" :ya-kayttolupa-muu-liikennealuetyo]]]
-      ["yleisen-alueen-rajaaminen-tyomaakayttoon"
-       [["talon-julkisivutyot" :ya-kayttolupa-talon-julkisivutyot]
-        ["talon-rakennustyot" :ya-kayttolupa-talon-rakennustyot]
-        ["muu-tyomaakaytto" :ya-kayttolupa-muu-tyomaakaytto]]]]]
-    ["kayttolupa"
-     [["tapahtumat" :ya-kayttolupa-tapahtumat]
-      ["harrastustoiminnan-jarjestaminen" :ya-kayttolupa-harrastustoiminnan-jarjestaminen]
-      ["mainokset" :ya-kayttolupa-mainostus-ja-viitoitus]
-      ["metsastys" :ya-kayttolupa-metsastys]
-      ["vesistoluvat" :ya-kayttolupa-vesistoluvat]
-      ["terassit" :ya-kayttolupa-terassit]
-      ["kioskit" :ya-kayttolupa-kioskit]
-      ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
+          [["sijoituslupa"
+            [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
+              [["vesi-ja-viemarijohtojen-sijoittaminen" :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen]
+               ["maalampoputkien-sijoittaminen" :ya-sijoituslupa-maalampoputkien-sijoittaminen]
+               ["kaukolampoputkien-sijoittaminen" :ya-sijoituslupa-kaukolampoputkien-sijoittaminen]
+               ["sahko-data-ja-muiden-kaapelien-sijoittaminen" :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen]]]
+             ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen"
+              [["ilmajohtojen-sijoittaminen" :ya-sijoituslupa-ilmajohtojen-sijoittaminen]
+               ["muuntamoiden-sijoittaminen" :ya-sijoituslupa-muuntamoiden-sijoittaminen]
+               ["jatekatoksien-sijoittaminen" :ya-sijoituslupa-jatekatoksien-sijoittaminen]
+               ["leikkipaikan-tai-koiratarhan-sijoittaminen" :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen]]]
+            ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
+           ["katulupa"
+            [["kaivaminen-yleisilla-alueilla"
+              [["vesi-ja-viemarityot" :ya-katulupa-vesi-ja-viemarityot]
+               ["maalampotyot" :ya-katulupa-maalampotyot]
+               ["kaukolampotyot" :ya-katulupa-kaukolampotyot]
+               ["kaapelityot" :ya-katulupa-kaapelityot]
+               ["kiinteiston-johto-kaapeli-ja-putkiliitynnat" :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat]]]
+             ["liikennealueen-rajaaminen-tyokayttoon"
+              [["nostotyot" :ya-kayttolupa-nostotyot]
+               ["vaihtolavat" :ya-kayttolupa-vaihtolavat]
+               ["kattolumien-pudotustyot" :ya-kayttolupa-kattolumien-pudotustyot]
+               ["muu-liikennealuetyo" :ya-kayttolupa-muu-liikennealuetyo]]]
+             ["yleisen-alueen-rajaaminen-tyomaakayttoon"
+              [["talon-julkisivutyot" :ya-kayttolupa-talon-julkisivutyot]
+               ["talon-rakennustyot" :ya-kayttolupa-talon-rakennustyot]
+               ["muu-tyomaakaytto" :ya-kayttolupa-muu-tyomaakaytto]]]]]
+           ["kayttolupa"
+            [["tapahtumat" :ya-kayttolupa-tapahtumat]
+             ["harrastustoiminnan-jarjestaminen" :ya-kayttolupa-harrastustoiminnan-jarjestaminen]
+             ["mainokset" :ya-kayttolupa-mainostus-ja-viitoitus]
+             ["metsastys" :ya-kayttolupa-metsastys]
+             ["vesistoluvat" :ya-kayttolupa-vesistoluvat]
+             ["terassit" :ya-kayttolupa-terassit]
+             ["kioskit" :ya-kayttolupa-kioskit]
+             ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
    ["jatkoaika" :ya-jatkoaika]]])
 
 (def ^:private operation-tree-for-P
@@ -105,7 +107,7 @@
     ["Meluilmoitus" :meluilmoitus]
 
     ; at the moment permit/R
-    ["Pima" :pima]
+           ["Pima" :pima]
     ["maa-ainesten_ottaminen" :maa-aineslupa]
 
     ; permit/YL
@@ -216,11 +218,13 @@
    :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-with-tyomaastavastaava
    :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
+   :ya-katulupa-maalampotyot                                          ya-katulupa-general
    :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
    :ya-katulupa-kaapelityot                                           ya-katulupa-general
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             ya-sijoituslupa-general
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                     ya-sijoituslupa-general
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                   ya-sijoituslupa-general
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      ya-sijoituslupa-general
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        ya-sijoituslupa-general
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                        ya-sijoituslupa-general
