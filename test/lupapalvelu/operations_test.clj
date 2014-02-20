@@ -56,11 +56,11 @@
 
   (fact "ymparistolupa"
     (operations-for-permit-type "YL") => [["Ymp\u00e4rist\u00f6luvat"
-                                           [["uusi toiminta" :yl-uusi-toiminta]
-                                            ["olemassa oleva toiminta" :yl-olemassa-oleva-toiminta]
-                                            ["toiminnan muutos" :yl-toiminnan-muutos]
-                                            ["lupam\u00e4\u00e4r\u00e4ysten tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
-                                            ["toiminnan aloittamislupa" :yl-toiminnan-aloittamislupa]]]])
+                                           [["uusi-toiminta" :yl-uusi-toiminta]
+                                            ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+                                            ["toiminnan-muutos" :yl-toiminnan-muutos]
+                                            ["lupamaaraysten-tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
+                                            ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]]]])
 
   )
 
