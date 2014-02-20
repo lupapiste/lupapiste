@@ -5,3 +5,19 @@ ya-sijoituslupa-kaukolampoputkien-sijoittaminen._group_label: Hankkeen kuvaus
 operations.tree.maalampotyot: Maalämpöputkitöiden tekeminen
 operations.ya-katulupa-maalampotyot: Maalämpöputkitöiden tekeminen
 operations.ya-katulupa-maalampotyot.desc: Kunnan yleisen alueen käyttö vaatii luvan tai ilmoituksen.
+
+operations.tree.uusi-toiminta: Uusi toiminta
+operations.tree.olemassa-oleva-toiminta: Olemassa oleva toiminta
+operations.tree.toiminnan-muutos: Toiminnan muutos
+operations.tree.lupamaaraysten-tarkistaminen: Lupamääräysten tarkistaminen
+operations.tree.toiminnan-aloittamislupa: Toiminnan aloittamislupa (YSL 101 §)
+operations.yl-uusi-toiminta: Uusi toiminta
+operations.yl-olemassa-oleva-toiminta: Olemassa oleva toiminta
+operations.yl-toiminnan-muutos: Toiminnan muutos
+operations.yl-lupamaaraysten-tarkistaminen: Lupamääräysten tarkistaminen
+operations.yl-toiminnan-aloittamislupa: Toiminnan aloittamislupa (YSL 101 §)
+operations.yl-uusi-toiminta.desc: Uusi toiminta
+operations.yl-olemassa-oleva-toiminta.desc: Olemassa oleva toiminta
+operations.yl-toiminnan-muutos.desc: Toiminnan muutos
+operations.yl-lupamaaraysten-tarkistaminen.desc: Lupamääräysten tarkistaminen
+operations.yl-toiminnan-aloittamislupa.desc: Toiminnan aloittamislupa (YSL 101 §)
