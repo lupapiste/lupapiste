@@ -130,6 +130,63 @@
 (def attachment-types-YI [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
                           :muut [:muu]])
 
+(def attachment-types-YL
+   [:laitoksen_tiedot [:voimassa_olevat_ymparistolupa_vesilupa
+                       :muut_paatokset_sopimukset
+                       :selvitys_ymparistovahinkovakuutuksesta]
+    :laitosalue_sen_ymparisto [:tiedot_kiinteistoista
+                               :tiedot_toiminnan_sijaintipaikasta
+                               :kaavaote
+                               :selvitys_pohjavesialueesta
+                               :selvitys_rajanaapureista
+                               :ote_asemakaavasta
+                               :ote_yleiskaavasta]
+    :laitoksen_toiminta [:yleiskuvaus_toiminnasta
+                         :yleisolle_tarkoitettu_tiivistelma
+                         :selvitys_tuotannosta
+                         :tiedot_toiminnan_suunnitellusta
+                         :tiedot_raaka-aineista
+                         :tiedot_energian
+                         :energiansaastosopimus
+                         :vedenhankinta_viemarointi
+                         :arvio_ymparistoriskeista
+                         :liikenne_liikennejarjestelyt
+                         :selvitys_ymparistoasioiden_hallintajarjestelmasta]
+    :ymparistokuormitus [:paastot_vesistoon_viemariin
+                         :paastot_ilmaan
+                         :paastot_maaperaan_pohjaveteen
+                         :tiedot_pilaantuneesta_maaperasta
+                         :melupaastot_tarina
+                         :selvitys_paastojen_vahentamisesta_puhdistamisesta
+                         :syntyvat_jatteet
+                         :selvitys_jatteiden_maaran_haitallisuuden_vahentamiseksi
+                         :kaatopaikkaa_koskevan_lupahakemuksen_lisatiedot
+                         :selvitys_vakavaraisuudesta_vakuudesta
+                         :jatteen_hyodyntamista_kasittelya_koskevan_toiminnan_lisatiedot]
+    :paras_tekniikka_kaytanto [:arvio_tekniikan_soveltamisesta
+                               :arvio_paastojen_vahentamistoimien_ristikkaisvaikutuksista
+                               :arvio_kaytannon_soveltamisesta]
+    :vaikutukset_ymparistoon [:arvio_vaikutuksista_yleiseen_viihtyvyyteen_ihmisten_terveyteen
+                              :arvio_vaikutuksista_luontoon_luonnonsuojeluarvoihin_rakennettuun_ymparistoon
+                              :arvio_vaikutuksista_vesistoon_sen_kayttoon
+                              :arvio_ilmaan_joutuvien_paastojen_vaikutuksista
+                              :arvio_vaikutuksista_maaperaan_pohjaveteen
+                              :arvio_melun_tarinan_vaikutuksista
+                              :arvio_ymparistovaikutuksista]
+    :tarkkailu_raportointi [:kayttotarkkailu
+                            :paastotarkkailu
+                            :vaikutustarkkailu
+                            :mittausmenetelmat_laitteet_laskentamenetelmat_laadunvarmistus
+                            :raportointi_tarkkailuohjelmat]
+    :vahinkoarvio_estavat_toimenpiteet [:toimenpiteet_vesistoon_kohdistuvien_vahinkojen_ehkaisemiseksi
+                                        :korvausestiys_vesistoon_kohdistuvista_vahingoista
+                                        :toimenpiteet_muiden_kuin_vesistovahinkojen_ehkaisemiseksi]
+    :muut [:asemapiirros_prosessien_paastolahteiden_sijainti
+           :ote_alueen_peruskartasta_sijainti_paastolahteet_olennaiset_kohteet
+           :prosessikaavio_yksikkoprosessit_paastolahteet
+           :selvitys_suuronnettomuuden_vaaran_arvioimiseksi
+           :muu]])
+
 ;;
 ;; Api
 ;;
@@ -153,11 +210,12 @@
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
   (partition 2
-    (condp = (keyword permit-type)
+    (case (keyword permit-type)
       :R  (attachment-types-R)
       :YA attachment-types-YA
       :P  (attachment-types-R)
       :YI attachment-types-YI
+      :YL attachment-types-YL
       (fail! "unsupported permit-type"))))
 
 (defn get-attachment-types-for-application

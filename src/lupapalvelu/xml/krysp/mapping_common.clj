@@ -15,10 +15,6 @@
                       {:tag :rakennusnro}
                       {:tag :aanestysalue}])
 
-(def ^:private piste {:tag :piste  :ns "yht"
-                      :child [{:tag :Point
-                               :child [{:tag :pos}]}]})
-
 (def ^:private postiosoite-children [{:tag :kunta}
                                      {:tag :osoitenimi :child [{:tag :teksti}]}
                                      {:tag :postinumero}
@@ -30,6 +26,8 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
+(def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
+
 (def sijantiType {:tag :Sijainti
                    :child [{:tag :osoite :ns "yht"
                             :child [{:tag :yksilointitieto}
@@ -37,8 +35,7 @@
                                     {:tag :osoitenimi
                                      :child [{:tag :teksti}]}]}
                            {:tag :piste :ns "yht"
-                            :child [{:tag :Point :ns "gml"
-                                     :child [{:tag :pos}]}]}
+                            :child [gml-point]}
                            {:tag :viiva :ns "yht"
                             :child [{:tag :LineString :ns "gml"
                                      :child [{:tag :pos}]}]}
@@ -49,17 +46,26 @@
                                                        :child [{:tag :pos}]}]} ]}]}
                            {:tag :tyhja :ns "yht"}]})
 
-(def sijantitieto {:tag :sijaintitieto
-                   :child [sijantiType]})
+(defn sijaintitieto
+  "Takes an optional xml namespace for Sijainti element"
+  [& [xmlns]]
+  {:tag :sijaintitieto
+   :child [(merge
+             sijantiType
+             (when xmlns {:ns xmlns}))]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
 
+(def yksilointitieto {:tag :yksilointitieto :ns "yht"})
+
+(def alkuHetki {:tag :alkuHetki :ns "yht"})
+
 (def rakennuspaikka {:tag :Rakennuspaikka
-                     :child [{:tag :yksilointitieto :ns "yht"}
-                             {:tag :alkuHetki :ns "yht"}
+                     :child [yksilointitieto
+                             alkuHetki
                              {:tag :rakennuspaikanKiinteistotieto :ns "yht"
                               :child [{:tag :RakennuspaikanKiinteisto
                                        :child [{:tag :kiinteistotieto
@@ -203,15 +209,21 @@
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
 
-(def ymp-kasittelytieto [{:tag :KasittelyTieto
-                          :child [{:tag :muutosHetki :ns "yht"}
+(def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
                                   {:tag :asiatunnus :ns "yht"}
                                   {:tag :paivaysPvm :ns "yht"}
                                   {:tag :kasittelija :ns "yht"
                                    :child [{:tag :henkilo
                                             :child [{:tag :nimi
                                                      :child [{:tag :etunimi}
-                                                             {:tag :sukunimi}]}]}]}]}])
+                                                             {:tag :sukunimi}]}]}]}])
+
+(def ymp-osapuoli-children
+  [{:tag :nimi}
+   {:tag :postiosoite :child postiosoite-children-ns-yht}
+   {:tag :sahkopostiosoite}
+   {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
+   {:tag :liikeJaYhteisotunnus}])
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
@@ -285,15 +297,15 @@
 
 (defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
   (not-empty (for [attachment attachments
-                                    :when (and (:latestVersion attachment)
-                                            (not= "statement" (-> attachment :target :type))
-                                            (not= "verdict" (-> attachment :target :type))
-                                            (or (nil? target) (= target (:target attachment))))
-                                    :let [type (get-in attachment [:type :type-id])
+                   :when (and (:latestVersion attachment)
+                           (not= "statement" (-> attachment :target :type))
+                           (not= "verdict" (-> attachment :target :type))
+                           (or (nil? target) (= target (:target attachment))))
+                   :let [type (get-in attachment [:type :type-id])
                          attachment-title (str title ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
+                         file-id (get-in attachment [:latestVersion :fileId])
+                         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                         link (str begin-of-link attachment-file-name)]]
                {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name)})))
 
 (defn write-attachments [attachments output-dir]
