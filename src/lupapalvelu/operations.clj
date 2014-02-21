@@ -7,6 +7,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
+            [lupapalvelu.document.vesihuolto-schemas]
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.permit :as permit]))
@@ -101,6 +102,7 @@
              ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
           ["jatkoaika" :ya-jatkoaika]]]})
 
+
 (def ^:private operation-tree-for-P
   {:permit-type permit/P
    :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
@@ -110,7 +112,12 @@
    :tree ["Ymp\u00e4rist\u00f6luvat"
           [["Meluilmoitus" :meluilmoitus]
            ["Pima" :pima]
-           ["maa-ainesten_ottaminen" :maa-aineslupa]]]})
+           ["maa-ainesten_ottaminen" :maa-aineslupa]]
+          ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
+           [["vesijohdosta" :vvvl-vesijohdosta]
+            ["viemarista" :vvvl-viemarista]
+            ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
+            ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]]})
 
 (def ^:private operation-tree
   (vector
@@ -142,6 +149,8 @@
 
 
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
+
+(def ^:private common-vvvl-schemas ["hankkeen-kuvaus-minimum" "vesihuolto-kiinteisto" "hakija"])
 
 
 (def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
@@ -458,6 +467,30 @@
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []
                                    :add-operation-allowed true
+                                   :link-permit-required false}
+     :vvvl-vesijohdosta           {:schema "talousvedet"
+                                   :permit-type permit/VVVL
+                                   :required common-vvvl-schemas
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+     :vvvl-viemarista             {:schema "jatevedet"
+                                   :permit-type permit/VVVL
+                                   :required common-vvvl-schemas
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+     :vvvl-vesijohdosta-ja-viemarista {:schema "jatevedet"
+                                   :permit-type permit/VVVL
+                                   :required (conj common-vvvl-schemas "jatevedet")
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+     :vvvl-hulevesiviemarista    {:schema "hulevedet"
+                                   :permit-type permit/VVVL
+                                   :required common-vvvl-schemas
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
                                    :link-permit-required false}
 
      :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
