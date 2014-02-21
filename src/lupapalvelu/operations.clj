@@ -149,6 +149,8 @@
 
 (def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
+(def ^:private common-vvvl-schemas ["hankkeen-kuvaus-minimum" "vesihuolto-kiinteisto" "hakija"])
+
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus
                                            [:asemapiirros
