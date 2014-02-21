@@ -3,6 +3,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.core :refer :all]
@@ -20,6 +21,12 @@
         (get-in body [:yritys :yritysnimi :value])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str (:value first-name) \space (:value last-name)))))))
+
+(defn get-applicant-phone [_ app]
+  (let [owner (first (domain/get-auths-by-role app :owner))
+        user (user/get-user-by-id (:id owner))]
+    (:phone user)))
+  
 
 (defn get-application-operation [app]
   (first (:operations app)))
@@ -71,6 +78,7 @@
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :applicantPhone :fn get-applicant-phone}
                   {:field :neighbors :fn neighbors/normalize-neighbors}
                   {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}
