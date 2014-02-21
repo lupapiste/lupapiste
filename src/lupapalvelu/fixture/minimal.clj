@@ -347,7 +347,11 @@
                      :inforequest-enabled true
                      :new-application-enabled true
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"} {:municipality "753" :permitType "P"} {:municipality "753" :permitType "YI"} {:municipality "753" :permitType "YL"}]
+                     :scope [{:municipality "753" :permitType "R"}
+                             {:municipality "753" :permitType "P"}
+                             {:municipality "753" :permitType "YI"}
+                             {:municipality "753" :permitType "YL"}
+                             {:municipality "753" :permitType "VVVL"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
