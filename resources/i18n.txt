@@ -1,7 +1,0 @@
-operations.tree.kaukolampoputkien-sijoittaminen: Kaukolämpöputkien sijoittaminen
-operations.ya-sijoituslupa-kaukolampoputkien-sijoittaminen: Kaukolämpöputkien sijoittaminen
-operations.ya-sijoituslupa-kaukolampoputkien-sijoittaminen.desc: Rakenteiden sijoittaminen vaatii luvan, ilmoituksen tai sijoitussopimuksen kunnan kanssa. Huomaa, että sijoittaminen muulle kuin kunnan alueelle vaatii sopimista maanomistajan kanssa.
-ya-sijoituslupa-kaukolampoputkien-sijoittaminen._group_label: Hankkeen kuvaus
-operations.tree.maalampotyot: Maalämpöputkitöiden tekeminen
-operations.ya-katulupa-maalampotyot: Maalämpöputkitöiden tekeminen
-operations.ya-katulupa-maalampotyot.desc: Kunnan yleisen alueen käyttö vaatii luvan tai ilmoituksen.

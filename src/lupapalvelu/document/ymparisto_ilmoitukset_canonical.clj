@@ -6,18 +6,7 @@
 (defn- ilmoittaja [hakijat]
   ;(clojure.pprint/pprint hakijat)
   (assert (= 1 (count hakijat)))
-  (let [hakija (first hakijat)]
-
-    (if (= (-> hakija :data :_selected) "yritys")
-      (let [yritys (-> hakija :data :yritys)]
-        {:nimi (-> yritys :yritysnimi)
-         :postiosoite (get-simple-osoite (:osoite yritys))
-         :sahkoposti (-> yritys :yhteystiedot :email)
-         :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
-         :liikeJaYhteisoTunnus (:liikeJaYhteisoTunnus yritys)})
-      {:nimi "Yksityishenkil\u00f6"
-       :postiosoite (get-simple-osoite (-> hakija :data :henkilo :osoite))
-       :yhteyshenkilo (get-henkilo (-> hakija :data :henkilo))})))
+  (->ymp-osapuoli (first hakijat)))
 
 (defn meluilmoitus-canonical [application lang]
   (let [application (tools/unwrapped application)

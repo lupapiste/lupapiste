@@ -45,7 +45,7 @@
 (def ^:private yht-rakennus
   [{:tag :yksilointitieto :ns "yht"}
    {:tag :alkuHetki :ns "yht"}
-   mapping-common/sijantitieto
+   (mapping-common/sijaintitieto)
    {:tag :rakennuksenTiedot
     :child [{:tag :rakennustunnus :child rakennustunnus}
             {:tag :kayttotarkoitus}
@@ -168,7 +168,7 @@
                                                {:tag :rakennelmatieto
                                                 :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
-                                                                                  mapping-common/sijantitieto
+                                                                                  (mapping-common/sijaintitieto)
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
                              katselmustieto

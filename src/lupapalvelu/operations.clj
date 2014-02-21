@@ -14,8 +14,7 @@
 (def default-description "operations.tree.default-description")
 
 (def ^:private operation-tree-for-R
-    {:permit-type permit/R
-     :tree ["Rakentaminen ja purkaminen"
+  ["Rakentaminen ja purkaminen"
             [["Uuden rakennuksen rakentaminen"
                    [["Asuinrakennus" :asuinrakennus]
                     ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
@@ -44,11 +43,10 @@
                   ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
                   ["Suunnittelija" :suunnittelijan-nimeaminen]
                   ["Jatkoaika" :jatkoaika]
-                  ["Aloitusoikeus" :aloitusoikeus]]]})
+    ["Aloitusoikeus" :aloitusoikeus]]])
 
 (def ^:private operation-tree-for-environment-R
-  {:permit-type permit/R
-   :tree ["Elinympariston muuttaminen"
+  ["Elinympariston muuttaminen"
           [["Maisemaa muutava toimenpide"
             [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
              ["Puun kaataminen" :puun-kaataminen]
@@ -57,11 +55,10 @@
             [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
              ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
              ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-             ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]})
+      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
 
 (def ^:private operation-tree-for-YA
-  {:permit-type permit/YA
-   :tree ["yleisten-alueiden-luvat"
+  ["yleisten-alueiden-luvat"
           [["sijoituslupa"
             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
               [["vesi-ja-viemarijohtojen-sijoittaminen" :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen]
@@ -99,20 +96,28 @@
              ["terassit" :ya-kayttolupa-terassit]
              ["kioskit" :ya-kayttolupa-kioskit]
              ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
-          ["jatkoaika" :ya-jatkoaika]]]})
+   ["jatkoaika" :ya-jatkoaika]]])
 
 (def ^:private operation-tree-for-P
-  {:permit-type permit/P
-   :tree ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]})
+  ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis])
 
 (def ^:private operation-tree-for-Y
-  {:permit-type permit/YI
-   :tree ["Ymp\u00e4rist\u00f6luvat"
-          [["Meluilmoitus" :meluilmoitus]
-           ["Pima" :pima]
-           ["maa-ainesten_ottaminen" :maa-aineslupa]]]})
+  ["Ymp\u00e4rist\u00f6luvat"
+   [; permit/YI
+    ["Meluilmoitus" :meluilmoitus]
 
-(def ^:private operation-tree
+    ; at the moment permit/R
+    ["Pima" :pima]
+    ["maa-ainesten_ottaminen" :maa-aineslupa]
+
+    ; permit/YL
+    ["uusi-toiminta" :yl-uusi-toiminta]
+    ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+    ["toiminnan-muutos" :yl-toiminnan-muutos]
+    ["lupamaaraysten-tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
+    ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]]])
+
+(def operation-tree
   (vector
     operation-tree-for-R
     operation-tree-for-environment-R
@@ -120,16 +125,8 @@
     (when (env/feature? :ymparisto) operation-tree-for-Y)
     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
 
-(defn all-operations []
-  (keep :tree operation-tree))
-
-(defn operations-for-permit-type [permit-type]
-  (->> operation-tree
-    (filter (fn->> :permit-type (= permit-type))) (keep :tree)))
-
 ;; TODO: implement
-(defn municipality-operations [municipality] (all-operations))
-
+(defn municipality-operations [municipality] operation-tree)
 
 (def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
 
@@ -244,6 +241,23 @@
                                            :attachments []
                                            :add-operation-allowed false
                                            :link-permit-required true}})
+
+(def ^:private common-ymparistolupa-schemas ["maksaja"])
+(def ^:private ymparistolupa-attachments [[:muut :muu]]) ; TODO
+(def ^:private ymparistolupa-operation
+  {:schema "yl-hankkeen-kuvaus"
+   :permit-type permit/YL
+   :schema-data []
+   :required common-ymparistolupa-schemas
+   :attachments ymparistolupa-attachments
+   :link-permit-required false})
+
+(def yl-operations
+  {:yl-uusi-toiminta ymparistolupa-operation
+   :yl-olemassa-oleva-toiminta ymparistolupa-operation
+   :yl-toiminnan-muutos ymparistolupa-operation
+   :yl-lupamaaraysten-tarkistaminen ymparistolupa-operation
+   :yl-toiminnan-aloittamislupa ymparistolupa-operation})
 
 (def operations
   (merge
@@ -447,13 +461,13 @@
                                    :add-operation-allowed false
                                    :link-permit-required false}
      :pima                        {:schema "pima"
-                                   :permit-type permit/R
+                                   :permit-type permit/R ; TODO
                                    :required ["ymp-ilm-kesto-mini"]
                                    :attachments []
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "ottamismaara"
-                                   :permit-type permit/R
+                                   :permit-type permit/R ; TODO
                                    :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []
@@ -487,10 +501,27 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}}
-    ya-operations))
+    ya-operations
+    yl-operations))
 
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
+
+(defn operations-for-permit-type [permit-type]
+  (clojure.walk/postwalk
+    (fn [node]
+      (if (keyword? node)
+        (when (= (name permit-type) (permit-type-of-operation node))
+          ; Return operation keyword if permit type matches, or nil
+          node)
+        (if (string? node)
+          ; A step in a path is returned as is
+          node
+          ; Not a keyword or string, must be a sequence. Take only paths that have operations.
+          (let [filtered (filter identity node)]
+            (when (or (> (count filtered) 1) (sequential? (first filtered)))
+              filtered)))))
+    operation-tree))
 
 (doseq [[op {:keys [permit-type]}] operations]
   (when-not permit-type
@@ -511,4 +542,8 @@
   [{{:keys [permitType]} :data}]
   (if permitType
     (ok :operations (operations-for-permit-type permitType))
-    (ok :operations (all-operations))))
+    (ok :operations operation-tree)))
+
+
+
+
