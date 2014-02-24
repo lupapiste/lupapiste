@@ -108,6 +108,8 @@
 
     ; at the moment permit/R
     ["Pima" :pima]
+
+    ; permit/MAL
     ["maa-ainesten_ottaminen" :maa-aineslupa]
 
     ; permit/YL
@@ -467,7 +469,7 @@
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "ottamismaara"
-                                   :permit-type permit/R ; TODO
+                                   :permit-type permit/MAL
                                    :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []

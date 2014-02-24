@@ -6,4 +6,6 @@
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
         kuvaus    nil]
-    {}))
+    {:MaaAinesluvat
+     {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
+      :maaAineslupaAsiatieto {}}}))

@@ -28,17 +28,17 @@
   [application lang _ krysp-version output-dir begin-of-link]
   (let [
 ;        krysp-polku-lausuntoon [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :lausuntotieto]
-;        canonical-without-attachments  (ymparistolupa-canonical/ymparistolupa-canonical application lang)
+        canonical-without-attachments  (maa-aines-canonical/maa-aines-canonical application lang)
 ;        statement-given-ids (mapping-common/statements-ids-with-status
 ;                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments nil;(mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments nil; (mapping-common/get-attachments-as-canonical application begin-of-link)
         ;canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
-        canonical nil #_(assoc-in
+        canonical canonical-without-attachments #_(assoc-in
                     canonical-with-statement-attachments
                     [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
                     attachments)
-        xml nil;(element-to-xml canonical ymparistolupa_to_krysp)
+        xml (element-to-xml canonical maa-aines_to_krysp)
         ]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
