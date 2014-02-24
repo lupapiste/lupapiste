@@ -98,7 +98,7 @@
 
     (facts "sijainti"
       (fact "osoite"
-        (let [sijainti (-> maa-aineslupa :sijaintitieto first :Sijainti) => truthy
+        (let [sijainti (-> maa-aineslupa :sijaintitieto :Sijainti) => truthy
              osoite (:osoite sijainti)]
 
           (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
