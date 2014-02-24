@@ -13,11 +13,44 @@
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    {:tag :lausuntotieto :child [mapping-common/lausunto]}
 
-   ; TODO
+   {:tag :hakemustieto
+    :child [{:tag :Hakemus
+             :child [{:tag :hakija :child mapping-common/henkilo-child-ns-yht}
+                     {:tag :omistaja :child mapping-common/henkilo-child-ns-yht} ; property owner
+                     {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht}
+                     {:tag :alueenKiinteistonSijainti :child [mapping-common/sijantiType]}
+                     {:tag :ottamismaara
+                      :child [{:tag :kokonaismaara} ; m^3
+                              {:tag :vuotuinenOtto} ; m^3
+                              {:tag :ottamisaika} ; vuotta
+                              ]}
+                     {:tag :paatoksenToimittaminen} ; string enumeration: Noudetaan, Postitetaan, ei tiedossa
+                     {:tag :viranomaismaksujenSuorittaja :child mapping-common/henkilo-child-ns-yht}
+                     {:tag :ottamissuunnitelmatieto
+                      :child [{:tag :Ottamissuunnitelma
+                               :child [mapping-common/yksilointitieto
+                                       mapping-common/alkuHetki
+                                       {:tag :ottamissuunnitelmanLaatija
+                                        :child (conj mapping-common/henkilo-child-ns-yht {:tag :ammatti} {:tag :koulutus})}
+                                       (mapping-common/sijaintitieto "yht")
+                                       {:tag :selvitys :child [{:tag :toimenpiteet} {:tag :tutkimukset} {:tag :ainesLaatu} {:tag :ainesMaara}]}
+                                       {:tag :luonnonolot :child [{:tag :maisemakuva} {:tag :kasvillisuusJaElaimisto} {:tag :kaavoitustilanne}]}
+                                       ;{:tag :toimintaAlueenKuvaus :child mapping-common/liite-children}
+                                       ;{:tag :ottamisenJarjestaminen :child mapping-common/liite-children}
+                                       {:tag :pohjavesiolot, :child [{:tag :luokitus} {:tag :suojavyohykkeet}]}
+                                       {:tag :vedenottamot}
+                                       ;{:tag :ymparistoHaittojenVahentaminen :child mapping-common/liite-children}
+                                       ;{:tag :alueenJalkihoito :child mapping-common/liite-children}
+                                       {:tag :vakuus :child [{:tag :kylla} ; string enumeration Rahaa, Pankkitakaus, ei tiedossa
+                                                             {:tag :ei}]}
+                                       ;{:tag :valtakirja :child mapping-common/liite-children}
+                                       {:tag :toimenpidealue :child [mapping-common/sijantiType]}
+                                       ]}]}]}]}
 
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
+   (mapping-common/sijaintitieto "yht")
+   {:tag :koontiKentta}
 
-   ])
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}])
 
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat
