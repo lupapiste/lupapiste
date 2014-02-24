@@ -31,8 +31,12 @@
           </div>
           <!-- Applicant: -->
           <div>
-            <p data-bind="ltext: 'application.applicant'"></p>
-            <span data-bind="text: applicant" data-test-id="inforequest-application-applicant" class="application_summary_text"></span>
+            <p data-bind="ltext: 'application.asker'"></p>
+            <span class="application_summary_text">
+              <span data-bind="text: applicant" data-test-id="inforequest-application-applicant" ></span> <br>
+              <span data-bind="ltext: 'phone.short'"></span>
+              <span data-bind="text: applicantPhone"></span>
+            </span>
           </div>
           <!-- State: -->
           <div data-bind="if: state">
@@ -129,7 +133,7 @@
               <!-- ko if: $data.latestVersion && latestVersion.filename -->
               <tr>
                 <td>
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
+                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId()}"></a><br/>
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                 </td>
