@@ -25,6 +25,11 @@
         :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :KasittelyTieto)
         :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
         :lausuntotieto (canonical-common/get-statements (:statements application))
-        :hakemustieto {:Hakemus {:hakija (->osapuoli hakija)}}
+        :hakemustieto
+        {:Hakemus
+         {:hakija (->osapuoli hakija)
+          :alueenKiinteistonSijainti (first (canonical-common/get-sijaintitieto application))
+          }
+         }
         :sijaintitieto (first (canonical-common/get-sijaintitieto application))
         }}}}))

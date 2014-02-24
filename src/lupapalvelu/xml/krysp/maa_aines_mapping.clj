@@ -7,8 +7,8 @@
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 (def maaAineslupaAsia
-  [{:tag :yksilointitieto :ns "yht"}
-   {:tag :alkuHetki :ns "yht"}
+  [mapping-common/yksilointitieto
+   mapping-common/alkuHetki
    {:tag :kasittelytietotieto :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    {:tag :lausuntotieto :child [mapping-common/lausunto]}
@@ -18,7 +18,7 @@
              :child [{:tag :hakija :child mapping-common/henkilo-child-ns-yht}
                      {:tag :omistaja :child mapping-common/henkilo-child-ns-yht} ; property owner
                      {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht}
-                     {:tag :alueenKiinteistonSijainti :child [mapping-common/sijantiType]}
+                     {:tag :alueenKiinteistonSijainti :child [(assoc mapping-common/sijantiType :ns "yht")]}
                      {:tag :ottamismaara
                       :child [{:tag :kokonaismaara} ; m^3
                               {:tag :vuotuinenOtto} ; m^3
