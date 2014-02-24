@@ -12,6 +12,10 @@
       (assoc (canonical-common/get-henkilo henkilo)
         :osoite (canonical-common/get-simple-osoite (:osoite henkilo))))))
 
+(defn sijainti [application]
+  (let [sijaintitieto (first (canonical-common/get-sijaintitieto application))]
+    (assoc-in sijaintitieto [:Sijainti :osoite :yksilointitieto] (:propertyId application))))
+
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
         hakija    (-> documents :hakija first)
@@ -28,8 +32,8 @@
         :hakemustieto
         {:Hakemus
          {:hakija (->osapuoli hakija)
-          :alueenKiinteistonSijainti (first (canonical-common/get-sijaintitieto application))
+          :alueenKiinteistonSijainti (sijainti application)
           }
          }
-        :sijaintitieto (first (canonical-common/get-sijaintitieto application))
+        :sijaintitieto (sijainti application)
         }}}}))

@@ -34,6 +34,7 @@
           osoite (xml/select1 sijainti :osoite)]
 
         (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
+        (xml/get-text sijainti [:yksilointitieto]) => (:propertyId application)
         (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274")
 
     ))
