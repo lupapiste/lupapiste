@@ -6,6 +6,12 @@
             [lupapalvelu.document.canonical-test-common :refer :all]
             [lupapalvelu.document.ymparisto-schemas]))
 
+(def schema-version 1)
+
+(def maksaja (assoc henkilohakija :schema-info {:name "maksaja" :type "party" :version schema-version}))
+
+(fact "Meta test: maksaja" maksaja => valid-against-current-schema?)
+
 (def application {:id "LP-638-2014-00001"
                   :attachments []
                   :auth [{:lastName "Borga" :firstName "Pekka" :username "pekka" :type "owner" :role "owner" :id "777777777777777777000033"}]
@@ -13,7 +19,7 @@
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
                   :documents [yrityshakija
-                              (assoc henkilohakija :schema-info {:name "maksaja" :type "party"})]
+                              maksaja]
                   :drawings drawings
                   :infoRequest false
                   :location {:x 428195.77099609 :y 6686701.3931274}
@@ -27,7 +33,7 @@
                   :permitType "MAL"
                   :permitSubtype nil
                   :propertyId "63844900010004"
-                  :schema-version 1
+                  :schema-version schema-version
                   :sent nil
                   :started nil
                   :state "submitted"
