@@ -12,19 +12,18 @@
                   :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
-                  :documents [henkilohakija
-                              yrityshakija]
+                  :documents [yrityshakija]
                   :drawings drawings
                   :infoRequest false
                   :location {:x 428195.77099609 :y 6686701.3931274}
                   :neighbors {}
                   :modified 1391415696674
                   :municipality "638"
-                  :operations [{:id "abba1" :name "yl-uusi-toiminta" :created 1391415025497}]
+                  :operations [{:id "abba1" :name "maa-aineslupa" :created 1391415025497}]
                   :openInfoRequest false
                   :opened 1391415025497
                   :organization "638-R"
-                  :permitType "YL"
+                  :permitType "MAL"
                   :permitSubtype nil
                   :propertyId "63844900010004"
                   :schema-version 1
@@ -62,39 +61,23 @@
         varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
         lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
-        ;hakijat (:hakija maa-aineslupa) => seq
+        hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq
         ]
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
 
-    (comment (facts "hakijat"
-             (count hakijat) => 2
+    (fact "hakija"
+      (:hakija hakemus)
+      =>
+      {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
+       :puhelin "060222155",
+       :sahkopostiosoite "tew@gjr.fi"
+       :osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                                      :postitoimipaikannimi "kuuva",
+                                      :postinumero "43640"}})
 
-             (let [hakija (first hakijat)
-                   postiosoite (:postiosoite hakija) => truthy
-                   osoitenimi (:osoitenimi postiosoite) => truthy
-                   yhteyshenkilo (:yhteyshenkilo hakija) => truthy]
-
-               (:nimi hakija) => "Yksityishenkil\u00f6"
-               (:liikeJaYhteisotunnus hakija) => nil
-               (:teksti osoitenimi) => "Murskaajankatu 5"
-               (:postinumero postiosoite) => "36570"
-               (:postitoimipaikannimi postiosoite) => "Kaivanto"
-               (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
-               (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
-               (:puhelin yhteyshenkilo) => "121212")
-
-             (second hakijat) => {:nimi "Yrtti Oy",
-                                  :postiosoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                                                :postitoimipaikannimi "kuuva",
-                                                :postinumero "43640"},
-                                  :yhteyshenkilo {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-                                                  :puhelin "060222155",
-                                                  :sahkopostiosoite "tew@gjr.fi"},
-                                  :liikeJaYhteisotunnus "1060155-5"}))
-
-;(clojure.pprint/pprint maa-aineslupa)
+;(clojure.pprint/pprint hakemus)
 
     (facts "sijainti"
       (fact "osoite"

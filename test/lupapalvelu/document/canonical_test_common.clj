@@ -59,7 +59,6 @@
                     :subtype "hakija",
                     :name "hakija",
                     :removable true,
-
                     :repeating true,
                     :version 1,
                     :type "party",

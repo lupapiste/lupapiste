@@ -27,11 +27,8 @@
 
     (xml/get-text lp-xml [:luvanTunnistetiedot :LupaTunnus :tunnus]) => (:id application)
 
-    #_(let [hakijat (xml/select lp-xml [:hakija])]
-       (count hakijat) => 2
-       (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
-       (xml/get-text (second hakijat) [:liikeJaYhteisotunnus]) => "1060155-5")
-
+    (let [hakija (xml/select1 lp-xml [:hakija])]
+      (xml/get-text hakija [:puhelin]) => "060222155")
 
     (let [sijainti (xml/select1 lp-xml [:sijaintitieto :Sijainti])
           osoite (xml/select1 sijainti :osoite)]
