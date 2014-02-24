@@ -25,8 +25,6 @@
 
     (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
 
-    (xml/get-text lp-xml [:luvanTunnistetiedot :LupaTunnus :tunnus]) => (:id application)
-
     (let [hakija (xml/select1 lp-xml [:hakija])]
       (xml/get-text hakija [:puhelin]) => "060222155")
 
