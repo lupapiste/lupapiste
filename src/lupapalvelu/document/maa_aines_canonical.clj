@@ -14,4 +14,6 @@
         :alkuHetki (util/to-xml-datetime (:created application))
         :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :KasittelyTieto)
         :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+
+        :sijaintitieto (canonical-common/get-sijaintitieto application)
         :lausuntotieto (canonical-common/get-statements (:statements application))}}}}))
