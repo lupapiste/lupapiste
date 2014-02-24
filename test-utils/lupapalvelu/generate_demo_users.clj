@@ -1,6 +1,8 @@
 (ns lupapalvelu.generate-demo-users
   (require [lupapalvelu.mongo :as mongo]
-           [lupapalvelu.user-api :as user-api]))
+           [lupapalvelu.user-api :as user-api]
+           [monger.operators :refer :all]
+           [slingshot.slingshot :refer [try+]]))
 
 
 ;luo testikayttajia
@@ -359,18 +361,18 @@
 "989"
 "992"])
 
-(defn generate-ymp []
-  (doseq [code kuntakoodit]
-    (let [org-id (str code "-YMP")
-          email  (str "ymp-admin@" code ".fi")
+(defn generate-ymp! []
+  (doseq [kuntano kuntakoodit]
+    (let [org-id (str kuntano "-YMP")
+          email  (str "ymp-admin@" kuntano ".fi")
           org {:_id org-id
                :inforequest-enabled true
                :new-application-enabled true
-               :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." code)) " ymp\u00e4rist\u00f6toimi")}
-                     :scope [{:municipality code :permitType "YI"}
-                             {:municipality code :permitType "YL"}
-                             {:municipality code :permitType "VVVL"}
-                             {:municipality code :permitType "MAL"}]
+               :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")}
+                     :scope [{:municipality kuntano :permitType "YI"}
+                             {:municipality kuntano :permitType "YL"}
+                             {:municipality kuntano :permitType "VVVL"}
+                             {:municipality kuntano :permitType "MAL"}]
                      :links []
                      :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
                              :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
@@ -384,11 +386,27 @@
          :username email
          :role "authorityAdmin"
          :firstName (str "Ymp\u00e4rist\u00f6toimi")
-         :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " code)
+         :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " kuntano)
          :enabled true
          :organization org-id
          :password "koulutus"}
         :send-email false)
       (generate-users-for-organization {:id org-id}))))
 
-
+(defn generate-applicants! []
+  (doseq [kuntano kuntakoodit
+          i (range 1 (inc 25))]
+    (let [full-email (str "hakija-" i "@" kuntano ".fi")]
+      (try+
+        (let [user (user-api/create-new-user nil
+                     {:email full-email
+                      :username full-email
+                      :role "applicant"
+                      :firstName (str "Koulutus " kuntano)
+                      :lastName (str "Hakija " i)
+                      :enabled false
+                      :password "koulutus"}
+                     :send-email false)]
+          (mongo/update-by-id :users (:id user) {$set {:enabled true}}))
+        (catch [:lupapalvelu.core/type :lupapalvelu.core/fail] {:keys [text desc] :as all}
+          (println text (or desc "")))))))
