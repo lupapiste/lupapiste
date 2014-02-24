@@ -22,10 +22,11 @@ var gis = (function() {
       theme: "/theme/default/style.css",
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
-      // VANHAT
+
 //      maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
 //      resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
-      // UUDET
+//      maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
+
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
       resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
 
@@ -65,20 +66,22 @@ var gis = (function() {
           name: "Taustakartta",
           url: wmtsServer,
           isBaseLayer: false,
-          requestEncoding: "KVP",     //TESTI
+          requestEncoding: "KVP",
           transitionEffect: "resize",
           layer: "taustakartta",
           matrixSet: "ETRS-TM35FIN",
           format: "image/png",
           style: "default",
           opacity: 1.0,
-          projection: new OpenLayers.Projection("EPSG:3067"),
-          // VANHA
+
 //          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
-//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
-          // UUSI
+//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
+//          maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
+
           resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+
+          projection: new OpenLayers.Projection("EPSG:3067")
       });
     var kiinteistorajat = new OpenLayers.Layer.WMTS({
 
@@ -87,24 +90,25 @@ var gis = (function() {
           name: "Kiinteistojaotus",
           url: wmtsServer,
           isBaseLayer: false,
-          requestEncoding: "KVP",     //TESTI
+          requestEncoding: "KVP",
 //          transitionEffect: "resize",
           layer: "kiinteistojaotus",
           matrixSet: "ETRS-TM35FIN",
           format: "image/png",
           style: "default",
           opacity: 1.0,
-          projection: new OpenLayers.Projection("EPSG:3067"),
-          // Ota nama pois käytöstä?
-          // VANHA
+
 //          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
-//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
-          // UUSI
+//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
+
 //          resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
-          // TESTI
+//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+
           resolutions: [4, 2, 1, 0.5],
-          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+//          maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
+
+          projection: new OpenLayers.Projection("EPSG:3067")
       });
     var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
 
@@ -113,24 +117,25 @@ var gis = (function() {
           name: "Kiinteistotunnukset",
           url: wmtsServer,
           isBaseLayer: false,
-          requestEncoding: "KVP",     //TESTI
+          requestEncoding: "KVP",
 //          transitionEffect: "resize",
           layer: "kiinteistotunnukset",
           matrixSet: "ETRS-TM35FIN",
           format: "image/png",
           style: "default",
           opacity: 1.0,
-          projection: new OpenLayers.Projection("EPSG:3067"),
-          // Ota nama pois käytöstä?
-          // VANHA
+
 //          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
 //          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
-          // UUSI
+
 //          resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
           // TESTI
           resolutions: [4, 2, 1, 0.5],
-          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+//          maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
+
+          projection: new OpenLayers.Projection("EPSG:3067")
       });
     // <- UUSI
 
