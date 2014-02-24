@@ -368,6 +368,7 @@
                                               :meluilmoitus [[:kartat :kartta-melun-ja-tarinan-leviamisesta]
                                                              [:muut :muu]]
                                               :yl-uusi-toiminta [[:muut :muu]]
+                                              :maa-aineslupa [[:muut :muu]]
                                               }
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "dev_sipoo"}

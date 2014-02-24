@@ -6,6 +6,19 @@
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
+(def maaAineslupaAsia
+  [{:tag :yksilointitieto :ns "yht"}
+   {:tag :alkuHetki :ns "yht"}
+   {:tag :kasittelytietotieto :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
+   {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
+   {:tag :lausuntotieto :child [mapping-common/lausunto]}
+
+   ; TODO
+
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
+
+   ])
+
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat
    :ns "ymm"
@@ -20,26 +33,24 @@
           :xmlns:xlink "http://www.w3.org/1999/xlink"
           :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-           {:tag :maaAineslupaAsiatieto :child []}]})
+           {:tag :maaAineslupaAsiatieto :child [{:tag :MaaAineslupaAsia :child maaAineslupaAsia}]}]})
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on MAL applications."
   [application lang _ krysp-version output-dir begin-of-link]
-  (let [
-;        krysp-polku-lausuntoon [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :lausuntotieto]
+  (let [krysp-polku-lausuntoon [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto]
         canonical-without-attachments  (maa-aines-canonical/maa-aines-canonical application lang)
-;        statement-given-ids (mapping-common/statements-ids-with-status
-;                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
-        statement-attachments nil;(mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments nil; (mapping-common/get-attachments-as-canonical application begin-of-link)
-        ;canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
-        canonical canonical-without-attachments #_(assoc-in
+        statement-given-ids (mapping-common/statements-ids-with-status
+                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
+        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical (assoc-in
                     canonical-with-statement-attachments
-                    [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
+                    [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :liitetieto]
                     attachments)
-        xml (element-to-xml canonical maa-aines_to_krysp)
-        ]
+        xml (element-to-xml canonical maa-aines_to_krysp)]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 

@@ -245,7 +245,7 @@
                                            :link-permit-required true}})
 
 (def ^:private common-ymparistolupa-schemas ["maksaja"])
-(def ^:private ymparistolupa-attachments [[:muut :muu]]) ; TODO
+(def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
    :permit-type permit/YL
