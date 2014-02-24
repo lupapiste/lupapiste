@@ -252,6 +252,7 @@
    :schema-data []
    :required common-ymparistolupa-schemas
    :attachments ymparistolupa-attachments
+   :add-operation-allowed false
    :link-permit-required false})
 
 (def yl-operations
@@ -473,7 +474,7 @@
                                    :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                               "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                    :attachments []
-                                   :add-operation-allowed true
+                                   :add-operation-allowed false
                                    :link-permit-required false}
 
      :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
