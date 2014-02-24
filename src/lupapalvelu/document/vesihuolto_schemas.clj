@@ -40,8 +40,7 @@
     :body [{:name "hulevedet" :type :select
             :body [{:name "Johdetaan muualle, minne"}
                    {:name "Johdetaan rajaojaan tai muuhun ojaan"}
-                   {:name "imeytetään maaperään"}
-                   ]}]}
+                   {:name "imeytetään maaperään"}]}]}
   {:info {:name "talousvedet"
           :approvable false
            :order 4}
@@ -49,14 +48,12 @@
            :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
                   {:name "Kiinteistön rengaskaivosta"}
                   {:name "Kiinteistön porakaivosta"}
-                  {:name "ei tiedossa"}
-                  ]}
+                  {:name "ei tiedossa"}]}
           {:name "johdatus" :type :select
            :body [{:name "kannetaan kaivosta tai vesistöstä"}
                   {:name "pumpataan kaivosta tai vesistöstä"}
                   {:name "johdetaan paineellisena vesijohtoa pitkin rakennukseen"}
-                  {:name "ei tiedossa"}
-                  ]}
+                  {:name "ei tiedossa"}]}
           {:name "riittavyys" :type :select
            :body [{:name "vesi ajoittain vähissä"}
                   {:name "vesi riittää talouden tarpeisiin"}

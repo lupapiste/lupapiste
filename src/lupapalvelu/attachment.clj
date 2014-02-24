@@ -216,6 +216,7 @@
       :P  (attachment-types-R)
       :YI attachment-types-YI
       :YL attachment-types-YL
+      :VVVL attachment-types-YL
       (fail! "unsupported permit-type"))))
 
 (defn get-attachment-types-for-application

@@ -493,13 +493,13 @@
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
-     :vvvl-vesijohdosta-ja-viemarista {:schema "jatevedet"
+     :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
                                    :permit-type permit/VVVL
                                    :required (conj common-vvvl-schemas "jatevedet")
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
-     :vvvl-hulevesiviemarista    {:schema "jatevedet"
+     :vvvl-hulevesiviemarista    {:schema "hulevedet"
                                    :permit-type permit/VVVL
                                    :required common-vvvl-schemas
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
