@@ -30,8 +30,8 @@
     (fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo" :version "2.1.2"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "sipoo" :version "2.1.3"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.3"}}})
 
     (fact "2.1.2: xml exist" xml_212 => truthy)
     (fact "2.1.3: xml exist" xml_213 => truthy)

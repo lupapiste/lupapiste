@@ -20,8 +20,8 @@
     ;(clojure.pprint/pprint canonical)
     ;(print (indent-str xml))
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:YI {:ftpUser "sipoo" :version "2.1.1"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:YI {:ftpUser "sipoo" :version "2.1.1"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:YI {:ftpUser "dev_sipoo" :version "2.1.1"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:YI {:ftpUser "dev_sipoo" :version "2.1.1"}}})
 
 
     (validator/validate (indent-str xml) (:permitType application) "2.1.1")
