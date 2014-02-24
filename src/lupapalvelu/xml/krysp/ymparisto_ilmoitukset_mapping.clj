@@ -26,7 +26,7 @@
                              {:tag :alkuHetki :ns "yht"}
                              {:tag :kasittelytietotieto
                               :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
-                             {:tag :luvanTunnisteTiedot
+                             {:tag :luvanTunnistetiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto
                               :child [mapping-common/lausunto]}
