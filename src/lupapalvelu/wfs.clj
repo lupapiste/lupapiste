@@ -297,16 +297,52 @@
 ;; Raster images:
 ;;
 (defn raster-images [request service]
-  (let [layer (get-in request [:params "LAYERS"])
-        {:keys [host path]} (env/value :geoserver :wms)
-        wms-url (str host path)]
+;  (println "\n raster-images, service: " service ", request params: ")
+;  (clojure.pprint/pprint (:params request))
+;  (println "\n")
+;
+;  (println "\n raster-images, service: " service ", request query-params: ")
+;  (clojure.pprint/pprint (:query-params request))
+;  (println "\n")
+;
+;  (println "\n raster-images, service: " service ", request headers: ")
+;  (clojure.pprint/pprint (:headers request))
+;  (println "\n")
+
+  (let [layer (get-in request [:params :LAYER])
+;        _ (do
+;            (println "\n raster-images, layer: ")
+;            (clojure.pprint/pprint layer)
+;            (println "\n")
+;            )
+        ]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
+              {:query-params (:params request)
+               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+               :basic-auth (:raster auth)
+               :as :stream})
+      "wms" (let [{:keys [host path]} (env/value :geoserver :wms)
+                  wms-url (str host path)]
+              (http/get wms-url
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                 :basic-auth (:raster auth)
-                 :as :stream})
-      "wms" (http/get wms-url
-                {:query-params (:params request)
-                 :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                 :as :stream}))))
+                 :as :stream}))
+      "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
+                   url-part (case layer
+                              "taustakartta" "maasto"
+                              "kiinteistojaotus" "kiinteisto"
+                              "kiinteistotunnukset" "kiinteisto")
+;                   _ (println "\n raster-images, url-part: " url-part "\n")
+                   final-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")
+;                   _ (println "\n raster-images, final-url: " final-url "\n")
+;                   _ (println "\n raster-images, accept-encoding: " (get-in request [:headers "accept-encoding"]) "\n")
+                   ]
+
+               (http/get final-url
+                 {:query-params (:params request)
+                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                  :basic-auth [username password]
+                  :as :stream})))))
+
+

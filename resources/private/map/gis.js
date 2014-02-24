@@ -22,8 +22,13 @@ var gis = (function() {
       theme: "/theme/default/style.css",
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
-      maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
-      resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
+      // VANHAT
+//      maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
+//      resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
+      // UUDET
+      maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+      resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+
       controls: [ new OpenLayers.Control.Zoom(),
                   new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
@@ -31,14 +36,103 @@ var gis = (function() {
     // Layers
 
     // use the old proxy server to wms
-    var wmsServer = LUPAPISTE.config.maps.proxyserver;
+    var wmtsServer = LUPAPISTE.config.maps.proxyserver;
     if (LUPAPISTE.config.maps.proxyserver.indexOf(",") > -1) {
-      wmsServer = LUPAPISTE.config.maps.proxyserver.split(",");
+      wmtsServer = LUPAPISTE.config.maps.proxyserver.split(",");
     }
     var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
-    var taustakartta = new OpenLayers.Layer.WMS("taustakartta", wmsServer, {layers: "taustakartta", format: "image/png"}, {isBaseLayer: false});
-    var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
-    var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
+
+    // VANHAT
+//    var taustakartta = new OpenLayers.Layer.WMS(
+//        "taustakartta",
+//        wmtsServer,
+//        {layers: "taustakartta", format: "image/png"},
+//        {isBaseLayer: false});
+//    var kiinteistorajat = new OpenLayers.Layer.WMS(
+//        "kiinteistorajat",
+//        wmtsServer,
+//        {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true},
+//        {isBaseLayer: false, maxScale: 1, minScale: 20000}
+//        );
+//    var kiinteistotunnukset = new OpenLayers.Layer.WMS(
+//        "kiinteistotunnukset",
+//        wmtsServer,
+//        {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, //"transparent: true" ei pakollinen
+//        {isBaseLayer: false, maxScale: 1, minScale: 10000});
+
+    // UUDET
+    var taustakartta = new OpenLayers.Layer.WMTS({
+          name: "Taustakartta",
+          url: wmtsServer,
+          isBaseLayer: false,
+          requestEncoding: "KVP",     //TESTI
+          transitionEffect: "resize",
+          layer: "taustakartta",
+          matrixSet: "ETRS-TM35FIN",
+          format: "image/png",
+          style: "default",
+          opacity: 1.0,
+          projection: new OpenLayers.Projection("EPSG:3067"),
+          // VANHA
+//          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
+//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+          // UUSI
+          resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+      });
+    var kiinteistorajat = new OpenLayers.Layer.WMTS({
+
+//          maxScale: 1, minScale: 20000,  // vanhasta
+
+          name: "Kiinteistojaotus",
+          url: wmtsServer,
+          isBaseLayer: false,
+          requestEncoding: "KVP",     //TESTI
+//          transitionEffect: "resize",
+          layer: "kiinteistojaotus",
+          matrixSet: "ETRS-TM35FIN",
+          format: "image/png",
+          style: "default",
+          opacity: 1.0,
+          projection: new OpenLayers.Projection("EPSG:3067"),
+          // Ota nama pois käytöstä?
+          // VANHA
+//          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
+//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+          // UUSI
+//          resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+          // TESTI
+          resolutions: [4, 2, 1, 0.5],
+          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+      });
+    var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
+
+//          maxScale: 1, minScale: 10000,  // vanhasta
+
+          name: "Kiinteistotunnukset",
+          url: wmtsServer,
+          isBaseLayer: false,
+          requestEncoding: "KVP",     //TESTI
+//          transitionEffect: "resize",
+          layer: "kiinteistotunnukset",
+          matrixSet: "ETRS-TM35FIN",
+          format: "image/png",
+          style: "default",
+          opacity: 1.0,
+          projection: new OpenLayers.Projection("EPSG:3067"),
+          // Ota nama pois käytöstä?
+          // VANHA
+//          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
+//          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+          // UUSI
+//          resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+          // TESTI
+          resolutions: [4, 2, 1, 0.5],
+          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000)
+      });
+    // <- UUSI
 
     self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
 
