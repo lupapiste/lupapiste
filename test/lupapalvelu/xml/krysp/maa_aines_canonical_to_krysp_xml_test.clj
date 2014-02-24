@@ -25,8 +25,12 @@
 
     (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
 
-    (let [hakija (xml/select1 lp-xml [:hakija])]
-      (xml/get-text hakija [:puhelin]) => "060222155")
+    (let [hakija (xml/select1 lp-xml [:hakija])
+          maksaja (xml/select1 lp-xml [:viranomaismaksujenSuorittaja])]
+      (xml/get-text hakija [:puhelin]) => "060222155"
+      (xml/get-text maksaja [:puhelin]) => "121212"
+      (xml/get-text maksaja [:henkilotunnus]) => "210281-9988")
+
 
     (let [sijainti (xml/select1 lp-xml [:sijaintitieto :Sijainti])
           osoite (xml/select1 sijainti :osoite)]

@@ -12,7 +12,8 @@
                   :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
-                  :documents [yrityshakija]
+                  :documents [yrityshakija
+                              (assoc henkilohakija :schema-info {:name "maksaja" :type "party"})]
                   :drawings drawings
                   :infoRequest false
                   :location {:x 428195.77099609 :y 6686701.3931274}
@@ -77,7 +78,19 @@
                                       :postitoimipaikannimi "kuuva",
                                       :postinumero "43640"}})
 
-;(clojure.pprint/pprint hakemus)
+    ;(clojure.pprint/pprint hakemus)
+
+    (fact "maksaja"
+      (:viranomaismaksujenSuorittaja hakemus)
+      =>
+      {:nimi {:sukunimi "Borga", :etunimi "Pekka"},
+       :puhelin "121212",
+       :sahkopostiosoite "pekka.borga@porvoo.fi"
+       :osoite {:osoitenimi {:teksti "Murskaajankatu 5"},
+                                      :postitoimipaikannimi "Kaivanto",
+                                      :postinumero "36570"}
+       :henkilotunnus "210281-9988"}
+      )
 
     (facts "sijainti"
 
