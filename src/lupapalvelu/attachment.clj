@@ -216,7 +216,8 @@
       :P  (attachment-types-R)
       :YI attachment-types-YI
       :YL attachment-types-YL
-      :MAL (attachment-types-R) ; TODO
+      :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
+      :MAL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
       (fail! "unsupported permit-type"))))
 
 (defn get-attachment-types-for-application
