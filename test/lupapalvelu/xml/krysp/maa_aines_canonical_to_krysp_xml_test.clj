@@ -3,14 +3,12 @@
             [lupapalvelu.document.maa-aines-canonical :refer [maa-aines-canonical]]
             [lupapalvelu.document.maa-aines-canonical-test :refer [application]]
             [lupapalvelu.xml.krysp.maa-aines-mapping :refer [maa-aines_to_krysp]]
-            ;[lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
-            ;[sade.util :as util]
             [sade.common-reader :as cr]
             ))
 
@@ -24,6 +22,9 @@
     ;(println xml-s)
 
     (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
+
+    (fact "kuvaus in koontiKentta element"
+      (xml/get-text lp-xml [:koontiKentta]) => "Hankkeen synopsis")
 
     (let [hakija (xml/select1 lp-xml [:hakija])
           maksaja (xml/select1 lp-xml [:viranomaismaksujenSuorittaja])]

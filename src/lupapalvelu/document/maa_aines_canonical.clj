@@ -19,7 +19,8 @@
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
         hakija    (-> documents :hakija first)
-        maksaja    (-> documents :maksaja first)]
+        maksaja   (-> documents :maksaja first)
+        kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)]
     {:MaaAinesluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :maaAineslupaAsiatieto
@@ -41,4 +42,5 @@
           }
          }
         :sijaintitieto (sijainti application)
+        :koontiKentta kuvaus
         }}}}))

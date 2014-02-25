@@ -12,13 +12,19 @@
 
 (fact "Meta test: maksaja" maksaja => valid-against-current-schema?)
 
+(def maa-aineslupa-kuvaus {:schema-info {:name "maa-aineslupa-kuvaus" :version schema-version}
+                           :data {:kuvaus {:value "Hankkeen synopsis"}}})
+
+(fact "Meta test: maa-aineslupa-kuvaus" maa-aineslupa-kuvaus => valid-against-current-schema?)
+
 (def application {:id "LP-638-2014-00001"
                   :attachments []
                   :auth [{:lastName "Borga" :firstName "Pekka" :username "pekka" :type "owner" :role "owner" :id "777777777777777777000033"}]
                   :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
-                  :documents [yrityshakija
+                  :documents [maa-aineslupa-kuvaus
+                              yrityshakija
                               maksaja]
                   :drawings drawings
                   :infoRequest false
@@ -70,9 +76,13 @@
 
         hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq
         ]
+    ;(clojure.pprint/pprint hakemus)
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
+
+    (fact "kuvaus"
+      (:koontiKentta maa-aineslupa) => "Hankkeen synopsis")
 
     (fact "hakija"
       (:hakija hakemus)
@@ -84,8 +94,6 @@
                                       :postitoimipaikannimi "kuuva",
                                       :postinumero "43640"}})
 
-    ;(clojure.pprint/pprint hakemus)
-
     (fact "maksaja"
       (:viranomaismaksujenSuorittaja hakemus)
       =>
@@ -95,11 +103,9 @@
        :osoite {:osoitenimi {:teksti "Murskaajankatu 5"},
                                       :postitoimipaikannimi "Kaivanto",
                                       :postinumero "36570"}
-       :henkilotunnus "210281-9988"}
-      )
+       :henkilotunnus "210281-9988"})
 
     (facts "sijainti"
-
       (fact "alueenKiinteistonSijainti"
         (let [sijainti (-> hakemus :alueenKiinteistonSijainti :Sijainti) => truthy
               osoite (:osoite sijainti)]
@@ -112,10 +118,6 @@
              osoite (:osoite sijainti)]
 
           (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
-          (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}))
+          (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}})))
 
-
-      )
-
-    ; (clojure.pprint/pprint canonical)
-))
+    ))
