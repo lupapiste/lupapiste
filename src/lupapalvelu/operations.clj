@@ -103,21 +103,22 @@
 
 (def ^:private operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
-   [; permit/YI
-    ["Meluilmoitus" :meluilmoitus]
+   (filterv identity
+     [; permit/YI
+      ["Meluilmoitus" :meluilmoitus]
 
-    ; at the moment permit/R
-    ["Pima" :pima]
+      ; at the moment permit/R
+      (when (env/feature? :pima) ["Pima" :pima])
 
-    ; permit/MAL
-    ["maa-ainesten_ottaminen" :maa-aineslupa]
+      ; permit/MAL
+      ["maa-ainesten_ottaminen" :maa-aineslupa]
 
-    ; permit/YL
-    ["uusi-toiminta" :yl-uusi-toiminta]
-    ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-    ["toiminnan-muutos" :yl-toiminnan-muutos]
-    ["lupamaaraysten-tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
-    ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]]])
+      ; permit/YL
+      ["uusi-toiminta" :yl-uusi-toiminta]
+      ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+      ["toiminnan-muutos" :yl-toiminnan-muutos]
+      ["lupamaaraysten-tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
+      ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]])])
 
 (def operation-tree
   (vector
