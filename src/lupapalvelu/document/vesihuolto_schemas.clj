@@ -76,5 +76,5 @@
            :order 5
            :removable false
            :repeating false}
-    :body [{:name "kuvaus" :type :string}]}]
+    :body [{:name "kuvaus"  :type :text :max-len 4000 :required true :layout :full-width}]}]
   )
