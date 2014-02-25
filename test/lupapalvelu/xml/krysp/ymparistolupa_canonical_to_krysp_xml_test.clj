@@ -27,8 +27,6 @@
 
     (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
 
-    (xml/get-text lp-xml [:luvanTunnistetiedot :LupaTunnus :tunnus]) => (:id application)
-
     (xml/get-text lp-xml [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
     (xml/get-text lp-xml [:toiminta :peruste]) => "Hankkeen peruste"
 

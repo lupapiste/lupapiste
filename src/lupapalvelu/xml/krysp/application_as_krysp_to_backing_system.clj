@@ -9,6 +9,7 @@
             [lupapalvelu.xml.krysp.poikkeamis-mapping]
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping]
+            [lupapalvelu.xml.krysp.maa-aines-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]))
 
 

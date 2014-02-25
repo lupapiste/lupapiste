@@ -63,6 +63,8 @@
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
 
+
+
 (defschemas
   1
   [{:info {:name "meluilmoitus"
@@ -95,6 +97,9 @@
            :order 1}
     :body [kuvaus
            {:name "peruste" :type :text :max-len 4000 :required false :layout :full-width}]}
+   {:info {:name "maa-aineslupa-kuvaus"
+           :order 1}
+    :body [kuvaus]}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
     :body [{:name "paatoksenToimittaminen" :type :select
