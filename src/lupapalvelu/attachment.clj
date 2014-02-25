@@ -12,13 +12,6 @@
             [lupapalvelu.mime :as mime]))
 
 ;;
-;; Constants
-;;
-
-(def default-version {:major 0, :minor 0})
-(def default-type {:type-group :muut, :type-id :muu})
-
-;;
 ;; Metadata
 ;;
 
