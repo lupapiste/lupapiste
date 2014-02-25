@@ -351,7 +351,8 @@
                              {:municipality "753" :permitType "P"}
                              {:municipality "753" :permitType "YI"}
                              {:municipality "753" :permitType "YL"}
-                             {:municipality "753" :permitType "MAL"}]
+                             {:municipality "753" :permitType "MAL"}
+                             {:municipality "753" :permitType "VVVL"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}

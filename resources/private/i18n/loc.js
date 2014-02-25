@@ -12,7 +12,7 @@ var loc;
     if (!key) {
       return null;
     }
-    
+
     if (_.isArray(key)) {
       if (_.some(key, notValidLocParam)) {
         return null;
