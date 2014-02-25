@@ -1,1 +1,17 @@
 maa-aineslupa-kuvaus.kuvaus: Hankkeen kuvaus
+attachmentType.hakija.ottamisalueen_omistus_hallintaoikeus: Selvitys ottamisalueen omistus- tai hallintaoikeudesta
+attachmentType.ottamisalue._group_label: Ottamisalue
+attachmentType.ottamisalue.ote_alueen_peruskartasta: Ote alueen peruskartasta
+attachmentType.ottamisalue.ote_yleiskaavasta: Ote yleiskaavasta
+attachmentType.ottamisalue.ote_asemakaavasta: Ote asemakaavasta
+attachmentType.ottamisalue.naapurit: Luettelo naapuritilojen sijainnista ja yhteystiedoista
+attachmentType.erityissuunnitelmat._group_label: Erityissuunnitelmat
+attachmentType.erityissuunnitelmat.yvalain_mukainen_arviointiselostus: YVA-lain (468/1994) mukainen arviointiselostus
+attachmentType.erityissuunnitelmat.luonnonsuojelulain_arviointi: Luonnonsuojelulain (1096/1996) 65§ arviointi
+attachmentType.erityissuunnitelmat.kivenmurskaamo: Alustava suunnitelma kivenmurskaamon sijoittamisesta ja toiminnasta alueella
+attachmentType.erityissuunnitelmat.selvitys_jalkihoitotoimenpiteista: Selvitys jälkihoitotoimenpiteistä (esim. maisemointi)
+attachmentType.erityissuunnitelmat.ottamissuunnitelma: Ottamissuunnitelma
+attachmentType.erityissuunnitelmat.kaivannaisjatteen_jatehuoltosuunnitelma: Selvitys kaivannaisjätteen jätehuoltosuunnitelmasta
+attachmentType.muut.vakuus_ottamisen_aloittamiseksi_ennen_luvan_lainvoimaa: Vakuus ottamisen aloittamiseksi ennen luvan lainvoimaa
+attachmentType.muut.selvitys_tieyhteyksista_oikeuksista: Selvitys tieyhteyksistä ja -oikeuksista
+attachmentType.muut.pohjavesitutkimus: Pohjavesitutkimus

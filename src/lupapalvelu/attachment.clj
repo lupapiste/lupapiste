@@ -177,6 +177,24 @@
            :selvitys_suuronnettomuuden_vaaran_arvioimiseksi
            :muu]])
 
+(def ^:private attachment-types-MAL
+  [:hakija [:valtakirja
+            :ottamisalueen_omistus_hallintaoikeus]
+   :ottamisalue [:ote_alueen_peruskartasta
+                 :ote_yleiskaavasta
+                 :ote_asemakaavasta
+                 :naapurit]
+   :erityissuunnitelmat [:yvalain_mukainen_arviointiselostus
+                         :luonnonsuojelulain_arviointi
+                         :kivenmurskaamo
+                         :selvitys_jalkihoitotoimenpiteista
+                         :ottamissuunnitelma
+                         :kaivannaisjatteen_jatehuoltosuunnitelma]
+   :muut [:vakuus_ottamisen_aloittamiseksi_ennen_luvan_lainvoimaa
+          :selvitys_tieyhteyksista_oikeuksista
+          :pohjavesitutkimus
+          :muu]])
+
 ;;
 ;; Api
 ;;
@@ -207,8 +225,8 @@
       :YI attachment-types-YI
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
-      :MAL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
-      (fail! "unsupported permit-type"))))
+      :MAL attachment-types-MAL
+      (fail! (str "unsupported permit-type " permit-type)))))
 
 (defn get-attachment-types-for-application
   [application]
