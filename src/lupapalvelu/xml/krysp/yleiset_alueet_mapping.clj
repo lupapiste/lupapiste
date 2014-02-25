@@ -98,16 +98,12 @@
 (defn get-yleiset-alueet-krysp-mapping [lupa-name-key]
   {:tag :YleisetAlueet
    :ns "yak"
-   :attr {:xsi:schemaLocation
-          "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
-           http://www.paikkatietopalvelu.fi/gml/yhteiset
-           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
-           http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
-           http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
-          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
-          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-          :xmlns:gml "http://www.opengis.net/gml"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+   :attr (merge {:xsi:schemaLocation
+                 (str mapping-common/schemalocation-yht-2.1.0
+                   "\nhttp://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
+                      http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd")
+                 :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
+           mapping-common/common-namespaces)
 
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :yleinenAlueAsiatieto

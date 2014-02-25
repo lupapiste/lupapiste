@@ -32,10 +32,12 @@
         :hakemustieto
         {:Hakemus
          {:hakija (->osapuoli hakija)
-          :alueenKiinteistonSijainti (sijainti application)
           ;ottamistoiminnanYhteyshenkilo ?
+          :alueenKiinteistonSijainti (sijainti application)
           ;ottamismaara ?
+          ;paatoksenToimittaminen ?
           :viranomaismaksujenSuorittaja (->osapuoli maksaja)
+          ;ottamissuunnitelmatieto TODO
           }
          }
         :sijaintitieto (sijainti application)
