@@ -259,9 +259,7 @@
 (def yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation
-   :yl-lupamaaraysten-tarkistaminen ymparistolupa-operation
-   :yl-toiminnan-aloittamislupa ymparistolupa-operation})
+   :yl-toiminnan-muutos ymparistolupa-operation})
 
 (def operations
   (merge
