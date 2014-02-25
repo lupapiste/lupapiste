@@ -149,19 +149,19 @@
 
 (defn- pre-verdict-applicationState [current-state]
   (let [current-state (keyword current-state)]
-    (cond (#{:draft :open} current-state) current-state 
+    (cond (#{:draft :open} current-state) current-state
           (= :cancelled current-state) :draft
           :else :submitted)))
 
 (defn- post-verdict-applicationState [current-state] :verdictGiven)
 ;  (let [current-state (keyword current-state)]
-;    (cond (= :closed current-state) :constructionStarted 
+;    (cond (= :closed current-state) :constructionStarted
 ;          (= :cancelled current-state) :verdictGiven
 ;          :else current-state))
 
 (defn- set-applicationState-to-attachment [verdict-given state attachment]
   (let [first-version      (-> attachment :versions first)
-        attachment-created (or (:created first-version) (:modified attachment))]
+        attachment-created (or (:created first-version) (:modified attachment) 0)]
     (if (and verdict-given (> attachment-created verdict-given))
       (assoc attachment :applicationState (post-verdict-applicationState state))
       (assoc attachment :applicationState (pre-verdict-applicationState state)))))
