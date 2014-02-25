@@ -8,6 +8,19 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
+(def schemalocation-yht-2.1.0
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def schemalocation-yht-2.1.1
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def common-namespaces
+  {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+   :xmlns:gml   "http://www.opengis.net/gml"
+   :xmlns:xlink "http://www.w3.org/1999/xlink"
+   :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"})
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
