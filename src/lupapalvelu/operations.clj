@@ -103,7 +103,7 @@
 
 (def ^:private operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
-   (filterv identity
+   (filterv identity ; TODO remove filter after pima featura is in production
      [; permit/YI
       ["Meluilmoitus" :meluilmoitus]
 
@@ -121,12 +121,12 @@
       ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]])])
 
 (def operation-tree
-  (vector
-    operation-tree-for-R
-    operation-tree-for-environment-R
-    operation-tree-for-P
-    (when (env/feature? :ymparisto) operation-tree-for-Y)
-    (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
+  (filterv identity
+    [operation-tree-for-R
+     operation-tree-for-environment-R
+     operation-tree-for-P
+     (when (env/feature? :ymparisto) operation-tree-for-Y)
+     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)]))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] operation-tree)
