@@ -114,11 +114,11 @@
       ["maa-ainesten_ottaminen" :maa-aineslupa]
 
       ; permit/YL
-      ["uusi-toiminta" :yl-uusi-toiminta]
-      ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-      ["toiminnan-muutos" :yl-toiminnan-muutos]
-      ["lupamaaraysten-tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
-      ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]])])
+      ["ympariston-pilaantumisen-vaara"
+       [["uusi-toiminta" :yl-uusi-toiminta]
+        ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+        ["toiminnan-muutos" :yl-toiminnan-muutos]]]
+      ])])
 
 (def operation-tree
   (filterv identity

@@ -15,3 +15,4 @@ attachmentType.erityissuunnitelmat.kaivannaisjatteen_jatehuoltosuunnitelma: Selv
 attachmentType.muut.vakuus_ottamisen_aloittamiseksi_ennen_luvan_lainvoimaa: Vakuus ottamisen aloittamiseksi ennen luvan lainvoimaa
 attachmentType.muut.selvitys_tieyhteyksista_oikeuksista: Selvitys tieyhteyksistä ja -oikeuksista
 attachmentType.muut.pohjavesitutkimus: Pohjavesitutkimus
+operations.tree.ympariston-pilaantumisen-vaara: Ympäristön pilaantumisen vaaraa aiheuttava toiminta
