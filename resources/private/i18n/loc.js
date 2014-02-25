@@ -31,8 +31,7 @@ var loc;
         }
       }
     } else {
-      console.log( key);
-        //debug("Missing localization key", key);
+      debug("Missing localization key", key);
       term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
 

@@ -1,0 +1,75 @@
+application.asker
+application.VVVL.neighbors
+hankkeen-kuvaus-vesihuolto._group_label
+hankkeen-kuvaus-vesihuolto.kuvaus
+help.VVVL.applicationInfoDesc
+help.VVVL.attachmentsDesc
+help.VVVL.conversationDesc
+help.VVVL.helpText
+help.VVVL.neighborsDesc
+help.VVVL.PartiesDesc
+help.VVVL.statementsDesc
+help.VVVL.verdictDesc
+hulevedet.hulevedet._group_label
+hulevedet.hulevedet.imeytetään maaperään
+hulevedet.hulevedet.Johdetaan muualle, minne
+hulevedet.hulevedet.Johdetaan rajaojaan tai muuhun ojaan
+jatevedet._group_label
+jatevedet.kuvaus
+operations.tree.hulevesiviemarista
+operations.tree.hulevesiviemarista
+operations.tree.vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta
+operations.tree.vesijohdosta
+operations.tree.vesijohdosta-ja-viemarista
+operations.tree.viemarista
+operations.vvvl-hulevesiviemarista
+operations.vvvl-hulevesiviemarista.desc
+operations.vvvl-vesijohdosta
+operations.vvvl-vesijohdosta-ja-viemarista
+operations.vvvl-vesijohdosta-ja-viemarista.desc
+operations.vvvl-vesijohdosta.desc
+operations.vvvl-viemarista
+operations.vvvl-viemarista.desc
+phone.short
+talousvedet.hankinta._group_label
+talousvedet.hankinta.ei tiedossa
+talousvedet.hankinta.Kiinteistön porakaivosta
+talousvedet.hankinta.Kiinteistön rengaskaivosta
+talousvedet.hankinta.Vesihuoltolaitoksen vesijohdosta
+talousvedet.johdatus._group_label
+talousvedet.johdatus.ei tiedossa
+talousvedet.johdatus.johdetaan paineellisena vesijohtoa pitkin rakennukseen
+talousvedet.johdatus.kannetaan kaivosta tai vesistöstä
+talousvedet.johdatus.pumpataan kaivosta tai vesistöstä
+talousvedet.riittavyys._group_label
+talousvedet.riittavyys.ei tiedossa
+talousvedet.riittavyys.vesi ajoittain vähissä
+talousvedet.riittavyys.vesi riittää talouden tarpeisiin
+vesihuolto-kiinteisto._group_label
+vesihuolto-kiinteisto.kiinteisto._group_label
+vesihuolto-kiinteisto.kiinteisto.maapintaala
+vesihuolto-kiinteisto.kiinteisto.rekisterointipvm
+vesihuolto-kiinteisto.kiinteisto.tilanNimi
+vesihuolto-kiinteisto.kiinteisto.vesipintaala
+vesihuolto-kiinteisto.kiinteistoonKuuluu._append_label
+vesihuolto-kiinteisto.kiinteistoonKuuluu._group_label
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi._group_label
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Asuinrakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.ei tiedossa
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Eläinsuoja
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Lomarakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Saunarakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennusvuosi
+vesihuolto-kiinteisto.kiinteistoonKuuluu.vapautus
+vesihuolto-kiinteisto.kohteenVarustelutaso._group_label
+vesihuolto-kiinteisto.kohteenVarustelutaso.Astianpesukone
+vesihuolto-kiinteisto.kohteenVarustelutaso.Kuivakäymälä
+vesihuolto-kiinteisto.kohteenVarustelutaso.Lämminvesivaraaja
+vesihuolto-kiinteisto.kohteenVarustelutaso.Pyykinpesukone
+vesihuolto-kiinteisto.kohteenVarustelutaso.Suihku
+vesihuolto-kiinteisto.kohteenVarustelutaso.Tiskiallas
+vesihuolto-kiinteisto.kohteenVarustelutaso.WC(vesikäymälä)
+vvvl-hulevesiviemarista._group_label
+vvvl-vesijohdosta-ja-viemarista._group_label
+vvvl-vesijohdosta._group_label
+vvvl-viemarista._group_label
