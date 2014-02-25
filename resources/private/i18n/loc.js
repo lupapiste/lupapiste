@@ -12,7 +12,7 @@ var loc;
     if (!key) {
       return null;
     }
-    
+
     if (_.isArray(key)) {
       if (_.some(key, notValidLocParam)) {
         return null;
@@ -31,7 +31,8 @@ var loc;
         }
       }
     } else {
-      debug("Missing localization key", key);
+      console.log( key);
+        //debug("Missing localization key", key);
       term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
 
