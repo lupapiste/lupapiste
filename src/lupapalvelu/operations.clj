@@ -469,10 +469,9 @@
                                    :attachments []
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :maa-aineslupa               {:schema "ottamismaara"
+     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
-                                   :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
-                                              "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
+                                   :required ["maksaja"]
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
