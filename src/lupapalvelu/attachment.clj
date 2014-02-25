@@ -21,7 +21,7 @@
    :paa_ja_rakennussuunnittelijan_tiedot
    :tutkintotodistus])
 
-(def attachment-types-R
+(def ^:private attachment-types-R
   [:hakija [:osakeyhtion_perustamiskirja
             :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta
             :ote_kauppa_ja_yhdistysrekisterista
@@ -102,7 +102,7 @@
           :ympariston_tietomalli_BIM
           :muu]])
 
-(def attachment-types-YA
+(def ^:private attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                     :asemapiirros
                     :liitoslausunto
@@ -116,10 +116,11 @@
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 
-(def attachment-types-YI [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
-                          :muut [:muu]])
+(def ^:private attachment-types-YI
+  [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
+   :muut [:muu]])
 
-(def attachment-types-YL
+(def ^:private attachment-types-YL
    [:laitoksen_tiedot [:voimassa_olevat_ymparistolupa_vesilupa
                        :muut_paatokset_sopimukset
                        :selvitys_ymparistovahinkovakuutuksesta]
