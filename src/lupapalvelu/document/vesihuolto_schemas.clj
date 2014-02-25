@@ -14,7 +14,7 @@
                                                                               "kaavanaste")
                                                 {:name "kiinteistoonKuuluu" :type :group :repeating true
                                                  :body [{:name "rakennuksenTyypi" :type :select
-                                                         :body [{:name "Eläinsuoja"}
+                                                         :body [{:name "El\u00e4insuoja"}
                                                                 {:name "Saunarakennus"}
                                                                 {:name "Lomarakennus"}
                                                                 {:name "Asuinrakennus"}
@@ -26,9 +26,9 @@
                                                         {:name "Tiskiallas" :type :checkbox}
                                                         {:name "Astianpesukone" :type :checkbox}
                                                         {:name "Pyykinpesukone" :type :checkbox}
-                                                        {:name "Lämminvesivaraaja" :type :checkbox}
-                                                        {:name "Kuivakäymälä" :type :checkbox}
-                                                        {:name "WC(vesikäymälä)" :type :checkbox}
+                                                        {:name "L\u00e4mminvesivaraaja" :type :checkbox}
+                                                        {:name "Kuivak\u00e4ym\u00e4l\u00e4" :type :checkbox}
+                                                        {:name "WC(vesik\u00e4ym\u00e4l\u00e4)" :type :checkbox}
                                                         ]})})
 
 
@@ -50,7 +50,7 @@
     :body [{:name "hulevedet" :type :select
             :body [{:name "Johdetaan muualle, minne"}
                    {:name "Johdetaan rajaojaan tai muuhun ojaan"}
-                   {:name "imeytetään maaperään"}]}]}
+                   {:name "imeytet\u00e4\u00e4n maaper\u00e4\u00e4n"}]}]}
    {:info {:name "talousvedet"
            :approvable false
            :order 4
@@ -58,17 +58,17 @@
            :repeating false}
     :body [{:name "hankinta" :type :select
             :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
-                   {:name "Kiinteistön rengaskaivosta"}
-                   {:name "Kiinteistön porakaivosta"}
+                   {:name "Kiinteist\u00f6n rengaskaivosta"}
+                   {:name "Kiinteist\u00f6n porakaivosta"}
                    {:name "ei tiedossa"}]}
            {:name "johdatus" :type :select
-            :body [{:name "kannetaan kaivosta tai vesistöstä"}
-                   {:name "pumpataan kaivosta tai vesistöstä"}
+            :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
+                   {:name "pumpataan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "johdetaan paineellisena vesijohtoa pitkin rakennukseen"}
                    {:name "ei tiedossa"}]}
            {:name "riittavyys" :type :select
-            :body [{:name "vesi ajoittain vähissä"}
-                   {:name "vesi riittää talouden tarpeisiin"}
+            :body [{:name "vesi ajoittain v\u00e4hiss\u00e4"}
+                   {:name "vesi riitt\u00e4\u00e4 talouden tarpeisiin"}
                    {:name "ei tiedossa"}
                    ]}]}
    {:info {:name "jatevedet"
