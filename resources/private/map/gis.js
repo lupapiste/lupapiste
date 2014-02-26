@@ -48,15 +48,13 @@ var gis = (function() {
     // Layers
 
     // use the old proxy server to wms/wmts
-    var mapServer = LUPAPISTE.config.maps.proxyserver;
-    if (LUPAPISTE.config.maps.proxyserver.indexOf(",") > -1) {
-      mapServer = LUPAPISTE.config.maps.proxyserver.split(",");
+    var mapServer = features.enabled("use-wmts-map") ? LUPAPISTE.config.maps["proxyserver-wmts"] : LUPAPISTE.config.maps["proxyserver-wms"];
+    if (mapServer.indexOf(",") > -1) {
+      mapServer = mapServer.split(",");
     }
     var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
 
     if (features.enabled("use-wmts-map")) {   // Uusi: WMTS-layerit
-
-      console.log("WMTS");
 
       var taustakartta = new OpenLayers.Layer.WMTS({
         name: "Taustakartta",
@@ -102,8 +100,6 @@ var gis = (function() {
       });
 
     } else {  // Vanha: WMS-layerit
-
-      console.log("WMS");
 
       var taustakartta = new OpenLayers.Layer.WMS(
           "taustakartta",
