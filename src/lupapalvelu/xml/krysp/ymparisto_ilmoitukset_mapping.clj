@@ -8,16 +8,13 @@
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
    :ns "ymi"
-   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
-                               http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset
-                               http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset/2.1.1/ilmoitukset.xsd"
-          :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"
-          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-          :xmlns:xlink "http://www.w3.org/1999/xlink"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"
-          :xmlns:gml "http://www.opengis.net/gml"}
+   :attr (merge {:xsi:schemaLocation
+                 (str mapping-common/schemalocation-yht-2.1.1
+                   "\nhttp://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset
+                      http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset/2.1.1/ilmoitukset.xsd")
+                 :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"}
+           mapping-common/common-namespaces)
+
    :child [{:tag :toimituksenTiedot
             :child mapping-common/toimituksenTiedot}
            {:tag :melutarina
@@ -26,7 +23,7 @@
                              {:tag :alkuHetki :ns "yht"}
                              {:tag :kasittelytietotieto
                               :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
-                             {:tag :luvanTunnisteTiedot
+                             {:tag :luvanTunnistetiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto
                               :child [mapping-common/lausunto]}

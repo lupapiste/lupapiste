@@ -4,42 +4,10 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.canonical-test-common :refer [drawings]]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]))
-
-
-(def ^:private drawings [{:id 1,
-                         :name "alue",
-                         :desc "alue 1",
-                         :category "123",
-                         :geometry
-                         "LINESTRING(530856.65649413 6972312.1564941,530906.40649413 6972355.6564941,530895.65649413 6972366.9064941,530851.15649413 6972325.9064941,530856.65649413 6972312.4064941)",
-                         :area "",
-                         :height "1000"}
-                        {:id 2,
-                         :name "Viiva",
-                         :desc "Viiiva",
-                         :category "123",
-                         :geometry
-                         "LINESTRING(530825.15649413 6972348.9064941,530883.65649413 6972370.1564941,530847.65649413 6972339.4064941,530824.90649413 6972342.4064941)",
-                         :area "",
-                         :height ""}
-                        {:id 3,
-                         :name "Piste",
-                         :desc "Piste jutska",
-                         :category "123",
-                         :geometry "POINT(530851.15649413 6972373.1564941)",
-                         :area "",
-                         :height ""}
-                        {:id 4
-                         :name "Alueen nimi"
-                         :desc "Alueen kuvaus"
-                         :category "123"
-                         :geometry "POLYGON((530859.15649413 6972389.4064941,530836.40649413 6972367.4064941,530878.40649413 6972372.6564941,530859.15649413 6972389.4064941))",
-                         :area "402",
-                         :height  ""
-                         }])
 
 (def ^:private operation {:id "52380c6894a74fc25bb4ba46",
                           :created 1379404904514,
