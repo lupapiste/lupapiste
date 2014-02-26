@@ -36,7 +36,7 @@ var gis = (function() {
 
     // Layers
 
-    // use the old proxy server to wms
+    // use the old proxy server to wmts
     var wmtsServer = LUPAPISTE.config.maps.proxyserver;
     if (LUPAPISTE.config.maps.proxyserver.indexOf(",") > -1) {
       wmtsServer = LUPAPISTE.config.maps.proxyserver.split(",");
@@ -67,7 +67,7 @@ var gis = (function() {
           url: wmtsServer,
           isBaseLayer: false,
           requestEncoding: "KVP",
-          transitionEffect: "resize",
+          // transitionEffect: "resize",
           layer: "taustakartta",
           matrixSet: "ETRS-TM35FIN",
           format: "image/png",
@@ -79,24 +79,24 @@ var gis = (function() {
 //          maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
 
           resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+          // maxExtent not defined here -> inherits from the config of the map
+//          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
 
           projection: new OpenLayers.Projection("EPSG:3067")
       });
     var kiinteistorajat = new OpenLayers.Layer.WMTS({
-
-//          maxScale: 1, minScale: 20000,  // vanhasta
-
           name: "Kiinteistojaotus",
           url: wmtsServer,
           isBaseLayer: false,
           requestEncoding: "KVP",
-//          transitionEffect: "resize",
+          // transitionEffect: "resize",
           layer: "kiinteistojaotus",
           matrixSet: "ETRS-TM35FIN",
           format: "image/png",
           style: "default",
           opacity: 1.0,
+
+//          maxScale: 1, minScale: 20000,  // vanhasta
 
 //          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
 //          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
@@ -105,34 +105,35 @@ var gis = (function() {
 //          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
 
           resolutions: [4, 2, 1, 0.5],
-          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+          // maxExtent not defined here -> inherits from the config of the map
+//          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
 //          maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
 
           projection: new OpenLayers.Projection("EPSG:3067")
       });
     var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
-
-//          maxScale: 1, minScale: 10000,  // vanhasta
-
           name: "Kiinteistotunnukset",
           url: wmtsServer,
           isBaseLayer: false,
           requestEncoding: "KVP",
-//          transitionEffect: "resize",
+          // transitionEffect: "resize",
           layer: "kiinteistotunnukset",
           matrixSet: "ETRS-TM35FIN",
           format: "image/png",
           style: "default",
           opacity: 1.0,
 
+//          maxScale: 1, minScale: 10000,  // vanhasta
+
 //          maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
 //          resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
 
 //          resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
 //          maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
-          // TESTI
+
           resolutions: [4, 2, 1, 0.5],
-          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+          // maxExtent not defined here -> inherits from the config of the map
+//          maxExtent: new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
 //          maxExtent: new OpenLayers.Bounds(-250000,-250000,250000,250000),
 
           projection: new OpenLayers.Projection("EPSG:3067")
@@ -146,6 +147,23 @@ var gis = (function() {
     } else {
       self.map.addLayers([base, self.vectorLayer]);
     }
+
+    //
+    // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
+    //       so that the old resolutions array [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+    //       would work.
+    //
+    self.map.events.register('zoomend', self.map, function (event) {
+      var x = self.map.getZoom();
+      console.log("zoomend, level: ", x, ", extent: ", self.map.getExtent(), ", resolution: ", self.map.getResolution());
+
+      if( x < 2) {
+        // For some reason, calling only "self.map.zoomTo(2);" did not work here.
+        // http://gis.stackexchange.com/questions/25080/why-doesnt-openlayers-zoom
+        self.map.setCenter(self.map.getCenter(), 2);
+      }
+    });
+
 
     // Markers
 
@@ -177,6 +195,7 @@ var gis = (function() {
     // Map handling functions
 
     self.center = function(x, y, zoom) {
+//      console.log("self.center, (x,y): (", x, ",", y, "), zoom: ", zoom);
       self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
