@@ -117,7 +117,8 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, 0).addClickHandler(self.click);
+      console.log("create.js, self.clear");
+      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, 2).addClickHandler(self.click);
       return self
         .search("")
         .x(0)
