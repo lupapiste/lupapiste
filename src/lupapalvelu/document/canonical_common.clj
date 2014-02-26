@@ -342,13 +342,15 @@
       joined)))
 
 (defn get-sijaistukset [sijaistukset sijaistettavaRooli]
-  (reduce (fn [c sijaistus] 
-            (conj c {:sijaistettavaHenkilo (str (:sijaistettavaHloEtunimi sijaistus) " " 
-                                                (:sijaistettavaHloSukunimi sijaistus)) 
-                     :sijaistettavaRooli sijaistettavaRooli
-                     :alkamisPvm (:alkamisPvm sijaistus)
-                     :paattymisPvm (:paattymisPvm sijaistus)}))
-          [] sijaistukset))
+  (mapv (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]
+          (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)) 
+            {}
+            (assoc-when {}
+                        :sijaistettavaHenkilo (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi) 
+                        :sijaistettavaRooli sijaistettavaRooli
+                        :alkamisPvm alkamisPvm
+                        :paattymisPvm paattymisPvm)))
+        sijaistukset))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)

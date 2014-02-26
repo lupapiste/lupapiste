@@ -241,8 +241,7 @@
                              :initiallyEmpty true
                              :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
                                     {:name "sijaistettavaHloSukunimi" :type :string :required true}
-                                    ;{:name "sijaistettavaHlo" :type :personSelector :blacklist [:neighbor]}
-                                    {:name "alkamisPvm" :type :date :required true}
+                                    {:name "alkamisPvm" :type :date}
                                     {:name "paattymisPvm" :type :date}]}])
 
 (def tyonjohtaja (body
