@@ -9,8 +9,9 @@ LUPAPISTE.MapModel = function() {
   var drawings = null;
   var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
 
-
-  var createMap = function(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); };
+  var createMap = function(divName) {
+    return gis.makeMap(divName, false).center(404168, 6693765, 12);
+  };
 
   var getOrCreateMap = function(kind) {
     if (kind === "application") {
