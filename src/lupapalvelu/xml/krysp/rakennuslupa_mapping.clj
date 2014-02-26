@@ -224,7 +224,10 @@
       (str mapping-common/schemalocation-yht-2.1.1
         "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd"))
 
-    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)))
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_211]}))
+  )
+
 
 
 (defn- get-mapping [krysp-version]
