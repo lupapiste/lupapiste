@@ -105,7 +105,6 @@
 
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
-    (try (contains? data :value) (catch Throwable t (println data) (throw t)))
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
             result  (validate-field element (:value data))]
