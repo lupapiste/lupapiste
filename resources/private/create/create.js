@@ -117,8 +117,8 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      console.log("create.js, self.clear");
-      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, 2).addClickHandler(self.click);
+      var zoomLevel = features.enabled("use-wmts-map") ? 2 : 0;
+      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, zoomLevel).addClickHandler(self.click);
       return self
         .search("")
         .x(0)
