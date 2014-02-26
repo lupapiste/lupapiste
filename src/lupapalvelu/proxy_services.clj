@@ -96,9 +96,6 @@
   stuff. At the moment strips the 'Set-Cookie' headers."
   [f service]
   (fn [request]
-;    (println "\n secure, service: " service ", request: ")
-;    (clojure.pprint/pprint request)
-;    (println "\n")
     (let [response (f request service)]
       (update-in response [:headers] dissoc "set-cookie" "server"))))
 
