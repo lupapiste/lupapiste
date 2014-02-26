@@ -239,13 +239,13 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-      cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
+        cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
     (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
-    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "422")
+    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "523")
 
     (let [verdict (first (:paatokset (last cases)))
           lupamaaraykset (:lupamaaraykset verdict)
@@ -255,16 +255,22 @@
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
         (:takuuaikaPaivat lupamaaraykset) => "760"
-        )
+        (let [muutMaaraykset (:muutMaaraykset lupamaaraykset)]
+          muutMaaraykset => sequential?
+          (count muutMaaraykset) => 2
+          (last muutMaaraykset) => "Kaivu: Viheralueet rakennettava."))
 
       (facts "paivamaarat data is correct"
-        paivamaarat    => truthy
-        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2013-11-04")
-        )
+        paivamaarat => truthy
+        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2014-01-29"))
 
       (facts "p\u00f6yt\u00e4kirjat data is correct"
-        poytakirjat    => truthy
-        (count poytakirjat) => 0))))
+        (let [pk1   (first poytakirjat)
+              liite (:liite pk1)]
+          (:kuvaus liite) => "liite"
+          (:linkkiliitteeseen liite) => "http://demokuopio.vianova.fi/Lupapiste/GetFile.aspx?GET_FILE=1106"
+          (:muokkausHetki liite) => (to-timestamp "2014-01-29T13:58:15")
+          (:tyyppi liite) => "Muu liite")))))
 
 
 (facts "Buildings from verdict message"

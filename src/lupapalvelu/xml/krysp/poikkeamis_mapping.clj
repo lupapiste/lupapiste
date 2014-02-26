@@ -42,36 +42,18 @@
                              {:tag :kayttotapaus}])
 
 
-
 (def poikkeamis_to_krysp
   {:tag :Popast
    :ns "ppst"
-   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
-                               http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu
-                               http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.1.2/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd"
-          :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
-          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-          :xmlns:xlink "http://www.w3.org/1999/xlink"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+   :attr (merge {:xsi:schemaLocation
+                 (str mapping-common/schemalocation-yht-2.1.0
+                   "\nhttp://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu
+                      http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.1.2/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd")
+                 :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
+           mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
            {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstractPoikkeamisType}]}]})
-
-
-(defn- add-statement-attachments [canonical statement-attachments krysp-polku-lausuntoon]
-  (if (empty? statement-attachments)
-    canonical
-    (reduce (fn [c a]
-              (let [
-                    lausuntotieto (get-in c krysp-polku-lausuntoon)
-                    lausunto-id (name (first (keys a)))
-                    paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
-                    index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-                    paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
-                    paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-                (assoc-in c krysp-polku-lausuntoon paivitetty))
-              ) canonical statement-attachments)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -89,7 +71,7 @@
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
-        canonical-with-statement-attachments  (add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical-with-statement-attachments  (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)

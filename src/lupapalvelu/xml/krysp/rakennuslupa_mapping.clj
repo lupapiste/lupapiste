@@ -45,7 +45,7 @@
 (def ^:private yht-rakennus
   [{:tag :yksilointitieto :ns "yht"}
    {:tag :alkuHetki :ns "yht"}
-   mapping-common/sijantitieto
+   (mapping-common/sijaintitieto)
    {:tag :rakennuksenTiedot
     :child [{:tag :rakennustunnus :child rakennustunnus}
             {:tag :kayttotarkoitus}
@@ -125,14 +125,12 @@
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
-   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
-                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"
-          :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-          :xmlns:xlink "http://www.w3.org/1999/xlink"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+   :attr (merge {:xsi:schemaLocation
+                 (str mapping-common/schemalocation-yht-2.1.0
+                   "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd")
+                 :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
+           mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
@@ -168,7 +166,7 @@
                                                {:tag :rakennelmatieto
                                                 :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
-                                                                                  mapping-common/sijantitieto
+                                                                                  (mapping-common/sijaintitieto)
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
                              katselmustieto
@@ -231,13 +229,12 @@
 (def rakennuslupa_to_krysp_213
   (->
     (assoc-in rakennuslupa_to_krysp_212 [:attr :xsi:schemaLocation]
-      "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
-       http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd")
+      (str mapping-common/schemalocation-yht-2.1.1
+        "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd"))
 
-    (update-in [:child] mapping-common/update-child-element 
-               [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)
-    (update-in [:child] mapping-common/update-child-element 
-               [:osapuolettieto :Osapuolet :osapuolitieto :tyonjohtajatieto :Tyonjohtaja :sijaistustieto] sijaistus_213)))
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_211]}))
+    (update-in [:child] mapping-common/update-child-element [:osapuolettieto :Osapuolet :osapuolitieto :tyonjohtajatieto :Tyonjohtaja :sijaistustieto] sijaistus_213)))
 
 
 (defn- get-mapping [krysp-version]
@@ -375,7 +372,10 @@
                                             :muokkausHetki (to-xml-datetime (now))
                                             :versionumero 1
                                             :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
-        canonical-with-statement-attachments  (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments)
+        canonical-with-statement-attachments  (mapping-common/add-statement-attachments
+                                                canonical-without-attachments
+                                                statement-attachments
+                                                [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]

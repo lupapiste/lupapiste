@@ -82,16 +82,19 @@
     (new-task "task-katselmus" task-name data meta source)))
 
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
-  (map-indexed
+ (map-indexed
    (fn [idx {lupamaaraykset :lupamaaraykset}]
      (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
        (concat
-        (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
-        (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
-          (filter #(not (s/blank? (:sisalto %))) (:maaraykset lupamaaraykset )))
-        (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
-          (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
-            (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))))
+         (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
+         (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
+           (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
+         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
+           (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
+             (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)")))
+         ;; from YA verdict
+         (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
+           (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))
    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]

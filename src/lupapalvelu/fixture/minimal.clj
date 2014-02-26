@@ -341,13 +341,18 @@
                               :url "http://www.jarvenpaa.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
-                     :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "jarvenpaa"}}}
+                     :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}}
 
                     {:id "753-R"
                      :inforequest-enabled true
                      :new-application-enabled true
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "753" :permitType "R"} {:municipality "753" :permitType "P"}]
+                     :scope [{:municipality "753" :permitType "R"}
+                             {:municipality "753" :permitType "P"}
+                             {:municipality "753" :permitType "YI"}
+                             {:municipality "753" :permitType "YL"}
+                             {:municipality "753" :permitType "MAL"}
+                             {:municipality "753" :permitType "VVVL"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -360,10 +365,18 @@
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]
-                                              :poikkeamis [[:paapiirustus :asemapiirros]]}
+                                              :poikkeamis [[:paapiirustus :asemapiirros]]
+                                              :meluilmoitus [[:kartat :kartta-melun-ja-tarinan-leviamisesta]
+                                                             [:muut :muu]]
+                                              :yl-uusi-toiminta [[:muut :muu]]
+                                              :maa-aineslupa [[:muut :muu]]
+                                              }
                      :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "sipoo"}
-                             :P {:ftpUser "poik_sipoo" :version "2.1.2"}}
+                                 :ftpUser "dev_sipoo"}
+                             :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
+                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
+                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
+                             :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -377,7 +390,7 @@
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :krysp {:YA {:ftpUser "ya_sipoo" :version "2.1.2"}}
+                     :krysp {:YA {:ftpUser "dev_ya_sipoo" :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -393,7 +406,7 @@
                      :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                               :url "http://www.kuopio.fi"}]
                      :krysp {:YA {:url local-krysp, :version "2.1.2"
-                                  :ftpUser "ya_kuopio"}}
+                                  :ftpUser "dev_ya_kuopio"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -432,14 +445,16 @@
                                         :text "Paloviranomainen"
                                         :email "jussi.viranomainen@tampere.fi"
                                         :name "Jussi Viranomainen"}]
-                     :krysp {:YA {:ftpUser "ya_tampere" :version "2.1.2"}}
+                     :krysp {:YA {:ftpUser "dev_ya_tampere" :version "2.1.2"}}
                      :operations-attachments ya-default-attachments-for-operations}
 
                     {:id "638-R"
                      :inforequest-enabled true
                      :new-application-enabled true
                      :name {:fi "Porvoon rakennusvalvonta"}
-                     :scope [{:municipality "638" :permitType "R"}]
+                     :scope [{:municipality "638" :permitType "R"}
+                             {:municipality "638" :permitType "YI"}
+                             {:municipality "638" :permitType "YL"}]
                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
                               :url "http://www.porvoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -491,7 +506,7 @@
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                      :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "sipoo"}}
+                                 :ftpUser "dev_sipoo"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -508,7 +523,7 @@
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                      :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "sipoo"}}
+                                 :ftpUser "dev_sipoo"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -525,7 +540,7 @@
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                      :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "sipoo"}}
+                                 :ftpUser "dev_sipoo"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",

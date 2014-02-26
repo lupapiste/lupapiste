@@ -265,6 +265,14 @@
                               :autopaikkojaKiinteistolla
                               :autopaikkojaUlkopuolella])))
 
+(defn ->lupamaaraukset-ya [paatos-xml-without-ns]
+  (let [lupaehdot (select paatos-xml-without-ns :lupaehdotJaMaaraykset)]
+    (when (not-empty lupaehdot)
+      (-> lupaehdot
+        (cleanup)
+        ((fn [maar] (map #(get-text % :lupaehdotJaMaaraykset) maar)))
+        (cr/ensure-sequental :lupaehdotJaMaaraykset)))))
+
 (defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
                    [% (cr/to-timestamp (get-text paatos xml-kw))]) v)))
@@ -288,16 +296,16 @@
 (defn- ->verdict [paatos-xml-without-ns]
   {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
    :paivamaarat    (get-pvm-dates paatos-xml-without-ns
-                                  [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+                     [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
 (defn- ->ya-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                    :muutMaaraykset (when (not-empty (select paatos-xml-without-ns :lupaehdotJaMaaraykset))
-                                      (reduce (fn [c v] (str c ", " v )) (map #(get-text % :lupaehdotJaMaaraykset)  (select paatos-xml-without-ns :lupaehdotJaMaaraykset))))}
+                    :muutMaaraykset (->lupamaaraukset-ya paatos-xml-without-ns)}
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
-   :poytakirjat    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of (select paatos-xml-without-ns [:liitetieto]))))})
+   :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
+                     (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})
 
 (permit/register-function permit/R :verdict-krysp-reader ->verdict)
 (permit/register-function permit/P :verdict-krysp-reader ->verdict)

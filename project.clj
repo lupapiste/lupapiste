@@ -53,8 +53,8 @@
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=256M"]}
-             :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
-             :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
+             :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
+             :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"

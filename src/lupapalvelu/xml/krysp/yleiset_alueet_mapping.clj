@@ -83,59 +83,39 @@
                                            :child [{:tag :Puolto
                                                     :child [{:tag :puolto}]}]}]}]}]}])
 
+(def kasittelytieto [{:tag :Kasittelytieto
+                      :child [{:tag :muutosHetki :ns "yht"}
+                              {:tag :hakemuksenTila :ns "yht"}
+                              {:tag :asiatunnus :ns "yht"}
+                              {:tag :paivaysPvm :ns "yht"}
+                              {:tag :kasittelija
+                               :child [{:tag :henkilotieto
+                                        :child [{:tag :Henkilo
+                                                 :child [{:tag :nimi :ns "yht"
+                                                          :child [{:tag :etunimi}
+                                                                  {:tag :sukunimi}]}]}]}]}]}])
+
 (defn get-yleiset-alueet-krysp-mapping [lupa-name-key]
   {:tag :YleisetAlueet
    :ns "yak"
-   :attr {:xsi:schemaLocation
-          "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd
-           http://www.paikkatietopalvelu.fi/gml/yhteiset
-           http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
-           http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
-           http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
-          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
-          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-          :xmlns:gml "http://www.opengis.net/gml"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+   :attr (merge {:xsi:schemaLocation
+                 (str mapping-common/schemalocation-yht-2.1.0
+                   "\nhttp://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
+                      http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd")
+                 :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
+           mapping-common/common-namespaces)
 
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :yleinenAlueAsiatieto
             :child [{:tag lupa-name-key
                      :child [{:tag :kasittelytietotieto
-                              :child [{:tag :Kasittelytieto
-                                       :child [{:tag :muutosHetki :ns "yht"}
-                                               {:tag :hakemuksenTila :ns "yht"}
-                                               {:tag :asiatunnus :ns "yht"}
-;                                               {:tag :tilanMuutosHetki :ns "yht"}
-;                                               {:tag :kunnanYhteyshenkilo :ns "yht"}
-                                               {:tag :paivaysPvm :ns "yht"}
-                                               {:tag :kasittelija
-                                                :child [{:tag :henkilotieto
-                                                         :child [{:tag :Henkilo
-                                                                  :child [{:tag :nimi :ns "yht"
-                                                                           :child [{:tag :etunimi}
-                                                                                   {:tag :sukunimi}]}]}]}]}]}]}
+                              :child kasittelytieto}
                              {:tag :luvanTunnisteTiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :alkuPvm}
                              {:tag :loppuPvm}
                              {:tag :sijaintitieto
-                              :child [{:tag :Sijainti
-                                       :child [{:tag :osoite :ns "yht"
-                                                :child [{:tag :yksilointitieto}
-                                                        {:tag :alkuHetki}
-                                                        {:tag :osoitenimi
-                                                         :child [{:tag :teksti}]}]}
-                                               {:tag :piste :ns "yht"
-                                                :child [{:tag :Point :ns "gml"
-                                                         :child [{:tag :pos}]}]}
-                                               {:tag :viiva :ns "yht"
-                                                :child [{:tag :LineString :ns "gml"
-                                                        :child [{:tag :pos}]}]}
-                                               {:tag :alue :ns "yht"
-                                                :child [{:tag :Polygon :ns "gml"
-                                                        :child [{:tag :exterior
-                                                                 :child [{:tag :LinearRing
-                                                                          :child [{:tag :pos}]}]} ]}]}]}]}
+                              :child [mapping-common/sijantiType]}
                              {:tag :pintaala}
                              {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                               :child [{:tag :Osapuoli

@@ -140,10 +140,11 @@
   [{:keys [id timestamp name given status official]}]
   {:kuntalupatunnus id
    :timestamp timestamp
-   :paatokset [{:paivamaarat {:anto          given
-                              :lainvoimainen official}
+   :paatokset [{:paivamaarat {:anto             given
+                              :lainvoimainen    official}
                 :poytakirjat [{:paatoksentekija name
                                :status          status
+                               :paatospvm       given
                                :paatoskoodi     (verdict/verdict-name status)}]}]})
 
 ;;
@@ -167,6 +168,7 @@
    :authority                {}
    :buildings                []
    :closed                   nil
+   :closedBy                 {}
    :comments                 []
    :created                  nil
    :documents                []
@@ -186,6 +188,7 @@
    :schema-version           nil
    :sent                     nil
    :started                  nil
+   :startedBy                {}
    :state                    ""
    :statements               []
    :submitted                nil

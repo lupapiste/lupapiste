@@ -104,16 +104,16 @@ var gis = (function() {
       return self;
     };
 
-    self.drawDrawings = function(drawings) {
-      var addFeatureFn = function(memo, drawing) {
-        var drawAttributes = {};
-        var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"};
-        var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(drawing.geometry), drawAttributes, drawStyle);
-        memo.push(newFeature);
-        return memo;
-      };
-      var featureArray = _.reduce(drawings || [], addFeatureFn, []);
-      if (featureArray.length > 0) self.vectorLayer.addFeatures(featureArray);
+    self.drawDrawings = function(drawings, attrs, style) {
+      if (drawings) {
+        var addFeatureFn = function(memo, drawing) {
+          var newFeature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(drawing.geometry), attrs, style);
+          memo.push(newFeature);
+          return memo;
+        };
+        var featureArray = _.reduce(drawings, addFeatureFn, []);
+        if (featureArray.length > 0) self.vectorLayer.addFeatures(featureArray);
+      }
       return self;
     };
 
