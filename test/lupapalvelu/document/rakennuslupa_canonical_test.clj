@@ -144,20 +144,11 @@
                                      :maanrakennustyo {:value true}
                                      :rakennelmaTaiLaitos {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
-            :yritys yritysnimi-ja-ytunnus})})
-
-(def ^:private sijainen
-  {:id "sijainen"
-   :schema-info {:name "tyonjohtaja", :version 1}
-   :data (merge suunnittelija-henkilo
-           {:sijaistukset {:0 {:sijaistettavaHloEtunimi {:value "Jaska"}
+            :yritys yritysnimi-ja-ytunnus
+            :sijaistukset {:0 {:sijaistettavaHloEtunimi {:value "Jaska"}
                                 :sijaistettavaHloSukunimi {:value "Jokunen"}
                                 :alkamisPvm {:value "13.02.2014"}
-                                :paattymisPvm {:value "20.02.2014"}}
-                           :1 {:sijaistettavaHloEtunimi {:value "Jaska"}
-                                :sijaistettavaHloSukunimi {:value "Jokunen"}
-                                :alkamisPvm {:value "13.03.2014"}
-                                :paattymisPvm {:value "20.03.2014"}}}})})
+                                :paattymisPvm {:value "20.02.2014"}}}})})
 
 (def ^:private tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -345,7 +336,6 @@
 (fact "Meta test: maksaja-henkilo"  maksaja-henkilo  => valid-against-current-schema?)
 (fact "Meta test: maksaja-yritys"   maksaja-yritys   => valid-against-current-schema?)
 (fact "Meta test: tyonjohtaja"      tyonjohtaja      => valid-against-current-schema?)
-(fact "Meta test: sijainen"         sijainen         => valid-against-current-schema?)
 (fact "Meta test: rakennuspaikka"   rakennuspaikka   => valid-against-current-schema?)
 (fact "Meta test: uusi-rakennus"    uusi-rakennus    => valid-against-current-schema?)
 (fact "Meta test: hankkeen-kuvaus"  hankkeen-kuvaus  => valid-against-current-schema?)
@@ -547,7 +537,8 @@
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
         tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
-        yritys (:yritys tyonjohtaja-model)]
+        yritys (:yritys tyonjohtaja-model)
+        sijaistus (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
@@ -563,6 +554,11 @@
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
+    (fact "sijaisuus" sijaistus => truthy)
+    (fact "sijaistettavan nimi" (:sijaistettavaHlo sijaistus) => "Jaska Jokunen")
+    (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus) => (:tyonjohtajaRooliKoodi tyonjohtaja-model))
+    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "13.02.2014")
+    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "20.02.2014")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -699,6 +695,8 @@
         paasuunnitelija (:Suunnittelija (last suunnittelijat)) => truthy
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
+        sijaistukset (:sijaistustieto tyonjohtajatieto) => truthy
+        sijaistus (:Sijaistus (last sijaistukset)) = truthy
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
         rakennuspaikkatieto (first rakennuspaikkatiedot) => truthy
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy

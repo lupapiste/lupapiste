@@ -353,12 +353,12 @@
   (mapv (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]
           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)) 
             {}
-            (assoc-when {}
-                        :sijaistettavaHenkilo (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi) 
-                        :sijaistettavaRooli sijaistettavaRooli
-                        :alkamisPvm alkamisPvm
-                        :paattymisPvm paattymisPvm)))
-        sijaistukset))
+            {:Sijaistus (assoc-when {}
+                                    :sijaistettavaHlo (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi) 
+                                    :sijaistettavaRooli sijaistettavaRooli
+                                    :alkamisPvm alkamisPvm
+                                    :paattymisPvm paattymisPvm)}))
+        (vals sijaistukset)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
