@@ -621,7 +621,7 @@
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
         permitSubType (keyword (:permitSubtype application))]
-    (when-not (and (:add-operation-allowed (op operations/operations))
+    (when-not (and (or (nil? op) (:add-operation-allowed (op operations/operations)))
                    (not= permitSubType :muutoslupa))
       (fail :error.add-operation-not-allowed))))
 

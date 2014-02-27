@@ -1,0 +1,73 @@
+application.VVVL.neighbors: Naapurit
+hankkeen-kuvaus-vesihuolto._group_label: Kohteen kuvaus
+hankkeen-kuvaus-vesihuolto.kuvaus: Perustelut vapautuksen tarpeelle
+help.VVVL.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot.
+help.VVVL.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+help.VVVL.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten kanssa. "Kysy viranomaiselta" - toiminnolla kutsut viranomaisen vastaamaan kysymykseesi. Tällöin viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+help.VVVL.helpText: Lupapisteessä voit valmistella hakemusta rauhassa viranomaisten kanssa. Viranomaiselta voit kysyä neuvoa "Keskusteluketju"  - välilehdeltä. Kun olette saaneet hakemuksen valmiiksi, voit jättää sen painamalla "Jätä hakemus". Tällöin hakemuksesi katsotaan tulleen virallisesti vireille. Tämän jälkeen viranomainen tarkistaa hakemuksen ja pyytää tarvittaessa täydennyksiä. Kun hakemus on viranomaisen kannalta valmis, hän ottaa hakemuksen käsittelyyn kunnan päätöksenteko järjestelmään. Hakemuksen tila on tällöin "Käsittelyssä", etkä voi enää muokata hakemusta. Viranomaisen tehtyä päätöksen näet päätös otteen "Päätös" - välilehdellä ja saat siitä myös tiedon sähköpostiisi.
+help.VVVL.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai <b>lähettää naapurille tiedotteen sähköpostitse Lupapisteen kautta</b>. 
+help.VVVL.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>. 
+help.VVVL.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
+help.VVVL.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
+hulevedet.hulevedet._group_label: Hulevedet
+hulevedet.hulevedet.imeytetään maaperään: Imeytetään maaperään
+hulevedet.hulevedet.Johdetaan muualle, minne: Imeytetään muualle
+hulevedet.hulevedet.Johdetaan rajaojaan tai muuhun ojaan: Johdetaan ojaan
+jatevedet._group_label: Jätevedet
+jatevedet.kuvaus: Kerro tarkasti miten jätevedet käsitellään
+operations.tree.hulevesiviemarista: Hulevesiviemäriin liittymisestä
+operations.tree.vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta: Vapautusta vesijohtoon tai viemäriin liittymisestä
+operations.tree.vesijohdosta: Vesijohtoon liittymisestä
+operations.tree.vesijohdosta-ja-viemarista: Vesijohtoon ja jätevesijärjestelmään liittymisestä
+operations.tree.viemarista: Jätevesiviemäriin liittymisestä
+operations.vvvl-hulevesiviemarista: Hulevesiviemäriin liittymisestä
+operations.vvvl-hulevesiviemarista.desc: Mitä tähän
+operations.vvvl-vesijohdosta: Vapautus vesijohtoon liittymisestä
+operations.vvvl-vesijohdosta-ja-viemarista: Vapautus vesijohtoon ja viemäriin liittymisestä
+operations.vvvl-vesijohdosta-ja-viemarista.desc: Mitä tähän
+operations.vvvl-vesijohdosta.desc:Mitä tähän
+operations.vvvl-viemarista:Vapautus viemäristä
+operations.vvvl-viemarista.desc:Mitä tähän
+phone.short: Puhelin
+talousvedet.hankinta._group_label: Talousveden hankinta
+talousvedet.hankinta.ei tiedossa: Ei tiedossa
+talousvedet.hankinta.Kiinteistön porakaivosta: Porakaivosta
+talousvedet.hankinta.Kiinteistön rengaskaivosta: Rengaskaivosta
+talousvedet.hankinta.Vesihuoltolaitoksen vesijohdosta: Vesijohdosta
+talousvedet.johdatus._group_label: Talusveden johdatus
+talousvedet.johdatus.ei tiedossa: Ei tiedossa
+talousvedet.johdatus.johdetaan paineellisena vesijohtoa pitkin rakennukseen: Johdetaan paineellisena vesijohtoa pitkin rakennukseeen
+talousvedet.johdatus.kannetaan kaivosta tai vesistöstä: Kannetaan kaivosta tai vesistöstä
+talousvedet.johdatus.pumpataan kaivosta tai vesistöstä: Pumpataan kaivosta tai vesistöstä
+talousvedet.riittavyys._group_label: Talousveden riittävyys
+talousvedet.riittavyys.ei tiedossa: Ei tiedossa
+talousvedet.riittavyys.vesi ajoittain vähissä: Vesi ajoittain vähissä
+talousvedet.riittavyys.vesi riittää talouden tarpeisiin: Vesi riittää talouden tarpeisiin
+vesihuolto-kiinteisto._group_label: Kiinteistö
+vesihuolto-kiinteisto.kiinteisto._group_label: Kiinteistö
+vesihuolto-kiinteisto.kiinteisto.maapintaala: Maapinta-ala
+vesihuolto-kiinteisto.kiinteisto.rekisterointipvm: Rekisteröintipäivä
+vesihuolto-kiinteisto.kiinteisto.tilanNimi: Tilan nimi
+vesihuolto-kiinteisto.kiinteisto.vesipintaala: Vesipinta-ala
+vesihuolto-kiinteisto.kiinteistoonKuuluu._append_label: + Lisää rakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu._group_label: Kiinteistöllä sijaitseva rakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi._group_label: Rakennuksen tyyppi
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Asuinrakennus: Asuinrakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.ei tiedossa: Ei tiedossa
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Eläinsuoja: Eläinsuoja
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Lomarakennus: Lomarakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Saunarakennus: Saunarakennus
+vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennusvuosi: Rakennusvuosi
+vesihuolto-kiinteisto.kiinteistoonKuuluu.vapautus: Haen vapautusta tälle rakennukselle
+vesihuolto-kiinteisto.kohteenVarustelutaso._group_label: Vapautushakemuksen kohteena olevan rakennuksen varustustaso
+vesihuolto-kiinteisto.kohteenVarustelutaso.Astianpesukone: Astianpesukone
+vesihuolto-kiinteisto.kohteenVarustelutaso.Kuivakäymälä: Kuivakäymälä
+vesihuolto-kiinteisto.kohteenVarustelutaso.Lämminvesivaraaja: Lämminvesivaraaja
+vesihuolto-kiinteisto.kohteenVarustelutaso.Pyykinpesukone: Pyykinpesukone
+vesihuolto-kiinteisto.kohteenVarustelutaso.Suihku: Suihku
+vesihuolto-kiinteisto.kohteenVarustelutaso.Tiskiallas: Tiskiallas
+vesihuolto-kiinteisto.kohteenVarustelutaso.WC(vesikäymälä): WC (Vesikäymälä)
+vvvl-hulevesiviemarista._group_label: Hulevesiviemäristä
+vvvl-vesijohdosta-ja-viemarista._group_label: Vesijohdosta ja jätevesiviemäristä
+vvvl-vesijohdosta._group_label: Vesijohdosta
+vvvl-viemarista._group_label: Viemäristä

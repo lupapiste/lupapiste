@@ -8,6 +8,19 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
+(def schemalocation-yht-2.1.0
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def schemalocation-yht-2.1.1
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def common-namespaces
+  {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+   :xmlns:gml   "http://www.opengis.net/gml"
+   :xmlns:xlink "http://www.w3.org/1999/xlink"
+   :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"})
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
@@ -147,7 +160,7 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :valmistumisvuosi}]}]}
+                             ]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -163,6 +176,38 @@
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}]}]}
+           {:tag :naapuritieto}]})
+
+(def osapuolet_211
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto
+            :child [osapuoli-body]}
+           {:tag :suunnittelijatieto
+            :child [{:tag :Suunnittelija
+                     :child [{:tag :suunnittelijaRoolikoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :kokemusvuodet}]}]}
+           {:tag :tyonjohtajatieto
+            :child [{:tag :Tyonjohtaja
+                     :child [{:tag :tyonjohtajaRooliKoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}
+                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :tyonjohtajaHakemusKytkin}
+                             {:tag :kokemusvuodet}
+                             ]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos
