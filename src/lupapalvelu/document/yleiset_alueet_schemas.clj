@@ -38,7 +38,7 @@
            {:name "sahko"}
            {:name "tele"}
            {:name "vesijohto"}]}
-   {:name "muu-sijoituksen-tarkoitus" :type :string :size "l"}])
+   {:name "muu-sijoituksen-tarkoitus" :type :string }])
 
 (def hankkeen-kuvaus-kaivulupa
   (body

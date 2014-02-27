@@ -297,16 +297,28 @@
 ;; Raster images:
 ;;
 (defn raster-images [request service]
-  (let [layer (get-in request [:params "LAYERS"])
-        {:keys [host path]} (env/value :geoserver :wms)
-        wms-url (str host path)]
+  (let [layer (get-in request [:params :LAYER])]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
+              {:query-params (:params request)
+               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+               :basic-auth (:raster auth)
+               :as :stream})
+      "wms" (let [{:keys [host path]} (env/value :geoserver :wms)
+                  wms-url (str host path)]
+              (http/get wms-url
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                 :basic-auth (:raster auth)
-                 :as :stream})
-      "wms" (http/get wms-url
-                {:query-params (:params request)
-                 :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                 :as :stream}))))
+                 :as :stream}))
+      "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
+                   url-part (case layer
+                              "taustakartta" "maasto"
+                              "kiinteistojaotus" "kiinteisto"
+                              "kiinteistotunnukset" "kiinteisto")
+                   wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
+               (http/get wmts-url
+                 {:query-params (:params request)
+                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                  :basic-auth [username password]
+                  :as :stream})))))
+
