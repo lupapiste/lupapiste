@@ -156,6 +156,11 @@
     (assoc-in [:data :patevyys :patevyysvaatimusluokka :value] "Ei tiedossa")
     (assoc-in [:data :patevyys :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
 
+(def ^:private tyonjohtajan-sijaistus-blank-dates
+  (-> tyonjohtaja
+    (dissoc-in [:data :sijaistukset :0 :alkamisPvm])
+    (assoc-in [:data :sijaistukset :0 :paattymisPvm :value] "")))
+
 (def ^:private rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
                                       :version 1}
@@ -570,6 +575,14 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "Ei tiedossa")
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => false)))
+
+(facts "Canonical tyonjohtajan sijaistus model is correct"
+       (let [tyonjohtaja (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
+        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja :tyonjohtaja)
+        sijaistus (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
+         (fact "model" sijaistus => truthy)
+         (fact "missing alkamisPvm" (:alkamisPvm sijaistus) => nil)
+         (fact "empty paattymisPvm" (:VRKrooliKoodi sijaistus) => nil)))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))
