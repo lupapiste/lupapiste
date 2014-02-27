@@ -111,7 +111,10 @@
                     :suunnitelmakartta
                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
                     :tilapainen-liikennejarjestelysuunnitelma
-                    :tyyppiratkaisu]
+                    :tyyppiratkaisu
+                    :tyoalueen-kuvaus
+                    :valokuva
+                    :valtakirja]
    :osapuolet attachment-types-osapuoli
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
