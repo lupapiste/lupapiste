@@ -104,32 +104,35 @@
 
 (def ^:private operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
-   [; permit/YI
-    ["Meluilmoitus" :meluilmoitus]
+   (filterv identity ; TODO remove filter after pima featura is in production
+     [; permit/YI
+      ["Meluilmoitus" :meluilmoitus]
 
-    ; at the moment permit/R
-    ["Pima" :pima]
-    ["maa-ainesten_ottaminen" :maa-aineslupa]
+      ; at the moment permit/R
+      (when (env/feature? :pima) ["Pima" :pima])
 
-    ; permit/YL
-    ["uusi-toiminta" :yl-uusi-toiminta]
-    ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-    ["toiminnan-muutos" :yl-toiminnan-muutos]
-    ["lupamaaraysten-tarkistaminen" :yl-lupamaaraysten-tarkistaminen]
-    ["toiminnan-aloittamislupa" :yl-toiminnan-aloittamislupa]
-    ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
-           [["vesijohdosta" :vvvl-vesijohdosta]
-            ["viemarista" :vvvl-viemarista]
-            ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
-            ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]]])
+      ; permit/MAL
+      ["maa-ainesten_ottaminen" :maa-aineslupa]
+
+      ; permit/YL
+      ["ympariston-pilaantumisen-vaara"
+       [["uusi-toiminta" :yl-uusi-toiminta]
+        ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+        ["toiminnan-muutos" :yl-toiminnan-muutos]]]
+      ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
+       [["vesijohdosta" :vvvl-vesijohdosta]
+        ["viemarista" :vvvl-viemarista]
+        ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
+        ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
+
 
 (def operation-tree
-  (vector
-    operation-tree-for-R
+  (filterv identity
+    [operation-tree-for-R
     operation-tree-for-environment-R
     operation-tree-for-P
     (when (env/feature? :ymparisto) operation-tree-for-Y)
-    (when (env/feature? :yleiset-alueet) operation-tree-for-YA)))
+     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)]))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] operation-tree)
@@ -251,21 +254,20 @@
                                            :link-permit-required true}})
 
 (def ^:private common-ymparistolupa-schemas ["maksaja"])
-(def ^:private ymparistolupa-attachments [[:muut :muu]]) ; TODO
+(def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
    :permit-type permit/YL
    :schema-data []
    :required common-ymparistolupa-schemas
    :attachments ymparistolupa-attachments
+   :add-operation-allowed false
    :link-permit-required false})
 
 (def yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
    :yl-olemassa-oleva-toiminta ymparistolupa-operation
-   :yl-toiminnan-muutos ymparistolupa-operation
-   :yl-lupamaaraysten-tarkistaminen ymparistolupa-operation
-   :yl-toiminnan-aloittamislupa ymparistolupa-operation})
+   :yl-toiminnan-muutos ymparistolupa-operation})
 
 (def operations
   (merge
@@ -474,12 +476,10 @@
                                    :attachments []
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :maa-aineslupa               {:schema "ottamismaara"
-                                   :permit-type permit/R ; TODO
-                                   :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
-                                              "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
+     :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
+                                   :permit-type permit/MAL
+                                   :required ["maksaja"]
                                    :attachments []
-                                   :add-operation-allowed true
                                    :link-permit-required false}
      :vvvl-vesijohdosta           {:schema "talousvedet"
                                    :permit-type permit/VVVL

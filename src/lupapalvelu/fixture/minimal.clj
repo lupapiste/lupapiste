@@ -351,6 +351,7 @@
                              {:municipality "753" :permitType "P"}
                              {:municipality "753" :permitType "YI"}
                              {:municipality "753" :permitType "YL"}
+                             {:municipality "753" :permitType "MAL"}
                              {:municipality "753" :permitType "VVVL"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
@@ -368,12 +369,14 @@
                                               :meluilmoitus [[:kartat :kartta-melun-ja-tarinan-leviamisesta]
                                                              [:muut :muu]]
                                               :yl-uusi-toiminta [[:muut :muu]]
+                                              :maa-aineslupa [[:muut :muu]]
                                               }
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "dev_sipoo"}
                              :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
                              :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
-                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
+                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
+                             :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",

@@ -54,6 +54,11 @@
    :sftp-directory   "/poikkeusasiat"
    :case-xml-element :Popast})
 
+(defpermit MAL "Maa-ainesluvat"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :case-xml-element :MaaAineslupaAsia})
+
 ;;
 ;; Helpers
 ;;
