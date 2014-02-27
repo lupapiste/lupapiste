@@ -915,10 +915,9 @@
                            :neighbors :openInfoRequest :statements :tasks :verdicts
                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
                         app-updates)
-        organization  (organization/get-organization (:organization application))
-        sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang application organization)
-        set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-    (update-application command {$set (merge app-updates set-statement)})
+        organization  (organization/get-organization (:organization application))]
+    (mapping-to-krysp/save-application-as-krysp application lang application organization)
+    (update-application command {$set app-updates})
     (ok)))
 
 
