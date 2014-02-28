@@ -78,6 +78,9 @@ vvvl-vesijohdosta-ja-viemarista._group_label: Vesijohdosta ja jätevesiviemäris
 vvvl-vesijohdosta._group_label: Vesijohdosta
 vvvl-viemarista._group_label: Viemäristä
 
+help.R.AddOperations: Jos teet samalla muita toimenpiteitä, kuten rakennat useamman rakennuksen, grillikatoksen tai kaadat puita, voit hakea lupaa samalla hakemuksella. Voit lisätä hakemukselle toimenpiteitä alla olevalla napilla.
+
+help.AddPermit: Valitsemasi toimenpiteen täytyy liittyä aikaisempaan lupaan. Lisää aikaisempi lupa viiteluvaksi alla olevalla napilla.
 purku.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
 rakennuksen-laajentaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
 rakennuksen-muuttaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
