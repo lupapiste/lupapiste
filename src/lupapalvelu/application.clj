@@ -873,14 +873,7 @@
                         (when (= "verdictGiven" (:state application))
                           {:started created
                            :state  :constructionStarted}))
-        application   (merge
-                        application
-                        (select-keys
-                          domain/application-skeleton
-                          [:allowedAttachmentTypes :attachments :comments :drawings
-                           :neighbors :openInfoRequest :statements :tasks :verdicts
-                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
-                        app-updates)
+        application   (merge application app-updates)
         organization  (organization/get-organization (:organization application))
         building      (or
                         (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
@@ -907,14 +900,7 @@
                        :closed timestamp
                        :closedBy (select-keys user [:id :firstName :lastName])
                        :state :closed}
-        application   (merge
-                        application
-                        (select-keys
-                          domain/application-skeleton
-                          [:allowedAttachmentTypes :attachments :comments :drawings
-                           :neighbors :openInfoRequest :statements :tasks :verdicts
-                           :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])
-                        app-updates)
+        application   (merge application app-updates)
         organization  (organization/get-organization (:organization application))]
     (mapping-to-krysp/save-application-as-krysp application lang application organization)
     (update-application command {$set app-updates})
