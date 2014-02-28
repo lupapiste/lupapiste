@@ -8,16 +8,25 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
+(def schemalocation-yht-2.1.0
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def schemalocation-yht-2.1.1
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def common-namespaces
+  {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+   :xmlns:gml   "http://www.opengis.net/gml"
+   :xmlns:xlink "http://www.w3.org/1999/xlink"
+   :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"})
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
                       {:tag :kiinttun}
                       {:tag :rakennusnro}
                       {:tag :aanestysalue}])
-
-(def ^:private piste {:tag :piste  :ns "yht"
-                      :child [{:tag :Point
-                               :child [{:tag :pos}]}]})
 
 (def ^:private postiosoite-children [{:tag :kunta}
                                      {:tag :osoitenimi :child [{:tag :teksti}]}
@@ -30,41 +39,46 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
-(def sijantitieto {:tag :sijaintitieto
-                   :child [{:tag :Sijainti
-                            :child [{:tag :tyhja  :ns "yht"}
-                                     osoite
-                                     piste
-                                     {:tag :sijaintiepavarmuus  :ns "yht"}
-                                     {:tag :luontitapa  :ns "yht"}]}]})
+(def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
+
+(def sijantiType {:tag :Sijainti
+                   :child [{:tag :osoite :ns "yht"
+                            :child [{:tag :yksilointitieto}
+                                    {:tag :alkuHetki}
+                                    {:tag :osoitenimi
+                                     :child [{:tag :teksti}]}]}
+                           {:tag :piste :ns "yht"
+                            :child [gml-point]}
+                           {:tag :viiva :ns "yht"
+                            :child [{:tag :LineString :ns "gml"
+                                     :child [{:tag :pos}]}]}
+                           {:tag :alue :ns "yht"
+                            :child [{:tag :Polygon :ns "gml"
+                                     :child [{:tag :exterior
+                                              :child [{:tag :LinearRing
+                                                       :child [{:tag :pos}]}]} ]}]}
+                           {:tag :tyhja :ns "yht"}]})
+
+(defn sijaintitieto
+  "Takes an optional xml namespace for Sijainti element"
+  [& [xmlns]]
+  {:tag :sijaintitieto
+   :child [(merge
+             sijantiType
+             (when xmlns {:ns xmlns}))]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
 
-(def ^:private kiinteisto [{:tag :kiinteisto
-                            :child (conj [{:tag :kiinteisto
-                                           :child [{:tag :kylanimi}
-                                                   {:tag :tilannimi}
-                                                   {:tag :kiinteistotunnus}
-                                                   {:tag :maaraAlaTunnus}]}
-                                          {:tag :palsta}
-                                          {:tag :kokotilaKytkin}
-                                          {:tag :hallintaperuste}
-                                          {:tag :vuokraAluetunnus}
-                                          {:tag :kaavanaste}
-                                          {:tag :kerrosala}
-                                          {:tag :tasosijainti}
-                                          {:tag :rakennusoikeusYhteensa}
-                                          {:tag :uusiKytkin}]
-                                     osoite
-                                     sijantitieto
-                                     rakennusoikeudet)}])
+(def yksilointitieto {:tag :yksilointitieto :ns "yht"})
+
+(def alkuHetki {:tag :alkuHetki :ns "yht"})
 
 (def rakennuspaikka {:tag :Rakennuspaikka
-                     :child [{:tag :yksilointitieto :ns "yht"}
-                             {:tag :alkuHetki :ns "yht"}
+                     :child [yksilointitieto
+                             alkuHetki
                              {:tag :rakennuspaikanKiinteistotieto :ns "yht"
                               :child [{:tag :RakennuspaikanKiinteisto
                                        :child [{:tag :kiinteistotieto
@@ -146,7 +160,7 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :valmistumisvuosi}]}]}
+                             ]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -162,6 +176,38 @@
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}]}]}
+           {:tag :naapuritieto}]})
+
+(def osapuolet_211
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto
+            :child [osapuoli-body]}
+           {:tag :suunnittelijatieto
+            :child [{:tag :Suunnittelija
+                     :child [{:tag :suunnittelijaRoolikoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :kokemusvuodet}]}]}
+           {:tag :tyonjohtajatieto
+            :child [{:tag :Tyonjohtaja
+                     :child [{:tag :tyonjohtajaRooliKoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}
+                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :tyonjohtajaHakemusKytkin}
+                             {:tag :kokemusvuodet}
+                             ]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos
@@ -206,6 +252,23 @@
                                          {:tag :puoltotieto
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
+
+
+(def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
+                                  {:tag :asiatunnus :ns "yht"}
+                                  {:tag :paivaysPvm :ns "yht"}
+                                  {:tag :kasittelija :ns "yht"
+                                   :child [{:tag :henkilo
+                                            :child [{:tag :nimi
+                                                     :child [{:tag :etunimi}
+                                                             {:tag :sukunimi}]}]}]}])
+
+(def ymp-osapuoli-children
+  [{:tag :nimi}
+   {:tag :postiosoite :child postiosoite-children-ns-yht}
+   {:tag :sahkopostiosoite}
+   {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
+   {:tag :liikeJaYhteisotunnus}])
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
@@ -310,24 +373,24 @@
   (let [attachments (flatten-statement-attachments statement-attachments)]
     (write-attachments attachments output-dir)))
 
-(defn add-statement-attachments [canonical statement-attachments]
+(defn add-statement-attachments [canonical statement-attachments lausunto-path]
   (if (empty? statement-attachments)
     canonical
     (reduce
       (fn [c a]
-        (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
+        (let [lausuntotieto (get-in c lausunto-path)
               lausunto-id (name (first (keys a)))
               paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
               index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
               paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
               paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-          (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty)))
+          (assoc-in c lausunto-path paivitetty)))
       canonical
       statement-attachments)))
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
-   Returns a sequence of attachemt fileIds that were written to disk."
+   Returns a sequence of attachment fileIds that were written to disk."
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
   {:pre [(string? output-dir)]
    :post [%]}

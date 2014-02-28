@@ -337,13 +337,13 @@ Select operation path by permit type
   ...  ELSE  Select operations path R
 
 Select operations path R
-  Click tree item by text  "Rakentaminen ja purkaminen"
-  Click tree item by text  "Uuden rakennuksen rakentaminen"
+  Click tree item by text  "Rakentaminen ja purkaminen (talot, grillikatokset, autotallit, remontointi)"
+  Click tree item by text  "Uuden rakennuksen rakentaminen (mökit, omakotitalot, saunat, julkiset rakennukset)"
   Click tree item by text  "Asuinrakennuksen rakentaminen"
 
 Select operations path YA kayttolupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
-  Click tree item by text  "Yleisten alueiden käyttö (tapahtumat, mainokset, yms.)"
+  Click tree item by text  "Yleisten alueiden tai muiden kunnan omistamien alueiden käyttö (tapahtumat, mainokset, yms.)"
   Click tree item by text  "Terassin sijoittaminen"
 
 Select operations path YA kayttolupa kaivu
@@ -354,7 +354,7 @@ Select operations path YA kayttolupa kaivu
 
 Select operations path YA kayttolupa mainostus-viitoitus
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
-  Click tree item by text  "Yleisten alueiden käyttö (tapahtumat, mainokset, yms.)"
+  Click tree item by text  "Yleisten alueiden tai muiden kunnan omistamien alueiden käyttö (tapahtumat, mainokset, yms.)"
   Click tree item by text  "Mainoksien sijoittaminen"
 
 Select operations path YA sijoituslupa
