@@ -282,6 +282,10 @@
             <button data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: $root.authorization.ok('add-operation')" class="btn-primary">
              <span data-bind="ltext: 'application.addOperation'">Lisää toimenpide</span> <span class="icon add left-align"></span> 
             </button>
+            <p data-bind="visible: $root.authorization.ok('permit-required'), ltext: 'help.AddPermit'"> </p>
+            <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('permit-required'), enable: $root.authorization.ok('permit-required')" class="btn-primary">
+             <span data-bind="ltext: 'application.addLinkPermit'">Lisääviitelupa</span> <span class="icon add left-align"></span> 
+            </button>
           </div>  
           <!-- docgen generated content: -->
           <div class="application_section">

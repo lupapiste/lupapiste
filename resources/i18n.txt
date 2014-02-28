@@ -79,3 +79,5 @@ vvvl-vesijohdosta._group_label: Vesijohdosta
 vvvl-viemarista._group_label: Viemäristä
 
 help.R.AddOperations: Jos teet samalla muita toimenpiteitä, kuten rakennat useamman rakennuksen, grillikatoksen tai kaadat puita, voit hakea lupaa samalla hakemuksella. Voit lisätä hakemukselle toimenpiteitä alla olevalla napilla.
+
+help.AddPermit: Valitsemasi toimenpide liittyy aikaisempaan lupaan. Lisää aikaisempi viiteluvaksi alla olevalla napilla.
