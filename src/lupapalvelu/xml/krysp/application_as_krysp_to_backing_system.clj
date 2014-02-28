@@ -90,5 +90,5 @@
         output-dir    (resolve-output-directory organization permit-type)]
     (assert (= permit/R permit-type)
       (str "Sending aloitusilmoitus to backing system is not supported for " (name permit-type) " type of permits."))
-    ((try-krysp (rl-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version)))))
+    (try-krysp (rl-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version))))
 
