@@ -347,17 +347,15 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="if: (!postVerdict() && preAttachmentsByGroup().length > 0 && postAttachmentsByGroup().length == 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
             <button
-              data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+              data-bind="click: $root.application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
               data-window-id="upload-dialog"
-              class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              class="btn btn-primary modal">
             </button>
             <button
               data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
-              class="btn btn-primary"
-              data-test-id="attachments-copy-own">
+              class="btn btn-primary">
             </button>
             <button
               data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
