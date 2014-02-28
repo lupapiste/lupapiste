@@ -2,11 +2,11 @@ application.VVVL.neighbors: Naapurit
 hankkeen-kuvaus-vesihuolto._group_label: Kohteen kuvaus
 hankkeen-kuvaus-vesihuolto.kuvaus: Perustelut vapautuksen tarpeelle
 help.VVVL.applicationInfoDesc: Tällä välilehdellä näet valitsemaasi toimenpiteeseen liittyvät lomaketiedot.
-help.VVVL.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>. 
+help.VVVL.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>.
 help.VVVL.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten kanssa. "Kysy viranomaiselta" - toiminnolla kutsut viranomaisen vastaamaan kysymykseesi. Tällöin viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
 help.VVVL.helpText: Lupapisteessä voit valmistella hakemusta rauhassa viranomaisten kanssa. Viranomaiselta voit kysyä neuvoa "Keskusteluketju"  - välilehdeltä. Kun olette saaneet hakemuksen valmiiksi, voit jättää sen painamalla "Jätä hakemus". Tällöin hakemuksesi katsotaan tulleen virallisesti vireille. Tämän jälkeen viranomainen tarkistaa hakemuksen ja pyytää tarvittaessa täydennyksiä. Kun hakemus on viranomaisen kannalta valmis, hän ottaa hakemuksen käsittelyyn kunnan päätöksenteko järjestelmään. Hakemuksen tila on tällöin "Käsittelyssä", etkä voi enää muokata hakemusta. Viranomaisen tehtyä päätöksen näet päätös otteen "Päätös" - välilehdellä ja saat siitä myös tiedon sähköpostiisi.
-help.VVVL.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai <b>lähettää naapurille tiedotteen sähköpostitse Lupapisteen kautta</b>. 
-help.VVVL.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>. 
+help.VVVL.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai <b>lähettää naapurille tiedotteen sähköpostitse Lupapisteen kautta</b>.
+help.VVVL.PartiesDesc: Täällä näet henkilöt, joilla on <b>oikeus nähdä tai muokata hakemustasi</b>. Voit halutessasi kutsua hakemuksellesi muita henkilöitä, kuten kanssahakijat. Samalla <b>valtuutat heidät käsittelemään hakemusta puolestasi</b>.
 help.VVVL.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> lausuntoja muilta viranomaisilta</b>. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
 help.VVVL.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
 hulevedet.hulevedet._group_label: Hulevedet
@@ -65,15 +65,20 @@ vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Lomarakennus: Lomarake
 vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennuksenTyypi.Saunarakennus: Saunarakennus
 vesihuolto-kiinteisto.kiinteistoonKuuluu.rakennusvuosi: Rakennusvuosi
 vesihuolto-kiinteisto.kiinteistoonKuuluu.vapautus: Haen vapautusta tälle rakennukselle
-vesihuolto-kiinteisto.kohteenVarustelutaso._group_label: Vapautushakemuksen kohteena olevan rakennuksen varustustaso
-vesihuolto-kiinteisto.kohteenVarustelutaso.Astianpesukone: Astianpesukone
-vesihuolto-kiinteisto.kohteenVarustelutaso.Kuivakäymälä: Kuivakäymälä
-vesihuolto-kiinteisto.kohteenVarustelutaso.Lämminvesivaraaja: Lämminvesivaraaja
-vesihuolto-kiinteisto.kohteenVarustelutaso.Pyykinpesukone: Pyykinpesukone
-vesihuolto-kiinteisto.kohteenVarustelutaso.Suihku: Suihku
-vesihuolto-kiinteisto.kohteenVarustelutaso.Tiskiallas: Tiskiallas
-vesihuolto-kiinteisto.kohteenVarustelutaso.WC(vesikäymälä): WC (Vesikäymälä)
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso._group_label: Vapautushakemuksen kohteena olevan rakennuksen varustustaso
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.Astianpesukone: Astianpesukone
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.Kuivakäymälä: Kuivakäymälä
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.Lämminvesivaraaja: Lämminvesivaraaja
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.Pyykinpesukone: Pyykinpesukone
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.Suihku: Suihku
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.Tiskiallas: Tiskiallas
+vesihuolto-kiinteisto.kiinteistoonKuuluu.kohteenVarustelutaso.WC(vesikäymälä): WC (Vesikäymälä)
 vvvl-hulevesiviemarista._group_label: Hulevesiviemäristä
 vvvl-vesijohdosta-ja-viemarista._group_label: Vesijohdosta ja jätevesiviemäristä
 vvvl-vesijohdosta._group_label: Vesijohdosta
 vvvl-viemarista._group_label: Viemäristä
+
+purku.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+rakennuksen-laajentaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+rakennuksen-muuttaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+uusiRakennus.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään

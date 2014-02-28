@@ -234,7 +234,9 @@
          :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
                     :lammonlahde        (get-text rakennus :polttoaine)}
                                         ; key :uima-altaita has been removed from lupapiste
-         :varusteet                     (dissoc (cr/all-of rakennus :varusteet) :uima-altaita)
+         :varusteet                     (-> (cr/all-of rakennus :varusteet)
+                                          (dissoc :uima-altaita)
+                                          (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))
          :huoneistot (->>
                        (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
@@ -245,7 +247,7 @@
                                                   :huoneistoala    (get-text huoneisto :huoneistoala)
                                                   :huoneluku       (get-text huoneisto :huoneluku)}
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
-                               :varusteet                          (cr/all-of   huoneisto :varusteet)})))}))))
+                               :varusteet                          (cr/all-of huoneisto :varusteet)})))}))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
