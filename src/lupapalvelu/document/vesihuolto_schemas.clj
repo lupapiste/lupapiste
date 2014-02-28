@@ -20,16 +20,17 @@
                                                                 {:name "Asuinrakennus"}
                                                                 {:name "ei tiedossa"}]}
                                                         {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
-                                                        {:name "vapautus" :type :checkbox}]}
-                                                {:name "kohteenVarustelutaso" :type :group
-                                                 :body [{:name "Suihku" :type :checkbox}
-                                                        {:name "Tiskiallas" :type :checkbox}
-                                                        {:name "Astianpesukone" :type :checkbox}
-                                                        {:name "Pyykinpesukone" :type :checkbox}
-                                                        {:name "L\u00e4mminvesivaraaja" :type :checkbox}
-                                                        {:name "Kuivak\u00e4ym\u00e4l\u00e4" :type :checkbox}
-                                                        {:name "WC(vesik\u00e4ym\u00e4l\u00e4)" :type :checkbox}
-                                                        ]})})
+                                                        {:name "vapautus" :type :checkbox}
+                                                        {:name "kohteenVarustelutaso" :type :group
+                                                         :body [{:name "Suihku" :type :checkbox}
+                                                                {:name "Tiskiallas" :type :checkbox}
+                                                                {:name "Astianpesukone" :type :checkbox}
+                                                                {:name "Pyykinpesukone" :type :checkbox}
+                                                                {:name "L\u00e4mminvesivaraaja" :type :checkbox}
+                                                                {:name "Kuivak\u00e4ym\u00e4l\u00e4" :type :checkbox}
+                                                                {:name "WC(vesik\u00e4ym\u00e4l\u00e4)" :type :checkbox}
+                                                                ]}]}
+                                                )})
 
 
 
@@ -47,20 +48,22 @@
            :removable false
            :repeating false
            }
-    :body [{:name "hulevedet" :type :select
+    :body [{:name "hulevedet" :type :select :other-key "johdetaanMuualle"
             :body [{:name "Johdetaan muualle, minne"}
                    {:name "Johdetaan rajaojaan tai muuhun ojaan"}
-                   {:name "imeytet\u00e4\u00e4n maaper\u00e4\u00e4n"}]}]}
+                   {:name "imeytet\u00e4\u00e4n maaper\u00e4\u00e4n"}]}
+           {:name "johdetaanMuualle" :type :string :size "l"}]}
    {:info {:name "talousvedet"
            :approvable false
            :order 4
            :removable false
            :repeating false}
-    :body [{:name "hankinta" :type :select
+    :body [{:name "hankinta" :type :select :other-key "muualta"
             :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
                    {:name "Kiinteist\u00f6n rengaskaivosta"}
                    {:name "Kiinteist\u00f6n porakaivosta"}
-                   {:name "ei tiedossa"}]}
+                   {:name "muualta"}]}
+           {:name "muualta" :type :string :size "l"}
            {:name "johdatus" :type :select
             :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "pumpataan kaivosta tai vesist\u00f6st\u00e4"}
