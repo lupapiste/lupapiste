@@ -277,6 +277,12 @@
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
           <p data-bind="html: loc('help.' + $root.application.permitType() + '.applicationInfoDesc')" class="tab-info"></p>
           <p data-bind="lhtml: 'required.field.desc'"></p>
+          <div data-bind="with: application">
+            <p data-bind="visible: $root.authorization.ok('add-operation'), html: loc('help.' + $root.application.permitType() + '.AddOperations')"> </p>
+            <button data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: $root.authorization.ok('add-operation')" class="btn-primary">
+             <span data-bind="ltext: 'application.addOperation'">Lisää toimenpide</span> <span class="icon add left-align"></span> 
+            </button>
+          </div>  
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="applicationDocgen" class="docgen-content">
