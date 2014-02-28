@@ -19,7 +19,10 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]))
+            [clojure.java.io :refer :all]
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]
+            ))
 
 (defn- do-test [application]
   (let [canonical (application-to-canonical application "fi")
@@ -121,3 +124,17 @@
       "2.1.2"
       "target"
       "begin-of-link") => nil ))
+
+(facts "Tyonjohtajan sijaistus"
+  (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi")
+        krysp-xml (element-to-xml canonical rakennuslupa_to_krysp_213)
+        xml-s     (indent-str krysp-xml)
+        lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))
+        sijaistus (xml/select1 lp-xml [:Sijaistus])]
+    ;(clojure.pprint/pprint sijaistus)
+    (fact "sijaistettavan nimi" (:sijaistettavaHlo sijaistus) => "Jaska Jokunen")
+    (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus) => (xml/get-text lp-xml [:tyonjohtajaRooliKoodi]))
+    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "13.02.2014")
+    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "20.02.2014")))
+
+

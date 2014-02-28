@@ -354,7 +354,7 @@
           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)) 
             {}
             {:Sijaistus (assoc-when {}
-                                    :sijaistettavaHlo (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi) 
+                                    :sijaistettavaHlo (clojure.string/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)) 
                                     :sijaistettavaRooli sijaistettavaRooli
                                     :alkamisPvm alkamisPvm
                                     :paattymisPvm paattymisPvm)}))

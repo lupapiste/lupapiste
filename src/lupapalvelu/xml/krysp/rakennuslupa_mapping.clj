@@ -234,7 +234,7 @@
 
     (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)
     (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
-    (update-in [:child] mapping-common/update-child-element [:osapuolettieto :Osapuolet :osapuolitieto :tyonjohtajatieto :Tyonjohtaja :sijaistustieto] sijaistus_213)))
+    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja] sijaistus_213)))
 
 
 (defn- get-mapping [krysp-version]
