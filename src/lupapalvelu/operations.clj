@@ -146,10 +146,6 @@
 
 (def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
-
-(def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
-
-
 (def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
 (def ^:private common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
@@ -253,7 +249,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private common-ymparistolupa-schemas ["maksaja"])
+(def ^:private common-ymparistolupa-schemas ["maksaja" "vesihuolto-kiinteisto"])
 (def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
@@ -466,7 +462,7 @@
                                    :link-permit-required false}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type permit/YI
-                                   :required common-ymp-schemas
+                                   :required ["ymp-ilm-kesto" "vesihuolto-kiinteisto"]
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
@@ -478,7 +474,7 @@
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
-                                   :required ["maksaja"]
+                                   :required ["maksaja" "vesihuolto-kiinteisto"]
                                    :attachments []
                                    :link-permit-required false}
      :vvvl-vesijohdosta           {:schema "talousvedet"
