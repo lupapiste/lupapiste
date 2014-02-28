@@ -22,6 +22,12 @@ operations.tree.vesijohdosta-ja-viemarista: Vesijohtoon ja jätevesijärjestelm�
 operations.tree.viemarista: Jätevesiviemäriin liittymisestä
 operations.vvvl-hulevesiviemarista: Hulevesiviemäriin liittymisestä
 operations.vvvl-hulevesiviemarista.desc: Mitä tähän
+
+attachmentType.yleiset-alueet.tyoalueen-kuvaus: Työalueen kuvaus
+attachmentType.yleiset-alueet.valokuva: Valokuva
+attachmentType.yleiset-alueet.valtakirja: Valtakirja
+
+
 operations.vvvl-vesijohdosta: Vapautus vesijohtoon liittymisestä
 operations.vvvl-vesijohdosta-ja-viemarista: Vapautus vesijohtoon ja viemäriin liittymisestä
 operations.vvvl-vesijohdosta-ja-viemarista.desc: Mitä tähän
