@@ -77,3 +77,8 @@ vvvl-hulevesiviemarista._group_label: Hulevesiviemäristä
 vvvl-vesijohdosta-ja-viemarista._group_label: Vesijohdosta ja jätevesiviemäristä
 vvvl-vesijohdosta._group_label: Vesijohdosta
 vvvl-viemarista._group_label: Viemäristä
+
+purku.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+rakennuksen-laajentaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+rakennuksen-muuttaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+uusiRakennus.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
