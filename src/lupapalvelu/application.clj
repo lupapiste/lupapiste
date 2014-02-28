@@ -134,7 +134,9 @@
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka") (domain/get-document-by-name application "poikkeusasian-rakennuspaikka"))]
+    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka")
+                                  (domain/get-document-by-name application "poikkeusasian-rakennuspaikka")
+                                  (domain/get-document-by-name application "vesihuolto-kiinteisto"))]
       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
