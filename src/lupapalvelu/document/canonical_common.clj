@@ -356,8 +356,8 @@
             {:Sijaistus (assoc-when {}
                                     :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
                                     :sijaistettavaRooli sijaistettavaRooli
-                                    :alkamisPvm (to-xml-date-from-string alkamisPvm)
-                                    :paattymisPvm (to-xml-date-from-string paattymisPvm))}))
+                                    :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                                    :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
         (vals sijaistukset)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]

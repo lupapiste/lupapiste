@@ -563,8 +563,8 @@
     (fact "sijaisuus" sijaistus => truthy)
     (fact "sijaistettavan nimi" (:sijaistettavaHlo sijaistus) => "Jaska Jokunen")
     (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus) => (:tyonjohtajaRooliKoodi tyonjohtaja-model))
-    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "13.02.2014")
-    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "20.02.2014")
+    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "2014-02-13")
+    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "2014-02-20")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
