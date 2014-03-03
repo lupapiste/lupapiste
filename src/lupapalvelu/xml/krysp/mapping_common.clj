@@ -207,7 +207,12 @@
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}
                              {:tag :kokemusvuodet}
-                             ]}]}
+                             {:tag :sijaistustieto
+                              :child [{:tag :Sijaistus
+                                       :child [{:tag :sijaistettavaHlo}
+                                               {:tag :sijaistettavaRooli}
+                                               {:tag :alkamisPvm}
+                                               {:tag :paattymisPvm}]}]}]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos

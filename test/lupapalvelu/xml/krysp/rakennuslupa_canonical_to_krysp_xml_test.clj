@@ -131,10 +131,11 @@
         xml-s     (indent-str krysp-xml)
         lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))
         sijaistus (xml/select1 lp-xml [:Sijaistus])]
-    ;(clojure.pprint/pprint sijaistus)
-    (fact "sijaistettavan nimi" (:sijaistettavaHlo sijaistus) => "Jaska Jokunen")
-    (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus) => (xml/get-text lp-xml [:tyonjohtajaRooliKoodi]))
-    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "13.02.2014")
-    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "20.02.2014")))
 
+    (validator/validate xml-s (:permitType application-tyonjohtajan-nimeaminen) "2.1.3")
+
+    (fact "sijaistettavan nimi" (xml/get-text sijaistus [:sijaistettavaHlo]) => "Jaska Jokunen")
+    (fact "sijaistettava rooli" (xml/get-text sijaistus [:sijaistettavaRooli]) => (xml/get-text lp-xml [:tyonjohtajaRooliKoodi]))
+    (fact "sijaistettavan alkamisPvm" (xml/get-text sijaistus [:alkamisPvm]) => "2014-02-13")
+    (fact "sijaistettavan paattymisPvm" (xml/get-text sijaistus [:paattymisPvm]) => "2014-02-20")))
 

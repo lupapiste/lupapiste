@@ -351,20 +351,20 @@
 
 (defn get-sijaistukset [sijaistukset sijaistettavaRooli]
   (mapv (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]
-          (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)) 
+          (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
             {}
             {:Sijaistus (assoc-when {}
-                                    :sijaistettavaHlo (clojure.string/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)) 
+                                    :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
                                     :sijaistettavaRooli sijaistettavaRooli
-                                    :alkamisPvm alkamisPvm
-                                    :paattymisPvm paattymisPvm)}))
+                                    :alkamisPvm (to-xml-date-from-string alkamisPvm)
+                                    :paattymisPvm (to-xml-date-from-string paattymisPvm))}))
         (vals sijaistukset)))
 
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
-    (merge foremans 
+    (merge foremans
            {:tyonjohtajaRooliKoodi rooli
             :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
             :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
