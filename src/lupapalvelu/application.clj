@@ -134,7 +134,9 @@
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka") (domain/get-document-by-name application "poikkeusasian-rakennuspaikka"))]
+    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka")
+                                  (domain/get-document-by-name application "poikkeusasian-rakennuspaikka")
+                                  (domain/get-document-by-name application "vesihuolto-kiinteisto"))]
       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
@@ -639,6 +641,19 @@
                                  $pushAll {:documents new-docs
                                            :attachments (make-attachments created op (:organization application) (:state application))}
                                  $set {:modified created}})))
+
+(defn- link-permit-required? [_ application]
+  (when (nil? (some
+                (fn [{op-name :name}]
+                  (:link-permit-required ((keyword op-name) operations/operations)))
+                (:operations application)))
+    (fail :error.link-permit-not-required)))
+
+(defcommand link-permit-required
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :complement-needed :submitted]
+   :pre-checks [link-permit-required?]})
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
