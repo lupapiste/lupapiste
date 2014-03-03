@@ -21,8 +21,7 @@
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]
             [sade.xml :as xml]
-            [sade.common-reader :as cr]
-            ))
+            [sade.common-reader :as cr]))
 
 (defn- do-test [application]
   (let [canonical (application-to-canonical application "fi")
@@ -42,6 +41,7 @@
     (validator/validate (indent-str xml_212) (:permitType application) "2.1.2")
     (validator/validate (indent-str xml_213) (:permitType application) "2.1.3")))
 
+
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
   (fact "Rakennuslupa application -> canonical -> xml"
@@ -53,8 +53,9 @@
   (fact "Suunnittelija application -> canonical -> xml"
     (do-test application-suunnittelijan-nimeaminen))
 
-  (fact "aloitusilmoitus -> canonical -> xml"
+  (fact "Aloitusoikeus -> canonical -> xml"
     (do-test aloitusoikeus-hakemus)))
+
 
 (let [application (assoc application-rakennuslupa :state "verdictGiven")
       user        {:id "777777777777777777000017"
@@ -80,7 +81,7 @@
         "Pohjakatselmus 1" ; task name
         "2.5.1974"
         [{:tila {:tila "osittainen" :kayttoonottava true}
-         :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
+          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
         user
         "pohjakatselmus" ; katselmuksen-nimi
         :katselmus ;tyyppi
@@ -106,10 +107,10 @@
        :data {:katselmuksenLaji {:value "pohjakatselmus"},
               :vaadittuLupaehtona {:value false}
               :rakennus {:0
-                        {:rakennus
-                         {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
-                         :tila {:tila {:value "osittainen"}
-                                :kayttoonottava {:value true}}}}
+                         {:rakennus
+                          {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
+                          :tila {:tila {:value "osittainen"}
+                                 :kayttoonottava {:value true}}}}
               :katselmus {:pitoPvm {:value "2.5.1974"}
                           :pitaja {:value "pitaja"}
                           :huomautukset {:kuvaus {:value "kuvaus"}
@@ -124,6 +125,7 @@
       "2.1.2"
       "target"
       "begin-of-link") => nil ))
+
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi")
