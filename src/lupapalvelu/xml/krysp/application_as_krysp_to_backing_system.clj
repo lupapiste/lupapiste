@@ -25,17 +25,18 @@
    :post [%]}
   (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
 
-(defn resolve-output-directory [organization permit-type]
+(defn- resolve-output-directory [organization permit-type]
   {:pre  [organization permit-type]
    :post [%]}
   (let [sftp-user (get-in organization [:krysp (keyword permit-type) :ftpUser])]
     (str (env/value :outgoing-directory) "/" sftp-user (permit/get-sftp-directory permit-type))))
 
-(defn resolve-krysp-version [organization permit-type]
+(defn- resolve-krysp-version [organization permit-type]
   {:pre [organization permit-type]}
   (if-let [krysp-version (get-in organization [:krysp (keyword permit-type) :version])]
     krysp-version
     (throw (IllegalStateException. (str "KRYSP version not found for organization " (:id organization) ", permit-type " permit-type)))))
+
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -80,3 +81,14 @@
     (assert (= permit/YA permit-type)
       (str "Saving jatkoaika as krysp is not supported for " (name permit-type) " type of permits."))
     (try-krysp (ya-mapping/save-jatkoaika-as-krysp application lang organization krysp-version output-dir begin-of-link))))
+
+(defn save-aloitusilmoitus-as-krysp
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang organization timestamp building user]
+  (let [permit-type   (permit/permit-type application)
+        krysp-version (resolve-krysp-version organization permit-type)
+        output-dir    (resolve-output-directory organization permit-type)]
+    (assert (= permit/R permit-type)
+      (str "Sending aloitusilmoitus to backing system is not supported for " (name permit-type) " type of permits."))
+    (try-krysp (rl-mapping/save-aloitusilmoitus-as-krysp application lang output-dir timestamp building user krysp-version))))
+

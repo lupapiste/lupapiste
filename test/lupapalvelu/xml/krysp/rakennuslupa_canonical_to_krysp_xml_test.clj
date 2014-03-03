@@ -9,7 +9,6 @@
                                                                       ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
                                                                 rakennuslupa_to_krysp_213
-                                                                save-aloitusilmoitus-as-krysp
                                                                 save-katselmus-as-krysp]]
             [lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]

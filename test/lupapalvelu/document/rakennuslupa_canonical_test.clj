@@ -196,7 +196,8 @@
                :vesijohtoKytkin {:value true}
                :viemariKytkin {:value true}
                :lamminvesiKytkin {:value true}
-               :aurinkopaneeliKytkin {:value true}}
+               :aurinkopaneeliKytkin {:value true}
+               :liitettyJatevesijarjestelmaanKytkin {:value true}}
    :verkostoliittymat {:kaapeliKytkin {:value true}
                        :maakaasuKytkin {:value true}
                        :sahkoKytkin {:value true}
@@ -678,6 +679,11 @@
                                                 :muu-lammonlahde {:value "fuusioenergialla"}}})
         rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
+
+(facts "rakennuksenTiedot"
+  (let [toimenpide {:varusteet {:liitettyJatevesijarjestelmaanKytkin true}}
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+    (fact (-> rakennus :rakennuksenTiedot :liitettyJatevesijarjestelmaanKytkin) => true)))
 
 (fl/facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy

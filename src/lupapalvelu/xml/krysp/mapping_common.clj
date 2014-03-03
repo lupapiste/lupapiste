@@ -395,7 +395,7 @@
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
-   Returns a sequence of attachemt fileIds that were written to disk."
+   Returns a sequence of attachment fileIds that were written to disk."
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
   {:pre [(string? output-dir)]
    :post [%]}
