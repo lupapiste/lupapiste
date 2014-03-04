@@ -9,6 +9,7 @@
             [lupapalvelu.document.poikkeamis-schemas]
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
+            [lupapalvelu.document.vesihuolto-schemas]
             [lupapalvelu.permit :as permit]))
 
 (def default-description "operations.tree.default-description")
@@ -118,14 +119,19 @@
        [["uusi-toiminta" :yl-uusi-toiminta]
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
-      ])])
+      ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
+       [["vesijohdosta" :vvvl-vesijohdosta]
+        ["viemarista" :vvvl-viemarista]
+        ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
+        ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
+
 
 (def operation-tree
   (filterv identity
     [operation-tree-for-R
-     operation-tree-for-environment-R
-     operation-tree-for-P
-     (when (env/feature? :ymparisto) operation-tree-for-Y)
+    operation-tree-for-environment-R
+    operation-tree-for-P
+    (when (env/feature? :ymparisto) operation-tree-for-Y)
      (when (env/feature? :yleiset-alueet) operation-tree-for-YA)]))
 
 ;; TODO: implement
@@ -140,11 +146,9 @@
 
 (def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
-
-(def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
-
-
 (def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
+
+(def ^:private common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus
@@ -245,7 +249,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private common-ymparistolupa-schemas ["maksaja"])
+(def ^:private common-ymparistolupa-schemas ["maksaja" "vesihuolto-kiinteisto"])
 (def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
@@ -458,7 +462,7 @@
                                    :link-permit-required false}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type permit/YI
-                                   :required common-ymp-schemas
+                                   :required ["ymp-ilm-kesto" "vesihuolto-kiinteisto"]
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
@@ -470,8 +474,31 @@
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
-                                   :required ["maksaja"]
+                                   :required ["maksaja" "vesihuolto-kiinteisto"]
                                    :attachments []
+                                   :link-permit-required false}
+     :vvvl-vesijohdosta           {:schema "talousvedet"
+                                   :permit-type permit/VVVL
+                                   :required common-vvvl-schemas
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+     :vvvl-viemarista             {:schema "jatevedet"
+                                   :permit-type permit/VVVL
+                                   :required common-vvvl-schemas
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+     :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
+                                   :permit-type permit/VVVL
+                                   :required (conj common-vvvl-schemas "jatevedet")
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+     :vvvl-hulevesiviemarista    {:schema "hulevedet"
+                                   :permit-type permit/VVVL
+                                   :required common-vvvl-schemas
+                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
 

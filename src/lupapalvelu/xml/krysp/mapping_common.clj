@@ -160,7 +160,38 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :valmistumisvuosi}]}]}
+                             ]}]}
+           {:tag :tyonjohtajatieto
+            :child [{:tag :Tyonjohtaja
+                     :child [{:tag :tyonjohtajaRooliKoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             ;{:tag :alkamisPvm}
+                             ;{:tag :paattymisPvm}
+                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :tyonjohtajaHakemusKytkin}]}]}
+           {:tag :naapuritieto}]})
+
+(def osapuolet_211
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto
+            :child [osapuoli-body]}
+           {:tag :suunnittelijatieto
+            :child [{:tag :Suunnittelija
+                     :child [{:tag :suunnittelijaRoolikoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :kokemusvuodet}]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -174,8 +205,14 @@
                              {:tag :paattymisPvm}
                              ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :tyonjohtajaHakemusKytkin}]}]}
+                             {:tag :tyonjohtajaHakemusKytkin}
+                             {:tag :kokemusvuodet}
+                             {:tag :sijaistustieto
+                              :child [{:tag :Sijaistus
+                                       :child [{:tag :sijaistettavaHlo}
+                                               {:tag :sijaistettavaRooli}
+                                               {:tag :alkamisPvm}
+                                               {:tag :paattymisPvm}]}]}]}]}
            {:tag :naapuritieto}]})
 
 (def tilamuutos
@@ -358,7 +395,7 @@
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
-   Returns a sequence of attachemt fileIds that were written to disk."
+   Returns a sequence of attachment fileIds that were written to disk."
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
   {:pre [(string? output-dir)]
    :post [%]}

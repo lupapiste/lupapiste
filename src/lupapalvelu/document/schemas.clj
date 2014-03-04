@@ -207,7 +207,7 @@
                                                   {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
                                                   {:name "muuMika" :type :string}]}])
 
-(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select
+(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select :required true
                                    :body [{:name "KVV-ty\u00F6njohtaja"}
                                           {:name "IV-ty\u00F6njohtaja"}
                                           {:name "erityisalojen ty\u00F6njohtaja"}
@@ -228,10 +228,21 @@
                             :body [{:name "nimeaminen"}
                                    {:name "hakemus"}]}])
 
+;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
                               :type :group
+                              :hidden true
                               :body [{:name "vastuuaika-alkaa-pvm" :type :date}
                                      {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+
+(def sijaisuus-tyonjohtaja [{:name "sijaistukset"
+                             :type :group
+                             :repeating true
+                             :initiallyEmpty true
+                             :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
+                                    {:name "sijaistettavaHloSukunimi" :type :string :required true}
+                                    {:name "alkamisPvm" :type :date}
+                                    {:name "paattymisPvm" :type :date}]}])
 
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
@@ -239,7 +250,8 @@
                    vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
-                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}))
+                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
+                   sijaisuus-tyonjohtaja))
 
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
@@ -431,7 +443,8 @@
                                  {:name "lamminvesiKytkin" :type :checkbox}
                                  {:name "aurinkopaneeliKytkin" :type :checkbox}
                                  {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                                 {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}]}
+                                 {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                                 {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]}
                          {:name "luokitus"
                           :type :group
                           :body [{:name "energialuokka" :type :select

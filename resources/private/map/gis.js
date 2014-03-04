@@ -18,27 +18,108 @@ var gis = (function() {
   function Map(element, zoomWheelEnabled) {
     var self = this;
 
-    self.map = new OpenLayers.Map(element, {
-      theme: "/theme/default/style.css",
-      projection: new OpenLayers.Projection("EPSG:3067"),
-      units: "m",
-      maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
-      resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
-      controls: [ new OpenLayers.Control.Zoom(),
-                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
-    });
+    if (features.enabled("use-wmts-map")) {
+
+      self.map = new OpenLayers.Map(element, {
+        theme: "/theme/default/style.css",
+        projection: new OpenLayers.Projection("EPSG:3067"),
+        units: "m",
+        maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+        resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+        controls: [ new OpenLayers.Control.Zoom(),
+                    new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
+      });
+
+    } else {
+
+      self.map = new OpenLayers.Map(element, {
+        theme: "/theme/default/style.css",
+        projection: new OpenLayers.Projection("EPSG:3067"),
+        units: "m",
+        maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
+        resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
+        controls: [ new OpenLayers.Control.Zoom(),
+                    new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
+      });
+
+    }
+
 
     // Layers
 
-    // use the old proxy server to wms
-    var wmsServer = LUPAPISTE.config.maps.proxyserver;
-    if (LUPAPISTE.config.maps.proxyserver.indexOf(",") > -1) {
-      wmsServer = LUPAPISTE.config.maps.proxyserver.split(",");
+    // use the old proxy server to wms/wmts
+    var mapServer = features.enabled("use-wmts-map") ? LUPAPISTE.config.maps["proxyserver-wmts"] : LUPAPISTE.config.maps["proxyserver-wms"];
+    if (mapServer.indexOf(",") > -1) {
+      mapServer = mapServer.split(",");
     }
     var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
-    var taustakartta = new OpenLayers.Layer.WMS("taustakartta", wmsServer, {layers: "taustakartta", format: "image/png"}, {isBaseLayer: false});
-    var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServer, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
-    var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServer, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
+
+    if (features.enabled("use-wmts-map")) {   // Uusi: WMTS-layerit
+
+      var taustakartta = new OpenLayers.Layer.WMTS({
+        name: "Taustakartta",
+        url: mapServer,
+        isBaseLayer: false,
+        requestEncoding: "KVP",
+        layer: "taustakartta",
+        matrixSet: "ETRS-TM35FIN",
+        format: "image/png",
+        style: "default",
+        opacity: 1.0,
+        resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+        // maxExtent not defined here -> inherits from the config of the map
+        projection: new OpenLayers.Projection("EPSG:3067")
+      });
+      var kiinteistorajat = new OpenLayers.Layer.WMTS({
+        name: "Kiinteistojaotus",
+        url: mapServer,
+        isBaseLayer: false,
+        requestEncoding: "KVP",
+        layer: "kiinteistojaotus",
+        matrixSet: "ETRS-TM35FIN",
+        format: "image/png",
+        style: "default",
+        opacity: 1.0,
+        resolutions: [4, 2, 1, 0.5],
+        // maxExtent not defined here -> inherits from the config of the map
+        projection: new OpenLayers.Projection("EPSG:3067")
+      });
+      var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
+        name: "Kiinteistotunnukset",
+        url: mapServer,
+        isBaseLayer: false,
+        requestEncoding: "KVP",
+        layer: "kiinteistotunnukset",
+        matrixSet: "ETRS-TM35FIN",
+        format: "image/png",
+        style: "default",
+        opacity: 1.0,
+        resolutions: [4, 2, 1, 0.5],
+        // maxExtent not defined here -> inherits from the config of the map
+        projection: new OpenLayers.Projection("EPSG:3067")
+      });
+
+    } else {  // Vanha: WMS-layerit
+
+      var taustakartta = new OpenLayers.Layer.WMS(
+          "taustakartta",
+          mapServer,
+          {layers: "taustakartta", format: "image/png"},
+          {isBaseLayer: false});
+      var kiinteistorajat = new OpenLayers.Layer.WMS(
+          "kiinteistorajat",
+          mapServer,
+          {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true},
+          {isBaseLayer: false, maxScale: 1, minScale: 20000}
+          );
+      var kiinteistotunnukset = new OpenLayers.Layer.WMS(
+          "kiinteistotunnukset",
+          mapServer,
+          {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true},
+          {isBaseLayer: false, maxScale: 1, minScale: 10000});
+
+    }
+
 
     self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
 
@@ -47,6 +128,25 @@ var gis = (function() {
     } else {
       self.map.addLayers([base, self.vectorLayer]);
     }
+
+
+    if (features.enabled("use-wmts-map")) {
+
+      //
+      // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
+      //       so that the old resolutions array [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+      //       would work.
+      //
+      self.map.events.register('zoomend', self.map, function (event) {
+        if( self.map.getZoom() < 2) {
+          // For some reason, calling only "self.map.zoomTo(2);" did not work here.
+          // http://gis.stackexchange.com/questions/25080/why-doesnt-openlayers-zoom
+          self.map.setCenter(self.map.getCenter(), 2);
+        }
+      });
+
+    }
+
 
     // Markers
 
