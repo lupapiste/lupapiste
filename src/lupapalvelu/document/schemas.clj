@@ -207,7 +207,7 @@
                                                   {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
                                                   {:name "muuMika" :type :string}]}])
 
-(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select
+(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select :required true
                                    :body [{:name "KVV-ty\u00F6njohtaja"}
                                           {:name "IV-ty\u00F6njohtaja"}
                                           {:name "erityisalojen ty\u00F6njohtaja"}
