@@ -1,1 +1,0 @@
-application.attachmentsAddList: Lisää liitetiedosto/uusi versio
