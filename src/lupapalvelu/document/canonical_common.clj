@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
             [sade.util :refer :all]
+            [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
             [cljts.geom :as geo]
             [cljts.io :as jts]))
@@ -374,14 +375,34 @@
             :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))
             :sijaistustieto (get-sijaistukset (:sijaistukset tyonjohtaja) rooli)})))
 
+
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
 
-(defn osapuolet [documents-by-types]
-  {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)
-    :tyonjohtajatieto (get-foremans documents-by-types)}})
+(defn get-neighbor [neighbor-name property-id]
+  {:Naapuri {:henkilo neighbor-name
+              :kiinteistotunnus property-id
+              :hallintasuhde "Ei tiedossa"}}
+  )
+
+(defn get-neighbors [neighbors]
+  (remove nil? (for [[_ neighbor] neighbors]
+                   (let [status (last (:status neighbor))
+                         propertyId (-> neighbor :neighbor :propertyId)]
+                     (case (:state status)
+                       "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
+                       "mark-done" (get-neighbor (-> neighbor :neighbor :owner :name) propertyId)
+                       nil)))))
+
+(defn osapuolet
+  ([documents-by-types]
+    (osapuolet documents-by-types nil))
+  ([documents-by-types neighbors]
+    {:Osapuolet
+     {:osapuolitieto (get-parties documents-by-types)
+      :suunnittelijatieto (get-designers documents-by-types)
+      :tyonjohtajatieto (get-foremans documents-by-types)
+      :naapuritieto (get-neighbors neighbors)}}))
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val
