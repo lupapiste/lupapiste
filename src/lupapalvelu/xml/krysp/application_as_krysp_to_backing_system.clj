@@ -34,8 +34,11 @@
 (defn- resolve-krysp-version [organization permit-type]
   {:pre [organization permit-type]}
   (if-let [krysp-version (get-in organization [:krysp (keyword permit-type) :version])]
-    krysp-version
-    (throw (IllegalStateException. (str "KRYSP version not found for organization " (:id organization) ", permit-type " permit-type)))))
+    (do
+      (when-not (re-matches #"\d+\.\d+\.\d+" krysp-version)
+        (throw (java.lang.IllegalStateException. (str \' krysp-version "' does not look like a KRYSP version"))))
+      krysp-version)
+    (throw (java.lang.IllegalStateException. (str "KRYSP version not found for organization " (:id organization) ", permit-type " permit-type)))))
 
 
 (defn save-application-as-krysp

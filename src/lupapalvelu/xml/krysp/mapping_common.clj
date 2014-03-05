@@ -394,8 +394,6 @@
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
   {:pre [(string? output-dir)]
    :post [%]}
-  (when-not (re-matches #"\d+\.\d+\.\d+" (or krysp-version "nil"))
-    (throw (IllegalAccessException. (str \' krysp-version "' does not look like a KRYSP version"))))
 
   (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
         tempfile   (io/file (str file-name ".tmp"))
