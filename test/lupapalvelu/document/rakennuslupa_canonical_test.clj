@@ -377,7 +377,8 @@
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
                  :status "condition"
-                   :text "Savupiippu pit\u00e4\u00e4 olla."}]}))
+                   :text "Savupiippu pit\u00e4\u00e4 olla."}]
+   :neighbors neighbors}))
 
 (def application-tyonjohtajan-nimeaminen
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
@@ -693,6 +694,21 @@
         paasuunnitelija (:Suunnittelija (last suunnittelijat)) => truthy
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
+
+        naapuritieto (:naapuritieto osapuolet) => truthy
+        naapuricount (count naapuritieto) => 2
+        naapuri (first naapuritieto) => truthy
+        Naapuri (:Naapuri naapuri) => truthy
+        naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
+        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
+        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+
+        naapuri (last naapuritieto) => truthy
+        Naapuri (:Naapuri naapuri) => truthy
+        naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
+        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
+        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
         rakennuspaikkatieto (first rakennuspaikkatiedot) => truthy
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy

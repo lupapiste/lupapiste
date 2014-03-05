@@ -128,3 +128,115 @@
                :area "402",
                :height  ""
                }])
+
+(def neighbors {:53158d0c42069e0c20033977
+                {:neighbor
+                 {:propertyId "75342600060211",
+                  :owner
+                  {:type "tuntematon",
+                   :name "Lindh, Tor-Erik Bertel",
+                   :email "t@t.fi",
+                   :businessID nil,
+                   :nameOfDeceased nil,
+                   :address {:street nil, :city nil, :zip nil}}},
+                 :status
+                 [{:state "open", :created 1393921292598}
+                  {:state "email-sent",
+                   :email "t@t.fi",
+                   :token "6uWPBLYwxZpvEiSCYi8t9NfnOKf7Vu8mK2QT6LuJRYswXV6i",
+                   :user
+                   {:enabled true,
+                    :lastName "Sibbo",
+                    :firstName "Sonja",
+                    :city "Sipoo",
+                    :username "sonja",
+                    :street "Katuosoite 1 a 1",
+                    :phone "03121991",
+                    :email "sonja.sibbo@sipoo.fi",
+                    :role "authority",
+                    :zip "33456",
+                    :organizations ["753-R" "753-YA"],
+                    :id "777777777777777777000023"},
+                   :created 1393921672676}
+                  {:state "response-given-ok",
+                   :message "",
+                   :user nil,
+                   :vetuma
+                   {:stamp "06485919427433614295",
+                    :userid "210281-9988",
+                    :city nil,
+                    :zip nil,
+                    :street nil,
+                    :lastName "TESTAA",
+                    :firstName "PORTAALIA"},
+                   :created 1393921693863}]},
+                :53158d1242069e0c20033986
+                {:neighbor
+                 {:propertyId "75342600020137",
+                  :owner
+                  {:type "luonnollinen",
+                   :name "Wickström, Stig Gunnar",
+                   :email "e@e.fi",
+                   :businessID nil,
+                   :nameOfDeceased nil,
+                   :address
+                   {:street "Grankullavägen 38", :city "PAIPIS", :zip "04170"}}},
+                 :status
+                 [{:state "open", :created 1393921298073}
+                  {:state "email-sent",
+                   :email "e@e.fi",
+                   :token "OlOWC6Bdp7tWTlaaBMgzmhiqyZm2o1OeY87KGnydG8RR3Pit",
+                   :user
+                   {:enabled true,
+                    :lastName "Sibbo",
+                    :firstName "Sonja",
+                    :city "Sipoo",
+                    :username "sonja",
+                    :street "Katuosoite 1 a 1",
+                    :phone "03121991",
+                    :email "sonja.sibbo@sipoo.fi",
+                    :role "authority",
+                    :zip "33456",
+                    :organizations ["753-R" "753-YA"],
+                    :id "777777777777777777000023"},
+                   :created 1393921476093}]},
+                :53158d4b42069e0c200339b0
+                {:neighbor
+                 {:propertyId "75342600020050",
+                  :owner
+                  {:type "luonnollinen",
+                   :name "Bergström, Georg Fredrik",
+                   :email nil,
+
+                   :businessID nil,
+                   :nameOfDeceased nil,
+                   :address {:street "Almvägen 4", :city "SIBBO", :zip "04130"}}},
+                 :status [{:state "open", :created 1393921355438}]},
+                :53158d9942069e0c200339f6
+                {:neighbor
+                 {:propertyId "75342600090092",
+                  :owner
+                  {:type "luonnollinen",
+                   :name "Lönnqvist, Rauno Georg Christian",
+                   :email nil,
+                   :businessID nil,
+                   :nameOfDeceased nil,
+                   :address
+                   {:street "Aspängsvägen 27", :city "PAIPIS", :zip "04170"}}},
+                 :status
+                 [{:state "open", :created 1393921433258}
+                  {:state "mark-done",
+                   :user
+                   {:enabled true,
+                    :lastName "Sibbo",
+                    :firstName "Sonja",
+                    :city "Sipoo",
+                    :username "sonja",
+                    :street "Katuosoite 1 a 1",
+                    :phone "03121991",
+                    :email "sonja.sibbo@sipoo.fi",
+                    :role "authority",
+                    :zip "33456",
+                    :organizations ["753-R" "753-YA"],
+                    :id "777777777777777777000023"},
+                   :created 1393921738151}]}})
