@@ -82,3 +82,7 @@ purku.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty eri
 rakennuksen-laajentaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
 rakennuksen-muuttaminen.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
 uusiRakennus.varusteet.liitettyJatevesijarjestelmaanKytkin: Kiinteistö on liitetty erilliseen jatevesijärjestelmään
+
+
+error.sftp.user.does.not.exist: Hakemusta ei voitu siirtää taustajärjestelmään. Voit antaa päätöksen käsin Päätös-välilehdellä. Alla tekninen virheilmoitus:
+error.integration.krysp-version: Siirto epäonnistui. Organisaatiollesi määritelty Krysp-versio puuttuu tai on vääränmuotoinen. Ota yhteyttä palvelun kehittäjiin.
