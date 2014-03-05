@@ -175,12 +175,12 @@
                  {:propertyId "75342600020137",
                   :owner
                   {:type "luonnollinen",
-                   :name "Wickström, Stig Gunnar",
+                   :name "Wickstr\u00f6m, Stig Gunnar",
                    :email "e@e.fi",
                    :businessID nil,
                    :nameOfDeceased nil,
                    :address
-                   {:street "Grankullavägen 38", :city "PAIPIS", :zip "04170"}}},
+                   {:street "Grankullav\u00e4gen 38", :city "PAIPIS", :zip "04170"}}},
                  :status
                  [{:state "open", :created 1393921298073}
                   {:state "email-sent",
@@ -205,24 +205,24 @@
                  {:propertyId "75342600020050",
                   :owner
                   {:type "luonnollinen",
-                   :name "Bergström, Georg Fredrik",
+                   :name "Bergstr\u00f6m, Georg Fredrik",
                    :email nil,
 
                    :businessID nil,
                    :nameOfDeceased nil,
-                   :address {:street "Almvägen 4", :city "SIBBO", :zip "04130"}}},
+                   :address {:street "Almv\u00e4gen 4", :city "SIBBO", :zip "04130"}}},
                  :status [{:state "open", :created 1393921355438}]},
                 :53158d9942069e0c200339f6
                 {:neighbor
                  {:propertyId "75342600090092",
                   :owner
                   {:type "luonnollinen",
-                   :name "Lönnqvist, Rauno Georg Christian",
+                   :name "L\u00f6nnqvist, Rauno Georg Christian",
                    :email nil,
                    :businessID nil,
                    :nameOfDeceased nil,
                    :address
-                   {:street "Aspängsvägen 27", :city "PAIPIS", :zip "04170"}}},
+                   {:street "Asp\u00e4ngsv\u00e4gen 27", :city "PAIPIS", :zip "04170"}}},
                  :status
                  [{:state "open", :created 1393921433258}
                   {:state "mark-done",
