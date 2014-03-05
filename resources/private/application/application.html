@@ -470,7 +470,7 @@
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                   </span>
-                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAdd', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">

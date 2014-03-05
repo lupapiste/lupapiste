@@ -307,7 +307,9 @@
      :permitType "P"
      :permitSubtype "poikkeamislupa"
      :id "LP-753-2013-00001"
-     :municipality "753"}))
+     :municipality "753"
+     :neighbors neighbors
+     }))
 
 (def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
 
