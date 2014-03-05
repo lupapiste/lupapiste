@@ -176,8 +176,8 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
-                             {:tag :alkamisPvm}
-                             {:tag :paattymisPvm}
+                             ;{:tag :alkamisPvm}
+                             ;{:tag :paattymisPvm}
                              ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
@@ -213,7 +213,12 @@
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}
                              {:tag :kokemusvuodet}
-                             ]}]}
+                             {:tag :sijaistustieto
+                              :child [{:tag :Sijaistus
+                                       :child [{:tag :sijaistettavaHlo}
+                                               {:tag :sijaistettavaRooli}
+                                               {:tag :alkamisPvm}
+                                               {:tag :paattymisPvm}]}]}]}]}
            naapuri]})
 
 (def tilamuutos
