@@ -147,6 +147,12 @@
                             yritys
                             {:tag :turvakieltoKytkin}]})
 
+(def ^:private naapuri {:tag :naapuritieto
+                        :child [{:tag :Naapuri
+                                 :child [{:tag :henkilo}
+                                         {:tag :kiinteistotunnus}
+                                         {:tag :hallintasuhde}]}]})
+
 (def osapuolet
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto
@@ -176,7 +182,7 @@
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}]}]}
-           {:tag :naapuritieto}]})
+           naapuri]})
 
 (def osapuolet_211
   {:tag :Osapuolet :ns "yht"
@@ -213,7 +219,7 @@
                                                {:tag :sijaistettavaRooli}
                                                {:tag :alkamisPvm}
                                                {:tag :paattymisPvm}]}]}]}]}
-           {:tag :naapuritieto}]})
+           naapuri]})
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"

@@ -1,4 +1,2 @@
-application.attachmentsAddList: Lisää liitetiedosto/uusi versio
-
 error.sftp.user.does.not.exist: Hakemusta ei voitu siirtää taustajärjestelmään. Voit antaa päätöksen käsin Päätös-välilehdellä. Alla tekninen virheilmoitus:
 error.integration.krysp-version: Siirto epäonnistui. Organisaatiollesi määritelty Krysp-versio puuttuu tai on vääränmuotoinen. Ota yhteyttä palvelun kehittäjiin.
