@@ -18,7 +18,10 @@
      (do ~@body)
      (catch org.xml.sax.SAXParseException e#
        (info e# "Invalid KRYSP XML message")
-       (fail! :error.integration.send :details (.getMessage e#)))))
+       (fail! :error.integration.send :details (.getMessage e#)))
+     (catch java.io.FileNotFoundException e#
+      (error e# (.getMessage e#))
+      (fail! :error.sftp.user.does.not.exist :details (.getMessage e#)))))
 
 (defn- get-begin-of-link [permit-type]
   {:pre  [permit-type]

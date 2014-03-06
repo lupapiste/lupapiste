@@ -343,6 +343,19 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
+
+;; Application approval
+
+(defn is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+
+(defn- validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (when (and (is-link-permit-required application) (= 0 linkPermits))
+      (fail :error.permit-must-have-link-permit))))
+
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         verdicts (mongo/select-one :applications {:_id link-permit-app-id} {:verdicts 1})
@@ -355,148 +368,36 @@
         (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it link permit's (" link-permit-app-id ") verdict.")
         (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
 
-#_(defn- check-if-organization-has-ftp-user [application do-rest-fn]
-   (let [organization (organization/get-organization (:organization application))
-         permit-type  (permit/permit-type application)]
-     (if (get-in organization [:krysp (keyword permit-type) :ftpUser])
-       true
-       (do
-         (do-rest-fn)
-         false)
-       )))
 
+(defn- approve-application-do-rest [{:keys [application user] :as command} mongo-query app-updates attachments-argument]
+  (update-application command
+    mongo-query
+    {$set (merge
+            app-updates
+            attachments-argument
+            (when (empty? (:authority application))
+              {:authority (user/summary user)}))}))
 
-(defn- do-approve-regular-app [{:keys [application created user] :as command} id lang #_organization]
+(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn]
+  (let [organization (organization/get-organization (:organization application))
+        organization-has-ftp-user? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser])]
+    (if organization-has-ftp-user?
+      (or
+        (validate-link-permits application)
+        (try
+          (let [sent-file-ids (if jatkoaika-app?
+                                (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+                                (let [submitted-application (mongo/by-id :submitted-applications id)]
+                                  (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+                attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+            (do-rest-fn attachments-argument))
 
-    (let [application (meta-fields/enrich-with-link-permit-data application)
-          application (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
-                        (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
-                        application)
-          app-updates {:modified created
-                       :sent created
-                       :state :sent}
-          application (merge application app-updates)
-          submitted-application (mongo/by-id :submitted-applications id)
-          organization (organization/get-organization (:organization application))
-          do-rest-fn   (fn [app attachments-arg]
-                         (println "\n **************** do-rest-fn \n")
-                         (update-application command
-                           {$set (merge
-                                   app-updates
-                                   attachments-arg
-                                   (when (empty? (:authority app))
-                                     {:authority (user/summary user)}))}))]
-      (try
-
-        (let [sent-file-ids (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)
-              attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-
-          (do-rest-fn application attachments-argument))
-
-
-        (catch java.io.FileNotFoundException e#
-
-          (let [permit-type  (permit/permit-type application)
-                sftp-user    (get-in organization [:krysp (keyword permit-type) :ftpUser])
-;              ftp-user-key (keyword (str "krysp." permit-type ".ftpUser"))
-              ;; TODO: Tarvitaanko tata mongo-hakua, vai riittaako "sftp-user":n olemassaolo?
-;              user-found (mongo/any? :organizations {ftp-user-key sftp-user})
-              ]
-
-            (println "\n permit-type:" permit-type "\n")
-            (println "\n sftp-user:" sftp-user "\n")
-;            (println "\n ftp-user-key:" ftp-user-key "\n")
-;            (println "\n user-found:" user-found "\n")
-
-          (if sftp-user
-            ;; SFTP user is defined for the organization. Most likely the SFTP user has not been created in the server. -> let the approve command fail
-            (do
-              (println "\n sftp-user is defined for the organization -> FAIL with message \n")
-              (error e# (.getMessage e#))
-              (fail :error.sftp.user.does.not.exist :details (.getMessage e#)))
-            ;; SFTP user not defined for the organization -> let the approve command pass
-            (do
-              (println "\n sftp-user is NOT defined for organization -> PASS with OK \n")
-              (do-rest-fn application nil)))))
-
-      ;; IllegalStateException is received e.g. when krysp version is not defined for the organization in mongo, or it is of incorrect form.
-      (catch java.lang.IllegalStateException e#
-;        (println "\n ******** IllegalStateException kiinni:" e# "\n")
-        (error e# (.getMessage e#))
-        (fail :error.integration.krysp-version))
-      ))
-  )
-
-
-(defn- do-approve-jatkoaika-app [{:keys [application created user] :as command} id lang #_organization]
-  (let [application   (meta-fields/enrich-with-link-permit-data application)
-        application   (if (= "lupapistetunnus" (-> application :linkPermitData first :type))
-                        (update-link-permit-data-with-kuntalupatunnus-from-verdict application)
-                        application)
-        app-updates   {:modified created
-                       :sent created
-                       :closed created
-                       :state :closed}
-        application   (merge application app-updates)
-        organization (organization/get-organization (:organization application))
-        do-rest-fn   (fn [app attachments-arg]
-                       (println "\n ** do-rest-fn \n")
-                       (update-application command
-                         {:state {$in ["submitted" "complement-needed"]}}
-                         {$set (merge
-                                 app-updates
-                                 attachments-arg
-                                 (when (empty? (:authority app))
-                                   {:authority (user/summary user)}))}))]
-    (try
-
-      (let [sent-file-ids (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-           attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-
-        (do-rest-fn application attachments-argument))
-
-      (catch java.io.FileNotFoundException e#
-
-        (let [permit-type  (permit/permit-type application)
-              sftp-user    (get-in organization [:krysp (keyword permit-type) :ftpUser])
-;              ftp-user-key (keyword (str "krysp." permit-type ".ftpUser"))
-              ;; TODO: Tarvitaanko tata mongo-hakua, vai riittaako "sftp-user":n olemassaolo?
-;              user-found (mongo/any? :organizations {ftp-user-key sftp-user})
-              ]
-
-          (println "\n permit-type:" permit-type "\n")
-          (println "\n sftp-user:" sftp-user "\n")
-;          (println "\n ftp-user-key:" ftp-user-key "\n")
-;          (println "\n user-found:" user-found "\n")
-
-          (if sftp-user
-            ;; SFTP user is defined for the organization. Most likely the SFTP user has not been created in the server. -> let the approve command fail
-            (do
-              (println "\n sftp-user is defined for the organization -> FAIL with message \n")
-              (error e# (.getMessage e#))
-              (fail :error.sftp.user.does.not.exist :details (.getMessage e#)))
-            ;; SFTP user not defined for the organization -> let the approve command pass
-            (do
-              (println "\n sftp-user is NOT defined for organization -> PASS with OK \n")
-              (do-rest-fn application nil)))))
-
-      ;; IllegalStateException is received e.g. when krysp version is not defined for the organization in mongo, or it is of incorrect form.
-      (catch java.lang.IllegalStateException e#
-;        (println "\n ******** IllegalStateException kiinni:" e# "\n")
-        (error e# (.getMessage e#))
-        (fail :error.integration.krysp-version))
-
-      )))
-
-(defn is-link-permit-required [application]
-  (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
-
-(defn- validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
-    (when (and (is-link-permit-required application) (= 0 linkPermits))
-      (fail :error.permit-must-have-link-permit))))
+          ;; IllegalStateException is received e.g. when krysp version is not defined for the organization in mongo, or it is of incorrect form.
+          (catch java.lang.IllegalStateException e#
+            (error e# (.getMessage e#))
+            (fail :error.integration.krysp-version))))
+      ;; SFTP user not defined for the organization -> let the approve command pass
+      (do-rest-fn nil))))
 
 (defcommand approve-application
   {:parameters [id lang]
@@ -504,55 +405,28 @@
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
-  [{:keys [application] :as command}]
+  [{:keys [application created user] :as command}]
+  (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
+        app-updates (merge
+                      {:modified created
+                       :sent created}
+                      (if jatkoaika-app?
+                        {:state :closed :closed created}
+                        {:state :sent}))
+        application (-> application
+                      (meta-fields/enrich-with-link-permit-data)
+                      ((fn [app]
+                        (if (= "lupapistetunnus" (-> app :linkPermitData first :type))
+                          (update-link-permit-data-with-kuntalupatunnus-from-verdict app)
+                          app)))
+                      (merge app-updates))
+        mongo-query (if jatkoaika-app?
+                      {:state {$in ["submitted" "complement-needed"]}}
+                      {})
+        do-rest-fn (partial approve-application-do-rest command mongo-query app-updates)]
 
-;  (let [organization (organization/get-organization (:organization application))
-;        permit-type  (permit/permit-type application)
-;        sftp-user    (get-in organization [:krysp (keyword permit-type) :ftpUser])]
-;
-;    (try
+    (do-approve application created id lang jatkoaika-app? do-rest-fn)))
 
-      (or
-        (validate-link-permits application)
-        (if (= :ya-jatkoaika (-> application :operations first :name keyword))
-          (do-approve-jatkoaika-app command id lang #_organization)
-          (do-approve-regular-app command id lang #_organization)))
-
-
-;      (catch java.io.FileNotFoundException e#
-;
-;        (println "\n permit-type:" permit-type "\n")
-;        (println "\n sftp-user:" sftp-user "\n")
-;
-;        (let [ftp-user-key (keyword (str "krysp." permit-type ".ftpUser"))
-;              ;; TODO: Tarvitaanko tata mongo-hakua, vai riittaako "sftp-user":n olemassaolo?
-;              user-found (mongo/any? :organizations {ftp-user-key sftp-user})
-;              ]
-;
-;          (println "\n ftp-user-key:" ftp-user-key "\n")
-;          (println "\n user-found:" user-found "\n")
-;
-;          (if sftp-user #_(and sftp-user user-found)
-;            ;; SFTP user is defined for the organization. Most likely the SFTP user has not been created in the server. -> let the approve command fail
-;            (do
-;              (println "\n sftp-user is defined for the organization -> FAIL with message \n")
-;              (error e# (.getMessage e#))
-;              (fail :error.sftp.user.does.not.exist :details (.getMessage e#)))
-;            ;; SFTP user not defined for the organization -> let the approve command pass
-;            (do
-;              (println "\n sftp-user is NOT defined for organization -> PASS with OK \n")
-;              (ok))  ;; TODO: Miksi (ok) EI toimi eli hakemuksen tila ei muutu?
-;            )))
-;
-;      ;; IllegalStateException is received e.g. when krysp version is not defined for the organization in mongo, or it is of incorrect form.
-;      (catch java.lang.IllegalStateException e#
-;        (println "\n ******** IllegalStateException kiinni:" e# "\n")
-;        (error e# (.getMessage e#))
-;        (fail :error.integration.krysp-version))
-;
-;      )
-;    )
-  )
 
 (defn- do-submit [command application created]
   (update-application command
