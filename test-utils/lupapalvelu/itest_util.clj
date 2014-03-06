@@ -19,7 +19,7 @@
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn find-user-from-minimal-by-apikey [apikey] (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
-(defn- apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
+(defn apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (defn email-for [username] (:email (find-user-from-minimal username)))
 (defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
