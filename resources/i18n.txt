@@ -1,3 +1,0 @@
-error.sftp.user.does.not.exist: Hakemusta ei voitu siirtää taustajärjestelmään. Kohdehakemisto puuttuu. Alla tekninen virheilmoitus:
-error.integration.krysp-version-missing: Siirto epäonnistui. Organisaatiollesi määritelty Krysp-versio puuttuu. Ota yhteyttä palvelun kehittäjiin, tuki@lupapiste.fi.
-error.integration.krysp-version-wrong-form: Siirto epäonnistui. Organisaatiollesi määritelty Krysp-versio on vääränmuotoinen. Ota yhteyttä palvelun kehittäjiin, tuki@lupapiste.fi.
