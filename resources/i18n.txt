@@ -1,0 +1,5 @@
+applications.missing.inforequest.title: Neuvontapyyntö
+applications.missing.application.title: Lupahakemus
+applications.missing.inforequest.desc: Jos haluat varmistaa luvan tarpeen viranomaiselta tai selvittää muita asioita viranomaiselta, voit tehdä neuvontapyynnön. Neuvontapyyntöä tehdessä sinua pyydetään ilmoittamaan rakennuspaikan sijainti ja kuvaamaan mitä olet tekemässä. Näillä tiedoilla rakennusvalvonta voi antaa sinulle paremman vastauksen kysymykseesi.
+applications.missing.application.desc: Jos tiedät tarvitsevasi luvan tai sinun pitää tehdä ilmoitus toimenpiteestäsi voit tehdä suoraan lupahakemuksen. Sinua pyydetään ilmoittamaan rakennuspaikka ja kuvaamaan toimenpide. Tämän jälkeen saat perustietoja luvan tarpeesta ja tarvittavista liitteistä. Voit myös kutsua mukaan suunnittelijoita ja kanssahakijoita tehtyäsi lupahakemuksen, jolloin voitte valmistella lupaa yhdessä Lupapisteessä.
+request.create: Uusi hakemus tai neuvontapyyntö
