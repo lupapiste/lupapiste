@@ -5,6 +5,12 @@
 
 (apply-remote-minimal)
 
+(defn- auth-contains-ronjas-statement [{auth :auth}]
+  (some #(and
+          (:statementId %)
+          (= (:role %) "statementGiver")
+          (= (:username %) "ronja")) auth))
+
 (facts* "statements"
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
@@ -65,7 +71,20 @@
         ))
 
     ; TODO facts about what Veikko can and can not do to application
-    )
+
+    (fact "Statement person has access to application"
+      (let [resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-ronja]) => ok?
+            application (query-application (apikey-for "ronja") application-id)]
+        (auth-contains-ronjas-statement application) => truthy
+
+        (fact "but not after statement has been deleted"
+          (let [statement-id (some #(when (= ronja-id (get-in % [:person :userId])) (:id %)) (:statements application)) => truthy
+                resp (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
+                application (query-application sonja application-id)]
+
+            (some #(= ronja-id (get-in % [:person :userId])) (:statements application)) => falsey
+
+            (auth-contains-ronjas-statement application) => falsey)))))
 
   (let [new-email "kirjaamo@museovirasto.example.com"]
     (fact "User does not exist before so she can not be added as a statement person"
