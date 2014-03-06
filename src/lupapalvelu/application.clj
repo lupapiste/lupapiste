@@ -384,18 +384,12 @@
     (if organization-has-ftp-user?
       (or
         (validate-link-permits application)
-        (try
-          (let [sent-file-ids (if jatkoaika-app?
-                                (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-                                (let [submitted-application (mongo/by-id :submitted-applications id)]
-                                  (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-                attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-            (do-rest-fn attachments-argument))
-
-          ;; IllegalStateException is received e.g. when krysp version is not defined for the organization in mongo, or it is of incorrect form.
-          (catch java.lang.IllegalStateException e#
-            (error e# (.getMessage e#))
-            (fail :error.integration.krysp-version))))
+        (let [sent-file-ids (if jatkoaika-app?
+                              (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+                              (let [submitted-application (mongo/by-id :submitted-applications id)]
+                                (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+              attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+          (do-rest-fn attachments-argument)))
       ;; SFTP user not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
 
