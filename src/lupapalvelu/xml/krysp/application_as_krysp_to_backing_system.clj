@@ -27,7 +27,6 @@
   {:pre [organization permit-type]}
   (if-let [krysp-version (get-in organization [:krysp (keyword permit-type) :version])]
     (do
-      (println "\n krysp-version: " krysp-version "\n")
       (when-not (re-matches #"\d+\.\d+\.\d+" krysp-version)
         (error (str \' krysp-version "' does not look like a KRYSP version"))
         (fail! :error.integration.krysp-version-wrong-form))

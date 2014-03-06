@@ -423,7 +423,7 @@
     (try
       (with-open [out-file-stream (io/writer tempfile)]
         (emit xml out-file-stream))
-      ;; this has to be called before calling "with-open" below)
+      ;; this has to be called before calling "with-open" below
       (catch java.io.FileNotFoundException e
         (error e (.getMessage e))
         (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
