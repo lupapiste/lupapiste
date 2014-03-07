@@ -8,14 +8,14 @@
 
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
-           :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
-           :kasittelija (let [handler (:authority application)]
-                          (if (seq handler)
-                            {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                                             :sukunimi (:lastName handler)}}}}
-                            empty-tag))}})
+                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+                    :asiatunnus (:id application)
+                    :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+                    :kasittelija (let [handler (:authority application)]
+                                   (if (seq handler)
+                                     {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
+                                                                      :sukunimi (:lastName handler)}}}}
+                                     empty-tag))}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu))]
