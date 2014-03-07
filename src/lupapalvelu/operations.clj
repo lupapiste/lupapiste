@@ -462,7 +462,7 @@
                                    :link-permit-required false}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type permit/YI
-                                   :required ["ymp-ilm-kesto" "vesihuolto-kiinteisto"]
+                                   :required ["ymp-ilm-kesto"]
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
