@@ -275,7 +275,7 @@
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
+     :vapaa-ajan-asuinrakennus    {:schema "uusi-vapaa-ajan-asunto"
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
                                    :required common-schemas

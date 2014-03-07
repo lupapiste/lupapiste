@@ -288,6 +288,12 @@
                         {:name "parvekeTaiTerassiKytkin" :type :checkbox}
                         {:name "lamminvesiKytkin" :type :checkbox}]}])
 
+(def huoneistot {:name "huoneistot"
+                 :type :group
+                 :repeating true
+                 :approvable true
+                 :body huoneisto})
+
 (def yhden-asunnon-talot "011 yhden asunnon talot")
 (def vapaa-ajan-asuinrakennus "041 vapaa-ajan asuinrakennukset")
 (def talousrakennus "941 talousrakennukset")
@@ -369,7 +375,7 @@
                                   {:name talousrakennus}
                                   {:name "999 muualla luokittelemattomat rakennukset"}
                                   {:name "ei tiedossa"}])
-(def rakennuksen-tiedot [{:name "kaytto"
+(def rakennuksen-tiedot-ilman-huoneistoa [{:name "kaytto"
                           :type :group
                           :body [{:name "rakentajaTyyppi" :type :select :required true
                                   :body [{:name "liiketaloudellinen"}
@@ -472,12 +478,9 @@
                                           {:name "P1/P2"}
                                           {:name "P1/P3"}
                                           {:name "P2/P3"}
-                                          {:name "P1/P2/P3"}]}]}
-                         {:name "huoneistot"
-                          :type :group
-                          :repeating true
-                          :approvable true
-                          :body huoneisto}])
+                                          {:name "P1/P2/P3"}]}]}])
+
+(def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistot))
 
 
 (def rakennelma (body [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}] kuvaus))
@@ -602,6 +605,9 @@
 
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+
+   {:info {:name "uusi-vapaa-ajan-asunto" :i18name "uusiRakennus" :approvable true}
+    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
 
     {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
