@@ -41,17 +41,17 @@
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
 
-    self.edit   = function(neighbor) { 
-        editModel.init(neighbor).edit().openEdit(); 
+    self.edit   = function(neighbor) {
+        editModel.init(neighbor).edit().openEdit();
     };
-    self.add    = function() { 
-        editModel.init().edit().openEdit(); 
+    self.add    = function() {
+        editModel.init().edit().openEdit();
     };
-    self.click  = function(x, y) { 
-        ownersModel.init().search(x, y).openOwners(); 
+    self.click  = function(x, y) {
+        ownersModel.init().search(x, y).openOwners();
     };
-    self.done = function() { 
-        window.location.hash = "!/application/" + applicationId + "/statement"; 
+    self.done = function() {
+        window.location.hash = "!/application/" + applicationId + "/statement";
     };
     self.remove = function(neighbor) {
       self.neighborId(neighbor.neighborId);
@@ -72,9 +72,9 @@
       return self;
     };
   }
-  
+
   function OwnersModel() {
-      
+
       var self = this, allSelectedWatch, selectedOwnersWatch;
 
       self.status = ko.observable();
@@ -84,7 +84,7 @@
       self.statusSelectOwners     = 3;
       self.statusOwnersSearchFailed     = 4;
       self.statusPropertyIdSearchFailed = 5;
-      
+
       self.owners = ko.observableArray();
       self.propertyId = ko.observable();
       self.selectedOwners = ko.observableArray([]);
@@ -110,25 +110,25 @@
       };
       watchAllSelected();
       watchSelectedOwners();
-      
-      self.init = function() { 
-          return self.status(self.statusInit).propertyId(null).owners([]).selectedOwners([]); 
+
+      self.init = function() {
+          return self.status(self.statusInit).propertyId(null).owners([]).selectedOwners([]);
       };
-      self.isSearching = function() { 
-          return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners; 
+      self.isSearching = function() {
+          return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
       };
-      self.isPropertyIdAvailable = function() { 
-          return self.propertyId() != null; 
+      self.isPropertyIdAvailable = function() {
+          return self.propertyId() != null;
       };
-      self.search = function(x, y) { 
-          return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y); 
+      self.search = function(x, y) {
+          return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y);
       };
 
-      self.searchPropertyId = function(x, y) { 
-          locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound); 
-          return self; 
+      self.searchPropertyId = function(x, y) {
+          locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound);
+          return self;
       };
-      
+
       self.propertyIdFound = function(propertyId) {
           if (propertyId) {
               return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
@@ -136,28 +136,28 @@
               return self.propertyIfNotFound();
           }
       };
-      
+
       self.searchOwners = function(propertyId) {
           locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, self.ownersNotFound);
       };
       self.ownersFound = function(data) {
           return self.owners(_.map(data.owners, convertOwner)).allSelected(true).status(self.statusSelectOwners);
       }
-      
-      self.propertyIfNotFound = function() { 
-          return self.status(self.statusPropertyIdSearchFailed); 
+
+      self.propertyIfNotFound = function() {
+          return self.status(self.statusPropertyIdSearchFailed);
       };
       self.ownersNotFound = function() {
-          return self.status(self.statusOwnersSearchFailed); 
+          return self.status(self.statusOwnersSearchFailed);
       };
-      self.cancelSearch = function() { 
-          self.status(self.statusEdit).requestContext.begin(); 
-          return self; 
+      self.cancelSearch = function() {
+          self.status(self.statusEdit).requestContext.begin();
+          return self;
       };
 
-      self.openOwners = function() { 
-          LUPAPISTE.ModalDialog.open("#dialog-select-owners"); 
-          return self; 
+      self.openOwners = function() {
+          LUPAPISTE.ModalDialog.open("#dialog-select-owners");
+          return self;
       };
 
       self.addSelectedOwners = function() {
@@ -169,20 +169,20 @@
               };
           ajax
           .command("neighbor-add-owners", parameters)
-          .complete(_.partial(repository.load, applicationId, 
+          .complete(_.partial(repository.load, applicationId,
                   function(v) {
-                      LUPAPISTE.ModalDialog.close(); 
+                      LUPAPISTE.ModalDialog.close();
                   }))
           .call();
         return self;
       }
-      
-      self.beginUpdateRequest = function() { 
-          self.requestContext.begin(); 
-          return self; 
+
+      self.beginUpdateRequest = function() {
+          self.requestContext.begin();
+          return self;
       };
       self.requestContext = new RequestContext();
-      
+
       // Helper functions
       function getPersonName(person) {
           if (person.sukunimi && person.etunimet) {
@@ -260,17 +260,19 @@
         if (t) return loc(['neighbors.owner.type', t]);
         else return null;
     }, self);
-    
+
     self.editablePropertyId = ko.computed({
         read: function() {
             return util.prop.toHumanFormat(self.propertyId());
         },
         write: function(newValue) {
+          if (util.prop.isPropertyId(newValue)) {
             self.propertyId(util.prop.toDbFormat(newValue));
+          }
         },
         owner: self
     });
-    
+
 
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
     self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
