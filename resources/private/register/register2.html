@@ -5,8 +5,7 @@
     <div class="content">
       <form id="register-form">
         <h1 data-bind="ltext: 'register.header2'"></h1>
-        <p data-bind="ltext: 'register.personal-info'"></p>
-        <p data-bind="lhtml: 'required.field.desc'"></p>
+        <p ><span data-bind="ltext: 'register.personal-info'"></span> <span data-bind="lhtml: 'required.field.desc'"></span></p>
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.firstName'">Etunimi</label>
@@ -64,22 +63,20 @@
           <div class="clear"></div>
         </div>
         <div class="form-group">
-          <div class="form-entry allowDirectMarketing-toggle">
+          <div class="form-entry register-checkbox">
             <label>
               <input type="checkbox" id="allowDirectMarketing" data-bind="checked: allowDirectMarketing" value="true">
               <span data-bind="ltext: 'userinfo.allowDirectMarketing'"></span>
             </label>
           </div>
-          <div class="clear"></div>
-        </div>
-        <div class="form-group">
-          <div class="form-entry">
+          <div class="form-entry register-checkbox">
             <label>
               <input type="checkbox" id="acceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
               <span data-bind="ltext: 'register.accept-terms.label'"></span>
               <a href="https://www.lupapiste.fi/?page_id=337" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
             </label>
           </div>
+
           <div class="clear"></div>
         </div>
         <span id="register-email-error" class="error-message"></span>
