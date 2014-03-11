@@ -42,9 +42,9 @@
         :organizations
         {:_id organization-id}
         {$push {:statementGivers {:id statement-giver-id
-                                   :text text
-                                   :email email
-                                   :name (str (:firstName user) " " (:lastName user))}}})
+                                  :text text
+                                  :email email
+                                  :name (str (:firstName user) " " (:lastName user))}}})
       (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
       (ok :id statement-giver-id))))
 

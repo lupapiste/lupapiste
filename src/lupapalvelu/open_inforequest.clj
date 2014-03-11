@@ -51,7 +51,7 @@
                                            :created          (now)
                                            :last-used        nil})
     (notifications/notify! :open-inforequest-invite {:data {:email email :token-id token-id}
-                                                      :application application})
+                                                     :application application})
     true))
 
 (defn make-user [token]
