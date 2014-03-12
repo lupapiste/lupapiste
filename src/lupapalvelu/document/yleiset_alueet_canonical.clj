@@ -8,14 +8,14 @@
 
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
-           :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
-           :kasittelija (let [handler (:authority application)]
-                          (if (seq handler)
-                            {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                                             :sukunimi (:lastName handler)}}}}
-                            empty-tag))}})
+                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+                    :asiatunnus (:id application)
+                    :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+                    :kasittelija (let [handler (:authority application)]
+                                   (if (seq handler)
+                                     {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
+                                                                      :sukunimi (:lastName handler)}}}}
+                                     empty-tag))}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu))]
@@ -123,8 +123,8 @@
     {:selitysteksti "Sijoituksen tarkoitus" :arvo arvo}))
 
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
-  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm))
-                   :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-paattyy-pvm))}})
+  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-alkaa-pvm))
+                   :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm))}})
 
 (defn- get-mainostus-viitoitus-lisatiedot [mainostus-viitoitus-tapahtuma]
   [{:LupakohtainenLisatieto
@@ -209,15 +209,22 @@
         main-viit-tapahtuma (when main-viit-tapahtuma-doc
                              (main-viit-tapahtuma-doc main-viit-tapahtuma-name))
 
+        ;; Note: Agreed with Vianova 5.3.2014 that:
+        ;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
+        ;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                     (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm))
+                     (or
+                       (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-alkaa-pvm))
+                       (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm)))
                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm))))
         loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
                     (to-xml-date (:modified application))
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                      (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm))
+                      (or
+                        (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
+                        (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
         maksaja (if (:dummy-maksaja config)
                   (merge (:Osapuoli hakija) {:laskuviite "0000000000"})

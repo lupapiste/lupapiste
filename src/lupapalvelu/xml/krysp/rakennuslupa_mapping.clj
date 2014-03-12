@@ -42,64 +42,62 @@
     {:tag :katselmusOsittainen}
     {:tag :kayttoonottoKytkin}))
 
-(def ^:private yht-rakennus
-  [{:tag :yksilointitieto :ns "yht"}
-   {:tag :alkuHetki :ns "yht"}
-   mapping-common/sijantitieto
-   {:tag :rakennuksenTiedot
-    :child [{:tag :rakennustunnus :child rakennustunnus}
-            {:tag :kayttotarkoitus}
-            {:tag :tilavuus}
-            {:tag :kokonaisala}
-            {:tag :kellarinpinta-ala}
-            {:tag :BIM :child []}
-            {:tag :kerrosluku}
-            {:tag :kerrosala}
-            {:tag :rakentamistapa}
-            {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
-                                               {:tag :rakennusaine}]}
-            {:tag :julkisivu
-             :child [{:tag :muuMateriaali}
-                     {:tag :julkisivumateriaali}]}
-            {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
-                                             {:tag :vesijohtoKytkin}
-                                             {:tag :sahkoKytkin}
-                                             {:tag :maakaasuKytkin}
-                                             {:tag :kaapeliKytkin}]}
-            {:tag :energialuokka}
-            {:tag :energiatehokkuusluku}
-            {:tag :energiatehokkuusluvunYksikko}
-            {:tag :paloluokka}
-                 {:tag :lammitystapa}
-                 {:tag :lammonlahde :child [{:tag :polttoaine}
-                                            {:tag :muu}]}
-                 {:tag :varusteet
-                  :child [{:tag :sahkoKytkin}
-                          {:tag :kaasuKytkin}
-                          {:tag :viemariKytkin}
-                          {:tag :vesijohtoKytkin}
-                          {:tag :lamminvesiKytkin}
-                          {:tag :aurinkopaneeliKytkin}
-                          {:tag :hissiKytkin}
-                          {:tag :koneellinenilmastointiKytkin}
-                          {:tag :saunoja}
-                          {:tag :uima-altaita}
-                          {:tag :vaestonsuoja}]}
-                 {:tag :jaahdytysmuoto}
-                 {:tag :asuinhuoneistot :child [huoneisto]}
-                 ]}
-   {:tag :rakentajatyyppi}
-   {:tag :omistajatieto
-    :child [{:tag :Omistaja
-             :child [{:tag :kuntaRooliKoodi :ns "yht"}
-                     {:tag :VRKrooliKoodi :ns "yht"}
-                     mapping-common/henkilo
-                     mapping-common/yritys
-                     {:tag :omistajalaji :ns "rakval"
-                      :child [{:tag :muu}
-                              {:tag :omistajalaji}]}]}]}])
-
-(def ^:private rakennus {:tag :Rakennus :child yht-rakennus})
+(def ^:private rakennus
+  {:tag :Rakennus
+   :child [{:tag :yksilointitieto :ns "yht"}
+           {:tag :alkuHetki :ns "yht"}
+           (mapping-common/sijaintitieto)
+           {:tag :rakennuksenTiedot
+            :child [{:tag :rakennustunnus :child rakennustunnus}
+                    {:tag :kayttotarkoitus}
+                    {:tag :tilavuus}
+                    {:tag :kokonaisala}
+                    {:tag :kellarinpinta-ala}
+                    {:tag :BIM :child []}
+                    {:tag :kerrosluku}
+                    {:tag :kerrosala}
+                    {:tag :rakentamistapa}
+                    {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
+                                                       {:tag :rakennusaine}]}
+                    {:tag :julkisivu
+                     :child [{:tag :muuMateriaali}
+                             {:tag :julkisivumateriaali}]}
+                    {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
+                                                     {:tag :vesijohtoKytkin}
+                                                     {:tag :sahkoKytkin}
+                                                     {:tag :maakaasuKytkin}
+                                                     {:tag :kaapeliKytkin}]}
+                    {:tag :energialuokka}
+                    {:tag :energiatehokkuusluku}
+                    {:tag :energiatehokkuusluvunYksikko}
+                    {:tag :paloluokka}
+                    {:tag :lammitystapa}
+                    {:tag :lammonlahde :child [{:tag :polttoaine}
+                                               {:tag :muu}]}
+                    {:tag :varusteet
+                     :child [{:tag :sahkoKytkin}
+                             {:tag :kaasuKytkin}
+                             {:tag :viemariKytkin}
+                             {:tag :vesijohtoKytkin}
+                             {:tag :lamminvesiKytkin}
+                             {:tag :aurinkopaneeliKytkin}
+                             {:tag :hissiKytkin}
+                             {:tag :koneellinenilmastointiKytkin}
+                             {:tag :saunoja}
+                             {:tag :uima-altaita}
+                             {:tag :vaestonsuoja}]}
+                    {:tag :jaahdytysmuoto}
+                    {:tag :asuinhuoneistot :child [huoneisto]}]}
+           {:tag :rakentajatyyppi}
+           {:tag :omistajatieto
+            :child [{:tag :Omistaja
+                     :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                             {:tag :VRKrooliKoodi :ns "yht"}
+                             mapping-common/henkilo
+                             mapping-common/yritys
+                             {:tag :omistajalaji :ns "rakval"
+                              :child [{:tag :muu}
+                                      {:tag :omistajalaji}]}]}]}]})
 
 (def ^:private katselmustieto
   {:tag :katselmustieto
@@ -125,14 +123,12 @@
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
-   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
-                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"
-          :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-          :xmlns:xlink "http://www.w3.org/1999/xlink"
-          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+   :attr (merge {:xsi:schemaLocation
+                 (str mapping-common/schemalocation-yht-2.1.0
+                   "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd")
+                 :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
+           mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
@@ -163,12 +159,11 @@
                                                                            {:tag :kuvaus}
                                                                            {:tag :perusparannusKytkin}]}
                                                {:tag :kaupunkikuvaToimenpide :child [{:tag :kuvaus}]}
-                                               {:tag :rakennustieto
-                                                :child [rakennus]}
+                                               {:tag :rakennustieto :child [rakennus]}
                                                {:tag :rakennelmatieto
                                                 :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
-                                                                                  mapping-common/sijantitieto
+                                                                                  (mapping-common/sijaintitieto)
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
                              katselmustieto
@@ -221,12 +216,19 @@
                     {:tag :poikkeamat}]}]})
 
 (def rakennuslupa_to_krysp_213
-  (->
-    (assoc-in rakennuslupa_to_krysp_212 [:attr :xsi:schemaLocation]
-      "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
-       http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd")
-
-    (update-in [:child] mapping-common/update-child-element [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto] katselmus_213)))
+  (-> rakennuslupa_to_krysp_212
+    (assoc-in [:attr :xsi:schemaLocation]
+      (str mapping-common/schemalocation-yht-2.1.1
+        "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd"))
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+      katselmus_213)
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
+      #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
 
 
 (defn- get-mapping [krysp-version]
@@ -325,8 +327,7 @@
   (let [building-id {:rakennus {:jarjestysnumero index
                                 :kiinttun        propertyId
                                 :rakennusnro     buildingId}}]
-    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil))
-  )
+    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil)))
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

@@ -40,8 +40,25 @@
             (concat results (check-tree (second ops)))
             (check-leaf ops))) ))))
 
-(let [leaf-operations (check-tree (all-operations))]
+(let [leaf-operations (check-tree operation-tree)]
   (fact "Operation tree has no duplicates"
     (count leaf-operations) => (count (distinct leaf-operations)))
   (fact "Meta: all operations were checked"
-    (count leaf-operations) => (count (filter keyword? (flatten (all-operations))))))
+    (count leaf-operations) => (count (filter keyword? (flatten operation-tree)))))
+
+(facts "operations-for-permit-type"
+
+  (fact "poikkarit"
+    (operations-for-permit-type "P") => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]])
+
+  (fact "meluilmoitus"
+    (operations-for-permit-type "YI") => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]])
+
+  (fact "ymparistolupa"
+    (operations-for-permit-type "YL") => [["Ymp\u00e4rist\u00f6luvat"
+                                           [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
+                                                                               ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+                                                                               ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])
+
+  )
+

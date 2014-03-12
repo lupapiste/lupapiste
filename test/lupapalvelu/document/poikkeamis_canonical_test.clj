@@ -8,16 +8,6 @@
             [midje.util :refer [testable-privates]]))
 
 
-(def ^:private statements [{:given 1379423133068
-                            :id "52385377da063788effc1e93"
-                            :person {:text "Paloviranomainen"
-                                     :name "Sonja Sibbo"
-                                     :email "sonja.sibbo@sipoo.fi"
-                                     :id "516560d6c2e6f603beb85147"}
-                            :requested 1379423095616
-                            :status "yes"
-                            :text "Lausunto liitteen\u00e4."}])
-
 (def ^:private hakija {:id "523844e1da063788effc1c58"
                        :schema-info {:approvable true
                                      :subtype "hakija"
@@ -317,7 +307,9 @@
      :permitType "P"
      :permitSubtype "poikkeamislupa"
      :id "LP-753-2013-00001"
-     :municipality "753"}))
+     :municipality "753"
+     :neighbors neighbors
+     }))
 
 (def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
 

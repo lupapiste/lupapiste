@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
             [sade.util :refer :all]
+            [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
             [cljts.geom :as geo]
             [cljts.io :as jts]))
@@ -99,11 +100,13 @@
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
    :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
    :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-maalampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "kaivu- tai katuty\u00f6lupa"
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muuntamoiden-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
@@ -126,12 +129,14 @@
    :ya-kayttolupa-muu-tyomaakaytto                 "muu ty\u00f6maak\u00e4ytt\u00f6"
    ;; Kaivu- tai katutyolupa
    :ya-katulupa-vesi-ja-viemarityot                "vesi-ja-viem\u00e4rity\u00f6t"
+   :ya-katulupa-maalampotyot                     "maal\u00e4mp\u00f6ty\u00f6t"
    :ya-katulupa-kaukolampotyot                     "kaukol\u00e4mp\u00f6ty\u00f6t"
    :ya-katulupa-kaapelityot                        "kaapelity\u00f6t"
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      "kiinteist\u00f6n johto-, kaapeli- ja putkiliitynn\u00e4t"
    ;; Pysyvien maanalaisten rakenteiden sijoittaminen
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        "vesi- ja viem\u00e4rijohtojen sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                "maal\u00e4mp\u00f6putkien sijoittaminen"
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                "kaukol\u00e4mp\u00f6putkien sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "s\u00e4hk\u00f6-, data- ja muiden kaapelien sijoittaminen"
    ;; pysyvien maanpaallisten rakenteiden sijoittaminen
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   "ilmajohtojen sijoittaminen"
@@ -156,11 +161,13 @@
    :ya-kayttolupa-talon-rakennustyot                             :Kayttolupa
    :ya-kayttolupa-muu-tyomaakaytto                               :Kayttolupa
    :ya-katulupa-vesi-ja-viemarityot                              :Tyolupa
+   :ya-katulupa-maalampotyot                                     :Tyolupa
    :ya-katulupa-kaukolampotyot                                   :Tyolupa
    :ya-katulupa-kaapelityot                                      :Tyolupa
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat      :Tyolupa
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen        :Sijoituslupa
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                :Sijoituslupa
+   :ya-sijoituslupa-kaukolampoputkien-sijoittaminen              :Sijoituslupa
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen :Sijoituslupa
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   :Sijoituslupa
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                   :Sijoituslupa
@@ -343,27 +350,59 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
+(defn get-sijaistukset [sijaistukset sijaistettavaRooli]
+  (mapv (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]
+          (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
+            {}
+            {:Sijaistus (assoc-when {}
+                                    :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
+                                    :sijaistettavaRooli sijaistettavaRooli
+                                    :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                                    :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
+        (vals sijaistukset)))
+
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)]
-    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
-                     :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                     :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
-                     :valmistumisvuosi (-> patevyys :valmistumisvuosi)
-                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm))
-                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm))
-                     :kokemusvuodet (-> patevyys :kokemusvuodet)
-                     :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
-                     :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))})))
+        patevyys (:patevyys tyonjohtaja)
+        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
+    (merge foremans
+           {:tyonjohtajaRooliKoodi rooli
+            :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+            :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
+            :valmistumisvuosi (-> patevyys :valmistumisvuosi)
+            :kokemusvuodet (-> patevyys :kokemusvuodet)
+            :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
+            :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))
+            :sijaistustieto (get-sijaistukset (:sijaistukset tyonjohtaja) rooli)})))
+
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
 
-(defn osapuolet [documents-by-types]
-  {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)
-    :tyonjohtajatieto (get-foremans documents-by-types)}})
+(defn get-neighbor [neighbor-name property-id]
+  {:Naapuri {:henkilo neighbor-name
+              :kiinteistotunnus property-id
+              :hallintasuhde "Ei tiedossa"}}
+  )
+
+(defn get-neighbors [neighbors]
+  (remove nil? (for [[_ neighbor] neighbors]
+                   (let [status (last (:status neighbor))
+                         propertyId (-> neighbor :neighbor :propertyId)]
+                     (case (:state status)
+                       "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
+                       "mark-done" (get-neighbor (-> neighbor :neighbor :owner :name) propertyId)
+                       nil)))))
+
+(defn osapuolet
+  ([documents-by-types]
+    (osapuolet documents-by-types nil))
+  ([documents-by-types neighbors]
+    {:Osapuolet
+     {:osapuolitieto (get-parties documents-by-types)
+      :suunnittelijatieto (get-designers documents-by-types)
+      :tyonjohtajatieto (get-foremans documents-by-types)
+      :naapuritieto (get-neighbors neighbors)}}))
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val
@@ -424,6 +463,18 @@
                   :sahkopostiosoite (-> henkilo :yhteystiedot :email)
                   :puhelin (-> henkilo :yhteystiedot :puhelin)
                    :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
+
+(defn ->ymp-osapuoli [unwrapped-party-doc]
+  (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
+    (let [yritys (-> unwrapped-party-doc :data :yritys)]
+      {:nimi (-> yritys :yritysnimi)
+       :postiosoite (get-simple-osoite (:osoite yritys))
+       :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
+       :liikeJaYhteisotunnus (:liikeJaYhteisoTunnus yritys)})
+    (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
+      {:nimi "Yksityishenkil\u00f6"
+       :postiosoite (get-simple-osoite (:osoite henkilo))
+       :yhteyshenkilo (get-henkilo henkilo)})))
 
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})

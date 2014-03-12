@@ -39,10 +39,25 @@
    :sftp-directory "/ymparisto"
    :case-xml-element :Ilmoitukset})
 
+(defpermit YL  "Ymparistolupa"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :case-xml-element :Ymparistolupa})
+
+(defpermit VVVL  "Vapautushakemus vesijohtaai ja viemariin liittymisesta"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :case-xml-element :Ymparistolupa})
+
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
    :case-xml-element :Popast})
+
+(defpermit MAL "Maa-ainesluvat"
+  {:subtypes       []
+   :sftp-directory "/ymparisto"
+   :case-xml-element :MaaAineslupaAsia})
 
 ;;
 ;; Helpers

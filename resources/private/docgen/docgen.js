@@ -856,7 +856,10 @@ var docgen = (function () {
       }
 
       if (subSchema.repeating) {
-        var models = model[myName] || [{}];
+        var models = model[myName];
+        if (!models) {
+            models = subSchema.initiallyEmpty ? [] : [{}];
+        }
         var elements = _.map(models, function (val, key) {
           var myModel = {};
           myModel[myName] = val;

@@ -5,9 +5,9 @@
             [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 
-(def yksilointitieto [{:tag :yksilointitieto}
-                      {:tag :alkuHetki}
-                      {:tag :loppuHetki}])
+(def yksilointitieto-children [{:tag :yksilointitieto}
+                               {:tag :alkuHetki}
+                               {:tag :loppuHetki}])
 
 (def result-str "<?xml version='1.0' encoding='UTF-8'?>
 <root>
@@ -25,7 +25,7 @@
        {:yksilointitieto "Uniikki arvo"
         :alkuHetki "10.10.2012"
         :loppuHetki "11.11.2013"}}
-      {:tag :root :child yksilointitieto})) => result)
+      {:tag :root :child yksilointitieto-children})) => result)
 
 (facts "update-child-element"
   (let [sample-children [{:tag :a :child [{:tag :b  :child [{:tag :c}]}]}

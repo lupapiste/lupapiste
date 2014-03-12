@@ -1,23 +1,34 @@
 (ns lupapalvelu.xml.krysp.mapping-common
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [clojure.java.io :as io]
             [clojure.data.xml :refer [emit indent-str]]
             [me.raynes.fs :as fs]
             [sade.strings :as ss]
             [sade.util :refer :all]
+            [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
+(def schemalocation-yht-2.1.0
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def schemalocation-yht-2.1.1
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
+(def common-namespaces
+  {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+   :xmlns:gml   "http://www.opengis.net/gml"
+   :xmlns:xlink "http://www.w3.org/1999/xlink"
+   :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"})
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
                       {:tag :kiinttun}
                       {:tag :rakennusnro}
                       {:tag :aanestysalue}])
-
-(def ^:private piste {:tag :piste  :ns "yht"
-                      :child [{:tag :Point
-                               :child [{:tag :pos}]}]})
 
 (def ^:private postiosoite-children [{:tag :kunta}
                                      {:tag :osoitenimi :child [{:tag :teksti}]}
@@ -30,6 +41,8 @@
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
 
+(def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
+
 (def sijantiType {:tag :Sijainti
                    :child [{:tag :osoite :ns "yht"
                             :child [{:tag :yksilointitieto}
@@ -37,8 +50,7 @@
                                     {:tag :osoitenimi
                                      :child [{:tag :teksti}]}]}
                            {:tag :piste :ns "yht"
-                            :child [{:tag :Point :ns "gml"
-                                     :child [{:tag :pos}]}]}
+                            :child [gml-point]}
                            {:tag :viiva :ns "yht"
                             :child [{:tag :LineString :ns "gml"
                                      :child [{:tag :pos}]}]}
@@ -49,17 +61,26 @@
                                                        :child [{:tag :pos}]}]} ]}]}
                            {:tag :tyhja :ns "yht"}]})
 
-(def sijantitieto {:tag :sijaintitieto
-                   :child [sijantiType]})
+(defn sijaintitieto
+  "Takes an optional xml namespace for Sijainti element"
+  [& [xmlns]]
+  {:tag :sijaintitieto
+   :child [(merge
+             sijantiType
+             (when xmlns {:ns xmlns}))]})
 
 (def ^:private rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
 
+(def yksilointitieto {:tag :yksilointitieto :ns "yht"})
+
+(def alkuHetki {:tag :alkuHetki :ns "yht"})
+
 (def rakennuspaikka {:tag :Rakennuspaikka
-                     :child [{:tag :yksilointitieto :ns "yht"}
-                             {:tag :alkuHetki :ns "yht"}
+                     :child [yksilointitieto
+                             alkuHetki
                              {:tag :rakennuspaikanKiinteistotieto :ns "yht"
                               :child [{:tag :RakennuspaikanKiinteisto
                                        :child [{:tag :kiinteistotieto
@@ -128,6 +149,12 @@
                             yritys
                             {:tag :turvakieltoKytkin}]})
 
+(def ^:private naapuri {:tag :naapuritieto
+                        :child [{:tag :Naapuri
+                                 :child [{:tag :henkilo}
+                                         {:tag :kiinteistotunnus}
+                                         {:tag :hallintasuhde}]}]})
+
 (def osapuolet
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto
@@ -141,7 +168,38 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :valmistumisvuosi}]}]}
+                             ]}]}
+           {:tag :tyonjohtajatieto
+            :child [{:tag :Tyonjohtaja
+                     :child [{:tag :tyonjohtajaRooliKoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             ;{:tag :alkamisPvm}
+                             ;{:tag :paattymisPvm}
+                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :tyonjohtajaHakemusKytkin}]}]}
+           naapuri]})
+
+(def osapuolet_211
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto
+            :child [osapuoli-body]}
+           {:tag :suunnittelijatieto
+            :child [{:tag :Suunnittelija
+                     :child [{:tag :suunnittelijaRoolikoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :kokemusvuodet}]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -155,9 +213,15 @@
                              {:tag :paattymisPvm}
                              ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :tyonjohtajaHakemusKytkin}]}]}
-           {:tag :naapuritieto}]})
+                             {:tag :tyonjohtajaHakemusKytkin}
+                             {:tag :kokemusvuodet}
+                             {:tag :sijaistustieto
+                              :child [{:tag :Sijaistus
+                                       :child [{:tag :sijaistettavaHlo}
+                                               {:tag :sijaistettavaRooli}
+                                               {:tag :alkamisPvm}
+                                               {:tag :paattymisPvm}]}]}]}]}
+           naapuri]})
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"
@@ -203,15 +267,21 @@
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
 
-(def ymp-kasittelytieto [{:tag :KasittelyTieto
-                          :child [{:tag :muutosHetki :ns "yht"}
+(def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
                                   {:tag :asiatunnus :ns "yht"}
                                   {:tag :paivaysPvm :ns "yht"}
                                   {:tag :kasittelija :ns "yht"
                                    :child [{:tag :henkilo
                                             :child [{:tag :nimi
                                                      :child [{:tag :etunimi}
-                                                             {:tag :sukunimi}]}]}]}]}])
+                                                             {:tag :sukunimi}]}]}]}])
+
+(def ymp-osapuoli-children
+  [{:tag :nimi}
+   {:tag :postiosoite :child postiosoite-children-ns-yht}
+   {:tag :sahkopostiosoite}
+   {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
+   {:tag :liikeJaYhteisotunnus}])
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
@@ -285,15 +355,15 @@
 
 (defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
   (not-empty (for [attachment attachments
-                                    :when (and (:latestVersion attachment)
-                                            (not= "statement" (-> attachment :target :type))
-                                            (not= "verdict" (-> attachment :target :type))
-                                            (or (nil? target) (= target (:target attachment))))
-                                    :let [type (get-in attachment [:type :type-id])
+                   :when (and (:latestVersion attachment)
+                           (not= "statement" (-> attachment :target :type))
+                           (not= "verdict" (-> attachment :target :type))
+                           (or (nil? target) (= target (:target attachment))))
+                   :let [type (get-in attachment [:type :type-id])
                          attachment-title (str title ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
+                         file-id (get-in attachment [:latestVersion :fileId])
+                         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                         link (str begin-of-link attachment-file-name)]]
                {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name)})))
 
 (defn write-attachments [attachments output-dir]
@@ -333,23 +403,31 @@
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
-   Returns a sequence of attachemt fileIds that were written to disk."
+   Returns a sequence of attachment fileIds that were written to disk."
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
   {:pre [(string? output-dir)]
    :post [%]}
-  (when-not (re-matches #"\d+\.\d+\.\d+" (or krysp-version "nil"))
-    (throw (IllegalAccessException. (str \' krysp-version "' does not look like a KRYSP version"))))
 
   (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
 
-    (validator/validate xml-s (permit/permit-type application) krysp-version)
+    (try
+      (validator/validate xml-s (permit/permit-type application) krysp-version)
+      (catch org.xml.sax.SAXParseException e
+       (info e "Invalid KRYSP XML message")
+       (fail! :error.integration.send :details (.getMessage e))))
 
-    (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below)
-    (with-open [out-file-stream (io/writer tempfile)]
-      (emit xml out-file-stream))
+    (fs/mkdirs output-dir)
+    (try
+      (with-open [out-file-stream (io/writer tempfile)]
+        (emit xml out-file-stream))
+      ;; this has to be called before calling "with-open" below
+      (catch java.io.FileNotFoundException e
+        (error e (.getMessage e))
+        (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
+
 
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)

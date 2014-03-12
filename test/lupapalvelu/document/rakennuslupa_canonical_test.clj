@@ -139,20 +139,27 @@
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
                        :kokemusvuodet {:value "3"}
                        :valvottavienKohteidenMaara {:value "9"}}
-            :vastuuaika {:vastuuaika-alkaa-pvm {:value "19.12.2013"},
-                         :vastuuaika-paattyy-pvm {:value "31.12.2013"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
                                      :rakennelmaTaiLaitos {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
-            :yritys yritysnimi-ja-ytunnus})})
+            :yritys yritysnimi-ja-ytunnus
+            :sijaistukset {:0 {:sijaistettavaHloEtunimi {:value "Jaska"}
+                                :sijaistettavaHloSukunimi {:value "Jokunen"}
+                                :alkamisPvm {:value "13.02.2014"}
+                                :paattymisPvm {:value "20.02.2014"}}}})})
 
 (def ^:private tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
     (assoc-in [:data :kuntaRoolikoodi :value] "")
     (assoc-in [:data :patevyys :patevyysvaatimusluokka :value] "Ei tiedossa")
     (assoc-in [:data :patevyys :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
+
+(def ^:private tyonjohtajan-sijaistus-blank-dates
+  (-> tyonjohtaja
+    (dissoc-in [:data :sijaistukset :0 :alkamisPvm])
+    (assoc-in [:data :sijaistukset :0 :paattymisPvm :value] "")))
 
 (def ^:private rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
@@ -189,7 +196,8 @@
                :vesijohtoKytkin {:value true}
                :viemariKytkin {:value true}
                :lamminvesiKytkin {:value true}
-               :aurinkopaneeliKytkin {:value true}}
+               :aurinkopaneeliKytkin {:value true}
+               :liitettyJatevesijarjestelmaanKytkin {:value true}}
    :verkostoliittymat {:kaapeliKytkin {:value true}
                        :maakaasuKytkin {:value true}
                        :sahkoKytkin {:value true}
@@ -376,7 +384,8 @@
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
                  :status "condition"
-                   :text "Savupiippu pit\u00e4\u00e4 olla."}]}))
+                   :text "Savupiippu pit\u00e4\u00e4 olla."}]
+   :neighbors neighbors}))
 
 (def application-tyonjohtajan-nimeaminen
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
@@ -535,7 +544,8 @@
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
         tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
-        yritys (:yritys tyonjohtaja-model)]
+        yritys (:yritys tyonjohtaja-model)
+        sijaistus (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
@@ -551,6 +561,11 @@
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
+    (fact "sijaisuus" sijaistus => truthy)
+    (fact "sijaistettavan nimi" (:sijaistettavaHlo sijaistus) => "Jaska Jokunen")
+    (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus) => (:tyonjohtajaRooliKoodi tyonjohtaja-model))
+    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "2014-02-13")
+    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "2014-02-20")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -562,6 +577,14 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => "Ei tiedossa")
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => false)))
+
+(facts "Canonical tyonjohtajan sijaistus model is correct"
+       (let [tyonjohtaja (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
+        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja :tyonjohtaja)
+        sijaistus (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
+         (fact "model" sijaistus => truthy)
+         (fact "missing alkamisPvm" (:alkamisPvm sijaistus) => nil)
+         (fact "empty paattymisPvm" (:VRKrooliKoodi sijaistus) => nil)))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))
@@ -658,6 +681,11 @@
         rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
+(facts "rakennuksenTiedot"
+  (let [toimenpide {:varusteet {:liitettyJatevesijarjestelmaanKytkin true}}
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+    (fact (-> rakennus :rakennuksenTiedot :liitettyJatevesijarjestelmaanKytkin) => true)))
+
 (fl/facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -687,6 +715,23 @@
         paasuunnitelija (:Suunnittelija (last suunnittelijat)) => truthy
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
+
+        naapuritieto (:naapuritieto osapuolet) => truthy
+        naapuricount (count naapuritieto) => 2
+        naapuri (first naapuritieto) => truthy
+        Naapuri (:Naapuri naapuri) => truthy
+        naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
+        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
+        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+
+        naapuri (last naapuritieto) => truthy
+        Naapuri (:Naapuri naapuri) => truthy
+        naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
+        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
+        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+
+        sijaistukset (:sijaistustieto tyonjohtajatieto) => truthy
+        sijaistus (:Sijaistus (last sijaistukset)) = truthy
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
         rakennuspaikkatieto (first rakennuspaikkatiedot) => truthy
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy

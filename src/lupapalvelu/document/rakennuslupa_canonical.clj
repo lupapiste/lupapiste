@@ -94,18 +94,20 @@
                                             :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
                                             :saunoja (-> toimenpide :varusteet :saunoja)
-                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}}
-                               (cond (-> toimenpide :manuaalinen_rakennusnro)
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
+                                :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))}
+                               (cond
+                                 (-> toimenpide :manuaalinen_rakennusnro)
                                  {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro)
-                                                     :jarjestysnumero nil
-                                                    :kiinttun (:propertyId application)}}
-                                     (-> toimenpide :rakennusnro)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro)
-                                                     :jarjestysnumero nil
-                                                     :kiinttun (:propertyId application)}}
-                                     :default
-                                       {:rakennustunnus {:jarjestysnumero nil
-                                                         :kiinttun (:propertyId application)}})
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 (-> toimenpide :rakennusnro)
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro)
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 :default
+                                 {:rakennustunnus {:jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
@@ -228,7 +230,7 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto (osapuolet documents)
+                      :osapuolettieto (osapuolet documents (:neighbors application))
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name
