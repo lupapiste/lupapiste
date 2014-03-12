@@ -2,7 +2,8 @@
   (:require [lupapalvelu.operations :refer :all]
             [lupapalvelu.test-util :refer :all]
             [midje.sweet :refer :all]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.env :as env]))
 
 (facts "check that every operation refers to existing schema"
   (doseq [[op {:keys [schema required]}] operations
@@ -51,14 +52,15 @@
   (fact "poikkarit"
     (operations-for-permit-type "P") => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]])
 
-  (fact "meluilmoitus"
-    (operations-for-permit-type "YI") => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]])
 
-  (fact "ymparistolupa"
-    (operations-for-permit-type "YL") => [["Ymp\u00e4rist\u00f6luvat"
-                                           [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
-                                                                               ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-                                                                               ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])
+  (when (env/feature? :ymparisto)
+    (fact "meluilmoitus"
+          (operations-for-permit-type "YI") => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]]))
 
-  )
+  (when (env/feature? :ymparisto)
+    (fact "ymparistolupa"
+          (operations-for-permit-type "YL") => [["Ymp\u00e4rist\u00f6luvat"
+                                                 [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
+                                                                                     ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+                                                                                     ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])))
 
