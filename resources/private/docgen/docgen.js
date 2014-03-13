@@ -311,16 +311,16 @@ var docgen = (function () {
       if (self.authorizationModel.ok("reject-doc")) {
         rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
         btnContainer$.append(rejectButton$);
-        
+
         if (!allowReject) {
             rejectButton$.hide();
         }
       }
-      
+
       if (allowApprove || allowReject) {
           approvalContainer$.removeClass("empty");
       }
-      
+
       if (!requiresApproval) {
         setStatus(approval);
       }
@@ -710,8 +710,8 @@ var docgen = (function () {
             var name = building.index;
             var option = document.createElement("option");
             option.value = name;
-            option.setAttribute("data-propertyid", building.propertyId);
-            option.setAttribute("data-buildingid", building.buildingId);
+            option.setAttribute("data-propertyid", building.propertyId || "");
+            option.setAttribute("data-buildingid", building.buildingId || "");
             option.appendChild(document.createTextNode(util.buildingName(building)));
             if (selectedOption === name) {
               option.selected = "selected";
