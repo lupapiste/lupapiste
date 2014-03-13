@@ -1,6 +1,6 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
@@ -298,6 +298,10 @@
 ;;
 (defn raster-images [request service]
   (let [layer (get-in request [:params :LAYER])]
+
+    (when (env/feature? :use-wmts-map)
+      (infof "raster-images, \nservice:\n %s, \nlayer:\n %s, \nrequest:\n %s" service layer request))
+
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
               {:query-params (:params request)
