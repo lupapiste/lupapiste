@@ -388,7 +388,7 @@ Select operations path YA kayttolupa kaivu
 Select operations path YA kayttolupa mainostus-viitoitus
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
   Click tree item by text  "Yleisten alueiden tai muiden kunnan omistamien alueiden käyttö (tapahtumat, mainokset, yms.)"
-  Click tree item by text  "Mainoksien sijoittaminen"
+  Click tree item by text  "Mainoslaitteiden ja opasteviittojen sijoittaminen"
 
 Select operations path YA sijoituslupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
