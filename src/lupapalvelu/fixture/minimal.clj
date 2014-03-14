@@ -165,6 +165,7 @@
     :username "admin@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f850"}}
+   ;; rakennustarkastaja@jarvenpaa.fi / jarvenpaa
    {:id "50ac77ecd2e6c2ea6e73f851"
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
