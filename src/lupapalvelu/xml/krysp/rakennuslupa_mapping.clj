@@ -343,19 +343,25 @@
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
+(defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
+    #(map (fn [tj]
+            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
+              (fn [luokka]
+                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+                  luokka))))
+       %)))
+
+(defn- map-enums-212 [canonical]
+  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
   [canonical krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
-    "2.1.2" (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
-              #(map (fn [tj]
-                      (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
-                        (fn [luokka]
-                          (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
-                            "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
-                            luokka))))
-                 %))
+    "2.1.2" (map-enums-212 canonical)
     canonical ; default: no conversions
     ))
 
