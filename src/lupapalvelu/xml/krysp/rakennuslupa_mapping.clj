@@ -230,12 +230,14 @@
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
       #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
 
+(def rakennuslupa_to_krysp_214 rakennuslupa_to_krysp_213)
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
     "2.1.3" rakennuslupa_to_krysp_213
+    "2.1.4" rakennuslupa_to_krysp_214
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
