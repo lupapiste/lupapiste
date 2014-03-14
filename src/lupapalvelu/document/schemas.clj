@@ -217,7 +217,9 @@
 
 (def patevyys-tyonjohtaja [{:name "koulutus" :type :string :required false}
                            {:name "patevyysvaatimusluokka" :type :select :required false
-                            :body [{:name "1"}
+                            :body [{:name "C"}
+                                   {:name "B"}
+                                   {:name "A"}
                                    {:name "AA"}
                                    {:name "ei tiedossa"}]}
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
