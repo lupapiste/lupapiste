@@ -1,3 +1,0 @@
-tyonjohtaja.patevyys.patevyysvaatimusluokka.A: A
-tyonjohtaja.patevyys.patevyysvaatimusluokka.B: B
-tyonjohtaja.patevyys.patevyysvaatimusluokka.C: C
