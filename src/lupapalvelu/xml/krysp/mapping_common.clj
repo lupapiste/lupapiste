@@ -1,9 +1,11 @@
 (ns lupapalvelu.xml.krysp.mapping-common
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [clojure.java.io :as io]
             [clojure.data.xml :refer [emit indent-str]]
             [me.raynes.fs :as fs]
             [sade.strings :as ss]
             [sade.util :refer :all]
+            [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
@@ -405,19 +407,27 @@
   [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
   {:pre [(string? output-dir)]
    :post [%]}
-  (when-not (re-matches #"\d+\.\d+\.\d+" (or krysp-version "nil"))
-    (throw (IllegalAccessException. (str \' krysp-version "' does not look like a KRYSP version"))))
 
   (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]
 
-    (validator/validate xml-s (permit/permit-type application) krysp-version)
+    (try
+      (validator/validate xml-s (permit/permit-type application) krysp-version)
+      (catch org.xml.sax.SAXParseException e
+       (info e "Invalid KRYSP XML message")
+       (fail! :error.integration.send :details (.getMessage e))))
 
-    (fs/mkdirs output-dir)  ;; this has to be called before calling "with-open" below)
-    (with-open [out-file-stream (io/writer tempfile)]
-      (emit xml out-file-stream))
+    (fs/mkdirs output-dir)
+    (try
+      (with-open [out-file-stream (io/writer tempfile)]
+        (emit xml out-file-stream))
+      ;; this has to be called before calling "with-open" below
+      (catch java.io.FileNotFoundException e
+        (error e (.getMessage e))
+        (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
+
 
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)

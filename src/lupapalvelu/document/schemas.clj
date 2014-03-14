@@ -525,6 +525,16 @@
                               full-osoite
                               rakennuksen-tiedot))
 
+(def olemassaoleva-rakennus-ei-huoneistoja (body
+                                             rakennuksen-valitsin
+                                             rakennuksen-omistajat
+                                             full-osoite
+                                             rakennuksen-tiedot-ilman-huoneistoa))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja (body
+                                               muutostyonlaji
+                                               olemassaoleva-rakennus-ei-huoneistoja))
+
 (def rakennuksen-muuttaminen (body
                                muutostyonlaji
                                olemassaoleva-rakennus))
@@ -606,10 +616,13 @@
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
-   {:info {:name "uusi-vapaa-ajan-asunto" :i18name "uusiRakennus" :approvable true}
+   {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
 
-    {:info {:name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja)}
+
+   {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
 
     {:info {:name "rakennuksen-laajentaminen" :approvable true}
