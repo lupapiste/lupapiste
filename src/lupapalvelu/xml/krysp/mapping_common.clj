@@ -167,7 +167,6 @@
                              yritys
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
-                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              ]}]}
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
@@ -178,28 +177,25 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
-                             ;{:tag :alkamisPvm}
-                             ;{:tag :paattymisPvm}
-                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             ;{:tag :kokemusvuodet}               ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}]}]}
            naapuri]})
 
+(def suunnittelijatieto_211
+  {:tag :suunnittelijatieto
+   :child [{:tag :Suunnittelija
+            :child [{:tag :suunnittelijaRoolikoodi}
+                    {:tag :VRKrooliKoodi}
+                    henkilo
+                    yritys
+                    {:tag :patevyysvaatimusluokka}
+                    {:tag :koulutus}
+                    {:tag :valmistumisvuosi}
+                    {:tag :kokemusvuodet}]}]})
+
 (def osapuolet_211
   {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto
-            :child [osapuoli-body]}
-           {:tag :suunnittelijatieto
-            :child [{:tag :Suunnittelija
-                     :child [{:tag :suunnittelijaRoolikoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys
-                             {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}
-                             {:tag :valmistumisvuosi}
-                             {:tag :kokemusvuodet}]}]}
+   :child [{:tag :osapuolitieto :child [osapuoli-body]}
+           suunnittelijatieto_211
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
                      :child [{:tag :tyonjohtajaRooliKoodi}
@@ -211,8 +207,6 @@
                              {:tag :valmistumisvuosi}
                              {:tag :alkamisPvm}
                              {:tag :paattymisPvm}
-                             ;{:tag :vastattavatTyotehtavat}      ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
                              {:tag :tyonjohtajaHakemusKytkin}
                              {:tag :kokemusvuodet}
                              {:tag :sijaistustieto
@@ -222,6 +216,35 @@
                                                {:tag :alkamisPvm}
                                                {:tag :paattymisPvm}]}]}]}]}
            naapuri]})
+
+(def osapuolet_212
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto
+            :child [osapuoli-body]}
+           suunnittelijatieto_211
+           {:tag :tyonjohtajatieto
+            :child [{:tag :Tyonjohtaja
+                     :child [{:tag :tyonjohtajaRooliKoodi}
+                             {:tag :VRKrooliKoodi}
+                             henkilo
+                             yritys
+                             {:tag :patevyysvaatimusluokka}
+                             {:tag :koulutus}
+                             {:tag :valmistumisvuosi}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}
+                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+                             {:tag :tyonjohtajaHakemusKytkin}
+                             {:tag :kokemusvuodet}
+                             {:tag :vastattavaTyotieto
+                              :child [{:tag :VastattavaTyo
+                                       :child [{:tag :vastattavaTyo} ; string
+                                               {:tag :alkamisPvm} ; date
+                                               {:tag :paattymisPvm}]}]}
+                             {:tag :sijaistettavaHlo}]}]}
+           naapuri]})
+
+
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"

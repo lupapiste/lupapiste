@@ -230,7 +230,11 @@
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
       #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
 
-(def rakennuslupa_to_krysp_214 rakennuslupa_to_krysp_213)
+(def rakennuslupa_to_krysp_214
+  (-> rakennuslupa_to_krysp_213
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
