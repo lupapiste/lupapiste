@@ -368,11 +368,11 @@
     (merge foremans
            {:tyonjohtajaRooliKoodi rooli
             :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-            :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
-            :valmistumisvuosi (-> patevyys :valmistumisvuosi)
-            :kokemusvuodet (-> patevyys :kokemusvuodet)
-            :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
-            :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))
+            :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+            :valmistumisvuosi (:valmistumisvuosi patevyys)
+            :kokemusvuodet (:kokemusvuodet patevyys)
+            :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
+            :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
             :sijaistustieto (get-sijaistukset (:sijaistukset tyonjohtaja) rooli)})))
 
 

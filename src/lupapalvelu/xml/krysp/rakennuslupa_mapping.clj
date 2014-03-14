@@ -343,6 +343,25 @@
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
+(defn- map-enums
+  "Map enumerations in canonical into values supperted by given KRYSP version"
+  [canonical krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
+              #(map (fn [tj]
+                      (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
+                        (fn [luokka]
+                          (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+                            "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+                            luokka))))
+                 %))
+    canonical ; default: no conversions
+    ))
+
+(defn- rakennuslupa-element-to-xml [canonical krysp-version]
+  (element-to-xml (map-enums canonical krysp-version) (get-mapping krysp-version)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
@@ -373,7 +392,7 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (rakennuslupa-element-to-xml canonical krysp-version)]
 
     (mapping-common/write-to-disk
       application attachments
