@@ -43,4 +43,10 @@ jQuery(function($){
     };
 
   $.datepicker.setDefaults($.datepicker.regional.fi);
+  $.datepicker.setDefaults({
+    changeMonth: true,
+    changeYear: true,
+    numberOfMonths: 3,
+    showButtonPanel: true
+  });
 });
