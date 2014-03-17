@@ -22,38 +22,58 @@
             [sade.xml :as xml]
             [sade.common-reader :as cr]))
 
-(defn- do-test [application]
+(testable-privates lupapalvelu.xml.krysp.rakennuslupa-mapping rakennuslupa-element-to-xml)
+
+(defn- do-test [application validate-tyonjohtaja?]
   (let [canonical (application-to-canonical application "fi")
-        xml_212 (element-to-xml canonical rakennuslupa_to_krysp_212)
-        xml_213 (element-to-xml canonical rakennuslupa_to_krysp_213)]
+        xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
+        xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
+        xml_212_s (indent-str xml_212)
+        xml_213_s (indent-str xml_213)]
 
     (fact "2.1.2: :tag is set" (has-tag rakennuslupa_to_krysp_212) => true)
     (fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
+
+    (fact "2.1.2: xml exist" xml_212 => truthy)
+    (fact "2.1.3: xml exist" xml_213 => truthy)
+
+    (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
+          lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
+          tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
+          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])]
+
+      (if validate-tyonjohtaja?
+        (do
+          (fact "In KRYSP 2.1.2, patevyysvaatimusluokka A is mapped to 'ei tiedossa'"
+            (xml/get-text tyonjohtaja_212 :patevyysvaatimusluokka) => "ei tiedossa")
+
+          (fact "In KRYSP 2.1.3, patevyysvaatimusluokka A not mapped"
+            (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"))
+        (do
+           tyonjohtaja_212 => nil
+           tyonjohtaja_213 => nil)))
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.3"}}})
 
-    (fact "2.1.2: xml exist" xml_212 => truthy)
-    (fact "2.1.3: xml exist" xml_213 => truthy)
-
-    (validator/validate (indent-str xml_212) (:permitType application) "2.1.2")
-    (validator/validate (indent-str xml_213) (:permitType application) "2.1.3")))
+    (validator/validate xml_212_s (:permitType application) "2.1.2")
+    (validator/validate xml_213_s (:permitType application) "2.1.3")))
 
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
   (fact "Rakennuslupa application -> canonical -> xml"
-    (do-test application-rakennuslupa))
+    (do-test application-rakennuslupa true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
-    (do-test application-tyonjohtajan-nimeaminen))
+    (do-test application-tyonjohtajan-nimeaminen true))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen))
+    (do-test application-suunnittelijan-nimeaminen false))
 
   (fact "Aloitusoikeus -> canonical -> xml"
-    (do-test aloitusoikeus-hakemus)))
+    (do-test aloitusoikeus-hakemus false)))
 
 
 (let [application (assoc application-rakennuslupa :state "verdictGiven")

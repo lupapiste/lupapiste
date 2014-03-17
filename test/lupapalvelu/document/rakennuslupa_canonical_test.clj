@@ -134,7 +134,7 @@
    :data (merge suunnittelija-henkilo
            {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
             :patevyys {:koulutus {:value "Koulutus"}
-                       :patevyysvaatimusluokka {:value "AA"}
+                       :patevyysvaatimusluokka {:value "A"}
                        :valmistumisvuosi {:value "2010"}
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
                        :kokemusvuodet {:value "3"}
