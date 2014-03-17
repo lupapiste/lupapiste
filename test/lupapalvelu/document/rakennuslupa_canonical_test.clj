@@ -148,7 +148,11 @@
             :sijaistukset {:0 {:sijaistettavaHloEtunimi {:value "Jaska"}
                                 :sijaistettavaHloSukunimi {:value "Jokunen"}
                                 :alkamisPvm {:value "13.02.2014"}
-                                :paattymisPvm {:value "20.02.2014"}}}})})
+                                :paattymisPvm {:value "20.02.2014"}}
+                           :1 {:sijaistettavaHloEtunimi {:value "Jamppa"}
+                                :sijaistettavaHloSukunimi {:value "Tuominen"}
+                                :alkamisPvm {:value "21.02.2014"}
+                                :paattymisPvm {:value "20.03.2014"}}}})})
 
 (def ^:private tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -562,7 +566,7 @@
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
     (fact "sijaisuus" sijaistus-213 => truthy)
-    (fact "sijaistettavan nimi 2.1.4" (:sijaistettavaHlo tyonjohtaja-model) => "Jaska Jokunen")
+    (fact "sijaistettavan nimi 2.1.4" (:sijaistettavaHlo tyonjohtaja-model) => "Jaska Jokunen, Jamppa Tuominen")
     (fact "sijaistettavan nimi 2.1.3" (:sijaistettavaHlo sijaistus-213) => "Jaska Jokunen")
     (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus-213) => (:tyonjohtajaRooliKoodi tyonjohtaja-model))
     (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus-213) => "2014-02-13")

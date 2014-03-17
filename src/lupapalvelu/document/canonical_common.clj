@@ -360,11 +360,12 @@
                                     :sijaistettavaRooli sijaistettavaRooli
                                     :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
                                     :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
-        (vals sijaistukset)))
+        (map second (sort sijaistukset))))
 
 (defn- get-sijaistettava-hlo-214 [sijaistukset]
   (->>
-    (vals sijaistukset)
+    (sort sijaistukset)
+    (map second)
     (map (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]
            (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
              (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)))))
