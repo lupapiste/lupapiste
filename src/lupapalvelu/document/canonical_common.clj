@@ -15,15 +15,15 @@
 ; NOT the same as the state of the application!
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
-(def application-state-to-krysp-state
-  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
-   :open "vireill\u00e4"
-   :sent "vireill\u00e4"
-   :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"
-   :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
-   :constructionStarted "rakennusty\u00f6t aloitettu"
-   :closed "valmis"})
+(def ymp-application-state-to-krysp-state
+  {:draft "1 Vireill\u00e4"
+   :open "1 Vireill\u00e4"
+   :sent "1 Vireill\u00e4"
+   :submitted "1 Vireill\u00e4"
+   :complement-needed "1 Vireill\u00e4"
+   :verdictGiven "ei tiedossa"
+   :constructionStarted "ei tiedossa"
+   :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
 (def state-timestamps
   {:draft :created
@@ -437,7 +437,7 @@
 
 (defn get-kasittelytieto-ymp [application kt-key]
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
-           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+           :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
            :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
            :kasittelija (let [handler (:authority application)]
