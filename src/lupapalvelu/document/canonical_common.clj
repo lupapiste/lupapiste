@@ -353,15 +353,16 @@
       joined)))
 
 (defn- get-sijaistustieto [sijaistukset sijaistettavaRooli]
-  (mapv (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]]
-          (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
-            {}
-            {:Sijaistus (assoc-when {}
-                                    :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
-                                    :sijaistettavaRooli sijaistettavaRooli
-                                    :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
-                                    :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
-        (sort sijaistukset)))
+  (when (seq sijaistukset)
+    (map (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]]
+           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
+             {}
+             {:Sijaistus (assoc-when {}
+                           :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
+                           :sijaistettavaRooli sijaistettavaRooli
+                           :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                           :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
+      (sort sijaistukset))))
 
 (defn- get-sijaistettava-hlo-214 [sijaistukset]
   (->>
@@ -398,7 +399,7 @@
                     :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm))}})
              (sort sijaistukset))}
           (when-not (ss/blank? tyotehtavat-canonical)
-            {:vastattavaTyotieto {:VastattavaTyo {:vastattavaTyo tyotehtavat-canonical}}}))))))
+            {:vastattavaTyotieto [{:VastattavaTyo {:vastattavaTyo tyotehtavat-canonical}}]}))))))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)

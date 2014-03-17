@@ -595,6 +595,15 @@
       (fact "sijaistettavaRooli" (:sijaistettavaRooli sijaistus-213) => "KVV-ty\u00f6njohtaja")
       (fact "sijaistettavaHlo"   (:sijaistettavaHlo sijaistus-213) => "Jaska Jokunen"))))
 
+(facts "Canonical tyonjohtajan vastattavaTyotieto is correct"
+  (let [tyonjohtaja       (-> tyonjohtaja :data (dissoc :sijaistukset) tools/unwrapped)
+        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja :tyonjohtaja)
+        sijaistus-213     (-> tyonjohtaja-model :sijaistustieto)]
+    (:sijaistustieto tyonjohtaja-model) => nil
+    (fact "vastattavaTyo"
+      (-> tyonjohtaja-model :vastattavaTyotieto first :VastattavaTyo :vastattavaTyo)
+      => "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen, Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen, Maanrakennusty\u00f6, Muu tyotehtava, Rakennelma tai laitos")))
+
 (facts "Canonical maksaja/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))
         maksaja-model (get-osapuoli-data osapuoli :maksaja)
