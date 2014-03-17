@@ -268,6 +268,7 @@
 
 
 (def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
+                                  {:tag :hakemuksenTila :ns "yht"}
                                   {:tag :asiatunnus :ns "yht"}
                                   {:tag :paivaysPvm :ns "yht"}
                                   {:tag :kasittelija :ns "yht"
