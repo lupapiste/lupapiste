@@ -154,15 +154,31 @@
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi")
-        krysp-xml (element-to-xml canonical rakennuslupa_to_krysp_213)
-        xml-s     (indent-str krysp-xml)
-        lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))
-        sijaistus (xml/select1 lp-xml [:Sijaistus])]
+        xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
+        xml_214 (rakennuslupa-element-to-xml canonical "2.1.4")
+        xml_213_s (indent-str xml_213)
+        xml_214_s (indent-str xml_214)]
 
-    (validator/validate xml-s (:permitType application-tyonjohtajan-nimeaminen) "2.1.3")
+    (validator/validate xml_213_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.3")
+    (validator/validate xml_214_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.4")
 
-    (fact "sijaistettavan nimi" (xml/get-text sijaistus [:sijaistettavaHlo]) => "Jaska Jokunen")
-    (fact "sijaistettava rooli" (xml/get-text sijaistus [:sijaistettavaRooli]) => (xml/get-text lp-xml [:tyonjohtajaRooliKoodi]))
-    (fact "sijaistettavan alkamisPvm" (xml/get-text sijaistus [:alkamisPvm]) => "2014-02-13")
-    (fact "sijaistettavan paattymisPvm" (xml/get-text sijaistus [:paattymisPvm]) => "2014-02-20")))
+    (facts "2.1.3"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_213_s))
+            sijaistus (xml/select1 lp-xml [:Sijaistus])]
+        (fact "sijaistettavan nimi" (xml/get-text sijaistus [:sijaistettavaHlo]) => "Jaska Jokunen")
+        (fact "sijaistettava rooli" (xml/get-text sijaistus [:sijaistettavaRooli]) => (xml/get-text lp-xml [:tyonjohtajaRooliKoodi]))
+        (fact "sijaistettavan alkamisPvm" (xml/get-text sijaistus [:alkamisPvm]) => "2014-02-13")
+        (fact "sijaistettavan paattymisPvm" (xml/get-text sijaistus [:paattymisPvm]) => "2014-02-20")))
+
+    (facts "2.1.4"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_214_s))
+            tyonjohtaja (xml/select1 lp-xml [:Tyonjohtaja])
+            vastuu (xml/select tyonjohtaja [:vastattavaTyotieto])]
+        (fact "rooli" (xml/get-text tyonjohtaja [:tyonjohtajaRooliKoodi]) => "KVV-työnjohtaja")
+        (fact "sijaistettavan nimi" (xml/get-text tyonjohtaja [:sijaistettavaHlo]) => "Jaska Jokunen, Jamppa Tuominen")
+        (fact "2 sijaista" (count vastuu) => 2)
+        (fact "vastuun alkamisPvm" (xml/get-text (first vastuu) [:alkamisPvm]) => "2014-02-13")
+        (fact "vastuun paattymisPvm" (xml/get-text (first vastuu) [:paattymisPvm]) => "2014-02-20")))
+
+    ))
 
