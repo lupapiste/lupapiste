@@ -163,7 +163,9 @@
 (def ^:private tyonjohtajan-sijaistus-blank-dates
   (-> tyonjohtaja
     (dissoc-in [:data :sijaistukset :0 :alkamisPvm])
-    (assoc-in [:data :sijaistukset :0 :paattymisPvm :value] "")))
+    (assoc-in  [:data :sijaistukset :0 :paattymisPvm :value] "")
+    (dissoc-in [:data :sijaistukset :1 :alkamisPvm])
+    (assoc-in  [:data :sijaistukset :2 :paattymisPvm :value] "")))
 
 (def ^:private rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"

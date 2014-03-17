@@ -381,9 +381,11 @@
                                     (sort tyotehtavat)
                                     (map
                                      (fn [[k v]] (when v
-                                                   (let [lstr (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
-                                                     (assert (not (ss/blank? lstr)))
-                                                     lstr))))
+                                                   (if (= k :muuMika)
+                                                     v
+                                                     (let [loc-s (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                                                       (assert (not (re-matches #"^\?\?\?.*" loc-s)))
+                                                       loc-s)))))
                                     (remove nil?)
                                     (s/join ", ")))]
       (cr/strip-nils
