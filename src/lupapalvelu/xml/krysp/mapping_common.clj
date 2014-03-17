@@ -20,7 +20,8 @@
    "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"}
    "ymparisto/maa_ainesluvat" {"2.1.1" "2.1.0"}
    "ymparisto/ilmoitukset" {"2.1.1" "2.1.0"}
-   "ymparisto/ymparistoluvat" {"2.1.1" "2.1.0"}})
+   "ymparisto/ymparistoluvat" {"2.1.1" "2.1.0"}
+   "ymparisto/vesihuoltolaki" {"2.1.1" "2.1.0"}})
 
 (defn xsd-filename [ns-name]
   (case ns-name
