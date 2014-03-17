@@ -470,7 +470,11 @@
         asianTiedot (:asianTiedot Poikkeamisasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
         vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
-        kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
+        kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
+
+    (fact "kerrosala KRYSP 2.1.3" (:kerrosala Tavoitetila) => "25")
+
+    ))
 
 
 ;Suunnitelutarveratkaisu
@@ -604,42 +608,6 @@
         pintala (:pintaAla kerrosala) => "200"
         paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "011 yhden asunnon talot"
 
-        uusit (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "941 talousrakennukset") %) toimenpidetieto)
-        uusit (:Toimenpide uusit)
-        rakennustunnus (:rakennustunnus uusit) => nil
-        _ (:liitetieto uusit) => nil
-        kuvauskoodi (:kuvausKoodi uusit) => "uusi"
-        kerrosalatieto (:kerrosalatieto uusit) => nil
-        tavoitetilatieto (:tavoitetilatieto uusit) => truthy
-        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
-        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
-        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
-        kokonaisala (:kokonaisala Tavoitetila) => "30"
-        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
-        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
-        kerrosala (:kerrosala kerrosalatieto) => truthy
-        pintala (:pintaAla kerrosala) => "25"
-        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
-
-        laajennus-tp (get-toimenpiteet (tools/unwrapped [laajennus]))
-        laajennus-tp (:Toimenpide (first laajennus-tp))
-        rakennustunnus (:rakennustunnus laajennus-tp) => nil
-        kuvauskoodi (:kuvausKoodi laajennus-tp) => "laajennus"
-        kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
-        kerrosala (:kerrosala kerrosalatieto) => truthy
-        pintala (:pintaAla kerrosala) => "99"
-        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "013 muut erilliset talot"
-        tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
-        Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
-        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset"
-        rakennuksenKerrosluku (:rakennuksenKerrosluku Tavoitetila) => "1"
-        kokonaisala (:kokonaisala Tavoitetila) => "30"
-        huoneistoja (:asuinhuoneitojenLkm Tavoitetila) => nil
-        kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
-        kerrosala (:kerrosala kerrosalatieto) => truthy
-        pintala (:pintaAla kerrosala) => "25"
-        paakayttotarkoitusKoodi (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset"
-
         lausuntotieto (:lausuntotieto Suunnittelutarveasia) => truthy
         Lausunto (:Lausunto (first lausuntotieto)) => truthy
         viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
@@ -666,8 +634,45 @@
         asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
         vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
-        kuvaus (:suunnittelutarveasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]))
+        kuvaus (:suunnittelutarveasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
 
+    (facts "talousrakennus"
+      (let [uusit (->> toimenpidetieto (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "941 talousrakennukset") %)) :Toimenpide)
+            tavoitetilatieto (:tavoitetilatieto uusit) => truthy
+            Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+            kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+            kerrosala (:kerrosala kerrosalatieto) => truthy]
+        (fact "rakennustunnus" (:rakennustunnus uusit) => nil)
+        (fact "liitetieto" (:liitetieto uusit) => nil)
+        (fact "kerrosalatieto" (:kerrosalatieto uusit) => nil)
+        (fact "kuvauskoodi" (:kuvausKoodi uusit) => "uusi")
+        (fact "paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset")
+        (fact "rakennuksenKerrosluku" (:rakennuksenKerrosluku Tavoitetila) => "1")
+        (fact "kokonaisala" (:kokonaisala Tavoitetila) => "30")
+        (fact "huoneistoja" (:asuinhuoneitojenLkm Tavoitetila) => nil)
+        (fact "tavoite-pintala" (:pintaAla kerrosala) => "25")
+        (fact "tavoite-kerrosala" (:kerrosala Tavoitetila) => "25") ; 2.1.3
+        (fact "paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset")))
 
+    (facts "laajennus"
+      (let [laajennus-tp (-> [laajennus] tools/unwrapped get-toimenpiteet first :Toimenpide)
+            kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
+            kerrosala (:kerrosala kerrosalatieto) => truthy
+            tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
+            Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy
+            tavoite-kerrosalatieto (:kerrosalatieto Tavoitetila) => truthy
+            tavoite-kerrosala (:kerrosala tavoite-kerrosalatieto) => truthy]
+
+        (fact "rakennustunnus" (:rakennustunnus laajennus-tp) => nil)
+        (fact "kuvauskoodi" (:kuvausKoodi laajennus-tp) => "laajennus")
+        (fact "pinta-ala" (:pintaAla kerrosala) => "99")
+        (fact "paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi kerrosala) => "013 muut erilliset talot")
+        (fact "paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi Tavoitetila) => "941 talousrakennukset")
+        (fact "rakennuksenKerrosluku" (:rakennuksenKerrosluku Tavoitetila) => "1")
+        (fact "kokonaisala" (:kokonaisala Tavoitetila) => "30")
+        (fact "huoneistoja" (:asuinhuoneitojenLkm Tavoitetila) => nil)
+        (fact "tavoite-pintala" (:pintaAla tavoite-kerrosala) => "25") ; 2.1.2
+        (fact "tavoite-kerrosala" (:kerrosala Tavoitetila) => "25") ; 2.1.3
+        (fact "tavoite-paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi tavoite-kerrosala) => "941 talousrakennukset")))))
 
 
