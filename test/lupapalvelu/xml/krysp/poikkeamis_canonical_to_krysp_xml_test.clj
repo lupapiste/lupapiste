@@ -28,6 +28,12 @@
     (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2") ; throws exception
     (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") ; throws exception
 
+    (facts "212"
+      (let [lp-xml    (cr/strip-xml-namespaces (xml/parse xml_212_s))]
+        (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => "200"))
 
-    )
-  )
+    (facts "214"
+      (let [lp-xml    (cr/strip-xml-namespaces (xml/parse xml_214_s))]
+        (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
+        (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"))
+    ))
