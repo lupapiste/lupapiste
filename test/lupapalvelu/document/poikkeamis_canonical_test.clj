@@ -238,16 +238,6 @@
 (def poikkari-hakemus
   (tools/unwrapped
     {:schema-version 1
-     :auth [{:lastName "Panaani"
-             :firstName "Pena"
-             :username "pena"
-             :type "owner"
-             :role "owner"
-             :id "777777777777777777000020"} {:id "777777777777777777000023"
-                                              :username "sonja"
-                                              :firstName "Sonja"
-                                              :lastName "Sibbo"
-                                              :role "writer"}]
      :submitted 1379422973832
      :state "submitted"
      :location {:x 404174.92749023
@@ -267,42 +257,6 @@
      :_statements-seen-by {:777777777777777777000023 1379423134104}
      :_software_version "1.0.5"
      :modified 1379423133065
-     :comments [{:text ""
-                 :target {:type "attachment"
-                          :id "52385207da063788effc1e24"
-                          :version {:major 1
-                                    :minor 0}
-                          :filename "3171_001taksi.pdf"
-                          :fileId "52385207da063788effc1e21"}
-                 :created 1379422727372
-                 :to nil
-                 :user {:role "applicant"
-                        :lastName "Panaani"
-                        :firstName "Pena"
-                        :username "pena"
-                        :id "777777777777777777000020"}} {:text ""
-                                                          :target {:type "attachment"
-                                                                   :id "5238538dda063788effc1eb2"
-                                                                   :version {:major 0
-                                                                             :minor 1}
-                                                                   :filename "3112_001.pdf"
-                                                                   :fileId "5238538dda063788effc1eaf"}
-                                                          :created 1379423117449
-                                                          :to nil
-                                                          :user {:role "authority"
-                                                                 :lastName "Sibbo"
-                                                                 :firstName "Sonja"
-                                                                 :username "sonja"
-                                                                 :id "777777777777777777000023"}} {:text "Hakemukselle lis\u00e4tty lausunto."
-                                                                                                   :target {:type "statement"
-                                                                                                            :id "52385377da063788effc1e93"}
-                                                                                                   :created 1379423133065
-                                                                                                   :to nil
-                                                                                                   :user {:role "authority"
-                                                                                                          :lastName "Sibbo"
-                                                                                                          :firstName "Sonja"
-                                                                                                          :username "sonja"
-                                                                                                          :id "777777777777777777000023"}}]
      :address "S\u00f6derkullantie 146"
      :permitType "P"
      :permitSubtype "poikkeamislupa"
