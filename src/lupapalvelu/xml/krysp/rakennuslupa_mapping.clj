@@ -232,6 +232,9 @@
 
 (def rakennuslupa_to_krysp_214
   (-> rakennuslupa_to_krysp_213
+    (assoc-in [:attr :xsi:schemaLocation]
+      (str mapping-common/schemalocation-yht-2.1.2
+        "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.4/rakennusvalvonta.xsd"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
       {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))

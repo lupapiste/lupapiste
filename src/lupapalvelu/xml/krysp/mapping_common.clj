@@ -18,6 +18,10 @@
   "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
    http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
 
+(def schemalocation-yht-2.1.2
+  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.2/yhteiset.xsd
+   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+
 (def common-namespaces
   {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
    :xmlns:gml   "http://www.opengis.net/gml"
