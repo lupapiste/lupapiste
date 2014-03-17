@@ -10,17 +10,37 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
-(def schemalocation-yht-2.1.0
-  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd
-   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+(def ^:private yht-version
+  {"rakennusvalvonta" {"2.1.2" "2.1.0"
+                       "2.1.3" "2.1.1"
+                       "2.1.4" "2.1.2"}
+   "poikkeamispaatos_ja_suunnittelutarveratkaisu" {"2.1.2" "2.1.0"
+                                                   "2.1.3" "2.1.1"
+                                                   "2.1.4" "2.1.2"}
+   "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"}
+   "ymparisto/maa_ainesluvat" {"2.1.1" "2.1.0"}
+   "ymparisto/ilmoitukset" {"2.1.1" "2.1.0"}
+   "ymparisto/ymparistoluvat" {"2.1.1" "2.1.0"}})
 
-(def schemalocation-yht-2.1.1
-  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.1/yhteiset.xsd
-   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+(defn xsd-filename [ns-name]
+  (case ns-name
+    "yleisenalueenkaytonlupahakemus" "YleisenAlueenKaytonLupahakemus.xsd"
+    "maa_ainesluvat" "maaAinesluvat.xsd"
+    (str (ss/suffix ns-name "/") ".xsd")))
 
-(def schemalocation-yht-2.1.2
-  "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.2/yhteiset.xsd
-   http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd")
+(defn- paikkatietopalvelu [ns-name ns-version]
+  (format "http://www.paikkatietopalvelu.fi/gml/%s http://www.paikkatietopalvelu.fi/gml/%s/%s/%s"
+    ns-name
+    ns-name
+    ns-version
+    (xsd-filename ns-name)))
+
+(defn schemalocation [ns-name ns-version]
+  {:pre [(get-in yht-version [ns-name ns-version])]}
+  (str
+    (paikkatietopalvelu "yhteiset" (get-in yht-version [ns-name ns-version]))
+    "\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n"
+    (paikkatietopalvelu ns-name ns-version)))
 
 (def common-namespaces
   {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
