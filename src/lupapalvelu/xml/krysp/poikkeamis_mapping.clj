@@ -42,18 +42,43 @@
                              {:tag :kayttotapaus}])
 
 
-(def poikkeamis_to_krysp
+(def poikkeamis_to_krysp_212
   {:tag :Popast
    :ns "ppst"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu
-                      http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.1.2/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.2")
                  :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
            {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstractPoikkeamisType}]}]})
+
+(def poikkeamis_to_krysp_213
+  (-> poikkeamis_to_krysp_212
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.3"))
+    (update-in [:child] mapping-common/update-child-element
+      [:poikkeamisasiatieto :Poikkeamisasia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
+    (update-in [:child] mapping-common/update-child-element
+    [:suunnittelutarveasiatieto :Suunnittelutarveasia :osapuolettieto]
+    {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})))
+
+(def poikkeamis_to_krysp_214
+  (-> poikkeamis_to_krysp_213
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.3"))
+    (update-in [:child] mapping-common/update-child-element
+      [:poikkeamisasiatieto :Poikkeamisasia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})
+    (update-in [:child] mapping-common/update-child-element
+    [:suunnittelutarveasiatieto :Suunnittelutarveasia :osapuolettieto]
+    {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" poikkeamis_to_krysp_212
+    "2.1.3" poikkeamis_to_krysp_213
+    "2.1.4" poikkeamis_to_krysp_214
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -76,7 +101,7 @@
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
                     attachments)
-        xml (element-to-xml canonical poikkeamis_to_krysp)]
+        xml (element-to-xml canonical (get-mapping krysp-version))]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
