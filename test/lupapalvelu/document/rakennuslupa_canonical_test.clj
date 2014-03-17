@@ -546,7 +546,7 @@
 
 (facts "Canonical tyonjohtaja model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
-        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)
         sijaistus-213 (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
@@ -576,7 +576,7 @@
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
-        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)]
+        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => "ei tiedossa")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ei tiedossa")
@@ -585,7 +585,7 @@
 
 (facts "Canonical tyonjohtajan sijaistus model is correct"
   (let [tyonjohtaja       (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
-        tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja :tyonjohtaja)
+        tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
     (facts "model 2.1.3" sijaistus-213 => truthy
       (fact "missing alkamisPvm" (:alkamisPvm sijaistus-213) => nil)

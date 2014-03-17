@@ -227,7 +227,7 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto (osapuolet documents (:neighbors application))
+                      :osapuolettieto (osapuolet documents (:neighbors application) lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name

@@ -371,7 +371,15 @@
     (remove ss/blank?)
     (s/join ", ")))
 
-(defn get-tyonjohtaja-data [tyonjohtaja party-type]
+(defn- get-vastattava-tyotieto [tyonjohtaja]
+   (let [sijaistukset (:sijaistukset tyonjohtaja)]
+     {:vastattavaTyotieto
+     [{:VastattavaTyo nil
+       :alkamisPvm nil
+       :paattymisPvm nil}]})
+  )
+
+(defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys tyonjohtaja)
         sijaistukset (:sijaistukset tyonjohtaja)
@@ -390,16 +398,15 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn get-foremans [documents]
-  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
+(defn- get-foremans [documents lang]
+  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang)))
 
-(defn get-neighbor [neighbor-name property-id]
+(defn- get-neighbor [neighbor-name property-id]
   {:Naapuri {:henkilo neighbor-name
-              :kiinteistotunnus property-id
-              :hallintasuhde "Ei tiedossa"}}
-  )
+             :kiinteistotunnus property-id
+             :hallintasuhde "Ei tiedossa"}})
 
-(defn get-neighbors [neighbors]
+(defn- get-neighbors [neighbors]
   (remove nil? (for [[_ neighbor] neighbors]
                    (let [status (last (:status neighbor))
                          propertyId (-> neighbor :neighbor :propertyId)]
@@ -409,18 +416,17 @@
                        nil)))))
 
 (defn osapuolet
-  ([documents-by-types]
+  ([documents-by-types lang]
     (osapuolet documents-by-types nil))
-  ([documents-by-types neighbors]
+  ([documents-by-types neighbors lang]
     {:Osapuolet
      {:osapuolitieto (get-parties documents-by-types)
       :suunnittelijatieto (get-designers documents-by-types)
-      :tyonjohtajatieto (get-foremans documents-by-types)
+      :tyonjohtajatieto (get-foremans documents-by-types lang)
       :naapuritieto (get-neighbors neighbors)}}))
 
 (defn change-value-to-when [value to_compare new_val]
-  (if (= value to_compare) new_val
-    value))
+  (if (= value to_compare) new_val value))
 
 
 (defn get-bulding-places [docs application]
