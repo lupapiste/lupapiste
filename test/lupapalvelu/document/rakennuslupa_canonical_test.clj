@@ -545,7 +545,7 @@
         tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja-unwrapped :tyonjohtaja)
         henkilo (:henkilo tyonjohtaja-model)
         yritys (:yritys tyonjohtaja-model)
-        sijaistus (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
+        sijaistus-213 (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
     (fact "model" tyonjohtaja-model => truthy)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
@@ -561,11 +561,12 @@
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
-    (fact "sijaisuus" sijaistus => truthy)
-    (fact "sijaistettavan nimi" (:sijaistettavaHlo sijaistus) => "Jaska Jokunen")
-    (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus) => (:tyonjohtajaRooliKoodi tyonjohtaja-model))
-    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus) => "2014-02-13")
-    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus) => "2014-02-20")
+    (fact "sijaisuus" sijaistus-213 => truthy)
+    (fact "sijaistettavan nimi 2.1.4" (:sijaistettavaHlo tyonjohtaja-model) => "Jaska Jokunen")
+    (fact "sijaistettavan nimi 2.1.3" (:sijaistettavaHlo sijaistus-213) => "Jaska Jokunen")
+    (fact "sijaistettava rooli" (:sijaistettavaRooli sijaistus-213) => (:tyonjohtajaRooliKoodi tyonjohtaja-model))
+    (fact "sijaistettavan alkamisPvm" (:alkamisPvm sijaistus-213) => "2014-02-13")
+    (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus-213) => "2014-02-20")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -579,12 +580,14 @@
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => false)))
 
 (facts "Canonical tyonjohtajan sijaistus model is correct"
-       (let [tyonjohtaja (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
+  (let [tyonjohtaja       (tools/unwrapped (:data tyonjohtajan-sijaistus-blank-dates))
         tyonjohtaja-model (get-tyonjohtaja-data tyonjohtaja :tyonjohtaja)
-        sijaistus (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
-         (fact "model" sijaistus => truthy)
-         (fact "missing alkamisPvm" (:alkamisPvm sijaistus) => nil)
-         (fact "empty paattymisPvm" (:VRKrooliKoodi sijaistus) => nil)))
+        sijaistus-213     (-> tyonjohtaja-model :sijaistustieto first :Sijaistus)]
+    (facts "model 2.1.3" sijaistus-213 => truthy
+      (fact "missing alkamisPvm" (:alkamisPvm sijaistus-213) => nil)
+      (fact "empty paattymisPvm" (:paattymisPvm sijaistus-213) => nil)
+      (fact "sijaistettavaRooli" (:sijaistettavaRooli sijaistus-213) => "KVV-ty\u00f6njohtaja")
+      (fact "sijaistettavaHlo"   (:sijaistettavaHlo sijaistus-213) => "Jaska Jokunen"))))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))

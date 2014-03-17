@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
+            [sade.strings :as ss]
             [sade.util :refer :all]
             [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
@@ -350,7 +351,7 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
-(defn get-sijaistukset [sijaistukset sijaistettavaRooli]
+(defn- get-sijaistustieto [sijaistukset sijaistettavaRooli]
   (mapv (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]
           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
             {}
@@ -361,20 +362,33 @@
                                     :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
         (vals sijaistukset)))
 
+(defn- get-sijaistettava-hlo-214 [sijaistukset]
+  (->>
+    (vals sijaistukset)
+    (map (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]
+           (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
+             (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)))))
+    (remove ss/blank?)
+    (s/join ", ")))
+
 (defn get-tyonjohtaja-data [tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys tyonjohtaja)
+        sijaistukset (:sijaistukset tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
-    (merge foremans
-           {:tyonjohtajaRooliKoodi rooli
-            :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-            :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
-            :valmistumisvuosi (:valmistumisvuosi patevyys)
-            :kokemusvuodet (:kokemusvuodet patevyys)
-            :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
-            :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
-            :sijaistustieto (get-sijaistukset (:sijaistukset tyonjohtaja) rooli)})))
-
+    (merge
+      foremans
+      {:tyonjohtajaRooliKoodi rooli
+       :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+       :valmistumisvuosi (:valmistumisvuosi patevyys)
+       :kokemusvuodet (:kokemusvuodet patevyys)
+       :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
+       :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
+       :sijaistustieto (get-sijaistustieto sijaistukset rooli)}
+      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistukset)]
+        (when-not (ss/blank? sijaistettava-hlo)
+          {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn get-foremans [documents]
   (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
