@@ -15,6 +15,16 @@
 ; NOT the same as the state of the application!
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
+(def application-state-to-krysp-state
+  {:draft "vireill\u00e4"
+   :open "vireill\u00e4"
+   :sent "vireill\u00e4"
+   :submitted "vireill\u00e4"
+   :complement-needed "vireill\u00e4"
+   :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
+   :constructionStarted "rakennusty\u00f6t aloitettu"
+   :closed "valmis"})
+
 (def ymp-application-state-to-krysp-state
   {:draft "1 Vireill\u00e4"
    :open "1 Vireill\u00e4"
