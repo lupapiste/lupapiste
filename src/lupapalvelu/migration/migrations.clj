@@ -264,3 +264,25 @@
   (doseq [application (mongo/select :applications {"attachments.0" {$exists true}})]
     (mongo/update-by-id :applications (:id application)
       {$set {:attachments (attachments-with-applicationState application)}})))
+
+(defn update-vapaa-ajan-asuinrakennus [document]
+  )
+
+(defn get-operation-name [document]
+  (get-in document [:schema-info :op :name]))
+
+(defn get-schema-name [document]
+  (get-in document [:schema-info :op :name]))
+
+(defmigration vapaa-ajan-asuinrakennus-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (let [applications-to-update (mongo/select :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}]}}})]
+    (for [application applications-to-update]
+      (let [new-documents (map (fn [document]
+                                 (let [schema-name (get-schema-name document)
+                                       operation-name (get-operation-name document)]
+                                   (if (and (= schema-name "vapaa-ajan-asuinrakennus") (= operation-name "uusiRakennus"))
+                                     (update-vapaa-ajan-asuinrakennus document)
+                                     document))) (:documents application))]
+        (mongo/update :applications {$set {:documents new-documents}}))))
+  )
