@@ -5,6 +5,7 @@
             [sade.util :refer :all]
             [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
+            [lupapalvelu.i18n :refer [with-lang loc]]
             [cljts.geom :as geo]
             [cljts.io :as jts]))
 
@@ -371,13 +372,31 @@
     (remove ss/blank?)
     (s/join ", ")))
 
-(defn- get-vastattava-tyotieto [tyonjohtaja]
-   (let [sijaistukset (:sijaistukset tyonjohtaja)]
-     {:vastattavaTyotieto
-     [{:VastattavaTyo nil
-       :alkamisPvm nil
-       :paattymisPvm nil}]})
-  )
+(defn- get-vastattava-tyotieto [tyonjohtaja lang]
+  (with-lang lang
+    (let [sijaistukset (:sijaistukset tyonjohtaja)
+          tyotehtavat  (:vastattavatTyotehtavat tyonjohtaja)
+          tyotehtavat-canonical (when (seq tyotehtavat)
+                                  (->>
+                                    (sort tyotehtavat)
+                                    (map
+                                     (fn [[k v]] (when v
+                                                   (let [lstr (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                                                     (assert (not (ss/blank? lstr)))
+                                                     lstr))))
+                                    (remove nil?)
+                                    (s/join ", ")))]
+      (cr/strip-nils
+        (if (seq sijaistukset)
+          {:vastattavaTyotieto
+           (map (fn [[_ {:keys [alkamisPvm paattymisPvm]}]]
+                  {:VastattavaTyo
+                   {:vastattavaTyo tyotehtavat-canonical
+                    :alkamisPvm   (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                    :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm))}})
+             (sort sijaistukset))}
+          (when-not (ss/blank? tyotehtavat-canonical)
+            {:vastattavaTyotieto {:VastattavaTyo {:vastattavaTyo tyotehtavat-canonical}}}))))))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
@@ -394,6 +413,7 @@
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
        :sijaistustieto (get-sijaistustieto sijaistukset rooli)}
+      (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistukset)]
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
