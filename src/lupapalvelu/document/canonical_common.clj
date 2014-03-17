@@ -352,7 +352,7 @@
       joined)))
 
 (defn- get-sijaistustieto [sijaistukset sijaistettavaRooli]
-  (mapv (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]
+  (mapv (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]]
           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
             {}
             {:Sijaistus (assoc-when {}
@@ -360,13 +360,12 @@
                                     :sijaistettavaRooli sijaistettavaRooli
                                     :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
                                     :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
-        (map second (sort sijaistukset))))
+        (sort sijaistukset)))
 
 (defn- get-sijaistettava-hlo-214 [sijaistukset]
   (->>
     (sort sijaistukset)
-    (map second)
-    (map (fn [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]
+    (map (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]]
            (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
              (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)))))
     (remove ss/blank?)
