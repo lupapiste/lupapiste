@@ -600,9 +600,10 @@
         tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto)]
     (:sijaistustieto tyonjohtaja-model) => nil
-    (fact "vastattavaTyo"
-      (-> tyonjohtaja-model :vastattavaTyotieto first :VastattavaTyo :vastattavaTyo)
-      => "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen, Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen, Maanrakennusty\u00f6, Muu tyotehtava, Rakennelma tai laitos")))
+    (let [vastattava-tyo (-> tyonjohtaja-model :vastattavaTyotieto first :VastattavaTyo)]
+      (fact "no dates" (keys vastattava-tyo) => [:vastattavaTyo])
+      (fact "vastattavaTyo"
+        (:vastattavaTyo vastattava-tyo) => "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen, Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen, Maanrakennusty\u00f6, Muu tyotehtava, Rakennelma tai laitos"))))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))
