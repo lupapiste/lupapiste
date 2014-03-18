@@ -11,9 +11,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]))
 
-;; Macro to get values from
-;(defmacro value [m & path] `(-> ~m ~@path :value))
-
 (defn- get-huoneisto-data [huoneistot]
   (for [huoneisto (vals huoneistot)
         :let [tyyppi (:huoneistonTyyppi huoneisto)
@@ -35,7 +32,7 @@
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
-                     (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
+                     (when (not-empty huoneistoPorras) {:porras (s/upper-case huoneistoPorras)})
                      (when (not-empty jakokirjain) {:jakokirjain (lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
@@ -94,18 +91,20 @@
                                             :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
                                             :saunoja (-> toimenpide :varusteet :saunoja)
-                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}}
-                               (cond (-> toimenpide :manuaalinen_rakennusnro)
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
+                                :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))}
+                               (cond
+                                 (-> toimenpide :manuaalinen_rakennusnro)
                                  {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro)
-                                                     :jarjestysnumero nil
-                                                    :kiinttun (:propertyId application)}}
-                                     (-> toimenpide :rakennusnro)
-                                       {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro)
-                                                     :jarjestysnumero nil
-                                                     :kiinttun (:propertyId application)}}
-                                     :default
-                                       {:rakennustunnus {:jarjestysnumero nil
-                                                         :kiinttun (:propertyId application)}})
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 (-> toimenpide :rakennusnro)
+                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro)
+                                                   :jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}}
+                                 :default
+                                 {:rakennustunnus {:jarjestysnumero nil
+                                                   :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
@@ -228,7 +227,7 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto (osapuolet documents)
+                      :osapuolettieto (osapuolet documents (:neighbors application) lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name
@@ -292,9 +291,14 @@
                        :poikkeamat poikkeamat}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
-                        {:rakennustunnus (select-keys (:rakennus (first buildings)) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
-                         :katselmuksenRakennustieto (map #(let [building-canonical (merge
-                                                                                     (select-keys (:rakennus %) [:jarjestysnumero :kiinttun :rakennusnro])
+                        {:rakennustunnus (let [building (-> buildings first :rakennus)]
+                                           (merge
+                                             (select-keys building [:jarjestysnumero :kiinttun])
+                                             (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)}))) ; v2.1.2
+                         :katselmuksenRakennustieto (map #(let [building (:rakennus %)
+                                                                building-canonical (merge
+                                                                                     (select-keys building [:jarjestysnumero :kiinttun])
+                                                                                     (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
                                                                                      {:katselmusOsittainen (get-in % [:tila :tila])
                                                                                       :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3

@@ -15,7 +15,7 @@
          {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
           :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
           :lausuntotieto (canonical-common/get-statements (:statements application))
-          :hakija (map canonical-common/->ymp-osapuoli (:hakija documents))
+          :hakija (remove nil? (map canonical-common/->ymp-osapuoli (:hakija documents)))
           :toiminta (select-keys kuvaus [:kuvaus :peruste])
           :tiedotToiminnanSijainnista
           {:TiedotToiminnanSijainnista

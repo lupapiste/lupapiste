@@ -1,8 +1,11 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
+            [sade.strings :as ss]
             [sade.util :refer :all]
+            [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
+            [lupapalvelu.i18n :refer [with-lang loc]]
             [cljts.geom :as geo]
             [cljts.io :as jts]))
 
@@ -15,7 +18,7 @@
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
 (def application-state-to-krysp-state
-  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
+  {:draft "vireill\u00e4"
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
    :submitted "vireill\u00e4"
@@ -23,6 +26,16 @@
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :closed "valmis"})
+
+(def ymp-application-state-to-krysp-state
+  {:draft "1 Vireill\u00e4"
+   :open "1 Vireill\u00e4"
+   :sent "1 Vireill\u00e4"
+   :submitted "1 Vireill\u00e4"
+   :complement-needed "1 Vireill\u00e4"
+   :verdictGiven "ei tiedossa"
+   :constructionStarted "ei tiedossa"
+   :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
 (def state-timestamps
   {:draft :created
@@ -349,31 +362,104 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
-(defn get-tyonjohtaja-data [tyonjohtaja party-type]
+(defn- get-sijaistustieto [sijaistukset sijaistettavaRooli]
+  (when (seq sijaistukset)
+    (map (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]]
+           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
+             {}
+             {:Sijaistus (assoc-when {}
+                           :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
+                           :sijaistettavaRooli sijaistettavaRooli
+                           :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                           :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
+      (sort sijaistukset))))
+
+(defn- get-sijaistettava-hlo-214 [sijaistukset]
+  (->>
+    (sort sijaistukset)
+    (map (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]]
+           (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
+             (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)))))
+    (remove ss/blank?)
+    (s/join ", ")))
+
+(defn- get-vastattava-tyotieto [tyonjohtaja lang]
+  (with-lang lang
+    (let [sijaistukset (:sijaistukset tyonjohtaja)
+          tyotehtavat  (:vastattavatTyotehtavat tyonjohtaja)
+          tyotehtavat-canonical (when (seq tyotehtavat)
+                                  (->>
+                                    (sort tyotehtavat)
+                                    (map
+                                     (fn [[k v]] (when v
+                                                   (if (= k :muuMika)
+                                                     v
+                                                     (let [loc-s (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                                                       (assert (not (re-matches #"^\?\?\?.*" loc-s)))
+                                                       loc-s)))))
+                                    (remove nil?)
+                                    (s/join ", ")))]
+      (cr/strip-nils
+        (if (seq sijaistukset)
+          {:vastattavaTyotieto
+           (map (fn [[_ {:keys [alkamisPvm paattymisPvm]}]]
+                  {:VastattavaTyo
+                   {:vastattavaTyo tyotehtavat-canonical
+                    :alkamisPvm   (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                    :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm))}})
+             (sort sijaistukset))}
+          (when-not (ss/blank? tyotehtavat-canonical)
+            {:vastattavaTyotieto [{:VastattavaTyo {:vastattavaTyo tyotehtavat-canonical}}]}))))))
+
+(defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)]
-    (merge foremans {:tyonjohtajaRooliKoodi (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)
-                     :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-                     :patevyysvaatimusluokka (-> patevyys :patevyysvaatimusluokka)
-                     :valmistumisvuosi (-> patevyys :valmistumisvuosi)
-                     :alkamisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-alkaa-pvm))
-                     :paattymisPvm (to-xml-date-from-string (-> tyonjohtaja :vastuuaika :vastuuaika-paattyy-pvm))
-                     :kokemusvuodet (-> patevyys :kokemusvuodet)
-                     :valvottavienKohteidenMaara (-> patevyys :valvottavienKohteidenMaara)
-                     :tyonjohtajaHakemusKytkin (true? (= "hakemus" (-> patevyys :tyonjohtajaHakemusKytkin)))})))
+        patevyys (:patevyys tyonjohtaja)
+        sijaistukset (:sijaistukset tyonjohtaja)
+        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
+    (merge
+      foremans
+      {:tyonjohtajaRooliKoodi rooli
+       :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+       :valmistumisvuosi (:valmistumisvuosi patevyys)
+       :kokemusvuodet (:kokemusvuodet patevyys)
+       :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
+       :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
+       :sijaistustieto (get-sijaistustieto sijaistukset rooli)}
+      (get-vastattava-tyotieto tyonjohtaja lang)
+      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistukset)]
+        (when-not (ss/blank? sijaistettava-hlo)
+          {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn get-foremans [documents]
-  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja get-tyonjohtaja-data))
+(defn- get-foremans [documents lang]
+  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang)))
 
-(defn osapuolet [documents-by-types]
-  {:Osapuolet
-   {:osapuolitieto (get-parties documents-by-types)
-    :suunnittelijatieto (get-designers documents-by-types)
-    :tyonjohtajatieto (get-foremans documents-by-types)}})
+(defn- get-neighbor [neighbor-name property-id]
+  {:Naapuri {:henkilo neighbor-name
+             :kiinteistotunnus property-id
+             :hallintasuhde "Ei tiedossa"}})
+
+(defn- get-neighbors [neighbors]
+  (remove nil? (for [[_ neighbor] neighbors]
+                   (let [status (last (:status neighbor))
+                         propertyId (-> neighbor :neighbor :propertyId)]
+                     (case (:state status)
+                       "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
+                       "mark-done" (get-neighbor (-> neighbor :neighbor :owner :name) propertyId)
+                       nil)))))
+
+(defn osapuolet
+  ([documents-by-types lang]
+    (osapuolet documents-by-types nil))
+  ([documents-by-types neighbors lang]
+    {:Osapuolet
+     {:osapuolitieto (get-parties documents-by-types)
+      :suunnittelijatieto (get-designers documents-by-types)
+      :tyonjohtajatieto (get-foremans documents-by-types lang)
+      :naapuritieto (get-neighbors neighbors)}}))
 
 (defn change-value-to-when [value to_compare new_val]
-  (if (= value to_compare) new_val
-    value))
+  (if (= value to_compare) new_val value))
 
 
 (defn get-bulding-places [docs application]
@@ -404,7 +490,7 @@
 
 (defn get-kasittelytieto-ymp [application kt-key]
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
-           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+           :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
            :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
            :kasittelija (let [handler (:authority application)]
@@ -438,7 +524,7 @@
        :postiosoite (get-simple-osoite (:osoite yritys))
        :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
        :liikeJaYhteisotunnus (:liikeJaYhteisoTunnus yritys)})
-    (let [henkilo (-> unwrapped-party-doc :data :henkilo)]
+    (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
       {:nimi "Yksityishenkil\u00f6"
        :postiosoite (get-simple-osoite (:osoite henkilo))
        :yhteyshenkilo (get-henkilo henkilo)})))

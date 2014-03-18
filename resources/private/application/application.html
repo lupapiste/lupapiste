@@ -266,7 +266,7 @@
           <h3 data-bind="ltext: 'help'">Ohje</h3>
           <span class="icon drill-down-grey" onclick="expand.click(this)"> </span>
           <div class="expanded-content expand">
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
+            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.helpText'"></p>
           </div>
         </aside>
       </div>
@@ -275,8 +275,22 @@
 
         <div id="application-info-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.applicationInfoDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'" class="tab-info"></p>
           <p data-bind="lhtml: 'required.field.desc'"></p>
+          <div data-bind="with: application">
+            <div data-bind="if: $root.authorization.ok('add-operation')">
+              <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
+              <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
+               <span data-bind="ltext: 'application.addOperation'"></span> <span class="icon add left-align"></span>
+              </button>
+            </div>
+            <div data-bind="if: $root.authorization.ok('link-permit-required')">
+              <p data-bind="ltext: 'help.AddPermit'"></p>
+              <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, enable: $root.authorization.ok('link-permit-required')" class="btn-primary">
+               <span data-bind="ltext: 'application.addLinkPermit'"></span> <span class="icon add left-align"></span>
+              </button>
+            </div>
+          </div>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="applicationDocgen" class="docgen-content">
@@ -289,21 +303,23 @@
         </div>
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.PartiesDesc')" class="tab-info"></p>
-          <p data-bind="lhtml: 'required.field.desc'"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.PartiesDesc'" class="tab-info"></p>
           <div class="application_section" data-bind="with: application">
-            <h2 class="application_section_header " onclick="accordion.click();">
-              <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
             <div class="application_section_content content_expanded">
               <div>
-                <h3 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h3>
-                <div data-bind="with: $root.application">
+                <h2 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h2>
+                <div data-bind="with: $root.application" class="parties-list">
                   <ul data-bind="foreach: roles">
-                    <li>
-                      <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
-                      (<span data-bind="text: username"></span>)
-                      <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                      <i><span data-bind="if: $data.invite"><span class="user-invite" data-bind="text: loc('invited')"></span></span></i>
+                    <li class="party">
+                      <span class="person">
+                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        (<span data-bind="text: username"></span>)
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                      </span>
+                      <span class="invite-state">  
+                        <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
+                        <span data-bind="if: !$data.invite"><span data-bind="ltext: 'accepted'"></span></span>
+                      </span>
                       <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                     </li>
                   </ul>
@@ -312,7 +328,7 @@
               </div>
             </div>
           </div>
-
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="partiesDocgen" class="docgen-content">
@@ -334,7 +350,7 @@
 
         <div id="application-attachments-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.attachmentsDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc'" class="tab-info"></p>
           <div class="attachment-legend">
             <span class="ok icon"></span>
             <span data-bind="ltext: 'ok.title'"></span>
@@ -347,16 +363,30 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-
+          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
+            <button
+              data-bind="click: $root.application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+              data-window-id="upload-dialog"
+              class="btn btn-primary modal">
+            </button>
+            <button
+              data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+              class="btn btn-primary">
+            </button>
+            <button
+              data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
+              class="btn">
+            </button>
+          </div>
 
           <div class="">
             <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
-              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"/></h1>
+              <h2><span data-bind="ltext: 'application.attachments.post-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
             </div>
             <!-- ko if: !postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h1>
+              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
             </div>
             <!-- /ko -->
@@ -442,7 +472,7 @@
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                   </span>
-                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAdd', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">
@@ -466,7 +496,7 @@
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.verdictDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'" class="tab-info"></p>
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
@@ -647,7 +677,7 @@
           <div data-bind="with: application" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="html: loc('help.' + permitType() + '.statementsDesc')" class="tab-info"></p>
+            <p data-bind="lhtml: 'help.' + permitType() + '.statementsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -692,8 +722,8 @@
 
           <div data-bind="with: application" class="application-neighbors">
 
-            <h1 data-bind="html: loc('application.' + $root.application.permitType() + '.neighbors')">Naapurit</h1>
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.neighborsDesc')" class="tab-info"></p>
+            <h1 data-bind="lhtml: 'application.' + $root.application.permitType() + '.neighbors'">Naapurit</h1>
+            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
@@ -881,7 +911,7 @@
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.conversationDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.conversationDesc'" class="tab-info"></p>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
           <div class="process-nav"></div>
         </div>

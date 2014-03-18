@@ -281,9 +281,29 @@ Create application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
+Create first application
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Click by test id  create-application
+  Wait Until  Element should be visible  application
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Click by test id  create-proceed-to-inforequest
+  # Needed for animation to finish.
+  Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
+  Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
+  Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
+  Click by test id  create-inforequest
+  Confirm  dynamic-ok-confirm-dialog
+  Wait Until  Element should be visible  inforequest
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+
+Create first inforequest 
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+  Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
@@ -298,6 +318,19 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
+  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
+  Input text by test id  create-address  ${address}
+  Set animations off
+  Click enabled by test id  create-continue
+  Select operation path by permit type  ${permitType}
+  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Set animations on
+
+Prepare first request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Go to page  applications
+  Click by test id  applications-create-new-inforequest
   Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
   Input text by test id  create-address  ${address}
@@ -355,7 +388,7 @@ Select operations path YA kayttolupa kaivu
 Select operations path YA kayttolupa mainostus-viitoitus
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
   Click tree item by text  "Yleisten alueiden tai muiden kunnan omistamien alueiden käyttö (tapahtumat, mainokset, yms.)"
-  Click tree item by text  "Mainoksien sijoittaminen"
+  Click tree item by text  "Mainoslaitteiden ja opasteviittojen sijoittaminen"
 
 Select operations path YA sijoituslupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"

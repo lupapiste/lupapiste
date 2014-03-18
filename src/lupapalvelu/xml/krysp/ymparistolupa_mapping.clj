@@ -57,10 +57,7 @@
 (def ymparistolupa_to_krysp
   {:tag :Ymparistoluvat
    :ns "ymy"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat
-                      http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat/2.1.1/ymparistoluvat.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ymparistoluvat" "2.1.1")
                  :xmlns:ymy "http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}

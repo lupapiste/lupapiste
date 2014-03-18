@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
-  Create application  create-app  753  753-416-17-15  R
+  Create first application  create-app  753  753-416-17-15  R
   It is possible to add operation
 
 Mikko sees application in list
@@ -56,7 +56,7 @@ The contents of unsent inforequest's message field is resetted properly when mov
 
 Mikko creates new application
   Go to page  applications
-  Wait until  Element should be visible  xpath=//*[@data-test-id='applications-create-new']
+  Applications page should be open
   Create application the fast way  create-app-2  753  753-416-25-22  asuinrakennus
   Go to page  applications
   Request should be visible  create-app

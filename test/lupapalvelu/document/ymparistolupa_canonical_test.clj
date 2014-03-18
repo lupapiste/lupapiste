@@ -28,6 +28,7 @@
                   :created 1391415025497
                   :documents [kuvaus
                               henkilohakija
+                              (select-keys henkilohakija [:schema-info])
                               yrityshakija]
                   :drawings []
                   :infoRequest false
