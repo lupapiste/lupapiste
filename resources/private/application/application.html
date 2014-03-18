@@ -304,20 +304,22 @@
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
           <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.PartiesDesc'" class="tab-info"></p>
-          <p data-bind="lhtml: 'required.field.desc'"></p>
           <div class="application_section" data-bind="with: application">
-            <h2 class="application_section_header " onclick="accordion.click();">
-              <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
             <div class="application_section_content content_expanded">
               <div>
-                <h3 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h3>
-                <div data-bind="with: $root.application">
+                <h2 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h2>
+                <div data-bind="with: $root.application" class="parties-list">
                   <ul data-bind="foreach: roles">
-                    <li>
-                      <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
-                      (<span data-bind="text: username"></span>)
-                      <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                      <i><span data-bind="if: $data.invite"><span class="user-invite" data-bind="text: loc('invited')"></span></span></i>
+                    <li class="party">
+                      <span class="person">
+                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        (<span data-bind="text: username"></span>)
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                      </span>
+                      <span class="invite-state">  
+                        <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
+                        <span data-bind="if: !$data.invite"><span data-bind="ltext: 'accepted'"></span></span>
+                      </span>
                       <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                     </li>
                   </ul>
@@ -326,7 +328,7 @@
               </div>
             </div>
           </div>
-
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="partiesDocgen" class="docgen-content">
