@@ -11,9 +11,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]))
 
-;; Macro to get values from
-;(defmacro value [m & path] `(-> ~m ~@path :value))
-
 (defn- get-huoneisto-data [huoneistot]
   (for [huoneisto (vals huoneistot)
         :let [tyyppi (:huoneistonTyyppi huoneisto)
@@ -35,7 +32,7 @@
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
-                     (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
+                     (when (not-empty huoneistoPorras) {:porras (s/upper-case huoneistoPorras)})
                      (when (not-empty jakokirjain) {:jakokirjain (lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
@@ -230,7 +227,7 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto (osapuolet documents (:neighbors application))
+                      :osapuolettieto (osapuolet documents (:neighbors application) lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name

@@ -8,52 +8,88 @@
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})
 
-(def abstractPoikkeamisType [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
-                             {:tag :luvanTunnistetiedot
-                              :child [mapping-common/lupatunnus]}
-                             {:tag :osapuolettieto
-                              :child [mapping-common/osapuolet]}
-                             {:tag :rakennuspaikkatieto
-                              :child [mapping-common/rakennuspaikka]}
-                             {:tag :toimenpidetieto :child [{:tag :Toimenpide :child [{:tag :kuvausKoodi }
-                                                                                      kerrosalatieto
-                                                                                      {:tag :tavoitetilatieto :child [{:tag :Tavoitetila :child [{:tag :paakayttotarkoitusKoodi}
-                                                                                                                                               {:tag :asuinhuoneistojenLkm}
-                                                                                                                                                {:tag :rakennuksenKerrosluku}
-                                                                                                                                                {:tag :kokonaisala}
-                                                                                                                                                kerrosalatieto]}]}]}]}
-                             {:tag :lausuntotieto :child [mapping-common/lausunto]}
-                             {:tag :liitetieto
-                              :child [{:tag :Liite
-                                       :child [{:tag :kuvaus :ns "yht"}
-                                               {:tag :linkkiliitteeseen :ns "yht"}
-                                               {:tag :muokkausHetki :ns "yht"}
-                                               {:tag :versionumero :ns "yht"}
-                                               {:tag :tekija :ns "yht"
-                                                :child [{:tag :kuntaRooliKoodi}
-                                                        {:tag :VRKrooliKoodi}
-                                                        mapping-common/henkilo
-                                                        mapping-common/yritys]}
-                                               {:tag :tyyppi :ns "yht"}]}]}
-                             {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
-                             {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
-                                                                                   {:tag :poikkeamisasianKuvaus}
-                                                                                   {:tag :suunnittelutarveasianKuvaus}]}]}
-                             {:tag :kayttotapaus}])
+(def tavoitetila-212 {:tag :Tavoitetila :child [{:tag :paakayttotarkoitusKoodi}
+                                                {:tag :asuinhuoneistojenLkm}
+                                                {:tag :rakennuksenKerrosluku}
+                                                {:tag :kokonaisala}
+                                                kerrosalatieto]})
 
+(def tavoitetila-213 {:tag :Tavoitetila :child [{:tag :paakayttotarkoitusKoodi}
+                                                {:tag :asuinhuoneistojenLkm}
+                                                {:tag :rakennuksenKerrosluku}
+                                                {:tag :kokonaisala}
+                                                {:tag :kerrosala}]})
 
-(def poikkeamis_to_krysp
+(def abstract-poikkeamistype-212 [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
+                                  {:tag :luvanTunnistetiedot
+                                   :child [mapping-common/lupatunnus]}
+                                  {:tag :osapuolettieto
+                                   :child [mapping-common/osapuolet]}
+                                  {:tag :rakennuspaikkatieto
+                                   :child [mapping-common/rakennuspaikka]}
+                                  {:tag :toimenpidetieto :child [{:tag :Toimenpide :child [{:tag :kuvausKoodi }
+                                                                                           kerrosalatieto
+                                                                                           {:tag :tavoitetilatieto :child [tavoitetila-212]}]}]}
+                                  {:tag :lausuntotieto :child [mapping-common/lausunto]}
+                                  {:tag :liitetieto
+                                   :child [{:tag :Liite
+                                            :child [{:tag :kuvaus :ns "yht"}
+                                                    {:tag :linkkiliitteeseen :ns "yht"}
+                                                    {:tag :muokkausHetki :ns "yht"}
+                                                    {:tag :versionumero :ns "yht"}
+                                                    {:tag :tekija :ns "yht"
+                                                     :child [{:tag :kuntaRooliKoodi}
+                                                             {:tag :VRKrooliKoodi}
+                                                             mapping-common/henkilo
+                                                             mapping-common/yritys]}
+                                                    {:tag :tyyppi :ns "yht"}]}]}
+                                  {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
+                                  {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
+                                                                                        {:tag :poikkeamisasianKuvaus}
+                                                                                        {:tag :suunnittelutarveasianKuvaus}]}]}
+                                  {:tag :kayttotapaus}])
+
+(def abstract-poikkeamistype-213
+  (-> abstract-poikkeamistype-212
+   (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
+   (mapping-common/update-child-element [:toimenpidetieto :Toimenpide :tavoitetilatieto] {:tag :tavoitetilatieto :child [tavoitetila-213]})))
+
+(def abstract-poikkeamistype-214
+  (-> abstract-poikkeamistype-213
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
+
+(def poikkeamis_to_krysp_212
   {:tag :Popast
    :ns "ppst"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu
-                      http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu/2.1.2/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.2")
                  :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-           {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstractPoikkeamisType}]}
-           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstractPoikkeamisType}]}]})
+           {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-212}]}
+           {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-212}]}]})
+
+(def poikkeamis_to_krysp_213
+  (-> poikkeamis_to_krysp_212
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.3"))
+    (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                   {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-213}]}
+                   {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-213}]}])))
+
+(def poikkeamis_to_krysp_214
+  (-> poikkeamis_to_krysp_213
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.4"))
+    (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                   {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-214}]}
+                   {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-214}]}])))
+
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" poikkeamis_to_krysp_212
+    "2.1.3" poikkeamis_to_krysp_213
+    "2.1.4" poikkeamis_to_krysp_214
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -76,7 +112,7 @@
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
                     attachments)
-        xml (element-to-xml canonical poikkeamis_to_krysp)]
+        xml (element-to-xml canonical (get-mapping krysp-version))]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 

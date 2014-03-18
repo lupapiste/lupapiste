@@ -1,7 +1,7 @@
 (ns lupapalvelu.factlet
-  (:use midje.sweet
-        clojure.walk)
-  (:require [midje.parsing.util.recognizing :as recognize]))
+  (:require [midje.sweet :refer :all]
+            [midje.parsing.util.recognizing :as recognize]
+            [clojure.walk :refer [prewalk]]))
 
 ;;; Processings let bindings in facts
 
@@ -22,7 +22,7 @@
     (fn [form [k v]]
       (if (recognize/all-arrows (str k))
         (conj form '_ `(midje.sweet/fact
-                         ~(str (-> form butlast last) " " k 
+                         ~(str (-> form butlast last) " " k
                                " in let-bindings at line #" (-> bindings meta :line))
                          ~(-> form butlast last) ~k ~v))
         (conj form k v)))
@@ -47,7 +47,7 @@
 
 ;(facts* (let [a :b => :c
 ;             b a => :d
-;             _ b => :d] 
+;             _ b => :d]
 ;         b => :c)
 ; (= 5 5)
 ; :e => :f

@@ -8,10 +8,7 @@
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
    :ns "ymi"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.1
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset
-                      http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset/2.1.1/ilmoitukset.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ilmoitukset" "2.1.1")
                  :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"}
            mapping-common/common-namespaces)
 

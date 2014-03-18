@@ -55,10 +55,7 @@
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat
    :ns "ymm"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat
-                      http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat/2.1.1/maaAinesluvat.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/maa_ainesluvat" "2.1.1")
                  :xmlns:ymm "http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
