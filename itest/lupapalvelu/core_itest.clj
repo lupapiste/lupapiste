@@ -1,6 +1,6 @@
 (ns lupapalvelu.common-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet]))
+  (:require [midje.sweet  :refer :all]
+            [lupapalvelu.itest-util :refer :all]))
 
 (facts "one can"
   (fact ".. list actions"

@@ -4,6 +4,8 @@
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
     [lupapalvelu.permit :as permit]))
 
+; :xsi:schemaLocation (mapping-common/schemalocation "ymparisto/vesihuoltolaki" "2.1.1")
+
 (def vesihuolto-to-krysp [{:tag :ymv:VesihuoltolakiType
                            :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                                    {:tag :vapatukset

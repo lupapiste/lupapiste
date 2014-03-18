@@ -434,7 +434,8 @@
                                               :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
-                                                                         [:muut :valaistussuunnitelma]]}}
+                                                                         [:muut :valaistussuunnitelma]]}
+                     :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}}
 
                     {:id "837-YA",
                      :inforequest-enabled true
