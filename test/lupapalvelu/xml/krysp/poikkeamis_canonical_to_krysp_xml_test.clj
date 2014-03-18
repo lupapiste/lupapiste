@@ -24,6 +24,7 @@
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}})
+    (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.4"}}})
 
     (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2") ; throws exception
     (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") ; throws exception
