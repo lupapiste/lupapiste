@@ -777,7 +777,7 @@ var docgen = (function () {
 
       // new invite
       $("<button>", {
-        "class": "icon-remove",
+        "class": "icon-remove btn-primary",
         "data-test-id": "application-invite-" + self.schemaName,
         text: loc("personSelector.invite"),
         click: function () {

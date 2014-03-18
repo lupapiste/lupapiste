@@ -1,8 +1,7 @@
 (ns lupapalvelu.inforequest-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet]
-        [clojure.pprint :only [pprint]])
-  (:require [lupapalvelu.operations :as operations]
+  (:require [midje.sweet  :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
