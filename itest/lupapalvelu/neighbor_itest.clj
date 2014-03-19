@@ -1,8 +1,7 @@
 (ns lupapalvelu.neighbor-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet]
-        [clojure.pprint :only [pprint]])
-  (:require [clojure.string :as s]
+  (:require [midje.sweet  :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer [fn->]]))
