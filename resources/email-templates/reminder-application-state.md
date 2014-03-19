@@ -1,9 +1,9 @@
 # Hei,
 
-Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus {{link-fi}}. Hakemusta en p&auml;ivitetty viimeksi {{viimeisin_muokkauspvm}}.
+Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus {{link-fi}}. Hakemusta en p&auml;ivitetty viimeksi {{modified}}.
 
 ---
 
 # Hej,
 
-Du har en aktiv ans&ouml;kan om lov i Lupapiste.fi tj&auml;nst: {{link-sv}}. Ans&ouml;kan om lov har senast uppdaterat {{viimeisin_muokkauspvm}}.
+Du har en aktiv ans&ouml;kan om lov i Lupapiste.fi tj&auml;nst: {{link-sv}}. Ans&ouml;kan om lov har senast uppdaterat {{modified}}.
