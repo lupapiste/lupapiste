@@ -239,8 +239,6 @@
 
 (def sijaisuus-tyonjohtaja [{:name "sijaistukset"
                              :type :group
-                             :repeating true
-                             :initiallyEmpty true
                              :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
                                     {:name "sijaistettavaHloSukunimi" :type :string :required true}
                                     {:name "alkamisPvm" :type :date}
