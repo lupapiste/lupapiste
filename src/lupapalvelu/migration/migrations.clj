@@ -284,7 +284,7 @@
                                  (let [schema-name (get-schema-name document)
                                        operation-name (get-operation-name document)]
                                    (if (and (= operation-name "vapaa-ajan-asuinrakennus") (= operation-name "uusiRakennus"))
-                                     (update-vapaa-ajan-asuinrakennus document)
+                                     (remove-huoneistot-and-update-schema-name document "uusi-rakennus-ei-huoneistoa")
                                      document)))
                                (:documents application))]
         (mongo/update :applications {$set {:documents new-documents}}))))
