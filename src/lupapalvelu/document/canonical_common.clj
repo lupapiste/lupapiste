@@ -374,33 +374,6 @@
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
-#_(defn- get-vastattava-tyotieto [tyonjohtaja lang]
-   (with-lang lang
-     (let [sijaistukset (:sijaistukset tyonjohtaja)
-           tyotehtavat  (:vastattavatTyotehtavat tyonjohtaja)
-           tyotehtavat-canonical (when (seq tyotehtavat)
-                                   (->>
-                                     (sort tyotehtavat)
-                                     (map
-                                      (fn [[k v]] (when v
-                                                    (if (= k :muuMika)
-                                                      v
-                                                      (let [loc-s (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
-                                                        (assert (not (re-matches #"^\?\?\?.*" loc-s)))
-                                                        loc-s)))))
-                                     (remove nil?)
-                                     (s/join ", ")))]
-       (cr/strip-nils
-         (if (seq sijaistukset)
-           {:vastattavaTyotieto
-            (map (fn [[_ {:keys [alkamisPvm paattymisPvm]}]]
-                   {:VastattavaTyo
-                    {:vastattavaTyo tyotehtavat-canonical
-                     }})
-              (sort sijaistukset))}
-           (when-not (ss/blank? tyotehtavat-canonical)
-             {:vastattavaTyotieto [{:VastattavaTyo {:vastattavaTyo tyotehtavat-canonical}}]}))))))
-
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
   (with-lang lang
     (cr/strip-nils
