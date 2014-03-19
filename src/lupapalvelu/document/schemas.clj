@@ -237,7 +237,7 @@
                               :body [{:name "vastuuaika-alkaa-pvm" :type :date}
                                      {:name "vastuuaika-paattyy-pvm" :type :date}]}])
 
-(def sijaisuus-tyonjohtaja [{:name "sijaistukset"
+(def sijaisuus-tyonjohtaja [{:name "sijaistus"
                              :type :group
                              :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
                                     {:name "sijaistettavaHloSukunimi" :type :string :required true}

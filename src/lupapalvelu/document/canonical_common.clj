@@ -362,7 +362,7 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
-(defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistukset} sijaistettavaRooli]
+(defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     {:Sijaistus (assoc-when {}
                   :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
@@ -370,7 +370,7 @@
                   :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
                   :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
 
-(defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistukset}]
+(defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistus}]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
@@ -421,7 +421,7 @@
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys tyonjohtaja)
-        {:keys [alkamisPvm paattymisPvm] :as sijaistukset} (:sijaistukset tyonjohtaja)
+        {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
@@ -432,11 +432,11 @@
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
-       :sijaistustieto (get-sijaistustieto sijaistukset rooli)}
+       :sijaistustieto (get-sijaistustieto sijaistus rooli)}
       (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
       (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
-      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistukset)]
+      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 

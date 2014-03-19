@@ -145,7 +145,7 @@
                                      :rakennelmaTaiLaitos {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus
-            :sijaistukset {:sijaistettavaHloEtunimi {:value "Jaska"}
+            :sijaistus {:sijaistettavaHloEtunimi {:value "Jaska"}
                             :sijaistettavaHloSukunimi {:value "Jokunen"}
                             :alkamisPvm {:value "13.02.2014"}
                             :paattymisPvm {:value "20.02.2014"}}})})
@@ -158,8 +158,8 @@
 
 (def ^:private tyonjohtajan-sijaistus-blank-dates
   (-> tyonjohtaja
-    (dissoc-in [:data :sijaistukset :alkamisPvm])
-    (assoc-in  [:data :sijaistukset :paattymisPvm :value] "")))
+    (dissoc-in [:data :sijaistus :alkamisPvm])
+    (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
 
 (def ^:private rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
@@ -593,7 +593,7 @@
       (fact "sijaistettavaHlo"   (:sijaistettavaHlo sijaistus-213) => "Jaska Jokunen"))))
 
 (facts "Canonical tyonjohtajan vastattavaTyotieto is correct"
-  (let [tyonjohtaja       (-> tyonjohtaja :data (dissoc :sijaistukset) tools/unwrapped)
+  (let [tyonjohtaja       (-> tyonjohtaja :data (dissoc :sijaistus) tools/unwrapped)
         tyonjohtaja-model (get-tyonjohtaja-data "fi" tyonjohtaja :tyonjohtaja)
         sijaistus-213     (-> tyonjohtaja-model :sijaistustieto)]
     (:sijaistustieto tyonjohtaja-model) => nil
@@ -747,8 +747,8 @@
         kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
         hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
 
-        sijaistukset (:sijaistustieto tyonjohtajatieto) => truthy
-        sijaistus (:Sijaistus (last sijaistukset)) = truthy
+        sijaistus (:sijaistustieto tyonjohtajatieto) => truthy
+        sijaistus (:Sijaistus (last sijaistus)) = truthy
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
         rakennuspaikkatieto (first rakennuspaikkatiedot) => truthy
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy
