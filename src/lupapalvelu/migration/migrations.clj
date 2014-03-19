@@ -265,8 +265,10 @@
     (mongo/update-by-id :applications (:id application)
       {$set {:attachments (attachments-with-applicationState application)}})))
 
-(defn update-vapaa-ajan-asuinrakennus [document]
-  )
+(defn- remove-huoneistot-and-update-schema-name [document new-schema-name]
+  (let [data (:data document)
+        data-ilman-huoneistoja (dissoc data :huoneistot)]
+    (assoc-in (assoc-in (assoc document :data data-ilman-huoneistoja) [:schema-info :i18name] (-> document :schema-info :name)) [:schema-info :name] new-schema-name)))
 
 (defn get-operation-name [document]
   (get-in document [:schema-info :op :name]))
@@ -281,8 +283,9 @@
       (let [new-documents (map (fn [document]
                                  (let [schema-name (get-schema-name document)
                                        operation-name (get-operation-name document)]
-                                   (if (and (= schema-name "vapaa-ajan-asuinrakennus") (= operation-name "uusiRakennus"))
+                                   (if (and (= operation-name "vapaa-ajan-asuinrakennus") (= operation-name "uusiRakennus"))
                                      (update-vapaa-ajan-asuinrakennus document)
-                                     document))) (:documents application))]
+                                     document)))
+                               (:documents application))]
         (mongo/update :applications {$set {:documents new-documents}}))))
   )
