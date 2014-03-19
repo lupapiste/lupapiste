@@ -20,7 +20,7 @@
      :info-fi (info-fn :fi)
      :info-sv (info-fn :sv)}))
 
-(def ^:private base-email-conf
+(def base-email-conf
   {:recipients-fn  notifications/from-data
    :subject-key    "applications.inforequest"
    :model-fn       base-email-model})

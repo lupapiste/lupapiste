@@ -40,7 +40,7 @@
   (mongo/connect!)
   (migration/update!)
   (mongo/ensure-indexes)
-  (batchrun/start-watch-email-scheduler)
+  (batchrun/start-reminder-email-scheduler)
   (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
