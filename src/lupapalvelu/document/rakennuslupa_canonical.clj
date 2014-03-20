@@ -182,6 +182,7 @@
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-uusi-toimenpide % application) (:uusi-vapaa-ajan-asunto documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
                                                (map #(get-purku-toimenpide % application) (:purku documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
