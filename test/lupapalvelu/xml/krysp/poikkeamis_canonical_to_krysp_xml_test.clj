@@ -32,7 +32,7 @@
 
     (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2") ; throws exception
     (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") ; throws exception
-    (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.5") ; throws exception
+    (validator/validate xml_215_s (:permitType poikkari-hakemus) "2.1.5") ; throws exception
 
     (facts "212"
       (let [lp-xml    (cr/strip-xml-namespaces (xml/parse xml_212_s))]

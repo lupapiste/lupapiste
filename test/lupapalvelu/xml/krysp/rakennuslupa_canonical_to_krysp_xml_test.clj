@@ -72,7 +72,7 @@
     (validator/validate xml_212_s (:permitType application) "2.1.2")
     (validator/validate xml_213_s (:permitType application) "2.1.3")
     (validator/validate xml_214_s (:permitType application) "2.1.4")
-    (validator/validate xml_214_s (:permitType application) "2.1.5")))
+    (validator/validate xml_215_s (:permitType application) "2.1.5")))
 
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
