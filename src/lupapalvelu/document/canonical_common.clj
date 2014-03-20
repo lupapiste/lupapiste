@@ -362,59 +362,39 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
-(defn- get-sijaistustieto [sijaistukset sijaistettavaRooli]
-  (when (seq sijaistukset)
-    (map (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]}]]
-           (if (not (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi))
-             {}
-             {:Sijaistus (assoc-when {}
-                           :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
-                           :sijaistettavaRooli sijaistettavaRooli
-                           :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
-                           :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
-      (sort sijaistukset))))
+(defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
+  (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
+    {:Sijaistus (assoc-when {}
+                  :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
+                  :sijaistettavaRooli sijaistettavaRooli
+                  :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
+                  :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
 
-(defn- get-sijaistettava-hlo-214 [sijaistukset]
-  (->>
-    (sort sijaistukset)
-    (map (fn [[_ {:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]]
-           (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
-             (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi)))))
-    (remove ss/blank?)
-    (s/join ", ")))
+(defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistus}]
+  (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
+    (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
-(defn- get-vastattava-tyotieto [tyonjohtaja lang]
+(defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
   (with-lang lang
-    (let [sijaistukset (:sijaistukset tyonjohtaja)
-          tyotehtavat  (:vastattavatTyotehtavat tyonjohtaja)
-          tyotehtavat-canonical (when (seq tyotehtavat)
-                                  (->>
-                                    (sort tyotehtavat)
-                                    (map
-                                     (fn [[k v]] (when v
-                                                   (if (= k :muuMika)
-                                                     v
-                                                     (let [loc-s (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
-                                                       (assert (not (re-matches #"^\?\?\?.*" loc-s)))
-                                                       loc-s)))))
-                                    (remove nil?)
-                                    (s/join ", ")))]
-      (cr/strip-nils
-        (if (seq sijaistukset)
-          {:vastattavaTyotieto
-           (map (fn [[_ {:keys [alkamisPvm paattymisPvm]}]]
-                  {:VastattavaTyo
-                   {:vastattavaTyo tyotehtavat-canonical
-                    :alkamisPvm   (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
-                    :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm))}})
-             (sort sijaistukset))}
-          (when-not (ss/blank? tyotehtavat-canonical)
-            {:vastattavaTyotieto [{:VastattavaTyo {:vastattavaTyo tyotehtavat-canonical}}]}))))))
+    (cr/strip-nils
+      (when (seq tyotehtavat)
+        {:vastattavaTyotieto
+         (remove nil?
+           (map (fn [[k v]]
+                  (when v
+                    {:VastattavaTyo
+                     {:vastattavaTyo
+                      (if (= k :muuMika)
+                        v
+                        (let [loc-s (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                          (assert (not (re-matches #"^\?\?\?.*" loc-s)))
+                          loc-s))}}))
+             tyotehtavat))}))))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
         patevyys (:patevyys tyonjohtaja)
-        sijaistukset (:sijaistukset tyonjohtaja)
+        {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
@@ -425,9 +405,11 @@
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
-       :sijaistustieto (get-sijaistustieto sijaistukset rooli)}
+       :sijaistustieto (get-sijaistustieto sijaistus rooli)}
+      (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
+      (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
-      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistukset)]
+      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 

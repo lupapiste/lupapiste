@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
 <!-- KRYSP projekti-->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:gml="http://www.opengis.net/gml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.2">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:gml="http://www.opengis.net/gml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.3">
 	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
 	<!--Local usage-->
@@ -744,33 +744,10 @@ tiedot</xs:documentation>
 					<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="yritys" minOccurs="0">
+			<xs:element name="yritys" type="yht:YritysType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Jos kyseessä on yritys tvs. niin tiedot siirretään tässä elementissä</xs:documentation>
 				</xs:annotation>
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="nimi" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>Nimi tai toiminimi</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element name="liikeJaYhteisotunnus" minOccurs="0">
-							<xs:simpleType>
-								<xs:restriction base="xs:string">
-									<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]"/>
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
-						<xs:element name="kayntiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="kotipaikka" type="xs:string" minOccurs="0"/>
-						<xs:element name="postiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="faksinumero" type="xs:string" minOccurs="0"/>
-						<xs:element name="puhelin" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-						<xs:element name="www" type="xs:anyURI" minOccurs="0"/>
-						<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
-					</xs:sequence>
-				</xs:complexType>
 			</xs:element>
 			<xs:element name="patevyysvaatimusluokka" minOccurs="0">
 				<xs:annotation>
@@ -823,33 +800,10 @@ tiedot</xs:documentation>
 					<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="yritys" minOccurs="0">
+			<xs:element name="yritys" type="yht:YritysType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Jos kyseessä on yritys tvs. niin tiedot siirretään tässä elementissä</xs:documentation>
 				</xs:annotation>
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="nimi" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>Nimi tai toiminimi</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element name="liikeJaYhteisotunnus" minOccurs="0">
-							<xs:simpleType>
-								<xs:restriction base="xs:string">
-									<xs:enumeration value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]"/>
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
-						<xs:element name="kayntiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="kotipaikka" type="xs:string" minOccurs="0"/>
-						<xs:element name="postiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="faksinumero" type="xs:string" minOccurs="0"/>
-						<xs:element name="puhelin" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-						<xs:element name="www" type="xs:anyURI" minOccurs="0"/>
-						<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
-					</xs:sequence>
-				</xs:complexType>
 			</xs:element>
 			<xs:element name="patevyysvaatimusluokka" minOccurs="0">
 				<xs:annotation>
@@ -2998,33 +2952,10 @@ tiedot</xs:documentation>
 					<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot. Henkilö voi olla itsenäinen henkilö että yhteyshenkilö yritykselle. Rooli ratkaisee käytön.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="yritys" minOccurs="0">
+			<xs:element name="yritys" type="yht:YritysType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Jos kyseessä on yritys tvs. niin tiedot siirretään tässä elementissä</xs:documentation>
 				</xs:annotation>
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="nimi" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>Nimi tai toiminimi</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element name="liikeJaYhteisotunnus" minOccurs="0">
-							<xs:simpleType>
-								<xs:restriction base="xs:string">
-									<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]"/>
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
-						<xs:element name="kayntiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="kotipaikka" type="xs:string" minOccurs="0"/>
-						<xs:element name="postiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="faksinumero" type="xs:string" minOccurs="0"/>
-						<xs:element name="puhelin" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-						<xs:element name="www" type="xs:anyURI" minOccurs="0"/>
-						<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
-					</xs:sequence>
-				</xs:complexType>
 			</xs:element>
 			<xs:element name="turvakieltoKytkin" type="xs:boolean" minOccurs="0"/>
 		</xs:sequence>
@@ -3185,12 +3116,24 @@ tiedot</xs:documentation>
 		<xs:sequence>
 			<xs:choice>
 				<xs:sequence>
-					<xs:element name="henkilotunnus" type="xs:string"/>
+					<xs:element name="henkilotunnus" minOccurs="0">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][-+A][0-9][0-9][0-9][A-Y0-9]"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
 					<xs:element name="sukunimi" type="xs:string"/>
 					<xs:element name="etunimi" type="xs:string"/>
 				</xs:sequence>
 				<xs:sequence>
-					<xs:element name="yTunnus" type="xs:string"/>
+					<xs:element name="yTunnus">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
 					<xs:element name="yrityksenNimi" type="xs:string"/>
 					<xs:element name="yhteyshenkilonNimi" type="xs:string" minOccurs="0"/>
 				</xs:sequence>
@@ -3205,6 +3148,13 @@ tiedot</xs:documentation>
 			<xs:element name="puhelinnumero" type="xs:string"/>
 			<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
 			<xs:element name="suoramarkkinointikielto" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="verkkolaskutustieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Verkkolaskutus" type="yht:VerkkolaskutusTypeType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="HakijaType">
@@ -3277,27 +3227,10 @@ tiedot</xs:documentation>
 					<xs:documentation>Yhteyshenkilön nimi ja yhteystiedot</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="yritys" minOccurs="0">
+			<xs:element name="yritys" type="yht:YritysType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Jos kyseessä on yritys tvs. niin tiedot siirretään tässä elementissä</xs:documentation>
 				</xs:annotation>
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element name="nimi" type="xs:string">
-							<xs:annotation>
-								<xs:documentation>Nimi tai toiminimi</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element name="liikeJaYhteisotunnus" type="xs:string" minOccurs="0"/>
-						<xs:element name="kayntiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="kotipaikka" type="xs:string" minOccurs="0"/>
-						<xs:element name="postiosoite" type="yht:PostiosoiteType" minOccurs="0"/>
-						<xs:element name="faksinumero" type="xs:string" minOccurs="0"/>
-						<xs:element name="puhelin" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-						<xs:element name="www" type="xs:anyURI" minOccurs="0"/>
-						<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
-					</xs:sequence>
-				</xs:complexType>
 			</xs:element>
 			<xs:element name="turvakieltoKytkin" type="xs:boolean" minOccurs="0"/>
 			<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0"/>
@@ -3668,6 +3601,70 @@ tiedot</xs:documentation>
 			<xs:element name="asiatunnus" type="xs:string" minOccurs="0"/>
 			<xs:element name="paivaysPvm" type="xs:date" minOccurs="0"/>
 			<xs:element name="kasittelija" type="yht:YmparistoOsapuoliType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="YritysType">
+		<xs:sequence>
+			<xs:element name="nimi" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Nimi tai toiminimi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="liikeJaYhteisotunnus" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="kayntiosoitetieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="kayntiosoite" type="yht:PostiosoiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="postiosoitetieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="postiosoite" type="yht:PostiosoiteType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="kotipaikka" type="xs:string" minOccurs="0"/>
+			<xs:element name="faksinumero" type="xs:string" minOccurs="0"/>
+			<xs:element name="puhelin" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="www" type="xs:anyURI" minOccurs="0"/>
+			<xs:element name="sahkopostiosoite" type="xs:string" minOccurs="0"/>
+			<xs:element name="verkkolaskutustieto" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Verkkolaskutus" type="yht:VerkkolaskutusTypeType"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VerkkolaskutusTypeType">
+		<xs:sequence>
+			<xs:element name="ovtTunnus" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>min. 12 merkkiä, max. 17</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:minLength value="12"/>
+						<xs:maxLength value="17"/>
+						<xs:pattern value=""/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="verkkolaskuTunnus" type="xs:string" minOccurs="0"/>
+			<xs:element name="valittajaTunnus" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>välittäjän tunnus</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
 </xs:schema>
