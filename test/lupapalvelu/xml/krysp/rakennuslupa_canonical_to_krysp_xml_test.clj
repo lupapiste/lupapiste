@@ -9,6 +9,8 @@
                                                                       ]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
                                                                 rakennuslupa_to_krysp_213
+                                                                rakennuslupa_to_krysp_214
+                                                                rakennuslupa_to_krysp_215
                                                                 save-katselmus-as-krysp]]
             [lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
@@ -24,22 +26,26 @@
 
 (testable-privates lupapalvelu.xml.krysp.rakennuslupa-mapping rakennuslupa-element-to-xml)
 
+(fact "2.1.2: :tag is set" (has-tag rakennuslupa_to_krysp_212) => true)
+(fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
+(fact "2.1.4: :tag is set" (has-tag rakennuslupa_to_krysp_214) => true)
+(fact "2.1.5: :tag is set" (has-tag rakennuslupa_to_krysp_215) => true)
+
 (defn- do-test [application validate-tyonjohtaja?]
   (let [canonical (application-to-canonical application "fi")
         xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
         xml_214 (rakennuslupa-element-to-xml canonical "2.1.4")
+        xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
         xml_212_s (indent-str xml_212)
         xml_213_s (indent-str xml_213)
-        xml_214_s (indent-str xml_214)]
-
-    (fact "2.1.2: :tag is set" (has-tag rakennuslupa_to_krysp_212) => true)
-    (fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
-    (fact "2.1.4: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
+        xml_214_s (indent-str xml_214)
+        xml_215_s (indent-str xml_215)]
 
     (fact "2.1.2: xml exist" xml_212 => truthy)
     (fact "2.1.3: xml exist" xml_213 => truthy)
     (fact "2.1.4: xml exist" xml_214 => truthy)
+    (fact "2.1.5: xml exist" xml_215 => truthy)
 
     (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
           lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
@@ -61,10 +67,12 @@
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.3"}}})
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.4"}}})
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.5"}}})
 
     (validator/validate xml_212_s (:permitType application) "2.1.2")
     (validator/validate xml_213_s (:permitType application) "2.1.3")
-    (validator/validate xml_214_s (:permitType application) "2.1.4")))
+    (validator/validate xml_214_s (:permitType application) "2.1.4")
+    (validator/validate xml_214_s (:permitType application) "2.1.5")))
 
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
