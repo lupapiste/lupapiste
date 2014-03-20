@@ -274,18 +274,27 @@
   (get-in document [:schema-info :op :name]))
 
 (defn get-schema-name [document]
-  (get-in document [:schema-info :op :name]))
+  (get-in document [:schema-info :name]))
 
-(defmigration vapaa-ajan-asuinrakennus-updates
-  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}] }}}))}
-  (let [applications-to-update (mongo/select :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}]}}})]
-    (for [application applications-to-update]
+(defn remove-huoneistot-for [applications operation old-schema-name new-schema-name]
+  (let [applications-to-update (mongo/select :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" operation} {"schema-info.name" old-schema-name}]}}})]
+    (doseq [application applications-to-update]
       (let [new-documents (map (fn [document]
                                  (let [schema-name (get-schema-name document)
                                        operation-name (get-operation-name document)]
-                                   (if (and (= operation-name "vapaa-ajan-asuinrakennus") (= operation-name "uusiRakennus"))
-                                     (remove-huoneistot-and-update-schema-name document "uusi-rakennus-ei-huoneistoa")
+                                   (if (and (= operation-name operation) (= schema-name old-schema-name))
+                                     (remove-huoneistot-and-update-schema-name document new-schema-name)
                                      document)))
                                (:documents application))]
-        (mongo/update :applications {$set {:documents new-documents}}))))
-  )
+        (mongo/update-by-id :applications (:id application) {$set {:documents new-documents}})))))
+
+
+(defmigration vapaa-ajan-asuinrakennus-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (remove-huoneistot-for "vapaa-ajan-asuinrakennus" "uusiRakennus" "uusi-rakennus-ei-huoneistoa"))
+
+
+(defmigration varasto-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "varasto-tms"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (remove-huoneistot-for "varasto-tms" "uusiRakennus" "uusi-rakennus-ei-huoneistoa"))
+
