@@ -175,14 +175,13 @@
             tyonjohtaja (xml/select1 lp-xml [:Tyonjohtaja])
             vastuu (xml/select tyonjohtaja [:vastattavaTyotieto])]
         (fact "rooli" (xml/get-text tyonjohtaja [:tyonjohtajaRooliKoodi]) => "KVV-ty\u00f6njohtaja")
-        (fact "sijaistettavan nimi" (xml/get-text tyonjohtaja [:sijaistettavaHlo]) => "Jaska Jokunen, Jamppa Tuominen")
-        (fact "2 sijaista" (count vastuu) => 2)
-        (fact "vastuun 1 alkamisPvm" (xml/get-text (first vastuu) [:alkamisPvm]) => "2014-02-13")
-        (fact "vastuun 1 paattymisPvm" (xml/get-text (first vastuu) [:paattymisPvm]) => "2014-02-20")
-        (fact "vastuun 1 vastattavaTyo" (xml/get-text (first vastuu) [:vastattavaTyo])
-          => "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen, Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen, Maanrakennusty\u00f6, Muu tyotehtava, Rakennelma tai laitos")
-        (fact "vastuun 2 alkamisPvm" (xml/get-text (second vastuu) [:alkamisPvm]) => "2014-02-21")
-        (fact "vastuun 2 paattymisPvm" (xml/get-text (second vastuu) [:paattymisPvm]) => "2014-03-20")
-        (fact "vastuun 2 vastattavaTyo" (xml/get-text (first vastuu) [:vastattavaTyo])
-          => "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen, Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen, Maanrakennusty\u00f6, Muu tyotehtava, Rakennelma tai laitos")))))
+        (fact "sijaistettavan nimi" (xml/get-text tyonjohtaja [:sijaistettavaHlo]) => "Jaska Jokunen")
+        (fact "5 vastuuta" (count vastuu) => 5)
+        (fact "vastuun alkamisPvm" (xml/get-text tyonjohtaja [:alkamisPvm]) => "2014-02-13")
+        (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
+
+        (fact "vastattavaTyo" (map #(xml/get-text % [:vastattavaTyo]) vastuu)
+          => (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen", "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen", "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"})
+
+          )))))
 
