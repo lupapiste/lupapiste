@@ -238,8 +238,8 @@
       {:tag :osapuolettieto :child [mapping-common/osapuolet_213]})
 
     (update-in [:child] mapping-common/update-child-element
-      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite :tekija :yritys]
-      mapping-common/yritys_213)
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
+      {:tag :Liite :child mapping-common/liite-children_213})
 
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
