@@ -11,7 +11,7 @@
    mapping-common/alkuHetki
    {:tag :kasittelytietotieto :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
-   {:tag :lausuntotieto :child [mapping-common/lausunto]}
+   {:tag :lausuntotieto :child [mapping-common/lausunto_213]}
 
    {:tag :hakemustieto
     :child [{:tag :Hakemus
@@ -50,12 +50,12 @@
    (mapping-common/sijaintitieto "yht")
    {:tag :koontiKentta}
 
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}])
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}])
 
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat
    :ns "ymm"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/maa_ainesluvat" "2.1.1")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/maa_ainesluvat" "2.1.2")
                  :xmlns:ymm "http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}

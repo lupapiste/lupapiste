@@ -30,19 +30,9 @@
                                   {:tag :toimenpidetieto :child [{:tag :Toimenpide :child [{:tag :kuvausKoodi }
                                                                                            kerrosalatieto
                                                                                            {:tag :tavoitetilatieto :child [tavoitetila-212]}]}]}
-                                  {:tag :lausuntotieto :child [mapping-common/lausunto]}
+                                  {:tag :lausuntotieto :child [mapping-common/lausunto_211]}
                                   {:tag :liitetieto
-                                   :child [{:tag :Liite
-                                            :child [{:tag :kuvaus :ns "yht"}
-                                                    {:tag :linkkiliitteeseen :ns "yht"}
-                                                    {:tag :muokkausHetki :ns "yht"}
-                                                    {:tag :versionumero :ns "yht"}
-                                                    {:tag :tekija :ns "yht"
-                                                     :child [{:tag :kuntaRooliKoodi}
-                                                             {:tag :VRKrooliKoodi}
-                                                             mapping-common/henkilo
-                                                             mapping-common/yritys_211]}
-                                                    {:tag :tyyppi :ns "yht"}]}]}
+                                   :child [{:tag :Liite :child mapping-common/liite-children_211}]}
                                   {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
                                   {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
                                                                                         {:tag :poikkeamisasianKuvaus}
@@ -57,6 +47,13 @@
 (def abstract-poikkeamistype-214
   (-> abstract-poikkeamistype-213
     (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
+
+; 2.1.5: update lausunto
+(def abstract-poikkeamistype-215
+  (-> abstract-poikkeamistype-214
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_213]})
+    (mapping-common/update-child-element [:lausuntotieto] {:tag :lausuntotieto :child [mapping-common/lausunto_213]})
+    (mapping-common/update-child-element [:liitetieto :Liite] {:tag :Liite :child mapping-common/liite-children_213})))
 
 (def poikkeamis_to_krysp_212
   {:tag :Popast
@@ -82,7 +79,12 @@
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-214}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-214}]}])))
 
-(def poikkeamis_to_krysp_215 poikkeamis_to_krysp_214)
+(def poikkeamis_to_krysp_215
+  (-> poikkeamis_to_krysp_214
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.5"))
+    (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                   {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-215}]}
+                   {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-215}]}])))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}

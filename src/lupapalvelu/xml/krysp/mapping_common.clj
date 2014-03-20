@@ -172,6 +172,11 @@
                    {:tag :www}
                    {:tag :sahkopostiosoite}])
 
+(def yritys-child_213
+  (-> yritys-child_211
+    (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children}]})
+    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]})))
+
 (def yritys-child-ns-yht_211 [{:tag :nimi}
                               {:tag :liikeJaYhteisotunnus}
                               {:tag :kayntiosoite :child postiosoite-children-ns-yht}
@@ -182,16 +187,24 @@
                               {:tag :www}
                               {:tag :sahkopostiosoite}])
 
+
+(def yritys-child-ns-yht_213
+  (-> yritys-child-ns-yht_211
+    (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children-ns-yht}]})
+    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children-ns-yht}]})))
+
 (def henkilo {:tag :henkilo :ns "yht" :child henkilo-child})
 
 (def yritys_211 {:tag :yritys :ns "yht" :child yritys-child_211})
+(def yritys_213 {:tag :yritys :ns "yht" :child yritys-child_213})
 
-(def osapuoli-body {:tag :Osapuoli
-                    :child [{:tag :kuntaRooliKoodi}
-                            {:tag :VRKrooliKoodi}
-                            henkilo
-                            yritys_211
-                            {:tag :turvakieltoKytkin}]})
+(def osapuoli-body_211 {:tag :Osapuoli :child [{:tag :kuntaRooliKoodi}
+                                               {:tag :VRKrooliKoodi}
+                                               henkilo
+                                               yritys_211
+                                               {:tag :turvakieltoKytkin}]})
+
+(def osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
 (def ^:private naapuri {:tag :naapuritieto
                         :child [{:tag :Naapuri
@@ -202,7 +215,7 @@
 (def osapuolet
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto
-            :child [osapuoli-body]}
+            :child [osapuoli-body_211]}
            {:tag :suunnittelijatieto
             :child [{:tag :Suunnittelija
                      :child [{:tag :suunnittelijaRoolikoodi}
@@ -236,9 +249,12 @@
                     {:tag :valmistumisvuosi}
                     {:tag :kokemusvuodet}]}]})
 
+(def suunnittelijatieto_213
+  (update-in suunnittelijatieto_211 [:child] update-child-element [:Suunnittelija :yritys] yritys_213))
+
 (def osapuolet_211
   {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body]}
+   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
            suunnittelijatieto_211
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
@@ -263,7 +279,7 @@
 
 (def osapuolet_212
   {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto :child [osapuoli-body]}
+   :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
            suunnittelijatieto_211
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
@@ -287,6 +303,11 @@
                              {:tag :sijaistettavaHlo}]}]}
            naapuri]})
 
+(def osapuolet_213
+  (-> osapuolet_212
+    (update-in [:child] update-child-element [:osapuolitieto] {:tag :osapuolitieto :child [osapuoli-body_213]})
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_213)
+    (update-in [:child] update-child-element [:tyonjohtajatieto :Tyonjohtaja :yritys] yritys_213)))
 
 
 (def tilamuutos
@@ -307,7 +328,7 @@
                         {:tag :kuntakoodi :ns "yht"}
                         {:tag :kielitieto :ns "yht"}])
 
-(def liite-children [{:tag :kuvaus :ns "yht"}
+(def liite-children_211 [{:tag :kuvaus :ns "yht"}
                      {:tag :linkkiliitteeseen :ns "yht"}
                      {:tag :muokkausHetki :ns "yht"}
                      {:tag :versionumero :ns "yht"}
@@ -318,7 +339,9 @@
                               yritys_211]}
                      {:tag :tyyppi :ns "yht"}])
 
-(def lausunto {:tag :Lausunto
+(def liite-children_213 (update-child-element liite-children_211 [:tekija :yritys] yritys_213))
+
+(def lausunto_211 {:tag :Lausunto
                :child [{:tag :viranomainen :ns "yht"}
                        {:tag :pyyntoPvm :ns "yht"}
                        {:tag :lausuntotieto :ns "yht"
@@ -326,12 +349,17 @@
                                  :child [{:tag :viranomainen}
                                          {:tag :lausunto}
                                          {:tag :liitetieto ; FIXME lausunnonliitetieto?
-                                          :child [{:tag :Liite :child liite-children}]}
+                                          :child [{:tag :Liite :child liite-children_211}]}
                                          {:tag :lausuntoPvm}
                                          {:tag :puoltotieto
                                           :child [{:tag :Puolto
                                                    :child [{:tag :puolto}]}]}]}]}]})
 
+(def lausunto_213
+  (update-in lausunto_211 [:child]
+    update-child-element
+    [:lausuntotieto :Lausunto :liitetieto :Liite]
+    {:tag :Liite :child liite-children_213}))
 
 (def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
                                   {:tag :hakemuksenTila :ns "yht"}

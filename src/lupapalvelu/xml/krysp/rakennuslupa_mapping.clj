@@ -115,7 +115,7 @@
                                       {:tag :maaraAika}
                                       {:tag :toteamisHetki}
                                       {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja :child mapping-common/liite-children}
+                    {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
@@ -164,7 +164,7 @@
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
                              katselmustieto
-                             {:tag :lausuntotieto :child [mapping-common/lausunto]}
+                             {:tag :lausuntotieto :child [mapping-common/lausunto_211]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
@@ -175,17 +175,7 @@
                                                {:tag :vakuudenmaara}
                                                {:tag :vakuuspaatospykala}]}]}]}
                              {:tag :liitetieto
-                              :child [{:tag :Liite
-                                       :child [{:tag :kuvaus :ns "yht"}
-                                               {:tag :linkkiliitteeseen :ns "yht"}
-                                               {:tag :muokkausHetki :ns "yht"}
-                                               {:tag :versionumero :ns "yht"}
-                                               {:tag :tekija :ns "yht"
-                                                :child [{:tag :kuntaRooliKoodi}
-                                                        {:tag :VRKrooliKoodi}
-                                                        mapping-common/henkilo
-                                                        mapping-common/yritys_211]}
-                                               {:tag :tyyppi :ns "yht"}]}]}
+                              :child [{:tag :Liite :child mapping-common/liite-children_211}]}
                              {:tag :kayttotapaus}
                              {:tag :asianTiedot
                               :child [{:tag :Asiantiedot
@@ -207,10 +197,15 @@
                                                                          {:tag :maaraAika}
                                                                          {:tag :toteamisHetki}
                                                                          {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja :child mapping-common/liite-children}
+                    {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
+
+(def ^:private katselmus_215
+  (update-in katselmus_213 [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuspoytakirja]
+      {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
@@ -233,7 +228,26 @@
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
       {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
 
-(def rakennuslupa_to_krysp_215 rakennuslupa_to_krysp_214)
+(def rakennuslupa_to_krysp_215
+  (-> rakennuslupa_to_krysp_214
+    (assoc-in [:attr :xsi:schemaLocation]
+      (mapping-common/schemalocation "rakennusvalvonta" "2.1.5"))
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_213]})
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite :tekija :yritys]
+      mapping-common/yritys_213)
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+      katselmus_215)
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+      {:tag :lausuntotieto :child [mapping-common/lausunto_213]})))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
