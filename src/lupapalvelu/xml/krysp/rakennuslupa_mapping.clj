@@ -123,10 +123,7 @@
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "rakennusvalvonta" "2.1.2")
                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -217,9 +214,7 @@
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation]
-      (str mapping-common/schemalocation-yht-2.1.1
-        "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "rakennusvalvonta" "2.1.3"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
       katselmus_213)
@@ -230,12 +225,20 @@
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
       #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
 
+(def rakennuslupa_to_krysp_214
+  (-> rakennuslupa_to_krysp_213
+    (assoc-in [:attr :xsi:schemaLocation]
+      (mapping-common/schemalocation "rakennusvalvonta" "2.1.4"))
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
     "2.1.3" rakennuslupa_to_krysp_213
+    "2.1.4" rakennuslupa_to_krysp_214
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
@@ -343,6 +346,31 @@
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
+(defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
+    #(map (fn [tj]
+            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
+              (fn [luokka]
+                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+                  luokka))))
+       %)))
+
+(defn- map-enums-212 [canonical]
+  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+
+(defn- map-enums
+  "Map enumerations in canonical into values supperted by given KRYSP version"
+  [canonical krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" (map-enums-212 canonical)
+    canonical ; default: no conversions
+    ))
+
+(defn- rakennuslupa-element-to-xml [canonical krysp-version]
+  (element-to-xml (map-enums canonical krysp-version) (get-mapping krysp-version)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
@@ -373,7 +401,7 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (rakennuslupa-element-to-xml canonical krysp-version)]
 
     (mapping-common/write-to-disk
       application attachments

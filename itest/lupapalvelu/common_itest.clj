@@ -1,7 +1,6 @@
 (ns lupapalvelu.common-itest
-  (:use [lupapalvelu.itest-util]
-        [midje.sweet]
-        [clojure.pprint :only [pprint]]))
+  (:require [midje.sweet  :refer :all]
+            [lupapalvelu.itest-util :refer :all]))
 
 (fact "minimal fixture has at least 4 municipalities with organization"
   (apply-remote-minimal)
