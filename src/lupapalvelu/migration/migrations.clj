@@ -268,7 +268,10 @@
 (defn- remove-huoneistot-and-update-schema-name [document new-schema-name]
   (let [data (:data document)
         data-ilman-huoneistoja (dissoc data :huoneistot)]
-    (assoc-in (assoc-in (assoc document :data data-ilman-huoneistoja) [:schema-info :i18name] (-> document :schema-info :name)) [:schema-info :name] new-schema-name)))
+    (->  document
+      (assoc :data data-ilman-huoneistoja)
+      (assoc-in  [:schema-info :i18name] (-> document :schema-info :name))
+      (assoc-in  [:schema-info :name] new-schema-name))))
 
 (defn get-operation-name [document]
   (get-in document [:schema-info :op :name]))
