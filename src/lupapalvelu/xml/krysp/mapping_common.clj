@@ -10,18 +10,23 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]))
 
+(def ^:private rp-yht {"2.1.2" "2.1.0"
+                        "2.1.3" "2.1.1"
+                        "2.1.4" "2.1.2"
+                        "2.1.5" "2.1.3"})
+
+(def ^:private ymp-yht {"2.1.1" "2.1.0"
+                        "2.1.2" "2.1.3"})
+
 (def ^:private yht-version
-  {"rakennusvalvonta" {"2.1.2" "2.1.0"
-                       "2.1.3" "2.1.1"
-                       "2.1.4" "2.1.2"}
-   "poikkeamispaatos_ja_suunnittelutarveratkaisu" {"2.1.2" "2.1.0"
-                                                   "2.1.3" "2.1.1"
-                                                   "2.1.4" "2.1.2"}
-   "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"}
-   "ymparisto/maa_ainesluvat" {"2.1.1" "2.1.0"}
-   "ymparisto/ilmoitukset" {"2.1.1" "2.1.0"}
-   "ymparisto/ymparistoluvat" {"2.1.1" "2.1.0"}
-   "ymparisto/vesihuoltolaki" {"2.1.1" "2.1.0"}})
+  {"rakennusvalvonta" rp-yht
+   "poikkeamispaatos_ja_suunnittelutarveratkaisu" rp-yht
+   "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"
+                                     "2.1.3" "2.1.3"}
+   "ymparisto/maa_ainesluvat" ymp-yht
+   "ymparisto/ilmoitukset"    ymp-yht
+   "ymparisto/ymparistoluvat" ymp-yht
+   "ymparisto/vesihuoltolaki" ymp-yht})
 
 (defn xsd-filename [ns-name]
   (case ns-name
