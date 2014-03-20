@@ -82,6 +82,7 @@
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-214}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-214}]}])))
 
+(def poikkeamis_to_krysp_215 poikkeamis_to_krysp_214)
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -89,6 +90,7 @@
     "2.1.2" poikkeamis_to_krysp_212
     "2.1.3" poikkeamis_to_krysp_213
     "2.1.4" poikkeamis_to_krysp_214
+    "2.1.5" poikkeamis_to_krysp_215
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn save-application-as-krysp
