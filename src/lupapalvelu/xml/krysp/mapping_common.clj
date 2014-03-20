@@ -54,6 +54,22 @@
    :xmlns:xlink "http://www.w3.org/1999/xlink"
    :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"})
 
+(defn update-child-element
+  "Utility for updating mappings: replace child in a given path with v.
+     children: sequence of :tag, :child maps
+     path: keyword sequence
+     v: the new value or a function that produces the new value from the old"
+  [children path v]
+  (map
+    #(if (= (:tag %) (first path))
+      (if (seq (rest path))
+        (update-in % [:child] update-child-element (rest path) v)
+        (if (fn? v)
+          (v %)
+          v))
+      %)
+    children))
+
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
                       {:tag :kiinttun}
@@ -166,11 +182,9 @@
                           {:tag :www}
                           {:tag :sahkopostiosoite}])
 
-(def henkilo {:tag :henkilo :ns "yht"
-              :child henkilo-child})
+(def henkilo {:tag :henkilo :ns "yht" :child henkilo-child})
 
-(def yritys {:tag :yritys :ns "yht"
-             :child yritys-child})
+(def yritys {:tag :yritys :ns "yht" :child yritys-child})
 
 (def osapuoli-body {:tag :Osapuoli
                     :child [{:tag :kuntaRooliKoodi}
@@ -249,8 +263,7 @@
 
 (def osapuolet_212
   {:tag :Osapuolet :ns "yht"
-   :child [{:tag :osapuolitieto
-            :child [osapuoli-body]}
+   :child [{:tag :osapuolitieto :child [osapuoli-body]}
            suunnittelijatieto_211
            {:tag :tyonjohtajatieto
             :child [{:tag :Tyonjohtaja
@@ -336,22 +349,6 @@
    {:tag :sahkopostiosoite}
    {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
    {:tag :liikeJaYhteisotunnus}])
-
-(defn update-child-element
-  "Utility for updating mappings: replace child in a given path with v.
-     children: sequence of :tag, :child maps
-     path: keyword sequence
-     v: the new value or a function that produces the new value from the old"
-  [children path v]
-  (map
-    #(if (= (:tag %) (first path))
-      (if (seq (rest path))
-        (update-in % [:child] update-child-element (rest path) v)
-        (if (fn? v)
-          (v %)
-          v))
-      %)
-    children))
 
 (defn get-child-element [mapping path]
   (let [children (if (map? mapping) (:child mapping) mapping)]
