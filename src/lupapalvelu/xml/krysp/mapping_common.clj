@@ -162,7 +162,7 @@
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
 (def henkilo-child-ns-yht (vec (map (fn [m] (assoc m :ns "yht")) henkilo-child)))
 
-(def yritys-child [{:tag :nimi}
+(def yritys-child_211 [{:tag :nimi}
                    {:tag :liikeJaYhteisotunnus}
                    {:tag :kayntiosoite :child postiosoite-children}
                    {:tag :kotipaikka}
@@ -172,25 +172,25 @@
                    {:tag :www}
                    {:tag :sahkopostiosoite}])
 
-(def yritys-child-ns-yht [{:tag :nimi}
-                          {:tag :liikeJaYhteisotunnus}
-                          {:tag :kayntiosoite :child postiosoite-children-ns-yht}
-                          {:tag :kotipaikka}
-                          {:tag :postiosoite :child postiosoite-children-ns-yht}
-                          {:tag :faksinumero}
-                          {:tag :puhelin}
-                          {:tag :www}
-                          {:tag :sahkopostiosoite}])
+(def yritys-child-ns-yht_211 [{:tag :nimi}
+                              {:tag :liikeJaYhteisotunnus}
+                              {:tag :kayntiosoite :child postiosoite-children-ns-yht}
+                              {:tag :kotipaikka}
+                              {:tag :postiosoite :child postiosoite-children-ns-yht}
+                              {:tag :faksinumero}
+                              {:tag :puhelin}
+                              {:tag :www}
+                              {:tag :sahkopostiosoite}])
 
 (def henkilo {:tag :henkilo :ns "yht" :child henkilo-child})
 
-(def yritys {:tag :yritys :ns "yht" :child yritys-child})
+(def yritys_211 {:tag :yritys :ns "yht" :child yritys-child_211})
 
 (def osapuoli-body {:tag :Osapuoli
                     :child [{:tag :kuntaRooliKoodi}
                             {:tag :VRKrooliKoodi}
                             henkilo
-                            yritys
+                            yritys_211
                             {:tag :turvakieltoKytkin}]})
 
 (def ^:private naapuri {:tag :naapuritieto
@@ -208,7 +208,7 @@
                      :child [{:tag :suunnittelijaRoolikoodi}
                              {:tag :VRKrooliKoodi}
                              henkilo
-                             yritys
+                             yritys_211
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ]}]}
@@ -217,7 +217,7 @@
                      :child [{:tag :tyonjohtajaRooliKoodi}
                              {:tag :VRKrooliKoodi}
                              henkilo
-                             yritys
+                             yritys_211
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
@@ -230,7 +230,7 @@
             :child [{:tag :suunnittelijaRoolikoodi}
                     {:tag :VRKrooliKoodi}
                     henkilo
-                    yritys
+                    yritys_211
                     {:tag :patevyysvaatimusluokka}
                     {:tag :koulutus}
                     {:tag :valmistumisvuosi}
@@ -245,7 +245,7 @@
                      :child [{:tag :tyonjohtajaRooliKoodi}
                              {:tag :VRKrooliKoodi}
                              henkilo
-                             yritys
+                             yritys_211
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
@@ -270,7 +270,7 @@
                      :child [{:tag :tyonjohtajaRooliKoodi}
                              {:tag :VRKrooliKoodi}
                              henkilo
-                             yritys
+                             yritys_211
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              {:tag :valmistumisvuosi}
@@ -315,7 +315,7 @@
                       :child [{:tag :kuntaRooliKoodi}
                               {:tag :VRKrooliKoodi}
                               henkilo
-                              yritys]}
+                              yritys_211]}
                      {:tag :tyyppi :ns "yht"}])
 
 (def lausunto {:tag :Lausunto

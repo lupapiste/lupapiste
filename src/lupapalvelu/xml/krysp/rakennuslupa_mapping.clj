@@ -94,7 +94,7 @@
                      :child [{:tag :kuntaRooliKoodi :ns "yht"}
                              {:tag :VRKrooliKoodi :ns "yht"}
                              mapping-common/henkilo
-                             mapping-common/yritys
+                             mapping-common/yritys_211
                              {:tag :omistajalaji :ns "rakval"
                               :child [{:tag :muu}
                                       {:tag :omistajalaji}]}]}]}]})
@@ -184,7 +184,7 @@
                                                 :child [{:tag :kuntaRooliKoodi}
                                                         {:tag :VRKrooliKoodi}
                                                         mapping-common/henkilo
-                                                        mapping-common/yritys]}
+                                                        mapping-common/yritys_211]}
                                                {:tag :tyyppi :ns "yht"}]}]}
                              {:tag :kayttotapaus}
                              {:tag :asianTiedot

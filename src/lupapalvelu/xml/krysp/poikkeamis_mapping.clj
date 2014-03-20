@@ -41,7 +41,7 @@
                                                      :child [{:tag :kuntaRooliKoodi}
                                                              {:tag :VRKrooliKoodi}
                                                              mapping-common/henkilo
-                                                             mapping-common/yritys]}
+                                                             mapping-common/yritys_211]}
                                                     {:tag :tyyppi :ns "yht"}]}]}
                                   {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
                                   {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
