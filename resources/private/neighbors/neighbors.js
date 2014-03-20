@@ -38,7 +38,7 @@
         .applicationId(application.id)
         .neighbors(application.neighbors)
         .neighborId(null)
-        .map.updateSize().clear().center(x, y, 11).add(x, y);
+        .map.updateSize().clear().center(x, y, 13).add(x, y); // original zoom 11
     };
 
     self.edit   = function(neighbor) {

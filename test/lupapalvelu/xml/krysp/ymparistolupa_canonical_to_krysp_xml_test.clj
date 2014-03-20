@@ -3,7 +3,6 @@
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
             [lupapalvelu.document.ymparistolupa-canonical-test :refer [application]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
-            ;[lupapalvelu.document.validators :refer [dummy-doc]]
             ;[lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :as validator]
             [lupapalvelu.xml.emit :refer :all]
@@ -11,9 +10,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
-            ;[sade.util :as util]
             [sade.common-reader :as cr]
-            ;[clojure.java.io :refer :all]
             ))
 
 (facts "Ymparistolupa type of permit to canonical and then to xml with schema validation"

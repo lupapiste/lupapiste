@@ -1,6 +1,6 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]

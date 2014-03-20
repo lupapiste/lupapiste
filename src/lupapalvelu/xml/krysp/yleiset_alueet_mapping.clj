@@ -98,10 +98,7 @@
 (defn get-yleiset-alueet-krysp-mapping [lupa-name-key]
   {:tag :YleisetAlueet
    :ns "yak"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
-                      http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.2")
                  :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
            mapping-common/common-namespaces)
 

@@ -8,18 +8,21 @@
    {:toimituksenTiedot (toimituksen-tiedot application lang)}})
 
 (defn- get-toimenpide [{toimenpide :toimenpiteet} common]
-  (merge common {:kuvausKoodi (-> toimenpide :Toimenpide)
-                 :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus)
-                                                  :asuinhuoneitojenLkm (-> toimenpide :huoneistoja)
-                                                  :rakennuksenKerrosluku (-> toimenpide :kerroksia)
-                                                  :kokonaisala (-> toimenpide :kokonaisala)
-                                                  :kerrosalatieto {:kerrosala {:pintaAla (-> toimenpide :kerrosala)
-                                                                               :paakayttotarkoitusKoodi (-> toimenpide :kayttotarkoitus)}}}}}))
+  (merge common {:kuvausKoodi (:Toimenpide toimenpide)
+                 :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)
+                                                  :asuinhuoneitojenLkm (:huoneistoja toimenpide)
+                                                  :rakennuksenKerrosluku (:kerroksia toimenpide)
+                                                  :kokonaisala (:kokonaisala toimenpide)
+                                                  ; 2.1.3+
+                                                  :kerrosala (:kerrosala toimenpide)
+                                                  ; 2.1.2
+                                                  :kerrosalatieto {:kerrosala {:pintaAla (:kerrosala toimenpide)
+                                                                               :paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)}}}}}))
 
 (defn- get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
-  (let [kaytettykerrosala-canonical (when-not (s/blank? (-> kaytettykerrosala :pintaAla))
-                                      {:kerrosalatieto {:kerrosala {:pintaAla (-> kaytettykerrosala :pintaAla)
-                                                                    :paakayttotarkoitusKoodi (-> kaytettykerrosala :kayttotarkoitusKoodi)}}})]
+  (let [kaytettykerrosala-canonical (when-not (s/blank? (:pintaAla kaytettykerrosala))
+                                      {:kerrosalatieto {:kerrosala {:pintaAla (:pintaAla kaytettykerrosala)
+                                                                    :paakayttotarkoitusKoodi (:kayttotarkoitusKoodi kaytettykerrosala)}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))
 
 
@@ -39,7 +42,7 @@
       {:kasittelynTilatieto (get-state application)
        :kuntakoodi (:municipality application)
        :luvanTunnistetiedot (lupatunnus (:id application))
-       :osapuolettieto (osapuolet documents (:neighbors application))
+       :osapuolettieto (osapuolet documents (:neighbors application) lang)
        :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents) application)
        :toimenpidetieto (get-toimenpiteet (:rakennushanke documents))
        :lausuntotieto (get-statements (:statements application))
@@ -47,8 +50,8 @@
                                                      "ruotsi"
                                                      "suomi")}}
        :kayttotapaus kayttotapaus
-       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (-> hanke :poikkeamat)
-                                   kuvaus-avain (-> hanke :kuvaus)}}})))
+       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (:poikkeamat hanke)
+                                   kuvaus-avain (:kuvaus hanke)}}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 

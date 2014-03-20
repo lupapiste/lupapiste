@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
+<!-- KRYSP projekti-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu" xmlns:gml="http://www.opengis.net/gml" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" targetNamespace="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.4">
+	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.2/yhteiset.xsd"/>
+	<!--<xs:import namespace="http://www.opengis.net/gml" schemaLocation="..\yhteiset\gml_dummy.xsd"/>
+	<xs:import namespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" schemaLocation="..\yhteiset\yhteiset.xsd"/>-->
+	<!-- ================================================= -->
+	<!-- Package: <<XSDschema>> poikkeamispaatos_ja_suunnittelutarveratkaisu  -->
+	<!-- ================================================= -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Class: <<FeatureType>> poikkeamispaatos_ja_suunnittelutarveratkaisu  -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Kohdejoukko: poikkeamispaatos_ja_suunnittelutarveratkaisu -->
+	<xs:element name="Popast" type="ppst:PopastType" substitutionGroup="gml:_Feature">
+		<xs:annotation>
+			<xs:documentation>Skeeman juurielementti</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="PopastType">
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="toimituksenTiedot" type="yht:AineistotoimituksentiedotType"/>
+					<xs:element name="poikkeamisasiatieto" type="ppst:PoikkeamisasiatType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="suunnittelutarveasiatieto" type="ppst:SuunnittelutarveasiatType" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="PoikkeamisasiatType">
+		<xs:sequence>
+			<xs:element ref="ppst:Poikkeamisasia"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SuunnittelutarveasiatType">
+		<xs:sequence>
+			<xs:element ref="ppst:Suunnittelutarveasia"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PoikkeamisasiaType">
+		<xs:complexContent>
+			<xs:extension base="ppst:AbstractPoikkeamisType">
+				<xs:sequence>
+					<xs:element name="asianTiedot" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Asiantiedot">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="vahainenPoikkeaminen" type="xs:string" minOccurs="0"/>
+											<xs:element name="poikkeamisasianKuvaus" type="xs:string" minOccurs="0"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="kayttotapaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="SuunnittelutarveasiaType">
+		<xs:complexContent>
+			<xs:extension base="ppst:AbstractPoikkeamisType">
+				<xs:sequence>
+					<xs:element name="asianTiedot" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Asiantiedot">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="vahainenPoikkeaminen" type="xs:string" minOccurs="0"/>
+											<xs:element name="suunnittelutarveasianKuvaus" type="xs:string" minOccurs="0"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="kayttotapaus" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="AbstractPoikkeamisType">
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="kasittelynTilatieto" type="yht:KasittelynTilaType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="kuntakoodi" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Kunnat ovat voineet yhdistyä, jolloin lupatasolla tarvitaan myös kuntakoodi</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="luvanTunnistetiedot" type="yht:LuvanTunnisteTiedotType"/>
+					<xs:element name="osapuolettieto" type="yht:OsapuoletType" minOccurs="0"/>
+					<xs:element name="rakennuspaikkatieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Rakennuspaikka" minOccurs="0">
+									<xs:complexType>
+										<xs:complexContent>
+											<xs:extension base="yht:RakennuspaikkaType">
+												<xs:sequence>
+													<xs:element name="paaKayttotarkoitus" minOccurs="0">
+														<xs:simpleType>
+															<xs:restriction base="xs:string">
+																<xs:enumeration value="ympärivuotinen asunto"/>
+																<xs:enumeration value="loma-asunto"/>
+																<xs:enumeration value="muu"/>
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:element>
+													<xs:element name="rantaKytkin" type="xs:boolean" minOccurs="0">
+														<xs:annotation>
+															<xs:documentation>Onko kysessä ranta-alue vai ei</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:extension>
+										</xs:complexContent>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="referenssiPiste" type="gml:PointPropertyType" minOccurs="0"/>
+					<xs:element name="toimenpidetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Toimenpide">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="rakennustunnus" minOccurs="0">
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="valtakunnallinenNumero" type="xs:string" minOccurs="0">
+															<xs:annotation>
+																<xs:documentation>Valtakunnallinen numero tulossa</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+														<xs:element name="jarjestysnumero" type="xs:string">
+															<xs:annotation>
+																<xs:documentation>Luvan sisälllä juokseva numerointi. VRKta varten yksilöivä koodi</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+														<xs:element name="kiinttun" minOccurs="0">
+															<xs:annotation>
+																<xs:documentation>Kiinteistötunnus, 14 merkkiä ilman väliviivoja.</xs:documentation>
+															</xs:annotation>
+															<xs:simpleType>
+																<xs:restriction base="xs:string">
+																	<xs:pattern value="(([0-9]{3}){2}([0-9]{4}){2})"/>
+																</xs:restriction>
+															</xs:simpleType>
+														</xs:element>
+														<xs:element name="rakennusnro" minOccurs="0">
+															<xs:annotation>
+																<xs:documentation>Rakennusnumero, kolmella numerolla etunollin</xs:documentation>
+															</xs:annotation>
+															<xs:simpleType>
+																<xs:restriction base="xs:string">
+																	<xs:pattern value="[0-9][0-9][0-9]"/>
+																</xs:restriction>
+															</xs:simpleType>
+														</xs:element>
+														<xs:element name="aanestysalue" type="xs:string" minOccurs="0">
+															<xs:annotation>
+																<xs:documentation>Äänestysalue</xs:documentation>
+															</xs:annotation>
+														</xs:element>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="liitetieto" minOccurs="0">
+												<xs:annotation>
+													<xs:documentation>Lyhyt selostus tulevasta rakennushankkeesta</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="Liite" type="yht:RakennusvalvontaLiiteType"/>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="kuvausKoodi">
+												<xs:simpleType>
+													<xs:restriction base="xs:string">
+														<xs:enumeration value="uusi"/>
+														<xs:enumeration value="laajennus"/>
+														<xs:enumeration value="perustus"/>
+														<xs:enumeration value="perusparannus"/>
+														<xs:enumeration value="uudelleenrakentaminen"/>
+														<xs:enumeration value="purkaminen"/>
+														<xs:enumeration value="muu muutostyö"/>
+														<xs:enumeration value="käyttötarkoitusmuutos"/>
+														<xs:enumeration value="loma-asunnon muuttaminen vakituiseksi"/>
+													</xs:restriction>
+												</xs:simpleType>
+											</xs:element>
+											<xs:element name="kerrosalatieto" minOccurs="0" maxOccurs="unbounded">
+												<xs:annotation>
+													<xs:documentation>Tähän mennessä käytetty kerrosala m2 ja rakennustyyppi</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="kerrosala">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="pintaAla" type="xs:decimal"/>
+																	<xs:element name="paakayttotarkoitusKoodi" type="yht:PaakayttotarkoitusType"/>
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="tavoitetilatieto">
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="Tavoitetila">
+															<xs:complexType>
+																<xs:sequence>
+																	<xs:element name="paakayttotarkoitusKoodi" type="yht:PaakayttotarkoitusType"/>
+																	<xs:element name="asuinhuoneistojenLkm" type="xs:int" minOccurs="0"/>
+																	<xs:element name="rakennuksenKerrosluku" type="xs:int" minOccurs="0"/>
+																	<xs:element name="kokonaisala" type="xs:decimal" minOccurs="0"/>
+																	<xs:element name="kerrosala" type="xs:int" minOccurs="0">
+																		<xs:annotation>
+																			<xs:documentation>Tähän mennessä käytetty kerrosala m2 ja rakennustyyppi</xs:documentation>
+																		</xs:annotation>
+																	</xs:element>
+																</xs:sequence>
+															</xs:complexType>
+														</xs:element>
+													</xs:sequence>
+												</xs:complexType>
+											</xs:element>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="lausuntotieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Lausunnot (ympäristökeskus, maakunnan liitto, naapurikunta) tarvittaessa</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Lausunto" type="yht:LausuntoRvPType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="paatostieto" type="yht:PaatoksetType" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Viranomaisien asiasta antamat päätökset</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="liitetieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:annotation>
+							<xs:documentation>Hankkeen liitteet</xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Liite" type="yht:RakennusvalvontaLiiteType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="lisatietotieto" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Lisatieto">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="asioimiskieli" minOccurs="0">
+												<xs:simpleType>
+													<xs:restriction base="xs:string">
+														<xs:enumeration value="ruotsi"/>
+														<xs:enumeration value="suomi"/>
+													</xs:restriction>
+												</xs:simpleType>
+											</xs:element>
+											<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="Poikkeamisasia" type="ppst:PoikkeamisasiaType" substitutionGroup="gml:_Feature"/>
+	<xs:element name="Suunnittelutarveasia" type="ppst:SuunnittelutarveasiaType" substitutionGroup="gml:_Feature"/>
+</xs:schema>

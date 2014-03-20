@@ -1,8 +1,8 @@
 (ns lupapalvelu.invite-itest
-  (:use [lupapalvelu.itest-util]
-        [lupapalvelu.factlet]
-        [midje.sweet])
-  (:require [lupapalvelu.domain :as domain]))
+  (:require [midje.sweet  :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.domain :as domain]))
 
 (defn- invite [apikey application-id document-id email]
   (command apikey :invite

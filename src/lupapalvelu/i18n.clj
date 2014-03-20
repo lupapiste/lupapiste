@@ -32,7 +32,7 @@
 (defn get-localizations [] @excel-data)
 
 (defn get-terms
-  "Return localization temrs for given language. If language is not supported returns terms for default language (\"fi\")"
+  "Return localization terms for given language. If language is not supported returns terms for default language (\"fi\")"
   [lang]
   (let [terms (get-localizations)]
     (or (terms (keyword lang)) (terms :fi))))
