@@ -42,11 +42,11 @@
    {:tag :tiedotToiminnanSijainnista :child [{:tag :TiedotToiminnanSijainnista :child [mapping-common/yksilointitieto
                                                                                        mapping-common/alkuHetki
                                                                                        (mapping-common/sijaintitieto "yht")
-                                                                                       ;{:tag :ymparistoolosuhteet :child mapping-common/liite-children}
-                                                                                       ;{:tag :ymparistonLaatu :child mapping-common/liite-children}
-                                                                                       ;{:tag :asutus :child mapping-common/liite-children}
-                                                                                       ;{:tag :kaavoitustilanne :child mapping-common/liite-children}
-                                                                                       ;{:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children}]}
+                                                                                       ;{:tag :ymparistoolosuhteet :child mapping-common/liite-children_213}
+                                                                                       ;{:tag :ymparistonLaatu :child mapping-common/liite-children_213}
+                                                                                       ;{:tag :asutus :child mapping-common/liite-children_213}
+                                                                                       ;{:tag :kaavoitustilanne :child mapping-common/liite-children_213}
+                                                                                       ;{:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children_213}]}
                                                                                        ]
                                               }]}
 
