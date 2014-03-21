@@ -8,7 +8,7 @@
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
    :ns "ymi"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ilmoitukset" "2.1.1")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ilmoitukset" "2.1.2")
                  :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"}
            mapping-common/common-namespaces)
 
@@ -23,7 +23,7 @@
                              {:tag :luvanTunnistetiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto
-                              :child [mapping-common/lausunto]}
+                              :child [mapping-common/lausunto_213]}
                              {:tag :ilmoittaja
                               :child mapping-common/ymp-osapuoli-children}
                              {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
@@ -46,7 +46,7 @@
                                                                                {:tag :yo}
                                                                                {:tag :mittaaja}]}]}
                              {:tag :koontikentta}
-                             {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]} ]}]}]})
+                             {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]} ]}]}]})
 
 
 (defn save-application-as-krysp
