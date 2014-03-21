@@ -163,23 +163,26 @@
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
-        xml_214 (rakennuslupa-element-to-xml canonical "2.1.4")
+        xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
         xml_213_s (indent-str xml_213)
-        xml_214_s (indent-str xml_214)]
+        xml_215_s (indent-str xml_215)]
 
     (validator/validate xml_213_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.3")
-    (validator/validate xml_214_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.4")
+    (validator/validate xml_215_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.5")
 
     (facts "2.1.3"
       (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_213_s))
+            tyonjohtaja (xml/select1 lp-xml [:Tyonjohtaja])
             sijaistus (xml/select1 lp-xml [:Sijaistus])]
         (fact "sijaistettavan nimi" (xml/get-text sijaistus [:sijaistettavaHlo]) => "Jaska Jokunen")
         (fact "sijaistettava rooli" (xml/get-text sijaistus [:sijaistettavaRooli]) => (xml/get-text lp-xml [:tyonjohtajaRooliKoodi]))
         (fact "sijaistettavan alkamisPvm" (xml/get-text sijaistus [:alkamisPvm]) => "2014-02-13")
-        (fact "sijaistettavan paattymisPvm" (xml/get-text sijaistus [:paattymisPvm]) => "2014-02-20")))
+        (fact "sijaistettavan paattymisPvm" (xml/get-text sijaistus [:paattymisPvm]) => "2014-02-20")
+        (fact "postiosoite"
+          (xml/get-text tyonjohtaja [:yritys :postiosoite :osoitenimi :teksti]) => "katu")))
 
-    (facts "2.1.4"
-      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_214_s))
+    (facts "2.1.5"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_215_s))
             tyonjohtaja (xml/select1 lp-xml [:Tyonjohtaja])
             vastuu (xml/select tyonjohtaja [:vastattavaTyotieto])]
         (fact "rooli" (xml/get-text tyonjohtaja [:tyonjohtajaRooliKoodi]) => "KVV-ty\u00f6njohtaja")
@@ -189,7 +192,11 @@
         (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
 
         (fact "vastattavaTyo" (map #(xml/get-text % [:vastattavaTyo]) vastuu)
-          => (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen", "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen", "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"})
+          => (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen"
+                     "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen"
+                     "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"}))
 
-          )))))
-
+        (fact "postiosoite"
+          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")
+        ))
+    ))
