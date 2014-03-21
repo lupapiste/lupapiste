@@ -400,6 +400,8 @@
      {:tag :suoramarkkinointikielto}
      {:tag :verkkolaskutustieto :child [verkkolaskutus_213]}]))
 
+(def maksajatype-children_213
+  (conj yhteystietotype-children_213 {:tag :laskuviite :ns "yht"}))
 
 (defn get-child-element [mapping path]
   (let [children (if (map? mapping) (:child mapping) mapping)]
