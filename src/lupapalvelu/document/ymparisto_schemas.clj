@@ -93,6 +93,14 @@
            :order 4
            :type :party}
     :body party}
+   {:info {:name "ymp-maksaja"
+           :i18name "maksaja"
+           :repeating false
+           :order 6
+           :removable false
+           :approvable true
+           :type :party}
+     :body maksaja}
    {:info {:name "yl-hankkeen-kuvaus"
            :order 1}
     :body [kuvaus

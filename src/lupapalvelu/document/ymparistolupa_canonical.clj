@@ -22,7 +22,7 @@
           :laitoksentiedot {:Laitos (assoc generic-id :kiinttun (:propertyId application))}
           :toiminnanSijaintitieto
           {:ToiminnanSijainti (assoc generic-id :sijaintitieto (canonical-common/get-sijaintitieto application))} }
-         (util/assoc-when {} :maksaja (canonical-common/get-maksajatiedot (first (:maksaja documents))))
+         (util/assoc-when {} :maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
          (when (seq (:linkPermitData application))
            {:voimassaOlevatLuvat
             {:luvat
