@@ -63,6 +63,7 @@
                     :version 1,
                     :type "party",
                     :order 3}})
+(fact "Meta test: yrityshakija" yrityshakija  => valid-against-current-schema?)
 
 (def henkilohakija {:created 1391415025497,
                     :data
@@ -93,9 +94,39 @@
                      :version 1,
                      :type "party",
                      :order 3}})
-
 (fact "Meta test: henkilohakija" henkilohakija  => valid-against-current-schema?)
-(fact "Meta test: henkilohakija" yrityshakija  => valid-against-current-schema?)
+
+(def henkilomaksaja
+  {:id "532c400eef4eb00000000000"
+   :schema-info { :name "ymp-maksaja" :version 1 :approvable true :type "party" }
+   :data {:henkilo {:henkilotiedot {:etunimi {:value "Pappa"}
+                                    :sukunimi {:value "Betalare"}
+                                    :hetu {:value "210354-947E"}
+                                    :turvakieltoKytkin {:value true}}
+                    :osoite {:katu {:value "Satakunnankatu"}
+                             :postinumero {:value "33210"}
+                             :postitoimipaikannimi {:value "Tammerfors"}}
+                    :yhteystiedot {:email {:value "pappa@example.com"}
+                                   :puhelin {:value "0400-123456"}}}
+          :laskuviite {:value "1686343528523"}}})
+
+(fact "Meta test: henkilomaksaja" henkilomaksaja  => valid-against-current-schema?)
+
+(def yritysmaksaja
+  {:id "532c400eef4eb00000000010"
+   :schema-info {:name "ymp-maksaja" :version 1 :approvable true :type "party"}
+   :data {:_selected {:value "yritys"}
+          :laskuviite {:value "168634352"}
+          :yritys {:liikeJaYhteisoTunnus {:value "1234567-1"}
+                   :osoite {:katu {:value "Satamakatu 1"}
+                            :postinumero {:value "00200"}
+                            :postitoimipaikannimi {:value "Affenammaa"}}
+                   :yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pappa"}
+                                                   :sukunimi {:value "Betalare"}}
+                                   :yhteystiedot {:email {:value "pappa@business.example.com"}
+                                                  :puhelin {:value "0500 123456"}}}
+                   :yritysnimi {:value "Pappas Business"}}}})
+(fact "Meta test: yritysmaksaja" yritysmaksaja  => valid-against-current-schema?)
 
 (def drawings [{:id 1,
                :name "alue",

@@ -29,7 +29,8 @@
                   :documents [kuvaus
                               henkilohakija
                               (select-keys henkilohakija [:schema-info])
-                              yrityshakija]
+                              yrityshakija
+                              henkilomaksaja]
                   :drawings []
                   :infoRequest false
                   :linkPermitData [{:id "LP-638-2013-00099" :type "lupapistetunnus"} {:id "kuntalupa-123" :type "kuntalupatunnus"}]
@@ -81,6 +82,8 @@
 
         hakijat (:hakija ymparistolupa) => seq
         luvat (get-in ymparistolupa [:voimassaOlevatLuvat :luvat :lupa]) => seq
+
+        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy
         ]
 
     (fact "Canonical model has all fields"
@@ -134,9 +137,22 @@
 
         (:yksilointitieto tiedot-sijainnista) => (:id application)
         (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
-        (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}
-        )
+        (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}))
+
+    (facts "maksaja"
+      (let [postiosoite (get-in maksaja [:osoitetieto :Osoite]) => truthy
+            osoitenimi (:osoitenimi postiosoite) => truthy]
+        (:teksti osoitenimi) => "Satakunnankatu"
+        (:postinumero postiosoite) => "33210"
+        (:postitoimipaikannimi postiosoite) => "Tammerfors"
+        (:etunimi maksaja) => "Pappa"
+        (:sukunimi maksaja) => "Betalare"
+        (:henkilotunnus maksaja) => "210354-947E"
+        (:sahkopostiosoite maksaja) => "pappa@example.com"
+        (:puhelinnumero maksaja) => "0400-123456"
+        (:laskuviite maksaja) => "1686343528523")
+
       )
 
-    ; (clojure.pprint/pprint canonical)
+     ;(clojure.pprint/pprint canonical)
 ))

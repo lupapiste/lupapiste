@@ -17,12 +17,12 @@
          {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
           :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
           :lausuntotieto (canonical-common/get-statements (:statements application))
+          :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
           :hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))
           :toiminta (select-keys kuvaus [:kuvaus :peruste])
           :laitoksentiedot {:Laitos (assoc generic-id :kiinttun (:propertyId application))}
           :toiminnanSijaintitieto
           {:ToiminnanSijainti (assoc generic-id :sijaintitieto (canonical-common/get-sijaintitieto application))} }
-         (util/assoc-when {} :maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
          (when (seq (:linkPermitData application))
            {:voimassaOlevatLuvat
             {:luvat

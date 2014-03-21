@@ -552,7 +552,7 @@
     (get-yhteystiedot unwrapped-party-doc)
     (not-empty
       (assoc-when {}
-        :laskuviite (:laskuviite unwrapped-party-doc)
+        :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
         ; TODO
         :verkkolaskutustieto nil))))
 
