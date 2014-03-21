@@ -3,15 +3,16 @@
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
             [lupapalvelu.document.ymparistolupa-canonical-test :refer [application]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
-            ;[lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
+            [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
-            [sade.common-reader :as cr]
-            ))
+            [sade.common-reader :as cr]))
+
+(fact "2.1.2: :tag is set" (has-tag ymparistolupa_to_krysp) => true)
 
 (facts "Ymparistolupa type of permit to canonical and then to xml with schema validation"
 
@@ -55,8 +56,5 @@
 
     (fact "laskuviite"
       (let [maksaja (xml/select lp-xml [:maksajatieto :Maksaja])]
-
-        (xml/get-text maksaja [:laskuviite]) => "1686343528523"
-        )
-      )
+        (xml/get-text maksaja [:laskuviite]) => "1686343528523"))
     ))
