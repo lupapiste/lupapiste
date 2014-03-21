@@ -90,27 +90,33 @@
       (count hakijat) => 2
 
       (let [hakija (first hakijat)
-            postiosoite (:postiosoite hakija) => truthy
-            osoitenimi (:osoitenimi postiosoite) => truthy
-            yhteyshenkilo (:yhteyshenkilo hakija) => truthy]
+            postiosoite (get-in hakija [:osoitetieto :Osoite]) => truthy
+            osoitenimi (:osoitenimi postiosoite) => truthy]
 
-        (:nimi hakija) => "Yksityishenkil\u00f6"
-        (:liikeJaYhteisotunnus hakija) => nil
+        (:yhteyshenkilonNimi hakija) => nil
+        (:yrityksenNimi hakija) => nil
+        (:yTunnus hakija) => nil
+
         (:teksti osoitenimi) => "Murskaajankatu 5"
         (:postinumero postiosoite) => "36570"
         (:postitoimipaikannimi postiosoite) => "Kaivanto"
-        (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
-        (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
-        (:puhelin yhteyshenkilo) => "121212")
+        (:etunimi hakija) => "Pekka"
+        (:sukunimi hakija) => "Borga"
+        (:sahkopostiosoite hakija) => "pekka.borga@porvoo.fi"
+        (:puhelinnumero hakija) => "121212")
 
-      (second hakijat) => {:nimi "Yrtti Oy",
-                           :postiosoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                                         :postitoimipaikannimi "kuuva",
-                                         :postinumero "43640"},
-                           :yhteyshenkilo {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-                                           :puhelin "060222155",
-                                           :sahkopostiosoite "tew@gjr.fi"},
-                           :liikeJaYhteisotunnus "1060155-5"})
+      (second hakijat) => {:yTunnus "1060155-5"
+                           :yrityksenNimi "Yrtti Oy"
+                           :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
+                           :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                                                 :postitoimipaikannimi "kuuva",
+                                                 :postinumero "43640"}}
+                           :puhelinnumero "060222155"
+                           :sahkopostiosoite "tew@gjr.fi"})
+
+    (fact "kiinteistotunnus"
+      (get-in ymparistolupa [:laitoksentiedot :Laitos :kiinttun]) => (:propertyId application)
+      )
 
     (facts "kuvaus"
       (get-in ymparistolupa [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
@@ -122,11 +128,11 @@
       (second luvat) => {:tunnistetieto "kuntalupa-123" :kuvaus "kuntalupatunnus"})
 
     (facts "sijainti"
-      (let [tiedot-sijainnista (get-in ymparistolupa [:tiedotToiminnanSijainnista :TiedotToiminnanSijainnista])
-            sijainti (get-in tiedot-sijainnista [:sijaintitieto :Sijainti])
+      (let [tiedot-sijainnista (get-in ymparistolupa [:toiminnanSijaintitieto :ToiminnanSijainti])
+            sijainti (-> tiedot-sijainnista :sijaintitieto first :Sijainti)
             osoite (:osoite sijainti)]
 
-        (:yksilointitieto tiedot-sijainnista) => (:propertyId application)
+        (:yksilointitieto tiedot-sijainnista) => (:id application)
         (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
         (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}
         )

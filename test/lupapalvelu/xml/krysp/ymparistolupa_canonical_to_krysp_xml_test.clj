@@ -22,7 +22,10 @@
 
     ;(println xml-s)
 
-    (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
+    (validator/validate xml-s (:permitType application) "2.1.2") ; throws exception
+
+    (fact "kiinteistotunnus"
+      (xml/get-text lp-xml [:laitoksentiedot :Laitos :kiinttun]) => (:propertyId application))
 
     (xml/get-text lp-xml [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
     (xml/get-text lp-xml [:toiminta :peruste]) => "Hankkeen peruste"
@@ -30,7 +33,7 @@
     (let [hakijat (xml/select lp-xml [:hakija])]
       (count hakijat) => 2
       (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
-      (xml/get-text (second hakijat) [:liikeJaYhteisotunnus]) => "1060155-5")
+      (xml/get-text (second hakijat) [:yTunnus]) => "1060155-5")
 
     (let [luvat (xml/select lp-xml [:voimassaOlevatLuvat :lupa])]
       (count luvat) => 2
@@ -38,11 +41,11 @@
       (xml/get-text (second luvat) [:tunnistetieto]) => "kuntalupa-123")
 
 
-    (let [tiedot-sijainnista (xml/select1 lp-xml [:tiedotToiminnanSijainnista :TiedotToiminnanSijainnista])
+    (let [tiedot-sijainnista (xml/select1 lp-xml [:toiminnanSijaintitieto :ToiminnanSijainti])
             sijainti (xml/select1 tiedot-sijainnista [:sijaintitieto :Sijainti])
             osoite (xml/select1 sijainti :osoite)]
 
-        (xml/get-text tiedot-sijainnista :yksilointitieto) => (:propertyId application)
+        (xml/get-text tiedot-sijainnista :yksilointitieto) => (:id application)
         (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
         (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274")
 
