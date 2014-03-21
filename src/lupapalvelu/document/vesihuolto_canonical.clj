@@ -1,2 +1,3 @@
-(ns lupapalvelu.document.vesihuolto-canonical)
+(ns lupapalvelu.document.vesihuolto-canonical
+  (require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]))
 

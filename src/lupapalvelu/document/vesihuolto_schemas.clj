@@ -26,8 +26,8 @@
                                                                 {:name "Tiskiallas" :type :checkbox}
                                                                 {:name "Astianpesukone" :type :checkbox}
                                                                 {:name "Pyykinpesukone" :type :checkbox}
-                                                                {:name "L\u00e4mminvesivaraaja" :type :checkbox}
-                                                                {:name "Kuivak\u00e4ym\u00e4l\u00e4" :type :checkbox}
+                                                                {:name "Lamminvesivaraaja" :type :checkbox}
+                                                                {:name "Kuivakaymala" :type :checkbox}
                                                                 {:name "WC" :type :checkbox}
                                                                 ]}]}
                                                 )})
