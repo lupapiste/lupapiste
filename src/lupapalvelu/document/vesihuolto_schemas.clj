@@ -28,7 +28,7 @@
                                                                 {:name "Pyykinpesukone" :type :checkbox}
                                                                 {:name "L\u00e4mminvesivaraaja" :type :checkbox}
                                                                 {:name "Kuivak\u00e4ym\u00e4l\u00e4" :type :checkbox}
-                                                                {:name "WC(vesik\u00e4ym\u00e4l\u00e4)" :type :checkbox}
+                                                                {:name "WC" :type :checkbox}
                                                                 ]}]}
                                                 )})
 
