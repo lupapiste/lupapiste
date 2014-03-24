@@ -253,6 +253,10 @@
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
+(def maksaja (body
+               party
+               {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
 (def muutostapa {:name "muutostapa" :type :select :required true
@@ -684,9 +688,7 @@
             :removable true
             :approvable true
             :type :party}
-     :body (body
-             party
-             {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
+     :body maksaja}
 
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}

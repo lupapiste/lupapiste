@@ -40,18 +40,18 @@
 
   (facts "katselmukset"
     (count katselmukset) => 3
-    (map :taskname katselmukset) => ["katselmus1" "katselmus2" "muu tarkastus"]
+    (map :taskname katselmukset) => ["Aloituskokous" "K\u00e4ytt\u00f6\u00f6nottotarkastus" "loppukatselmus"]
     (-> katselmukset first :data :katselmuksenLaji :value) => "aloituskokous"
     (map #(get-in % [:data :vaadittuLupaehtona :value]) katselmukset) => (partial every? true?))
 
   (facts "maaraykset"
     (count maaraykset) => 3
-    (map :taskname maaraykset) => ["Maarays 1" "Maarays 2" "tee joku muukin tarkastus"]
+    (map :taskname maaraykset) => ["Radontekninen suunnitelma" "Ilmanvaihtosuunnitelma" "Valaistussuunnitelma"]
     (map #(get-in % [:data :maarays :value]) maaraykset) => (partial every? truthy))
 
   (facts "tyonjohtajat"
     (count tyonjohtajat) => 3
-    (map :taskname tyonjohtajat) => ["vastaava ylijohtaja" "vastaava varajohtaja" "altavastaava johtaja"]
+    (map :taskname tyonjohtajat) => ["Vastaava ty\u00f6njohtaja" "Vastaava IV-ty\u00f6njohtaja" "Ty\u00f6njohtaja"]
     (map :data tyonjohtajat) => (partial every? empty?))
 
   (fact "totally 9 tasks in fixture"

@@ -25,12 +25,26 @@
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    ; 0-n {:tag :valvontatapahtumattieto :child []}
    {:tag :lausuntotieto :child [mapping-common/lausunto_213]}
-   {:tag :hakija :child mapping-common/ymp-osapuoli-children}
+   {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_213}]}
+   {:tag :hakija :child mapping-common/yhteystietotype-children_213}
    {:tag :toiminta
     :child [{:tag :peruste} ; string
             {:tag :kuvaus} ;string
             {:tag :luvanHakemisenSyy}]} ;optional string
-   ; 0-n {:tag :laitoksentiedot :child []}
+   {:tag :laitoksentiedot :child [{:tag :Laitos :child [;{:tag :yht:metatieto}
+                                                        mapping-common/yksilointitieto
+                                                        mapping-common/alkuHetki
+                                                        {:tag :laitoksenNimi}
+                                                        {:tag :osoite :child mapping-common/postiosoite-children-ns-yht}
+                                                        (mapping-common/sijaintitieto "yht")
+                                                        {:tag :toimialatunnus}
+                                                        {:tag :toimiala}
+                                                        {:tag :yhteyshenkilo :child mapping-common/henkilo-child-ns-yht}
+                                                        {:tag :toimintaAika :child [{:tag :aloitusPvm} {:tag :lopetusPvm}]}
+                                                        {:tag :tyontekijamaara}
+                                                        {:tag :henkilotyovuodet}
+                                                        {:tag :kiinttun}
+                                                        {:tag :rakennustunnustieto, :child [{:tag :kiinttun :ns "yht"} {:tag :rakennusnro :ns "yht"}]}]}]}
    {:tag :voimassaOlevatLuvat
     :child [{:tag :luvat :child [{:tag :lupa :child [{:tag :tunnistetieto} ; string
                                                      {:tag :kuvaus} ; string
@@ -39,20 +53,21 @@
                                                                {:tag :vakuutusnumero}]}]}]} ; string
 ;   {:tag :alueJaYmparisto :child [{:tag :kiinteistonLaitokset :child [{:tag :kiinteistorekisteritunnus} ; string
 ;                                                                      {:tag :laitos}]}]} ; string
-   {:tag :tiedotToiminnanSijainnista :child [{:tag :TiedotToiminnanSijainnista :child [mapping-common/yksilointitieto
-                                                                                       mapping-common/alkuHetki
-                                                                                       (mapping-common/sijaintitieto "yht")
-                                                                                       ;{:tag :ymparistoolosuhteet :child mapping-common/liite-children}
-                                                                                       ;{:tag :ymparistonLaatu :child mapping-common/liite-children}
-                                                                                       ;{:tag :asutus :child mapping-common/liite-children}
-                                                                                       ;{:tag :kaavoitustilanne :child mapping-common/liite-children}
-                                                                                       ;{:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children}]}
-                                                                                       ]
-                                              }]}
+    {:tag :toiminnanSijaintitieto :child [{:tag :ToiminnanSijainti :child [mapping-common/yksilointitieto
+                                                                           mapping-common/alkuHetki
+                                                                           (mapping-common/sijaintitieto "yht")
+                                                                           ;{:tag :ymparistoolosuhteet :child mapping-common/liite-children_213}
+                                                                           ;{:tag :ymparistonLaatu :child mapping-common/liite-children_213}
+                                                                           ;{:tag :asutus :child mapping-common/liite-children_213}
+                                                                           ;{:tag :kaavoitustilanne :child mapping-common/liite-children_213}
+                                                                           ;{:tag :rajanaapurit :child [{:tag :luettelo :child mapping-common/liite-children_213}]}
+                                                                           ]
+                                               }]}
 
    {:tag :referenssiPiste :child [mapping-common/gml-point]}
    {:tag :koontiKentta} ; String
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}])
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
+   {:tag :asianKuvaus}])
 
 (def ymparistolupa_to_krysp
   {:tag :Ymparistoluvat

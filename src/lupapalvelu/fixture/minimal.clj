@@ -376,7 +376,7 @@
                                  :ftpUser "dev_sipoo"}
                              :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
                              :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
-                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
+                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
                              :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",

@@ -249,7 +249,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private common-ymparistolupa-schemas ["maksaja" "vesihuolto-kiinteisto"])
+(def ^:private common-ymparistolupa-schemas ["ymp-maksaja" "vesihuolto-kiinteisto"])
 (def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
