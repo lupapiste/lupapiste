@@ -85,14 +85,16 @@
       (:koontiKentta maa-aineslupa) => "Hankkeen synopsis")
 
     (fact "hakija"
-      (:hakija hakemus)
+      (first (:hakija hakemus))
       =>
-      {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-       :puhelin "060222155",
-       :sahkopostiosoite "tew@gjr.fi"
-       :osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                                      :postitoimipaikannimi "kuuva",
-                                      :postinumero "43640"}})
+      {:yTunnus "1060155-5"
+       :yrityksenNimi "Yrtti Oy"
+       :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
+       :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                              :postitoimipaikannimi "kuuva",
+                              :postinumero "43640"}}
+       :puhelinnumero "060222155"
+       :sahkopostiosoite "tew@gjr.fi"})
 
     (fact "maksaja"
       (:viranomaismaksujenSuorittaja hakemus)

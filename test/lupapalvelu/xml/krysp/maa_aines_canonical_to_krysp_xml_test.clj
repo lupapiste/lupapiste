@@ -19,25 +19,29 @@
         xml-s     (indent-str krysp-xml)
         lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
 
+    ;(clojure.pprint/pprint canonical)
     ;(println xml-s)
 
-    (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
+    (validator/validate xml-s (:permitType application) "2.1.2") ; throws exception
 
     (fact "kuvaus in koontiKentta element"
       (xml/get-text lp-xml [:koontiKentta]) => "Hankkeen synopsis")
 
-    (let [hakija (xml/select1 lp-xml [:hakija])
-          maksaja (xml/select1 lp-xml [:viranomaismaksujenSuorittaja])]
-      (xml/get-text hakija [:puhelin]) => "060222155"
-      (xml/get-text maksaja [:puhelin]) => "121212"
-      (xml/get-text maksaja [:henkilotunnus]) => "210281-9988")
+    (fact "hakija"
+      (let [hakija (xml/select1 lp-xml [:hakija])]
+        (xml/get-text hakija [:puhelinnumero]) => "060222155"))
 
+    (fact "maksaja"
+      (let [maksaja (xml/select1 lp-xml [:viranomaismaksujenSuorittaja])]
+       (xml/get-text maksaja [:puhelin]) => "121212"
+       (xml/get-text maksaja [:henkilotunnus]) => "210281-9988"))
 
-    (let [sijainti (xml/select1 lp-xml [:sijaintitieto :Sijainti])
-          osoite (xml/select1 sijainti :osoite)]
+    (fact "sijainti"
+      (let [sijainti (xml/select1 lp-xml [:sijaintitieto :Sijainti])
+            osoite (xml/select1 sijainti :osoite)]
 
-        (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
-        (xml/get-text sijainti [:yksilointitieto]) => (:propertyId application)
-        (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274")
+         (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
+         (xml/get-text sijainti [:yksilointitieto]) => (:propertyId application)
+         (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274"))
 
     ))

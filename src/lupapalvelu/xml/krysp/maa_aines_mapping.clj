@@ -15,7 +15,7 @@
 
    {:tag :hakemustieto
     :child [{:tag :Hakemus
-             :child [{:tag :hakija :child mapping-common/henkilo-child-ns-yht}
+             :child [{:tag :hakija :child mapping-common/yhteystietotype-children_213}
                      {:tag :omistaja :child mapping-common/henkilo-child-ns-yht} ; property owner
                      {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht}
                      {:tag :alueenKiinteistonSijainti :child [(assoc mapping-common/sijantiType :ns "yht")]}

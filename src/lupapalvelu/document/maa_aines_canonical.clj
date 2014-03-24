@@ -18,7 +18,6 @@
 
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
-        hakija    (-> documents :hakija first)
         maksaja   (-> documents :maksaja first)
         kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)]
     {:MaaAinesluvat
@@ -32,7 +31,7 @@
         :lausuntotieto (canonical-common/get-statements (:statements application))
         :hakemustieto
         {:Hakemus
-         {:hakija (->osapuoli hakija)
+         {:hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))
           ;ottamistoiminnanYhteyshenkilo ?
           :alueenKiinteistonSijainti (sijainti application)
           ;ottamismaara ?
