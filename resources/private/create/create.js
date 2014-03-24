@@ -210,11 +210,11 @@
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
       [{kind: "address"}, comp(fillAddress, self.searchNow)],
-      [{kind: "address", type: "street"}, zoomer(13)],  // original zoom 10
-      [{kind: "address", type: "street-city"}, zoomer(13)],  // original zoom 10
-      [{kind: "address", type: "street-number"}, zoomer(14)],   // original zoom 11
-      [{kind: "address", type: "street-number-city"}, zoomer(14)],  // original zoom 11
-      [{kind: "property-id"}, comp(zoomer(14), self.searchNow)]  // original zoom 12
+      [{kind: "address", type: "street"}, zoomer(10)],  // wmts zoom 13
+      [{kind: "address", type: "street-city"}, zoomer(10)],  // wmts zoom 13
+      [{kind: "address", type: "street-number"}, zoomer(11)],   // wmts zoom 14
+      [{kind: "address", type: "street-number-city"}, zoomer(11)],  // wmts zoom 14
+      [{kind: "property-id"}, comp(zoomer(12), self.searchNow)]  // wmts zoom 14
     ];
 
     var renderers = [
@@ -267,7 +267,7 @@
             self
               .useManualEntry(false)
               .setXY(x, y)
-              .center(x, y, 14)  // original zoom 11
+              .center(x, y, 11)  // wmts zoom 14
               .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
@@ -285,7 +285,7 @@
             self
               .useManualEntry(false)
               .setXY(x, y)
-              .center(x, y, 14)  // original zoom 11
+              .center(x, y, 11)  // wmts zoom 14
               .propertyId(id)
               .beginUpdateRequest()
               .searchAddress(x, y);

@@ -7,7 +7,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.map = function() {
     if (!_map) _map = gis
         .makeMap("change-location-map")
-        .center(404168, 6693765, 13) // original zoom 10
+        .center(404168, 6693765, 10) // wmts zoom 13
         .addClickHandler(function(x, y) {
           self
             .address("")
@@ -61,7 +61,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.propertyId(app.propertyId());
     self.errorMessage(null);
     self.map().clear().updateSize();
-    self.center(14); // original zoom 10
+    self.center(10); // wmts zoom 14
     self.processing(false);
     self.pending(false);
   };
