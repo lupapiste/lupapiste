@@ -54,7 +54,9 @@
         (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
         (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274"))
 
-    (fact "laskuviite"
+    (fact "maksaja"
       (let [maksaja (xml/select lp-xml [:maksajatieto :Maksaja])]
-        (xml/get-text maksaja [:laskuviite]) => "1686343528523"))
+        (fact "etunimi" (xml/get-text maksaja [:etunimi]) => "Pappa")
+        (fact "sukunimi" (xml/get-text maksaja [:sukunimi]) => "Betalare")
+        (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")))
     ))
