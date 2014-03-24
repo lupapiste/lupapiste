@@ -310,3 +310,15 @@
 (defmigration parveke-muutos-updates
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "parveke-tai-terassi"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
   (remove-huoneistot-for "parveke-tai-terassi" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+
+(defn- update-krysp-version-for-all-orgs [permit-type from to]
+  (let [path (str "krysp." permit-type ".version")]
+    (mongo/update-by-query :organizations {path from} {$set {path to}})))
+
+(defmigration ymparistolupa-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.YL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "YL" "2.1.1" "2.1.2"))
+
+(defmigration mal-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.MAL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "MAL" "2.1.1" "2.1.2"))
