@@ -13,7 +13,7 @@
 ;; :postiosoite -> :postiosoitetieto
 ;; Added tag :Kayntiosoite after :kayntiosoitetieto
 ;; Added tag :Postiosoite after :postiosoitetieto
-(def ^:private yritys-child-modified
+(def ^:private yritys-child-modified_211
   (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
               (assoc
@@ -28,14 +28,14 @@
                   :child
                   [{:tag :Postiosoite :child mapping-common/postiosoite-children-ns-yht}])
                 m))
-      mapping-common/yritys-child)))
+      mapping-common/yritys-child_211)))
 
 (def maksaja [{:tag :henkilotieto
                :child [{:tag :Henkilo
                         :child mapping-common/henkilo-child-ns-yht}]}
               {:tag :yritystieto
                :child [{:tag :Yritys
-                        :child mapping-common/yritys-child-ns-yht}]}
+                        :child mapping-common/yritys-child-ns-yht_211}]}
               {:tag :laskuviite}])
 
 (def osapuoli [{:tag :henkilotieto
@@ -43,7 +43,7 @@
                          :child mapping-common/henkilo-child-ns-yht}]}
                {:tag :yritystieto
                 :child [{:tag :Yritys
-                         :child yritys-child-modified}]}
+                         :child yritys-child-modified_211}]}
                {:tag :rooliKoodi}])
 
 (def vastuuhenkilo [{:tag :Vastuuhenkilo
