@@ -30,6 +30,9 @@
     (fact "kuvaus in koontiKentta element"
       (xml/get-text lp-xml [:koontiKentta]) => "Hankkeen synopsis")
 
+    (fact "kuvaus in asianKuvaus element"
+      (xml/get-text lp-xml [:asianKuvaus]) => "Hankkeen synopsis")
+
     (fact "hakija"
       (let [hakija (xml/select1 lp-xml [:hakija])]
         (xml/get-text hakija [:puhelinnumero]) => "060222155"))
@@ -44,7 +47,7 @@
             osoite (xml/select1 sijainti :osoite)]
 
          (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
-         (xml/get-text sijainti [:yksilointitieto]) => (:propertyId application)
+         (xml/get-text sijainti [:yksilointitieto]) => (:id application)
          (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274"))
 
     ))

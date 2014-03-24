@@ -30,4 +30,5 @@
         :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
         :sijaintitieto (canonical-common/get-sijaintitieto application)
         :koontiKentta kuvaus
+        :asianKuvaus kuvaus
         }}}}))

@@ -51,7 +51,8 @@
    {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_213}]}
    (mapping-common/sijaintitieto "yht")
    {:tag :koontiKentta}
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}])
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
+   {:tag :asianKuvaus}])
 
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat

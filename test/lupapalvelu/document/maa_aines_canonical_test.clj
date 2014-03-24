@@ -84,7 +84,8 @@
       (:kiinteistotunnus maa-aineslupa) => "63844900010004")
 
     (fact "kuvaus"
-      (:koontiKentta maa-aineslupa) => "Hankkeen synopsis")
+      (:koontiKentta maa-aineslupa) => "Hankkeen synopsis"
+      (:asianKuvaus maa-aineslupa) => "Hankkeen synopsis")
 
     (fact "hakija"
       (first (:hakija hakemus))
