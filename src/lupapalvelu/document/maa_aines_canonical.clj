@@ -18,7 +18,6 @@
 
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
-        maksaja   (-> documents :maksaja first)
         kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)]
     {:MaaAinesluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
@@ -37,10 +36,11 @@
           :alueenKiinteistonSijainti (sijainti application)
           ;ottamismaara ?
           ;paatoksenToimittaminen ?
-          :viranomaismaksujenSuorittaja (->osapuoli maksaja)
+          ; :viranomaismaksujenSuorittaja has been moved to maksajatieto
           ;ottamissuunnitelmatieto TODO
           }
          }
+        :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
         :sijaintitieto (sijainti application)
         :koontiKentta kuvaus
         }}}}))

@@ -26,7 +26,7 @@
                               {:tag :ottamisaika} ; vuotta
                               ]}
                      {:tag :paatoksenToimittaminen} ; string enumeration: Noudetaan, Postitetaan, ei tiedossa
-                     {:tag :viranomaismaksujenSuorittaja :child mapping-common/henkilo-child-ns-yht}
+                     ; {:tag :viranomaismaksujenSuorittaja :child mapping-common/henkilo-child-ns-yht} REMOVED, using maksajatieto from 2.1.2 onwards
                      {:tag :ottamissuunnitelmatieto
                       :child [{:tag :Ottamissuunnitelma
                                :child [mapping-common/yksilointitieto
@@ -48,9 +48,9 @@
                                        {:tag :toimenpidealue :child [mapping-common/sijantiType]}
                                        ]}]}]}]}
 
+   {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_213}]}
    (mapping-common/sijaintitieto "yht")
    {:tag :koontiKentta}
-
    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}])
 
 (def maa-aines_to_krysp

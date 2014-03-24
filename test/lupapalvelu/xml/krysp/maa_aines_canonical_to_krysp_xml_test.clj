@@ -35,8 +35,8 @@
         (xml/get-text hakija [:puhelinnumero]) => "060222155"))
 
     (fact "maksaja"
-      (let [maksaja (xml/select1 lp-xml [:viranomaismaksujenSuorittaja])]
-       (xml/get-text maksaja [:puhelin]) => "121212"
+      (let [maksaja (xml/select1 lp-xml [:maksajatieto])]
+       (xml/get-text maksaja [:puhelinnumero]) => "121212"
        (xml/get-text maksaja [:henkilotunnus]) => "210281-9988"))
 
     (fact "sijainti"

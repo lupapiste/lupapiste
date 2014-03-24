@@ -8,7 +8,7 @@
 
 (def schema-version 1)
 
-(def maksaja (assoc henkilohakija :schema-info {:name "maksaja" :type "party" :version schema-version}))
+(def maksaja (assoc henkilohakija :schema-info {:name "ymp-maksaja" :type "party" :version schema-version}))
 
 (fact "Meta test: maksaja" maksaja => valid-against-current-schema?)
 
@@ -76,7 +76,6 @@
 
         hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq
         ]
-    ;(clojure.pprint/pprint hakemus)
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
@@ -99,16 +98,20 @@
        :puhelinnumero "060222155"
        :sahkopostiosoite "tew@gjr.fi"})
 
-    (fact "maksaja"
-      (:viranomaismaksujenSuorittaja hakemus)
-      =>
-      {:nimi {:sukunimi "Borga", :etunimi "Pekka"},
-       :puhelin "121212",
-       :sahkopostiosoite "pekka.borga@porvoo.fi"
-       :osoite {:osoitenimi {:teksti "Murskaajankatu 5"},
-                                      :postitoimipaikannimi "Kaivanto",
-                                      :postinumero "36570"}
-       :henkilotunnus "210281-9988"})
+
+    (facts "maksaja"
+      (let [maksaja (get-in maa-aineslupa [:maksajatieto :Maksaja]) => truthy
+            postiosoite (get-in maksaja [:osoitetieto :Osoite]) => truthy
+            osoitenimi (:osoitenimi postiosoite) => truthy]
+        (:teksti osoitenimi) => "Murskaajankatu 5"
+        (:postinumero postiosoite) => "36570"
+        (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:etunimi maksaja) => "Pekka"
+        (:sukunimi maksaja) => "Borga"
+        (:henkilotunnus maksaja) => "210281-9988"
+        (:sahkopostiosoite maksaja) => "pekka.borga@porvoo.fi"
+        (:puhelinnumero maksaja) => "121212"
+        (:laskuviite maksaja) => nil))
 
     (facts "sijainti"
       (fact "alueenKiinteistonSijainti"
