@@ -3,15 +3,16 @@
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
             [lupapalvelu.document.ymparistolupa-canonical-test :refer [application]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
-            ;[lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
+            [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
-            [sade.common-reader :as cr]
-            ))
+            [sade.common-reader :as cr]))
+
+(fact "2.1.2: :tag is set" (has-tag ymparistolupa_to_krysp) => true)
 
 (facts "Ymparistolupa type of permit to canonical and then to xml with schema validation"
 
@@ -22,28 +23,40 @@
 
     ;(println xml-s)
 
-    (validator/validate xml-s (:permitType application) "2.1.1") ; throws exception
+    (validator/validate xml-s (:permitType application) "2.1.2") ; throws exception
 
-    (xml/get-text lp-xml [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
-    (xml/get-text lp-xml [:toiminta :peruste]) => "Hankkeen peruste"
+    (fact "kiinteistotunnus"
+      (xml/get-text lp-xml [:laitoksentiedot :Laitos :kiinttun]) => (:propertyId application))
 
-    (let [hakijat (xml/select lp-xml [:hakija])]
-      (count hakijat) => 2
-      (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
-      (xml/get-text (second hakijat) [:liikeJaYhteisotunnus]) => "1060155-5")
+    (fact "kuvaus"
+      (xml/get-text lp-xml [:toiminta :kuvaus]) => "Hankkeen kuvauskentan sisalto"
+      (xml/get-text lp-xml [:toiminta :peruste]) => "Hankkeen peruste")
 
-    (let [luvat (xml/select lp-xml [:voimassaOlevatLuvat :lupa])]
-      (count luvat) => 2
-      (xml/get-text (first luvat) [:kuvaus]) => "lupapistetunnus"
-      (xml/get-text (second luvat) [:tunnistetieto]) => "kuntalupa-123")
+    (fact "hakijat"
+      (let [hakijat (xml/select lp-xml [:hakija])]
+       (count hakijat) => 2
+       (xml/get-text (first hakijat) [:sukunimi]) => "Borga"
+       (xml/get-text (second hakijat) [:yTunnus]) => "1060155-5"))
+
+    (fact "luvat"
+      (let [luvat (xml/select lp-xml [:voimassaOlevatLuvat :lupa])]
+       (count luvat) => 2
+       (xml/get-text (first luvat) [:kuvaus]) => "lupapistetunnus"
+       (xml/get-text (second luvat) [:tunnistetieto]) => "kuntalupa-123"))
 
 
-    (let [tiedot-sijainnista (xml/select1 lp-xml [:tiedotToiminnanSijainnista :TiedotToiminnanSijainnista])
+    (fact "sijainti"
+      (let [tiedot-sijainnista (xml/select1 lp-xml [:toiminnanSijaintitieto :ToiminnanSijainti])
             sijainti (xml/select1 tiedot-sijainnista [:sijaintitieto :Sijainti])
             osoite (xml/select1 sijainti :osoite)]
 
-        (xml/get-text tiedot-sijainnista :yksilointitieto) => (:propertyId application)
+        (xml/get-text tiedot-sijainnista :yksilointitieto) => (:id application)
         (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
-        (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274")
+        (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274"))
 
+    (fact "maksaja"
+      (let [maksaja (xml/select lp-xml [:maksajatieto :Maksaja])]
+        (fact "etunimi" (xml/get-text maksaja [:etunimi]) => "Pappa")
+        (fact "sukunimi" (xml/get-text maksaja [:sukunimi]) => "Betalare")
+        (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")))
     ))
