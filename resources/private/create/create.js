@@ -192,7 +192,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 11); } // original zoom 8
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); } // wmts zoom 11
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
