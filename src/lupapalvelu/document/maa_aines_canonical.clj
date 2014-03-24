@@ -25,6 +25,7 @@
       :maaAineslupaAsiatieto
       {:MaaAineslupaAsia
        {:yksilointitieto (:id application)
+        :kiinteistotunnus (:propertyId application)
         :alkuHetki (util/to-xml-datetime (:created application))
         :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :KasittelyTieto)
         :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))

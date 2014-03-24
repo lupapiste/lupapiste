@@ -10,6 +10,7 @@
   [mapping-common/yksilointitieto
    mapping-common/alkuHetki
    {:tag :kasittelytietotieto :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
+   {:tag :kiinteistotunnus}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    {:tag :lausuntotieto :child [mapping-common/lausunto_213]}
 

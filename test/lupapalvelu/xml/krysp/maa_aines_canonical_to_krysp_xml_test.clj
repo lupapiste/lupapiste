@@ -24,6 +24,9 @@
 
     (validator/validate xml-s (:permitType application) "2.1.2") ; throws exception
 
+    (fact "property id"
+      (xml/get-text lp-xml [:kiinteistotunnus])  => (:propertyId application))
+
     (fact "kuvaus in koontiKentta element"
       (xml/get-text lp-xml [:koontiKentta]) => "Hankkeen synopsis")
 

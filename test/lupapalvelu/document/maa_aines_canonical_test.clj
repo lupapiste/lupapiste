@@ -81,6 +81,9 @@
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
 
+    (fact "property id"
+      (:kiinteistotunnus maa-aineslupa) => "63844900010004")
+
     (fact "kuvaus"
       (:koontiKentta maa-aineslupa) => "Hankkeen synopsis")
 
