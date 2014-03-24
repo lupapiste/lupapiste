@@ -20,7 +20,7 @@
         {:Hakemus
          {:hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))
           ;ottamistoiminnanYhteyshenkilo ?
-          :alueenKiinteistonSijainti (sijainti application)
+          ;:alueenKiinteistonSijainti REMOVED, using only sijaintitieto
           ;ottamismaara ?
           ;paatoksenToimittaminen ?
           ; :viranomaismaksujenSuorittaja has been moved to maksajatieto
