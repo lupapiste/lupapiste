@@ -257,16 +257,17 @@
   {:sahkopostiosoite (-> yhteystiedot :email)
    :puhelin (-> yhteystiedot :puhelin)})
 
-(defn- get-simple-yritys [yritys]
-  {:nimi (-> yritys :yritysnimi)
-   :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus)})
+(defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
+  {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
-(defn- get-yritys-data [yritys]
-  (let [yhteystiedot (get-in yritys [:yhteyshenkilo :yhteystiedot])]
+(defn- get-yritys-data [{:keys [osoite yhteyshenkilo] :as yritys}]
+  (let [yhteystiedot (:yhteystiedot yhteyshenkilo)
+        postiosoite (get-simple-osoite osoite)]
     (merge (get-simple-yritys yritys)
-           {:postiosoite (get-simple-osoite (:osoite yritys))
-            :puhelin (-> yhteystiedot :puhelin)
-            :sahkopostiosoite (-> yhteystiedot :email)})))
+           {:postiosoite postiosoite ; - 2.1.4
+            :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
+            :puhelin (:puhelin yhteystiedot)
+            :sahkopostiosoite (:email yhteystiedot)})))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -341,7 +342,9 @@
         (when (-> suunnittelija :yritys :yritysnimi s/blank? not)
           {:yritys (merge
                      (get-simple-yritys (:yritys suunnittelija))
-                     {:postiosoite osoite})})))))
+                     {:postiosoite osoite ; - 2.1.4
+                      ; 2.1.5+
+                      :postiosoitetieto {:postiosoite osoite}})})))))
 
 (defn- get-designers [documents]
   (filter #(seq (:Suunnittelija %))

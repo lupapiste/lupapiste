@@ -448,7 +448,8 @@
 (defn- validate-minimal-company [company]
   (fact company => (contains {:nimi "Solita Oy" :liikeJaYhteisotunnus "1060155-5"}))
   ; postiosoite is required in KRYSP Rakennusvalvonta
-  (validate-address (:postiosoite company)))
+  (validate-address (:postiosoite company)) ; up to 2.1.4
+  (validate-address (get-in company [:postiosoitetieto :postiosoite]))) ; 2.1.5+
 
 (defn- validate-company [company]
   (validate-minimal-company company)

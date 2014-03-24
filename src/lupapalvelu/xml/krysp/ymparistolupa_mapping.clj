@@ -24,7 +24,7 @@
   [{:tag :kasittelytietotieto :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
    ; 0-n {:tag :valvontatapahtumattieto :child []}
-   {:tag :lausuntotieto :child [mapping-common/lausunto]}
+   {:tag :lausuntotieto :child [mapping-common/lausunto_213]}
    {:tag :hakija :child mapping-common/ymp-osapuoli-children}
    {:tag :toiminta
     :child [{:tag :peruste} ; string
@@ -34,7 +34,7 @@
    {:tag :voimassaOlevatLuvat
     :child [{:tag :luvat :child [{:tag :lupa :child [{:tag :tunnistetieto} ; string
                                                      {:tag :kuvaus} ; string
-                                                     {:tag :liite :child mapping-common/liite-children}]}]}
+                                                     {:tag :liite :child mapping-common/liite-children_213}]}]}
             {:tag :vakuutukset :child [{:tag :vakuutus :child [{:tag :vakuutusyhtio} ; string
                                                                {:tag :vakuutusnumero}]}]}]} ; string
 ;   {:tag :alueJaYmparisto :child [{:tag :kiinteistonLaitokset :child [{:tag :kiinteistorekisteritunnus} ; string
@@ -52,12 +52,12 @@
 
    {:tag :referenssiPiste :child [mapping-common/gml-point]}
    {:tag :koontiKentta} ; String
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}])
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}])
 
 (def ymparistolupa_to_krysp
   {:tag :Ymparistoluvat
    :ns "ymy"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ymparistoluvat" "2.1.1")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ymparistoluvat" "2.1.2")
                  :xmlns:ymy "http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
