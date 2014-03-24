@@ -122,7 +122,7 @@
           (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}))
 
       (fact "osoite"
-        (let [sijainti (-> maa-aineslupa :sijaintitieto :Sijainti) => truthy
+        (let [sijainti (-> maa-aineslupa :sijaintitieto first :Sijainti) => truthy
              osoite (:osoite sijainti)]
 
           (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
