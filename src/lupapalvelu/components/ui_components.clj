@@ -3,6 +3,7 @@
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
+            [lupapalvelu.xml.krysp.validator :as validator]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
@@ -26,8 +27,11 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
-(defn loc->js []
+(defn- loc->js []
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+
+(defn- schema-versions-by-permit-type []
+  (str ";LUPAPISTE.config.kryps = " (json/generate-string validator/supported-versions-by-permit-type) ";"))
 
 (def ui-components
   {;; 3rd party libs
@@ -189,7 +193,7 @@
                   :html ["index.html"]}
 
    :authority-admin {:depends [:common :authenticated :admins :mypage :user-menu :debug]
-                     :js ["admin.js"]
+                     :js ["admin.js" schema-versions-by-permit-type]
                      :html ["index.html" "admin.html"]}
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
