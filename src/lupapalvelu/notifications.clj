@@ -118,7 +118,7 @@
             application    (application-fn (:application command))
             command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
-            recipients     (recipients-fn command)
+            recipients     (remove ss/blank? (recipients-fn command))
             subject        (get-email-subject application (get conf :subject-key (name template-name)))
             model-fn       (get conf :model-fn create-app-model)
             model          (model-fn command conf)
