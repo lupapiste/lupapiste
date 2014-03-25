@@ -31,7 +31,7 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (defn- schema-versions-by-permit-type []
-  (str ";LUPAPISTE.config.kryps = " (json/generate-string validator/supported-versions-by-permit-type) ";"))
+  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-versions-by-permit-type) ";"))
 
 (def ui-components
   {;; 3rd party libs
