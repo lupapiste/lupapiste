@@ -148,6 +148,8 @@
 
 (def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
+(def ^:private common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
+
 (def ^:private common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
 
@@ -249,7 +251,6 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private common-ymparistolupa-schemas ["ymp-maksaja" "vesihuolto-kiinteisto"])
 (def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
@@ -474,7 +475,7 @@
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
-                                   :required ["maksaja" "vesihuolto-kiinteisto"]
+                                   :required ["maksaja" "rakennuspaikka"]
                                    :attachments []
                                    :link-permit-required false}
      :vvvl-vesijohdosta           {:schema "talousvedet"
