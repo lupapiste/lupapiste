@@ -1,9 +1,15 @@
 # Hei,
 
-Uusi kommentti lis&auml;tty keskusteluun: {{link-fi}}
+Uusi kommentti lis&auml;tty keskusteluun: 
+
+{{link-fi}}
+
+Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 ---
 
 # Hej,
 
-En ny kommentar har inkommit till diskusionet: {{link-sv}}
+En ny kommentar har inkommit till diskusionet: 
+
+{{link-sv}}
