@@ -70,6 +70,8 @@
       %)
     children))
 
+(defn in-yhteiset-ns [coll] (mapv (fn [m] (assoc m :ns "yht")) coll))
+
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
                       {:tag :kiinttun}
@@ -82,10 +84,9 @@
                                      {:tag :postitoimipaikannimi}])
 
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
-(def postiosoite-children-ns-yht (vec (map (fn [m] (assoc m :ns "yht")) postiosoite-children)))
+(def postiosoite-children-ns-yht (in-yhteiset-ns postiosoite-children))
 
-(def ^:private osoite {:tag :osoite  :ns "yht"
-                       :child postiosoite-children})
+(def ^:private osoite {:tag :osoite :ns "yht" :child postiosoite-children})
 
 (def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
 
@@ -160,7 +161,7 @@
                               {:tag :henkilotunnus}])
 
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
-(def henkilo-child-ns-yht (vec (map (fn [m] (assoc m :ns "yht")) henkilo-child)))
+(def henkilo-child-ns-yht (in-yhteiset-ns henkilo-child))
 
 (def yritys-child_211 [{:tag :nimi}
                    {:tag :liikeJaYhteisotunnus}
@@ -377,6 +378,30 @@
    {:tag :sahkopostiosoite}
    {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
    {:tag :liikeJaYhteisotunnus}])
+
+(def verkkolaskutus_213
+  {:tag :Verkkolaskutus
+   :ns "yht"
+   :child [{:tag :ovtTunnus}
+           {:tag :verkkolaskuTunnus}
+           {:tag :valittajaTunnus}]})
+
+(def yhteystietotype-children_213
+  (in-yhteiset-ns
+    [{:tag :henkilotunnus}
+     {:tag :sukunimi}
+     {:tag :etunimi}
+     {:tag :yTunnus}
+     {:tag :yrityksenNimi}
+     {:tag :yhteyshenkilonNimi}
+     {:tag :osoitetieto :child [{:tag :Osoite :child postiosoite-children}]}
+     {:tag :puhelinnumero}
+     {:tag :sahkopostiosoite}
+     {:tag :suoramarkkinointikielto}
+     {:tag :verkkolaskutustieto :child [verkkolaskutus_213]}]))
+
+(def maksajatype-children_213
+  (conj yhteystietotype-children_213 {:tag :laskuviite :ns "yht"}))
 
 (defn get-child-element [mapping path]
   (let [children (if (map? mapping) (:child mapping) mapping)]
