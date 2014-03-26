@@ -40,8 +40,8 @@ Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
 
-Add attachment to katselmus1
-  Open task  katselmus1
+Add attachment to Aloituskokous
+  Open task  Aloituskokous
   Click enabled by test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
@@ -50,14 +50,14 @@ Add attachment to katselmus1
   Unselect Frame
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
-katselmus1 requires action
+Aloituskokous requires action
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_authority_action"]  1
 
-Reject katselmus1
+Reject Aloituskokous
   Click enabled by test id  reject-task
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
 
-Approve katselmus1
+Approve Aloituskokous
   Click enabled by test id  approve-task
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
 
@@ -66,7 +66,7 @@ Return to listing
   Tab should be visible  tasks
 
 Delete Muu tarkastus
-  Open task  muu tarkastus
+  Open task  loppukatselmus
   Click enabled by test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 
@@ -78,7 +78,7 @@ Three buildings, all not started
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  3
 
 Start constructing the first building
-  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (893 turkistarhat) - 501 m²
+  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (039 muut asuinkerrostalot) - 2000 m²
   Click Element  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//a
   Wait Until  Element should be visible  modal-datepicker-date
   Input text by test id  modal-datepicker-date  1.1.2014

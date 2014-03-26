@@ -253,6 +253,10 @@
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
+(def maksaja (body
+               party
+               {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
 (def muutostapa {:name "muutostapa" :type :select :required true
@@ -287,6 +291,12 @@
                         {:name "saunaKytkin" :type :checkbox}
                         {:name "parvekeTaiTerassiKytkin" :type :checkbox}
                         {:name "lamminvesiKytkin" :type :checkbox}]}])
+
+(def huoneistot {:name "huoneistot"
+                 :type :group
+                 :repeating true
+                 :approvable true
+                 :body huoneisto})
 
 (def yhden-asunnon-talot "011 yhden asunnon talot")
 (def vapaa-ajan-asuinrakennus "041 vapaa-ajan asuinrakennukset")
@@ -369,7 +379,7 @@
                                   {:name talousrakennus}
                                   {:name "999 muualla luokittelemattomat rakennukset"}
                                   {:name "ei tiedossa"}])
-(def rakennuksen-tiedot [{:name "kaytto"
+(def rakennuksen-tiedot-ilman-huoneistoa [{:name "kaytto"
                           :type :group
                           :body [{:name "rakentajaTyyppi" :type :select :required true
                                   :body [{:name "liiketaloudellinen"}
@@ -472,12 +482,9 @@
                                           {:name "P1/P2"}
                                           {:name "P1/P3"}
                                           {:name "P2/P3"}
-                                          {:name "P1/P2/P3"}]}]}
-                         {:name "huoneistot"
-                          :type :group
-                          :repeating true
-                          :approvable true
-                          :body huoneisto}])
+                                          {:name "P1/P2/P3"}]}]}])
+
+(def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistot))
 
 
 (def rakennelma (body [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}] kuvaus))
@@ -521,6 +528,16 @@
                               rakennuksen-omistajat
                               full-osoite
                               rakennuksen-tiedot))
+
+(def olemassaoleva-rakennus-ei-huoneistoja (body
+                                             rakennuksen-valitsin
+                                             rakennuksen-omistajat
+                                             full-osoite
+                                             rakennuksen-tiedot-ilman-huoneistoa))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja (body
+                                               muutostyonlaji
+                                               olemassaoleva-rakennus-ei-huoneistoja))
 
 (def rakennuksen-muuttaminen (body
                                muutostyonlaji
@@ -603,7 +620,13 @@
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
-    {:info {:name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
+    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
+
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja)}
+
+   {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
 
     {:info {:name "rakennuksen-laajentaminen" :approvable true}
@@ -665,9 +688,7 @@
             :removable true
             :approvable true
             :type :party}
-     :body (body
-             party
-             {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
+     :body maksaja}
 
     {:info {:name "rakennuspaikka" :approvable true
             :order 2}

@@ -14,7 +14,7 @@
                                                      {:tag :luvanTunnistetiedot
                                                       :child [mapping-common/lupatunnus]}
                                                      {:tag :lausuntotieto
-                                                      :child [mapping-common/lausunto]}]}]}
+                                                      :child [mapping-common/lausunto_213]}]}]}
                                    {:tag :vapautushakemustieto :child []}
-                                   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}
+                                   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
                                    ]}])

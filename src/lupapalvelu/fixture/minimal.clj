@@ -66,7 +66,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :organizations ["753-R" "753-YA"]
+    :organizations ["753-R" "753-YA" "998-R-TESTI-2"]
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -376,8 +376,8 @@
                                  :ftpUser "dev_sipoo"}
                              :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
                              :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
-                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
-                             :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}}
+                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
+                             :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -524,8 +524,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "dev_sipoo"}}
+                     :krysp {:R {:url local-krysp, :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -541,8 +540,7 @@
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                     :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "dev_sipoo"}}
+                     :krysp {:R {:url local-krysp :version "2.1.2"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",

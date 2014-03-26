@@ -243,30 +243,30 @@
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
 
-(defn get-simple-osoite [osoite]
-  (when (-> osoite :katu)  ;; required field in krysp (i.e. "osoitenimi")
-    {:osoitenimi {:teksti (-> osoite :katu)}
-     :postitoimipaikannimi (-> osoite :postitoimipaikannimi)
-     :postinumero (-> osoite :postinumero)}))
+(defn get-simple-osoite [{:keys [katu postinumero postitoimipaikannimi] :as osoite}]
+  (when katu  ;; required field in krysp (i.e. "osoitenimi")
+    {:osoitenimi {:teksti katu}
+     :postitoimipaikannimi postitoimipaikannimi
+     :postinumero postinumero}))
 
 (defn- get-name [henkilotiedot]
-  {:nimi {:etunimi (-> henkilotiedot :etunimi)
-          :sukunimi (-> henkilotiedot :sukunimi)}})
+  {:nimi (select-keys henkilotiedot [:etunimi :sukunimi])})
 
 (defn- get-yhteystiedot-data [yhteystiedot]
   {:sahkopostiosoite (-> yhteystiedot :email)
    :puhelin (-> yhteystiedot :puhelin)})
 
-(defn- get-simple-yritys [yritys]
-  {:nimi (-> yritys :yritysnimi)
-   :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus)})
+(defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
+  {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
-(defn- get-yritys-data [yritys]
-  (let [yhteystiedot (get-in yritys [:yhteyshenkilo :yhteystiedot])]
+(defn- get-yritys-data [{:keys [osoite yhteyshenkilo] :as yritys}]
+  (let [yhteystiedot (:yhteystiedot yhteyshenkilo)
+        postiosoite (get-simple-osoite osoite)]
     (merge (get-simple-yritys yritys)
-           {:postiosoite (get-simple-osoite (:osoite yritys))
-            :puhelin (-> yhteystiedot :puhelin)
-            :sahkopostiosoite (-> yhteystiedot :email)})))
+           {:postiosoite postiosoite ; - 2.1.4
+            :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
+            :puhelin (:puhelin yhteystiedot)
+            :sahkopostiosoite (:email yhteystiedot)})))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -341,7 +341,9 @@
         (when (-> suunnittelija :yritys :yritysnimi s/blank? not)
           {:yritys (merge
                      (get-simple-yritys (:yritys suunnittelija))
-                     {:postiosoite osoite})})))))
+                     {:postiosoite osoite ; - 2.1.4
+                      ; 2.1.5+
+                      :postiosoitetieto {:postiosoite osoite}})})))))
 
 (defn- get-designers [documents]
   (filter #(seq (:Suunnittelija %))
@@ -499,6 +501,7 @@
                   :puhelin (-> henkilo :yhteystiedot :puhelin)
                    :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
 
+; TODO remove after 2.1.2 canonical is complete
 (defn ->ymp-osapuoli [unwrapped-party-doc]
   (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
     (let [yritys (-> unwrapped-party-doc :data :yritys)]
@@ -510,6 +513,48 @@
       {:nimi "Yksityishenkil\u00f6"
        :postiosoite (get-simple-osoite (:osoite henkilo))
        :yhteyshenkilo (get-henkilo henkilo)})))
+
+(defn get-yhteystiedot [unwrapped-party-doc]
+  (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
+    (let [yritys (-> unwrapped-party-doc :data :yritys)
+          {:keys [yhteyshenkilo osoite]} yritys
+          {:keys [etunimi sukunimi]} (:henkilotiedot yhteyshenkilo)
+          {:keys [puhelin email]} (:yhteystiedot yhteyshenkilo)
+          yhteyshenkilon-nimi (s/trim (str etunimi " " sukunimi))
+          osoite (get-simple-osoite (:osoite yritys))]
+      (not-empty
+        (assoc-when {}
+          :yTunnus (:liikeJaYhteisoTunnus yritys)
+          :yrityksenNimi (:yritysnimi yritys)
+          :yhteyshenkilonNimi (when-not (ss/blank? yhteyshenkilon-nimi) yhteyshenkilon-nimi)
+          :osoitetieto (when (seq osoite) {:Osoite osoite})
+          :puhelinnumero puhelin
+          :sahkopostiosoite email)))
+    (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
+      (let [{:keys [henkilotiedot osoite yhteystiedot]} henkilo
+            teksti (assoc-when {} :teksti (:katu osoite))
+            osoite (assoc-when {}
+                     :osoitenimi teksti
+                     :postinumero (:postinumero osoite)
+                     :postitoimipaikannimi (:postitoimipaikannimi osoite))]
+        (not-empty
+         (assoc-when {}
+           :henkilotunnus (:hetu henkilotiedot)
+           :sukunimi (:sukunimi henkilotiedot)
+           :etunimi (:etunimi henkilotiedot)
+           :osoitetieto (when (seq osoite) {:Osoite osoite})
+           :puhelinnumero (:puhelin yhteystiedot)
+           :sahkopostiosoite (:email yhteystiedot))))
+      )))
+
+(defn get-maksajatiedot [unwrapped-party-doc]
+  (merge
+    (get-yhteystiedot unwrapped-party-doc)
+    (not-empty
+      (assoc-when {}
+        :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
+        ; TODO
+        :verkkolaskutustieto nil))))
 
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
