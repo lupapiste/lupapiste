@@ -1,1 +1,0 @@
-integration.unavailable: Taustajärjestelmäsiirto ei ole käytettävissä.
