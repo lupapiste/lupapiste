@@ -378,10 +378,12 @@
             (when (empty? (:authority application))
               {:authority (user/summary user)}))}))
 
+(defn- organization-has-ftp-user? [organization application]
+  (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
+
 (defn- do-approve [application created id lang jatkoaika-app? do-rest-fn]
-  (let [organization (organization/get-organization (:organization application))
-        organization-has-ftp-user? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser])]
-    (if organization-has-ftp-user?
+  (let [organization (organization/get-organization (:organization application))]
+    (if (organization-has-ftp-user? organization application)
       (or
         (validate-link-permits application)
         (let [sent-file-ids (if jatkoaika-app?
@@ -886,7 +888,8 @@
         building      (or
                         (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
                         (fail! :error.unknown-building))]
-    (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user)
+    (when (organization-has-ftp-user? organization application)
+      (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user))
     (update-application command
       {:buildings {$elemMatch {:index (:index building)}}}
       {$set (merge app-updates {:buildings.$.constructionStarted timestamp
@@ -910,7 +913,8 @@
                        :state :closed}
         application   (merge application app-updates)
         organization  (organization/get-organization (:organization application))]
-    (mapping-to-krysp/save-application-as-krysp application lang application organization)
+    (when (organization-has-ftp-user? organization application)
+      (mapping-to-krysp/save-application-as-krysp application lang application organization))
     (update-application command {$set app-updates})
     (ok)))
 
