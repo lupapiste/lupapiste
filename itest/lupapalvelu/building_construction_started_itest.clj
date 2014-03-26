@@ -10,13 +10,11 @@
         application     (query-application sonja application-id)
         building-1     (-> application :buildings first) => truthy
 
-        _ (:state application) => "verdictGiven"
-
-        _ (command sonja :inform-building-construction-started
-            :id application-id
-            :buildingIndex (:index building-1)
-            :startedDate "1.1.2015"
-            :lang "fi") => ok?]
+        resp (command sonja :inform-building-construction-started
+               :id application-id
+               :buildingIndex (:index building-1)
+               :startedDate "1.1.2015"
+               :lang "fi")]
 
     (fact "Meta: organization has no ftpUser"
       (let [org (query admin :organization-by-id :organizationId (:organization application))
@@ -24,6 +22,15 @@
         org => truthy
         krysp-conf => truthy
         (:ftpUser krysp-conf) => nil))
+
+    (fact "Application state before :inform-building-construction-started was verdictGiven"
+      (:state application) => "verdictGiven")
+
+    (fact "inform-building-construction-started command succeeded"
+      resp => ok?)
+
+    (fact "XML file was not actually sent"
+      (:integrationAvailable resp) => false)
 
     (fact "State has changed to construction started"
       (:state (query-application sonja application-id)) => "constructionStarted")))

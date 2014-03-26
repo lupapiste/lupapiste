@@ -376,7 +376,8 @@
             app-updates
             attachments-argument
             (when (empty? (:authority application))
-              {:authority (user/summary user)}))}))
+              {:authority (user/summary user)}))})
+  (ok :integrationAvailable (not (nil? attachments-argument))))
 
 (defn- organization-has-ftp-user? [organization application]
   (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
@@ -885,10 +886,11 @@
                            :state  :constructionStarted}))
         application   (merge application app-updates)
         organization  (organization/get-organization (:organization application))
+        ftp-user?     (organization-has-ftp-user? organization application)
         building      (or
                         (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
                         (fail! :error.unknown-building))]
-    (when (organization-has-ftp-user? organization application)
+    (when ftp-user?
       (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user))
     (update-application command
       {:buildings {$elemMatch {:index (:index building)}}}
@@ -896,7 +898,7 @@
                                 :buildings.$.startedBy (select-keys user [:id :firstName :lastName])})})
     (when (= "verdictGiven" (:state application))
       (notifications/notify! :application-state-change command))
-    (ok)))
+    (ok :integrationAvailable ftp-user?)))
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
@@ -912,11 +914,12 @@
                        :closedBy (select-keys user [:id :firstName :lastName])
                        :state :closed}
         application   (merge application app-updates)
-        organization  (organization/get-organization (:organization application))]
-    (when (organization-has-ftp-user? organization application)
+        organization  (organization/get-organization (:organization application))
+        ftp-user?     (organization-has-ftp-user? organization application)]
+    (when ftp-user?
       (mapping-to-krysp/save-application-as-krysp application lang application organization))
     (update-application command {$set app-updates})
-    (ok)))
+    (ok :integrationAvailable ftp-user?)))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]
