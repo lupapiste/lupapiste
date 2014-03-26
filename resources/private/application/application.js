@@ -12,6 +12,7 @@
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
       {commandName         : "inform-construction-started",
+       checkIntegrationAvailability: true,
        dateParameter       : "startedTimestampStr",
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
@@ -31,6 +32,7 @@
   constructionStateChangeModel.openBuildingConstructionStartDialog = function(building) {
     constructionStateChangeModel.openWithConfig(
         {commandName         : "inform-building-construction-started",
+         checkIntegrationAvailability: true,
          dateParameter       : "startedDate",
          extraParameters     : {buildingIndex: building.index(), lang: loc.getCurrentLanguage()},
          dateSelectorLabel   : "building.constructionStarted.startedDate",
