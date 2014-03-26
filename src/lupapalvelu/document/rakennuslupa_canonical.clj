@@ -12,7 +12,7 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- get-huoneisto-data [huoneistot]
-  (for [huoneisto (vals huoneistot)
+  (for [huoneisto (vals (into (sorted-map) huoneistot))
         :let [tyyppi (:huoneistonTyyppi huoneisto)
               varusteet (:varusteet huoneisto)
               huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero)

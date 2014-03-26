@@ -651,7 +651,7 @@
                      (get-in [:data :huoneistot])
                      tools/unwrapped
                      get-huoneisto-data)
-        h2 (first huoneistot), h1 (last huoneistot)]
+        h2 (last huoneistot), h1 (first huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
     (fact "h1 huoneluku" (:huoneluku h1) => "66")
