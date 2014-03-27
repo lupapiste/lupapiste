@@ -4,14 +4,14 @@
            [lupapalvelu.document.tools :as tools]))
 
 
-(defn get-talousvedet [talousvedet]
+(defn- get-talousvedet [talousvedet]
   {:talousvedet
    {:hankinta (:hakinta talousvedet)
     :johdatus (:johdatus talousvedet)
     :riittavyys (:riittavyys talousvedet)}})
 
 
-(defn get-vapautus-kohde [{property-id :propertyId} documents]
+(defn- get-vapautus-kohde [{property-id :propertyId} documents]
     (let [kiinteisto (:data (first (:vesihuolto-kiinteisto documents)))]
       (merge {:kiinteistorekisteritunnus property-id
              :kiinteistonRakennusTieto
