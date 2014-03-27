@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application executed]]
+            [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]
@@ -29,6 +29,8 @@
 
 (defcommand create-statement-giver
   {:parameters [email text]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :notified   true
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]

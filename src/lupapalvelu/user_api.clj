@@ -11,7 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters]]
+            [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -182,6 +182,8 @@
 
 (defcommand create-user
   {:parameters [:email role]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)]
@@ -251,8 +253,10 @@
 
 (defcommand update-user-organization
   {:parameters       [operation email firstName lastName]
-   :roles            [:authorityAdmin]
-   :input-validators [valid-organization-operation? (partial non-blank-parameters [:email :firstName :lastName])]}
+   :input-validators [valid-organization-operation?
+                      (partial action/non-blank-parameters [:email :firstName :lastName])
+                      action/validate-email]
+   :roles            [:authorityAdmin]}
   [{caller :user}]
   (let [email            (ss/lower-case email)
         new-organization (first (:organizations caller))
@@ -296,6 +300,8 @@
 
 (defcommand reset-password
   {:parameters    [email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :notified      true
    :authenticated false}
   [_]
@@ -323,6 +329,8 @@
 
 (defcommand set-user-enabled
   {:parameters    [email enabled]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles         [:admin]}
   [_]
   (let [email (ss/lower-case email)
@@ -365,7 +373,7 @@
 (defcommand impersonate-authority
   {:parameters [organizationId password]
    :roles [:admin]
-   :input-validators [(partial non-blank-parameters [:organizationId])]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user}]
   (if (user/get-user-with-password (:username user) password)
@@ -382,6 +390,8 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
+   :input-validators [(partial action/non-blank-parameters [:email :password])
+                      action/validate-email]
    :verified   true}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
