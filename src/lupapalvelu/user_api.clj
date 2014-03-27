@@ -43,6 +43,12 @@
                                                   data))
                                      (user/find-users)))))
 
+(env/in-dev
+  (defquery user-by-email
+    {:parameters [email] :roles [:admin]}
+    [_]
+    (ok :user (user/get-user-by-email email))))
+
 (defcommand users-for-datatables
   {:roles [:admin :authorityAdmin]}
   [{caller :user {params :params} :data}]
@@ -260,14 +266,14 @@
   [{caller :user}]
   (let [email            (ss/lower-case email)
         new-organization (first (:organizations caller))
-        update-count     (mongo/update-n :users {:email email}
+        update-count     (mongo/update-n :users {:email email, :role "authority"}
                            {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
     (debug "update user" email)
     (if (pos? update-count)
       (ok :operation operation)
-      (if (= operation "add")
+      (if (and (= operation "add") (not (user/get-user-by-email email)))
         (create-authority-user-with-organization caller new-organization email firstName lastName)
-        (fail :not-found :email email)))))
+        (fail :error.user-not-found)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
