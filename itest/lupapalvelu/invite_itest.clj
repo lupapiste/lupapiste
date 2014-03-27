@@ -28,11 +28,17 @@
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija")) => truthy
         paasuunnittelija-doc (:id (domain/get-document-by-name app "paasuunnittelija")) => truthy]
 
+    (facts "email is validated"
+      (fact "Empty email is rejected"
+        (:text (invite mikko id suunnittelija-doc "")) => "error.missing-parameters")
+      (fact "Email contains whitespace"
+        (:text (invite mikko id suunnittelija-doc "juha jokimaki@solita.fi")) => "error.email")
+      (fact "Email contains non-ascii chars"
+        (:text (invite mikko id suunnittelija-doc "juha.jokim\u00e4ki@solita.fi")) => "error.email"))
+
     (fact "Teppo must not be able to invite himself!"
       (invite teppo id suunnittelija-doc (email-for-key teppo)) => unauthorized?)
 
-    (fact "Empty email is rejected"
-      (:text (invite mikko id suunnittelija-doc "")) => "error.missing-parameters")
 
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
