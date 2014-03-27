@@ -29,7 +29,7 @@
         paasuunnittelija-doc (:id (domain/get-document-by-name app "paasuunnittelija")) => truthy]
 
     (fact "Teppo must not be able to invite himself!"
-      (invite teppo id suunnittelija-doc "teppo@example.com") => unauthorized?)
+      (invite teppo id suunnittelija-doc (email-for-key teppo)) => unauthorized?)
 
     (fact "Empty email is rejected"
       (:text (invite mikko id suunnittelija-doc "")) => "error.missing-parameters")
@@ -37,25 +37,25 @@
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
 
-      (invite mikko id suunnittelija-doc "teppo@example.com") => ok?
+      (invite mikko id suunnittelija-doc (email-for-key teppo)) => ok?
 
       (count (:invites (query teppo :invites))) => 1
 
       (let [email (last-email)]
         email => (partial contains-application-link? id)
-        (:to email) => "teppo@example.com"
+        (:to email) => (email-for-key teppo)
         (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id id :email "teppo@example.com") => unauthorized?
+      (command sonja :remove-auth :id id :email (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko must be able to uninvite Teppo!"
-      (command mikko :remove-auth :id id :email "teppo@example.com") => ok?
+      (command mikko :remove-auth :id id :email (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Mikko must be able to re-invite Teppo!"
-      (invite mikko id suunnittelija-doc "teppo@example.com") => ok?
+      (invite mikko id suunnittelija-doc (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Teppo must be able to decline invitation!"
@@ -63,16 +63,27 @@
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Mikko must NOT be able to accept Teppo's invite"
-      (invite mikko id suunnittelija-doc "teppo@example.com") => ok?
-      (command mikko :approve-invite :id id :email "teppo@example.com")
+      (invite mikko id suunnittelija-doc (email-for-key teppo)) => ok?
+      (command mikko :approve-invite :id id :email (email-for-key teppo))
       (count (:invites (query teppo :invites))) => 1)
+
+    (fact "Mikko submits"
+      (command mikko :submit-application :id id) => ok?)
+
+    (last-email) ; Inbox zero
+
+    (fact "Sonja adds comment, only Mikko gets email"
+      (comment-application id sonja false)
+      (let [emails (sent-emails)]
+        (count emails) => 1
+        (:to (first emails)) => (email-for-key mikko)))
 
     (fact "Teppo must be able to accept Teppo's invite"
       (command teppo :approve-invite :id id) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text "teppo@example.com" :target "application" :openApplication true) => ok?)
+      (command teppo :add-comment :id id :text (email-for-key teppo) :target "application" :openApplication true) => ok?)
 
     (let [actions (:actions (query teppo :allowed-actions :id id))]
       (fact "Teppo should be able to do stuff."
@@ -81,7 +92,7 @@
         (-> actions :cancel-application :ok) => true))
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)
+      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?)
 
     (fact "Pena is inveted to a deleted doc"
       (invite mikko id paasuunnittelija-doc (email-for "pena")) => ok?
@@ -103,23 +114,23 @@
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
 
     (fact "Sonja must be able to invite Teppo!"
-      (invite sonja id suunnittelija-doc "teppo@example.com") => ok?
+      (invite sonja id suunnittelija-doc (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Sonja must be able to uninvite Teppo!"
-      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?
+      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Reinvite & accept"
-      (invite sonja id suunnittelija-doc "teppo@example.com") => ok?
+      (invite sonja id suunnittelija-doc (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 1
       (command teppo :approve-invite :id id) => ok?)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => ok?)
+      (command teppo :add-comment :id id :text (email-for-key teppo) :target "application") => ok?)
 
     (fact "Teppo must be able to invite another designer, Mikko!"
       (invite teppo id suunnittelija-doc "mikko@example.com") => ok?)
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)))
+      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?)))
