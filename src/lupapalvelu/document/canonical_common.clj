@@ -476,7 +476,6 @@
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
            :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
-           :a (println  (keyword (:state application) ))
            :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
            :kasittelija (let [handler (:authority application)]
                           (if (seq handler)

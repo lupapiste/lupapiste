@@ -11,18 +11,18 @@
     :riittavyys (:riittavyys talousvedet)}})
 
 
-(defn get-vapautus-kohde [{property-id :PropertyId} documents]
-    (let [kiinteisto (first (:vesihuolto-kiinteisto documents))]
+(defn get-vapautus-kohde [{property-id :propertyId} documents]
+    (let [kiinteisto (:data (first (:vesihuolto-kiinteisto documents)))]
       (merge {:kiinteistorekisteritunnus property-id
              :kiinteistonRakennusTieto
-             (for [rakennus (:kiinteistoonKuuluu (:vesihuolto-kiinteisto documents))]
-               {:KiinteistonRakennus
-                {:kayttotarkoitustieto (:rakennuksenTyypi rakennus)
-                 :kohteenVarustelutaso (map (fn [[k v]] (when v (name k))) (:kohteenVarustelutaso rakennus))
-                 :vapautus (true? (:vapautus rakennus))}})}
-             {:hulevedet (:hulevedet (first (:hulevedet documents)))}
-             (get-talousvedet (first (:talousvedet documents)))
-             {:jatevedet (:kuvaus (first (:jatevedet documents)))})))
+             (for [[_ rakennus] (sort (:kiinteistoonKuuluu kiinteisto))]
+               (let [kohteenVarustelutaso (remove nil? (map (fn [[k v]] (when v (name k))) (:kohteenVarustelutaso rakennus)))] {:KiinteistonRakennus
+                               {:kayttotarkoitustieto (:rakennuksenTyypi rakennus)
+                                :kohteenVarustelutaso (not-empty kohteenVarustelutaso)
+                                :haetaanVapautustaKytkin (true? (:vapautus rakennus))}}))}
+             {:hulevedet (:hulevedet (:data (first (:hulevedet documents))))}
+             (get-talousvedet (:data (first (:talousvedet documents))))
+             {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))})))
 
 (defn vapautus-canonical [application lang]
   (let [application (tools/unwrapped application)
@@ -37,10 +37,11 @@
         :vapautusperuste ""
         :vapautushakemustieto
         {:Vapautushakemus
-         {:hakija (get-henkilo (first (:hakija documents)))
-          :kohde (get-vapautus-kohde application documents)}}
-        :sijaintitieto (get-sijaintitieto application)
+         {:hakija (get-henkilo (:henkilo (:data (first (:hakija documents)))))
+          :kohde (get-vapautus-kohde application documents)
+          :sijaintitieto (get-sijaintitieto application)}}
 
-        :asianKuvaus (:kuvaus (first (:hankkeen-kuvaus-vesihuolto documents)))
+
+        :asianKuvaus (:kuvaus (:data (first (:hankkeen-kuvaus-vesihuolto documents))))
         }}}})
   )
