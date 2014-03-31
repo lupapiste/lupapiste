@@ -38,7 +38,8 @@
         organization    (mongo/select-one :organizations {:_id organization-id})
         email           (ss/lower-case email)
         statement-giver-id (mongo/create-id)]
-    (with-user-by-email email
+    (if-let [user (user/get-user-by-email email)]
+      (do
       (when-not (user/authority? user) (fail! :error.not-authority))
       (mongo/update
         :organizations
@@ -48,7 +49,8 @@
                                    :email email
                                    :name (str (:firstName user) " " (:lastName user))}}})
       (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
-      (ok :id statement-giver-id))))
+        (ok :id statement-giver-id))
+      (fail :error.user-not-found))))
 
 (defcommand delete-statement-giver
   {:parameters [personId]
