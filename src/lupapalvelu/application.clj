@@ -12,7 +12,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -177,13 +177,14 @@
 
 (defcommand invite
   {:parameters [id email title text documentName documentId path]
-   :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)
    :verified   true}
   [{:keys [created user application] :as command}]
-  (let [email (ss/lower-case email)]
+  (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
       (let [invited (user-api/get-or-create-user-by-email email)
@@ -235,6 +236,8 @@
 
 (defcommand remove-auth
   {:parameters [:id email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))
@@ -596,7 +599,7 @@
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :notified   true ; OIR
-   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+   :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
@@ -667,7 +670,7 @@
   {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed :submitted]
-   :input-validators [(partial non-blank-parameters [:address])
+   :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
   [{:keys [created application] :as command}]
@@ -744,7 +747,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :pre-checks [validate-jatkolupa-zero-link-permits]
-   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+   :input-validators [(partial action/non-blank-parameters [:linkPermitId])]}
   [{application :application}]
   (do-add-link-permit application linkPermitId))
 
@@ -861,7 +864,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
+   :input-validators [(partial action/non-blank-parameters [:startedTimestampStr])]}
   [{:keys [user created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:modified created
@@ -876,7 +879,7 @@
    :states     [:verdictGiven :constructionStarted]
    :notified   true
    :pre-checks [(permit/validate-permit-type-is permit/R)]
-   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
+   :input-validators [(partial action/non-blank-parameters [:buildingIndex :startedDate :lang])]}
   [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string startedDate)
         app-updates   (merge
@@ -906,7 +909,7 @@
    :states     [:constructionStarted]
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
+   :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
   [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates   {:modified created
