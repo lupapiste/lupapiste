@@ -250,11 +250,11 @@
                  kohteenVarustelutaso_count (count kohteenVarustelutaso) => 6
                  vss (set kohteenVarustelutaso)
                  has_Astianpesukone (vss "Astianpesukone") => truthy
-                 has_Lamminvesivaraaja (vss "Lämminvesivaraaja") => truthy
+                 has_Lamminvesivaraaja (vss "L\u00e4mminvesivaraaja") => truthy
                  has_Pyykinpesukone (vss "Pyykinpesukone") => truthy
                  has_Suihku (vss "Suihku") => truthy
                  hasTiskiallas (vss "Tiskiallas") => truthy
-                 has_WC (vss "WC(vesikäymälä)") => truthy
+                 has_WC (vss "WC(vesik\u00e4ym\u00e4l\u00e4)") => truthy
                  haetaanVapautustaKytkin (:haetaanVapautustaKytkin KiinteistonRakennus) => true?
 
                  kr2 (nth kiinteistonRakennusTieto 1) => truthy
@@ -271,7 +271,7 @@
                  kohteenVarustelutaso (:kohteenVarustelutaso KiinteistonRakennus) => truthy
                  kohteenVarustelutaso_count (count kohteenVarustelutaso) => 1
                  vss (set kohteenVarustelutaso)
-                 has_Kuivakaymala (vss "Kuivakäymälä") => truthy
+                 has_Kuivakaymala (vss "Kuivak\u00e4ym\u00e4l\u00e4") => truthy
                  has_Suihku (vss "Suihku") => nil
                  haetaanVapautustaKytkin (:haetaanVapautustaKytkin KiinteistonRakennus) => false
                  sijaintitieto (:sijaintitieto Vapautushakemus) => truthy

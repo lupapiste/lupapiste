@@ -49,9 +49,9 @@
            :repeating false
            }
     :body [{:name "hulevedet" :type :select :other-key "johdetaanMuualle"
-            :body [{:name "Johdetaan muualle, minne"}
-                   {:name "Johdetaan rajaojaan tai muuhun ojaan"}
-                   {:name "imeytet\u00e4\u00e4n maaper\u00e4\u00e4n"}]}
+            :body [{:name "muualle"}
+                   {:name "ojaan"}
+                   {:name "imeytetaan"}]}
            {:name "johdetaanMuualle" :type :string :size "l"}]}
    {:info {:name "talousvedet"
            :approvable false

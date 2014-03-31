@@ -21,6 +21,7 @@
              xml-s     (indent-str krysp-xml)
              lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
 
-         (println xml-s)
+         ;(clojure.pprint/pprint canonical)
+         ;(println xml-s)
 
          (validator/validate xml-s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.2")))

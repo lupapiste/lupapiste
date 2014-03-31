@@ -35,7 +35,14 @@
                                                                                            :child [{:tag :kayttotarkoitus}
                                                                                                    {:tag :muu}]}
                                                                                           {:tag :kohteenVarustelutaso}
-                                                                                          {:tag :haetaanVapautustaKytkin}]}]}]}
+                                                                                          {:tag :haetaanVapautustaKytkin}]}]}
+                                                                                 {:tag :hulevedet}
+                                                                                 {:tag :talousvedetPOISTATAMA
+                                                                                  :child
+                                                                                  [{:tag :hankinta}
+                                                                                   {:tag :johdatus}
+                                                                                   {:tag :riittavyys}]}
+                                                                                 {:tag :jatevedet}]}
                                                                (mapping-common/sijaintitieto "yht")]}]}
                                              {:tag :liitetieto
                                               :child [{:tag :Liite :child mapping-common/liite-children_213}]}

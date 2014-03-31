@@ -11,13 +11,23 @@
     :johdatus (:johdatus talousvedet)
     :riittavyys (:riittavyys talousvedet)}})
 
-(def varuste->krysp-varuste {:Lamminvesivaraaja "Lämminvesivaraaja"
-                             :Kuivakaymala "Kuivakäymälä"
-                             :WC "WC(vesikäymälä)"})
+(def varuste->krysp-varuste {:Lamminvesivaraaja "L\u00e4mminvesivaraaja"
+                             :Kuivakaymala "Kuivak\u00e4ym\u00e4l\u00e4"
+                             :WC "WC(vesik\u00e4ym\u00e4l\u00e4)"})
 
 (defn get-varuste-as-krysp [varuste]
   (or (varuste varuste->krysp-varuste)
       (name varuste)))
+
+
+(def hulevesi->krysp-hulevesi
+  {:ojaan "johdetaan rajaojaan tai muuhun ojaan"
+   :muualle
+   :imeytetaan "imeytetään maaperään"})
+
+(defn hulevedet [hulevesi]
+  (:or (:hulevesi hulevesi->krysp-hulevesi)
+       hulevesi))
 
 (defn- get-vapautus-kohde [{property-id :propertyId} documents]
     (let [kiinteisto (:data (first (:vesihuolto-kiinteisto documents)))]
@@ -28,7 +38,7 @@
                                {:kayttotarkoitustieto {:kayttotarkoitus (lower-case (:rakennuksenTyypi rakennus))}
                                 :kohteenVarustelutaso (not-empty kohteenVarustelutaso)
                                 :haetaanVapautustaKytkin (true? (:vapautus rakennus))}}))}
-             {:hulevedet (:hulevedet (:data (first (:hulevedet documents))))}
+             {:hulevedet (:hulevedet (hulevedet (:data (first (:hulevedet documents)))))}
              (get-talousvedet (:data (first (:talousvedet documents))))
              {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))})))
 
