@@ -1,6 +1,10 @@
 # Hei,
 
-P&auml;&auml;t&ouml;s annettu hakemukseen {{link-fi}}
+P&auml;&auml;t&ouml;s annettu hakemukseen 
+
+{{link-fi}}
+
+Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 ---
 

@@ -38,6 +38,7 @@
                            (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
                            auth)
         auth-user-emails (->> included-users
+                           (remove :invite) ; filters out users that have not accepted invite
                            (filter (fn [user] (not-any? #(= (:role user) %) excluded-roles)))
                            (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
     (if (some #(= "statementGiver" %) excluded-roles)
