@@ -192,7 +192,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); } // wmts zoom 11
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
@@ -210,11 +210,11 @@
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
       [{kind: "address"}, comp(fillAddress, self.searchNow)],
-      [{kind: "address", type: "street"}, zoomer(10)],  // wmts zoom 13
-      [{kind: "address", type: "street-city"}, zoomer(10)],  // wmts zoom 13
-      [{kind: "address", type: "street-number"}, zoomer(11)],   // wmts zoom 14
-      [{kind: "address", type: "street-number-city"}, zoomer(11)],  // wmts zoom 14
-      [{kind: "property-id"}, comp(zoomer(12), self.searchNow)]  // wmts zoom 14
+      [{kind: "address", type: "street"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
+      [{kind: "address", type: "street-city"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
+      [{kind: "address", type: "street-number"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
+      [{kind: "address", type: "street-number-city"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
+      [{kind: "property-id"}, comp(zoomer(features.enabled("use-wmts-map") ? 14 : 12), self.searchNow)]
     ];
 
     var renderers = [
@@ -267,7 +267,7 @@
             self
               .useManualEntry(false)
               .setXY(x, y)
-              .center(x, y, 11)  // wmts zoom 14
+              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
@@ -285,7 +285,7 @@
             self
               .useManualEntry(false)
               .setXY(x, y)
-              .center(x, y, 11)  // wmts zoom 14
+              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .propertyId(id)
               .beginUpdateRequest()
               .searchAddress(x, y);
