@@ -231,10 +231,10 @@
                  vapautushakemustieto (:vapautushakemustieto Vapautus) => truthy
                  Vapautushakemus (:Vapautushakemus vapautushakemustieto) => truthy
                  haetaan (:haetaan Vapautushakemus) => nil
-                 hakija (:hakija Vapautushakemus) => truthy
-                 nimi (:nimi hakija) => truthy
-                 etunimi (:etunimi nimi) => "Pena"
-                 sukunimi (:sukunimi nimi) => "Panaani"
+                 hakija (first (:hakija Vapautushakemus)) => truthy
+                 _ (clojure.pprint/pprint hakija)
+                 etunimi (:etunimi hakija) => "Pena"
+                 sukunimi (:sukunimi hakija) => "Panaani"
                  henkilotunnus (:henkilotunnus hakija) => "210281-9988"
 
                  kohde (:kohde Vapautushakemus) => truthy
@@ -277,7 +277,6 @@
                  sijaintitieto (:sijaintitieto Vapautushakemus) => truthy
                  s1 (first sijaintitieto) => truthy
                  Sijainti (:Sijainti s1) => truthy
-
                  asianKuvaus (:asianKuvaus Vapautus) => "Uudehko talo, jonka rakentamisen yhteydess\u00e4 tehty porakaivo ja pienpuhdistamo, josta j\u00e4tevedet johdetaan pois pohjaveden valuma-alueeta."
 
 ]))

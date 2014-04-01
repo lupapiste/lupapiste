@@ -5,9 +5,6 @@
     [lupapalvelu.permit :as permit]
     [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]))
 
-; :xsi:schemaLocation (mapping-common/schemalocation "ymparisto/vesihuoltolaki" "2.1.1")
-
-
 (def vesihuolto-to-krysp {:tag :Vesihuoltolaki :ns "ymv"
                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/vesihuoltolaki" "2.1.2")
                                         :xmlns:ymv "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"}
@@ -26,7 +23,7 @@
                                              {:tag :vapautushakemustieto
                                               :child [{:tag :Vapautushakemus
                                                        :child [{:tag :hakija
-                                                                :child mapping-common/henkilo-child-ns-yht}
+                                                                :child mapping-common/yhteystietotype-children_213}
                                                                {:tag :kohde
                                                                 :child [{:tag :kiinteistorekisteritunnus}
                                                                         {:tag :kiinteistonRakennusTieto
@@ -37,7 +34,7 @@
                                                                                           {:tag :kohteenVarustelutaso}
                                                                                           {:tag :haetaanVapautustaKytkin}]}]}
                                                                                  {:tag :hulevedet}
-                                                                                 {:tag :talousvedetPOISTATAMA
+                                                                                 {:tag :talousvedet
                                                                                   :child
                                                                                   [{:tag :hankinta}
                                                                                    {:tag :johdatus}

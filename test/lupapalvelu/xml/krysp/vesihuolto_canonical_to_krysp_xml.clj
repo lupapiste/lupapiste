@@ -24,4 +24,4 @@
          ;(clojure.pprint/pprint canonical)
          ;(println xml-s)
 
-         (validator/validate xml-s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.2")))
+         (validator/validate xml-s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.3")))

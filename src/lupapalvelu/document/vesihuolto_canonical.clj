@@ -22,8 +22,7 @@
 
 (def hulevesi->krysp-hulevesi
   {:ojaan "johdetaan rajaojaan tai muuhun ojaan"
-   :muualle
-   :imeytetaan "imeytetään maaperään"})
+   :imeytetaan "imeytet\u00e4\u00e4n maaper\u00e4\u00e4n"})
 
 (defn hulevedet [hulevesi]
   (:or (:hulevesi hulevesi->krysp-hulevesi)
@@ -42,6 +41,11 @@
              (get-talousvedet (:data (first (:talousvedet documents))))
              {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))})))
 
+(defn- hakija [hakijat]
+  ;(clojure.pprint/pprint hakijat)
+  (assert (= 1 (count hakijat)))
+  (->ymp-osapuoli (first hakijat)))
+
 (defn vapautus-canonical [application lang]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)]
@@ -55,7 +59,7 @@
         :vapautusperuste ""
         :vapautushakemustieto
         {:Vapautushakemus
-         {:hakija (get-henkilo (:henkilo (:data (first (:hakija documents)))))
+         {:hakija (remove nil? (map get-yhteystiedot (:hakija documents)))
           :kohde (get-vapautus-kohde application documents)
           :sijaintitieto (get-sijaintitieto application)}}
         :asianKuvaus (:kuvaus (:data (first (:hankkeen-kuvaus-vesihuolto documents))))
