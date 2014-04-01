@@ -7,7 +7,9 @@
 
 (defn- get-talousvedet [talousvedet]
   {:talousvedet
-   {:hankinta (:hakinta talousvedet)
+   {:hankinta (or (when (:muualta talousvedet)
+                    {:muu (:muualta talousvedet)})
+                  {:hankinta (lower-case (:hankinta talousvedet))})
     :johdatus (:johdatus talousvedet)
     :riittavyys (:riittavyys talousvedet)}})
 

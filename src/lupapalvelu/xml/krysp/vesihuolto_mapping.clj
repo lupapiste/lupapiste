@@ -36,7 +36,9 @@
                                                                                  {:tag :hulevedet}
                                                                                  {:tag :talousvedet
                                                                                   :child
-                                                                                  [{:tag :hankinta}
+                                                                                  [{:tag :hankinta
+                                                                                    :child [{:tag :muu}
+                                                                                            {:tag :hankinta}]}
                                                                                    {:tag :johdatus}
                                                                                    {:tag :riittavyys}]}
                                                                                  {:tag :jatevedet}]}

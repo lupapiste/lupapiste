@@ -232,7 +232,6 @@
                  Vapautushakemus (:Vapautushakemus vapautushakemustieto) => truthy
                  haetaan (:haetaan Vapautushakemus) => nil
                  hakija (first (:hakija Vapautushakemus)) => truthy
-                 _ (clojure.pprint/pprint hakija)
                  etunimi (:etunimi hakija) => "Pena"
                  sukunimi (:sukunimi hakija) => "Panaani"
                  henkilotunnus (:henkilotunnus hakija) => "210281-9988"
@@ -278,6 +277,12 @@
                  s1 (first sijaintitieto) => truthy
                  Sijainti (:Sijainti s1) => truthy
                  asianKuvaus (:asianKuvaus Vapautus) => "Uudehko talo, jonka rakentamisen yhteydess\u00e4 tehty porakaivo ja pienpuhdistamo, josta j\u00e4tevedet johdetaan pois pohjaveden valuma-alueeta."
+
+                 talousvedet (:talousvedet kohde) => truthy
+                 hankinta (:hankinta talousvedet) => truthy
+                 hankinta (:hankinta hankinta) => "Kiinteist\u00f6n porakaivosta"
+
+                 jatevedet (:jatevedet kohde) => "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."
 
 ]))
 

@@ -12,7 +12,7 @@
             [sade.xml :as xml]
             [sade.common-reader :as cr]))
 
-(fact "2.1.2: :tag is set" (has-tag vesihuolto-to-krysp) => true)
+(fact "2.1.3: :tag is set" (has-tag vesihuolto-to-krysp) => true)
 
 (facts "Vesilupalupa type of permit to canonical and then to xml with schema validation"
 
