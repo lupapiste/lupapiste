@@ -39,9 +39,9 @@
 
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
-  (if (re-matches #"^LP-\d{3}-\d{4}-\d{5}$" filter-search) ;LP-753-2014-00001
-    {:_id filter-search}
-    {:address {$regex filter-search $options "i"}}))
+  (cond
+    (re-matches #"^LP-\d{3}-\d{4}-\d{5}$" filter-search) {:_id filter-search}
+    :else {:address {$regex filter-search $options "i"}}))
 
 (defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
   (merge
