@@ -322,3 +322,7 @@
 (defmigration mal-organization-krysp-212
   {:apply-when (pos? (mongo/count :organizations {"krysp.MAL.version" "2.1.1"}))}
   (update-krysp-version-for-all-orgs "MAL" "2.1.1" "2.1.2"))
+
+(defmigration vvvl-organization-krysp-213
+  {:apply-when (pos? (mongo/count :organizations {"krysp.VVVL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "VVVL" "2.1.1" "2.1.3"))
