@@ -293,6 +293,38 @@
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
+
+(defn getcapabilities [request]
+  (let [{:keys [host path]} (env/value :geoserver :wms)
+        wms-url (str host path)]
+    (:body (http/get wms-url
+             {:query-params {"version" "1.1.1"
+                             "request" "GetCapabilities"}
+              :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
+
+(defn startparse-sax-non-validating [s ch]
+  (.. (doto (. javax.xml.parsers.SAXParserFactory (newInstance))
+        (.setValidating false)
+        (.setFeature "http://apache.org/xml/features/nonvalidating/load-dtd-grammar" false)
+        (.setFeature "http://apache.org/xml/features/nonvalidating/load-external-dtd" false)
+        (.setFeature "http://xml.org/sax/features/validation" false)
+        (.setFeature "http://xml.org/sax/features/external-general-entities" false)
+        (.setFeature "http://xml.org/sax/features/external-parameter-entities" false))
+    
+    (newSAXParser) (parse s ch)))
+
+(defn capabilities-to-layers [capabilities]
+  (when capabilities
+    (let [caps (zip/xml-zip 
+                 (xml/parse 
+                   (java.io.ByteArrayInputStream.
+                     (.getBytes capabilities)
+                     ) startparse-sax-non-validating))]
+      (xml-> caps :Capability :Layer :Layer))))
+
+(defn layer-to-name [layer]
+  (first (xml-> layer :Name text)))
+
 ;;
 ;; Raster images:
 ;;
