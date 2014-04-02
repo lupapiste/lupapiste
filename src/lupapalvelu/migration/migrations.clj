@@ -322,3 +322,23 @@
 (defmigration mal-organization-krysp-212
   {:apply-when (pos? (mongo/count :organizations {"krysp.MAL.version" "2.1.1"}))}
   (update-krysp-version-for-all-orgs "MAL" "2.1.1" "2.1.2"))
+
+
+(defn- convert-neighbors [orig-neighbors]
+  (if-not (empty? orig-neighbors)
+    (for [[k v] orig-neighbors
+            :let [propertyId (-> v :neighbor :propertyId)
+                  owner (-> v :neighbor :owner)
+                  status (-> v :status)]]
+        {:id (name k)
+         :propertyId propertyId
+         :status status
+         :owner owner})
+    []))
+
+(defmigration neighbors-to-sequable
+  (doseq [application (mongo/select :applications {} {:neighbors 1})]
+    (mongo/update-by-id :applications (:id application)
+      {$set {:neighbors (convert-neighbors (:neighbors application))}})))
+
+
