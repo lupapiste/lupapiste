@@ -5,6 +5,7 @@
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.user :refer [applicant?]]
             [lupapalvelu.application-meta-fields :as meta-fields]))
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
@@ -36,18 +37,19 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} {role :role}]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
   (merge
     query
     (case filter-kind
       "applications" {:infoRequest false}
       "inforequests" {:infoRequest true}
-      "both"         nil)
-    (case filter-state
-      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-      "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-      "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
-      "canceled"          {:state "canceled"})
+      nil) ; defaults to both
+    (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
+      (case filter-state
+       "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
+       "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+       "canceled"          {:state "canceled"}
+       all))
     (when-not (contains? #{nil "0"} filter-user)
       {$or [{"auth.id" filter-user}
             {"authority.id" filter-user}]})

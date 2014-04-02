@@ -12,13 +12,13 @@
     (facts "by address"
 
       (fact "no matches"
-        (let [results0 (datatables mikko :applications-for-datatables :params {:filter-kind "applications" :filter-state "all" :filter-search "hakukatu"})]
+        (let [results0 (datatables mikko :applications-for-datatables :params {:filter-search "hakukatu"})]
           results0 => ok?
           (get-in results0 [:data :iTotalDisplayRecords]) => 0
           (count (get-in results0 [:data :aaData])) => 0))
 
       (fact "one match"
-        (let [results1 (datatables mikko :applications-for-datatables :params {:filter-kind "applications" :filter-state "all" :filter-search "hakukuja"})]
+        (let [results1 (datatables mikko :applications-for-datatables :params {:filter-search "hakukuja"})]
           results1 => ok?
           (get-in results1 [:data :iTotalDisplayRecords]) => 1
           (count (get-in results1 [:data :aaData])) => 1
