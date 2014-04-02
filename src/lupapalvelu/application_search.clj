@@ -64,15 +64,15 @@
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
-        skip        (params :iDisplayStart)
-        limit       (params :iDisplayLength)
+        skip        (or (:iDisplayStart params) 0)
+        limit       (or (:iDisplayLength params) 10)
         apps        (query/with-collection "applications"
                       (query/find query)
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row (partial meta-fields/with-meta-fields user)) apps)
-        echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
+        echo        (str (util/->int (str (:sEcho params))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
