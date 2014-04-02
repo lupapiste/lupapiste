@@ -39,11 +39,11 @@
 (defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} {role :role}]
   (merge
     query
-    (condp = filter-kind
+    (case filter-kind
       "applications" {:infoRequest false}
       "inforequests" {:infoRequest true}
       "both"         nil)
-    (condp = filter-state
+    (case filter-state
       "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
       "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
       "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
