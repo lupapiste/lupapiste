@@ -132,7 +132,7 @@
     operation-tree-for-environment-R
     operation-tree-for-P
     (when (env/feature? :ymparisto) operation-tree-for-Y)
-     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)]))
+    operation-tree-for-YA]))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] operation-tree)

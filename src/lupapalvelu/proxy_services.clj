@@ -86,6 +86,13 @@
       (resp/json (map wfs/feature-to-property-info features))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn wms-capabilities-proxy [request]
+  (let [capabilities (wfs/getcapabilities request)
+        layers (wfs/capabilities-to-layers capabilities)]
+    (if layers
+      (resp/json (map wfs/layer-to-name layers))
+      (resp/status 503 "Service temporarily unavailable"))))
+
 ;
 ; Utils:
 ;
@@ -117,5 +124,6 @@
                "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
                "get-address" get-addresses-proxy
-               "property-info-by-wkt" property-info-by-wkt-proxy})
+               "property-info-by-wkt" property-info-by-wkt-proxy
+               "wmscap" wms-capabilities-proxy})
 
