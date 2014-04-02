@@ -9,4 +9,4 @@
             (println "Tag missing in:") (clojure.pprint/pprint children) (println)
             false))
       true)
-    false))
+    (do (println m) false)))
