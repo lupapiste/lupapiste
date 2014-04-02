@@ -41,6 +41,7 @@
   {:pre [filter-search]}
   (cond
     (re-matches #"^LP-\d{3}-\d{4}-\d{5}$" filter-search) {:_id filter-search}
+    (re-matches #"^\d{1,3}-\d{1,3}-\d{1,4}-\d{1,4}$") {:propertyId nil} ; TODO to db format
     :else {:address {$regex filter-search $options "i"}}))
 
 (defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
