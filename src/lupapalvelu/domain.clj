@@ -177,7 +177,7 @@
    :location                 {}
    :modified                 nil
    :municipality             ""
-   :neighbors                {}
+   :neighbors                []
    :opened                   nil
    :openInfoRequest          false
    :operations               []
