@@ -37,6 +37,12 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
+(defn- make-text-query [filter-search]
+  {:pre [filter-search]}
+  (if (re-matches #"^LP-\d{3}-\d{4}-\d{5}$" filter-search) ;LP-753-2014-00001
+    {:_id filter-search}
+    {:address {$regex filter-search $options "i"}}))
+
 (defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
   (merge
     query
@@ -53,8 +59,7 @@
     (when-not (contains? #{nil "0"} filter-user)
       {$or [{"auth.id" filter-user}
             {"authority.id" filter-user}]})
-    (when-not (ss/blank? filter-search)
-      {:address {$regex filter-search $options "i"}})))
+    (when-not (ss/blank? filter-search) (make-text-query (ss/trim filter-search)))))
 
 (defn- make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
