@@ -33,15 +33,17 @@
                                                                                                    {:tag :muu}]}
                                                                                           {:tag :kohteenVarustelutaso}
                                                                                           {:tag :haetaanVapautustaKytkin}]}]}
-                                                                                 {:tag :hulevedet}
-                                                                                 {:tag :talousvedet
-                                                                                  :child
-                                                                                  [{:tag :hankinta
-                                                                                    :child [{:tag :muu}
-                                                                                            {:tag :hankinta}]}
-                                                                                   {:tag :johdatus}
-                                                                                   {:tag :riittavyys}]}
-                                                                                 {:tag :jatevedet}]}
+                                                                        {:tag :hulevedet
+                                                                         :child [{:tag :muu}
+                                                                                 {:tag :hulevedet}]}
+                                                                        {:tag :talousvedet
+                                                                         :child
+                                                                         [{:tag :hankinta
+                                                                           :child [{:tag :muu}
+                                                                                   {:tag :hankinta}]}
+                                                                          {:tag :johdatus}
+                                                                          {:tag :riittavyys}]}
+                                                                        {:tag :jatevedet}]}
                                                                (mapping-common/sijaintitieto "yht")]}]}
                                              {:tag :liitetieto
                                               :child [{:tag :Liite :child mapping-common/liite-children_213}]}

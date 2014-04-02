@@ -10,7 +10,8 @@
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping]
             [lupapalvelu.xml.krysp.maa-aines-mapping]
-            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]))
+            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
+            [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]))
 
 (defn- get-begin-of-link [permit-type]
   {:pre  [permit-type]
@@ -44,7 +45,8 @@
         krysp-fn      (permit/get-application-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type)]
+        begin-of-link (get-begin-of-link permit-type)
+        _ (println krysp-fn)]
     (krysp-fn application lang submitted-application krysp-version output-dir begin-of-link)))
 
 (defn save-review-as-krysp

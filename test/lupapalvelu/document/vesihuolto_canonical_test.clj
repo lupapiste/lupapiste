@@ -280,7 +280,7 @@
 
                  talousvedet (:talousvedet kohde) => truthy
                  hankinta (:hankinta talousvedet) => truthy
-                 hankinta (:hankinta hankinta) => "Kiinteist\u00f6n porakaivosta"
+                 hankinta (:hankinta hankinta) => "kiinteist\u00f6n porakaivosta"
 
                  jatevedet (:jatevedet kohde) => "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."
 

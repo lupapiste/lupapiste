@@ -2,16 +2,17 @@
   (require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
            [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
-           [clojure.string :refer [lower-case]]))
+           [sade.strings :refer [lower-case]]))
 
 
 (defn- get-talousvedet [talousvedet]
-  {:talousvedet
-   {:hankinta (or (when (:muualta talousvedet)
-                    {:muu (:muualta talousvedet)})
+  (when talousvedet
+    {:talousvedet
+     {:hankinta (if (= (:hankinta talousvedet) "other")
+                  {:muu (:muualta talousvedet)}
                   {:hankinta (lower-case (:hankinta talousvedet))})
-    :johdatus (:johdatus talousvedet)
-    :riittavyys (:riittavyys talousvedet)}})
+      :johdatus (:johdatus talousvedet)
+      :riittavyys (:riittavyys talousvedet)}}))
 
 (def varuste->krysp-varuste {:Lamminvesivaraaja "L\u00e4mminvesivaraaja"
                              :Kuivakaymala "Kuivak\u00e4ym\u00e4l\u00e4"
@@ -27,8 +28,10 @@
    :imeytetaan "imeytet\u00e4\u00e4n maaper\u00e4\u00e4n"})
 
 (defn hulevedet [hulevesi]
-  (:or (:hulevesi hulevesi->krysp-hulevesi)
-       hulevesi))
+  (when hulevesi
+    (if (= (:hulevedet hulevesi) "other")
+      {:hulevedet {:muu (:johdetaanMuualle hulevesi)}}
+      {:hulevedet {:hulevedet ((keyword (:hulevedet hulevesi)) hulevesi->krysp-hulevesi)}})))
 
 (defn- get-vapautus-kohde [{property-id :propertyId} documents]
     (let [kiinteisto (:data (first (:vesihuolto-kiinteisto documents)))]
@@ -39,12 +42,12 @@
                                {:kayttotarkoitustieto {:kayttotarkoitus (lower-case (:rakennuksenTyypi rakennus))}
                                 :kohteenVarustelutaso (not-empty kohteenVarustelutaso)
                                 :haetaanVapautustaKytkin (true? (:vapautus rakennus))}}))}
-             {:hulevedet (:hulevedet (hulevedet (:data (first (:hulevedet documents)))))}
+             (hulevedet (:data (first (:hulevedet documents))))
              (get-talousvedet (:data (first (:talousvedet documents))))
-             {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))})))
+             (when (:jatevedet documents)
+               {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))}))))
 
 (defn- hakija [hakijat]
-  ;(clojure.pprint/pprint hakijat)
   (assert (= 1 (count hakijat)))
   (->ymp-osapuoli (first hakijat)))
 
@@ -64,6 +67,5 @@
          {:hakija (remove nil? (map get-yhteystiedot (:hakija documents)))
           :kohde (get-vapautus-kohde application documents)
           :sijaintitieto (get-sijaintitieto application)}}
-        :asianKuvaus (:kuvaus (:data (first (:hankkeen-kuvaus-vesihuolto documents))))
-        }}}})
+        :asianKuvaus (:kuvaus (:data (first (:hankkeen-kuvaus-vesihuolto documents))))}}}})
   )

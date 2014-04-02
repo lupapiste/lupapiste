@@ -49,8 +49,7 @@
            :repeating false
            }
     :body [{:name "hulevedet" :type :select :other-key "johdetaanMuualle"
-            :body [{:name "muualle"}
-                   {:name "ojaan"}
+            :body [{:name "ojaan"}
                    {:name "imeytetaan"}]}
            {:name "johdetaanMuualle" :type :string :size "l"}]}
    {:info {:name "talousvedet"
@@ -61,8 +60,7 @@
     :body [{:name "hankinta" :type :select :other-key "muualta"
             :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
                    {:name "Kiinteist\u00f6n rengaskaivosta"}
-                   {:name "Kiinteist\u00f6n porakaivosta"}
-                   {:name "muualta"}]}
+                   {:name "Kiinteist\u00f6n porakaivosta"}]}
            {:name "muualta" :type :string :size "l"}
            {:name "johdatus" :type :select
             :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
@@ -79,5 +77,4 @@
            :order 5
            :removable false
            :repeating false}
-    :body [{:name "kuvaus"  :type :text :max-len 4000 :required true :layout :full-width}]}]
-  )
+    :body [{:name "kuvaus"  :type :text :max-len 4000 :required true :layout :full-width}]}])
