@@ -8,7 +8,7 @@
 
 (def schema-version 1)
 
-(def maksaja (assoc henkilohakija :schema-info {:name "maksaja" :type "party" :version schema-version}))
+(def maksaja (assoc henkilohakija :schema-info {:name "ymp-maksaja" :type "party" :version schema-version}))
 
 (fact "Meta test: maksaja" maksaja => valid-against-current-schema?)
 
@@ -76,45 +76,47 @@
 
         hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq
         ]
-    ;(clojure.pprint/pprint hakemus)
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
 
+    (fact "property id"
+      (:kiinteistotunnus maa-aineslupa) => "63844900010004")
+
     (fact "kuvaus"
-      (:koontiKentta maa-aineslupa) => "Hankkeen synopsis")
+      (:koontiKentta maa-aineslupa) => "Hankkeen synopsis"
+      (:asianKuvaus maa-aineslupa) => "Hankkeen synopsis")
 
     (fact "hakija"
-      (:hakija hakemus)
+      (first (:hakija hakemus))
       =>
-      {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-       :puhelin "060222155",
-       :sahkopostiosoite "tew@gjr.fi"
-       :osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                                      :postitoimipaikannimi "kuuva",
-                                      :postinumero "43640"}})
+      {:yTunnus "1060155-5"
+       :yrityksenNimi "Yrtti Oy"
+       :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
+       :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                              :postitoimipaikannimi "kuuva",
+                              :postinumero "43640"}}
+       :puhelinnumero "060222155"
+       :sahkopostiosoite "tew@gjr.fi"})
 
-    (fact "maksaja"
-      (:viranomaismaksujenSuorittaja hakemus)
-      =>
-      {:nimi {:sukunimi "Borga", :etunimi "Pekka"},
-       :puhelin "121212",
-       :sahkopostiosoite "pekka.borga@porvoo.fi"
-       :osoite {:osoitenimi {:teksti "Murskaajankatu 5"},
-                                      :postitoimipaikannimi "Kaivanto",
-                                      :postinumero "36570"}
-       :henkilotunnus "210281-9988"})
+
+    (facts "maksaja"
+      (let [maksaja (get-in maa-aineslupa [:maksajatieto :Maksaja]) => truthy
+            postiosoite (get-in maksaja [:osoitetieto :Osoite]) => truthy
+            osoitenimi (:osoitenimi postiosoite) => truthy]
+        (:teksti osoitenimi) => "Murskaajankatu 5"
+        (:postinumero postiosoite) => "36570"
+        (:postitoimipaikannimi postiosoite) => "Kaivanto"
+        (:etunimi maksaja) => "Pekka"
+        (:sukunimi maksaja) => "Borga"
+        (:henkilotunnus maksaja) => "210281-9988"
+        (:sahkopostiosoite maksaja) => "pekka.borga@porvoo.fi"
+        (:puhelinnumero maksaja) => "121212"
+        (:laskuviite maksaja) => nil))
 
     (facts "sijainti"
-      (fact "alueenKiinteistonSijainti"
-        (let [sijainti (-> hakemus :alueenKiinteistonSijainti :Sijainti) => truthy
-              osoite (:osoite sijainti)]
-
-          (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
-          (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}}))
-
       (fact "osoite"
-        (let [sijainti (-> maa-aineslupa :sijaintitieto :Sijainti) => truthy
+        (let [sijainti (-> maa-aineslupa :sijaintitieto first :Sijainti) => truthy
              osoite (:osoite sijainti)]
 
           (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}

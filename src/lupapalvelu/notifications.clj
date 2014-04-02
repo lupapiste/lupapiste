@@ -38,6 +38,7 @@
                            (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
                            auth)
         auth-user-emails (->> included-users
+                           (remove :invite) ; filters out users that have not accepted invite
                            (filter (fn [user] (not-any? #(= (:role user) %) excluded-roles)))
                            (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
     (if (some #(= "statementGiver" %) excluded-roles)
@@ -119,7 +120,7 @@
             application    (application-fn (:application command))
             command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
-            recipients     (recipients-fn command)
+            recipients     (remove ss/blank? (recipients-fn command))
             subject        (get-email-subject application (get conf :subject-key (name template-name)))
             model-fn       (get conf :model-fn create-app-model)
             model          (model-fn command conf)

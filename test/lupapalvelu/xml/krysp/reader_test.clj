@@ -43,16 +43,16 @@
         (:autopaikkojaUlkopuolella lupamaaraykset) => 3
         (:kerrosala lupamaaraykset) => "100"
         (:kokonaisala lupamaaraykset) => "110"
-        (:vaaditutTyonjohtajat lupamaaraykset) => "vastaava ylijohtaja, vastaava varajohtaja, altavastaava johtaja"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "Vastaava ty\u00f6njohtaja, Vastaava IV-ty\u00f6njohtaja, Ty\u00f6njohtaja"
         (let [katselmukset (:vaaditutKatselmukset lupamaaraykset)
               maaraykset   (:maaraykset lupamaaraykset)]
           (facts "katselmukset"
             (count katselmukset) => 2
             (:katselmuksenLaji (first katselmukset)) => "aloituskokous"
-            (:tarkastuksenTaiKatselmuksenNimi (last katselmukset)) => "katselmus2")
+            (:tarkastuksenTaiKatselmuksenNimi (last katselmukset)) => "K\u00e4ytt\u00f6\u00f6nottotarkastus")
           (facts "m\u00e4\u00e4r\u00e4ykset"
             (count maaraykset) => 2
-            (:sisalto (first maaraykset)) => "Maarays 1"
+            (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
             (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
             (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))
 

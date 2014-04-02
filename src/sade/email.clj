@@ -60,7 +60,7 @@
   "Sends email message using a template."
   [to subject msg]
   {:pre [subject msg]}
-  (if to
+  (if-not (ss/blank? to)
     (let [[plain html] msg]
       (send-mail to subject :plain plain :html html))
     (error "Email could not be sent because of missing To field. Subject being: " subject)))

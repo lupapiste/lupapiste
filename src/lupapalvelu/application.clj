@@ -12,7 +12,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand update-application non-blank-parameters without-system-keys notify]]
+            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -177,13 +177,14 @@
 
 (defcommand invite
   {:parameters [id email title text documentName documentId path]
-   :input-validators [(partial non-blank-parameters [:email :documentName :documentId])]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)
    :verified   true}
   [{:keys [created user application] :as command}]
-  (let [email (ss/lower-case email)]
+  (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invited? application email)
       (fail :invite.already-invited)
       (let [invited (user-api/get-or-create-user-by-email email)
@@ -235,6 +236,8 @@
 
 (defcommand remove-auth
   {:parameters [:id email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))
@@ -376,12 +379,15 @@
             app-updates
             attachments-argument
             (when (empty? (:authority application))
-              {:authority (user/summary user)}))}))
+              {:authority (user/summary user)}))})
+  (ok :integrationAvailable (not (nil? attachments-argument))))
+
+(defn- organization-has-ftp-user? [organization application]
+  (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
 
 (defn- do-approve [application created id lang jatkoaika-app? do-rest-fn]
-  (let [organization (organization/get-organization (:organization application))
-        organization-has-ftp-user? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser])]
-    (if organization-has-ftp-user?
+  (let [organization (organization/get-organization (:organization application))]
+    (if (organization-has-ftp-user? organization application)
       (or
         (validate-link-permits application)
         (let [sent-file-ids (if jatkoaika-app?
@@ -593,7 +599,7 @@
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :notified   true ; OIR
-   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+   :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
@@ -664,7 +670,7 @@
   {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed :submitted]
-   :input-validators [(partial non-blank-parameters [:address])
+   :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
   [{:keys [created application] :as command}]
@@ -741,7 +747,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :submitted]
    :pre-checks [validate-jatkolupa-zero-link-permits]
-   :input-validators [(partial non-blank-parameters [:linkPermitId])]}
+   :input-validators [(partial action/non-blank-parameters [:linkPermitId])]}
   [{application :application}]
   (do-add-link-permit application linkPermitId))
 
@@ -858,7 +864,7 @@
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:startedTimestampStr])]}
+   :input-validators [(partial action/non-blank-parameters [:startedTimestampStr])]}
   [{:keys [user created] :as command}]
   (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
     (update-application command {$set {:modified created
@@ -873,7 +879,7 @@
    :states     [:verdictGiven :constructionStarted]
    :notified   true
    :pre-checks [(permit/validate-permit-type-is permit/R)]
-   :input-validators [(partial non-blank-parameters [:buildingIndex :startedDate :lang])]}
+   :input-validators [(partial action/non-blank-parameters [:buildingIndex :startedDate :lang])]}
   [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string startedDate)
         app-updates   (merge
@@ -883,17 +889,19 @@
                            :state  :constructionStarted}))
         application   (merge application app-updates)
         organization  (organization/get-organization (:organization application))
+        ftp-user?     (organization-has-ftp-user? organization application)
         building      (or
                         (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
                         (fail! :error.unknown-building))]
-    (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user)
+    (when ftp-user?
+      (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user))
     (update-application command
       {:buildings {$elemMatch {:index (:index building)}}}
       {$set (merge app-updates {:buildings.$.constructionStarted timestamp
                                 :buildings.$.startedBy (select-keys user [:id :firstName :lastName])})})
     (when (= "verdictGiven" (:state application))
       (notifications/notify! :application-state-change command))
-    (ok)))
+    (ok :integrationAvailable ftp-user?)))
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
@@ -901,7 +909,7 @@
    :states     [:constructionStarted]
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial non-blank-parameters [:readyTimestampStr])]}
+   :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
   [{:keys [user created application] :as command}]
   (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates   {:modified created
@@ -909,10 +917,12 @@
                        :closedBy (select-keys user [:id :firstName :lastName])
                        :state :closed}
         application   (merge application app-updates)
-        organization  (organization/get-organization (:organization application))]
-    (mapping-to-krysp/save-application-as-krysp application lang application organization)
+        organization  (organization/get-organization (:organization application))
+        ftp-user?     (organization-has-ftp-user? organization application)]
+    (when ftp-user?
+      (mapping-to-krysp/save-application-as-krysp application lang application organization))
     (update-application command {$set app-updates})
-    (ok)))
+    (ok :integrationAvailable ftp-user?)))
 
 
 (defn- validate-new-applications-enabled [command {:keys [organization]}]

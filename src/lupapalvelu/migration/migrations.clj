@@ -264,3 +264,61 @@
   (doseq [application (mongo/select :applications {"attachments.0" {$exists true}})]
     (mongo/update-by-id :applications (:id application)
       {$set {:attachments (attachments-with-applicationState application)}})))
+
+(defn- remove-huoneistot-and-update-schema-name [document new-schema-name]
+  (let [data (:data document)
+        data-ilman-huoneistoja (dissoc data :huoneistot)]
+    (->  document
+      (assoc :data data-ilman-huoneistoja)
+      (assoc-in  [:schema-info :i18name] (-> document :schema-info :name))
+      (assoc-in  [:schema-info :name] new-schema-name))))
+
+(defn get-operation-name [document]
+  (get-in document [:schema-info :op :name]))
+
+(defn get-schema-name [document]
+  (get-in document [:schema-info :name]))
+
+(defn remove-huoneistot-for [operation old-schema-name new-schema-name]
+  (let [applications-to-update (mongo/select :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" operation} {"schema-info.name" old-schema-name}]}}})]
+    (doseq [application applications-to-update]
+      (let [new-documents (map (fn [document]
+                                 (let [schema-name (get-schema-name document)
+                                       operation-name (get-operation-name document)]
+                                   (if (and (= operation-name operation) (= schema-name old-schema-name))
+                                     (remove-huoneistot-and-update-schema-name document new-schema-name)
+                                     document)))
+                               (:documents application))]
+        (mongo/update-by-id :applications (:id application) {$set {:documents new-documents}})))))
+
+
+(defmigration vapaa-ajan-asuinrakennus-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (remove-huoneistot-for "vapaa-ajan-asuinrakennus" "uusiRakennus" "uusi-rakennus-ei-huoneistoa"))
+(defmigration varasto-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "varasto-tms"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (remove-huoneistot-for "varasto-tms" "uusiRakennus" "uusi-rakennus-ei-huoneistoa"))
+(defmigration julkisivu-muutos-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "julkisivu-muutos"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "julkisivu-muutos" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+(defmigration markatila-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "markatilan-laajentaminen"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "markatilan-laajentaminen" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+(defmigration takka-muutos-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "takka-tai-hormi"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "takka-tai-hormi" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+(defmigration parveke-muutos-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "parveke-tai-terassi"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "parveke-tai-terassi" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+
+(defn- update-krysp-version-for-all-orgs [permit-type from to]
+  (let [path (str "krysp." permit-type ".version")]
+    (mongo/update-by-query :organizations {path from} {$set {path to}})))
+
+(defmigration ymparistolupa-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.YL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "YL" "2.1.1" "2.1.2"))
+
+(defmigration mal-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.MAL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "MAL" "2.1.1" "2.1.2"))

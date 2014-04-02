@@ -10,7 +10,7 @@ LUPAPISTE.MapModel = function() {
   var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
 
   var createMap = function(divName) {
-    return gis.makeMap(divName, false).center(404168, 6693765, 14);  // original zoom 12
+    return gis.makeMap(divName, false).center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
   };
 
   var getOrCreateMap = function(kind) {
@@ -42,7 +42,7 @@ LUPAPISTE.MapModel = function() {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, 14).add(x, y);  // original zoom 10
+    map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10).add(x, y);
     if(drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }

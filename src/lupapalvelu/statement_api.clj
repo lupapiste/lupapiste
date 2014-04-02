@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application executed]]
+            [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]
@@ -29,6 +29,8 @@
 
 (defcommand create-statement-giver
   {:parameters [email text]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :notified   true
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
@@ -36,7 +38,8 @@
         organization    (mongo/select-one :organizations {:_id organization-id})
         email           (ss/lower-case email)
         statement-giver-id (mongo/create-id)]
-    (with-user-by-email email
+    (if-let [user (user/get-user-by-email email)]
+      (do
       (when-not (user/authority? user) (fail! :error.not-authority))
       (mongo/update
         :organizations
@@ -46,7 +49,8 @@
                                   :email email
                                   :name (str (:firstName user) " " (:lastName user))}}})
       (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
-      (ok :id statement-giver-id))))
+        (ok :id statement-giver-id))
+      (fail :error.user-not-found))))
 
 (defcommand delete-statement-giver
   {:parameters [personId]

@@ -50,6 +50,7 @@
 (def sonja-muni  (muni-for "sonja"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
+(def naantali    (apikey-for "admin@naantali.fi"))
 (def dummy       (apikey-for "dummy"))
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))

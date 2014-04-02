@@ -11,7 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters]]
+            [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -42,6 +42,12 @@
                                                   (assoc data :organizations {$in [organizations]})
                                                   data))
                                      (user/find-users)))))
+
+(env/in-dev
+  (defquery user-by-email
+    {:parameters [email] :roles [:admin]}
+    [_]
+    (ok :user (user/get-user-by-email email))))
 
 (defcommand users-for-datatables
   {:roles [:admin :authorityAdmin]}
@@ -182,6 +188,8 @@
 
 (defcommand create-user
   {:parameters [:email role]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)]
@@ -190,7 +198,8 @@
       (do
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
-      (let [token (token/make-token :password-reset {:email (:email user)})]
+      (let [token-ttl (* 7 24 60 60 1000)
+            token (token/make-token :password-reset {:email (:email user)} :ttl token-ttl)]
         (ok :id (:id user)
           :user user
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
@@ -250,19 +259,21 @@
 
 (defcommand update-user-organization
   {:parameters       [operation email firstName lastName]
-   :roles            [:authorityAdmin]
-   :input-validators [valid-organization-operation? (partial non-blank-parameters [:email :firstName :lastName])]}
+   :input-validators [valid-organization-operation?
+                      (partial action/non-blank-parameters [:email :firstName :lastName])
+                      action/validate-email]
+   :roles            [:authorityAdmin]}
   [{caller :user}]
   (let [email            (ss/lower-case email)
         new-organization (first (:organizations caller))
-        update-count     (mongo/update-n :users {:email email}
+        update-count     (mongo/update-n :users {:email email, :role "authority"}
                            {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
     (debug "update user" email)
     (if (pos? update-count)
       (ok :operation operation)
-      (if (= operation "add")
+      (if (and (= operation "add") (not (user/get-user-by-email email)))
         (create-authority-user-with-organization caller new-organization email firstName lastName)
-        (fail :not-found :email email)))))
+        (fail :error.user-not-found)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
@@ -295,13 +306,16 @@
 
 (defcommand reset-password
   {:parameters    [email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :notified      true
    :authenticated false}
   [_]
   (let [email (ss/lower-case email)]
     (infof "Password reset request: email=%s" email)
     (if (mongo/select-one :users {:email email})
-      (let [token (token/make-token :password-reset {:email email})]
+      (let [token-ttl (* 24 60 60 1000)
+            token (token/make-token :password-reset {:email email} :ttl token-ttl)]
         (infof "password reset request: email=%s, token=%s" email token)
         (notifications/notify! :reset-password {:data {:email email :token token}})
         (ok))
@@ -321,6 +335,8 @@
 
 (defcommand set-user-enabled
   {:parameters    [email enabled]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/validate-email]
    :roles         [:admin]}
   [_]
   (let [email (ss/lower-case email)
@@ -363,7 +379,7 @@
 (defcommand impersonate-authority
   {:parameters [organizationId password]
    :roles [:admin]
-   :input-validators [(partial non-blank-parameters [:organizationId])]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user}]
   (if (user/get-user-with-password (:username user) password)
@@ -380,6 +396,8 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
+   :input-validators [(partial action/non-blank-parameters [:email :password])
+                      action/validate-email]
    :verified   true}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)

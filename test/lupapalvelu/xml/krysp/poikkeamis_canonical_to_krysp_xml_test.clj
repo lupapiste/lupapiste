@@ -14,20 +14,25 @@
 (fact ":tag is set, 2.1.2" (has-tag mapping/poikkeamis_to_krysp_212) => true)
 (fact ":tag is set, 2.1.3" (has-tag mapping/poikkeamis_to_krysp_213) => true)
 (fact ":tag is set, 2.1.4" (has-tag mapping/poikkeamis_to_krysp_214) => true)
+(fact ":tag is set, 2.1.5" (has-tag mapping/poikkeamis_to_krysp_215) => true)
 
 (facts "Poikkeuslupa to canonical and then to poikkeuslupa xml with schema validation"
   (let [canonical (poikkeus-application-to-canonical poikkari-hakemus "fi")
         xml_212 (element-to-xml canonical mapping/poikkeamis_to_krysp_212)
         xml_214 (element-to-xml canonical mapping/poikkeamis_to_krysp_214)
+        xml_215 (element-to-xml canonical mapping/poikkeamis_to_krysp_215)
         xml_212_s (indent-str xml_212)
-        xml_214_s (indent-str xml_214)]
+        xml_214_s (indent-str xml_214)
+        xml_215_s (indent-str xml_215)]
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.4"}}})
+    (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.5"}}})
 
     (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2") ; throws exception
     (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") ; throws exception
+    (validator/validate xml_215_s (:permitType poikkari-hakemus) "2.1.5") ; throws exception
 
     (facts "212"
       (let [lp-xml    (cr/strip-xml-namespaces (xml/parse xml_212_s))]

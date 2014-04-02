@@ -49,7 +49,7 @@
           x = l.x,
           y = l.y;
 
-      self.application(a).map.updateSize().clear().center(x, y, 14).add(x, y); // original zoom 12
+      self.application(a).map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 12).add(x, y);
 
       var partyDocs = _.filter(a.documents, isPartyDoc);
       var nonpartyDocs = _.filter(a.documents, isNotPartyDoc);
@@ -137,7 +137,7 @@
   });
 
   $(function() {
-    model.map = gis.makeMap("neighbor-map", false).updateSize().center(404168, 6693765, 14); // original zoom 12
+    model.map = gis.makeMap("neighbor-map", false).updateSize().center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
     $("#neighbor-show").applyBindings(model);
   });
 
