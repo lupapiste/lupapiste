@@ -10,7 +10,8 @@
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping]
             [lupapalvelu.xml.krysp.maa-aines-mapping]
-            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]))
+            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
+            [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]))
 
 (defn- get-begin-of-link [permit-type]
   {:pre  [permit-type]
