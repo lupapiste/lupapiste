@@ -310,13 +310,13 @@
         (.setFeature "http://xml.org/sax/features/validation" false)
         (.setFeature "http://xml.org/sax/features/external-general-entities" false)
         (.setFeature "http://xml.org/sax/features/external-parameter-entities" false))
-    
+
     (newSAXParser) (parse s ch)))
 
 (defn capabilities-to-layers [capabilities]
   (when capabilities
-    (let [caps (zip/xml-zip 
-                 (xml/parse 
+    (let [caps (zip/xml-zip
+                 (xml/parse
                    (java.io.ByteArrayInputStream.
                      (.getBytes capabilities)
                      ) startparse-sax-non-validating))]
