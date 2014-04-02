@@ -8,36 +8,36 @@
             [lupapalvelu.user :refer [applicant?]]
             [lupapalvelu.application-meta-fields :as meta-fields]))
 
-(def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
-                  (juxt :address :municipality)
-                  meta-fields/get-application-operation
-                  :applicant
-                  :submitted
-                  :indicators
-                  :unseenComments
-                  :modified
-                  :state
-                  :authority])
+(def ^:private col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
+                            (juxt :address :municipality)
+                            meta-fields/get-application-operation
+                            :applicant
+                            :submitted
+                            :indicators
+                            :unseenComments
+                            :modified
+                            :state
+                            :authority])
 
-(def order-by (assoc col-sources
-                     0 :infoRequest
-                     1 :address
-                     2 nil
-                     3 nil
-                     5 nil
-                     6 nil))
+(def ^:private order-by (assoc col-sources
+                          0 :infoRequest
+                          1 :address
+                          2 nil
+                          3 nil
+                          5 nil
+                          6 nil))
 
-(def col-map (zipmap col-sources (map str (range))))
+(def ^:private col-map (zipmap col-sources (map str (range))))
 
-(defn add-field [application data [app-field data-field]]
+(defn- add-field [application data [app-field data-field]]
   (assoc data data-field (app-field application)))
 
-(defn make-row [application]
+(defn- make-row [application]
   (let [base {"id" (:_id application)
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
+(defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
   (merge
     query
     (case filter-kind
@@ -56,7 +56,7 @@
     (when-not (ss/blank? filter-search)
       {:address {$regex filter-search $options "i"}})))
 
-(defn make-sort [params]
+(defn- make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
         dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
     (if col {col dir} {})))
