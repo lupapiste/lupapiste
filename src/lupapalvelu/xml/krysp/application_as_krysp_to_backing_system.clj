@@ -45,8 +45,7 @@
         krysp-fn      (permit/get-application-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type)
-        _ (println krysp-fn)]
+        begin-of-link (get-begin-of-link permit-type)]
     (krysp-fn application lang submitted-application krysp-version output-dir begin-of-link)))
 
 (defn save-review-as-krysp
