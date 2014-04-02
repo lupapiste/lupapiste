@@ -21,7 +21,7 @@
   {:apply-when (pos? (mongo/count :submitted-applications {:schema-version {$exists false}}))}
   (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
     (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
-                                                               :documents (map drop-schema-data (:documents application))}})))
+                                                                         :documents (map drop-schema-data (:documents application))}})))
 
 (defn verdict-to-verdics [{verdict :verdict}]
   {$set {:verdicts (map domain/->paatos verdict)}
