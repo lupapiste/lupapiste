@@ -39,12 +39,6 @@
 
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
 
-(fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
-  (make-query {} {:filter-kind  "both"
-                  :filter-state "all"
-                  :filter-user  "123"}
-              {:role "authority"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
-
 (facts filter-repeating-party-docs
   (filter-repeating-party-docs 1 ["a" "b" "c"]) => (just "a")
   (provided (schemas/get-schemas 1) => {"a" {:info {:type :party

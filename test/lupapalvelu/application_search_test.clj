@@ -4,7 +4,7 @@
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]))
 
-(testable-privates lupapalvelu.application-search make-sort)
+(testable-privates lupapalvelu.application-search make-sort make-query)
 
 (facts "sorting parameter parsing"
   (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}
@@ -21,3 +21,9 @@
               :sSortDir_0 "; drop database;"})   => {}
   (make-sort {})                                 => {}
   (make-sort nil)                                => {})
+
+(fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
+  (make-query {} {:filter-kind  "both"
+                  :filter-state "all"
+                  :filter-user  "123"}
+              {:role "authority"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
