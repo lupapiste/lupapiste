@@ -513,8 +513,7 @@
         (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId]}
-    (let [parts    (vec (map #(Integer/parseInt %) (rest (re-matches #"(\d+)-(\d+)-(\d+)-(\d+)" propertyId))))
-          property (format "%03d%03d%04d%04d" (get parts 0) (get parts 1) (get parts 2) (get parts 3))
+    (let [property (util/to-property-id propertyId)
           response (execute-command "create-application" (assoc (from-query) :propertyId property))]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))

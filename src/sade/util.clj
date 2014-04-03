@@ -169,6 +169,14 @@
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
 
+(def property-id-pattern
+  "Regex for property id human readable format"
+  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
+
+(defn to-property-id [^String human-readable]
+  (let [parts (map #(Integer/parseInt %) (rest (re-matches property-id-pattern human-readable)))]
+    (apply format "%03d%03d%04d%04d" parts)))
+
 (defn sequable?
   "Returns true if x can be converted to sequence."
   [x]
