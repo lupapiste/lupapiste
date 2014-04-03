@@ -38,12 +38,13 @@
     (reduce (partial add-field application) base col-map)))
 
 (defn- make-free-text-query [filter-search]
-  {:address {$regex filter-search $options "i"}}) ; TODO (or operations, applicant, verdict id)
+  {$or [{:address {$regex filter-search $options "i"}}
+        {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}]}) ; TODO (or operations, applicant)
 
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
   (cond
-    (re-matches #"^LP-\d{3}-\d{4}-\d{5}$" filter-search) {:_id filter-search}
+    (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
     (re-matches util/property-id-pattern filter-search) {:propertyId (util/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
