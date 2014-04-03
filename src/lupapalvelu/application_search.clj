@@ -37,12 +37,15 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
+(defn- make-free-text-query [filter-search]
+  {:address {$regex filter-search $options "i"}}) ; TODO (or operations, applicant, verdict id)
+
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
   (cond
     (re-matches #"^LP-\d{3}-\d{4}-\d{5}$" filter-search) {:_id filter-search}
     (re-matches util/property-id-pattern filter-search) {:propertyId (util/to-property-id filter-search)}
-    :else {:address {$regex filter-search $options "i"}}))
+    :else (make-free-text-query filter-search)))
 
 (defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
   (merge
