@@ -113,6 +113,11 @@
   (fact "valid date" (to-millis-from-local-date-string "1.1.2013") => 1356998400000)
   (fact "invalid date" (to-millis-from-local-date-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 
+(facts "to-property-id"
+  (to-property-id "245-003-0105-0006") => "24500301050006"
+  (to-property-id "245-3-105-6") => "24500301050006"
+  (to-property-id "245-03-0105-06") => "24500301050006"
+  (to-property-id "05-03-0105-006") => "00500301050006")
 
 (facts sequable?
   (sequable? [])        => true
