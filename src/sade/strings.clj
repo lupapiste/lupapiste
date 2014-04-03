@@ -67,6 +67,8 @@
 
 (defn lower-case ^String [^CharSequence x] (when x (s/lower-case x)))
 
+(defn upper-case ^String [^CharSequence x] (when x (s/upper-case x)))
+
 (defn trim ^String [^CharSequence x] (when x (s/trim x)))
 
 (defn split ^String [^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))
