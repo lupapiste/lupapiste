@@ -33,7 +33,8 @@
 
     (facts "by ID"
       (fact "no matches" (search (str "LP-" sonja-muni "-2010-00001")) => no-results?)
-      (fact "one match" (search application-id) => id-matches?))
+      (fact "one match" (search application-id) => id-matches?)
+      (fact "one match - lower case query" (search (clojure.string/lower-case application-id)) => id-matches?))
 
     (facts "by property ID"
       (fact "no matches" (search (str sonja-muni "-123-0000-1230")) => no-results?)
