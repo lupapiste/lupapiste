@@ -326,3 +326,25 @@
 (defmigration vvvl-organization-krysp-213
   {:apply-when (pos? (mongo/count :organizations {"krysp.VVVL.version" "2.1.1"}))}
   (update-krysp-version-for-all-orgs "VVVL" "2.1.1" "2.1.3"))
+
+(defn remove-huoneistot-for [operation old-schema-name new-schema-name]
+  (let [applications-to-update (mongo/select :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" operation} {"schema-info.name" old-schema-name}]}}})]
+    (doseq [application applications-to-update]
+      (let [new-documents (map (fn [document]
+                                 (let [schema-name (get-schema-name document)
+                                       operation-name (get-operation-name document)]
+                                   (if (and (= operation-name operation) (= schema-name old-schema-name))
+                                     (remove-huoneistot-and-update-schema-name document new-schema-name)
+                                     document)))
+                               (:documents application))]
+         (mongo/update-by-id :applications (:id application) {$set {:documents new-documents}})))))
+
+
+
+(defmigration rakennuksen-ominaistieto-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "julkisivu-muutos"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
+  (remove-ominaisuudet-for "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
+
+
+
+

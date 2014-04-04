@@ -499,6 +499,7 @@
                                           luokitus])
 
 (def rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja [kaytto
+                                                                  rakenne
                                                                   mitat])
 
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistot))
