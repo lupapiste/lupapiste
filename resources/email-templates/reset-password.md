@@ -13,3 +13,5 @@ Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 Byt din l&ouml;senord genom att trycka l&auml;nken: 
 
 {{link-sv}}
+
+Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;sarens adressf&auml;lt.
