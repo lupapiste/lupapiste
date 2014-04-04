@@ -17,3 +17,5 @@ Ni anlitas som ett parti i en lovans&ouml;kan.
 F&ouml;r att godk&auml;nna uppgiften och se ans&ouml;kan klicka h&auml;r: 
 
 {{link-sv}}
+
+Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;sarens adressf&auml;lt.
