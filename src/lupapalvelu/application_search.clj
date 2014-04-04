@@ -11,6 +11,8 @@
             [lupapalvelu.user :refer [applicant?]]
             [lupapalvelu.application-meta-fields :as meta-fields]))
 
+;; Operations
+
 (defn- normalize-operation-name [i18n-text]
   (when-let [lc (ss/lower-case i18n-text)]
     (s/replace lc #"\p{Punct}" "")))
@@ -27,6 +29,7 @@
 ;;
 ;; Table definition
 ;;
+
 (def ^:private col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                             (juxt :address :municipality)
                             meta-fields/get-application-operation
@@ -48,13 +51,9 @@
 
 (def ^:private col-map (zipmap col-sources (map str (range))))
 
-(defn- add-field [application data [app-field data-field]]
-  (assoc data data-field (app-field application)))
-
-(defn- make-row [application]
-  (let [base {"id" (:_id application)
-              "kind" (if (:infoRequest application) "inforequest" "application")}]
-    (reduce (partial add-field application) base col-map)))
+;;
+;; Query construction
+;;
 
 (defn- make-free-text-query [filter-search]
   {$or [{:address {$regex filter-search $options "i"}}
@@ -89,6 +88,22 @@
   (let [col (get order-by (:iSortCol_0 params))
         dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
     (if col {col dir} {})))
+
+;;
+;; Result presentation
+;;
+
+(defn- add-field [application data [app-field data-field]]
+  (assoc data data-field (app-field application)))
+
+(defn- make-row [application]
+  (let [base {"id" (:_id application)
+              "kind" (if (:infoRequest application) "inforequest" "application")}]
+    (reduce (partial add-field application) base col-map)))
+
+;;
+;; Public API
+;;
 
 (defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
