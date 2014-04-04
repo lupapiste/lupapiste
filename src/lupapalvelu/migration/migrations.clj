@@ -365,11 +365,11 @@
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "takka-tai-hormi"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
   (remove-ominaisuudet-for "takka-tai-hormi" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
 
-(defmigration rakennuksen-ominaistieto-updates-takka
+(defmigration rakennuksen-ominaistieto-updates-parveke
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "parveke-tai-terassi"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
   (remove-ominaisuudet-for "parveke-tai-terassi" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
 
-(defmigration rakennuksen-ominaistieto-updates-takka
+(defmigration rakennuksen-ominaistieto-updates-purku
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "purkaminen"} {"schema-info.name" "purku"}] }}}))}
   (remove-ominaisuudet-for "purkaminen" "purku" "purkaminen")
   (remove-huoneistot-for "purkaminen" "purku" "purkaminen")
