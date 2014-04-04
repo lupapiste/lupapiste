@@ -20,7 +20,11 @@
 
 (facts* "Search"
   (let [property-id (str sonja-muni "-123-0000-1234")
-        application (create-and-submit-application mikko :municipality sonja-muni :address "Hakukuja 123" :propertyId (sade.util/to-property-id property-id)) => truthy
+        application (create-and-submit-application mikko
+                      :municipality sonja-muni
+                      :address "Hakukuja 123"
+                      :propertyId (sade.util/to-property-id property-id)
+                      :operation "muu-uusi-rakentaminen") => truthy
         application-id (:id application)
         id-matches? (fn [response]
                       (and
@@ -44,5 +48,11 @@
       (fact "no verdict, matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => no-results?)
       (command sonja :give-verdict :id application-id :verdictId "Hakup\u00e4\u00e4t\u00f6s-2014-1" :status 1 :name "" :given 123 :official 124) => ok?
       (fact "no matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014-2") => no-results?)
-      (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?))))
+      (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?))
+
+    (facts "by operation name"
+      (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
+      (fact "one match" (search "Muun  rakennuksen:   rakentaminen") => id-matches?))
+
+    ))
 
