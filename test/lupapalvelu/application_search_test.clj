@@ -4,7 +4,14 @@
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]))
 
-(testable-privates lupapalvelu.application-search make-sort make-query)
+(testable-privates lupapalvelu.application-search make-sort make-query operation-names)
+
+(facts "operation-names"
+  (operation-names "bil") => [:auto-katos]
+  (operation-names "grilli") => [:auto-katos]
+  (operation-names "Ty\u00f6njohtaja") => [:tyonjohtajan-nimeaminen]
+  (operation-names "ANNAN") => [:muu-tontti-tai-kort-muutos :ya-kayttolupa-muu-kayttolupa :muu-laajentaminen :varasto-tms :mainoslaite]
+  (operation-names "S\u00e4hk\u00f6-, data ja muiden kaapelien sijoittaminen") => [:ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen])
 
 (facts "sorting parameter parsing"
   (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}

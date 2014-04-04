@@ -22,9 +22,16 @@
     (fn [ops [k _]]
       (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
             normalized (map normalize-operation-name localizations)]
-        (conj ops {:op k :locs normalized})))
+        (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
     []
     operations/operations))
+
+(defn- operation-names [filter-search]
+  (let [normalized (normalize-operation-name filter-search)]
+    (map :op
+      (filter
+        (fn [{locs :locs}] (some (fn [i18n-text] (.contains i18n-text normalized)) locs))
+        operation-index))))
 
 ;;
 ;; Table definition
@@ -56,8 +63,14 @@
 ;;
 
 (defn- make-free-text-query [filter-search]
-  {$or [{:address {$regex filter-search $options "i"}}
-        {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}]}) ; TODO (or operations, applicant)
+  (let [or-query {$or [{:address {$regex filter-search $options "i"}}
+                       {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
+                       ; TODO applicant
+                       ]}
+        ops (operation-names filter-search)]
+    (if (seq ops)
+      (update-in or-query [$or] conj {:operations.name {$in ops}})
+      or-query)))
 
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
