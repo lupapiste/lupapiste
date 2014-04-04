@@ -664,7 +664,7 @@
     {:info {:name "rakennuksen-laajentaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-    {:info {:name "purku" :approvable true}
+    {:info {:name "purkaminen" :i18name "purku" :approvable true}
      :body (approvable-top-level-groups purku)}
 
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}
