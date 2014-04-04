@@ -15,7 +15,9 @@
 
 (defn- normalize-operation-name [i18n-text]
   (when-let [lc (ss/lower-case i18n-text)]
-    (s/replace lc #"\p{Punct}" "")))
+    (-> lc
+      (s/replace #"\p{Punct}" "")
+      (s/replace #"\s{2,}"    " "))))
 
 (def operation-index
   (reduce

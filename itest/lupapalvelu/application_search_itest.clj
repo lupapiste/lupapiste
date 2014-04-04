@@ -52,7 +52,7 @@
 
     (facts "by operation name"
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
-      (fact "one match" (search "Muun rakennuksen rakentaminen") => id-matches?))
+      (fact "one match" (search "Muun  rakennuksen:   rakentaminen") => id-matches?))
 
     ))
 
