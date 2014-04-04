@@ -1,13 +1,32 @@
 (ns lupapalvelu.application-search
-  (:require [monger.operators :refer :all]
+  (:require [clojure.string :as s]
+            [monger.operators :refer :all]
             [monger.query :as query]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.user :refer [applicant?]]
             [lupapalvelu.application-meta-fields :as meta-fields]))
 
+(defn- normalize-operation-name [i18n-text]
+  (when-let [lc (ss/lower-case i18n-text)]
+    (s/replace lc #"\p{Punct}" "")))
+
+(def operation-index
+  (reduce
+    (fn [ops [k _]]
+      (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
+            normalized (map normalize-operation-name localizations)]
+        (conj ops {:op k :locs normalized})))
+    []
+    operations/operations))
+
+;;
+;; Table definition
+;;
 (def ^:private col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                             (juxt :address :municipality)
                             meta-fields/get-application-operation
