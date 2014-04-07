@@ -156,7 +156,21 @@
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
                                    {:purkamisenSyy (-> toimenpide :poistumanSyy)}
                                    {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta))})
-                  :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
+                  :rakennustieto (update-in
+                                   (get-rakennus-data toimenpide application purku-doc)
+                                   [:Rakennus :rakennuksenTiedot]
+                                   (fn [m]
+                                     (-> m
+                                       ; Cleanup top level keys that will bi nil anyway.
+                                       ; Recursive cr/strip-nils would be too much.
+                                       (dissoc :verkostoliittymat)
+                                       (dissoc :energialuokka )
+                                       (dissoc :energiatehokkuusluku)
+                                       (dissoc :energiatehokkuusluvunYksikko)
+                                       (dissoc :paloluokka)
+                                       (dissoc :lammitystapa)
+                                       (dissoc :varusteet)
+                                       (dissoc :liitettyJatevesijarjestelmaanKytkin))))}
      :created (:created purku-doc)}))
 
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
@@ -185,7 +199,7 @@
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
-                                               (map #(get-purku-toimenpide % application) (:purku documents))
+                                               (map #(get-purku-toimenpide % application) (:purkaminen documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
