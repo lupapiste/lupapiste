@@ -156,7 +156,10 @@
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
                                    {:purkamisenSyy (-> toimenpide :poistumanSyy)}
                                    {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta))})
-                  :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
+                  :rakennustieto (update-in
+                                   (get-rakennus-data toimenpide application purku-doc)
+                                   [:Rakennus :rakennuksenTiedot]
+                                   select-keys [:rakennustunnus :kayttotarkoitus])}
      :created (:created purku-doc)}))
 
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
@@ -185,7 +188,7 @@
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
-                                               (map #(get-purku-toimenpide % application) (:purku documents))
+                                               (map #(get-purku-toimenpide % application) (:purkaminen documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))

@@ -173,7 +173,8 @@
         buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
-        schema       (schemas/get-schema (schemas/get-latest-schema-version) "purku")]
+        schema       (schemas/get-schema (schemas/get-latest-schema-version) "purkaminen")]
+    (fact "Meta: schema is found" schema => truthy)
     (fact "xml is parsed" buildings => truthy)
     (fact "xml has 2 buildings" (count buildings) => 2)
     (fact "Kiinteistotunnus" (:propertyId (first buildings)) => "63845900130022")
