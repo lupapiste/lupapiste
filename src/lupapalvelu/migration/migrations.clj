@@ -328,12 +328,12 @@
   (update-krysp-version-for-all-orgs "VVVL" "2.1.1" "2.1.3"))
 
 (defn- remove-ominaisuustiedot-and-update-schema-name [document new-schema-name]
-  (let [data (:data document)
-        data (dissoc data :mitat)
-        data (dissoc data :lammitys)
-        data (dissoc data :verkostoliittymat)
-        data (dissoc data :varusteet)
-        data (dissoc data :luokitus)]
+  (let [data (-> (:data document)
+               (dissoc :mitat)
+               (dissoc :lammitys)
+               (dissoc :verkostoliittymat)
+               (dissoc :varusteet)
+               (dissoc :luokitus))]
     (-> document
       (assoc :data data)
       (assoc-in  [:schema-info :i18name] (-> document :schema-info :name))
