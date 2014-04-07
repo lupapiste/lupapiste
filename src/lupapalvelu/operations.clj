@@ -406,7 +406,7 @@
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :purkaminen                  {:schema "purku"
+     :purkaminen                  {:schema "purkaminen"
                                    :permit-type permit/R
                                    :required common-schemas
                                    :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
