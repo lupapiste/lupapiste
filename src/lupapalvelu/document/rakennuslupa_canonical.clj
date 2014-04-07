@@ -159,7 +159,18 @@
                   :rakennustieto (update-in
                                    (get-rakennus-data toimenpide application purku-doc)
                                    [:Rakennus :rakennuksenTiedot]
-                                   select-keys [:rakennustunnus :kayttotarkoitus])}
+                                   (fn [m]
+                                     (-> m
+                                       ; Cleanup top level keys that will bi nil anyway.
+                                       ; Recursive cr/strip-nils would be too much.
+                                       (dissoc :verkostoliittymat)
+                                       (dissoc :energialuokka )
+                                       (dissoc :energiatehokkuusluku)
+                                       (dissoc :energiatehokkuusluvunYksikko)
+                                       (dissoc :paloluokka)
+                                       (dissoc :lammitystapa)
+                                       (dissoc :varusteet)
+                                       (dissoc :liitettyJatevesijarjestelmaanKytkin))))}
      :created (:created purku-doc)}))
 
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]

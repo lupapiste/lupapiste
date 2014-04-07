@@ -329,7 +329,6 @@
 
 (defn- remove-ominaisuustiedot-and-update-schema-name [document new-schema-name]
   (let [data (-> (:data document)
-               (dissoc :mitat)
                (dissoc :lammitys)
                (dissoc :verkostoliittymat)
                (dissoc :varusteet)

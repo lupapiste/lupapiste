@@ -278,7 +278,6 @@
                               (->
                                 common-rakennus
                                 (dissoc :huoneistot)
-                                (dissoc :mitat)
                                 (dissoc :lammitys)
                                 (dissoc :verkostoliittymat)
                                 (dissoc :varusteet)
