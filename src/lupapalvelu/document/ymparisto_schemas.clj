@@ -8,9 +8,9 @@
                   :body [{:name "alku" :type :date}
                          {:name "loppu" :type :date}
                          {:name "kello" :type :group
-                          :body [{:name "arkisin" :type :string :size "s"}
-                                 {:name "lauantait" :type :string :size "s"}
-                                 {:name "pyhat" :type :string :size "s"}]}]}))
+                          :body [{:name "arkisin" :type :time}
+                                 {:name "lauantait" :type :time}
+                                 {:name "pyhat" :type :time}]}]}))
 
 
 (def kesto-mini (body {:name "kesto" :type :group
