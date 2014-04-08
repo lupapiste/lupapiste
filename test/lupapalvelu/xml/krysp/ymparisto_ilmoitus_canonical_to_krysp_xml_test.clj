@@ -3,7 +3,7 @@
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :refer [meluilmoitus-canonical]]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical-test :refer [meluilmoitus-yritys-application ]]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
-            [lupapalvelu.document.validators :refer [dummy-doc]]
+            ;[lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :refer :all :as validator]
@@ -11,7 +11,11 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]))
+            [clojure.java.io :refer :all]
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]))
+
+(fact "2.1.2: :tag is set" (has-tag ilmoitus_to_krysp) => true)
 
 (defn- do-test [application]
   (let [canonical (meluilmoitus-canonical application "fi")
