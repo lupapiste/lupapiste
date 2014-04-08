@@ -178,7 +178,7 @@
 
                  ilmoittaja (:ilmoittaja Melutarina) => truthy
 
-                 toiminnanSijainti (get-in Melutarina [:toiminnanSijaintitieto :ToiminnanSijainti]) => truthy
+                 toiminnanSijainti (-> Melutarina :toiminnanSijaintitieto first :ToiminnanSijainti) => truthy
                  Osoite (:Osoite toiminnanSijainti) => truthy
                  osoitenimi (:osoitenimi Osoite) => {:teksti "Londb\u00f6lentie 97"}
                  kunta (:kunta Osoite) => "638"
