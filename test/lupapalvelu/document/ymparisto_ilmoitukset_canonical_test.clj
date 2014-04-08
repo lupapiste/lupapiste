@@ -1,57 +1,47 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as yic]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.canonical-test-common :refer :all]
             [lupapalvelu.document.ymparisto-schemas]))
 
-(def ^:private kesto {:created 1391415025497,
+(def ^:private kesto {:id "52ef4ef14206428d3c0394b7"
+                      :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}
                       :data
-                      {:kesto
-                       {:alku {:modified 1391415615718, :value "03.02.2014"},
-                        :kello
-                        {:arkisin {:modified 1391415637288, :value "07.00 - 16:00"},
-                         :lauantait {:modified 1391415639677, :value "-"},
-                         :pyhat {:modified 1391415640276, :value "-"}},
-                        :loppu {:modified 1391415618809, :value "07.02.2014"}}},
-                      :id "52ef4ef14206428d3c0394b7",
-                      :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}})
+                      (tools/wrapped
+                        {:kesto
+                         {:alku "03.02.2014"
+                          :loppu "7.2.2014"
+                          :arki {:arkiAlkuAika "7:00", :arkiLoppuAika "21:30"}
+                          :lauantai {:lauantaiAlkuAika "7:00", :lauantaiLoppuAika "21:30"}
+                          :sunnuntai {:sunnuntaiAlkuAika "7:00", :sunnuntaiLoppuAika "21:30"}}})
+                      })
 
-(def ^:private meluilmo {:created 1391415025497,
-               :data
-               {:melu
-                {:melu10mdBa {:modified 1391415596372, :value "150"},
-                 :mittaus {:modified 1391415612510, :value "dbsid?"},
-                 :paivalla {:modified 1391415601672
-                            :value "150"},
-                 :yolla {:modified 1391415602101, :value "0"}},
-                :rakentaminen
-                {:koneet
-                 {:modified 1391415557870,
-                  :value
-                  "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "},
-                 :kuvaus
-                 {:modified 1391415519512,
-                  :value
-                  "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"},
-                 :melua-aihettava-toiminta
-                 {:modified 1391415423129, :value "louhinta"}},
-                :tapahtuma
-                {:kuvaus
-                 {:modified 1391415593261,
-                  :value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"},
-                 :nimi {:modified 1391415570121, :value "Louhijouden saunailta"},
-                 :ulkoilmakonsertti {:modified 1391415571551, :value true}}},
-               :id "52ef4ef14206428d3c0394b5",
-               :schema-info
-               {:order 50,
-                :version 1,
-                :name "meluilmoitus",
-                :op
-                {:id "52ef4ef14206428d3c0394b4",
-                 :name "meluilmoitus",
-                 :created 1391415025497},
-                :removable true}})
+(fact "Meta test: kesto" kesto => valid-against-current-schema?)
+
+(def ^:private meluilmo
+  {:id "52ef4ef14206428d3c0394b5"
+   :created 1391415025497
+   :schema-info {:name "meluilmoitus", :version 1, :op {:id "52ef4ef14206428d3c0394b4", :name "meluilmoitus", :created 1391415025497}}
+   :data
+   {:melu
+    {:melu10mdBa {:value "150"}
+     :mittaus {:value "dbsid?"}
+     :paivalla {:value "150"}
+     :yolla {:value "0"}}
+    :rakentaminen
+    {:koneet
+     {:value "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "}
+     :kuvaus
+     {:value "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"}
+     :melua-aihettava-toiminta {:value "louhinta"}}
+    :tapahtuma {:kuvaus {:value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"}
+                :nimi {:value "Louhijouden saunailta"}
+                :ulkoilmakonsertti {:value true}}}
+   })
+
+(fact "Meta test: meluilmo" meluilmo => valid-against-current-schema?)
 
 (def meluilmoitus-application {:sent nil,
                                :neighbors {},
