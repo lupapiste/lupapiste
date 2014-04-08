@@ -22,11 +22,14 @@
                                              :luvanTunnistetiedot (lupatunnus (:id application))
                                              :lausuntotieto (get-statements (:statements application))
                                              :ilmoittaja (ilmoittaja (:hakija documents))
-                                             :toiminnanSijainti {:Osoite {:osoitenimi {:teksti (:address application)}
-                                                                          :kunta (:municipality application)}
-                                                                 :Kunta (:municipality application)
-                                                                 :Sijainti (:Sijainti (first (get-sijaintitieto application)))
-                                                                 :Kiinteistorekisterinumero (:propertyId application)}
+                                             :toiminnanSijaintitieto
+                                             {:toiminnanSijainti
+                                              {:Osoite {:osoitenimi {:teksti (:address application)}
+                                                       :kunta (:municipality application)}
+                                               :Kunta (:municipality application)
+                                               :Sijainti (:Sijainti (first (get-sijaintitieto application)))
+                                               :Kiinteistorekisterinumero (:propertyId application)}}
+                                             ; TODO map :Sijainti (:Sijainti (rest (get-sijaintitieto application)))
                                              :toimintatieto {:Toiminta (assoc-when {:yksilointitieto (:id meluilmo)
                                                                                     :alkuHetki (to-xml-datetime (:created meluilmo))}
                                                                                    :rakentaminen
@@ -37,6 +40,7 @@
                                                                                                             :ulkoilmakonsertti
                                                                                                             :muu))
                                                                                                  (str (-> meluilmo :data :tapahtuma :nimi) " - " (-> meluilmo :data :tapahtuma :kuvaus))}))}
+                                             ; FIXME
                                              :toiminnanKesto {:alkuHetki (to-xml-datetime-from-string (:alku kesto))
                                                               :loppuHetki (to-xml-datetime-from-string (:loppu kesto))
                                                               :arkisin (:arkisin kello)

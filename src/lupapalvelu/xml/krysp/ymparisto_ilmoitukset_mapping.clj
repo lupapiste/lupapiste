@@ -26,10 +26,12 @@
                               :child [mapping-common/lausunto_213]}
                              {:tag :ilmoittaja ; FIXME
                               :child mapping-common/ymp-osapuoli-children}
-                             {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
-                                                              {:tag :Kunta}
-                                                              mapping-common/sijantiType
-                                                              {:tag :Kiinteistorekisterinumero}]}
+                             {:tag :toiminnanSijaintitieto
+                              :child [{:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
+                                                                       {:tag :Kunta}
+                                                                       mapping-common/sijantiType
+                                                                       {:tag :Kiinteistorekisterinumero}]}]}
+
                              ; {:tag :ilmoittaja}}
                              {:tag :jatkoIlmoitusKytkin} ; boolean
                              {:tag :asianKuvaus} ; String
