@@ -4,6 +4,7 @@
             [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.neighbors :refer [find-by-id]]
             [sade.util :refer [fn->]]))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
@@ -13,11 +14,12 @@
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :municipality sonja-muni)]
     (command pena :add-comment :id application-id :text "foo" :target "application" :openApplication true) => ok?
-    (fact "no name" (command sonja "neighbor-add" :id application-id :propertyId "p" :street "s" :city "c" :zip "z" :email "e") => ok?)
-    (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
-    (fact "no city" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"  :zip "z" :email "e") => ok?)
-    (fact "no zip" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :email "e") => ok?)
-    (fact "no email" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
+    (fact "no name"   (command sonja "neighbor-add" :id application-id :propertyId "p"           :street "s" :city "c" :zip "z" :email "e") => ok?)
+    (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"             :city "c" :zip "z" :email "e") => ok?)
+    (fact "no city"   (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"           :zip "z" :email "e") => ok?)
+    (fact "no zip"    (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c"          :email "e") => ok?)
+    (fact "no email"  (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z") => ok?)))
+
 
 (defn- create-app-with-neighbor [& args]
   (let [application-id (apply create-app-id pena args)
@@ -28,19 +30,16 @@
         neighbors (:neighbors application)]
     [application neighborId neighbors]))
 
-(defn- find-by-id [neighborId neighbors]
-  (some (fn [neighbor] (when (= neighborId (:neighborId neighbor)) neighbor)) neighbors))
-
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
         neighbor (find-by-id neighborId neighbors)]
-    (fact (:neighbor neighbor) => {:propertyId "p"
-                                   :owner {:name "n"
-                                           :businessID nil
-                                           :nameOfDeceased nil
-                                           :type nil
-                                           :address {:street "s" :city "c" :zip "z"}
-                                           :email "e"}})
+    (fact neighbor => (contains {:propertyId "p"
+                                 :owner {:name "n"
+                                         :businessID nil
+                                         :nameOfDeceased nil
+                                         :type nil
+                                         :address {:street "s" :city "c" :zip "z"}
+                                         :email "e"}}))
     (fact (count (:status neighbor)) => 1)
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
 
@@ -52,13 +51,13 @@
         neighbors (:neighbors application)
         neighbor (find-by-id neighborId neighbors)]
     (fact (count neighbors) => 1)
-    (fact (:neighbor neighbor) => {:propertyId "p2"
-                                   :owner {:name "n2"
-                                           :businessID nil
-                                           :nameOfDeceased nil
-                                           :type nil
-                                           :address {:street "s2" :city "c2" :zip "z2"}
-                                           :email "e2"}})
+    (fact neighbor => (contains {:propertyId "p2"
+                                 :owner {:name "n2"
+                                         :businessID nil
+                                         :nameOfDeceased nil
+                                         :type nil
+                                         :address {:street "s2" :city "c2" :zip "z2"}
+                                         :email "e2"}}))
     (fact (count (:status neighbor)) => 1)
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
 
@@ -175,11 +174,12 @@
                 (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
 
               (let [file-id (->> application :attachments first :latestVersion :fileId)]
+
                 (fact "downloading should be possible"
-                  (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token token :file-id file-id) => http200?)
+                  (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
 
                 (fact "downloading with wrong token should not be possible"
-                  (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token "h4x3d token" :file-id file-id) => http401?)))
+                  (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
 
             (:auth application) => nil)))
 
