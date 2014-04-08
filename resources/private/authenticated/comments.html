@@ -80,8 +80,8 @@
               <div class="comment-text">
                 <span data-bind="if: $parents[1].mainConversation">
                   <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
-                    <span data-bind="if: target.attachmentId">
-                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + target.attachmentId()}">
+                    <span data-bind="if: target.id()">
+                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + target.id()}">
                       <span data-bind="text: target.attachmentType"></span>
                     </a></span>
                   </span>
