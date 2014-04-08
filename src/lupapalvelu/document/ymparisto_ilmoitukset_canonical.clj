@@ -8,12 +8,13 @@
   (let [unwrapped-docs {:documents (tools/unwrapped (:documents application))}
         documents (canonical-common/documents-by-type-without-blanks unwrapped-docs)
         meluilmo (first (:meluilmoitus documents))
-        kesto (-> (:ymp-ilm-kesto documents) first :data :kesto)
-        kello (apply merge (filter map? (vals kesto)))
-        melu (-> meluilmo :data :melu)
+        sijainti-seq (canonical-common/get-sijaintitieto application)
         rakentamisen-kuvaus (-> meluilmo :data :rakentaminen :kuvaus)
         muu-rakentaminen (-> meluilmo :data :rakentaminen :muu-rakentaminen)
-        muu-rakentaminen? (not (ss/blank? muu-rakentaminen))]
+        muu-rakentaminen? (not (ss/blank? muu-rakentaminen))
+        kesto (-> (:ymp-ilm-kesto documents) first :data :kesto)
+        kello (apply merge (filter map? (vals kesto)))
+        melu (-> meluilmo :data :melu)]
     {:Ilmoitukset {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
                                              :alkuHetki (util/to-xml-datetime (:submitted application))
@@ -22,13 +23,17 @@
                                              :lausuntotieto (canonical-common/get-statements (:statements application))
                                              :ilmoittaja (canonical-common/get-yhteystiedot (first (:hakija documents)))
                                              :toiminnanSijaintitieto
-                                             {:ToiminnanSijainti
-                                              {:Osoite {:osoitenimi {:teksti (:address application)}
-                                                       :kunta (:municipality application)}
-                                               :Kunta (:municipality application)
-                                               :Sijainti (:Sijainti (first (canonical-common/get-sijaintitieto application)))
-                                               :Kiinteistorekisterinumero (:propertyId application)}}
-                                             ; TODO map :Sijainti (:Sijainti (rest (get-sijaintitieto application)))
+                                             (cons
+                                               {:ToiminnanSijainti
+                                                {:Osoite {:osoitenimi {:teksti (:address application)}
+                                                         :kunta (:municipality application)}
+                                                 :Kunta (:municipality application)
+                                                 :Sijainti (:Sijainti (first sijainti-seq))
+                                                 :Kiinteistorekisterinumero (:propertyId application)}}
+                                               (map
+                                                 (fn [sijainti]
+                                                   {:ToiminnanSijainti (assoc sijainti :Osoite {:osoitenimi {:teksti canonical-common/empty-tag}})}) ; Osoite is mandatory
+                                                 (rest sijainti-seq)))
                                              :toimintatieto {:Toiminta (util/assoc-when {:yksilointitieto (:id meluilmo)
                                                                                          :alkuHetki (util/to-xml-datetime (:created meluilmo))}
                                                                                    :rakentaminen
