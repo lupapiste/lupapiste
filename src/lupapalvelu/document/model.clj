@@ -65,8 +65,8 @@
     (if-let [matches (re-matches #"([012]?[0-9]):([0-5]?[0-9])" v)]
       (let [h (util/->int (second matches))
             m (util/->int (last matches))]
-        (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:date"]))
-      [:warn "illegal-value:date"])))
+        (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))
+      [:warn "illegal-value:time"])))
 
 (defmethod validate-field :select [{:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
