@@ -96,7 +96,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
   self.showError = function (e) {
     var element = self.findErrorElement(e);
-    if (element.children().size()) {
+    if (element && element.children && element.children().size()) {
       element.stop();
       element.fadeIn("slow").css("display", "block");
     }
