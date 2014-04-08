@@ -24,12 +24,15 @@
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto
                               :child [mapping-common/lausunto_213]}
-                             {:tag :ilmoittaja
+                             {:tag :ilmoittaja ; FIXME
                               :child mapping-common/ymp-osapuoli-children}
                              {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
                                                               {:tag :Kunta}
                                                               mapping-common/sijantiType
                                                               {:tag :Kiinteistorekisterinumero}]}
+                             ; {:tag :ilmoittaja}}
+                             {:tag :jatkoIlmoitusKytkin} ; boolean
+                             {:tag :asianKuvaus} ; String
                              {:tag :toimintatieto :child [{:tag :Toiminta :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
                                                                                   {:tag :rakentaminen :child [{:tag :louhinta}
