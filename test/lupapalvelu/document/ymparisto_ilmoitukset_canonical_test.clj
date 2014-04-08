@@ -30,10 +30,8 @@
      :paivalla {:value "150"}
      :yolla {:value "0"}}
     :rakentaminen
-    {:koneet
-     {:value "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "}
-     :kuvaus
-     {:value "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"}
+    {:koneet {:value "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "}
+     :kuvaus {:value "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"}
      :melua-aihettava-toiminta {:value "louhinta"}}
     :tapahtuma {:kuvaus {:value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"}
                 :nimi {:value "Louhijouden saunailta"}
@@ -208,7 +206,7 @@
                  toiminnanKesto (:toiminnanKesto Melutarina) => truthy
 
                  melutiedot (:melutiedot Melutarina) => truthy
-                 koneidenLkm (:koneidenLkm melutiedot) => nil
+                 koneidenLkm (:koneidenLkm melutiedot) => "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. " ; TODO was nil, why?
                  melutaso (:melutaso melutiedot) => truthy
                  db (:db melutaso) => "150"
                  paiva (:paiva melutaso) => "150"
@@ -230,8 +228,7 @@
                  (:etunimi ilmoittaja) => "Pekka"
                  (:sukunimi ilmoittaja) => "Borga"
                  (:sahkopostiosoite ilmoittaja) => "pekka.borga@porvoo.fi"
-                 (:puhelinnumero ilmoittaja) => "121212")
-               )
+                 (:puhelinnumero ilmoittaja) => "121212"))
 
              (fact "toiminnan kesto"
                (:alkuPvm toiminnanKesto) => "2014-02-03"

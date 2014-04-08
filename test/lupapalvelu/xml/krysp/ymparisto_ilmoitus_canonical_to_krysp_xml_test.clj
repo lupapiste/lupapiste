@@ -37,6 +37,10 @@
       (xml/get-text lp-xml [:Melutarina :toiminnanKesto :lauantaiLoppuAika]) => "20:00:00.0"
       (xml/get-text lp-xml [:Melutarina :toiminnanKesto :sunnuntaiAlkuAika]) => "12:00:00"
       (xml/get-text lp-xml [:Melutarina :toiminnanKesto :sunnuntaiLoppuAika]) => "18:00:00")
+
+    (fact "koneet"
+      (xml/get-text lp-xml [:Melutarina :koneidenLkm]) => "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. ")
+
     ))
 
 
