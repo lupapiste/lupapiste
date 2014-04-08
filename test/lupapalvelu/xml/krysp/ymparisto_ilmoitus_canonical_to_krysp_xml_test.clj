@@ -3,7 +3,6 @@
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :refer [meluilmoitus-canonical]]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical-test :refer [meluilmoitus-yritys-application ]]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
-            ;[lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :refer :all :as validator]
