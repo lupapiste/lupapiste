@@ -31,12 +31,12 @@
     (fact "toiminnan kesto"
       (xml/get-text lp-xml [:Melutarina :toiminnanKesto :alkuPvm]) => "2014-02-03"
       (xml/get-text lp-xml [:Melutarina :toiminnanKesto :loppuPvm]) => "2014-02-07"
-      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :arkiAlkuAika]) => "07:00"
-      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :arkiLoppuAika]) => "21:30"
-      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :lauantaiAlkuAika]) => "08:00"
-      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :lauantaiLoppuAika]) => "20:00"
-      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :sunnuntaiAlkuAika]) => "12:00"
-      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :sunnuntaiLoppuAika]) => "18:00")
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :arkiAlkuAika]) => "07:00:00"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :arkiLoppuAika]) => "21:30:00"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :lauantaiAlkuAika]) => "08:00:00"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :lauantaiLoppuAika]) => "20:00:00.0"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :sunnuntaiAlkuAika]) => "12:00:00"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :sunnuntaiLoppuAika]) => "18:00:00")
     ))
 
 
