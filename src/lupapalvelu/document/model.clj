@@ -10,6 +10,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
+            [sade.util :as util]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -53,11 +54,19 @@
 (defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate-field :date [elem v]
+(defmethod validate-field :date [_ v]
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
+
+(defmethod validate-field :time [_ v]
+  (when-not (s/blank? v)
+    (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
+      (let [h (util/->int (first matches))
+            m (util/->int (second matches))]
+        (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))
+      [:warn "illegal-value:time"])))
 
 (defmethod validate-field :select [{:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
@@ -65,13 +74,15 @@
     (when-not (or (s/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
-;; FIXME implement validator, the same as :select?
+;; FIXME https://support.solita.fi/browse/LUPA-1453
+;; implement validator, the same as :select?
 (defmethod validate-field :radioGroup [elem v] nil)
 
 (defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
 (defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
 
-;; FIXME implement validator (mongo id, check that user exists)
+;; FIXME https://support.solita.fi/browse/LUPA-1454
+;; implement validator (mongo id, check that user exists)
 (defmethod validate-field :personSelector [elem v] nil)
 
 (defmethod validate-field nil [_ _]

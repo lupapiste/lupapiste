@@ -1,0 +1,11 @@
+error.illegal-value:time:  Kellonaika annetaan muodossa hh:mm (esim. 8:00 tai 16:00)
+ymp-ilm-kesto.kesto.arki._group_label: Kellonajat arkena
+ymp-ilm-kesto.kesto.arki.arkiAlkuAika: Alkaa arkena kello
+ymp-ilm-kesto.kesto.arki.arkiLoppuAika: Loppuu arkena kello
+ymp-ilm-kesto.kesto.lauantai.lauantaiAlkuAika: Alkaa lauantaina kello
+ymp-ilm-kesto.kesto.lauantai.lauantaiLoppuAika: Loppuu lauantaina kello
+ymp-ilm-kesto.kesto.sunnuntai.sunnuntaiAlkuAika: Alkaa sunnuntaina kello
+ymp-ilm-kesto.kesto.sunnuntai.sunnuntaiLoppuAika: Loppuu sunnuntaina kello
+ymp-ilm-kesto.kesto.lauantai._group_label: Kellonajat lauantaina
+ymp-ilm-kesto.kesto.sunnuntai._group_label: Kellonajat sunnuntaina
+TODO: poista keston vanhat avaimet
