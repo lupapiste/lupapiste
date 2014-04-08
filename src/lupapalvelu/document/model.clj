@@ -62,7 +62,7 @@
 
 (defmethod validate-field :time [_ v]
   (when-not (s/blank? v)
-    (if-let [matches (seq (rest (re-matches #"^([012]?[0-9]):([0-5]?[0-9])(:[0-5][0-9](\.\d)?)?$" v)))]
+    (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
       (let [h (util/->int (first matches))
             m (util/->int (second matches))]
         (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))

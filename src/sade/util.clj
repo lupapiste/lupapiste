@@ -169,12 +169,22 @@
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
 
+(def time-pattern #"^([012]?[0-9]):([0-5]?[0-9])(:([0-5][0-9])(\.(\d))?)?$")
+
+(defn to-xml-time-from-string [^String time-s]
+  (when-let [matches (and time-s (seq (filter #(and % (Character/isDigit (first %))) (rest (re-matches time-pattern time-s)))))]
+    (let [fmt (case (count matches)
+                2 "%02d:%02d"
+                3 "%02d:%02d:%02d"
+                4 "%02d:%02d:%02d.%d")]
+      (apply format fmt (map ->int matches)))))
+
 (def property-id-pattern
   "Regex for property id human readable format"
   #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
 
 (defn to-property-id [^String human-readable]
-  (let [parts (map #(Integer/parseInt %) (rest (re-matches property-id-pattern human-readable)))]
+  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
     (apply format "%03d%03d%04d%04d" parts)))
 
 (defn sequable?
