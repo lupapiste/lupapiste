@@ -1,11 +1,11 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical
   (:require [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer [to-xml-date to-xml-datetime assoc-when]]))
+            [sade.util :refer [to-xml-date-from-string to-xml-datetime assoc-when]]))
 
 (defn meluilmoitus-canonical [application lang]
   (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)
+        documents (canonical-common/documents-by-type-without-blanks application)
         meluilmo (first (:meluilmoitus documents))
         kesto (:kesto (:data (first (:ymp-ilm-kesto documents))))
         kello (:kello kesto)
