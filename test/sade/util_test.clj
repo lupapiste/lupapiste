@@ -116,12 +116,12 @@
 (facts "to-xml-time-from-string"
   (fact "nil -> nil" (to-xml-time-from-string nil) => nil)
   (fact "valid times"
-    (to-xml-time-from-string "12:12") => "12:12"
+    (to-xml-time-from-string "12:12") => "12:12:00"
     (to-xml-time-from-string "00:00:01") => "00:00:01"
     (to-xml-time-from-string "12:59:59.9") => "12:59:59.9"
-    (to-xml-time-from-string "0:0") => "00:00"
-    (to-xml-time-from-string "0:10") => "00:10"
-    (to-xml-time-from-string "1:0") => "01:00"))
+    (to-xml-time-from-string "0:0") => "00:00:00"
+    (to-xml-time-from-string "0:10") => "00:10:00"
+    (to-xml-time-from-string "1:0") => "01:00:00"))
 
 (facts "to-property-id"
   (to-property-id "245-003-0105-0006") => "24500301050006"

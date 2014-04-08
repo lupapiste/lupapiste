@@ -181,7 +181,7 @@
 (defn to-xml-time-from-string [^String time-s]
   (when-let [matches (and time-s (seq (filter #(and % (Character/isDigit (first %))) (rest (re-matches time-pattern time-s)))))]
     (let [fmt (case (count matches)
-                2 "%02d:%02d"
+                2 "%02d:%02d:00"
                 3 "%02d:%02d:%02d"
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
