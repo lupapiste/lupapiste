@@ -1,12 +1,7 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical
-  (:require [lupapalvelu.document.canonical-common :refer :all]
+  (:require [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]))
-
-(defn- ilmoittaja [hakijat]
-  ;(clojure.pprint/pprint hakijat)
-  (assert (= 1 (count hakijat)))
-  (->ymp-osapuoli (first hakijat)))
+            [sade.util :refer [to-xml-date to-xml-datetime assoc-when]]))
 
 (defn meluilmoitus-canonical [application lang]
   (let [application (tools/unwrapped application)
@@ -15,19 +10,19 @@
         kesto (:kesto (:data (first (:ymp-ilm-kesto documents))))
         kello (:kello kesto)
         melu (-> meluilmo :data :melu)]
-    {:Ilmoitukset {:toimituksenTiedot (toimituksen-tiedot application lang)
+    {:Ilmoitukset {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
                                              :alkuHetki (to-xml-datetime (:submitted application))
-                                             :kasittelytietotieto (get-kasittelytieto-ymp application :Kasittelytieto)
-                                             :luvanTunnistetiedot (lupatunnus (:id application))
-                                             :lausuntotieto (get-statements (:statements application))
-                                             :ilmoittaja (ilmoittaja (:hakija documents))
+                                             :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
+                                             :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+                                             :lausuntotieto (canonical-common/get-statements (:statements application))
+                                             :ilmoittaja (canonical-common/get-yhteystiedot (first (:hakija documents)))
                                              :toiminnanSijaintitieto
                                              {:toiminnanSijainti
                                               {:Osoite {:osoitenimi {:teksti (:address application)}
                                                        :kunta (:municipality application)}
                                                :Kunta (:municipality application)
-                                               :Sijainti (:Sijainti (first (get-sijaintitieto application)))
+                                               :Sijainti (:Sijainti (first (canonical-common/get-sijaintitieto application)))
                                                :Kiinteistorekisterinumero (:propertyId application)}}
                                              ; TODO map :Sijainti (:Sijainti (rest (get-sijaintitieto application)))
                                              :toimintatieto {:Toiminta (assoc-when {:yksilointitieto (:id meluilmo)
