@@ -19,7 +19,7 @@
                      :child [{:tag :yksilointitieto :ns "yht"}
                              {:tag :alkuHetki :ns "yht"}
                              {:tag :kasittelytietotieto
-                              :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
+                              :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
                              {:tag :luvanTunnistetiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto

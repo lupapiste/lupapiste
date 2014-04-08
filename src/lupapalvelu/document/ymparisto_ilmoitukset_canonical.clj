@@ -18,7 +18,7 @@
     {:Ilmoitukset {:toimituksenTiedot (toimituksen-tiedot application lang)
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
                                              :alkuHetki (to-xml-datetime (:submitted application))
-                                             :kasittelytietotieto (get-kasittelytieto-ymp application :KasittelyTieto)
+                                             :kasittelytietotieto (get-kasittelytieto-ymp application :Kasittelytieto)
                                              :luvanTunnistetiedot (lupatunnus (:id application))
                                              :lausuntotieto (get-statements (:statements application))
                                              :ilmoittaja (ilmoittaja (:hakija documents))
