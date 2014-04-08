@@ -14,9 +14,8 @@
                          {:alku "03.02.2014"
                           :loppu "7.2.2014"
                           :arki {:arkiAlkuAika "7:00", :arkiLoppuAika "21:30"}
-                          :lauantai {:lauantaiAlkuAika "7:00", :lauantaiLoppuAika "21:30"}
-                          :sunnuntai {:sunnuntaiAlkuAika "7:00", :sunnuntaiLoppuAika "21:30"}}})
-                      })
+                          :lauantai {:lauantaiAlkuAika "8:00", :lauantaiLoppuAika "20:00"}
+                          :sunnuntai {:sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}}})})
 
 (fact "Meta test: kesto" kesto => valid-against-current-schema?)
 
@@ -237,14 +236,15 @@
              (fact "toiminnan kesto"
                (:alkuPvm toiminnanKesto) => "2014-02-03"
                (:loppuPvm toiminnanKesto) => "2014-02-07"
-               ; FIXME
-               ;arkisin (:arkisin toiminnanKesto) => "07.00 - 16:00"
-               ;lauantaisin (:lauantaisin toiminnanKesto) => "-"
-               ;pyhisin (:pyhisin toiminnanKesto) => "-"
-               )
 
+               (:arkiAlkuAika toiminnanKesto) => "07:00"
+               (:arkiLoppuAika toiminnanKesto) => "21:30"
+               (:lauantaiAlkuAika toiminnanKesto) => "08:00"
+               (:lauantaiLoppuAika toiminnanKesto) => "20:00"
+               (:sunnuntaiAlkuAika toiminnanKesto) => "12:00"
+               (:sunnuntaiLoppuAika toiminnanKesto) => "18:00")
 
-;                 (clojure.pprint/pprint canonical)
+             ; (clojure.pprint/pprint canonical)
 ))
 
 (fl/facts* "Meluilmoitus yrityshakija to canonical"
