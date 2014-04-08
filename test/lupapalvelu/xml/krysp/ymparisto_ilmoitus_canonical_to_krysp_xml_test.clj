@@ -24,12 +24,14 @@
         lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
 
     ;(clojure.pprint/pprint canonical)
-    ;(print (indent-str xml))
+    ;(println xml-s)
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:YI {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (validator/validate (indent-str xml) (:permitType application) "2.1.2")
 
-    ;(fact "kuvaus" (xml/get-text lp-xml [:Melutarina :asianKuvaus]) )
+    (fact "toiminnan kesto"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :alkuPvm]) => "2014-02-03"
+      (xml/get-text lp-xml [:Melutarina :toiminnanKesto :loppuPvm]) => "2014-02-07")
 
     ))
 
