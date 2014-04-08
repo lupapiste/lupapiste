@@ -10,10 +10,11 @@
   (throw (UnsupportedOperationException. (str element))))
 
 (defn dummy-values [{:keys [type subtype case name body] :as element}]
-  (condp = (keyword type)
+  (case (keyword type)
     :text             "text"
     :checkbox         true
     :date             "2.5.1974"
+    :time             "16:10"
     :select           (-> body first :name)
     :radioGroup       (-> body first :name)
     :personSelector   "123"
