@@ -41,11 +41,14 @@
                                                                                                               {:tag :muu}]}
                                                                           {:tag :tapahtuma :child [{:tag :ulkoilmakonsertti}
                                                                                                    {:tag :muu}]}]}]}
-                             {:tag :toiminnanKesto :child [
-                                                           {:tag :alkuPvm}
+                             {:tag :toiminnanKesto :child [{:tag :alkuPvm}
                                                            {:tag :loppuPvm}
-                                                           ; FIXME
-                                                           ]}
+                                                           {:tag :arkiAlkuAika}
+                                                           {:tag :arkiLoppuAika}
+                                                           {:tag :lauantaiAlkuAika}
+                                                           {:tag :lauantaiLoppuAika}
+                                                           {:tag :sunnuntaiAlkuAika}
+                                                           {:tag :sunnuntaiLoppuAika}]}
                              {:tag :melutiedot :child [{:tag :koneidenLkm}
                                                        {:tag :melutaso :child [{:tag :db}
                                                                                {:tag :paiva}
