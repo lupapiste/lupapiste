@@ -190,21 +190,8 @@
                  lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
                  ilmoittaja (:ilmoittaja Melutarina) => truthy
-                 nimi (:nimi ilmoittaja) => "Yksityishenkil\u00f6"
-                 postiosoite (:postiosoite ilmoittaja) => truthy
-                 osoitenimi (:osoitenimi postiosoite) => truthy
-                 teksti (:teksti osoitenimi) => "Murskaajankatu 5"
-                 postinumero (:postinumero postiosoite) => "36570"
-                 postitoimipaikannimi (:postitoimipaikannimi postiosoite) => "Kaivanto"
 
-                 yhteyshenkilo (:yhteyshenkilo ilmoittaja) => truthy
-                 nimi (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
-                 sahkopostiosoite (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
-                 puhelin (:puhelin yhteyshenkilo) => "121212"
-
-                 liikeJaYhteisotunnus (:liikeJaYhteisotunnus ilmoittaja) => nil
-
-                 toiminnanSijainti (:toiminnanSijainti Melutarina) => truthy
+                 toiminnanSijainti (get-in Melutarina [:toiminnanSijaintitieto :ToiminnanSijainti]) => truthy
                  Osoite (:Osoite toiminnanSijainti) => truthy
                  osoitenimi (:osoitenimi Osoite) => {:teksti "Londb\u00f6lentie 97"}
                  kunta (:kunta Osoite) => "638"
@@ -230,11 +217,6 @@
                  muu (:muu tapahtuma) => nil
 
                  toiminnanKesto (:toiminnanKesto Melutarina) => truthy
-                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-02-03T00:00:00"
-                 loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07T00:00:00"
-                 arkisin (:arkisin toiminnanKesto) => "07.00 - 16:00"
-                 lauantaisin (:lauantaisin toiminnanKesto) => "-"
-                 pyhisin (:pyhisin toiminnanKesto) => "-"
 
                  melutiedot (:melutiedot Melutarina) => truthy
                  koneidenLkm (:koneidenLkm melutiedot) => nil
@@ -244,34 +226,63 @@
                  yo (:yo melutaso) => "0"
                  mittaaja (:mittaaja melutaso) => "dbsid?"]
 
+
+             (facts "ilmoittaja"
+               (let [postiosoite (get-in ilmoittaja [:osoitetieto :Osoite]) => truthy
+                     osoitenimi (:osoitenimi postiosoite) => truthy]
+
+                 (:yhteyshenkilonNimi ilmoittaja) => nil
+                 (:yrityksenNimi ilmoittaja) => nil
+                 (:yTunnus ilmoittaja) => nil
+
+                 (:teksti osoitenimi) => "Murskaajankatu 5"
+                 (:postinumero postiosoite) => "36570"
+                 (:postitoimipaikannimi postiosoite) => "Kaivanto"
+                 (:etunimi ilmoittaja) => "Pekka"
+                 (:sukunimi ilmoittaja) => "Borga"
+                 (:sahkopostiosoite ilmoittaja) => "pekka.borga@porvoo.fi"
+                 (:puhelinnumero ilmoittaja) => "121212")
+               )
+
+             (fact "toiminnan kesto"
+               (:alkuPvm toiminnanKesto) => "2014-02-03"
+               (:loppuPvm toiminnanKesto) => "2014-02-07"
+               ; FIXME
+               ;arkisin (:arkisin toiminnanKesto) => "07.00 - 16:00"
+               ;lauantaisin (:lauantaisin toiminnanKesto) => "-"
+               ;pyhisin (:pyhisin toiminnanKesto) => "-"
+               )
+
+
 ;                 (clojure.pprint/pprint canonical)
 ))
 
 (fl/facts* "Meluilmoitus yrityshakija to canonical"
-           (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
-                 Ilmoitukset (:Ilmoitukset canonical) => truthy
-                 toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
-                 aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
+  (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
+        Ilmoitukset (:Ilmoitukset canonical) => truthy
+        toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
+        aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
 
-                 melutarina (-> Ilmoitukset :melutarina :Melutarina) => truthy
-                 kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
+        melutarina (-> Ilmoitukset :melutarina :Melutarina) => truthy
+        kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
 
-                 luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
-                 LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
-                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-                 MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-                 tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
-                 sovellus (:sovellus MuuTunnus) => "Lupapiste"
-                 ilmoittaja (:ilmoittaja melutarina) => {:nimi "Yrtti Oy",
-                                                         :postiosoite
-                                                         {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+        luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
+        sovellus (:sovellus MuuTunnus) => "Lupapiste"]
+
+    (fact "yritys-ilmoittaja"
+      (:ilmoittaja melutarina) => {:yTunnus "1060155-5"
+                                   :yrityksenNimi "Yrtti Oy"
+                                   :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
+                                   :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
                                                           :postitoimipaikannimi "kuuva",
-                                                          :postinumero "43640"},
-                                                         :yhteyshenkilo
-                                                         {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-                                                          :puhelin "060222155",
-                                                          :sahkopostiosoite "tew@gjr.fi"},
-                                                         :liikeJaYhteisotunnus "1060155-5"}]))
+                                                          :postinumero "43640"}}
+                                   :puhelinnumero "060222155"
+                                   :sahkopostiosoite "tew@gjr.fi"})
+    ))
 
 
 
