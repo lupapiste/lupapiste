@@ -18,7 +18,7 @@
                                              :lausuntotieto (canonical-common/get-statements (:statements application))
                                              :ilmoittaja (canonical-common/get-yhteystiedot (first (:hakija documents)))
                                              :toiminnanSijaintitieto
-                                             {:toiminnanSijainti
+                                             {:ToiminnanSijainti
                                               {:Osoite {:osoitenimi {:teksti (:address application)}
                                                        :kunta (:municipality application)}
                                                :Kunta (:municipality application)
@@ -36,11 +36,12 @@
                                                                                                             :muu))
                                                                                                  (str (-> meluilmo :data :tapahtuma :nimi) " - " (-> meluilmo :data :tapahtuma :kuvaus))}))}
                                              ; FIXME
-                                             :toiminnanKesto {:alkuHetki (to-xml-datetime-from-string (:alku kesto))
-                                                              :loppuHetki (to-xml-datetime-from-string (:loppu kesto))
-                                                              :arkisin (:arkisin kello)
-                                                              :lauantaisin (:lauantait kello)
-                                                              :pyhisin (:pyhat kello)}
+                                             :toiminnanKesto {:alkuPvm (to-xml-date-from-string (:alku kesto))
+                                                              :loppuPvm (to-xml-date-from-string (:loppu kesto))
+                                                              ;:arkisin (:arkisin kello)
+                                                              ;:lauantaisin (:lauantait kello)
+                                                              ;:pyhisin (:pyhat kello)
+                                                              }
                                              :melutiedot {:melutaso {:db (:melu10mdBa melu)
                                                                      :paiva (:paivalla melu)
                                                                      :yo (:yolla melu)

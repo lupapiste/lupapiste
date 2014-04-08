@@ -25,7 +25,7 @@
                              {:tag :lausuntotieto
                               :child [mapping-common/lausunto_213]}
                              {:tag :toiminnanSijaintitieto
-                              :child [{:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
+                              :child [{:tag :ToiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
                                                                        {:tag :Kunta}
                                                                        mapping-common/sijantiType
                                                                        {:tag :Kiinteistorekisterinumero}]}]}
@@ -41,8 +41,11 @@
                                                                                                               {:tag :muu}]}
                                                                           {:tag :tapahtuma :child [{:tag :ulkoilmakonsertti}
                                                                                                    {:tag :muu}]}]}]}
-                             {:tag :toiminnanKesto :child [{:tag :alkuHetki}
-                                                           {:tag :loppuHetki}]}
+                             {:tag :toiminnanKesto :child [
+                                                           {:tag :alkuPvm}
+                                                           {:tag :loppuPvm}
+                                                           ; FIXME
+                                                           ]}
                              {:tag :melutiedot :child [{:tag :koneidenLkm}
                                                        {:tag :melutaso :child [{:tag :db}
                                                                                {:tag :paiva}
