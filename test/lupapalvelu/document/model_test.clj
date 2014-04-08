@@ -59,6 +59,18 @@
   (validate-field {:type :date} "") => nil
   (validate-field {:type :date} "11.12.2013") => nil)
 
+(facts "times"
+  (validate-field {:type :time} "abba") => [:warn "illegal-value:date"]
+  (validate-field {:type :time} "") => nil
+  (validate-field {:type :time} "11:12") => nil
+  (validate-field {:type :time} "1:2") => nil
+  (validate-field {:type :time} "1:20") => nil
+  (validate-field {:type :time} "00:00") => nil
+  (validate-field {:type :time} "23:59") => nil
+  (validate-field {:type :time} "24:00") => [:warn "illegal-value:date"]
+  (validate-field {:type :time} "23:60") => [:warn "illegal-value:date"]
+  (validate-field {:type :time} "-1:10") => [:warn "illegal-value:date"])
+
 ;;
 ;; validate
 ;;

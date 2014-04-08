@@ -10,6 +10,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
+            [sade.util :as util]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -53,11 +54,19 @@
 (defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate-field :date [elem v]
+(defmethod validate-field :date [_ v]
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
+
+(defmethod validate-field :time [_ v]
+  (when-not (s/blank? v)
+    (if-let [matches (re-matches #"([012]?[0-9]):([0-5]?[0-9])" v)]
+      (let [h (util/->int (second matches))
+            m (util/->int (last matches))]
+        (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:date"]))
+      [:warn "illegal-value:date"])))
 
 (defmethod validate-field :select [{:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
