@@ -66,7 +66,11 @@
   (validate-field {:type :time} "1:2") => nil
   (validate-field {:type :time} "1:20") => nil
   (validate-field {:type :time} "00:00") => nil
+  (validate-field {:type :time} "00:00:00") => nil
+  (validate-field {:type :time} "00:00:00.1") => nil
   (validate-field {:type :time} "23:59") => nil
+  (validate-field {:type :time} "23:59:59") => nil
+  (validate-field {:type :time} "23:59:59.9") => nil
   (validate-field {:type :time} "24:00") => [:warn "illegal-value:time"]
   (validate-field {:type :time} "23:60") => [:warn "illegal-value:time"]
   (validate-field {:type :time} "-1:10") => [:warn "illegal-value:time"])
