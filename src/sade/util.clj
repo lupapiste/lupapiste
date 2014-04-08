@@ -13,6 +13,13 @@
   "traverses m and applies f to all maps within"
   [f m] (prewalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
 
+(defn convert-values
+  "Runs a recursive conversion"
+  ([m f]
+    (postwalk-map (partial map (fn [[k v]] [k (f v)])) m))
+  ([m pred f]
+    (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
+
 ; from clojure.contrib/core
 
 (defn dissoc-in
