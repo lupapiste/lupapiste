@@ -372,13 +372,6 @@
                                                      :child [{:tag :etunimi}
                                                              {:tag :sukunimi}]}]}]}])
 
-(def ymp-osapuoli-children
-  [{:tag :nimi}
-   {:tag :postiosoite :child postiosoite-children-ns-yht}
-   {:tag :sahkopostiosoite}
-   {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
-   {:tag :liikeJaYhteisotunnus}])
-
 (def verkkolaskutus_213
   {:tag :Verkkolaskutus
    :ns "yht"

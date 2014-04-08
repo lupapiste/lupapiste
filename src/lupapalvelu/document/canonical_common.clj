@@ -204,6 +204,8 @@
 (defn get-state [application]
   (let [state (keyword (:state application))]
     {:Tilamuutos
+     ; TODO vektoriksi? Kuittaukset taustajarjestelmatoimittajilta
+     ; https://support.solita.fi/browse/LUPA-1437
      {:tila (application-state-to-krysp-state state)
       :pvm (to-xml-date ((state-timestamps state) application))
       :kasittelija (get-handler application)}}))
@@ -211,7 +213,8 @@
 
 (defn lupatunnus [id]
   {:LupaTunnus
-   {:muuTunnustieto {:MuuTunnus {:tunnus id
+   {; :saapumisPvm submitted-timestamp
+    :muuTunnustieto {:MuuTunnus {:tunnus id
                                  :sovellus "Lupapiste"}}}})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi

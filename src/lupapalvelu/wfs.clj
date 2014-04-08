@@ -295,7 +295,8 @@
           (polygon p))))))
 
 (defn getcapabilities [request]
-  (let [{:keys [host path]} (env/value :geoserver :wms)
+  (let [host (env/value :geoserver :host) ; local IP from Chef environment
+        path (env/value :geoserver :wms :path)
         wms-url (str host path)]
     (:body (http/get wms-url
              {:query-params {"version" "1.1.1"

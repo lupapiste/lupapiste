@@ -371,11 +371,12 @@
                                                              [:muut :muu]]
                                               :yl-uusi-toiminta [[:muut :muu]]
                                               :maa-aineslupa [[:muut :muu]]
+                                              "vvvl-vesijohdosta" [[:muut :muu]]
                                               }
                      :krysp {:R {:url local-krysp, :version "2.1.2"
                                  :ftpUser "dev_sipoo"}
                              :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
-                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
+                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
                              :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
                              :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
                              :VVVL {:ftpUser "dev_ymp_sipoo" :version "2.1.3"}}
