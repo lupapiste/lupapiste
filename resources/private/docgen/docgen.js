@@ -27,10 +27,8 @@ var docgen = (function () {
 
       if (schema.info.repeating && !isDisabled && authorizationModel.ok('create-doc')) {
 
-        var btn = $("<button>")
-          .attr("id", schema.info.name + "_append_btn")
+        var btn = $("<button>", {"id": schema.info.name + "_append_btn", "class": "btn block"})
           .text(loc(schema.info.name + "._append_label"))
-          .addClass("btn").addClass("block")
           .click(function () {
             var self = this;
             ajax
