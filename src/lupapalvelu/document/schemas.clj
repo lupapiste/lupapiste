@@ -379,110 +379,128 @@
                                   {:name talousrakennus}
                                   {:name "999 muualla luokittelemattomat rakennukset"}
                                   {:name "ei tiedossa"}])
-(def rakennuksen-tiedot-ilman-huoneistoa [{:name "kaytto"
-                          :type :group
-                          :body [{:name "rakentajaTyyppi" :type :select :required true
-                                  :body [{:name "liiketaloudellinen"}
-                                         {:name "muu"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select :size "l"
-                                  :body rakennuksen-kayttotarkoitus}]}
-                         {:name "mitat"
-                          :type :group
-                          :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                 {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]}
-                         {:name "rakenne"
-                          :type :group
-                          :body [{:name "rakentamistapa" :type :select :required true
-                                  :body [{:name "elementti"}
-                                         {:name "paikalla"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
-                                  :body [{:name "betoni"}
-                                         {:name "tiili"}
-                                         {:name "ter\u00e4s"}
-                                         {:name "puu"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "muuRakennusaine" :type :string}
-                                 {:name "julkisivu" :type :select :other-key "muuMateriaali"
-                                  :body [{:name "betoni"}
-                                         {:name "tiili"}
-                                         {:name "metallilevy"}
-                                         {:name "kivi"}
-                                         {:name "puu"}
-                                         {:name "lasi"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "muuMateriaali" :type :string}]}
-                         {:name "lammitys"
-                          :type :group
-                          :body [{:name "lammitystapa" :type :select
-                                  :body [{:name "vesikeskus"}
-                                         {:name "ilmakeskus"}
-                                         {:name "suora s\u00e4hk\u00f6"}
-                                         {:name "uuni"}
-                                         {:name "ei l\u00e4mmityst\u00e4"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
-                                  :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
-                                         {:name "kevyt poltto\u00f6ljy"}
-                                         {:name "raskas poltto\u00f6ljy"}
-                                         {:name "s\u00e4hk\u00f6"}
-                                         {:name "kaasu"}
-                                         {:name "kiviihiili koksi tms"}
-                                         {:name "turve"}
-                                         {:name "maal\u00e4mp\u00f6"}
-                                         {:name "puu"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "muu-lammonlahde" :type :string}]}
-                         {:name "verkostoliittymat" :type :group :layout :vertical
-                          :body [{:name "viemariKytkin" :type :checkbox}
-                                 {:name "vesijohtoKytkin" :type :checkbox}
-                                 {:name "sahkoKytkin" :type :checkbox}
-                                 {:name "maakaasuKytkin" :type :checkbox}
-                                 {:name "kaapeliKytkin" :type :checkbox}]}
-                         {:name "varusteet" :type :group :layout :vertical
-                          :body [{:name "sahkoKytkin" :type :checkbox}
-                                 {:name "kaasuKytkin" :type :checkbox}
-                                 {:name "viemariKytkin" :type :checkbox}
-                                 {:name "vesijohtoKytkin" :type :checkbox}
-                                 {:name "hissiKytkin" :type :checkbox}
-                                 {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                                 {:name "lamminvesiKytkin" :type :checkbox}
-                                 {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                 {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                                 {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
-                                 {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]}
-                         {:name "luokitus"
-                          :type :group
-                          :body [{:name "energialuokka" :type :select
-                                  :body [{:name "A"}
-                                         {:name "B"}
-                                         {:name "C"}
-                                         {:name "D"}
-                                         {:name "E"}
-                                         {:name "F"}
-                                         {:name "G"}]}
-                                 {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
-                                 {:name "energiatehokkuusluvunYksikko" :type :select
-                                  :body [{:name "kWh/m2"}
-                                         {:name "kWh/brm2/vuosi"}]}
-                                 {:name "paloluokka" :type :select
-                                  :body [{:name "palonkest\u00e4v\u00e4"}
-                                          {:name "paloapid\u00e4tt\u00e4v\u00e4"}
-                                          {:name "paloahidastava"}
-                                          {:name "l\u00e4hinn\u00e4 paloakest\u00e4v\u00e4"}
-                                          {:name "l\u00e4hinn\u00e4 paloapid\u00e4tt\u00e4v\u00e4"}
-                                          {:name "l\u00e4hinn\u00e4 paloahidastava"}
-                                          {:name "P1"}
-                                          {:name "P2"}
-                                          {:name "P3"}
-                                          {:name "P1/P2"}
-                                          {:name "P1/P3"}
-                                          {:name "P2/P3"}
-                                          {:name "P1/P2/P3"}]}]}])
+
+(def kaytto {:name "kaytto"
+             :type :group
+             :body [{:name "rakentajaTyyppi" :type :select :required true
+                     :body [{:name "liiketaloudellinen"}
+                            {:name "muu"}
+                            {:name "ei tiedossa"}]}
+                    {:name "kayttotarkoitus" :type :select :size "l"
+                     :body rakennuksen-kayttotarkoitus}]})
+
+(def mitat {:name "mitat"
+            :type :group
+            :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                   {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                   {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                   {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                   {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+
+(def rakenne {:name "rakenne"
+              :type :group
+              :body [{:name "rakentamistapa" :type :select :required true
+                      :body [{:name "elementti"}
+                             {:name "paikalla"}
+                             {:name "ei tiedossa"}]}
+                     {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
+                      :body [{:name "betoni"}
+                             {:name "tiili"}
+                             {:name "ter\u00e4s"}
+                             {:name "puu"}
+                             {:name "ei tiedossa"}]}
+                     {:name "muuRakennusaine" :type :string}
+                     {:name "julkisivu" :type :select :other-key "muuMateriaali"
+                      :body [{:name "betoni"}
+                             {:name "tiili"}
+                             {:name "metallilevy"}
+                             {:name "kivi"}
+                             {:name "puu"}
+                             {:name "lasi"}
+                             {:name "ei tiedossa"}]}
+                     {:name "muuMateriaali" :type :string}]})
+
+(def lammitys {:name "lammitys"
+               :type :group
+               :body [{:name "lammitystapa" :type :select
+                       :body [{:name "vesikeskus"}
+                              {:name "ilmakeskus"}
+                              {:name "suora s\u00e4hk\u00f6"}
+                              {:name "uuni"}
+                              {:name "ei l\u00e4mmityst\u00e4"}
+                              {:name "ei tiedossa"}]}
+                      {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
+                       :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
+                              {:name "kevyt poltto\u00f6ljy"}
+                              {:name "raskas poltto\u00f6ljy"}
+                              {:name "s\u00e4hk\u00f6"}
+                              {:name "kaasu"}
+                              {:name "kiviihiili koksi tms"}
+                              {:name "turve"}
+                              {:name "maal\u00e4mp\u00f6"}
+                              {:name "puu"}
+                              {:name "ei tiedossa"}]}
+                      {:name "muu-lammonlahde" :type :string}]})
+
+(def verkostoliittymat {:name "verkostoliittymat" :type :group :layout :vertical
+                        :body [{:name "viemariKytkin" :type :checkbox}
+                               {:name "vesijohtoKytkin" :type :checkbox}
+                               {:name "sahkoKytkin" :type :checkbox}
+                               {:name "maakaasuKytkin" :type :checkbox}
+                               {:name "kaapeliKytkin" :type :checkbox}]})
+(def varusteet {:name "varusteet" :type :group :layout :vertical
+                                                     :body [{:name "sahkoKytkin" :type :checkbox}
+                                                            {:name "kaasuKytkin" :type :checkbox}
+                                                            {:name "viemariKytkin" :type :checkbox}
+                                                            {:name "vesijohtoKytkin" :type :checkbox}
+                                                            {:name "hissiKytkin" :type :checkbox}
+                                                            {:name "koneellinenilmastointiKytkin" :type :checkbox}
+                                                            {:name "lamminvesiKytkin" :type :checkbox}
+                                                            {:name "aurinkopaneeliKytkin" :type :checkbox}
+                                                            {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
+                                                            {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}
+                                                            {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
+
+(def luokitus {:name "luokitus"
+               :type :group
+               :body [{:name "energialuokka" :type :select
+                       :body [{:name "A"}
+                              {:name "B"}
+                              {:name "C"}
+                              {:name "D"}
+                              {:name "E"}
+                              {:name "F"}
+                              {:name "G"}]}
+                      {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
+                      {:name "energiatehokkuusluvunYksikko" :type :select
+                       :body [{:name "kWh/m2"}
+                              {:name "kWh/brm2/vuosi"}]}
+                      {:name "paloluokka" :type :select
+                       :body [{:name "palonkest\u00e4v\u00e4"}
+                               {:name "paloapid\u00e4tt\u00e4v\u00e4"}
+                               {:name "paloahidastava"}
+                               {:name "l\u00e4hinn\u00e4 paloakest\u00e4v\u00e4"}
+                               {:name "l\u00e4hinn\u00e4 paloapid\u00e4tt\u00e4v\u00e4"}
+                               {:name "l\u00e4hinn\u00e4 paloahidastava"}
+                               {:name "P1"}
+                               {:name "P2"}
+                               {:name "P3"}
+                               {:name "P1/P2"}
+                               {:name "P1/P3"}
+                               {:name "P2/P3"}
+                               {:name "P1/P2/P3"}]}]})
+
+(def rakennuksen-tiedot-ilman-huoneistoa [kaytto
+                                          mitat
+                                          rakenne
+                                          lammitys
+                                          verkostoliittymat
+                                          varusteet
+                                          luokitus])
+
+(def rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja [kaytto
+                                                                  rakenne
+                                                                  mitat])
 
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistot))
 
@@ -535,9 +553,20 @@
                                              full-osoite
                                              rakennuksen-tiedot-ilman-huoneistoa))
 
+(def olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja
+  (body rakennuksen-valitsin
+        rakennuksen-omistajat
+        full-osoite
+        rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja))
+
+
 (def rakennuksen-muuttaminen-ei-huoneistoja (body
                                                muutostyonlaji
                                                olemassaoleva-rakennus-ei-huoneistoja))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
+                                               muutostyonlaji
+                                               olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
 (def rakennuksen-muuttaminen (body
                                muutostyonlaji
@@ -574,7 +603,7 @@
                      {:name "r\u00e4nsistymisen vuoksi hyl\u00e4tty"}
                      {:name "poistaminen"}]}
              {:name "poistumanAjankohta" :type :date}
-             olemassaoleva-rakennus))
+             olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
 
 (def rakennuspaikka [{:name "kiinteisto"
                       :type :group
@@ -626,13 +655,16 @@
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja)}
 
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja)}
+
    {:info {:name "rakennuksen-muuttaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-muuttaminen)}
 
     {:info {:name "rakennuksen-laajentaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-    {:info {:name "purku" :approvable true}
+    {:info {:name "purkaminen" :i18name "purku" :approvable true}
      :body (approvable-top-level-groups purku)}
 
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}

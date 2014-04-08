@@ -322,7 +322,7 @@
                                    :attachments rakennuksen_muutos_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
+     :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
@@ -336,21 +336,21 @@
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
+     :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :takka-tai-hormi             {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
+     :takka-tai-hormi             {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
+     :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
@@ -406,7 +406,7 @@
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :purkaminen                  {:schema "purku"
+     :purkaminen                  {:schema "purkaminen"
                                    :permit-type permit/R
                                    :required common-schemas
                                    :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
@@ -475,7 +475,7 @@
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
-                                   :required ["maksaja" "rakennuspaikka"]
+                                   :required ["ymp-maksaja" "rakennuspaikka"]
                                    :attachments []
                                    :link-permit-required false}
      :vvvl-vesijohdosta           {:schema "talousvedet"

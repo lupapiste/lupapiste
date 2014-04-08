@@ -271,11 +271,17 @@
 
 (def ^:private purku {:id "purku"
                       :created 4
-                      :schema-info {:name "purku"
+                      :schema-info {:name "purkaminen"
                                     :version 1
                                     :op {:name "purkaminen"}}
                       :data (conj
-                              common-rakennus
+                              (->
+                                common-rakennus
+                                (dissoc :huoneistot)
+                                (dissoc :lammitys)
+                                (dissoc :verkostoliittymat)
+                                (dissoc :varusteet)
+                                (dissoc :luokitus))
                               {:rakennusnro {:value "001"}
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
@@ -651,7 +657,7 @@
                      (get-in [:data :huoneistot])
                      tools/unwrapped
                      get-huoneisto-data)
-        h2 (first huoneistot), h1 (last huoneistot)]
+        h2 (last huoneistot), h1 (first huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
     (fact "h1 huoneluku" (:huoneluku h1) => "66")
@@ -811,13 +817,21 @@
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
-    (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 2)
+    (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
+    (fact "Purku: syy" (-> purku-t :purkaminen :purkamisenSyy) => "tuhoutunut")
+    (facts "Purku: rakennus"
+      (let [rakennus (get-in purku-t [:rakennustieto :Rakennus])]
+        (fact "omistaja" (-> rakennus :omistajatieto first :Omistaja :henkilo :sahkopostiosoite) => "pena@example.com")
+        (fact "yksilointitieto" (-> rakennus :yksilointitieto) => "purku")
+        (fact "rakennusnro" (-> rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro) => "001")
+        (fact "kayttotarkoitus" (-> rakennus :rakennuksenTiedot :kayttotarkoitus) => "012 kahden asunnon talot")))
+
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
 
