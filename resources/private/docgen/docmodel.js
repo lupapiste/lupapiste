@@ -350,9 +350,12 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function buildString(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
-    var type = (subSchema.subtype === "email") ? "email" : "text";
+
+    var supportedInputSubtypes = ["email", "time"];
+    var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
+
     var sizeClass = self.sizeClasses[subSchema.size] || "";
-    var input = makeInput(type, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
+    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
     setMaxLen(input, subSchema);
 
     span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
@@ -466,6 +469,15 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     input.appendTo(span);
 
     return span;
+  }
+
+  function buildTime(subSchema, model, path, partOfChoice) {
+    // Set implisit options into a clone
+    var timeSchema = _.clone(subSchema);
+    timeSchema.subtype = "time";
+    timeSchema.size = "m";
+    timeSchema["max-len"] = 10; // hh:mm:ss.f
+    return buildString(timeSchema, model, path, partOfChoice);
   }
 
   function buildSelect(subSchema, model, path) {
@@ -807,6 +819,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     select: buildSelect,
     radioGroup: buildRadioGroup,
     date: buildDate,
+    time: buildTime,
     element: buildElement,
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
