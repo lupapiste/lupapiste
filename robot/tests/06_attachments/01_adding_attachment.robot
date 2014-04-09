@@ -85,10 +85,15 @@ Sonja goes to conversation tab
   Open application  ${appname}  753-416-25-30
   Open tab  conversation
   Click Element  link=Ote alueen peruskartasta
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+
+Sonja goes to attachments tab
+  [Tags]  attachments
+  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Open tab  attachments
 
 Sonja see that attachment is for authority
   [Tags]  attachments
-  Wait Until  Comment count is  2
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  requires_authority_action
 
 Sonja opens attachment details
