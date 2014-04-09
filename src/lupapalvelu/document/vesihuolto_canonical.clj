@@ -2,6 +2,7 @@
   (require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
            [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
+           [lupapalvelu.i18n :as i18n]
            [sade.strings :refer [lower-case]]))
 
 
@@ -53,7 +54,10 @@
 
 (defn vapautus-canonical [application lang]
   (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)]
+        documents (documents-by-type-without-blanks application)
+        kuvaus (-> (:hankkeen-kuvaus-vesihuolto documents) first :data :kuvaus)
+        operation-name (->> (:operations application) first :name (i18n/localize lang "operations"))
+        asian-kuvaus (str operation-name " / " kuvaus)]
     {:Vesihuoltolaki
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :vapautukset
@@ -67,5 +71,5 @@
          {:hakija (remove nil? (map get-yhteystiedot (:hakija documents)))
           :kohde (get-vapautus-kohde application documents)
           :sijaintitieto (get-sijaintitieto application)}}
-        :asianKuvaus (:kuvaus (:data (first (:hankkeen-kuvaus-vesihuolto documents))))}}}})
+        :asianKuvaus asian-kuvaus}}}})
   )

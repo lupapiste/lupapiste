@@ -119,6 +119,8 @@
        [["uusi-toiminta" :yl-uusi-toiminta]
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
+
+      ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
        [["vesijohdosta" :vvvl-vesijohdosta]
         ["viemarista" :vvvl-viemarista]

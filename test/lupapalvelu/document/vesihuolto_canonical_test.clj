@@ -276,7 +276,7 @@
                  sijaintitieto (:sijaintitieto Vapautushakemus) => truthy
                  s1 (first sijaintitieto) => truthy
                  Sijainti (:Sijainti s1) => truthy
-                 asianKuvaus (:asianKuvaus Vapautus) => "Uudehko talo, jonka rakentamisen yhteydess\u00e4 tehty porakaivo ja pienpuhdistamo, josta j\u00e4tevedet johdetaan pois pohjaveden valuma-alueeta."
+                 asianKuvaus (:asianKuvaus Vapautus) => "Vapautus vesijohtoon ja viem\u00e4riin liittymisest\u00e4 / Uudehko talo, jonka rakentamisen yhteydess\u00e4 tehty porakaivo ja pienpuhdistamo, josta j\u00e4tevedet johdetaan pois pohjaveden valuma-alueeta."
 
                  talousvedet (:talousvedet kohde) => truthy
                  hankinta (:hankinta talousvedet) => truthy
