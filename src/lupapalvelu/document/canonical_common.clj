@@ -18,8 +18,7 @@
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
 (def application-state-to-krysp-state
-  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
-   :open "uusi lupa, ei k\u00e4sittelyss\u00e4"
+  {:open "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :submitted "vireill\u00e4"
    :sent "vireill\u00e4"
    :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
@@ -28,8 +27,7 @@
    :closed "valmis"})
 
 (def ymp-application-state-to-krysp-state
-  {:draft "1 Vireill\u00e4"
-   :open "1 Vireill\u00e4"
+  {:open "1 Vireill\u00e4"
    :sent "1 Vireill\u00e4"
    :submitted "1 Vireill\u00e4"
    :complement-needed "1 Vireill\u00e4"
@@ -38,8 +36,7 @@
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
 (def ^:private state-timestamp-fn
-  {:draft :created
-   :open (fn [app] (some-key app :opened :created))
+  {:open (fn [app] (some-key app :opened :created))
    :submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
    :complement-needed :complementNeeded
