@@ -8,10 +8,11 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.core :refer [now]]
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
             [sade.util :as util]
-            [lupapalvelu.itest-util :refer [last-email] ] ;; TODO: Poista tama lopuksi!
+;            [lupapalvelu.itest-util :refer [last-email] ] ;; TODO: Poista tama lopuksi!
             [sade.env :as env]))
 
 
@@ -141,13 +142,13 @@
 ;                                                              ;; HUOM: Tama id neighborin paatasolla vasta kun neighbors on muutettu toisteiseksi kannassa!
 ;                                                              :neighborId (:id neighbor)
 ;                                                              }})
-;            ;; TODO: Paivita kannassa kyseisen neighborin stateksi "reminder-sent".
-;            (mongo/update-by-query :applications
+;
+;            (mongo/update :applications
 ;              {:_id (:id app)
-;               :neighbors.$.id (:id neighbor) ;; HUOM: Tama id neighborin paatasolla vasta kun neighbors on muutettu toisteiseksi kannassa!
-;               }
-;              {$set {:neighbors.$.status.state "reminder-sent"}}  ;; TODO KORJAA oheinen query
-;              )
+;               :neighbors {$elemMatch {:id (:id neighbor)}}}
+;              {$push {:neighbors.$.status {:state    "reminder-sent"
+;                                           :created  (now)}}})
+;
 ;            ))
 ;        apps))
 
