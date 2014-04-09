@@ -285,7 +285,7 @@
         Poikkeamisasia (:Poikkeamisasia poikkeamisasiatieto)
         ;abstarctPoikkeamistype
         kasittelynTilatieto (:kasittelynTilatieto Poikkeamisasia) => truthy
-        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        Tilamuutos (-> kasittelynTilatieto first :Tilamuutos) => map?
         pvm (:pvm Tilamuutos) => "2013-09-17"
 
         kuntakoodi (:kuntakoodi Poikkeamisasia) => (:municipality poikkari-hakemus)
@@ -496,7 +496,7 @@
         Suunnittelutarveasia (:Suunnittelutarveasia suunnittelutarveasiatieto)
         ;abstarctPoikkeamistype
         kasittelynTilatieto (:kasittelynTilatieto Suunnittelutarveasia) => truthy
-        Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+        Tilamuutos (-> kasittelynTilatieto first :Tilamuutos) => map?
         pvm (:pvm Tilamuutos) => "2013-09-17"
 
         kuntakoodi (:kuntakoodi Suunnittelutarveasia) => (:municipality poikkari-hakemus)
