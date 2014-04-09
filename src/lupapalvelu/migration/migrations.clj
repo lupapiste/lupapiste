@@ -330,6 +330,10 @@
   {:apply-when (pos? (mongo/count :organizations {"krysp.VVVL.version" "2.1.1"}))}
   (update-krysp-version-for-all-orgs "VVVL" "2.1.1" "2.1.3"))
 
+(defmigration yi-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.YI.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "YI" "2.1.1" "2.1.2"))
+
 (defn- remove-ominaisuustiedot-and-update-schema-name [document new-schema-name]
   (let [data (-> (:data document)
                (dissoc :lammitys)
