@@ -54,7 +54,7 @@
         window.location.hash = "!/application/" + applicationId + "/statement";
     };
     self.remove = function(neighbor) {
-      self.neighborId(neighbor.neighborId);
+      self.neighborId(neighbor.id);
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("neighbors.remove-dialog.title"),
         loc("neighbors.remove-dialog.message"),
@@ -219,15 +219,14 @@
     self.statusInit         = 0;
     self.statusEdit         = 2;
 
-    self.init = function(data) {
-      var data = data || {},
-          neighbor = data.neighbor || {},
+    self.init = function(neighbor) {
+      var neighbor = neighbor || {},
           owner = neighbor.owner || {},
           address = owner.address || {};
       return self
         .status(self.statusInit)
         .id(applicationId)
-        .neighborId(data.neighborId)
+        .neighborId(neighbor.id)
         .propertyId(neighbor.propertyId)
         .name(owner.name)
         .street(address.street)
