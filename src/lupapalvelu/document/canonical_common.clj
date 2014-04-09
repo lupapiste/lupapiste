@@ -37,7 +37,7 @@
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
 (def ^:private state-timestamp-fn
-  {:open (fn [app] (some-key app :opened :created))
+  {:open #(or (:opened %) (:created %))
    :submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
    :complement-needed :complementNeeded
