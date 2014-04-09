@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
+            [swiss-arrows.core :refer [-<>]]
             [sade.strings :as ss]
             [sade.util :refer :all]
             [sade.common-reader :as cr]
@@ -206,7 +207,10 @@
 
 
 (defn get-state [application]
-  (let [state-timestamps (sort-by second (cr/strip-nils (all-state-timestamps application)))]
+  (let [state-timestamps (-<> (all-state-timestamps application)
+                           (dissoc :sent) ; sent date will be returned from toimituksen-tiedot function
+                           cr/strip-nils
+                           (sort-by second <>))]
     (mapv
       (fn [[state ts]]
         {:Tilamuutos
