@@ -54,8 +54,7 @@
   (into {}
     (map
       (fn [state] [state (state-timestamp (assoc application :state state))])
-      (keys state-timestamp-fn)))
-  )
+      (keys state-timestamp-fn))))
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
@@ -512,19 +511,6 @@
                   :sahkopostiosoite (-> henkilo :yhteystiedot :email)
                   :puhelin (-> henkilo :yhteystiedot :puhelin)
                    :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
-
-; TODO remove after 2.1.2 canonical is complete
-(defn ->ymp-osapuoli [unwrapped-party-doc]
-  (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
-    (let [yritys (-> unwrapped-party-doc :data :yritys)]
-      {:nimi (-> yritys :yritysnimi)
-       :postiosoite (get-simple-osoite (:osoite yritys))
-       :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
-       :liikeJaYhteisotunnus (:liikeJaYhteisoTunnus yritys)})
-    (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
-      {:nimi "Yksityishenkil\u00f6"
-       :postiosoite (get-simple-osoite (:osoite henkilo))
-       :yhteyshenkilo (get-henkilo henkilo)})))
 
 (defn get-yhteystiedot [unwrapped-party-doc]
   (if (= (-> unwrapped-party-doc :data :_selected) "yritys")

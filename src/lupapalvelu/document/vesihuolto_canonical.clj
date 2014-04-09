@@ -48,10 +48,6 @@
              (when (:jatevedet documents)
                {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))}))))
 
-(defn- hakija [hakijat]
-  (assert (= 1 (count hakijat)))
-  (->ymp-osapuoli (first hakijat)))
-
 (defn vapautus-canonical [application lang]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
