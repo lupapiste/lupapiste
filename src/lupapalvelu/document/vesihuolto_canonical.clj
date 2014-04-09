@@ -48,10 +48,6 @@
              (when (:jatevedet documents)
                {:jatevedet (:kuvaus (:data (first (:jatevedet documents))))}))))
 
-(defn- hakija [hakijat]
-  (assert (= 1 (count hakijat)))
-  (->ymp-osapuoli (first hakijat)))
-
 (defn vapautus-canonical [application lang]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
@@ -63,7 +59,7 @@
       :vapautukset
       {:Vapautus
        {:kasittelytietotieto (get-kasittelytieto-ymp application :KasittelyTieto)
-        :luvanTunnistetiedot (lupatunnus (:id application))
+        :luvanTunnistetiedot (lupatunnus application)
         :lausuntotieto (get-statements (:statements application))
         :vapautusperuste ""
         :vapautushakemustieto
