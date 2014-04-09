@@ -29,7 +29,7 @@
                   :drawings drawings
                   :infoRequest false
                   :location {:x 428195.77099609 :y 6686701.3931274}
-                  :neighbors {}
+                  :neighbors []
                   :modified 1391415696674
                   :municipality "638"
                   :operations [{:id "abba1" :name "maa-aineslupa" :created 1391415025497}]
