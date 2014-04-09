@@ -17,17 +17,17 @@
 ; NOT the same as the state of the application!
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
-(def application-state-to-krysp-state
-  {:draft "vireill\u00e4"
-   :open "vireill\u00e4"
-   :sent "vireill\u00e4"
+(def ^:private application-state-to-krysp-state
+  {:draft "uusi lupa, ei käsittelyssä"
+   :open "uusi lupa, ei käsittelyssä"
    :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"
+   :sent "vireill\u00e4"
+   :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :closed "valmis"})
 
-(def ymp-application-state-to-krysp-state
+(def ^:private ymp-application-state-to-krysp-state
   {:draft "1 Vireill\u00e4"
    :open "1 Vireill\u00e4"
    :sent "1 Vireill\u00e4"
@@ -37,17 +37,19 @@
    :constructionStarted "ei tiedossa"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
-(def state-timestamps
+(def ^:private state-timestamp-fn
   {:draft :created
-   :open :opened
-   :complement-needed :opened
-   ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened
+   :open (fn [app] (some-key app :opened :created))
+   :complement-needed (fn [app] (some-key app :complementNeeded :submitted))
+   :submitted :submitted
    ; Enables XML to be formed from sent applications
-   :sent :opened
-   :verdictGiven :opened
-   :constructionStarted :opened
+   :sent :sent
+   :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
+   :constructionStarted :started
    :closed :closed})
+
+(defn state-timestamp [{state :state :as application}]
+  ((state-timestamp-fn (keyword state)) application))
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
@@ -207,7 +209,7 @@
      ; TODO vektoriksi? Kuittaukset taustajarjestelmatoimittajilta
      ; https://support.solita.fi/browse/LUPA-1437
      {:tila (application-state-to-krysp-state state)
-      :pvm (to-xml-date ((state-timestamps state) application))
+      :pvm (to-xml-date (state-timestamp application))
       :kasittelija (get-handler application)}}))
 
 
@@ -480,7 +482,7 @@
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
            :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+           :paivaysPvm (to-xml-date (state-timestamp application))
            :kasittelija (let [handler (:authority application)]
                           (if (seq handler)
                             {:henkilo
