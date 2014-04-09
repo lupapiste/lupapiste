@@ -40,10 +40,9 @@
 (def ^:private state-timestamp-fn
   {:draft :created
    :open (fn [app] (some-key app :opened :created))
-   :complement-needed (fn [app] (some-key app :complementNeeded :submitted))
    :submitted :submitted
-   ; Enables XML to be formed from sent applications
-   :sent :sent
+   :sent :submitted ; Enables XML to be formed from sent applications
+   :complement-needed (fn [app] (some-key app :complementNeeded :submitted))
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started
    :closed :closed})
