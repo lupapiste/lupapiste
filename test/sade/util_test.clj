@@ -13,6 +13,17 @@
   (fact (select nil [:a :c]) => [nil nil])
   (fact (select {:a \a :b \b :c \c} nil) => nil))
 
+(facts "some-key"
+  (some-key nil) => nil
+  (some-key nil nil) => nil
+  (some-key nil :a) => nil
+  (some-key {:a 1} nil) => nil
+  (some-key {:a 1} :a) => 1
+  (some-key {:a 1, :b 2} :a :b) => 1
+  (some-key {:a 1, :b 2} :b :a) => 2
+  (some-key {:a nil, :b 2} :a :b) => 2
+  (some-key {:a false, :b 2} :a :b) => false)
+
 (fact (positions #{2} [1 2 3 4 1 2 3 4]) => [1 5])
 
 (facts "deep-merge-with"
