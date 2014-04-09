@@ -18,8 +18,8 @@
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
 (def application-state-to-krysp-state
-  {:draft "uusi lupa, ei käsittelyssä"
-   :open "uusi lupa, ei käsittelyssä"
+  {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
+   :open "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :submitted "vireill\u00e4"
    :sent "vireill\u00e4"
    :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
