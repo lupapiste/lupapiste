@@ -17,7 +17,7 @@
 ; NOT the same as the state of the application!
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
-(def ^:private application-state-to-krysp-state
+(def application-state-to-krysp-state
   {:draft "uusi lupa, ei käsittelyssä"
    :open "uusi lupa, ei käsittelyssä"
    :submitted "vireill\u00e4"
@@ -27,7 +27,7 @@
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :closed "valmis"})
 
-(def ^:private ymp-application-state-to-krysp-state
+(def ymp-application-state-to-krysp-state
   {:draft "1 Vireill\u00e4"
    :open "1 Vireill\u00e4"
    :sent "1 Vireill\u00e4"
@@ -42,13 +42,20 @@
    :open (fn [app] (some-key app :opened :created))
    :submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
-   :complement-needed (fn [app] (some-key app :complementNeeded :submitted))
+   :complement-needed :complementNeeded
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started
    :closed :closed})
 
 (defn state-timestamp [{state :state :as application}]
   ((state-timestamp-fn (keyword state)) application))
+
+(defn all-state-timestamps [application]
+  (into {}
+    (map
+      (fn [state] [state (state-timestamp (assoc application :state state))])
+      (keys state-timestamp-fn)))
+  )
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
