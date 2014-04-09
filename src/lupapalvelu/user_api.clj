@@ -313,15 +313,16 @@
   [_]
   (let [email (ss/lower-case email)]
     (infof "Password reset request: email=%s" email)
-    (if (mongo/select-one :users {:email email})
-      (let [token-ttl (* 24 60 60 1000)
-            token (token/make-token :password-reset {:email email} :ttl token-ttl)]
-        (infof "password reset request: email=%s, token=%s" email token)
-        (notifications/notify! :reset-password {:data {:email email :token token}})
-        (ok))
-      (do
-        (warnf "password reset request: unknown email: email=%s" email)
-        (fail :email-not-found)))))
+    (let [user (mongo/select-one :users {:email email})]
+      (if (and user (not= "dummy" (:role user)))
+       (let [token-ttl (* 24 60 60 1000)
+             token (token/make-token :password-reset {:email email} :ttl token-ttl)]
+         (infof "password reset request: email=%s, token=%s" email token)
+         (notifications/notify! :reset-password {:data {:email email :token token}})
+         (ok))
+       (do
+         (warnf "password reset request: unknown email: email=%s" email)
+         (fail :email-not-found))))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
   (let [email (ss/lower-case (:email data))]

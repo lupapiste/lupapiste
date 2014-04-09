@@ -1,48 +1,58 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical
-  (:require [lupapalvelu.document.canonical-common :refer :all]
+  (:require [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]))
-
-(defn- ilmoittaja [hakijat]
-  ;(clojure.pprint/pprint hakijat)
-  (assert (= 1 (count hakijat)))
-  (->ymp-osapuoli (first hakijat)))
+            [sade.util :as util]
+            [sade.strings :as ss]))
 
 (defn meluilmoitus-canonical [application lang]
-  (let [application (tools/unwrapped application)
-        documents (documents-by-type-without-blanks application)
+  (let [unwrapped-docs {:documents (tools/unwrapped (:documents application))}
+        documents (canonical-common/documents-by-type-without-blanks unwrapped-docs)
         meluilmo (first (:meluilmoitus documents))
-        kesto (:kesto (:data (first (:ymp-ilm-kesto documents))))
-        kello (:kello kesto)
+        sijainti-seq (canonical-common/get-sijaintitieto application)
+        rakentamisen-kuvaus (-> meluilmo :data :rakentaminen :kuvaus)
+        muu-rakentaminen (-> meluilmo :data :rakentaminen :muu-rakentaminen)
+        muu-rakentaminen? (not (ss/blank? muu-rakentaminen))
+        kesto (-> (:ymp-ilm-kesto documents) first :data :kesto)
+        kello (apply merge (filter map? (vals kesto)))
         melu (-> meluilmo :data :melu)]
-    {:Ilmoitukset {:toimituksenTiedot (toimituksen-tiedot application lang)
+    {:Ilmoitukset {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
-                                             :alkuHetki (to-xml-datetime (:submitted application))
-                                             :kasittelytietotieto (get-kasittelytieto-ymp application :KasittelyTieto)
-                                             :luvanTunnistetiedot (lupatunnus (:id application))
-                                             :lausuntotieto (get-statements (:statements application))
-                                             :ilmoittaja (ilmoittaja (:hakija documents))
-                                             :toiminnanSijainti {:Osoite {:osoitenimi {:teksti (:address application)}
-                                                                          :kunta (:municipality application)}
-                                                                 :Kunta (:municipality application)
-                                                                 :Sijainti (:Sijainti (first (get-sijaintitieto application)))
-                                                                 :Kiinteistorekisterinumero (:propertyId application)}
-                                             :toimintatieto {:Toiminta (assoc-when {:yksilointitieto (:id meluilmo)
-                                                                                    :alkuHetki (to-xml-datetime (:created meluilmo))}
+                                             :alkuHetki (util/to-xml-datetime (:submitted application))
+                                             :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
+                                             :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+                                             :lausuntotieto (canonical-common/get-statements (:statements application))
+                                             :ilmoittaja (canonical-common/get-yhteystiedot (first (:hakija documents)))
+                                             :toiminnanSijaintitieto
+                                             (cons
+                                               {:ToiminnanSijainti
+                                                {:Osoite {:osoitenimi {:teksti (:address application)}
+                                                         :kunta (:municipality application)}
+                                                 :Kunta (:municipality application)
+                                                 :Sijainti (:Sijainti (first sijainti-seq))
+                                                 :Kiinteistorekisterinumero (:propertyId application)}}
+                                               (map
+                                                 (fn [sijainti]
+                                                   {:ToiminnanSijainti (assoc sijainti :Osoite {:osoitenimi {:teksti canonical-common/empty-tag}})}) ; Osoite is mandatory
+                                                 (rest sijainti-seq)))
+                                             :toimintatieto {:Toiminta (util/assoc-when {:yksilointitieto (:id meluilmo)
+                                                                                         :alkuHetki (util/to-xml-datetime (:created meluilmo))}
                                                                                    :rakentaminen
-                                                                                   (when (or (-> meluilmo :data :rakentaminen :melua-aihettava-toiminta ) (-> meluilmo :data :rakentaminen :muu-rakentaminen ))
-                                                                                     {(keyword (or (-> meluilmo :data :rakentaminen :melua-aihettava-toiminta ) "muu")) (-> meluilmo :data :rakentaminen :kuvaus)})
+                                                                                   (when (or (-> meluilmo :data :rakentaminen :melua-aihettava-toiminta ) muu-rakentaminen?)
+                                                                                     {(keyword (or (-> meluilmo :data :rakentaminen :melua-aihettava-toiminta ) "muu"))
+                                                                                      (if muu-rakentaminen?
+                                                                                        (str muu-rakentaminen ": " rakentamisen-kuvaus)
+                                                                                        rakentamisen-kuvaus)})
                                                                                    :tapahtuma (when (-> meluilmo :data :tapahtuma :nimi)
                                                                                                 {(keyword (if (-> meluilmo :data :tapahtuma :ulkoilmakonsertti)
                                                                                                             :ulkoilmakonsertti
                                                                                                             :muu))
                                                                                                  (str (-> meluilmo :data :tapahtuma :nimi) " - " (-> meluilmo :data :tapahtuma :kuvaus))}))}
-                                             :toiminnanKesto {:alkuHetki (to-xml-datetime-from-string (:alku kesto))
-                                                              :loppuHetki (to-xml-datetime-from-string (:loppu kesto))
-                                                              :arkisin (:arkisin kello)
-                                                              :lauantaisin (:lauantait kello)
-                                                              :pyhisin (:pyhat kello)}
-                                             :melutiedot {:melutaso {:db (:melu10mdBa melu)
+                                             :toiminnanKesto (merge
+                                                               {:alkuPvm (util/to-xml-date-from-string (:alku kesto))
+                                                                :loppuPvm (util/to-xml-date-from-string (:loppu kesto))}
+                                                               (util/convert-values kello util/to-xml-time-from-string))
+                                             :melutiedot {:koneidenLkm (-> meluilmo :data :rakentaminen :koneet)
+                                                          :melutaso {:db (:melu10mdBa melu)
                                                                      :paiva (:paivalla melu)
                                                                      :yo (:yolla melu)
                                                                      :mittaaja (:mittaus melu)
