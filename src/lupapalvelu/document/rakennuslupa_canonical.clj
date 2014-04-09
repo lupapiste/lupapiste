@@ -243,7 +243,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto (osapuolet documents (:neighbors application) lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
@@ -328,7 +328,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       ; Osapuoli is not required in KRYSP 2.1.3
                       :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
                                                                               :henkilo {:nimi {:etunimi (:firstName user)
@@ -355,7 +355,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"

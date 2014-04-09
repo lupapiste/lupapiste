@@ -63,7 +63,7 @@
       :vapautukset
       {:Vapautus
        {:kasittelytietotieto (get-kasittelytieto-ymp application :KasittelyTieto)
-        :luvanTunnistetiedot (lupatunnus (:id application))
+        :luvanTunnistetiedot (lupatunnus application)
         :lausuntotieto (get-statements (:statements application))
         :vapautusperuste ""
         :vapautushakemustieto

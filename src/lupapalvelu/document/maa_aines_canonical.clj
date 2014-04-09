@@ -14,7 +14,7 @@
         :kiinteistotunnus (:propertyId application)
         :alkuHetki (util/to-xml-datetime (:created application))
         :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :KasittelyTieto)
-        :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+        :luvanTunnistetiedot (canonical-common/lupatunnus application)
         :lausuntotieto (canonical-common/get-statements (:statements application))
         :hakemustieto
         {:Hakemus

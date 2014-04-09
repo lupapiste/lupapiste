@@ -211,11 +211,12 @@
       :kasittelija (get-handler application)}}))
 
 
-(defn lupatunnus [id]
+(defn lupatunnus [{:keys [id submitted]}]
+  {:pre [id]}
   {:LupaTunnus
-   {; :saapumisPvm submitted-timestamp
-    :muuTunnustieto {:MuuTunnus {:tunnus id
-                                 :sovellus "Lupapiste"}}}})
+   (assoc-when
+     {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
+     :saapumisPvm (to-xml-date submitted))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -472,7 +473,7 @@
     (assoc-in
       (if (= (:type link-permit-data) "kuntalupatunnus")
         {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}}
-        (lupatunnus (:id link-permit-data)))
+        (lupatunnus link-permit-data))
       [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 
 (defn get-kasittelytieto-ymp [application kt-key]

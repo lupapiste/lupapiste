@@ -1294,15 +1294,18 @@
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
-
+        lupa-tunnus (get-in rakennusvalvontaasia [:luvanTunnisteTiedot :LupaTunnus]) => map?
         toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
         asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot)
-        rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
         lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
         Lisatiedot (:Lisatiedot lisatiedot) => truthy
-        vakuus (:vakuus Lisatiedot) => nil?
-        ]
-    ))
+        vakuus (:vakuus Lisatiedot) => nil?]
 
+        (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
+        (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
+
+        (get-in lupa-tunnus [:muuTunnustieto :MuuTunnus]) => {:tunnus (:id aloitusoikeus-hakemus), :sovellus "Lupapiste"}
+
+        (fact "SaapumisPvm = submitted date"
+          (:saapumisPvm lupa-tunnus) => "2014-01-02")))
