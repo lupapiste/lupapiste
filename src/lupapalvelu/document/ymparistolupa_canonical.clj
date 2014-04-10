@@ -15,7 +15,7 @@
       {:Ymparistolupa
        (merge
          {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
-          :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+          :luvanTunnistetiedot (canonical-common/lupatunnus application)
           :lausuntotieto (canonical-common/get-statements (:statements application))
           :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
           :hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))

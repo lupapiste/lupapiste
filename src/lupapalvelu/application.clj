@@ -320,8 +320,9 @@
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
-           :state     :canceled}})
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
   (mongo/remove-many :app-links {:link {$in [id]}})
   (ok))
 
@@ -333,8 +334,9 @@
    :states     [:draft]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
-           :state     :open}}))
+    {$set {:modified created
+           :opened   created
+           :state    :open}}))
 
 (defcommand request-for-complement
   {:parameters [:id]
@@ -344,7 +346,8 @@
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
+    {$set {:modified created
+           :complementNeeded created
            :state :complement-needed}}))
 
 
