@@ -417,13 +417,10 @@
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
-
         do-update (fn [attachments-argument]
                     (update-application command
                       mongo-query
-                      {$set (merge
-                              app-updates
-                              attachments-argument)})
+                      {$set (merge app-updates attachments-argument)})
                     (ok :integrationAvailable (not (nil? attachments-argument))))]
 
     (do-approve application created id lang jatkoaika-app? do-update)))
