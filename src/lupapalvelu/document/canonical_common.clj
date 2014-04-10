@@ -208,7 +208,7 @@
 
 (defn get-state [application]
   (let [state-timestamps (-<> (all-state-timestamps application)
-                           (dissoc :sent) ; sent date will be returned from toimituksen-tiedot function
+                           (dissoc :sent :closed) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
                            cr/strip-nils
                            (sort-by second <>))]
     (mapv
