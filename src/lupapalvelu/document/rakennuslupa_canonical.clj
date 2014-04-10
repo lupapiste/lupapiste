@@ -274,15 +274,16 @@
   (if (= :tarkastus tyyppi)
     "muu tarkastus"
     (case nimi
-    "Aloitusilmoitus" "ei tiedossa"
-    "muu katselmus" "muu katselmus"
-    "aloituskokous" "aloituskokous"
-    "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
-    "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
-    "pohjakatselmus" "pohjakatselmus"
-    "rakennekatselmus" "rakennekatselmus"
-    "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
-    "osittainen loppukatselmus" "osittainen loppukatselmus"
+      "Aloitusilmoitus" "ei tiedossa"
+      "muu katselmus" "muu katselmus"
+      "muu tarkastus" "muu tarkastus"
+      "aloituskokous" "aloituskokous"
+      "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
+      "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
+      "pohjakatselmus" "pohjakatselmus"
+      "rakennekatselmus" "rakennekatselmus"
+      "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+      "osittainen loppukatselmus" "osittainen loppukatselmus"
       "loppukatselmus" "loppukatselmus"
       "ei tiedossa")))
 
