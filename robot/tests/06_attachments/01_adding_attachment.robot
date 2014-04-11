@@ -80,9 +80,16 @@ Switch user
   Logout
   Sonja logs in
 
-Sonja goes to attachment tab
+Sonja goes to conversation tab
   [Tags]  attachments
   Open application  ${appname}  753-416-25-30
+  Open tab  conversation
+  Click Element  link=Ote alueen peruskartasta
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+
+Sonja goes to attachments tab
+  [Tags]  attachments
+  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Open tab  attachments
 
 Sonja see that attachment is for authority
@@ -145,4 +152,4 @@ Attachment state should be
 
 Comment count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='attachment']//div[@data-bind='foreach: comments()']/div  ${amount}
+  Xpath Should Match X Times  //section[@id='attachment']//div[@data-bind='foreach: comments().reverse()']/div  ${amount}
