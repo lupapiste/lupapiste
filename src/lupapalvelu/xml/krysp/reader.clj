@@ -84,8 +84,6 @@
                  (str server "?"))]
     (str server "request=GetFeature&" object-type "&filter=" filter)))
 
-    ;&outputFormat=KRYSP
-
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
@@ -100,11 +98,11 @@
     (debug "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
-(defn rakval-application-xml [server id raw?]
-  (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
-
-(defn poik-application-xml [server id raw?]
-  (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
+(defn rakval-application-xml [server id raw?] (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
+(defn poik-application-xml [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
+(defn yl-application-xml [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
+(defn mal-application-xml [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
+(defn vvvl-application-xml [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
 
 (defn ya-application-xml [server id raw?]
   (let [options (post-body-for-ya-application id)
@@ -115,6 +113,9 @@
 (permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P  :xml-from-krysp poik-application-xml)
 (permit/register-function permit/YA :xml-from-krysp ya-application-xml)
+(permit/register-function permit/YL :xml-from-krysp yl-application-xml)
+(permit/register-function permit/MAL :xml-from-krysp mal-application-xml)
+(permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
 
 (defn- ->building-ids [id-container xml-no-ns]
   {:propertyId (get-text xml-no-ns id-container :kiinttun)
