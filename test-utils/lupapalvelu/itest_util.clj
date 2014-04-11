@@ -209,7 +209,7 @@
 
 (defn comment-application [id apikey open]
   (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target "application" :openApplication open) => ok?))
+    (command apikey :add-comment :id id :text "hello" :target {:type "application"} :openApplication open) => ok?))
 
 (defn query-application
   "Fetch application from server.

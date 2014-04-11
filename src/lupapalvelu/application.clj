@@ -247,6 +247,10 @@
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
+(defn- validate-comment-target [{{:keys [target]} :data}]
+  (when (string? target)
+    (fail :error.unknown-type)))
+
 (defcommand can-target-comment-to-authority
   {:roles [:authority]
    :pre-checks  [not-open-inforequest-user-validator]
@@ -257,6 +261,7 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :pre-checks [applicant-cant-set-to]
+   :input-validators [validate-comment-target]
    :notified   true
    :on-success [(notify :new-comment)
                 (fn [{data :data :as command} _]

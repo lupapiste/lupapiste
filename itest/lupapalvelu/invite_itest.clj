@@ -89,7 +89,7 @@
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text (email-for-key teppo) :target "application" :openApplication true) => ok?)
+      (command teppo :add-comment :id id :text (email-for-key teppo) :target {:type "application"} :openApplication true) => ok?)
 
     (let [actions (:actions (query teppo :allowed-actions :id id))]
       (fact "Teppo should be able to do stuff."
@@ -133,7 +133,7 @@
       (command teppo :approve-invite :id id) => ok?)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text (email-for-key teppo) :target "application") => ok?)
+      (command teppo :add-comment :id id :text (email-for-key teppo) :target {:type "application"}) => ok?)
 
     (fact "Teppo must be able to invite another designer, Mikko!"
       (invite teppo id suunnittelija-doc "mikko@example.com") => ok?)
