@@ -324,6 +324,9 @@
 (permit/register-function permit/R :verdict-krysp-reader ->verdict)
 (permit/register-function permit/P :verdict-krysp-reader ->verdict)
 (permit/register-function permit/YA :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/YL :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdict)
 
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
