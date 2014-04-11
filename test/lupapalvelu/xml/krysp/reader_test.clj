@@ -282,7 +282,34 @@
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)
       (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
-      )))
+
+      (fact "kuntalupatunnus"
+        (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:takuuaikaPaivat lupamaaraykset) => "5"
+        (let [muutMaaraykset (:muutMaaraykset lupamaaraykset)]
+          muutMaaraykset => sequential?
+          (count muutMaaraykset) => 1
+          (last muutMaaraykset) => "Lupaehdot vapaana tekstin\u00e4"))
+
+      (facts "paivamaarat data is correct"
+        paivamaarat => truthy
+        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2014-04-11"))
+
+      (facts "p\u00f6yt\u00e4kirjat data is correct"
+        (let [pk1   (first poytakirjat)
+              liite (:liite pk1)]
+          (:kuvaus liite) => "paatoksenTiedot"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/img/under-construction.gif"
+          (:muokkausHetki liite) => (to-timestamp "2014-03-29T13:58:15")
+          (:tyyppi liite) => "Muu liite"))))))
 
 (facts "Buildings from verdict message"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
