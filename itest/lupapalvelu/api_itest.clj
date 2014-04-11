@@ -41,20 +41,20 @@
       (query teppo :application :id id) => unauthorized?)
 
     (fact "Mikko must be able to comment!"
-      (command mikko :add-comment :id id :text "mikko@example.com" :target "application" :openApplication true) => ok?)
+      (command mikko :add-comment :id id :text "mikko@example.com" :target {:type "application"} :openApplication true) => ok?)
 
     (fact "Teppo must not be able to comment!"
-      (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => unauthorized?)
+      (command teppo :add-comment :id id :text "teppo@example.com" :target {:type "application"}) => unauthorized?)
 
     (fact "Veikko must not be able to comment!"
-      (command veikko :add-comment :id id :text "sonja" :target "application") => unauthorized?)
+      (command veikko :add-comment :id id :text "sonja" :target {type: "application"}) => unauthorized?)
 
     (fact "Sonja must be able to see the application!"
       (let [resp (query sonja :application :id id)]
         resp => ok?))
 
     (fact "Sonja must be able to comment!"
-      (command sonja :add-comment :id id :text "sonja" :target "application") => ok?)
+      (command sonja :add-comment :id id :text "sonja" :target {:type "application"}) => ok?)
 
     (fact "Mikko must not be able to assign to himself!"
       (command mikko :assign-to-me :id id) => unauthorized?)
