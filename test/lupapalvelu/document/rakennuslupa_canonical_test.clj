@@ -958,8 +958,10 @@
                                      :zip "33456"
                                      :city "Tampere"})
 
+(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)}]))
+
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [application (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application application-rakennuslupa-verdict-given
                  canonical (katselmus-canonical
                              application
                              "sv"
@@ -979,7 +981,7 @@
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
                  tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
@@ -1024,7 +1026,7 @@
         (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
-           (let [application (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application application-rakennuslupa-verdict-given
                  canonical (unsent-attachments-to-canonical application "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -1033,7 +1035,7 @@
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
                  LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
@@ -1123,7 +1125,7 @@
     ))
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [application (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application application-rakennuslupa-verdict-given
                  canonical (katselmus-canonical
                              application
                              "fi"
@@ -1151,7 +1153,7 @@
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => map?
                  tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
@@ -1294,15 +1296,18 @@
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
-
+        lupa-tunnus (get-in rakennusvalvontaasia [:luvanTunnisteTiedot :LupaTunnus]) => map?
         toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
         asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot)
-        rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
         lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
         Lisatiedot (:Lisatiedot lisatiedot) => truthy
-        vakuus (:vakuus Lisatiedot) => nil?
-        ]
-    ))
+        vakuus (:vakuus Lisatiedot) => nil?]
 
+        (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
+        (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
+
+        (get-in lupa-tunnus [:muuTunnustieto :MuuTunnus]) => {:tunnus (:id aloitusoikeus-hakemus), :sovellus "Lupapiste"}
+
+        (fact "SaapumisPvm = submitted date"
+          (:saapumisPvm lupa-tunnus) => "2014-01-02")))

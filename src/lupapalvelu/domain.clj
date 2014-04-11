@@ -185,7 +185,7 @@
    :permitType               ""
    :schema-version           nil
    :sent                     nil
-   :started                  nil
+   :started                  nil ; construction started
    :startedBy                {}
    :state                    ""
    :statements               []

@@ -243,7 +243,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto (osapuolet documents (:neighbors application) lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
@@ -274,15 +274,16 @@
   (if (= :tarkastus tyyppi)
     "muu tarkastus"
     (case nimi
-    "Aloitusilmoitus" "ei tiedossa"
-    "muu katselmus" "muu katselmus"
-    "aloituskokous" "aloituskokous"
-    "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
-    "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
-    "pohjakatselmus" "pohjakatselmus"
-    "rakennekatselmus" "rakennekatselmus"
-    "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
-    "osittainen loppukatselmus" "osittainen loppukatselmus"
+      "Aloitusilmoitus" "ei tiedossa"
+      "muu katselmus" "muu katselmus"
+      "muu tarkastus" "muu tarkastus"
+      "aloituskokous" "aloituskokous"
+      "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
+      "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
+      "pohjakatselmus" "pohjakatselmus"
+      "rakennekatselmus" "rakennekatselmus"
+      "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+      "osittainen loppukatselmus" "osittainen loppukatselmus"
       "loppukatselmus" "loppukatselmus"
       "ei tiedossa")))
 
@@ -328,7 +329,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       ; Osapuoli is not required in KRYSP 2.1.3
                       :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
                                                                               :henkilo {:nimi {:etunimi (:firstName user)
@@ -355,7 +356,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"

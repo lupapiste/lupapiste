@@ -42,6 +42,16 @@
   (when k
     (cons (get m k) (select m ks))))
 
+(defn some-key
+  "Tries given keys and returns the first non-nil value from map m"
+  [m & ks]
+  (let [k (first ks)]
+    (when (and m k)
+      (if (nil? (m k))
+        (apply some-key m (rest ks))
+        (m k)))))
+
+
 ; From clojure.contrib/seq
 
 (defn indexed
