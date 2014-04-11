@@ -47,7 +47,7 @@
       (command teppo :add-comment :id id :text "teppo@example.com" :target {:type "application"}) => unauthorized?)
 
     (fact "Veikko must not be able to comment!"
-      (command veikko :add-comment :id id :text "sonja" :target {type: "application"}) => unauthorized?)
+      (command veikko :add-comment :id id :text "sonja" :target {:type "application"}) => unauthorized?)
 
     (fact "Sonja must be able to see the application!"
       (let [resp (query sonja :application :id id)]
