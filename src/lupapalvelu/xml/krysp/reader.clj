@@ -31,15 +31,23 @@
 
 ;; Object types (URL encoded)
 (def building-type  "typeName=rakval%3AValmisRakennus")
-(def case-type      "typeName=rakval%3ARakennusvalvontaAsia")
+(def rakval-case-type      "typeName=rakval%3ARakennusvalvontaAsia")
 (def poik-case-type "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
 (def ya-type        "typeName=yak%3AYleisetAlueet")
+(def yl-case-type   "typeName=ymy%3AYmparistolupa")
+(def mal-case-type   "typeName=ymm%3AMaaAineslupaAsia")
+(def vvvl-case-type   "typeName=ymv%3AVapautus")
 
 ;; For building filters
+(def ^:private yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
-(def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
-(def yleisten-alueiden-lp-lupatunnus "yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
-(def poik-lp-lupatunnus "ppst:luvanTunnistetiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def asian-lp-lupatunnus (str "rakval:luvanTunnisteTiedot/" yht-tunnus))
+(def yleisten-alueiden-lp-lupatunnus (str "yak:luvanTunnisteTiedot/" yht-tunnus))
+(def poik-lp-lupatunnus  (str "ppst:luvanTunnistetiedot/" yht-tunnus))
+(def yl-lp-lupatunnus (str "ymy:luvanTunnistetiedot/" yht-tunnus))
+(def mal-lp-lupatunnus (str "ymm:luvanTunnistetiedot/" yht-tunnus))
+(def vvvl-lp-lupatunnus (str "ymv:luvanTunnistetiedot/" yht-tunnus))
 
 
 (defn property-equals
@@ -93,7 +101,7 @@
     (cr/get-xml url credentials raw?)))
 
 (defn rakval-application-xml [server id raw?]
-  (application-xml case-type asian-lp-lupatunnus server id raw?))
+  (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
 
 (defn poik-application-xml [server id raw?]
   (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
