@@ -325,8 +325,9 @@
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
-           :state     :canceled}})
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
   (mongo/remove-many :app-links {:link {$in [id]}})
   (ok))
 
@@ -338,8 +339,9 @@
    :states     [:draft]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
-           :state     :open}}))
+    {$set {:modified created
+           :opened   created
+           :state    :open}}))
 
 (defcommand request-for-complement
   {:parameters [:id]
@@ -349,7 +351,8 @@
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
+    {$set {:modified created
+           :complementNeeded created
            :state :complement-needed}}))
 
 
@@ -376,17 +379,6 @@
       (do
         (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it link permit's (" link-permit-app-id ") verdict.")
         (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
-
-
-(defn- approve-application-do-rest [{:keys [application user] :as command} mongo-query app-updates attachments-argument]
-  (update-application command
-    mongo-query
-    {$set (merge
-            app-updates
-            attachments-argument
-            (when (empty? (:authority application))
-              {:authority (user/summary user)}))})
-  (ok :integrationAvailable (not (nil? attachments-argument))))
 
 (defn- organization-has-ftp-user? [organization application]
   (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
@@ -415,12 +407,13 @@
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
         app-updates (merge
                       {:modified created
-                       :sent created}
+                       :sent created
+                       :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
                       (if jatkoaika-app?
                         {:state :closed :closed created}
                         {:state :sent}))
         application (-> application
-                      (meta-fields/enrich-with-link-permit-data)
+                      meta-fields/enrich-with-link-permit-data
                       ((fn [app]
                         (if (= "lupapistetunnus" (-> app :linkPermitData first :type))
                           (update-link-permit-data-with-kuntalupatunnus-from-verdict app)
@@ -429,9 +422,13 @@
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
-        do-rest-fn (partial approve-application-do-rest command mongo-query app-updates)]
+        do-update (fn [attachments-argument]
+                    (update-application command
+                      mongo-query
+                      {$set (merge app-updates attachments-argument)})
+                    (ok :integrationAvailable (not (nil? attachments-argument))))]
 
-    (do-approve application created id lang jatkoaika-app? do-rest-fn)))
+    (do-approve application created id lang jatkoaika-app? do-update)))
 
 
 (defn- do-submit [command application created]
