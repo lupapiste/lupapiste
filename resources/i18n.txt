@@ -4,3 +4,5 @@ email.title.active-application-reminder: Muistutus aktiivisesta hakemuksesta
 email.title.statement-request-reminder: Muistutus lausuntopyynnöstä
 email.title.open-inforequest-reminder: Muistutus avoimesta neuvontapyynnöstä
 email.title.neighbor-reminder: Muistutus naapurin kuulemisesta
+
+maisematyo._group_label: Maisematyö
