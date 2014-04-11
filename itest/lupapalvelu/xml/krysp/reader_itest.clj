@@ -120,13 +120,13 @@
                                        :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"}})))))
 
-(fact "converting verdict krysp to lupapiste domain model"
-  (let [xml (application-xml local-krysp id false)]
+(fact "converting rakval verdict krysp to lupapiste domain model"
+  (let [xml (rakval-application-xml local-krysp id false)]
     xml => truthy
     (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-krysp id false)]
+  (let [xml (poik-application-xml local-krysp id false)]
     xml => truthy
     (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
 

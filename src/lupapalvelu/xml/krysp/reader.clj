@@ -86,14 +86,17 @@
     (debug "Get building: " url)
     (cr/get-xml url)))
 
-(defn application-xml
-  ([server id raw?]
-    (application-xml case-type asian-lp-lupatunnus server id raw?))
-  ([ct tunnus-path server id raw?]
-    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))
-          credentials nil]
-      (debug "Get application: " url)
-      (cr/get-xml url credentials raw?))))
+(defn- application-xml [type-name id-path server id raw?]
+  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
+        credentials nil]
+    (debug "Get application: " url)
+    (cr/get-xml url credentials raw?)))
+
+(defn rakval-application-xml [server id raw?]
+  (application-xml case-type asian-lp-lupatunnus server id raw?))
+
+(defn poik-application-xml [server id raw?]
+  (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
 
 (defn ya-application-xml [server id raw?]
   (let [options (post-body-for-ya-application id)
@@ -101,8 +104,8 @@
     (debug "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
-(permit/register-function permit/R  :xml-from-krysp application-xml)
-(permit/register-function permit/P  :xml-from-krysp (partial application-xml poik-case-type poik-lp-lupatunnus))
+(permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
+(permit/register-function permit/P  :xml-from-krysp poik-application-xml)
 (permit/register-function permit/YA :xml-from-krysp ya-application-xml)
 
 (defn- ->building-ids [id-container xml-no-ns]
