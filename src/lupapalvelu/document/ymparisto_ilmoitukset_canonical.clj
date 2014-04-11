@@ -19,7 +19,7 @@
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
                                              :alkuHetki (util/to-xml-datetime (:submitted application))
                                              :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
-                                             :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+                                             :luvanTunnistetiedot (canonical-common/lupatunnus application)
                                              :lausuntotieto (canonical-common/get-statements (:statements application))
                                              :ilmoittaja (canonical-common/get-yhteystiedot (first (:hakija documents)))
                                              :toiminnanSijaintitieto

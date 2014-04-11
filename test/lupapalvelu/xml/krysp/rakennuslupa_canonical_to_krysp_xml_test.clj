@@ -52,6 +52,11 @@
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])]
 
+      (fact "saapumisPvm"
+        (let [expected (sade.util/to-xml-date (:submitted application))]
+          (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
+          (xml/get-text lp-xml_213 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected))
+
       (if validate-tyonjohtaja?
         (do
           (fact "In KRYSP 2.1.2, patevyysvaatimusluokka A is mapped to 'ei tiedossa'"

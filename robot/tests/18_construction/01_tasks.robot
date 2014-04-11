@@ -120,6 +120,6 @@ Task count is
 
 Open task
   [Arguments]  ${name}
-  Click Element  //div[@id='application-tasks-tab']//table//td[text()='${name}']
+  Click Element  //div[@id='application-tasks-tab']//table//td/a[text()='${name}']
   Wait Until  Element should be visible  taskAttachments
   Wait until  Element should be visible  taskDocgen
