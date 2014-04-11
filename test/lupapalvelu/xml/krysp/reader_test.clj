@@ -10,7 +10,7 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -240,7 +240,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-        cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
+        cases (->verdicts xml :yleinenAlueAsiatieto ->simple-verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)

@@ -4,7 +4,7 @@
             [lupapalvelu.xml.krysp.reader :refer :all]
             [lupapalvelu.itest-util :refer :all]))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
 
 (def id "75300301050006")
 
@@ -134,5 +134,5 @@
 (fact "converting ya-verdict krysp to lupapiste domain model"
   (let [xml (ya-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)) => 1))
+    (count (->verdicts xml :yleinenAlueAsiatieto ->simple-verdict)) => 1))
 

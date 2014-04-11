@@ -314,7 +314,7 @@
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
-(defn- ->ya-verdict [paatos-xml-without-ns]
+(defn- ->simple-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
                     :muutMaaraykset (->lupamaaraukset-ya paatos-xml-without-ns)}
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
@@ -323,7 +323,7 @@
 
 (permit/register-function permit/R :verdict-krysp-reader ->verdict)
 (permit/register-function permit/P :verdict-krysp-reader ->verdict)
-(permit/register-function permit/YA :verdict-krysp-reader ->ya-verdict)
+(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdict)
 
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
