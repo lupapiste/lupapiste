@@ -273,6 +273,16 @@
           (:muokkausHetki liite) => (to-timestamp "2014-01-29T13:58:15")
           (:tyyppi liite) => "Muu liite")))))
 
+(facts "Ymparisto verdicts"
+  (doseq [permit-type ["yl" "mal" "vvvl"]]
+    (let [xml (sade.xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
+          case-elem (lupapalvelu.permit/get-case-xml-element (clojure.string/upper-case permit-type))
+          cases (->verdicts xml case-elem ->simple-verdict)]
+
+      (fact "xml is parsed" cases => truthy)
+      (fact "xml has 1 cases" (count cases) => 1)
+      (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+      )))
 
 (facts "Buildings from verdict message"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
@@ -285,6 +295,6 @@
     (:rakennusnro building1) => "123"))
 
 (facts "wfs-krysp-url works correctly"
-  (fact "without ? returns url with ?" (wfs-krysp-url "http://localhost" case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
-  (fact "with ? returns url with ?" (wfs-krysp-url "http://localhost" case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
-  (fact "without extraparam returns correct" (wfs-krysp-url "http://localhost?output=KRYSP" case-type (property-equals "test" "lp-1")) =>  "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
+  (fact "without ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+  (fact "with ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+  (fact "without extraparam returns correct" (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
