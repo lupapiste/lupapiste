@@ -10,7 +10,7 @@
       state => "submitted")
 
     (fact "applicant can't comment with to"
-      pena =not=> (allowed? :can-target-comment-to-authority)
+      pena =not=> (allowed? :can-target-comment-to-authority :id id)
       pena =not=> (allowed? :add-comment :id id :to irrelevant)
       (command pena :add-comment :id id :text "comment1" :target "application") => ok?
       (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) =not=> ok?)
@@ -22,7 +22,7 @@
         email => has-correct-link?))
 
     (fact "authority can comment with to"
-      sonja => (allowed? :can-target-comment-to-authority)
+      sonja => (allowed? :can-target-comment-to-authority :id id)
       sonja => (allowed? :add-comment :id id :to sonja-id))
 
     (fact "when sonja adds comment, both pena and ronja will receive email"
