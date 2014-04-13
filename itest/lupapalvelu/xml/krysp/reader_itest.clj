@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.itest-util :refer :all]))
 
 (testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
@@ -136,3 +137,19 @@
     xml => truthy
     (count (->verdicts xml :yleinenAlueAsiatieto ->simple-verdict)) => 1))
 
+(facts "converting ymparisto verdicts  krysp to lupapiste domain model"
+  (doseq [permit-type ["YL" "MAL" "VVVL"]]
+    (let [getter (permit/get-application-xml-getter permit-type)
+          reader (permit/get-verdict-reader permit-type)
+          case-elem (permit/get-case-xml-element permit-type)]
+
+      (fact "Application XML getter is set up" getter => fn?)
+      (fact "Verdict reader is set ip" reader => fn?)
+      (fact "Case element is set" case-elem => keyword?)
+
+      (let [xml (getter local-krysp id false)
+            cases (->verdicts xml case-elem reader)]
+        (fact "xml is parsed" cases => truthy)
+        (fact "xml has 1 cases" (count cases) => 1)
+        (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+        (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))))))
