@@ -264,7 +264,7 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-(defn ->lupamaaraukset [paatos-xml-without-ns]
+(defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
     (cr/ensure-sequental :vaaditutKatselmukset)
@@ -279,7 +279,7 @@
                               :autopaikkojaKiinteistolla
                               :autopaikkojaUlkopuolella])))
 
-(defn ->lupamaaraukset-text [paatos-xml-without-ns]
+(defn- ->lupamaaraukset-text [paatos-xml-without-ns]
   (let [lupaehdot (select paatos-xml-without-ns :lupaehdotJaMaaraykset)]
     (when (not-empty lupaehdot)
       (-> lupaehdot
@@ -291,7 +291,7 @@
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
                    [% (cr/to-timestamp (get-text paatos xml-kw))]) v)))
 
-(defn ->liite [{:keys [metatietotieto] :as liite}]
+(defn- ->liite [{:keys [metatietotieto] :as liite}]
   (-> liite
     (assoc  :metadata (into {} (map
                                  (fn [{meta :metatieto}]
@@ -300,7 +300,7 @@
     (dissoc :metatietotieto)
     (cr/convert-keys-to-timestamps [:muokkausHetki])))
 
-(defn ->paatospoytakirja [paatos-xml-without-ns]
+(defn- ->paatospoytakirja [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
