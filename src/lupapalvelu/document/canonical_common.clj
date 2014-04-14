@@ -439,7 +439,7 @@
 (defn- get-neighbors [neighbors]
   (remove nil? (for [neighbor neighbors]
                    (let [status (last (:status neighbor))
-                         propertyId (-> neighbor :propertyId)]
+                         propertyId (:propertyId neighbor)]
                      (case (:state status)
                        "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
                        "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
