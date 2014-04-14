@@ -115,42 +115,39 @@
     ;; * _Naapurin kuuleminen_:
     ;; Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran.
     ;;
-    ;; - kts. neighbors.clj:  defcommand neighbor-send-invite
-    ;;   - olemassa oleva neighbor-config kelpaa
-    ;;
-    ;; **
-    ;; Mahdoton tehdä mongossa wildcard-tyyppista kyselya, kuten ":neighbors.$.status". ->
-    ;; Tarvii muuttaa kannassa neighborien rakenne arrayksi eli toisteiseksi.
-    ;; **
-    ;;
-;    (let [apps (mongo/select :applications {:state {$in ["open" "submitted"]}
-;                                            ;; TODO: KORJAA oheinen query:
-;                                            ;;       wildcard-tyyppisia operaattoreita .$. tai .*. ei ole tahan tarkoitukseen olemassa mongossa.
-;                                            :neighbors.$.status {:created {$lt timestamp-1-week-ago}
-;                                                                 :state {$in ["email-sent"]}
-;                                                                 }})]
-;      (map
-;        (fn [app]
-;          (for [neighbor (:neighbors app)
-;                :let [status (:status neighbor)]
-;                :when (and
-;                        (= "email-sent" (:state status))
-;                        (< (:created status) timestamp-1-week-ago))]
-;            (notifications/notify! :reminder-neighbor {:application app
-;                                                       :data {:email (:email status)
-;                                                              :token (:token status)
-;                                                              ;; HUOM: Tama id neighborin paatasolla vasta kun neighbors on muutettu toisteiseksi kannassa!
-;                                                              :neighborId (:id neighbor)
-;                                                              }})
-;
-;            (mongo/update :applications
-;              {:_id (:id app)
-;               :neighbors {$elemMatch {:id (:id neighbor)}}}
-;              {$push {:neighbors.$.status {:state    "reminder-sent"
-;                                           :created  (now)}}})
-;
-;            ))
-;        apps))
+    (let [apps (mongo/select :applications
+                 {:state {$in ["open" "submitted"]}
+                  :neighbors {$elemMatch {:status.state {$in ["email-sent"]}
+                                          :status.created {$lt timestamp-1-week-ago}}}})]
+      (map
+        (fn [app]
+          (map
+            (fn [neighbor]
+              (let [statuses (:status neighbor)]
+
+                (when (not-any? #(= "reminder-sent" (:state %)) statuses)
+                  (map
+                    (fn [status]
+                      (when (and
+                              (= "email-sent" (:state status))
+                              (< (:created status) timestamp-1-week-ago))
+
+                        (notifications/notify! :reminder-neighbor {:application app
+                                                                   :data {:email (:email status)
+                                                                          :token (:token status)
+                                                                          :neighborId (:id neighbor)}})
+                        (mongo/update :applications
+                          {:_id (:id app) :neighbors {$elemMatch {:id (:id neighbor)}}}
+                          {$push {:neighbors.$.status {:state    "reminder-sent"
+                                                       :created  (now)}}})))
+                    statuses
+                    ))
+
+                ))
+            (:neighbors app)
+            ))
+        apps
+        ))
 
 
     ;; * _Hakemus_:
@@ -163,14 +160,10 @@
 
       ; TODO: Kaytetaan Owner-tyypin authin emailia - onko ok?
       (map
-        (fn [app]
-          (notifications/notify! :reminder-application-state {:application app
-                                                              :data {:email (get-app-owner-email app)}}))
-        apps)
-      )
-    )
-
-  )
+        (fn [app] (notifications/notify! :reminder-application-state {:application app
+                                                                      :data {:email (get-app-owner-email app)}})) ; TODO: Kaytetaan Owner-tyypin authin emailia - onko ok?
+        apps))
+    ))
 
 (defn start-reminder-email-scheduler []
   ;;
