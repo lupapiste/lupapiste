@@ -99,11 +99,11 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "lupapiste:Mikkeli_Asemakaavat"
+    (doseq [layer [{"LAYERS" "lupapiste:491_asemakaava"
                     "BBOX"   "512000,6837760,514560,6840320"}
-                   {"LAYERS" "lupapiste:Hameenlinna_Asemakaava"
+                   {"LAYERS" "lupapiste:109_asemakaava"
                     "BBOX"   "358400,6758400,409600,6809600"}
-                   {"LAYERS" "lupapiste:Hameenlinna_Kantakartta"
+                   {"LAYERS" "lupapiste:109_kantakartta"
                     "BBOX"   "358400,6758400,409600,6809600"}
                    {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
                     "BBOX"   "208384,6715136,208640,6715392"}

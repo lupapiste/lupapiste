@@ -31,15 +31,23 @@
 
 ;; Object types (URL encoded)
 (def building-type  "typeName=rakval%3AValmisRakennus")
-(def case-type      "typeName=rakval%3ARakennusvalvontaAsia")
+(def rakval-case-type      "typeName=rakval%3ARakennusvalvontaAsia")
 (def poik-case-type "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
 (def ya-type        "typeName=yak%3AYleisetAlueet")
+(def yl-case-type   "typeName=ymy%3AYmparistolupa")
+(def mal-case-type   "typeName=ymm%3AMaaAineslupaAsia")
+(def vvvl-case-type   "typeName=ymv%3AVapautus")
 
 ;; For building filters
+(def ^:private yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
-(def asian-lp-lupatunnus "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
-(def yleisten-alueiden-lp-lupatunnus "yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
-(def poik-lp-lupatunnus "ppst:luvanTunnistetiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def asian-lp-lupatunnus (str "rakval:luvanTunnisteTiedot/" yht-tunnus))
+(def yleisten-alueiden-lp-lupatunnus (str "yak:luvanTunnisteTiedot/" yht-tunnus))
+(def poik-lp-lupatunnus  (str "ppst:luvanTunnistetiedot/" yht-tunnus))
+(def yl-lp-lupatunnus (str "ymy:luvanTunnistetiedot/" yht-tunnus))
+(def mal-lp-lupatunnus (str "ymm:luvanTunnistetiedot/" yht-tunnus))
+(def vvvl-lp-lupatunnus (str "ymv:luvanTunnistetiedot/" yht-tunnus))
 
 
 (defn property-equals
@@ -76,8 +84,6 @@
                  (str server "?"))]
     (str server "request=GetFeature&" object-type "&filter=" filter)))
 
-    ;&outputFormat=KRYSP
-
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
@@ -86,14 +92,17 @@
     (debug "Get building: " url)
     (cr/get-xml url)))
 
-(defn application-xml
-  ([server id raw?]
-    (application-xml case-type asian-lp-lupatunnus server id raw?))
-  ([ct tunnus-path server id raw?]
-    (let [url (wfs-krysp-url-with-service server ct (property-equals tunnus-path id))
-          credentials nil]
-      (debug "Get application: " url)
-      (cr/get-xml url credentials raw?))))
+(defn- application-xml [type-name id-path server id raw?]
+  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
+        credentials nil]
+    (debug "Get application: " url)
+    (cr/get-xml url credentials raw?)))
+
+(defn rakval-application-xml [server id raw?] (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
+(defn poik-application-xml [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
+(defn yl-application-xml [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
+(defn mal-application-xml [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
+(defn vvvl-application-xml [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
 
 (defn ya-application-xml [server id raw?]
   (let [options (post-body-for-ya-application id)
@@ -101,9 +110,12 @@
     (debug "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
-(permit/register-function permit/R  :xml-from-krysp application-xml)
-(permit/register-function permit/P  :xml-from-krysp (partial application-xml poik-case-type poik-lp-lupatunnus))
+(permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
+(permit/register-function permit/P  :xml-from-krysp poik-application-xml)
 (permit/register-function permit/YA :xml-from-krysp ya-application-xml)
+(permit/register-function permit/YL :xml-from-krysp yl-application-xml)
+(permit/register-function permit/MAL :xml-from-krysp mal-application-xml)
+(permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
 
 (defn- ->building-ids [id-container xml-no-ns]
   {:propertyId (get-text xml-no-ns id-container :kiinttun)
@@ -252,7 +264,7 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-(defn ->lupamaaraukset [paatos-xml-without-ns]
+(defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
     (cr/ensure-sequental :vaaditutKatselmukset)
@@ -267,7 +279,7 @@
                               :autopaikkojaKiinteistolla
                               :autopaikkojaUlkopuolella])))
 
-(defn ->lupamaaraukset-ya [paatos-xml-without-ns]
+(defn- ->lupamaaraukset-text [paatos-xml-without-ns]
   (let [lupaehdot (select paatos-xml-without-ns :lupaehdotJaMaaraykset)]
     (when (not-empty lupaehdot)
       (-> lupaehdot
@@ -279,7 +291,7 @@
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
                    [% (cr/to-timestamp (get-text paatos xml-kw))]) v)))
 
-(defn ->liite [{:keys [metatietotieto] :as liite}]
+(defn- ->liite [{:keys [metatietotieto] :as liite}]
   (-> liite
     (assoc  :metadata (into {} (map
                                  (fn [{meta :metatieto}]
@@ -288,7 +300,7 @@
     (dissoc :metatietotieto)
     (cr/convert-keys-to-timestamps [:muokkausHetki])))
 
-(defn ->paatospoytakirja [paatos-xml-without-ns]
+(defn- ->paatospoytakirja [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :poytakirja)
     (cr/convert-keys-to-ints [:pykala])
     (cr/convert-keys-to-timestamps [:paatospvm])
@@ -302,16 +314,19 @@
    :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
                      (map ->paatospoytakirja poytakirjat))})
 
-(defn- ->ya-verdict [paatos-xml-without-ns]
+(defn- ->simple-verdict [paatos-xml-without-ns]
   {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                    :muutMaaraykset (->lupamaaraukset-ya paatos-xml-without-ns)}
+                    :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
    :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
    :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
                      (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})
 
 (permit/register-function permit/R :verdict-krysp-reader ->verdict)
 (permit/register-function permit/P :verdict-krysp-reader ->verdict)
-(permit/register-function permit/YA :verdict-krysp-reader ->ya-verdict)
+(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/YL :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdict)
 
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])

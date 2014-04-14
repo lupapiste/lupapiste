@@ -12,7 +12,6 @@
 ;; application mongo querys
 ;;
 
-;; TODO: test me!
 (defn basic-application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
@@ -21,7 +20,6 @@
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
       {:_id nil}))) ; should not yield any results
 
-;; TODO: test me!
 (defn application-query-for [user]
   (merge
     (basic-application-query-for user)
@@ -187,7 +185,7 @@
    :permitType               ""
    :schema-version           nil
    :sent                     nil
-   :started                  nil
+   :started                  nil ; construction started
    :startedBy                {}
    :state                    ""
    :statements               []

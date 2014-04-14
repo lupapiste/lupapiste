@@ -86,18 +86,26 @@
     (when (= status 200)
       body)))
 
-(defn raw-command [apikey command-name & args]
+(defn- decode-post [action-type apikey command-name & args]
   (decode-response
     (http/post
-      (str (server-address) "/api/command/" (name command-name))
+      (str (server-address) "/api/" (name action-type) "/" (name command-name))
       {:headers {"authorization" (str "apikey=" apikey)
                  "content-type" "application/json;charset=utf-8"}
        :body (json/encode (apply hash-map args))
        :follow-redirects false
        :throw-exceptions false})))
 
+(defn raw-command [apikey command-name & args]
+  (apply decode-post :command apikey command-name args))
+
 (defn command [apikey command-name & args]
   (let [{status :status body :body} (apply raw-command apikey command-name args)]
+    (when (= status 200)
+      body)))
+
+(defn datatables [apikey query-name & args]
+  (let [{status :status body :body} (apply decode-post :datatables apikey query-name args)]
     (when (= status 200)
       body)))
 
@@ -201,7 +209,7 @@
 
 (defn comment-application [id apikey open]
   (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target "application" :openApplication open) => ok?))
+    (command apikey :add-comment :id id :text "hello" :target {:type "application"} :openApplication open) => ok?))
 
 (defn query-application
   "Fetch application from server.

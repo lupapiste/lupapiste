@@ -33,6 +33,7 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.application-search :as search]
             [lupapalvelu.application-meta-fields :as meta-fields])
   (:import [java.net URL]))
 
@@ -246,6 +247,10 @@
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
+(defn- validate-comment-target [{{:keys [target]} :data}]
+  (when (string? target)
+    (fail :error.unknown-type)))
+
 (defcommand can-target-comment-to-authority
   {:roles [:authority]
    :pre-checks  [not-open-inforequest-user-validator]
@@ -256,6 +261,7 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :pre-checks [applicant-cant-set-to]
+   :input-validators [validate-comment-target]
    :notified   true
    :on-success [(notify :new-comment)
                 (fn [{data :data :as command} _]
@@ -319,8 +325,9 @@
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
-           :state     :canceled}})
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
   (mongo/remove-many :app-links {:link {$in [id]}})
   (ok))
 
@@ -332,8 +339,9 @@
    :states     [:draft]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
-           :state     :open}}))
+    {$set {:modified created
+           :opened   created
+           :state    :open}}))
 
 (defcommand request-for-complement
   {:parameters [:id]
@@ -343,7 +351,8 @@
    :states     [:sent]}
   [{:keys [created] :as command}]
   (update-application command
-    {$set {:modified  created
+    {$set {:modified created
+           :complementNeeded created
            :state :complement-needed}}))
 
 
@@ -370,17 +379,6 @@
       (do
         (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it link permit's (" link-permit-app-id ") verdict.")
         (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
-
-
-(defn- approve-application-do-rest [{:keys [application user] :as command} mongo-query app-updates attachments-argument]
-  (update-application command
-    mongo-query
-    {$set (merge
-            app-updates
-            attachments-argument
-            (when (empty? (:authority application))
-              {:authority (user/summary user)}))})
-  (ok :integrationAvailable (not (nil? attachments-argument))))
 
 (defn- organization-has-ftp-user? [organization application]
   (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
@@ -409,12 +407,13 @@
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
         app-updates (merge
                       {:modified created
-                       :sent created}
+                       :sent created
+                       :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
                       (if jatkoaika-app?
                         {:state :closed :closed created}
                         {:state :sent}))
         application (-> application
-                      (meta-fields/enrich-with-link-permit-data)
+                      meta-fields/enrich-with-link-permit-data
                       ((fn [app]
                         (if (= "lupapistetunnus" (-> app :linkPermitData first :type))
                           (update-link-permit-data-with-kuntalupatunnus-from-verdict app)
@@ -423,9 +422,13 @@
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
-        do-rest-fn (partial approve-application-do-rest command mongo-query app-updates)]
+        do-update (fn [attachments-argument]
+                    (update-application command
+                      mongo-query
+                      {$set (merge app-updates attachments-argument)})
+                    (ok :integrationAvailable (not (nil? attachments-argument))))]
 
-    (do-approve application created id lang jatkoaika-app? do-rest-fn)))
+    (do-approve application created id lang jatkoaika-app? do-update)))
 
 
 (defn- do-submit [command application created]
@@ -1097,82 +1100,11 @@
 ;; Service point for jQuery dataTables:
 ;;
 
-(def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
-                  (juxt :address :municipality)
-                  meta-fields/get-application-operation
-                  :applicant
-                  :submitted
-                  :indicators
-                  :unseenComments
-                  :modified
-                  :state
-                  :authority])
-
-(def order-by (assoc col-sources
-                     0 :infoRequest
-                     1 :address
-                     2 nil
-                     3 nil
-                     5 nil
-                     6 nil))
-
-(def col-map (zipmap col-sources (map str (range))))
-
-(defn add-field [application data [app-field data-field]]
-  (assoc data data-field (app-field application)))
-
-(defn make-row [application]
-  (let [base {"id" (:_id application)
-              "kind" (if (:infoRequest application) "inforequest" "application")}]
-    (reduce (partial add-field application) base col-map)))
-
-(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} {role :role}]
-  (merge
-    query
-    (condp = filter-kind
-      "applications" {:infoRequest false}
-      "inforequests" {:infoRequest true}
-      "both"         nil)
-    (condp = filter-state
-      "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-      "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-      "all"               (if (= role "applicant") {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})
-      "canceled"          {:state "canceled"})
-    (when-not (contains? #{nil "0"} filter-user)
-      {$or [{"auth.id" filter-user}
-            {"authority.id" filter-user}]})
-    (when-not (blank? filter-search)
-      {:address {$regex filter-search $options "i"}})))
-
-(defn make-sort [params]
-  (let [col (get order-by (:iSortCol_0 params))
-        dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
-    (if col {col dir} {})))
-
-(defn applications-for-user [user params]
-  (let [user-query  (domain/basic-application-query-for user)
-        user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params user)
-        query-total (mongo/count :applications query)
-        skip        (params :iDisplayStart)
-        limit       (params :iDisplayLength)
-        apps        (query/with-collection "applications"
-                      (query/find query)
-                      (query/sort (make-sort params))
-                      (query/skip skip)
-                      (query/limit limit))
-        rows        (map (comp make-row (partial meta-fields/with-meta-fields user)) apps)
-        echo        (str (util/->int (str (params :sEcho))))] ; Prevent XSS
-    {:aaData                rows
-     :iTotalRecords         user-total
-     :iTotalDisplayRecords  query-total
-     :sEcho                 echo}))
-
-(defquery "applications-for-datatables"
-  {:parameters [:params]
+(defquery applications-for-datatables
+  {:parameters [params]
    :verified true}
-  [{user :user {params :params} :data}]
-  (ok :data (applications-for-user user params)))
+  [{user :user}]
+  (ok :data (search/applications-for-user user params)))
 
 ;;
 ;; Query that returns number of applications or info-requests user has:

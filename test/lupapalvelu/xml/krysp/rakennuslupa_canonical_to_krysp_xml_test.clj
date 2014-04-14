@@ -52,6 +52,11 @@
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])]
 
+      (fact "saapumisPvm"
+        (let [expected (sade.util/to-xml-date (:submitted application))]
+          (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
+          (xml/get-text lp-xml_213 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected))
+
       (if validate-tyonjohtaja?
         (do
           (fact "In KRYSP 2.1.2, patevyysvaatimusluokka A is mapped to 'ei tiedossa'"
@@ -62,6 +67,11 @@
         (do
            tyonjohtaja_212 => nil
            tyonjohtaja_213 => nil)))
+
+    (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
+      ; Address format has changed in 2.1.5
+      (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu"
+      (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :kunta]) => "Tuonela")
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})

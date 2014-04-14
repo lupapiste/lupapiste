@@ -12,7 +12,7 @@
 
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :municipality sonja-muni)]
-    (command pena :add-comment :id application-id :text "foo" :target "application" :openApplication true) => ok?
+    (command pena :add-comment :id application-id :text "foo" :target {:type "application"} :openApplication true) => ok?
     (fact "no name" (command sonja "neighbor-add" :id application-id :propertyId "p" :street "s" :city "c" :zip "z" :email "e") => ok?)
     (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"  :city "c" :zip "z" :email "e") => ok?)
     (fact "no city" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"  :zip "z" :email "e") => ok?)
@@ -21,7 +21,7 @@
 
 (defn- create-app-with-neighbor [& args]
   (let [application-id (apply create-app-id pena args)
-        resp (command pena :add-comment :id application-id :text "foo" :target "application" :openApplication true)
+        resp (command pena :add-comment :id application-id :text "foo" :target {:type "application"} :openApplication true)
         resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
         application (query-application pena application-id)
@@ -103,7 +103,7 @@
                                       :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
                                                 ["henkilo.henkilotiedot.sukunimi" "Zorro"]
                                                 ["henkilo.henkilotiedot.hetu"     "123456789"]
-                                                ["henkilo.yhteystiedot.puhelin"     "040-1234567"]])
+                                                ["henkilo.yhteystiedot.puhelin"   "040-1234567"]])
         _               (command pena :update-doc
                                       :id application-id
                                       :doc uusirak-doc-id
@@ -111,8 +111,8 @@
                                                 ["rakennuksenOmistajat.0.henkilo.henkilotiedot.sukunimi" "Golem"]
                                                 ["rakennuksenOmistajat.0.henkilo.henkilotiedot.hetu"     "abba"]
                                                 ["rakennuksenOmistajat.0.henkilo.henkilotiedot.turvakieltoKytkin" true]
-                                                ["rakennuksenOmistajat.0.henkilo.osoite.katu" "Katuosoite"]
-                                                ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"     "040-2345678"]])]
+                                                ["rakennuksenOmistajat.0.henkilo.osoite.katu"            "Katuosoite"]
+                                                ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]])]
 
     application => truthy
 
@@ -120,120 +120,119 @@
           body                      (get-in email [:message :body :plain])
           [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
-      token => truthy
-      token =not=> #"="
+    token => truthy
+    token =not=> #"="
 
-      (fact "application query returns set document info"
-        (let [application (query-application pena application-id)
-              hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
-              uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
+    (fact "application query returns set document info"
+     (let [application (query-application pena application-id)
+           hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
+           uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
 
-          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
-          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"
-          (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => "040-1234567"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "abba"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => true
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
+       (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
+       (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
+       (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"
+       (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => "040-1234567"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "abba"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => true
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
 
-      (fact "neighbor application query does not return hetu"
-        (let [resp        (query pena :neighbor-application
-                                      :applicationId application-id
-                                      :neighborId neighborId
-                                      :token token)
-              application (:application resp)
-              hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
-              uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
+    (fact "neighbor application query does not return hetu"
+     (let [resp        (query pena :neighbor-application
+                                   :applicationId application-id
+                                   :neighborId neighborId
+                                   :token token)
+           application (:application resp)
+           hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
+           uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
 
-          resp => truthy
-          resp => (contains {:ok true})
-          application => truthy
+       resp => truthy
+       resp => (contains {:ok true})
+       application => truthy
 
-          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
-          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
-          (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => nil
-          (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
-          (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
+       (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
+       (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
+       (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
+       (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+       (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => nil
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => nil
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => nil
 
-          (facts "random testing about content"
-            (:comments application) => nil
-            (count (:documents application)) => 4 ; evil
+       (facts "random testing about content"
+        (:comments application) => nil
+        (count (:documents application)) => 4 ; evil
 
-            (fact "attachments"
-              (fact "there are some attachments"
-                (->> application :attachments count) => pos?)
-              (fact "everyone is paapiirustus"
-                (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
+        (fact "attachments"
+          (fact "there are some attachments"
+            (->> application :attachments count) => pos?)
+          (fact "everyone is paapiirustus"
+            (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
 
-              (let [file-id (->> application :attachments first :latestVersion :fileId)]
-                (fact "downloading should be possible"
-                  (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token token :file-id file-id) => http200?)
+          (let [file-id (->> application :attachments first :latestVersion :fileId)]
+            (fact "downloading should be possible"
+              (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token token :file-id file-id) => http200?)
 
-                (fact "downloading with wrong token should not be possible"
-                  (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token "h4x3d token" :file-id file-id) => http401?)))
+            (fact "downloading with wrong token should not be possible"
+              (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token "h4x3d token" :file-id file-id) => http401?)))
 
-            (:auth application) => nil)))
+        (:auth application) => nil)))
 
-      (fact "without tupas, neighbor can't give response"
-        (command pena :neighbor-response
-          :applicationId application-id
-          :neighborId (name neighborId)
-          :token token
-          :stamp "INVALID"
-          :response "ok"
-          :message "kehno suunta") => invalid-vetuma?)
+    (fact "without tupas, neighbor can't give response"
+     (command pena :neighbor-response
+       :applicationId application-id
+       :neighborId (name neighborId)
+       :token token
+       :stamp "INVALID"
+       :response "ok"
+       :message "kehno suunta") => invalid-vetuma?)
 
-      (fact "with vetuma"
-        (let [stamp (vetuma-stamp!)]
+    (fact "with vetuma"
+     (let [stamp (vetuma-stamp!)]
 
-          (fact "neighbor cant give ill response"
-            (command pena :neighbor-response
-              :applicationId application-id
-              :neighborId (name neighborId)
-              :stamp stamp
-              :token token
-              :response "ime parsaa!"
-              :message "kehno suunta") => invalid-response?)
+       (fact "neighbor cant give ill response"
+         (command pena :neighbor-response
+           :applicationId application-id
+           :neighborId (name neighborId)
+           :stamp stamp
+           :token token
+           :response "ime parsaa!"
+           :message "kehno suunta") => invalid-response?)
 
-          (fact "neighbor can give response"
-            (command pena :neighbor-response
-              :applicationId application-id
-              :neighborId (name neighborId)
-              :stamp stamp
-              :token token
-              :response "comments"
-              :message "kehno suunta") => ok?)
+       (fact "neighbor can give response"
+         (command pena :neighbor-response
+           :applicationId application-id
+           :neighborId (name neighborId)
+           :stamp stamp
+           :token token
+           :response "comments"
+           :message "kehno suunta") => ok?)
 
-          (fact "neighbour cant regive response 'cos vetuma has expired"
-            (command pena :neighbor-response
-              :applicationId application-id
-              :neighborId (name neighborId)
-              :stamp stamp
-              :token token
-              :response "comments"
-              :message "kehno suunta") => invalid-vetuma?)
+       (fact "neighbour cant regive response 'cos vetuma has expired"
+         (command pena :neighbor-response
+           :applicationId application-id
+           :neighborId (name neighborId)
+           :stamp stamp
+           :token token
+           :response "comments"
+           :message "kehno suunta") => invalid-vetuma?)
 
-          (fact "neighbour cant regive response with new tupas 'con token has expired"
-            (command pena :neighbor-response
-              :applicationId application-id
-              :neighborId (name neighborId)
-              :stamp (vetuma-stamp!)
-              :token token
-              :response "comments"
-              :message "kehno suunta") => invalid-token?)
+       (fact "neighbour cant regive response with new tupas 'con token has expired"
+         (command pena :neighbor-response
+           :applicationId application-id
+           :neighborId (name neighborId)
+           :stamp (vetuma-stamp!)
+           :token token
+           :response "comments"
+           :message "kehno suunta") => invalid-token?)
 
-          (fact "neighbour cant see application anymore"
-            (query pena :neighbor-application
-              :applicationId application-id
-              :neighborId (name neighborId)
-              :token token) => invalid-token?))))))
-
+       (fact "neighbour cant see application anymore"
+         (query pena :neighbor-application
+           :applicationId application-id
+           :neighborId (name neighborId)
+           :token token) => invalid-token?))))))

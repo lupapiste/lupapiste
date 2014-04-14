@@ -15,8 +15,7 @@
                         "2.1.4" "2.1.2"
                         "2.1.5" "2.1.3"})
 
-(def ^:private ymp-yht {"2.1.1" "2.1.0"
-                        "2.1.2" "2.1.3"})
+(def ^:private ymp-yht {"2.1.2" "2.1.3"})
 
 (def ^:private yht-version
   {"rakennusvalvonta" rp-yht
@@ -26,7 +25,7 @@
    "ymparisto/maa_ainesluvat" ymp-yht
    "ymparisto/ilmoitukset"    ymp-yht
    "ymparisto/ymparistoluvat" ymp-yht
-   "ymparisto/vesihuoltolaki" ymp-yht})
+   "ymparisto/vesihuoltolaki" {"2.1.3" "2.1.3"}})
 
 (defn xsd-filename [ns-name]
   (case ns-name
@@ -371,13 +370,6 @@
                                             :child [{:tag :nimi
                                                      :child [{:tag :etunimi}
                                                              {:tag :sukunimi}]}]}]}])
-
-(def ymp-osapuoli-children
-  [{:tag :nimi}
-   {:tag :postiosoite :child postiosoite-children-ns-yht}
-   {:tag :sahkopostiosoite}
-   {:tag :yhteyshenkilo :child henkilo-child-ns-yht}
-   {:tag :liikeJaYhteisotunnus}])
 
 (def verkkolaskutus_213
   {:tag :Verkkolaskutus

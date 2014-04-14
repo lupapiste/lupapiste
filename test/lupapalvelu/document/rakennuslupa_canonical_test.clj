@@ -172,7 +172,10 @@
 (def ^:private common-rakennus
   {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                               :henkilo henkilo
-                              :omistajalaji {:value "muu yksityinen henkil\u00f6 tai perikunta"}}}
+                              :omistajalaji {:value "muu yksityinen henkil\u00f6 tai perikunta"}}
+                          :1 {:_selected {:value "yritys"}
+                              :yritys yritys
+                              :omistajalaji {:value "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}}}
    :kaytto {:rakentajaTyyppi {:value "muu"}
             :kayttotarkoitus {:value "012 kahden asunnon talot"}}
    :mitat {:tilavuus {:value "1500"}
@@ -271,11 +274,17 @@
 
 (def ^:private purku {:id "purku"
                       :created 4
-                      :schema-info {:name "purku"
+                      :schema-info {:name "purkaminen"
                                     :version 1
                                     :op {:name "purkaminen"}}
                       :data (conj
-                              common-rakennus
+                              (->
+                                common-rakennus
+                                (dissoc :huoneistot)
+                                (dissoc :lammitys)
+                                (dissoc :verkostoliittymat)
+                                (dissoc :varusteet)
+                                (dissoc :luokitus))
                               {:rakennusnro {:value "001"}
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
@@ -651,7 +660,7 @@
                      (get-in [:data :huoneistot])
                      tools/unwrapped
                      get-huoneisto-data)
-        h2 (first huoneistot), h1 (last huoneistot)]
+        h2 (last huoneistot), h1 (first huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
     (fact "h1 huoneluku" (:huoneluku h1) => "66")
@@ -811,13 +820,21 @@
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
-    (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 2)
+    (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
+    (fact "Purku: syy" (-> purku-t :purkaminen :purkamisenSyy) => "tuhoutunut")
+    (facts "Purku: rakennus"
+      (let [rakennus (get-in purku-t [:rakennustieto :Rakennus])]
+        (fact "omistaja" (-> rakennus :omistajatieto first :Omistaja :henkilo :sahkopostiosoite) => "pena@example.com")
+        (fact "yksilointitieto" (-> rakennus :yksilointitieto) => "purku")
+        (fact "rakennusnro" (-> rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro) => "001")
+        (fact "kayttotarkoitus" (-> rakennus :rakennuksenTiedot :kayttotarkoitus) => "012 kahden asunnon talot")))
+
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
 
@@ -944,8 +961,10 @@
                                      :zip "33456"
                                      :city "Tampere"})
 
+(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)}]))
+
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [application (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application application-rakennuslupa-verdict-given
                  canonical (katselmus-canonical
                              application
                              "sv"
@@ -965,7 +984,7 @@
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
                  tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
@@ -1010,7 +1029,7 @@
         (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
-           (let [application (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application application-rakennuslupa-verdict-given
                  canonical (unsent-attachments-to-canonical application "sv")
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -1019,7 +1038,7 @@
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
                  LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
@@ -1109,7 +1128,7 @@
     ))
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [application (assoc application-rakennuslupa :state "verdictGiven")
+           (let [application application-rakennuslupa-verdict-given
                  canonical (katselmus-canonical
                              application
                              "fi"
@@ -1137,7 +1156,7 @@
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (:Tilamuutos kasittelynTilatieto) => truthy
+                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => map?
                  tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
@@ -1280,15 +1299,18 @@
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
-
+        lupa-tunnus (get-in rakennusvalvontaasia [:luvanTunnisteTiedot :LupaTunnus]) => map?
         toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
         asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot)
-        rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
         lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
         Lisatiedot (:Lisatiedot lisatiedot) => truthy
-        vakuus (:vakuus Lisatiedot) => nil?
-        ]
-    ))
+        vakuus (:vakuus Lisatiedot) => nil?]
 
+        (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
+        (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
+
+        (get-in lupa-tunnus [:muuTunnustieto :MuuTunnus]) => {:tunnus (:id aloitusoikeus-hakemus), :sovellus "Lupapiste"}
+
+        (fact "SaapumisPvm = submitted date"
+          (:saapumisPvm lupa-tunnus) => "2014-01-02")))

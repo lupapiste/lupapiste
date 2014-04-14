@@ -15,7 +15,7 @@
         <div data-bind="with: application" class="application_summary_info">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
-             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-bind="ltext: 'edit.address', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
           </h1>
 
@@ -316,7 +316,7 @@
                         (<span data-bind="text: username"></span>)
                         <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                       </span>
-                      <span class="invite-state">  
+                      <span class="invite-state">
                         <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
                         <span data-bind="if: !$data.invite"><span data-bind="ltext: 'accepted'"></span></span>
                       </span>
@@ -892,9 +892,9 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: tasks">
-                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}">
                   <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-                  <td data-bind="text: displayName"></td>
+                  <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
                   <td data-bind="dateString: $data.closed"></td>
                 </tr>
               </tbody>

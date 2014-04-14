@@ -371,13 +371,14 @@
                                                              [:muut :muu]]
                                               :yl-uusi-toiminta [[:muut :muu]]
                                               :maa-aineslupa [[:muut :muu]]
+                                              "vvvl-vesijohdosta" [[:muut :muu]]
                                               }
-                     :krysp {:R {:url local-krysp, :version "2.1.2"
-                                 :ftpUser "dev_sipoo"}
+                     :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.1.2"}
                              :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
-                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.1"}
-                             :YL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
-                             :MAL {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}}
+                             :YI {:ftpUser "dev_ymp_sipoo" :version "2.1.2"}
+                             :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
+                             :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.2"}
+                             :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.1.3"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",

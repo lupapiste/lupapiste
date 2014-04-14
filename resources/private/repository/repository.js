@@ -44,9 +44,9 @@ var repository = (function() {
         _.each(application.documents || [], setSchema);
         _.each(application.tasks || [], setSchema);
         _.each(application.comments || [], function(comment) {
-          if (comment.target && comment.target.type === 'attachment' && comment.target.fileId) {
+          if (comment.target && comment.target.type === 'attachment' && comment.target.id) {
             var targetAttachment = _.find(application.attachments || [], function(attachment) {
-              return _.some(attachment.versions || [], function(ver) {return comment.target.fileId === ver.fileId;});
+              return attachment.id === comment.target.id;
             });
             if (targetAttachment) {
               comment.target.attachmentType = loc('attachmentType.' + targetAttachment.type['type-group'] + '.' + targetAttachment.type['type-id']);

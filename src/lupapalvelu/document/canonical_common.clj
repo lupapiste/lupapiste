@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
+            [swiss-arrows.core :refer [-<>]]
             [sade.strings :as ss]
             [sade.util :refer :all]
             [sade.common-reader :as cr]
@@ -18,18 +19,16 @@
 (def toimituksenTiedot-tila "keskener\u00e4inen")
 
 (def application-state-to-krysp-state
-  {:draft "vireill\u00e4"
-   :open "vireill\u00e4"
-   :sent "vireill\u00e4"
+  {:open "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :submitted "vireill\u00e4"
-   :complement-needed "vireill\u00e4"
+   :sent "vireill\u00e4"
+   :complement-needed "odottaa asiakkaan toimenpiteit\u00e4"
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :closed "valmis"})
 
 (def ymp-application-state-to-krysp-state
-  {:draft "1 Vireill\u00e4"
-   :open "1 Vireill\u00e4"
+  {:open "1 Vireill\u00e4"
    :sent "1 Vireill\u00e4"
    :submitted "1 Vireill\u00e4"
    :complement-needed "1 Vireill\u00e4"
@@ -37,17 +36,23 @@
    :constructionStarted "ei tiedossa"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
-(def state-timestamps
-  {:draft :created
-   :open :opened
-   :complement-needed :opened
-   ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened
-   ; Enables XML to be formed from sent applications
-   :sent :opened
-   :verdictGiven :opened
-   :constructionStarted :opened
+(def ^:private state-timestamp-fn
+  {:open #(or (:opened %) (:created %))
+   :submitted :submitted
+   :sent :submitted ; Enables XML to be formed from sent applications
+   :complement-needed :complementNeeded
+   :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
+   :constructionStarted :started
    :closed :closed})
+
+(defn state-timestamp [{state :state :as application}]
+  ((state-timestamp-fn (keyword state)) application))
+
+(defn all-state-timestamps [application]
+  (into {}
+    (map
+      (fn [state] [state (state-timestamp (assoc application :state state))])
+      (keys state-timestamp-fn))))
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
@@ -202,17 +207,25 @@
 
 
 (defn get-state [application]
-  (let [state (keyword (:state application))]
-    {:Tilamuutos
-     {:tila (application-state-to-krysp-state state)
-      :pvm (to-xml-date ((state-timestamps state) application))
-      :kasittelija (get-handler application)}}))
+  (let [state-timestamps (-<> (all-state-timestamps application)
+                           (dissoc :sent :closed) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
+                           cr/strip-nils
+                           (sort-by second <>))]
+    (mapv
+      (fn [[state ts]]
+        {:Tilamuutos
+         {:tila (application-state-to-krysp-state state)
+          :pvm (to-xml-date ts)
+          :kasittelija (get-handler application)}})
+      state-timestamps)))
 
 
-(defn lupatunnus [id]
+(defn lupatunnus [{:keys [id submitted]}]
+  {:pre [id]}
   {:LupaTunnus
-   {:muuTunnustieto {:MuuTunnus {:tunnus id
-                                 :sovellus "Lupapiste"}}}})
+   (assoc-when
+     {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
+     :saapumisPvm (to-xml-date submitted))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -469,14 +482,14 @@
     (assoc-in
       (if (= (:type link-permit-data) "kuntalupatunnus")
         {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}}
-        (lupatunnus (:id link-permit-data)))
+        (lupatunnus link-permit-data))
       [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
 
 (defn get-kasittelytieto-ymp [application kt-key]
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
            :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+           :paivaysPvm (to-xml-date (state-timestamp application))
            :kasittelija (let [handler (:authority application)]
                           (if (seq handler)
                             {:henkilo
@@ -500,19 +513,6 @@
                   :sahkopostiosoite (-> henkilo :yhteystiedot :email)
                   :puhelin (-> henkilo :yhteystiedot :puhelin)
                    :henkilotunnus (-> henkilo :henkilotiedot :hetu)))))
-
-; TODO remove after 2.1.2 canonical is complete
-(defn ->ymp-osapuoli [unwrapped-party-doc]
-  (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
-    (let [yritys (-> unwrapped-party-doc :data :yritys)]
-      {:nimi (-> yritys :yritysnimi)
-       :postiosoite (get-simple-osoite (:osoite yritys))
-       :yhteyshenkilo (get-henkilo (:yhteyshenkilo yritys))
-       :liikeJaYhteisotunnus (:liikeJaYhteisoTunnus yritys)})
-    (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
-      {:nimi "Yksityishenkil\u00f6"
-       :postiosoite (get-simple-osoite (:osoite henkilo))
-       :yhteyshenkilo (get-henkilo henkilo)})))
 
 (defn get-yhteystiedot [unwrapped-party-doc]
   (if (= (-> unwrapped-party-doc :data :_selected) "yritys")

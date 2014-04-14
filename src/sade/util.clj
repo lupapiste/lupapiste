@@ -13,6 +13,13 @@
   "traverses m and applies f to all maps within"
   [f m] (prewalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
 
+(defn convert-values
+  "Runs a recursive conversion"
+  ([m f]
+    (postwalk-map (partial map (fn [[k v]] [k (f v)])) m))
+  ([m pred f]
+    (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
+
 ; from clojure.contrib/core
 
 (defn dissoc-in
@@ -34,6 +41,16 @@
   [m [k & ks]]
   (when k
     (cons (get m k) (select m ks))))
+
+(defn some-key
+  "Tries given keys and returns the first non-nil value from map m"
+  [m & ks]
+  (let [k (first ks)]
+    (when (and m k)
+      (if (nil? (m k))
+        (apply some-key m (rest ks))
+        (m k)))))
+
 
 ; From clojure.contrib/seq
 
@@ -169,9 +186,27 @@
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
 
+(def time-pattern #"^([012]?[0-9]):([0-5]?[0-9])(:([0-5][0-9])(\.(\d))?)?$")
 
-(defn sequable? [x]
+(defn to-xml-time-from-string [^String time-s]
+  (when-let [matches (and time-s (seq (filter #(and % (Character/isDigit (first %))) (rest (re-matches time-pattern time-s)))))]
+    (let [fmt (case (count matches)
+                2 "%02d:%02d:00"
+                3 "%02d:%02d:%02d"
+                4 "%02d:%02d:%02d.%d")]
+      (apply format fmt (map ->int matches)))))
+
+(def property-id-pattern
+  "Regex for property id human readable format"
+  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
+
+(defn to-property-id [^String human-readable]
+  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
+    (apply format "%03d%03d%04d%04d" parts)))
+
+(defn sequable?
   "Returns true if x can be converted to sequence."
+  [x]
   (or (seq? x)
       (instance? clojure.lang.Seqable x)
       (instance? Iterable x)
@@ -180,14 +215,16 @@
       (nil? x)
       (-> x .getClass .isArray)))
 
-(defn empty-or-nil? [x]
+(defn empty-or-nil?
   "Returns true if x is either nil or empty if it's sequable."
+  [x]
   (or (nil? x) (and (sequable? x) (empty? x))))
 
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
 
 (defn boolean? [x] (instance? Boolean x))
 
-(defn assoc-when [m & kvs]
+(defn assoc-when
   "Assocs entries with not-empty-or-nil values into m."
+  [m & kvs]
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))

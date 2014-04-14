@@ -19,17 +19,20 @@
                      :child [{:tag :yksilointitieto :ns "yht"}
                              {:tag :alkuHetki :ns "yht"}
                              {:tag :kasittelytietotieto
-                              :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
+                              :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
                              {:tag :luvanTunnistetiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto
                               :child [mapping-common/lausunto_213]}
-                             {:tag :ilmoittaja
-                              :child mapping-common/ymp-osapuoli-children}
-                             {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
-                                                              {:tag :Kunta}
-                                                              mapping-common/sijantiType
-                                                              {:tag :Kiinteistorekisterinumero}]}
+                             {:tag :toiminnanSijaintitieto
+                              :child [{:tag :ToiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
+                                                                       {:tag :Kunta}
+                                                                       mapping-common/sijantiType
+                                                                       {:tag :Kiinteistorekisterinumero}]}]}
+
+                             {:tag :ilmoittaja :child mapping-common/yhteystietotype-children_213}
+                             {:tag :jatkoIlmoitusKytkin} ; boolean
+                             {:tag :asianKuvaus} ; String
                              {:tag :toimintatieto :child [{:tag :Toiminta :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
                                                                                   {:tag :rakentaminen :child [{:tag :louhinta}
@@ -38,8 +41,14 @@
                                                                                                               {:tag :muu}]}
                                                                           {:tag :tapahtuma :child [{:tag :ulkoilmakonsertti}
                                                                                                    {:tag :muu}]}]}]}
-                             {:tag :toiminnanKesto :child [{:tag :alkuHetki}
-                                                           {:tag :loppuHetki}]}
+                             {:tag :toiminnanKesto :child [{:tag :alkuPvm}
+                                                           {:tag :loppuPvm}
+                                                           {:tag :arkiAlkuAika}
+                                                           {:tag :arkiLoppuAika}
+                                                           {:tag :lauantaiAlkuAika}
+                                                           {:tag :lauantaiLoppuAika}
+                                                           {:tag :sunnuntaiAlkuAika}
+                                                           {:tag :sunnuntaiLoppuAika}]}
                              {:tag :melutiedot :child [{:tag :koneidenLkm}
                                                        {:tag :melutaso :child [{:tag :db}
                                                                                {:tag :paiva}
