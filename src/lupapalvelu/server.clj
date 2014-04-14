@@ -25,8 +25,7 @@
             [lupapalvelu.document.schema-repository]
             [lupapalvelu.common-actions]
             [lupapalvelu.migration.migration :as migration]
-            [lupapalvelu.screenmessage]
-            [lupapalvelu.batchrun :as batchrun]))
+            [lupapalvelu.screenmessage]))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
@@ -40,7 +39,6 @@
   (mongo/connect!)
   (migration/update!)
   (mongo/ensure-indexes)
-  (batchrun/start-reminder-email-scheduler)
   (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)

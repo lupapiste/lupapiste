@@ -14,9 +14,6 @@
             [sade.env :as env]))
 
 
-; default pattern is daily at 2am
-;(def ^:dynamic ^:String *send-interval-pattern* "0 2") ; TODO: Joka yo backuppien jalkeen, selvita infralta, koska ne menevat
-
 (defn- get-timestamp-from-now [time-key amount]
   {:pre [(#{:week :month} time-key)]}
   (let [time-fn (case time-key
@@ -57,7 +54,7 @@
 
 
 
-(defn- send-reminder-emails []
+(defn send-reminder-emails [& args]
   (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
         timestamp-1-month-ago (get-timestamp-from-now :month 1)]
 
@@ -143,12 +140,4 @@
                                                                       :data {:email (get-app-owner-email app)}})) ; TODO: Kaytetaan Owner-tyypin authin emailia - onko ok?
         apps))
     ))
-
-(defn start-reminder-email-scheduler []
-  ;;
-  ;; ** TODO: Testaa tama (kutsutaan serverin kaynnistyksessa) **
-  ;;
-;  (log/info "Starting reminder email scheduler with pattern" *send-interval-pattern*)
-;  (cron/repeatedly-schedule *send-interval-pattern* send-reminder-emails)
-  )
 
