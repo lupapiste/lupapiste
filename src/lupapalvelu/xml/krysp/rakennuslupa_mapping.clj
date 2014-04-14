@@ -99,6 +99,17 @@
                               :child [{:tag :muu}
                                       {:tag :omistajalaji}]}]}]}]})
 
+(def ^:private rakennus_215
+  (update-in rakennus [:child] mapping-common/update-child-element
+      [:omistajatieto :Omistaja]
+      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                              {:tag :VRKrooliKoodi :ns "yht"}
+                              mapping-common/henkilo
+                              mapping-common/yritys_213
+                              {:tag :omistajalaji :ns "rakval"
+                               :child [{:tag :muu}
+                                       {:tag :omistajalaji}]}]}))
+
 (def ^:private katselmustieto
   {:tag :katselmustieto
    :child [{:tag :Katselmus
@@ -247,7 +258,11 @@
 
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
-      {:tag :lausuntotieto :child [mapping-common/lausunto_213]})))
+      {:tag :lausuntotieto :child [mapping-common/lausunto_213]})
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
+      {:tag :rakennustieto :child [rakennus_215]})))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
