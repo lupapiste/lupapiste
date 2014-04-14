@@ -172,7 +172,10 @@
 (def ^:private common-rakennus
   {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                               :henkilo henkilo
-                              :omistajalaji {:value "muu yksityinen henkil\u00f6 tai perikunta"}}}
+                              :omistajalaji {:value "muu yksityinen henkil\u00f6 tai perikunta"}}
+                          :1 {:_selected {:value "yritys"}
+                              :yritys yritys
+                              :omistajalaji {:value "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}}}
    :kaytto {:rakentajaTyyppi {:value "muu"}
             :kayttotarkoitus {:value "012 kahden asunnon talot"}}
    :mitat {:tilavuus {:value "1500"}

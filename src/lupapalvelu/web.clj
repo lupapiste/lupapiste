@@ -487,8 +487,11 @@
     (if-not (s/blank? typeName)
       (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
+                  "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
+                  "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
+                  "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
                   "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}]
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName)))))
       (when (= r "GetCapabilities")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
 
