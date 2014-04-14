@@ -175,10 +175,10 @@
 
             (let [file-id (->> application :attachments first :latestVersion :fileId)]
               (fact "downloading should be possible"
-                (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token token :file-id file-id) => http200?)
+                (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
 
               (fact "downloading with wrong token should not be possible"
-                (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token "h4x3d token" :file-id file-id) => http401?)))
+                (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
 
           (:auth application) => nil)))
 
