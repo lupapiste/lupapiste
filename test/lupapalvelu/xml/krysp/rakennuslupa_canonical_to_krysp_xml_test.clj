@@ -68,6 +68,11 @@
            tyonjohtaja_212 => nil
            tyonjohtaja_213 => nil)))
 
+    (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
+      ; Address format has changed in 2.1.5
+      (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu"
+      (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :kunta]) => "Tuonela")
+
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.3"}}})
