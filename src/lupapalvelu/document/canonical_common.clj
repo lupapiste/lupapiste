@@ -437,12 +437,12 @@
              :hallintasuhde "Ei tiedossa"}})
 
 (defn- get-neighbors [neighbors]
-  (remove nil? (for [[_ neighbor] neighbors]
+  (remove nil? (for [neighbor neighbors]
                    (let [status (last (:status neighbor))
-                         propertyId (-> neighbor :neighbor :propertyId)]
+                         propertyId (-> neighbor :propertyId)]
                      (case (:state status)
                        "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
-                       "mark-done" (get-neighbor (-> neighbor :neighbor :owner :name) propertyId)
+                       "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
 (defn osapuolet
