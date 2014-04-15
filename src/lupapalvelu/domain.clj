@@ -146,13 +146,6 @@
                                :paatoskoodi     (verdict/verdict-name status)}]}]})
 
 ;;
-;; Software version metadata
-;;
-
-(defn set-software-version [m]
-  (assoc m :_software_version (str (:build-number env/buildinfo))))
-
-;;
 ;; Application skeleton with default values
 ;;
 
