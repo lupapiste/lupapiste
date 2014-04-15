@@ -202,7 +202,7 @@
     (seq (select omistaja [:henkilo])) (->henkilo omistaja)
     :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
-(def cleanup (comp cr/strip-empty-maps util/strip-nils))
+(def cleanup (comp util/strip-empty-maps util/strip-nils))
 
 (def polished  (comp cr/index-maps cleanup cr/convert-booleans))
 

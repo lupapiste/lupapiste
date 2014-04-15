@@ -2,6 +2,13 @@
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]))
 
+
+(fact "strip-nils"
+  (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
+
+(fact "strip-empty-maps"
+  (strip-empty-maps {:a 1 :b {} :c {:d 2 :e {}}}) => {:a 1 :c {:d 2}})
+
 (facts
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :b]) => {:a {:c \c}})
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :x]) => {:a {:b \b :c \c}}))
