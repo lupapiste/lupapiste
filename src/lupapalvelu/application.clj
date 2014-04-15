@@ -179,7 +179,7 @@
 (defcommand invite
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)
@@ -238,7 +238,7 @@
 (defcommand remove-auth
   {:parameters [:id email]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))

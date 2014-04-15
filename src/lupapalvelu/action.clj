@@ -33,10 +33,10 @@
 ;; some utils
 ;;
 
-(defn validate-email
+(defn email-validator
   "Reads email key from action parameters and checks that it is valid email address.
    Blank address passes the validation."
-  ([command] (validate-email :email command))
+  ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
       (when-not (ss/blank? email)

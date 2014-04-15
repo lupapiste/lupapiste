@@ -189,7 +189,7 @@
 (defcommand create-user
   {:parameters [:email role]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)]
@@ -261,7 +261,7 @@
   {:parameters       [operation email firstName lastName]
    :input-validators [valid-organization-operation?
                       (partial action/non-blank-parameters [:email :firstName :lastName])
-                      action/validate-email]
+                      action/email-validator]
    :roles            [:authorityAdmin]}
   [{caller :user}]
   (let [email            (ss/lower-case email)
@@ -307,7 +307,7 @@
 (defcommand reset-password
   {:parameters    [email]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :notified      true
    :authenticated false}
   [_]
@@ -337,7 +337,7 @@
 (defcommand set-user-enabled
   {:parameters    [email enabled]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles         [:admin]}
   [_]
   (let [email (ss/lower-case email)
@@ -398,7 +398,7 @@
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
    :input-validators [(partial action/non-blank-parameters [:email :password])
-                      action/validate-email]
+                      action/email-validator]
    :verified   true}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)

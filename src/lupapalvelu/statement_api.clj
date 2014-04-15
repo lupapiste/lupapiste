@@ -30,7 +30,7 @@
 (defcommand create-statement-giver
   {:parameters [email text]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :notified   true
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
