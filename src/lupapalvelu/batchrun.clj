@@ -58,7 +58,6 @@
 (defn statement-request-reminder []
   ;;
   (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
-;        _ (println "\n statement-request-reminder, (older-than timestamp-1-week-ago): " (older-than timestamp-1-week-ago))
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                                    :given nil
