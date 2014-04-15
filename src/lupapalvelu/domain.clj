@@ -2,11 +2,9 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.model :as model]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.strings :refer [lower-case]]
-            [sade.env :as env]
-            [sade.common-reader :refer [strip-nils strip-empty-maps]]))
+            [sade.env :as env]))
 
 ;;
 ;; application mongo querys
@@ -89,49 +87,6 @@
 ;;
 ;; Conversion between Lupapiste and documents
 ;;
-
-(defn has-hetu?
-  ([schema]
-    (has-hetu? schema [:henkilo]))
-  ([schema-body base-path]
-    (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
-      (boolean (model/find-by-name schema-body full-path)))))
-
-(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
-                         companyName companyId
-                         fise degree graduatingYear]} & {:keys [with-hetu]}]
-  (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
-    (->
-      {:userId                        {:value id}
-       :henkilotiedot {:etunimi       {:value firstName}
-                       :sukunimi      {:value lastName}}
-       :yhteystiedot {:email          {:value email}
-                      :puhelin        {:value phone}}
-       :osoite {:katu                 {:value street}
-                :postinumero          {:value zip}
-                :postitoimipaikannimi {:value city}}
-       :yritys {:yritysnimi           {:value companyName}
-                :liikeJaYhteisoTunnus {:value companyId}}
-       :patevyys {:koulutus           {:value degree}
-                  :valmistumisvuosi   {:value graduatingYear}
-                  :fise               {:value fise}
-                  }}
-      merge-hetu
-      strip-nils
-      strip-empty-maps)))
-
-(defn ->yritys [{:keys [id firstName lastName email phone street zip city]}]
-  (->
-    {;:userId                        {:value id}
-     :yhteyshenkilo {:henkilotiedot {:etunimi       {:value firstName}
-                                     :sukunimi      {:value lastName}}
-                     :yhteystiedot {:email          {:value email}
-                                    :puhelin        {:value phone}}}
-     :osoite {:katu                 {:value street}
-              :postinumero          {:value zip}
-              :postitoimipaikannimi {:value city}}}
-    strip-nils
-    strip-empty-maps))
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
