@@ -18,9 +18,10 @@
   {:pre [(#{:week :month} time-key)]}
   (let [time-fn (case time-key
                   :week weeks
-                  :month months
-                  )]
+                  :month months)]
     (to-long (-> amount time-fn ago))))
+
+(defn- older-than [timestamp] {$lt timestamp})
 
 (defn- get-app-owner-email [application]
   (let [owner (domain/get-auths-by-role application :owner)

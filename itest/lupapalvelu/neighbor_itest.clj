@@ -86,7 +86,7 @@
     n-id => neighbor-id
     token => #"[A-Za-z0-9]{48}"))
 
-(facts "neighbour invite & view on application"
+(facts "neighbor invite & view on application"
   (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
@@ -212,7 +212,7 @@
             :response "comments"
             :message "kehno suunta") => ok?)
 
-        (fact "neighbour cant regive response 'cos vetuma has expired"
+        (fact "neighbor can't re-give response 'cos vetuma has expired"
           (command pena :neighbor-response
             :applicationId application-id
             :neighborId (name neighborId)
@@ -221,7 +221,7 @@
             :response "comments"
             :message "kehno suunta") => invalid-vetuma?)
 
-        (fact "neighbour cant regive response with new tupas 'con token has expired"
+        (fact "neighbor can't re-give response with new tupas 'cos token has expired"
           (command pena :neighbor-response
             :applicationId application-id
             :neighborId (name neighborId)
@@ -230,7 +230,7 @@
             :response "comments"
             :message "kehno suunta") => invalid-token?)
 
-        (fact "neighbour cant see application anymore"
+        (fact "neighbor cant see application anymore"
           (query pena :neighbor-application
             :applicationId application-id
             :neighborId (name neighborId)
