@@ -85,7 +85,7 @@
   (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
 
 ;;
-;; Conversion between Lupapiste and documents
+;; Verdict model
 ;;
 
 (defn ->paatos
