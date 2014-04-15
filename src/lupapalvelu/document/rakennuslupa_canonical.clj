@@ -4,7 +4,6 @@
             [clojure.string :as s]
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
-            [sade.common-reader :as cr]
             [sade.util :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
@@ -162,7 +161,7 @@
                                    (fn [m]
                                      (-> m
                                        ; Cleanup top level keys that will bi nil anyway.
-                                       ; Recursive cr/strip-nils would be too much.
+                                       ; Recursive strip-nils would be too much.
                                        (dissoc :verkostoliittymat)
                                        (dissoc :energialuokka )
                                        (dissoc :energiatehokkuusluku)
@@ -297,7 +296,7 @@
 (defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
-        katselmus (cr/strip-nils
+        katselmus (strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                        :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)

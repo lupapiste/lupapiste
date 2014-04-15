@@ -20,6 +20,10 @@
   ([m pred f]
     (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
 
+(defn strip-nils
+  "removes recursively all keys from map which have value of nil"
+  [m] (postwalk-map (partial filter (comp not nil? val)) m))
+
 ; from clojure.contrib/core
 
 (defn dissoc-in
