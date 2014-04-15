@@ -120,7 +120,9 @@
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization :allowDirectMarketing])
+                    :phone :city :street :zip :enabled :organization
+                    :allowDirectMarketing :architect])
+      (util/assoc-when :partnerApplications (:partnerApplications user-data))
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
