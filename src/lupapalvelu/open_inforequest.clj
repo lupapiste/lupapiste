@@ -49,6 +49,7 @@
                                            :organization-id  organization-id
                                            :email            email
                                            :created          (now)
+                                           :reminder-sent    nil
                                            :last-used        nil})
     (notifications/notify! :open-inforequest-invite {:data {:email email :token-id token-id}
                                                      :application application})

@@ -183,6 +183,7 @@
    :propertyId               ""
    :permitSubtype            ""
    :permitType               ""
+   :reminder-sent            nil
    :schema-version           nil
    :sent                     nil
    :started                  nil ; construction started

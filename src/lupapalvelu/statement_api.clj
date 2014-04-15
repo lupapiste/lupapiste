@@ -88,6 +88,7 @@
                                              :person    statement-giver
                                              :requested now
                                              :given     nil
+                                             :reminder-sent nil
                                              :status    nil}
                                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
                                  :email (:email %)}) persons)
