@@ -39,11 +39,8 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (ss/blank? email)
-        (try
-          (javax.mail.internet.InternetAddress. email)
-          (when-not (ss/contains email "@") (fail :error.email))
-          (catch Exception _ (fail :error.email)))))))
+      (when-not (or (ss/blank? email) (util/valid-email? email))
+        (fail :error.email)))))
 
 ;; Notificator
 
