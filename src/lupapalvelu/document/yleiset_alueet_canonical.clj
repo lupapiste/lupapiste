@@ -72,7 +72,8 @@
                       :etunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :etunimi)
                       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :yritys :osoite))
                       :puhelinnumero (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :puhelin)
-                      :sahkopostiosoite (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email))
+                      :sahkopostiosoite (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email)
+                      ::henkilotunnus (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email))
                     ;; henkilo-tyyppinen vastuuhenkilo
                     (assoc-when {}
                       :sukunimi (-> vastuuhenkilo :henkilo :henkilotiedot :sukunimi)
