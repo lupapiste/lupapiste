@@ -119,6 +119,10 @@
   (let [s (str v)]
     (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
 
+(defn abs [n]
+  {:pre [(number? n)]}
+  (Math/abs n))
+
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
