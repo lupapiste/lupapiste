@@ -326,25 +326,6 @@
   {:apply-when (pos? (mongo/count :organizations {"krysp.MAL.version" "2.1.1"}))}
   (update-krysp-version-for-all-orgs "MAL" "2.1.1" "2.1.2"))
 
-
-(defn- convert-neighbors [orig-neighbors]
-  (if-not (empty? orig-neighbors)
-    (for [[k v] orig-neighbors
-            :let [propertyId (-> v :neighbor :propertyId)
-                  owner (-> v :neighbor :owner)
-                  status (-> v :status)]]
-        {:id (name k)
-         :propertyId propertyId
-         :status status
-         :owner owner})
-    []))
-
-(defmigration neighbors-to-sequable
-  (doseq [application (mongo/select :applications {} {:neighbors 1})]
-    (mongo/update-by-id :applications (:id application)
-      {$set {:neighbors (convert-neighbors (:neighbors application))}})))
-
-
 (defmigration vvvl-organization-krysp-213
   {:apply-when (pos? (mongo/count :organizations {"krysp.VVVL.version" "2.1.1"}))}
   (update-krysp-version-for-all-orgs "VVVL" "2.1.1" "2.1.3"))
@@ -402,3 +383,22 @@
 (defmigration rakennuksen-ominaistieto-updates-purku
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "purkaminen"} {"schema-info.name" "purku"}] }}}))}
   (remove-ominaisuudet-huoneistot-for "purkaminen" "purku" "purkaminen"))
+
+(defn- convert-neighbors [orig-neighbors]
+  (if-not (empty? orig-neighbors)
+    (for [[k v] orig-neighbors
+            :let [propertyId (-> v :neighbor :propertyId)
+                  owner (-> v :neighbor :owner)
+                  status (-> v :status)]]
+        {:id (name k)
+         :propertyId propertyId
+         :status status
+         :owner owner})
+    []))
+
+(defmigration neighbors-to-sequable
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {} {:neighbors 1})]
+    (when (map? (:neighbors application))
+      (mongo/update-by-id collection (:id application)
+        {$set {:neighbors (convert-neighbors (:neighbors application))}}))))
