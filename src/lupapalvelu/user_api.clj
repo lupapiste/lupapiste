@@ -37,6 +37,7 @@
   {:roles [:admin :authorityAdmin]}
   [{{:keys [role organizations]} :user data :data}]
   (ok :users (map user/non-private (-> data
+                                     (set/rename-keys {:userId :id})
                                      (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
                                      (as-> data (if (= role :authorityAdmin)
                                                   (assoc data :organizations {$in [organizations]})
