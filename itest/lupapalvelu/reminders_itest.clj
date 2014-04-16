@@ -11,7 +11,7 @@
             [lupapalvelu.batchrun :as batchrun]))
 
 
-(def ^:private timestamp-the-beginning-of-time 12345)
+(def ^:private timestamp-the-beginning-of-time 0)
 (def ^:private timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
 
 (def ^:private neighbor-non-matching
