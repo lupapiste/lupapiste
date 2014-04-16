@@ -961,7 +961,8 @@
                                      :zip "33456"
                                      :city "Tampere"})
 
-(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)}]))
+(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)
+                                                                                                              :kuntalupatunnus "2013-01"}]))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
            (let [application application-rakennuslupa-verdict-given
@@ -1128,11 +1129,8 @@
     ))
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [application application-rakennuslupa-verdict-given
-                 canonical (katselmus-canonical
-                             (assoc application :verdicts [{:paatokset []
-                                                            :kuntalupatunnus "2013-01"
-                                                            }])
+           (let [canonical (katselmus-canonical
+                             application-rakennuslupa-verdict-given
                              "fi"
                              "123"
                              "Pohjakatselmus 1"

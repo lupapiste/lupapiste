@@ -226,7 +226,7 @@
    (assoc-when
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
      :saapumisPvm (to-xml-date submitted)
-     :kuntalupatunnus (-> application :verdict first :kuntalupatunnus))})
+     :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
