@@ -8,6 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
+            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
 
@@ -148,6 +149,7 @@
 (facts "reminders"
 
  (mongo/clear!)
+ (fixture/apply-fixture "minimal")
  (mongo/insert :applications reminder-application)
  (mongo/insert :open-inforequest-token open-inforequest-entry-non-matching)
  (mongo/insert :open-inforequest-token open-inforequest-entry-matching)
