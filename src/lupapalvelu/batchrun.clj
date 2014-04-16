@@ -2,7 +2,7 @@
   (:require [lupapalvelu.notifications :as notifications]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
-            [clj-time.core :refer [weeks months ago]]
+            [clj-time.core :refer [days weeks months ago]]
             [clj-time.coerce :refer [to-long]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -15,9 +15,10 @@
             [sade.env :as env]))
 
 
-(defn- get-timestamp-from-now [time-key amount]
-  {:pre [(#{:week :month} time-key)]}
+(defn get-timestamp-from-now [time-key amount]
+  {:pre [(#{:day :week :month} time-key)]}
   (let [time-fn (case time-key
+                  :day days
                   :week weeks
                   :month months)]
     (to-long (-> amount time-fn ago))))
