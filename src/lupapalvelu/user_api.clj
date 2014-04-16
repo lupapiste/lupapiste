@@ -406,7 +406,6 @@
   (let [vetuma-data (vetuma/get-user stamp)
         email (-> email ss/lower-case ss/trim)]
     (when-not vetuma-data (fail! :error.create-user))
-    (when-not (ss/contains email "@") (fail! :error.email))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant"}))]
