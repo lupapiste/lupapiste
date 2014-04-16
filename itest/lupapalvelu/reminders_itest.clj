@@ -58,7 +58,7 @@
     :status nil})
 
 (def ^:private statement-matching
-  (-> statement
+  (-> statement-non-matching
     (assoc :id "525533f7e4b0138a23d8e4b5")
     (assoc :requested timestamp-the-beginning-of-time)))
 
