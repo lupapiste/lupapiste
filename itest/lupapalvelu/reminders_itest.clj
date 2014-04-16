@@ -43,7 +43,7 @@
                     :id "777777777777777777000020"}}]})
 
 (def ^:private neighbor-matching
-  (-> neighbor
+  (-> neighbor-non-matching
     (assoc :id "534bf825299508fb3618456c")
     (assoc-in [:status 1 :created] timestamp-the-beginning-of-time)))
 
