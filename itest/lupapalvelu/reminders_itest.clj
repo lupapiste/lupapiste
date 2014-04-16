@@ -34,8 +34,7 @@
                        :created 1397487653097}
                   :removable true}
     :created 1397487653097
-    :data {:huoneistot
-           {:0 {:huoneistoTunnus {:huoneistonumero {:modified 1397487653097 :value "000"}}}},
+    :data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:modified 1397487653097 :value "000"}}}}
            :kaytto {:kayttotarkoitus {:modified 1397487653097, :value "011 yhden asunnon talot"}}}}
    {:id "534bf825299508fb36184564"
     :schema-info
@@ -155,49 +154,49 @@
 
 (def ^:private reminder-application
   {:sent nil,
-  :neighbors neighbors
-  :schema-version 1
-  :authority {}
-  :auth [{:lastName "Panaani"
-          :firstName "Pena"
-          :username "pena"
-          :type "owner"
-          :role "owner"
-          :id "777777777777777777000020"}]
-  :drawings []
-  :submitted nil
-  :state "open"
-  :permitSubtype nil
-  :tasks []
-  :closedBy {}
-  :_verdicts-seen-by {}
-  :location {:x 444444.0, :y 6666666.0}
-  :attachments attachments
-  :statements statements
-  :organization "753-R"
-  :buildings []
-  :title "Naapurikuja 3"
-  :started nil
-  :closed nil
-  :operations [{:id "534bf825299508fb3618455d"
-                :name "asuinrakennus"
-                :created 1397487653097}]
-  :infoRequest false
-  :openInfoRequest false
-  :opened 1397487653750
-  :created 1397487653097
-  :_comments-seen-by {}
-  :propertyId "75312312341234"
-  :verdicts []
-  :startedBy {}
-  :documents documents
-  :_statements-seen-by {}
-  :modified timestamp-the-beginning-of-time
-  :comments comments
-  :address "Naapurikuja 3"
-  :permitType "R"
-  :id app-id
-  :municipality "753"})
+   :neighbors neighbors
+   :schema-version 1
+   :authority {}
+   :auth [{:lastName "Panaani"
+           :firstName "Pena"
+           :username "pena"
+           :type "owner"
+           :role "owner"
+           :id "777777777777777777000020"}]
+   :drawings []
+   :submitted nil
+   :state "open"
+   :permitSubtype nil
+   :tasks []
+   :closedBy {}
+   :_verdicts-seen-by {}
+   :location {:x 444444.0, :y 6666666.0}
+   :attachments attachments
+   :statements statements
+   :organization "753-R"
+   :buildings []
+   :title "Naapurikuja 3"
+   :started nil
+   :closed nil
+   :operations [{:id "534bf825299508fb3618455d"
+                 :name "asuinrakennus"
+                 :created 1397487653097}]
+   :infoRequest false
+   :openInfoRequest false
+   :opened 1397487653750
+   :created 1397487653097
+   :_comments-seen-by {}
+   :propertyId "75312312341234"
+   :verdicts []
+   :startedBy {}
+   :documents documents
+   :_statements-seen-by {}
+   :modified timestamp-the-beginning-of-time
+   :comments comments
+   :address "Naapurikuja 3"
+   :permitType "R"
+   :id app-id
+   :municipality "753"})
 
 (def ^:private open-inforequest-id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rv2")
 
