@@ -219,12 +219,13 @@
       state-timestamps)))
 
 
-(defn lupatunnus [{:keys [id submitted]}]
+(defn lupatunnus [{:keys [id submitted] :as application}]
   {:pre [id]}
   {:LupaTunnus
    (assoc-when
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
-     :saapumisPvm (to-xml-date submitted))})
+     :saapumisPvm (to-xml-date submitted)
+     :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
