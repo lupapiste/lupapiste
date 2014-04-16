@@ -139,8 +139,12 @@
 
 
 (defn send-reminder-emails [& args]
-    (statement-request-reminder)
-    (open-inforequest-reminder)
-    (neighbor-reminder)
-    (application-state-reminder))
+  (mongo/connect!)
+
+  (statement-request-reminder)
+  (open-inforequest-reminder)
+  (neighbor-reminder)
+  (application-state-reminder)
+
+  (mongo/disconnect!))
 
