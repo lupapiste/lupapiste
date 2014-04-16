@@ -1130,7 +1130,9 @@
 (fl/facts* "Canonical model for katselmus is correct"
            (let [application application-rakennuslupa-verdict-given
                  canonical (katselmus-canonical
-                             application
+                             (assoc application :verdicts [{:paatokset []
+                                                            :kuntalupatunnus "2013-01"
+                                                            }])
                              "fi"
                              "123"
                              "Pohjakatselmus 1"
@@ -1161,6 +1163,7 @@
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
                  LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+                 kuntalupatunnus (:kuntalupatunnus LupaTunnus) => "2013-01"
                  muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
                  mt (:MuuTunnus muuTunnustieto) => truthy
 
