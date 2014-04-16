@@ -5,7 +5,8 @@
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
 ; TODO put these somewhere safe
-(def ^:private secrets {"lupapiste" "TAMAN-MUODOSTI-LUPAPISTE"})
+(def ^:private secrets {"lupapiste" "TAMAN-MUODOSTI-LUPAPISTE"
+                        "rakentajafi" "TAMAN-MUODOSTI-RAKENTAJA.FI"})
 
 (defn known-partner? [partner-name]
   (contains? secrets partner-name))
