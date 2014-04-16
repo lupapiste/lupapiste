@@ -30,6 +30,14 @@
                 m))
       mapping-common/yritys-child_211)))
 
+(def maksaja [{:tag :henkilotieto
+               :child [{:tag :Henkilo
+                        :child mapping-common/henkilo-child-ns-yht}]}
+              {:tag :yritystieto
+               :child [{:tag :Yritys
+                        :child mapping-common/yritys-child-ns-yht_211}]}
+              {:tag :laskuviite}])
+
 (def osapuoli [{:tag :henkilotieto
                 :child [{:tag :Henkilo
                          :child mapping-common/henkilo-child-ns-yht}]}
@@ -38,27 +46,15 @@
                          :child yritys-child-modified_211}]}
                {:tag :rooliKoodi}])
 
-(def vastuuhenkilo_2_1_2 [{:tag :Vastuuhenkilo
-                           :child [{:tag :sukunimi}
-                                   {:tag :etunimi}
-                                   {:tag :osoitetieto
-                                    :child [{:tag :osoite
-                                             :child mapping-common/postiosoite-children-ns-yht}]}
-                                   {:tag :puhelinnumero}
-                                   {:tag :sahkopostiosoite}
-                                   {:tag :rooliKoodi}]}])
-
-(def vastuuhenkilo_2_1_3 [{:tag :Vastuuhenkilo
-                           :child [{:tag :sukunimi}
-                                   {:tag :etunimi}
-                                   {:tag :henkilotunnus}
-                                   {:tag :osoitetieto
-                                    :child [{:tag :osoite
-                                             :child mapping-common/postiosoite-children-ns-yht}]}
-                                   {:tag :puhelinnumero}
-                                   {:tag :sahkopostiosoite}
-                                   {:tag :rooliKoodi}]}])
-
+(def vastuuhenkilo [{:tag :Vastuuhenkilo
+                     :child [{:tag :sukunimi}
+                             {:tag :etunimi}
+                             {:tag :osoitetieto
+                              :child [{:tag :osoite
+                                       :child mapping-common/postiosoite-children-ns-yht}]}
+                             {:tag :puhelinnumero}
+                             {:tag :sahkopostiosoite}
+                             {:tag :rooliKoodi}]}])
 
 (def liitetieto [{:tag :Liite
                   :child [{:tag :kuvaus :ns "yht"}
@@ -160,12 +156,17 @@
                                                                :child [{:tag :vaadittuKytkin
                                                                         ;:tag :tunniste
                                                                         }]}]}]}]}]}
-        ya_to_krysp_2_1_3 (-> (assoc-in [:attr :xsi:schemaLocation]
-                                        (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.5"))
+        ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2 (assoc-in [:attr :xsi:schemaLocation]
+                                        (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.3"))
 
                             (update-in [:child] mapping-common/update-child-element
-                                       [:yleinenAlueAsiatieto lupa-name-key :vastuuhenkilotieto]
-                                       {:tag :osapuolettieto :child [mapping-common/osapuolet_213]}))]
+                                       [:yleinenAlueAsiatieto lupa-name-key :maksajatieto]
+                                       {:tag :maksajatieto
+                                        :child [{:tag :Maksaja
+                                                 :child mapping-common/maksajatype-children_213}]}))]
+
+
+
     (case (name krysp-version)
     "2.1.2" ya_to_krysp_2_1_2
     "2.1.3" ya_to_krysp_2_1_3
