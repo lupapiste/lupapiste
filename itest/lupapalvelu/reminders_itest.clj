@@ -210,12 +210,12 @@
        ))
 
    (fact "the \"reminder-sent\" timestamp already exists"
-     (mongo/update-by-id :open-inforequest-token open-inforequest-id
+     (mongo/update-by-id :open-inforequest-token (:_id open-inforequest-entry-matching)
        {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
      (batchrun/open-inforequest-reminder)
 
-     (let [oir (mongo/by-id :open-inforequest-token open-inforequest-id)]
+     (let [oir (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))]
 
        (> (:reminder-sent oir) timestamp-the-beginning-of-time) => true?
 
