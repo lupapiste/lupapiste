@@ -7,6 +7,7 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
+            [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.batchrun :as batchrun]))
 
 
@@ -207,15 +208,24 @@
                                        :last-used nil
                                        :organization-id "732-R"})
 
+(defn- check-sent-reminder-email [to subject bodypart]
 
+  ;; dummy-email-server/messages sometimes returned nil for the email
+  ;; (because the email sending is asynchronous). Thus applying sleep here.
+  (Thread/sleep 100)
 
-;(facts "Getting user"
-;  (fact (query pena :user) => (contains {:user (contains {:email "pena@example.com"})})))
+  (let [email (last (dummy-email-server/messages :reset true))]
+    (fact "email check"
+      (:to email) => to
+      (:subject email) => subject
+      (get-in email [:body :plain]) => (contains bodypart))))
+
 
 (facts "reminders"
 
  (apply-remote-minimal)
  (mongo/insert :applications reminder-application)
+ (dummy-email-server/messages :reset true)  ;; clears inbox
 
 
  (facts "statement-request-reminder"
@@ -226,7 +236,13 @@
        (batchrun/statement-request-reminder)
 
        (let [app (mongo/by-id :applications app-id)]
-         (> (-> app :statements first :reminder-sent) now-timestamp) => true?)))
+         (> (-> app :statements first :reminder-sent) now-timestamp) => true?)
+
+       (check-sent-reminder-email
+         "pena@example.com"
+         "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
+         "Sinulta on pyydetty lausuntoa lupahakemukseen")
+       ))
 
    (fact "the \"reminder-sent\" timestamp already exists"
      (update-application
@@ -237,84 +253,107 @@
      (batchrun/statement-request-reminder)
 
      (let [app (mongo/by-id :applications app-id)]
-       (> (-> app :statements first :reminder-sent) timestamp-the-beginning-of-time) => true?)))
+       (> (-> app :statements first :reminder-sent) timestamp-the-beginning-of-time) => true?)
+
+     (check-sent-reminder-email
+       "pena@example.com"
+       "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
+       "Sinulta on pyydetty lausuntoa lupahakemukseen")
+     ))
 
 
-  (facts "open-inforequest-reminder"
+ (facts "open-inforequest-reminder"
 
-    (mongo/insert :open-inforequest-token open-inforequest-entry)
+   (mongo/insert :open-inforequest-token open-inforequest-entry)
 
-    (fact "the \"reminder-sent\" timestamp does not exist"
-      (let [now-timestamp (now)]
+   (fact "the \"reminder-sent\" timestamp does not exist"
+     (let [now-timestamp (now)]
 
-        (batchrun/open-inforequest-reminder)
+       (batchrun/open-inforequest-reminder)
 
-        (let [oir (mongo/by-id :open-inforequest-token open-inforequest-id)]
-          (> (:reminder-sent oir) now-timestamp) => true?)))
+       (let [oir (mongo/by-id :open-inforequest-token open-inforequest-id)]
+         (> (:reminder-sent oir) now-timestamp) => true?
 
-    (fact "the \"reminder-sent\" timestamp already exists"
-      (mongo/update-by-id :open-inforequest-token open-inforequest-id
-        {$set {:reminder-sent timestamp-the-beginning-of-time}})
+         (check-sent-reminder-email
+           (:email oir)
+           "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
+         )))
 
-      (batchrun/open-inforequest-reminder)
+   (fact "the \"reminder-sent\" timestamp already exists"
+     (mongo/update-by-id :open-inforequest-token open-inforequest-id
+       {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
-      (let [oir (mongo/by-id :open-inforequest-token open-inforequest-id)]
-        (> (:reminder-sent oir) timestamp-the-beginning-of-time) => true?))
-   )
+     (batchrun/open-inforequest-reminder)
 
-  (facts "neighbor-reminder"
+     (let [oir (mongo/by-id :open-inforequest-token open-inforequest-id)]
 
-    (fact "the \"reminder-sent\" status does not exist"
-      (let [now-timestamp (now)]
-        (batchrun/neighbor-reminder)
-        (let [app (mongo/by-id :applications app-id)
-              status-reminder-sent (first (filter
-                                            #(= "reminder-sent" (:state %))
-                                            (-> app :neighbors first :status)))]
+       (> (:reminder-sent oir) timestamp-the-beginning-of-time) => true?
 
-          status-reminder-sent =not=> nil?
-          (> (:created status-reminder-sent) now-timestamp) => true?
+       (check-sent-reminder-email
+         (:email oir)
+         "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+         "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
+       )))
 
-          ;;
-          ;; ***  TODO: Miten email checkit saa kayttoon? Muissa itesteissa toimii...
-          ;;            Ota ne kayttoon muissakin factoissa.***
-          ;;
 
-          #_(let [email (last-email)]
-             (println "\n email: " email "\n")
-;            (println "\n email: ")
-;            (clojure.pprint/pprint email)
-;            (println "\n")
+ (facts "neighbor-reminder"
 
-            (:to email) => (-> reminder-application :neighbors first :status second :email)
-            (:subject email) => "Lupapiste.fi: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
-;            (get-in email [:body :plain]) => (contains "Rakennusty\u00f6t aloitettu")
-;            email => (partial contains-application-link? (:id app))
-            )
+   (fact "the \"reminder-sent\" status does not exist"
+     (let [now-timestamp (now)]
+       (batchrun/neighbor-reminder)
 
-          )))
 
-    (fact "the \"reminder-sent\" status already exists - no emails sent"
-      (last-email)  ;; clears inbox
-      (batchrun/neighbor-reminder)
-      (last-email) => nil)
-    )
+       (let [app (mongo/by-id :applications app-id)
+             status-reminder-sent (first (filter
+                                           #(= "reminder-sent" (:state %))
+                                           (-> app :neighbors first :status)))]
 
-  (facts "application-state-reminder"
+         status-reminder-sent =not=> nil?
+         (> (:created status-reminder-sent) now-timestamp) => true?
 
-    (fact "the \"reminder-sent\" timestamp does not exist"
-      (let [now-timestamp (now)]
-        (batchrun/application-state-reminder)
-        (let [app (mongo/by-id :applications app-id)]
-          (> (:reminder-sent app) now-timestamp) => true?)))
+         (check-sent-reminder-email
+           (-> app :neighbors first :status second :email)
+           "Lupapiste.fi: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
+           "T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan")
+         )))
 
-    (fact "the \"reminder-sent\" timestamp already exists"
-      (update-application (application->command reminder-application)
-        {$set {:reminder-sent timestamp-the-beginning-of-time}})
-      (batchrun/application-state-reminder)
-      (let [app (mongo/by-id :applications app-id)]
-        (> (:reminder-sent app) timestamp-the-beginning-of-time) => true?))
-    )
+   (fact "the \"reminder-sent\" status already exists - no emails sent"
+     (dummy-email-server/messages :reset true)  ;; clears inbox
+     (batchrun/neighbor-reminder)
+     (dummy-email-server/messages :reset true) => empty?))
 
-  )
+
+ (facts "application-state-reminder"
+
+   (fact "the \"reminder-sent\" timestamp does not exist"
+     (let [now-timestamp (now)]
+
+       (batchrun/application-state-reminder)
+
+       (let [app (mongo/by-id :applications app-id)]
+         (> (:reminder-sent app) now-timestamp) => true?
+
+         (check-sent-reminder-email
+           "pena@example.com"
+           "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+           "Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus")
+         )))
+
+   (fact "the \"reminder-sent\" timestamp already exists"
+     (update-application (application->command reminder-application)
+       {$set {:reminder-sent timestamp-the-beginning-of-time}})
+
+     (batchrun/application-state-reminder)
+
+     (let [app (mongo/by-id :applications app-id)]
+       (> (:reminder-sent app) timestamp-the-beginning-of-time) => true?
+
+       (check-sent-reminder-email
+         "pena@example.com"
+         "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+         "Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus")
+       )))
+
+ )
 
