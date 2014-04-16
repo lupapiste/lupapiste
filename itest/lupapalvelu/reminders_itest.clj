@@ -12,149 +12,63 @@
 
 
 (def ^:private timestamp-the-beginning-of-time 12345)
+(def ^:private timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
 
-(def ^:private documents
-  [{:id "534bf825299508fb3618455f"
-    :schema-info {:approvable true
-                  :subtype "hakija"
-                  :name "hakija"
-                  :removable true
-                  :repeating true
-                  :version 1
-                  :type "party"
-                  :order 3}
-    :created 1397487653097
-    :data {:_selected {:value "henkilo"}}}
-   {:id "534bf825299508fb3618455e"
-    :schema-info {:version 1
-                  :name "uusiRakennus"
-                  :approvable true
-                  :op {:id "534bf825299508fb3618455d"
-                       :name "asuinrakennus"
-                       :created 1397487653097}
-                  :removable true}
-    :created 1397487653097
-    :data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:modified 1397487653097 :value "000"}}}}
-           :kaytto {:kayttotarkoitus {:modified 1397487653097, :value "011 yhden asunnon talot"}}}}
-   {:id "534bf825299508fb36184564"
-    :schema-info
-    {:approvable true, :name "hankkeen-kuvaus" :version 1 :order 1}
-    :created 1397487653097
-    :data {}}
-   {:id "534bf825299508fb36184565"
-    :schema-info {:approvable true
-                  :name "maksaja"
-                  :removable true
-                  :repeating true
-                  :version 1
-                  :type "party"
-                  :order 6}
-    :created 1397487653097
-    :data {}}
-   {:id "534bf825299508fb36184566"
-    :schema-info {:approvable true, :name "rakennuspaikka", :version 1, :order 2}
-    :created 1397487653097
-    :data {}}
-   {:id "534bf825299508fb36184567"
-    :schema-info {:approvable true
-                  :name "paasuunnittelija"
-                  :removable false
-                  :version 1
-                  :type "party"
-                  :order 4}
-    :created 1397487653097
-    :data {}}
-   {:id "534bf825299508fb36184568"
-    :schema-info {:approvable true
-                  :name "suunnittelija"
-                  :removable true
-                  :repeating true
-                  :version 1
-                  :type "party"
-                  :order 5},
-    :created 1397487653097
-    :data {}}
-   {:id
-    "534bf825299508fb36184569"
-    :schema-info {:approvable true
-                  :name "tyonjohtaja"
-                  :removable true
-                  :repeating true
-                  :version 1
-                  :type "party"
-                  :order 5}
-    :created 1397487653097
-    :data {}}])
+(def ^:private neighbor-non-matching
+  {:id "534bf825299508fb3618489v"
+   :propertyId "p"
+   :owner {:type nil
+           :name "n"
+           :email "e"
+           :businessID nil
+           :nameOfDeceased nil
+           :address {:street "s", :city "c", :zip "z"}}
+   :status [{:state "open"
+             :created 1}
+            {:state "email-sent"
+             :created timestamp-1-day-ago
+             :email "abba@example.com"
+             :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar"
+             :user {:enabled true,
+                    :lastName "Panaani"
+                    :firstName "Pena"
+                    :city "Piippola"
+                    :username "pena"
+                    :street "Paapankuja 12"
+                    :phone "0102030405"
+                    :email "pena@example.com"
+                    :personId "010203-0405"
+                    :role "applicant"
+                    :zip "10203"
+                    :id "777777777777777777000020"}}]})
 
-(def ^:private attachments
-  [{:state "requires_user_action"
-    :target nil
-    :op {:id "534bf825299508fb3618455d"
-         :name "asuinrakennus"
-         :created 1397487653097}
-    :locked false
-    :type {:type-group "paapiirustus", :type-id "asemapiirros"}
-    :applicationState "open"
-    :modified 1397487653097
-    :versions []
-    :id "534bf825299508fb36184560"}])
+(def ^:private neighbor-matching
+  (-> neighbor
+    (assoc :id "534bf825299508fb3618456c")
+    (assoc-in [:status 1 :created] timestamp-the-beginning-of-time)))
 
-(def ^:private comments
-  [{:text "foo"
-    :type "applicant"
-    :target {:type "application"}
-    :created 1397487653750
-    :to nil
-    :user {:role "applicant"
-           :lastName "Panaani"
-           :firstName "Pena"
-           :username "pena"
-           :id "777777777777777777000020"}}])
-
-(def ^:private neighbors
-  [{:id "534bf825299508fb3618456c"
-    :propertyId "p"
-    :owner {:type nil
-            :name "n"
-            :email "e"
-            :businessID nil
-            :nameOfDeceased nil
-            :address {:street "s", :city "c", :zip "z"}}
-    :status [{:state "open"
-              :created 1}
-             {:state "email-sent"
-              :created timestamp-the-beginning-of-time
-              :email "abba@example.com"
-              :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar"
-              :user {:enabled true,
-                     :lastName "Panaani"
-                     :firstName "Pena"
-                     :city "Piippola"
-                     :username "pena"
-                     :street "Paapankuja 12"
-                     :phone "0102030405"
-                     :email "pena@example.com"
-                     :personId "010203-0405"
-                     :role "applicant"
-                     :zip "10203"
-                     :id "777777777777777777000020"}}]}])
-
-(def ^:private statements
-  [{:id "525533f7e4b0138a23d8e4b5"
+(def ^:private statement-non-matching
+  {:id "525533f7e4b0138a23d8r4b4"
     :given nil
     :person {:id "5252ecdfe4b0138a23d8e385"
              :text "Palotarkastus"
              :email "sito.lupapiste@gmail.com"
-             :name "Sito Lupapiste"}
-    :requested timestamp-the-beginning-of-time
-    :status nil}])
+             :name "Sito Lupapiste 1"}
+    :requested timestamp-1-day-ago
+    :status nil})
+
+(def ^:private statement-matching
+  (-> statement
+    (assoc :id "525533f7e4b0138a23d8e4b5")
+    (assoc :requested timestamp-the-beginning-of-time)))
 
 (def ^:private app-id
   "LP-753-2014-12345")
 
 (def ^:private reminder-application
-  {:sent nil,
-   :neighbors neighbors
+  {:sent nil
+   :neighbors [neighbor-non-matching
+               neighbor-matching]
    :schema-version 1
    :authority {}
    :auth [{:lastName "Panaani"
@@ -171,8 +85,9 @@
    :closedBy {}
    :_verdicts-seen-by {}
    :location {:x 444444.0, :y 6666666.0}
-   :attachments attachments
-   :statements statements
+   :attachments []
+   :statements [statement-non-matching
+                statement-matching]
    :organization "753-R"
    :buildings []
    :title "Naapurikuja 3"
@@ -189,23 +104,29 @@
    :propertyId "75312312341234"
    :verdicts []
    :startedBy {}
-   :documents documents
+   :documents []
    :_statements-seen-by {}
    :modified timestamp-the-beginning-of-time
-   :comments comments
+   :comments []
    :address "Naapurikuja 3"
    :permitType "R"
    :id app-id
    :municipality "753"})
 
-(def ^:private open-inforequest-id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rv2")
+(def ^:private open-inforequest-entry-non-matching {:_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rrd"
+                                                    :application-id "LP-732-2013-00006"
+                                                    :created timestamp-1-day-ago
+                                                    :email "reba.skebamies@example.com"
+                                                    :last-used nil
+                                                    :organization-id "732-R"})
 
-(def ^:private open-inforequest-entry {"_id" open-inforequest-id
-                                       :application-id "LP-732-2013-00006"
-                                       :created 1382597181946
-                                       :email "juba.skebamies@example.com"
-                                       :last-used nil
-                                       :organization-id "732-R"})
+(def ^:private open-inforequest-entry-matching
+  (-> open-inforequest-entry-non-matching
+    (assoc
+      :_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rv2"
+      :created timestamp-the-beginning-of-time
+      :email "juba.skebamies@example.com")))
+
 
 (defn- check-sent-reminder-email [to subject bodypart]
 
@@ -213,30 +134,37 @@
   ;; (because the email sending is asynchronous). Thus applying sleep here.
   (Thread/sleep 100)
 
-  (let [email (last (dummy-email-server/messages :reset true))]
-    (fact "email check"
-      (:to email) => to
-      (:subject email) => subject
-      (get-in email [:body :plain]) => (contains bodypart))))
+  (let [emails (dummy-email-server/messages :reset true)]
+    (fact "email count"
+      (count emails) => 1)
+
+    (let [email (last emails)]
+      (fact "email check"
+        (:to email) => to
+        (:subject email) => subject
+        (get-in email [:body :plain]) => (contains bodypart)))))
 
 
 (facts "reminders"
 
  (apply-remote-minimal)
  (mongo/insert :applications reminder-application)
- (mongo/insert :open-inforequest-token open-inforequest-entry)
+ (mongo/insert :open-inforequest-token open-inforequest-entry-non-matching)
+ (mongo/insert :open-inforequest-token open-inforequest-entry-matching)
  (dummy-email-server/messages :reset true)  ;; clears inbox
 
 
  (facts "statement-request-reminder"
 
-   (fact "the \"reminder-sent\" timestamp does not exist"
+   (fact "the \"reminder-sent\" timestamp does not pre-exist"
      (let [now-timestamp (now)]
 
        (batchrun/statement-request-reminder)
 
        (let [app (mongo/by-id :applications app-id)]
-         (> (-> app :statements first :reminder-sent) now-timestamp) => true?)
+         (> (-> app :statements second :reminder-sent) now-timestamp) => true?
+         (-> app :statements first :reminder-sent) => nil?
+         )
 
        (check-sent-reminder-email
          "pena@example.com"
@@ -247,13 +175,13 @@
    (fact "the \"reminder-sent\" timestamp already exists"
      (update-application
        (application->command reminder-application)
-       {:statements {$elemMatch {:id (-> statements first :id)}}}
+       {:statements {$elemMatch {:id (-> statement-matching :id)}}}
        {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
 
      (batchrun/statement-request-reminder)
 
      (let [app (mongo/by-id :applications app-id)]
-       (> (-> app :statements first :reminder-sent) timestamp-the-beginning-of-time) => true?)
+       (> (-> app :statements second :reminder-sent) timestamp-the-beginning-of-time) => true?)
 
      (check-sent-reminder-email
        "pena@example.com"
@@ -264,19 +192,22 @@
 
  (facts "open-inforequest-reminder"
 
-   (fact "the \"reminder-sent\" timestamp does not exist"
+   (fact "the \"reminder-sent\" timestamp does not pre-exist"
      (let [now-timestamp (now)]
 
        (batchrun/open-inforequest-reminder)
 
-       (let [oir (mongo/by-id :open-inforequest-token open-inforequest-id)]
-         (> (:reminder-sent oir) now-timestamp) => true?
+       (let [oir-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))
+             oir-non-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-non-matching))]
+         (> (:reminder-sent oir-matching) now-timestamp) => true?
+         (:reminder-sent oir-non-matching) => nil?
+         )
 
-         (check-sent-reminder-email
-           (:email oir)
-           "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
-           "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
-         )))
+       (check-sent-reminder-email
+         (:email open-inforequest-entry-matching)
+         "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+         "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
+       ))
 
    (fact "the \"reminder-sent\" timestamp already exists"
      (mongo/update-by-id :open-inforequest-token open-inforequest-id
@@ -289,7 +220,7 @@
        (> (:reminder-sent oir) timestamp-the-beginning-of-time) => true?
 
        (check-sent-reminder-email
-         (:email oir)
+         (:email open-inforequest-entry-matching)
          "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
          "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
        )))
@@ -297,21 +228,24 @@
 
  (facts "neighbor-reminder"
 
-   (fact "the \"reminder-sent\" status does not exist"
+   (fact "the \"reminder-sent\" status does not pre-exist"
      (let [now-timestamp (now)]
+
        (batchrun/neighbor-reminder)
 
-
        (let [app (mongo/by-id :applications app-id)
-             status-reminder-sent (first (filter
-                                           #(= "reminder-sent" (:state %))
-                                           (-> app :neighbors first :status)))]
+             reminder-sent-statuses (filter
+                                      #(= "reminder-sent" (:state %))
+                                      (-> app :neighbors second :status))]
 
-         status-reminder-sent =not=> nil?
-         (> (:created status-reminder-sent) now-timestamp) => true?
+         (count reminder-sent-statuses) => 1
+         (> (:created (first reminder-sent-statuses)) now-timestamp) => true?
+         (filter
+           #(= "reminder-sent" (:state %))
+           (-> app :neighbors first :status)) => empty?
 
          (check-sent-reminder-email
-           (-> app :neighbors first :status second :email)
+           (-> neighbor-matching :status second :email)
            "Lupapiste.fi: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
            "T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan")
          )))
@@ -324,7 +258,7 @@
 
  (facts "application-state-reminder"
 
-   (fact "the \"reminder-sent\" timestamp does not exist"
+   (fact "the \"reminder-sent\" timestamp does not pre-exist"
      (let [now-timestamp (now)]
 
        (batchrun/application-state-reminder)
