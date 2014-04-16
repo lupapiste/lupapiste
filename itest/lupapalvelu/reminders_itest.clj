@@ -147,7 +147,7 @@
 
 (facts "reminders"
 
- (apply-remote-minimal)
+ (mongo/clear!)
  (mongo/insert :applications reminder-application)
  (mongo/insert :open-inforequest-token open-inforequest-entry-non-matching)
  (mongo/insert :open-inforequest-token open-inforequest-entry-matching)
