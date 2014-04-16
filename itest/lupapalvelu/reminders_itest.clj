@@ -224,6 +224,7 @@
 
  (apply-remote-minimal)
  (mongo/insert :applications reminder-application)
+ (mongo/insert :open-inforequest-token open-inforequest-entry)
  (dummy-email-server/messages :reset true)  ;; clears inbox
 
 
@@ -262,8 +263,6 @@
 
 
  (facts "open-inforequest-reminder"
-
-   (mongo/insert :open-inforequest-token open-inforequest-entry)
 
    (fact "the \"reminder-sent\" timestamp does not exist"
      (let [now-timestamp (now)]
