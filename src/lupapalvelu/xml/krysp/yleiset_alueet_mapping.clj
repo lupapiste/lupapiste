@@ -30,14 +30,6 @@
                 m))
       mapping-common/yritys-child_211)))
 
-(def maksaja [{:tag :henkilotieto
-               :child [{:tag :Henkilo
-                        :child mapping-common/henkilo-child-ns-yht}]}
-              {:tag :yritystieto
-               :child [{:tag :Yritys
-                        :child mapping-common/yritys-child-ns-yht_211}]}
-              {:tag :laskuviite}])
-
 (def osapuoli [{:tag :henkilotieto
                 :child [{:tag :Henkilo
                          :child mapping-common/henkilo-child-ns-yht}]}

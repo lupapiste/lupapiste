@@ -227,10 +227,9 @@
                         (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
                         (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
-        maksaja (if (:dummy-maksaja config)
-                  (merge (:Osapuoli hakija) {:laskuviite "0000000000"})
-                  (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja"))
-        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
+        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first :data))
+        maksajatieto (when maksaja {:Maksaja (merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
@@ -333,7 +332,8 @@
                    (to-xml-date (:submitted application)))
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
-        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first :data))
+        maksajatieto (when maksaja {:Maksaja (merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         osapuolitieto (vec (filter :Osapuoli [hakija]))
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))
