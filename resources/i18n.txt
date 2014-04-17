@@ -1,8 +1,0 @@
-account-activation-template: Kiitos rekisteröitymisestä, {{name}}. Tervetuloa Lupapisteen käyttäjäksi. Aktivoi käyttäjätunnuksesi tästä linkistä: {{link}}. Jos et ole rekisteröitynyt Lupapisteeseen, voit jättää tämän sähköpostin huomiotta.
-
-email.title.active-application-reminder: Muistutus aktiivisesta hakemuksesta
-email.title.statement-request-reminder: Muistutus lausuntopyynnöstä
-email.title.open-inforequest-reminder: Muistutus avoimesta neuvontapyynnöstä
-email.title.neighbor-reminder: Muistutus naapurin kuulemisesta
-
-maisematyo._group_label: Maisematyö
