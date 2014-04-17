@@ -32,7 +32,7 @@
     (:email user)))
 
 
-;; For the "open info request reminder"
+;; Email definition for the "open info request reminder"
 
 (defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
@@ -49,7 +49,7 @@
 
 (notifications/defemail :reminder-open-inforequest oir-reminder-email-conf)
 
-;; For the "Neighbor reminder"
+;; Email definition for the "Neighbor reminder"
 
 (notifications/defemail :reminder-neighbor (assoc neighbors/email-conf :subject-key "neighbor-reminder"))
 
@@ -115,8 +115,6 @@
                                                        :data {:email (:email status)
                                                               :token (:token status)
                                                               :neighborId (:id neighbor)}})
-
-            ;; *** TODO: Mista tietaa onnistuiko emailin lahetys? Vain onnistuessa pitaisi paivittaa kantaa. ****
             (update-application (application->command app)
               {:neighbors {$elemMatch {:id (:id neighbor)}}}
               {$push {:neighbors.$.status {:state    "reminder-sent"
