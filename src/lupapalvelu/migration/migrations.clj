@@ -20,7 +20,7 @@
   {:apply-when (pos? (mongo/count :submitted-applications {:schema-version {$exists false}}))}
   (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
     (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
-                                                               :documents (map drop-schema-data (:documents application))}})))
+                                                                         :documents (map drop-schema-data (:documents application))}})))
 
 (defn verdict-to-verdics [{verdict :verdict}]
   {$set {:verdicts (map domain/->paatos verdict)}
@@ -382,3 +382,22 @@
 (defmigration rakennuksen-ominaistieto-updates-purku
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "purkaminen"} {"schema-info.name" "purku"}] }}}))}
   (remove-ominaisuudet-huoneistot-for "purkaminen" "purku" "purkaminen"))
+
+(defn- convert-neighbors [orig-neighbors]
+  (if-not (empty? orig-neighbors)
+    (for [[k v] orig-neighbors
+            :let [propertyId (-> v :neighbor :propertyId)
+                  owner (-> v :neighbor :owner)
+                  status (-> v :status)]]
+        {:id (name k)
+         :propertyId propertyId
+         :status status
+         :owner owner})
+    []))
+
+(defmigration neighbors-to-sequable
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {} {:neighbors 1})]
+    (when (map? (:neighbors application))
+      (mongo/update-by-id collection (:id application)
+        {$set {:neighbors (convert-neighbors (:neighbors application))}}))))

@@ -123,7 +123,7 @@
    :location                 {}
    :modified                 nil
    :municipality             ""
-   :neighbors                {}
+   :neighbors                []
    :opened                   nil
    :openInfoRequest          false
    :operations               []
@@ -131,6 +131,7 @@
    :propertyId               ""
    :permitSubtype            ""
    :permitType               ""
+   :reminder-sent            nil
    :schema-version           nil
    :sent                     nil
    :started                  nil ; construction started

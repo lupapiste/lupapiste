@@ -1068,7 +1068,7 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
-(defcommand "merge-details-from-krysp"
+(defcommand merge-details-from-krysp
   {:parameters [id documentId buildingId collection]
    :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]}

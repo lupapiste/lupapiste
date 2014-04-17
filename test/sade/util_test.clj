@@ -3,11 +3,31 @@
             [midje.sweet :refer :all]))
 
 
-(fact "strip-nils"
-  (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
+(facts "strip-nils"
+  (fact "Removes the whole key-value pair when value is nil"
+    (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
+  (fact "Does not remove empty maps from inside sequential structures like list and vector"
+    (strip-nils {:a nil
+                 :b {:aa nil :bb nil}
+                 :c {:aa nil :bb 2}
+                 :d '({:a 11} {:b nil} :c nil)
+                 :e [{:a "a"} {:b nil} "c" nil]})
+    => {:b {}
+        :c {:bb 2}
+        :d '({:a 11} {} :c nil)
+        :e [{:a "a"} {} "c" nil]}))
 
-(fact "strip-empty-maps"
-  (strip-empty-maps {:a 1 :b {} :c {:d 2 :e {}}}) => {:a 1 :c {:d 2}})
+(facts "strip-empty-maps"
+  (fact "Removes the whole key-value pair when value is an empty map"
+    (strip-empty-maps {:a 1 :b {} :c {:d 2 :e {}}}) => {:a 1 :c {:d 2}})
+  (fact "Does not remove empty maps from inside sequential structures like list and vector"
+    (strip-empty-maps {:b {}
+                       :c {:bb 2 :cc {}}
+                       :d '({:a 11} {} :c nil)
+                       :e [{:a "a"} {} "c" nil]})
+    => {:c {:bb 2}
+        :d '({:a 11} {} :c nil)
+        :e [{:a "a"} {} "c" nil]}))
 
 (facts
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :b]) => {:a {:c \c}})
