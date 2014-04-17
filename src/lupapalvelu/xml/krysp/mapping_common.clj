@@ -173,9 +173,9 @@
                    {:tag :sahkopostiosoite}])
 
 (def yritys-child_213
-  (-> yritys-child_211
+  (in-yhteiset-ns (-> yritys-child_211
     (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children}]})
-    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]})))
+    (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]}))))
 
 (def yritys-child-ns-yht_211 [{:tag :nimi}
                               {:tag :liikeJaYhteisotunnus}

@@ -20,13 +20,25 @@
   (let [operation-name-key (-> application :operations first :name keyword)
         lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         canonical (application-to-canonical application "fi")
-        mapping (get-yleiset-alueet-krysp-mapping lupa-name-key)
-        xml (element-to-xml canonical mapping)
-        xml-s (indent-str xml)]
+        mapping-212 (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.2")
+        mapping-213 (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.3")
+        xml-212 (element-to-xml canonical mapping-212 "2.1.2")
+        xml-213 (element-to-xml canonical mapping-213 "2.1.3")
+        xml-212s (indent-str xml-212)
+        xml-213s (indent-str xml-213)]
+(clojure.pprint/pprint canonical)
 
     (fact ":tag is set"
       (xml-test-common/has-tag
-        (get-yleiset-alueet-krysp-mapping lupa-name-key)) => true)
+        (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.2")) => true)
+
+    (fact ":tag is set"
+      (xml-test-common/has-tag
+        (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.3")) => true)
+
+
+    (fact "2.1.2: xml exist" xml-212 => truthy)
+    (fact "2.1.3: xml exist" xml-213 => truthy)
 
 ;    (println "\n xml-s: " xml-s "\n")
 
@@ -43,10 +55,13 @@
     ;; TODO: own test
     (mapping-to-krysp/save-application-as-krysp
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}})
+    (mapping-to-krysp/save-application-as-krysp
+      application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}})
 
-    (fact "xml exist" xml => truthy)
 
-    (validator/validate xml-s (:permitType application) "2.1.2")))
+    (validator/validate xml-212s (:permitType application) "2.1.2")
+    (validator/validate xml-213s (:permitType application) "2.1.3")
+   ))
 
 
 (facts "YA permits to canonical and then to xml with schema validation"

@@ -157,13 +157,15 @@
                                                                         ;:tag :tunniste
                                                                         }]}]}]}]}]}
         ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2 (assoc-in [:attr :xsi:schemaLocation]
-                                        (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.3"))
-
+                                                          (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.3"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :maksajatieto]
                                        {:tag :maksajatieto
                                         :child [{:tag :Maksaja
-                                                 :child mapping-common/maksajatype-children_213}]}))]
+                                                 :child mapping-common/maksajatype-children_213}]})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys ]
+                                       {:tag :Yritys :child mapping-common/yritys-child_213}))]
 
 
 

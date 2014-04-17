@@ -300,6 +300,7 @@
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
         yritys-type-osapuoli? (= "yritys" selected-value)
+        _ (println yritys-type-osapuoli? selected-value)
         henkilo        (if yritys-type-osapuoli?
                          (get-in osapuoli [:yritys :yhteyshenkilo])
                          (:henkilo osapuoli))]
