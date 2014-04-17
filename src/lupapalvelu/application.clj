@@ -73,9 +73,9 @@
   (let [schema       (schemas/get-schema (:schema-info document))
          subject      (user/get-user-by-id user-id)
          with-hetu    (and
-                        (domain/has-hetu? (:body schema) [path])
+                        (model/has-hetu? (:body schema) [path])
                         (user/same-user? current-user subject))
-         person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+         person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu))
          model        (if-not (blank? path)
                         (assoc-in {} (map keyword (split path #"\.")) person)
                         person)
@@ -179,7 +179,7 @@
 (defcommand invite
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)
@@ -238,7 +238,7 @@
 (defcommand remove-auth
   {:parameters [:id email]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))

@@ -3,7 +3,7 @@
 
 (defn add-security-headers
   "Ring middleware.
-   Sets X-XSS-Protection, X-Frame-Options and X-Content-Type-Options headers.
+   Sets X-XSS-Protection and X-Frame-Options headers.
    Ported from Debian Unstable apache2.2-common /etc/apache2/conf.d/security,
    see also http://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Common_non-standard_response_headers"
   [handler]
