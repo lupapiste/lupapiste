@@ -196,6 +196,34 @@
       canonical
       statement-attachments)))
 
+
+***************************
+(defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
+    #(map (fn [tj]
+            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
+              (fn [luokka]
+                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+                  luokka))))
+       %)))
+
+(defn- map-enums-212 [canonical]
+  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+
+(defn- map-enums
+  "Map enumerations in canonical into values supperted by given KRYSP version"
+  [canonical krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" (map-enums-212 canonical)
+    canonical ; default: no conversions
+    ))
+
+(defn- yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
+  (element-to-xml (map-enums canonical krysp-version) (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)))
+***************************
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YA applications."
@@ -216,7 +244,7 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
-        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version))]
+        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
