@@ -7,6 +7,7 @@
             [ring.util.codec :as codec]
             [sade.xml :refer :all]
             [sade.http :as http]
+            [sade.util :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [lupapalvelu.document.schemas :as schema]
@@ -201,7 +202,7 @@
     (seq (select omistaja [:henkilo])) (->henkilo omistaja)
     :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
-(def cleanup (comp cr/strip-empty-maps cr/strip-nils))
+(def cleanup (comp util/strip-empty-maps util/strip-nils))
 
 (def polished  (comp cr/index-maps cleanup cr/convert-booleans))
 

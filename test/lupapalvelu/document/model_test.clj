@@ -567,3 +567,45 @@
       (fact "owners 1 & 3 match stripped-hakija"
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1]) => (:data stripped-hakija)
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
+
+(facts
+  (fact "all fields are mapped"
+    (->henkilo {:id        "id"
+                :firstName "firstName"
+                :lastName  "lastName"
+                :email     "email"
+                :phone     "phone"
+                :street    "street"
+                :zip       "zip"
+                :city      "city"}) => {:userId                        {:value "id"}
+                                        :henkilotiedot {:etunimi       {:value "firstName"}
+                                                        :sukunimi      {:value "lastName"}}
+                                        :yhteystiedot {:email          {:value "email"}
+                                                       :puhelin        {:value "phone"}}
+                                        :osoite {:katu                 {:value "street"}
+                                                 :postinumero          {:value "zip"}
+                                                 :postitoimipaikannimi {:value "city"}}})
+  (fact "no fields are mapped"
+    (->henkilo {} => {}))
+
+  (fact "some fields are mapped"
+    (->henkilo {:firstName "firstName"
+                :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
+                                       :osoite {:postinumero     {:value "zip"}}})
+
+  (fact "hetu is mapped"
+    (->henkilo {:id       "id"
+                :personId "123"} :with-hetu true) => {:userId               {:value "id"}
+                                                      :henkilotiedot {:hetu {:value "123"}}}))
+
+(facts "has-hetu?"
+  (fact "direct find"
+    (has-hetu? schemas/party)            => true
+    (has-hetu? schemas/party [:henkilo]) => true
+    (has-hetu? schemas/party [:invalid]) => false)
+  (fact "nested find"
+    (has-hetu? [{:name "a"
+                 :type :group
+                 :body [{:name "b"
+                         :type :group
+                         :body schemas/party}]}] [:a :b :henkilo]) => true))

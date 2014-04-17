@@ -30,7 +30,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]))
+            [lupapalvelu.neighbors]
+            [lupapalvelu.idf.idf-server :as idf-server]))
 
 ;;
 ;; Helpers
@@ -477,6 +478,21 @@
 
 (defn session-timeout [handler]
   (fn [request] (session-timeout-handler handler request)))
+
+;;
+;; Identity federation
+;;
+
+(defpage
+  [:post "/api/id-federation"]
+  {:keys [etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac]}
+  (idf-server/handle-create-user-request etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac))
 
 ;;
 ;; dev utils:

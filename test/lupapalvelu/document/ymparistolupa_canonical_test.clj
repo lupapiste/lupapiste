@@ -35,7 +35,7 @@
                   :infoRequest false
                   :linkPermitData [{:id "LP-638-2013-00099" :type "lupapistetunnus"} {:id "kuntalupa-123" :type "kuntalupatunnus"}]
                   :location {:x 428195.77099609 :y 6686701.3931274}
-                  :neighbors {}
+                  :neighbors []
                   :modified 1391415696674
                   :municipality "638"
                   :operations [{:id "abba1" :name "yl-uusi-toiminta" :created 1391415025497}]

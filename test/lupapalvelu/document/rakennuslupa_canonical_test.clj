@@ -1208,7 +1208,7 @@
   (tools/unwrapped
     {:sent nil,
      :linkPermitData [link-permit-data-kuntalupatunnus],
-     :neighbors {},
+     :neighbors [],
      :schema-version 1,
      :authority {},
      :auth [{:lastName "Panaani",

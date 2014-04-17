@@ -1,7 +1,7 @@
 (ns lupapalvelu.mongo-test
-  (:use clojure.test
-        midje.sweet)
-  (:require [monger.collection :as mc]
+  (:require [clojure.test :refer :all]
+            [midje.sweet :refer :all]
+            [monger.collection :as mc]
             [monger.gridfs :as gfs]
             [lupapalvelu.mongo :as mongo]))
 

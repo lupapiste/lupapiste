@@ -339,3 +339,33 @@
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
 
+(defn has-hetu?
+  ([schema]
+    (has-hetu? schema [:henkilo]))
+  ([schema-body base-path]
+    (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
+      (boolean (find-by-name schema-body full-path)))))
+
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+                         companyName companyId
+                         fise degree graduatingYear]} & {:keys [with-hetu]}]
+  (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
+    (->
+      {:userId                        {:value id}
+       :henkilotiedot {:etunimi       {:value firstName}
+                       :sukunimi      {:value lastName}}
+       :yhteystiedot {:email          {:value email}
+                      :puhelin        {:value phone}}
+       :osoite {:katu                 {:value street}
+                :postinumero          {:value zip}
+                :postitoimipaikannimi {:value city}}
+       :yritys {:yritysnimi           {:value companyName}
+                :liikeJaYhteisoTunnus {:value companyId}}
+       :patevyys {:koulutus           {:value degree}
+                  :valmistumisvuosi   {:value graduatingYear}
+                  :fise               {:value fise}
+                  }}
+      merge-hetu
+      util/strip-nils
+      util/strip-empty-maps)))
+
