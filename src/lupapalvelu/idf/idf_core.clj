@@ -6,7 +6,7 @@
 
 ; TODO put these somewhere safe
 (def ^:private secrets {"lupapiste" "TAMAN-MUODOSTI-LUPAPISTE"
-                        "rakentajafi" "TAMAN-MUODOSTI-RAKENTAJA.FI"})
+                        "rakentaja.fi" "TAMAN-MUODOSTI-RAKENTAJA.FI"})
 
 (defn known-partner? [partner-name]
   (contains? secrets partner-name))
