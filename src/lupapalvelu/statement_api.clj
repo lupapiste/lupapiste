@@ -45,9 +45,9 @@
         :organizations
         {:_id organization-id}
         {$push {:statementGivers {:id statement-giver-id
-                                   :text text
-                                   :email email
-                                   :name (str (:firstName user) " " (:lastName user))}}})
+                                  :text text
+                                  :email email
+                                  :name (str (:firstName user) " " (:lastName user))}}})
       (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
         (ok :id statement-giver-id))
       (fail :error.user-not-found))))
@@ -88,14 +88,15 @@
                                              :person    statement-giver
                                              :requested now
                                              :given     nil
+                                             :reminder-sent nil
                                              :status    nil}
                                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                                 :mail-list (assoc user :email (:email %))}) persons)
+                                 :email (:email %)}) persons)
             statements (map :statement details)
             auth       (map :auth details)
-            mail-list  (map :mail-list details)]
+            mail-list  (map :email details)]
           (update-application command {$pushAll {:statements statements :auth auth}})
-          (notifications/notify! :request-statement (assoc command :data {:users mail-list}))))))
+          (notifications/notify! :request-statement (assoc command :data {:email mail-list}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
