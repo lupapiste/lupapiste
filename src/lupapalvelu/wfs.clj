@@ -10,6 +10,20 @@
             [sade.strings :refer [starts-with-i]]
             [sade.util :refer [future*]]))
 
+
+;; SAX options
+(defn startparse-sax-non-validating [s ch]
+  (.. (doto (javax.xml.parsers.SAXParserFactory/newInstance)
+        (.setValidating false)
+        (.setFeature javax.xml.XMLConstants/FEATURE_SECURE_PROCESSING true)
+        (.setFeature "http://apache.org/xml/features/disallow-doctype-decl" true)
+        (.setFeature "http://apache.org/xml/features/nonvalidating/load-dtd-grammar" false)
+        (.setFeature "http://apache.org/xml/features/nonvalidating/load-external-dtd" false)
+        (.setFeature "http://xml.org/sax/features/validation" false)
+        (.setFeature "http://xml.org/sax/features/external-general-entities" false)
+        (.setFeature "http://xml.org/sax/features/external-parameter-entities" false))
+    (newSAXParser) (parse s ch)))
+
 ;;
 ;; config:
 ;;
@@ -194,7 +208,7 @@
                      (s/replace "UTF-8" "ISO-8859-1")
                      (.getBytes "ISO-8859-1")
                      java.io.ByteArrayInputStream.
-                     xml/parse
+                     (xml/parse startparse-sax-non-validating)
                      zip/xml-zip)]
       (xml-> features :gml:featureMember))))
 
@@ -303,24 +317,12 @@
                              "request" "GetCapabilities"}
               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
 
-(defn startparse-sax-non-validating [s ch]
-  (.. (doto (. javax.xml.parsers.SAXParserFactory (newInstance))
-        (.setValidating false)
-        (.setFeature "http://apache.org/xml/features/nonvalidating/load-dtd-grammar" false)
-        (.setFeature "http://apache.org/xml/features/nonvalidating/load-external-dtd" false)
-        (.setFeature "http://xml.org/sax/features/validation" false)
-        (.setFeature "http://xml.org/sax/features/external-general-entities" false)
-        (.setFeature "http://xml.org/sax/features/external-parameter-entities" false))
-
-    (newSAXParser) (parse s ch)))
-
 (defn capabilities-to-layers [capabilities]
   (when capabilities
     (let [caps (zip/xml-zip
                  (xml/parse
-                   (java.io.ByteArrayInputStream.
-                     (.getBytes capabilities)
-                     ) startparse-sax-non-validating))]
+                   (java.io.ByteArrayInputStream. (.getBytes capabilities))
+                   startparse-sax-non-validating))]
       (xml-> caps :Capability :Layer :Layer))))
 
 (defn layer-to-name [layer]
