@@ -35,7 +35,7 @@
                  [com.google.zxing/javase "2.2"]
                  [digest "1.4.3"]
                  [org.clojure/tools.trace "0.7.6"]
-                 [cljts "0.2.0"]]
+                 [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
   :profiles {:dev {:dependencies [[midje "1.6.0"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]]
@@ -65,4 +65,6 @@
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
+  :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
+                [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.0.0")
