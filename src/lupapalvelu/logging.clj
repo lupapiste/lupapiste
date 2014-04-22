@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.strings :as ss]
             [cheshire.core :as json]
             [clojure.java.io :as io])
   (:import [org.joda.time.format DateTimeFormat DateTimeFormatter]))
@@ -53,8 +54,5 @@
 
 (defn sanitize
   "Replaces newlines and limits length"
-  [limit s]
-  (let [line (s/replace (str s) #"[\r\n]" "\\n")]
-    (if (> (.length line) limit)
-      (str (.substring line 0 limit) "... (truncated)")
-      line)))
+  [limit ^String s]
+  (ss/limit (s/replace (str s) #"[\r\n]" "\\n") limit "... (truncated)"))
