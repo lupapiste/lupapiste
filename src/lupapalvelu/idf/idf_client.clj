@@ -2,10 +2,11 @@
   "Identity federation client: create users to partner applications"
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.set :refer [rename-keys]]
+            [clojure.string :refer [split-lines]]
             [sade.http :as http]
             [sade.strings :as ss]
             [lupapalvelu.core :refer [now]]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.idf.idf-core :refer :all]))
 
 (defn send-user-data [user partner-name]
@@ -30,11 +31,6 @@
         resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})
         body (:body resp)]
     (if (= 200 (:status resp))
-      (let [id (first (clojure.string/split-lines (:body resp)))]
-        )
-      (errorf "Unable link %s to %s: %s" (:email user) partner-name)
-      )
-
-
-    )
-  )
+      (let [id (-> (split-lines body) first ss/trim)]
+        (link-account! (:email user) partner-name id))
+      (errorf "Unable link %s to %s: status=%s, body=%s" (:email user) partner-name (:status resp) (logging/sanitize 1000 body)))))
