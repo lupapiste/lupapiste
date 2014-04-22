@@ -3,6 +3,7 @@
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.set :refer [rename-keys]]
             [sade.http :as http]
+            [sade.strings :as ss]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.user :as user]
             [lupapalvelu.idf.idf-core :refer :all]))
@@ -24,11 +25,12 @@
                                :suoramarkkinointilupa :ammattilainen])
                  (assoc :app "lupapiste"))
         ts (now)
-        form-params (assoc params :ts ts :mac (calculate-mac query-params "lupapiste" ts))
+        form-params (assoc params :ts ts :mac (calculate-mac params "lupapiste" ts))
         _  (debugf "Send user %s data to %s" (:email user) url)
-        resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})]
+        resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})
+        body (:body resp)]
     (if (= 200 (:status resp))
-      (do
+      (let [id (first (clojure.string/split-lines (:body resp)))]
         )
       (errorf "Unable link %s to %s: %s" (:email user) partner-name)
       )
