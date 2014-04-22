@@ -412,7 +412,7 @@
       (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
-          (when (:rakentajafi data)
+          (when (and (env/feature? :rakentajafi) (:rakentajafi data))
             (util/future* (idf/send-user-data user "rakentaja.fi")))
           (ok :id (:_id user)))
         (fail :error.create-user))
