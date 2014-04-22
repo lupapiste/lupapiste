@@ -154,8 +154,7 @@
         (println "Checking" (get layer "LAYERS"))
         (wfs/raster-images request "wms") => http200?))))
 
-(comment (fact "WMS capabilites"
-       (http/get (str (server-address) "/proxy/wmscap")
-         {:query-params {:v "428"}
-          :throw-exceptions false}) => http200?))
-
+(fact "WMS capabilites"
+      (http/get (str (server-address) "/proxy/wmscap")
+        {:query-params {:v "428"}
+         :throw-exceptions false}) => http200?)
