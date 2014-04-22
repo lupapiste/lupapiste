@@ -310,9 +310,9 @@
 
 (defn getcapabilities [request]
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
-        path (env/value :geoserver :wms :path)
-        wms-url (str host path)]
-    (:body (http/get wms-url
+        path (env/value :geoserver :wms :path)]
+    (assert (and host path))
+    (:body (http/get (str host path)
              {:query-params {"version" "1.1.1"
                              "request" "GetCapabilities"}
               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
