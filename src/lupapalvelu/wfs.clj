@@ -5,8 +5,9 @@
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [sade.env :as env]
             [clojure.data.zip.xml :refer [xml-> text]]
+            [sade.env :as env]
+            [sade.xml]
             [sade.strings :refer [starts-with-i]]
             [sade.util :refer [future*]]))
 
@@ -16,7 +17,6 @@
   (.. (doto (javax.xml.parsers.SAXParserFactory/newInstance)
         (.setValidating false)
         (.setFeature javax.xml.XMLConstants/FEATURE_SECURE_PROCESSING true)
-        (.setFeature "http://apache.org/xml/features/disallow-doctype-decl" true)
         (.setFeature "http://apache.org/xml/features/nonvalidating/load-dtd-grammar" false)
         (.setFeature "http://apache.org/xml/features/nonvalidating/load-external-dtd" false)
         (.setFeature "http://xml.org/sax/features/validation" false)
@@ -208,7 +208,7 @@
                      (s/replace "UTF-8" "ISO-8859-1")
                      (.getBytes "ISO-8859-1")
                      java.io.ByteArrayInputStream.
-                     (xml/parse startparse-sax-non-validating)
+                     (xml/parse sade.xml/startparse-sax-no-doctype)
                      zip/xml-zip)]
       (xml-> features :gml:featureMember))))
 
