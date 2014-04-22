@@ -6,7 +6,7 @@
             [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
              :refer [mainostus-application viitoitus-application]]
             [lupapalvelu.xml.emit :refer :all]
-            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping]]
+            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping yleisetalueet-element-to-xml]]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.validator :refer :all :as validator]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer :all :as xml-test-common]
@@ -20,13 +20,11 @@
   (let [operation-name-key (-> application :operations first :name keyword)
         lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         canonical (application-to-canonical application "fi")
-        mapping-212 (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.2")
-        mapping-213 (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.3")
-        xml-212 (element-to-xml canonical mapping-212 "2.1.2")
-        xml-213 (element-to-xml canonical mapping-213 "2.1.3")
+        xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")
+        xml-213 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.3")
         xml-212s (indent-str xml-212)
         xml-213s (indent-str xml-213)]
-(clojure.pprint/pprint canonical)
+
 
     (fact ":tag is set"
       (xml-test-common/has-tag

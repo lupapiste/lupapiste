@@ -197,32 +197,31 @@
       statement-attachments)))
 
 
-***************************
-(defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
-  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
-    #(map (fn [tj]
-            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
-              (fn [luokka]
-                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
-                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
-                  luokka))))
-       %)))
+(defn- map-kayttotarkoitus [canonical lupa-name-key]
+  (update-in canonical [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :kayttotarkoitus]
+             (fn [kayttotarkoitus]
+               (case kayttotarkoitus
+                 "vesihuoltoverkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 "muu" "kaivu- tai katuty\u00f6lupa"
+                 "kaukol\u00e4mp\u00f6verkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 "tietoliikenneverkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 "verkoston liitosty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 kayttotarkoitus))))
 
-(defn- map-enums-212 [canonical]
-  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+(defn- map-enums-212 [canonical lupa-name-key]
+  (map-kayttotarkoitus canonical lupa-name-key))
 
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
-  [canonical krysp-version]
+  [canonical lupa-name-key krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
-    "2.1.2" (map-enums-212 canonical)
+    "2.1.2" (map-enums-212 canonical lupa-name-key)
     canonical ; default: no conversions
     ))
 
-(defn- yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
-  (element-to-xml (map-enums canonical krysp-version) (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)))
-***************************
+(defn yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
+  (element-to-xml (map-enums canonical lupa-name-key krysp-version) (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -258,6 +257,6 @@
                             (-> application :linkPermitData first :operation keyword)
                             :ya-katulupa-vesi-ja-viemarityot))
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
-          xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version))]
+          xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
       (mapping-common/write-to-disk application nil nil xml krysp-version output-dir)))

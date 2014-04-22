@@ -116,11 +116,11 @@
    :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
    :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
-   :ya-katulupa-vesi-ja-viemarityot "vesihuoltoverkostoty\u00f6"  "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-maalampotyot "muu" "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-kaukolampotyot "kaukol\u00e4mp\u00f6verkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-kaapelityot "tietoliikenneverkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "verkoston liitosty\u00f6" "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-vesi-ja-viemarityot "vesihuoltoverkostoty\u00f6"
+   :ya-katulupa-maalampotyot "muu"
+   :ya-katulupa-kaukolampotyot "kaukol\u00e4mp\u00f6verkostoty\u00f6"
+   :ya-katulupa-kaapelityot "tietoliikenneverkostoty\u00f6"
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "verkoston liitosty\u00f6"
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
@@ -300,7 +300,6 @@
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
         yritys-type-osapuoli? (= "yritys" selected-value)
-        _ (println yritys-type-osapuoli? selected-value)
         henkilo        (if yritys-type-osapuoli?
                          (get-in osapuoli [:yritys :yhteyshenkilo])
                          (:henkilo osapuoli))]
