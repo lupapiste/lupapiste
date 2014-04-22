@@ -269,10 +269,7 @@
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
-        sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
-                           (if (> (.length line) limit)
-                             (str (.substring line 0 limit) "... (truncated)")
-                             line)))
+        sanitize (partial lupapalvelu.logging/sanitize limit)
         sanitized-page (sanitize (or page "(unknown)"))
         user           (or (ss/lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)

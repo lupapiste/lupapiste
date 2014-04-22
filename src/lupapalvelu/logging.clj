@@ -40,7 +40,7 @@
 (defn unsecure-log-event [level event]
   (.write event-log-out (str (log-prefix {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) " - " event \newline))
   (.flush event-log-out))
-  
+
 (defn log-event [level event]
   (let [stripped (-> event
                    (dissoc :application)
@@ -50,3 +50,11 @@
       (unsecure-log-event level jsoned)
       (catch Exception e
         (error e "Can't write to event log:" jsoned)))))
+
+(defn sanitize
+  "Replaces newlines and limits length"
+  [limit s]
+  (let [line (s/replace (str s) #"[\r\n]" "\\n")]
+    (if (> (.length line) limit)
+      (str (.substring line 0 limit) "... (truncated)")
+      line)))
