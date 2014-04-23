@@ -27,7 +27,7 @@
                  (assoc :app "lupapiste"))
         ts (now)
         form-params (assoc params :ts ts :mac (calculate-mac params "lupapiste" ts))
-        _  (debugf "Send user %s data to %s" (:email user) url)
+        _  (debugf "Send user %s data to %s (%s)" (:email user) partner-name url)
         resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})
         body (:body resp)]
     (if (= 200 (:status resp))
