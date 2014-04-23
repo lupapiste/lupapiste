@@ -1,17 +1,35 @@
 (ns lupapalvelu.idf.idf-core
-  (:require [digest]))
+  (:require [digest]
+            [sade.env :as env]
+            [lupapalvelu.user :as user]))
 
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
-; TODO put these somewhere safe
-(def ^:private secrets {"lupapiste" "TAMAN-MUODOSTI-LUPAPISTE"
-                        "rakentaja.fi" "TAMAN-MUODOSTI-RAKENTAJA.FI"})
+(def ^:private config (reduce (fn [m [k v]] (assoc m (:name v) (assoc v :id (name k)))) {} (env/value :idf)))
 
 (defn known-partner? [partner-name]
-  (contains? secrets partner-name))
+  (contains? config partner-name))
 
-(defn calculate-mac [first-name last-name email phone street zip city marketing architect app id ts]
-  {:pre [(known-partner? app)]}
-  (let [text (str first-name last-name email phone street zip city marketing architect app id ts (secrets app))]
-    (digest/sha-256 (java.io.ByteArrayInputStream. (.getBytes text utf8)))))
+(defn id-for-partner [partner-name]
+  {:pre [(known-partner? partner-name)], :post [%]}
+  (:id (config partner-name)))
+
+(defn url-for-partner [partner-name]
+  {:pre [(known-partner? partner-name)], :post [%]}
+  (:url (config partner-name)))
+
+(defn- key-for-partner [partner-name] (:key (config partner-name)))
+
+(defn calculate-mac
+  ([{:keys [etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen id] :as query-params} app ts]
+    {:pre [(known-partner? app)]}
+    (calculate-mac etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts))
+  ([etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts]
+    {:pre [(known-partner? app)]}
+    (let [text (str etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts (key-for-partner app))]
+      (digest/sha-256 (java.io.ByteArrayInputStream. (.getBytes text utf8))))))
+
+(defn link-account! [email app id]
+  (let [partner-id (id-for-partner app)]
+    (user/update-user-by-email email {(str "partnerApplications." partner-id ".id") id})))

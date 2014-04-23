@@ -1,6 +1,6 @@
 # Hei,
 
-Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus {{link-fi}}. Hakemusta en p&auml;ivitetty viimeksi {{modified}}.
+Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus {{link-fi}}. Hakemusta on p&auml;ivitetty viimeksi {{modified}}.
 
 ---
 

@@ -341,6 +341,7 @@
                :as :stream})
       "wms" (let [{:keys [host path]} (env/value :geoserver :wms)
                   wms-url (str host path)]
+              (assert (and host path))
               (http/get wms-url
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}

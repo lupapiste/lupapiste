@@ -142,7 +142,7 @@
       };
       self.ownersFound = function(data) {
           return self.owners(_.map(data.owners, convertOwner)).allSelected(true).status(self.statusSelectOwners);
-      }
+      };
 
       self.propertyIfNotFound = function() {
           return self.status(self.statusPropertyIdSearchFailed);
@@ -175,7 +175,7 @@
                   }))
           .call();
         return self;
-      }
+      };
 
       self.beginUpdateRequest = function() {
           self.requestContext.begin();
