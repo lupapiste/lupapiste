@@ -1,1 +1,1 @@
-register.rakentajafi: Haluan rekisteröityä samalla rakentaja.fi palveluun
+register.rakentajafi: Haluan rekisteröityä samalla rakentaja.fi -palveluun. Lue lisää:

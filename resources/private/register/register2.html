@@ -65,6 +65,13 @@
         <div class="form-group">
           <div class="form-entry register-checkbox">
             <label>
+              <input type="checkbox" id="acceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
+              <span data-bind="ltext: 'register.accept-terms.label'"></span>
+              <a href="https://www.lupapiste.fi/?page_id=337" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
+            </label>
+          </div>
+          <div class="form-entry register-checkbox">
+            <label>
               <input type="checkbox" id="allowDirectMarketing" data-bind="checked: allowDirectMarketing" value="true">
               <span data-bind="ltext: 'userinfo.allowDirectMarketing'"></span>
             </label>
@@ -74,16 +81,9 @@
             <label>
               <input type="checkbox" id="rakentajafi" data-bind="checked: rakentajafi" value="true">
               <span data-bind="ltext: 'register.rakentajafi'"></span>
-              <a href="http://www.rakentaja.fi/" target="_blank">Rakentaja.fi</a>
+              <a href="https://www.rakentaja.fi/suorakanava/jasenrekisterointi/" target="_blank">Rakentaja.fi</a>
             </label>
           </div>
-          </div>
-          <div class="form-entry register-checkbox">
-            <label>
-              <input type="checkbox" id="acceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
-              <span data-bind="ltext: 'register.accept-terms.label'"></span>
-              <a href="https://www.lupapiste.fi/?page_id=337" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
-            </label>
           </div>
 
           <div class="clear"></div>
