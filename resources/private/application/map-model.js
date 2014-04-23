@@ -68,7 +68,7 @@ LUPAPISTE.MapModel = function() {
           "area": d.area || "",
           "height": d.height || "",
           "length": d.length || ""
-        }});
+        };});
 
       hub.send("oskari-show-shapes", {
         drawings: oskariDrawings,
