@@ -69,6 +69,15 @@
               <span data-bind="ltext: 'userinfo.allowDirectMarketing'"></span>
             </label>
           </div>
+          <div data-bind="if: features.enabled('rakentajafi')" class="feature">
+          <div class="form-entry register-checkbox">
+            <label>
+              <input type="checkbox" id="rakentajafi" data-bind="checked: rakentajafi" value="true">
+              <span data-bind="ltext: 'register.rakentajafi'"></span>
+              <a href="http://www.rakentaja.fi/" target="_blank">Rakentaja.fi</a>
+            </label>
+          </div>
+          </div>
           <div class="form-entry register-checkbox">
             <label>
               <input type="checkbox" id="acceptTerms" required="required" data-bind="checked: acceptTerms" value="true">

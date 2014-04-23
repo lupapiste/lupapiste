@@ -7,6 +7,18 @@
   (when s
     (apply str (take-last n s))))
 
+(defn limit
+  ([^String s max-length]
+    (limit s max-length nil))
+  ([^String s max-length truncated-info]
+    (when (and s max-length)
+      (if (> (.length s) max-length)
+        (let [truncated (.substring s 0 max-length)]
+          (if truncated-info
+            (str truncated truncated-info)
+            truncated))
+        s))))
+
 (defn contains [^String s ^CharSequence needle]
   (when (and s needle)
     (.contains s needle)))

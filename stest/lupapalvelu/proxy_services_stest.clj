@@ -155,6 +155,6 @@
         (wfs/raster-images request "wms") => http200?))))
 
 (fact "WMS capabilites"
-      (http/get (str (server-address) "/proxy/wmscap")
-        {:query-params {:v "428"}
-         :throw-exceptions false}) => http200?)
+  (http/get (str (server-address) "/proxy/wmscap")
+    {:query-params {:v "428"}
+     :throw-exceptions false}) => http200?)

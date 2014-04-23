@@ -143,7 +143,6 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common]
-                  :css ["register.css"]
                   :js ["register.js"]
                   :html ["register.html" "register2.html" "register3.html"]}
 
