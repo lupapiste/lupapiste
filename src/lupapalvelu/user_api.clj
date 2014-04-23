@@ -17,7 +17,8 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]))
@@ -123,7 +124,6 @@
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :organization
                     :allowDirectMarketing :architect])
-      (util/assoc-when :partnerApplications (:partnerApplications user-data))
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
@@ -409,9 +409,11 @@
     (when-not vetuma-data (fail! :error.create-user))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant"}))]
+      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
+          (when (and (env/feature? :rakentajafi) (:rakentajafi data))
+            (util/future* (idf/send-user-data user "rakentaja.fi")))
           (ok :id (:_id user)))
         (fail :error.create-user))
       (catch IllegalArgumentException e

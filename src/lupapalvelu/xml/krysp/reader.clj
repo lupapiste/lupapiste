@@ -59,7 +59,7 @@
 (defn post-body-for-ya-application [application-id]
   {:body (str "<wfs:GetFeature
       service=\"WFS\"
-        version=\"1.0.0\"
+        version=\"1.1.0\"
         outputFormat=\"GML2\"
         xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
         xmlns:wfs=\"http://www.opengis.net/wfs\"
