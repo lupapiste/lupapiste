@@ -7,10 +7,9 @@
 (def kesto (body {:name "kesto" :type :group
                   :body [{:name "alku" :type :date}
                          {:name "loppu" :type :date}
-                         {:name "kello" :type :group
-                          :body [{:name "arkisin" :type :string :size "s"}
-                                 {:name "lauantait" :type :string :size "s"}
-                                 {:name "pyhat" :type :string :size "s"}]}]}))
+                         {:name "arki", :type :group, :body [{:name "arkiAlkuAika" :type :time} {:name "arkiLoppuAika" :type :time}]}
+                         {:name "lauantai", :type :group, :body [{:name "lauantaiAlkuAika" :type :time} {:name "lauantaiLoppuAika" :type :time}]}
+                         {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :time} {:name "sunnuntaiLoppuAika" :type :time}]}]}))
 
 
 (def kesto-mini (body {:name "kesto" :type :group
@@ -93,6 +92,14 @@
            :order 4
            :type :party}
     :body party}
+   {:info {:name "ymp-maksaja"
+           :i18name "maksaja"
+           :repeating false
+           :order 6
+           :removable false
+           :approvable true
+           :type :party}
+     :body maksaja}
    {:info {:name "yl-hankkeen-kuvaus"
            :order 1}
     :body [kuvaus

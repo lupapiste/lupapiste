@@ -70,7 +70,6 @@
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
-        _ (clojure.pprint/pprint Kasittelytieto)
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
         luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => nil?
@@ -177,16 +176,12 @@
                                         (tools/unwrapped
                                           (assoc-in (:data hankkeen-kuvaus) [:sijoituksen-tarkoitus :value] "liikennevalo"))) => truthy]
 
-;      (println "\n canonical: ")
-;      (clojure.pprint/pprint canonical)
-;      (println "\n")
-
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
       (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified kaivulupa-application)))
       (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
       (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id kaivulupa-application))
-      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened kaivulupa-application)))
+      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:submitted kaivulupa-application)))
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 

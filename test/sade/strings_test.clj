@@ -18,6 +18,15 @@
   (fact "Four"
     (last-n 5 "Four") => "Four")  )
 
+(facts "limit"
+  (limit nil nil) => nil
+  (limit "abcdefg" nil) => nil
+  (limit nil 2) => nil
+  (limit "abcdefg" 2) => "ab"
+  (limit "abcdefg" 2 nil) => "ab"
+  (limit "abcdefg" 2 "...") => "ab..."
+  (limit "abcdefg" 20) => "abcdefg")
+
 (facts "Test suffix"
   (fact (suffix nil nil) => nil)
   (fact (suffix nil "nil") => nil)

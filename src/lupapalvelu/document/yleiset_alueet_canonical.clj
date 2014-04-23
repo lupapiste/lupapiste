@@ -3,14 +3,13 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
-            [clojure.walk :as walk]
-            [sade.common-reader :as cr]))
+            [clojure.walk :as walk]))
 
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
                     :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
-                    :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
+                    :paivaysPvm (to-xml-date (state-timestamp application))
                     :kasittelija (let [handler (:authority application)]
                                    (if (seq handler)
                                      {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
@@ -300,7 +299,7 @@
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
-    (cr/strip-nils body)))
+    (strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."

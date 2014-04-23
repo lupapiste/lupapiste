@@ -30,7 +30,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]))
+            [lupapalvelu.neighbors]
+            [lupapalvelu.idf.idf-server :as idf-server]))
 
 ;;
 ;; Helpers
@@ -268,10 +269,7 @@
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
-        sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
-                           (if (> (.length line) limit)
-                             (str (.substring line 0 limit) "... (truncated)")
-                             line)))
+        sanitize (partial lupapalvelu.logging/sanitize limit)
         sanitized-page (sanitize (or page "(unknown)"))
         user           (or (ss/lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
@@ -479,6 +477,21 @@
   (fn [request] (session-timeout-handler handler request)))
 
 ;;
+;; Identity federation
+;;
+
+(defpage
+  [:post "/api/id-federation"]
+  {:keys [etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac]}
+  (idf-server/handle-create-user-request etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac))
+
+;;
 ;; dev utils:
 ;;
 
@@ -487,8 +500,11 @@
     (if-not (s/blank? typeName)
       (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
+                  "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
+                  "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
+                  "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
                   "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}]
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName)))))
       (when (= r "GetCapabilities")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
 
@@ -513,8 +529,7 @@
         (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId]}
-    (let [parts    (vec (map #(Integer/parseInt %) (rest (re-matches #"(\d+)-(\d+)-(\d+)-(\d+)" propertyId))))
-          property (format "%03d%03d%04d%04d" (get parts 0) (get parts 1) (get parts 2) (get parts 3))
+    (let [property (util/to-property-id propertyId)
           response (execute-command "create-application" (assoc (from-query) :propertyId property))]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))

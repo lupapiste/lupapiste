@@ -52,10 +52,10 @@
 (facts create-user
   (apply-remote-minimal)
   (fact (command pena :create-user :email "x" :role "dummy" :password "foobarbozbiz") => fail?)
-  (fact (command admin :create-user :email "x" :role "authorityAdmin" :enabled true
+  (fact (command admin :create-user :email "x@example.com" :role "authorityAdmin" :enabled true
           :organization "753-R" :password "foobarbozbiz") => ok?)
   ; Check that user was created
-  (fact (-> (query admin :users :email "x") :users first) => (contains {:role "authorityAdmin" :email "x" :enabled true}))
+  (fact (-> (query admin :users :email "x@example.com") :users first) => (contains {:role "authorityAdmin" :email "x@example.com" :enabled true}))
 
   ; Inbox zero
   (last-email)
@@ -76,26 +76,28 @@
 
 (facts update-user
   (apply-remote-minimal)
-  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :organization "753-R" :apikey "xyz") => ok?)
+  (fact (command admin :create-user :email "foo@example.com" :role "authorityAdmin" :enabled "true" :organization "753-R" :apikey "xyz") => ok?)
   (fact (command "xyz" :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query "xyz" :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
 (facts update-user-organization
   (apply-remote-minimal)
 
-  (fact (command admin :create-user :email "foo" :role "authorityAdmin" :enabled "true" :organization "555-R" :apikey "xyz") => ok?)
+  (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
 
-  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
+  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R"])
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
-  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R" "753-R"])
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "add") => ok?)
+  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R" "753-R"])
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
-  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R" "753-R"])
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "remove") => ok?)
-  (fact (-> (query "xyz" :user) :user :organizations) => ["555-R"])
+  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R" "753-R"])
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "remove") => ok?)
+  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R"])
 
-  (fact (command sipoo :update-user-organization :email "foo" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+
+  (fact (command sipoo :update-user-organization :email (email-for-key teppo) :firstName "Teppo" :lastName "Example" :operation "add") => fail?)
 
   (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :operation "add") => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
 

@@ -4,7 +4,7 @@
             [clj-time.format :as timeformat]
             [sade.http :as http]
             [sade.env :as env]
-            [sade.util :refer [prewalk-map postwalk-map boolean?]]
+            [sade.util :refer [prewalk-map postwalk-map boolean? convert-values]]
             [sade.xml :refer :all]
             [sade.strings :as ss]))
 
@@ -38,14 +38,6 @@
   "removes recursively all namespacey parts from map keywords keys"
   [m] (postwalk-map (partial map (fn [[k v]] [(strip-key k) v])) m))
 
-(defn strip-nils
-  "removes recursively all keys from map which have value of nil"
-  [m] (postwalk-map (partial filter (comp not nil? val)) m))
-
-(defn strip-empty-maps
-  "removes recursively all keys from map which have empty map as value"
-  [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
-
 (defn to-boolean
   "converts 'true' and 'false' strings to booleans. returns others as-are."
   [v] (condp = v
@@ -65,13 +57,6 @@
         (re-matches #"^\d{4}-\d{2}-\d{2}$" v)  (coerce/to-long (parse-date :year-month-day v))
         (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$" v) (coerce/to-long (parse-datetime v))
         :else v))
-
-(defn convert-values
-  "Runs a recursive conversion"
-  ([m f]
-    (postwalk-map (partial map (fn [[k v]] [k (f v)])) m))
-  ([m pred f]
-    (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
 
 (defn convert-booleans
   "Changes recursively all stringy boolean values to booleans"

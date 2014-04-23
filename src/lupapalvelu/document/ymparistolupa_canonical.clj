@@ -6,34 +6,27 @@
 
 (defn ymparistolupa-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
-        kuvaus    (-> documents :yl-hankkeen-kuvaus first :data)]
+        kuvaus    (-> documents :yl-hankkeen-kuvaus first :data)
+        generic-id {:yksilointitieto (:id application)
+                    :alkuHetki (util/to-xml-datetime (:created application))}]
     {:Ymparistoluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :ymparistolupatieto
       {:Ymparistolupa
        (merge
          {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
-          :luvanTunnistetiedot (canonical-common/lupatunnus (:id application))
+          :luvanTunnistetiedot (canonical-common/lupatunnus application)
           :lausuntotieto (canonical-common/get-statements (:statements application))
-          :hakija (remove nil? (map canonical-common/->ymp-osapuoli (:hakija documents)))
+          :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
+          :hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))
           :toiminta (select-keys kuvaus [:kuvaus :peruste])
-          :tiedotToiminnanSijainnista
-          {:TiedotToiminnanSijainnista
-           {:yksilointitieto (:propertyId application)
-            :alkuHetki (util/to-xml-datetime (:created application))
-            :sijaintitieto (first (canonical-common/get-sijaintitieto application))}}
-          }
+          :laitoksentiedot {:Laitos (assoc generic-id :kiinttun (:propertyId application))}
+          :toiminnanSijaintitieto
+          {:ToiminnanSijainti (assoc generic-id :sijaintitieto (canonical-common/get-sijaintitieto application))} }
          (when (seq (:linkPermitData application))
            {:voimassaOlevatLuvat
             {:luvat
              {:lupa (map
                       (fn [{:keys [id type]}] {:tunnistetieto id :kuvaus type})
-                      (:linkPermitData application))}}}
-           )
-          ; TODO, kun saadaan skeemaan paikka:
-          ; - drawings
-          ; - maksaja
-         )}
-
-     }}))
-
+                      (:linkPermitData application))}}})
+         )}}}))

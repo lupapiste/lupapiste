@@ -99,11 +99,11 @@
                      "BBOX"   "444416,6666496,444672,6666752"
                      "WIDTH"   "256"
                      "HEIGHT" "256"}]
-    (doseq [layer [{"LAYERS" "lupapiste:Mikkeli_Asemakaavat"
+    (doseq [layer [{"LAYERS" "lupapiste:491_asemakaava"
                     "BBOX"   "512000,6837760,514560,6840320"}
-                   {"LAYERS" "lupapiste:Hameenlinna_Asemakaava"
+                   {"LAYERS" "lupapiste:109_asemakaava"
                     "BBOX"   "358400,6758400,409600,6809600"}
-                   {"LAYERS" "lupapiste:Hameenlinna_Kantakartta"
+                   {"LAYERS" "lupapiste:109_kantakartta"
                     "BBOX"   "358400,6758400,409600,6809600"}
                    {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
                     "BBOX"   "208384,6715136,208640,6715392"}
@@ -115,45 +115,46 @@
         (println "Checking" (get layer "LAYERS"))
         (http/get (env/value :maps :geoserver) request) => http200?))))
 
-(if (env/feature? :use-wmts-map)
+(facts "WMTS layers"
+  (let [base-params {:FORMAT "image/png"
+                     :SERVICE "WMTS"
+                     :VERSION "1.0.0"
+                     :REQUEST "GetTile"
+                     :STYLE "default"
+                     :TILEMATRIXSET "ETRS-TM35FIN"
+                     :TILEMATRIX "11"
+                     :TILEROW "1247"
+                     :TILECOL "891"}]
+    (doseq [layer [{:LAYER "taustakartta"}
+                   {:LAYER "kiinteistojaotus"}
+                   {:LAYER "kiinteistotunnukset"}]]
+      (let [request {:params (merge base-params layer)
+                     :headers {"accept-encoding" "gzip, deflate"}}]
+        (println "Checking" (get layer :LAYER))
+        (wfs/raster-images request "wmts") => http200?))))
 
-  (facts "WMTS layers"
-    (let [base-params {:FORMAT "image/png"
-                       :SERVICE "WMTS"
-                       :VERSION "1.0.0"
-                       :REQUEST "GetTile"
-                       :STYLE "default"
-                       :TILEMATRIXSET "ETRS-TM35FIN"
-                       :TILEMATRIX "11"
-                       :TILEROW "1247"
-                       :TILECOL "891"}]
-      (doseq [layer [{:LAYER "taustakartta"}
-                     {:LAYER "kiinteistojaotus"}
-                     {:LAYER "kiinteistotunnukset"}]]
-        (let [request {:params (merge base-params layer)
-                       :headers {"accept-encoding" "gzip, deflate"}}]
-          (println "Checking" (get layer :LAYER))
-          (wfs/raster-images request "wmts") => http200?))))
+(facts "WMS layers"
+  (let [base-params {"FORMAT" "image/png"
+                     "SERVICE" "WMS"
+                     "VERSION" "1.1.1"
+                     "REQUEST" "GetMap"
+                     "STYLES"  ""
+                     "SRS"     "EPSG:3067"
+                     "BBOX"   "444416,6666496,444672,6666752"
+                     "WIDTH"   "256"
+                     "HEIGHT" "256"}]
+    (doseq [layer [{"LAYERS" "taustakartta_5k"}
+                   {"LAYERS" "taustakartta_10k"}
+                   {"LAYERS" "taustakartta_20k"}
+                   {"LAYERS" "taustakartta_40k"}
+                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+      (let [request {:params (merge base-params layer)
+                     :headers {"accept-encoding" "gzip, deflate"}}]
+        (println "Checking" (get layer "LAYERS"))
+        (wfs/raster-images request "wms") => http200?))))
 
-  (facts "raster-images"
-    (let [base-params {"FORMAT" "image/png"
-                       "SERVICE" "WMS"
-                       "VERSION" "1.1.1"
-                       "REQUEST" "GetMap"
-                       "STYLES"  ""
-                       "SRS"     "EPSG:3067"
-                       "BBOX"   "444416,6666496,444672,6666752"
-                       "WIDTH"   "256"
-                       "HEIGHT" "256"}]
-      (doseq [layer [{"LAYERS" "taustakartta_5k"}
-                     {"LAYERS" "taustakartta_10k"}
-                     {"LAYERS" "taustakartta_20k"}
-                     {"LAYERS" "taustakartta_40k"}
-                     {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                     {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
-        (let [request {:params (merge base-params layer)
-                       :headers {"accept-encoding" "gzip, deflate"}}]
-          (println "Checking" (get layer "LAYERS"))
-          (wfs/raster-images request "wms") => http200?))))
-  )
-
+(fact "WMS capabilites"
+  (http/get (str (server-address) "/proxy/wmscap")
+    {:query-params {:v "428"}
+     :throw-exceptions false}) => http200?)

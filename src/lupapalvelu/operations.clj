@@ -119,6 +119,8 @@
        [["uusi-toiminta" :yl-uusi-toiminta]
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
+
+      ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
        [["vesijohdosta" :vvvl-vesijohdosta]
         ["viemarista" :vvvl-viemarista]
@@ -132,7 +134,7 @@
     operation-tree-for-environment-R
     operation-tree-for-P
     (when (env/feature? :ymparisto) operation-tree-for-Y)
-     (when (env/feature? :yleiset-alueet) operation-tree-for-YA)]))
+    operation-tree-for-YA]))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] operation-tree)
@@ -147,6 +149,8 @@
 (def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
 (def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
+
+(def ^:private common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
 
 (def ^:private common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
@@ -249,7 +253,6 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private common-ymparistolupa-schemas ["maksaja" "vesihuolto-kiinteisto"])
 (def ^:private ymparistolupa-attachments []) ; TODO
 (def ^:private ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
@@ -275,14 +278,14 @@
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
+     :vapaa-ajan-asuinrakennus    {:schema "uusi-rakennus-ei-huoneistoa"
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
                                    :required common-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :varasto-tms                 {:schema "uusiRakennus"
+     :varasto-tms                 {:schema "uusi-rakennus-ei-huoneistoa"
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
                                    :required common-schemas
@@ -307,7 +310,7 @@
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen"
+     :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/perustusten-korjaus]]
                                    :required common-schemas
@@ -321,7 +324,7 @@
                                    :attachments rakennuksen_muutos_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
+     :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
@@ -335,21 +338,21 @@
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
+     :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
+     :takka-tai-hormi             {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
+     :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas
@@ -405,7 +408,7 @@
                                    :attachments kaupunkikuva_toimenpide_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :purkaminen                  {:schema "purku"
+     :purkaminen                  {:schema "purkaminen"
                                    :permit-type permit/R
                                    :required common-schemas
                                    :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
@@ -474,7 +477,7 @@
                                    :link-permit-required false}
      :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
-                                   :required ["maksaja" "vesihuolto-kiinteisto"]
+                                   :required ["ymp-maksaja" "rakennuspaikka"]
                                    :attachments []
                                    :link-permit-required false}
      :vvvl-vesijohdosta           {:schema "talousvedet"

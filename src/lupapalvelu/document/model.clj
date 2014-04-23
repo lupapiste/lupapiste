@@ -10,6 +10,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
+            [sade.util :as util]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -53,11 +54,19 @@
 (defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate-field :date [elem v]
+(defmethod validate-field :date [_ v]
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
+
+(defmethod validate-field :time [_ v]
+  (when-not (s/blank? v)
+    (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
+      (let [h (util/->int (first matches))
+            m (util/->int (second matches))]
+        (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))
+      [:warn "illegal-value:time"])))
 
 (defmethod validate-field :select [{:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
@@ -65,13 +74,15 @@
     (when-not (or (s/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
-;; FIXME implement validator, the same as :select?
+;; FIXME https://support.solita.fi/browse/LUPA-1453
+;; implement validator, the same as :select?
 (defmethod validate-field :radioGroup [elem v] nil)
 
 (defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
 (defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
 
-;; FIXME implement validator (mongo id, check that user exists)
+;; FIXME https://support.solita.fi/browse/LUPA-1454
+;; implement validator (mongo id, check that user exists)
 (defmethod validate-field :personSelector [elem v] nil)
 
 (defmethod validate-field nil [_ _]
@@ -327,4 +338,34 @@
           doc)))
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
+
+(defn has-hetu?
+  ([schema]
+    (has-hetu? schema [:henkilo]))
+  ([schema-body base-path]
+    (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
+      (boolean (find-by-name schema-body full-path)))))
+
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+                         companyName companyId
+                         fise degree graduatingYear]} & {:keys [with-hetu]}]
+  (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
+    (->
+      {:userId                        {:value id}
+       :henkilotiedot {:etunimi       {:value firstName}
+                       :sukunimi      {:value lastName}}
+       :yhteystiedot {:email          {:value email}
+                      :puhelin        {:value phone}}
+       :osoite {:katu                 {:value street}
+                :postinumero          {:value zip}
+                :postitoimipaikannimi {:value city}}
+       :yritys {:yritysnimi           {:value companyName}
+                :liikeJaYhteisoTunnus {:value companyId}}
+       :patevyys {:koulutus           {:value degree}
+                  :valmistumisvuosi   {:value graduatingYear}
+                  :fise               {:value fise}
+                  }}
+      merge-hetu
+      util/strip-nils
+      util/strip-empty-maps)))
 

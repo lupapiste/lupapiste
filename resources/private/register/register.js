@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var keys = ['stamp', 'personId', 'firstName', 'lastName', 'email', 'confirmEmail', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city', 'allowDirectMarketing'];
+  var keys = ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
   var model;
   var confirmModel = {
     email: ko.observable("")
@@ -22,20 +22,20 @@
   function reset(model) {
     for (var i in keys) {
       if (model[keys[i]] !== undefined) {
-      model[keys[i]]('');
+        model[keys[i]]("");
         if (model[keys[i]].isModified) {
-      model[keys[i]].isModified(false);
-    }
+          model[keys[i]].isModified(false);
+        }
       }
     }
     return false;
   }
 
   function submit(m) {
-    var error$ = $('#register-email-error');
-    error$.text('');
+    var error$ = $("#register-email-error");
+    error$.text("");
 
-    ajax.command('register-user', json(m))
+    ajax.command("register-user", json(m))
       .success(function() {
         confirmModel.email(model().email());
         reset(model());
@@ -73,6 +73,7 @@
     allowDirectMarketing: ko.observable(false),
     email: ko.observable("").extend({email: true}),
     password: ko.observable("").extend({validPassword: true}),
+    rakentajafi: ko.observable(false),
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
     submit: submit,
@@ -85,8 +86,8 @@
   function StatusModel() {
     var self = this;
     self.subPage = ko.observable("");
-    self.isCancel = ko.computed(function() { return self.subPage() === 'cancel'; });
-    self.isError = ko.computed(function() { return self.subPage() === 'error'; });
+    self.isCancel = ko.computed(function() { return self.subPage() === "cancel"; });
+    self.isError = ko.computed(function() { return self.subPage() === "error"; });
   }
 
   var statusModel = new StatusModel();
@@ -106,24 +107,24 @@
     return _.first(pagePath) || undefined;
   }
 
-  hub.onPageChange('register', function() {
+  hub.onPageChange("register", function() {
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-    $.get('/api/vetuma', {success: urlPrefix + '#!/register2',
-                          cancel:  urlPrefix + '#!/register/cancel',
-                          error:   urlPrefix + '#!/register/error'}, function(d) {
-      $('#vetuma-register')
-        .html(d).find(':submit').addClass('btn btn-primary')
-                                .attr('value',loc("register.action"))
-                                .attr('id', 'vetuma-init');
+    $.get("/api/vetuma", {success: urlPrefix + "#!/register2",
+                          cancel:  urlPrefix + "#!/register/cancel",
+                          error:   urlPrefix + "#!/register/error"}, function(d) {
+      $("#vetuma-register")
+        .html(d).find(":submit").addClass("btn btn-primary")
+                                .attr("value",loc("register.action"))
+                                .attr("id", "vetuma-init");
     });
     statusModel.subPage(subPage());
 
   });
 
-  hub.onPageChange('register2', function() {
+  hub.onPageChange("register2", function() {
     reset(model());
     reset(confirmModel);
-    ajax.get('/api/vetuma/user')
+    ajax.get("/api/vetuma/user")
       .raw(true)
       .success(function(data) {
         if (data) {
@@ -138,14 +139,14 @@
           window.location.hash = "!/register";
         }
       })
-      .error(function(e){$('#register-email-error').text(loc(e.text));})
+      .error(function(e){$("#register-email-error").text(loc(e.text));})
       .call();
   });
 
   $(function(){
-    $('#register').applyBindings(statusModel);
-    $('#register2').applyBindings(model);
-    $('#register3').applyBindings(confirmModel);
+    $("#register").applyBindings(statusModel);
+    $("#register2").applyBindings(model);
+    $("#register3").applyBindings(confirmModel);
   });
 
 })();

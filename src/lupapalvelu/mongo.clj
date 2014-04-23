@@ -269,12 +269,7 @@
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1})
-  (try
-    (mc/drop-index :users "personId_1")
-    (catch Exception e
-      (warn "Unable to drop personId_1 index" (.getMessage e))))
-  )
+  (mc/ensure-index :app-links {:link 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

@@ -15,7 +15,7 @@
         <div data-bind="with: application" class="application_summary_info">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
-             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-bind="ltext: 'edit.address', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
           </h1>
 
@@ -316,7 +316,7 @@
                         (<span data-bind="text: username"></span>)
                         <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                       </span>
-                      <span class="invite-state">  
+                      <span class="invite-state">
                         <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
                         <span data-bind="if: !$data.invite"><span data-bind="ltext: 'accepted'"></span></span>
                       </span>
@@ -728,7 +728,7 @@
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
 
-            <div data-bind="if: neighbors() && neighbors().length>0">
+            <div data-bind="if: neighbors() && neighbors().length > 0">
               <table>
                 <thead>
                   <tr>
@@ -739,9 +739,9 @@
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: neighbors">
-                  <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + neighbor.owner.email()}">
-                    <td data-bind="text: neighbor.propertyId"></td>
-                    <td data-bind="with: neighbor.owner">
+                  <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + owner.email()}">
+                    <td data-bind="text: propertyId"></td>
+                    <td data-bind="with: owner">
                       <span data-bind="text: name" class="owner-name"></span>
                       <span data-bind="text: address.street" class="owner-street"></span>
                       <span data-bind="text: address.zip" class="owner-zip"></span>
@@ -751,16 +751,16 @@
                     <td>
                       <a data-bind="visible: $root.neighbor.statusCompleted($data),
                                     click: $root.neighbor.showStatus,
-                                    attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
+                                    attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
                          href="#">
-                        <span data-bind="text: loc(['neighbor.state', lastStatus.state()])" class="status-state"></span>
+                        <span data-bind="text: loc(['neighbor.state', _.last(status()).state()])" class="status-state"></span>
                       </a>
                       <span data-bind="visible: !$root.neighbor.statusCompleted($data),
-                                       text: loc(['neighbor.state', lastStatus.state()]),
-                                       attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
+                                       text: loc(['neighbor.state', _.last(status()).state()]),
+                                       attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
                             class="status-state">
                       </span>
-                      <span data-bind="dateTimeString: lastStatus.created" class="status-time"></span>
+                      <span data-bind="dateTimeString: _.last(status()).created()" class="status-time"></span>
                     </td>
                     <td>
                       <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
@@ -772,7 +772,7 @@
                            href="#">
                         </a>
                         <a data-bind="click: $root.neighbor.markDone,
-                                      visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
+                                      visible: _.last(status()).state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
                                       ltext: 'neighbors.actions.markDone',
                                       clickBubble: false"
                            data-test-id="neighbor-row-mark-done"
@@ -892,9 +892,9 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: tasks">
-                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}">
                   <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-                  <td data-bind="text: displayName"></td>
+                  <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
                   <td data-bind="dateString: $data.closed"></td>
                 </tr>
               </tbody>

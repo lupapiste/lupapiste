@@ -41,7 +41,7 @@
     (-> (:comments application) first :text) => "hello"))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
-  (let [application-id  (create-app-id pena :municipality "753")
+  (let [application-id  (create-app-id pena :municipality sonja-muni)
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
@@ -246,13 +246,12 @@
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
 
 (fact* "Merging building information from KRYSP does not overwrite the rest of the document"
-  (let [application-id  (create-app-id pena :municipality "753")
-        resp            (command pena :add-operation :id application-id :operation "kayttotark-muutos")
+  (let [application-id  (create-app-id pena :municipality sonja-muni :operation "kayttotark-muutos")
         app             (query-application pena application-id)
         rakmuu-doc      (domain/get-document-by-name app "rakennuksen-muuttaminen")
         resp2           (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
         updated-app     (query-application pena application-id)
-        building-info   (command pena :get-building-info-from-wfs :id application-id)
+        building-info   (command pena :get-building-info-from-wfs :id application-id) => ok?
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
         resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id) => ok?
@@ -260,5 +259,17 @@
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+        (count (get-in doc-after [:data :huoneistot])) => 21
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
+(fact* "Merging building information from KRYSP succeeds even if document schema does not have place for all the info"
+  (let [application-id  (create-app-id pena :municipality sonja-muni :operation "purkaminen")
+        app             (query-application pena application-id)
+        doc             (domain/get-document-by-name app "purkaminen")
+        building-info   (command pena :get-building-info-from-wfs :id application-id) => ok?
+        building-id     (:buildingId (first (:data building-info)))
+        resp            (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId building-id) => ok?
+        merged-app      (query-application pena application-id)
+        doc-after       (domain/get-document-by-name merged-app "purkaminen")]
+        (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
+        (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))

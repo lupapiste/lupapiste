@@ -45,4 +45,4 @@ Legacy should be
 
 Legacy should not be set
   Wait until  Element should not be visible  wfs-for-R
-  Element should be visible  wfs-not-set
+  Element should be visible  wfs-not-set-R

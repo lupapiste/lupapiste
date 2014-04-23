@@ -8,8 +8,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.operations :as op]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map]]
-            [sade.common-reader :refer [strip-nils]]))
+            [sade.util :refer [dissoc-in postwalk-map strip-nils]]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -21,7 +20,7 @@
   {:apply-when (pos? (mongo/count :submitted-applications {:schema-version {$exists false}}))}
   (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
     (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
-                                                               :documents (map drop-schema-data (:documents application))}})))
+                                                                         :documents (map drop-schema-data (:documents application))}})))
 
 (defn verdict-to-verdics [{verdict :verdict}]
   {$set {:verdicts (map domain/->paatos verdict)}
@@ -264,3 +263,141 @@
   (doseq [application (mongo/select :applications {"attachments.0" {$exists true}})]
     (mongo/update-by-id :applications (:id application)
       {$set {:attachments (attachments-with-applicationState application)}})))
+
+(defn- remove-huoneistot-and-update-schema-name [document new-schema-name]
+  (let [data (:data document)
+        data-ilman-huoneistoja (dissoc data :huoneistot)]
+    (->  document
+      (assoc :data data-ilman-huoneistoja)
+      (assoc-in  [:schema-info :i18name] (-> document :schema-info :name))
+      (assoc-in  [:schema-info :name] new-schema-name))))
+
+(defn get-operation-name [document]
+  (get-in document [:schema-info :op :name]))
+
+(defn get-schema-name [document]
+  (get-in document [:schema-info :name]))
+
+(defn remove-data-for [operation old-schema-name new-schema-name update-fn]
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications-to-update (mongo/select collection {:documents {$elemMatch {$and [{ "schema-info.op.name" operation} {"schema-info.name" old-schema-name}]}}})]
+     (doseq [application applications-to-update]
+       (let [new-documents (map (fn [document]
+                                  (let [schema-name (get-schema-name document)
+                                        operation-name (get-operation-name document)]
+                                    (if (and (= operation-name operation) (= schema-name old-schema-name))
+                                      (update-fn document new-schema-name)
+                                      document)))
+                                (:documents application))]
+         (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
+
+(defn remove-huoneistot-for [operation old-schema-name new-schema-name]
+  (remove-data-for operation old-schema-name new-schema-name remove-huoneistot-and-update-schema-name))
+
+(defmigration vapaa-ajan-asuinrakennus-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "vapaa-ajan-asuinrakennus"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (remove-huoneistot-for "vapaa-ajan-asuinrakennus" "uusiRakennus" "uusi-rakennus-ei-huoneistoa"))
+(defmigration varasto-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "varasto-tms"} {"schema-info.name" "uusiRakennus"}] }}}))}
+  (remove-huoneistot-for "varasto-tms" "uusiRakennus" "uusi-rakennus-ei-huoneistoa"))
+(defmigration julkisivu-muutos-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "julkisivu-muutos"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "julkisivu-muutos" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+(defmigration markatila-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "markatilan-laajentaminen"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "markatilan-laajentaminen" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+(defmigration takka-muutos-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "takka-tai-hormi"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "takka-tai-hormi" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+(defmigration parveke-muutos-updates
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{ "schema-info.op.name" "parveke-tai-terassi"} {"schema-info.name" "rakennuksen-muuttaminen"}] }}}))}
+  (remove-huoneistot-for "parveke-tai-terassi" "rakennuksen-muuttaminen" "rakennuksen-muuttaminen-ei-huoneistoja"))
+
+(defn- update-krysp-version-for-all-orgs [permit-type from to]
+  (let [path (str "krysp." permit-type ".version")]
+    (mongo/update-by-query :organizations {path from} {$set {path to}})))
+
+(defmigration ymparistolupa-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.YL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "YL" "2.1.1" "2.1.2"))
+
+(defmigration mal-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.MAL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "MAL" "2.1.1" "2.1.2"))
+
+(defmigration vvvl-organization-krysp-213
+  {:apply-when (pos? (mongo/count :organizations {"krysp.VVVL.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "VVVL" "2.1.1" "2.1.3"))
+
+(defmigration yi-organization-krysp-212
+  {:apply-when (pos? (mongo/count :organizations {"krysp.YI.version" "2.1.1"}))}
+  (update-krysp-version-for-all-orgs "YI" "2.1.1" "2.1.2"))
+
+(defn- remove-ominaisuustiedot-and-update-schema-name [document new-schema-name]
+  (let [data (-> (:data document)
+               (dissoc :lammitys)
+               (dissoc :verkostoliittymat)
+               (dissoc :varusteet)
+               (dissoc :luokitus))]
+    (-> document
+      (assoc :data data)
+      (assoc-in  [:schema-info :i18name] (-> document :schema-info :name))
+      (assoc-in  [:schema-info :name] new-schema-name))))
+
+(defn- remove-ominaisuustiedot-huoneistot-and-update-schema-name [document new-schema-name]
+  (let [data (-> (:data document)
+               (dissoc :lammitys)
+               (dissoc :verkostoliittymat)
+               (dissoc :varusteet)
+               (dissoc :huoneistot)
+               (dissoc :luokitus))]
+
+    (-> document
+      (assoc :data data)
+      (assoc-in  [:schema-info :i18name] (-> document :schema-info :name))
+      (assoc-in  [:schema-info :name] new-schema-name))))
+
+(defn remove-ominaisuudet-for [operation old-schema-name new-schema-name]
+  (remove-data-for operation old-schema-name new-schema-name remove-ominaisuustiedot-and-update-schema-name))
+
+(defn remove-ominaisuudet-huoneistot-for [operation old-schema-name new-schema-name]
+  (remove-data-for operation old-schema-name new-schema-name remove-ominaisuustiedot-huoneistot-and-update-schema-name))
+
+(defmigration rakennuksen-ominaistieto-updates-julkisivu-muutos
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "julkisivu-muutos"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
+  (remove-ominaisuudet-for "julkisivu-muutos" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
+
+(defmigration rakennuksen-ominaistieto-updates-markatila
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "markatilan-laajentaminen"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
+  (remove-ominaisuudet-for "markatilan-laajentaminen" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
+
+(defmigration rakennuksen-ominaistieto-updates-takka
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "takka-tai-hormi"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
+  (remove-ominaisuudet-for "takka-tai-hormi" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
+
+(defmigration rakennuksen-ominaistieto-updates-parveke
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "parveke-tai-terassi"} {"schema-info.name" "rakennuksen-muuttaminen-ei-huoneistoja"}] }}}))}
+  (remove-ominaisuudet-for "parveke-tai-terassi" "rakennuksen-muuttaminen-ei-huoneistoja" "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"))
+
+(defmigration rakennuksen-ominaistieto-updates-purku
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.op.name" "purkaminen"} {"schema-info.name" "purku"}] }}}))}
+  (remove-ominaisuudet-huoneistot-for "purkaminen" "purku" "purkaminen"))
+
+(defn- convert-neighbors [orig-neighbors]
+  (if-not (empty? orig-neighbors)
+    (for [[k v] orig-neighbors
+            :let [propertyId (-> v :neighbor :propertyId)
+                  owner (-> v :neighbor :owner)
+                  status (-> v :status)]]
+        {:id (name k)
+         :propertyId propertyId
+         :status status
+         :owner owner})
+    []))
+
+(defmigration neighbors-to-sequable
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {} {:neighbors 1})]
+    (when (map? (:neighbors application))
+      (mongo/update-by-id collection (:id application)
+        {$set {:neighbors (convert-neighbors (:neighbors application))}}))))

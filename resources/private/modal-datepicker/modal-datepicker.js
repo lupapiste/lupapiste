@@ -47,11 +47,14 @@ LUPAPISTE.ModalDatepickerModel = function() {
     ajax.command(self.config.commandName, commandData)
       .processing(self.processing)
       .pending(self.pending)
-      .success(function() {
+      .success(function(resp) {
         repository.load(self.appId);
         LUPAPISTE.ModalDialog.close();
         self.errorMessage(null);
         self.dateObservable(null);
+        if (self.config.checkIntegrationAvailability && !resp.integrationAvailable) {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc('integration.title'), loc('integration.unavailable'));
+        }
       })
       .error(self.onError)
       .call();

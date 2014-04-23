@@ -2,6 +2,33 @@
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]))
 
+
+(facts "strip-nils"
+  (fact "Removes the whole key-value pair when value is nil"
+    (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
+  (fact "Does not remove empty maps from inside sequential structures like list and vector"
+    (strip-nils {:a nil
+                 :b {:aa nil :bb nil}
+                 :c {:aa nil :bb 2}
+                 :d '({:a 11} {:b nil} :c nil)
+                 :e [{:a "a"} {:b nil} "c" nil]})
+    => {:b {}
+        :c {:bb 2}
+        :d '({:a 11} {} :c nil)
+        :e [{:a "a"} {} "c" nil]}))
+
+(facts "strip-empty-maps"
+  (fact "Removes the whole key-value pair when value is an empty map"
+    (strip-empty-maps {:a 1 :b {} :c {:d 2 :e {}}}) => {:a 1 :c {:d 2}})
+  (fact "Does not remove empty maps from inside sequential structures like list and vector"
+    (strip-empty-maps {:b {}
+                       :c {:bb 2 :cc {}}
+                       :d '({:a 11} {} :c nil)
+                       :e [{:a "a"} {} "c" nil]})
+    => {:c {:bb 2}
+        :d '({:a 11} {} :c nil)
+        :e [{:a "a"} {} "c" nil]}))
+
 (facts
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :b]) => {:a {:c \c}})
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :x]) => {:a {:b \b :c \c}}))
@@ -12,6 +39,17 @@
   (fact (select {:a \a :b \b :c \c} [:x :a :y]) => [nil \a nil])
   (fact (select nil [:a :c]) => [nil nil])
   (fact (select {:a \a :b \b :c \c} nil) => nil))
+
+(facts "some-key"
+  (some-key nil) => nil
+  (some-key nil nil) => nil
+  (some-key nil :a) => nil
+  (some-key {:a 1} nil) => nil
+  (some-key {:a 1} :a) => 1
+  (some-key {:a 1, :b 2} :a :b) => 1
+  (some-key {:a 1, :b 2} :b :a) => 2
+  (some-key {:a nil, :b 2} :a :b) => 2
+  (some-key {:a false, :b 2} :a :b) => false)
 
 (fact (positions #{2} [1 2 3 4 1 2 3 4]) => [1 5])
 
@@ -113,6 +151,21 @@
   (fact "valid date" (to-millis-from-local-date-string "1.1.2013") => 1356998400000)
   (fact "invalid date" (to-millis-from-local-date-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 
+(facts "to-xml-time-from-string"
+  (fact "nil -> nil" (to-xml-time-from-string nil) => nil)
+  (fact "valid times"
+    (to-xml-time-from-string "12:12") => "12:12:00"
+    (to-xml-time-from-string "00:00:01") => "00:00:01"
+    (to-xml-time-from-string "12:59:59.9") => "12:59:59.9"
+    (to-xml-time-from-string "0:0") => "00:00:00"
+    (to-xml-time-from-string "0:10") => "00:10:00"
+    (to-xml-time-from-string "1:0") => "01:00:00"))
+
+(facts "to-property-id"
+  (to-property-id "245-003-0105-0006") => "24500301050006"
+  (to-property-id "245-3-105-6") => "24500301050006"
+  (to-property-id "245-03-0105-06") => "24500301050006"
+  (to-property-id "05-03-0105-006") => "00500301050006")
 
 (facts sequable?
   (sequable? [])        => true

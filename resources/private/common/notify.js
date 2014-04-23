@@ -18,6 +18,7 @@ var notify = (function() {
   }
 
   function error(title, data) {
+    LUPAPISTE.ModalDialog.close();
     LUPAPISTE.ModalDialog.showDynamicOk(title, data);
   }
 

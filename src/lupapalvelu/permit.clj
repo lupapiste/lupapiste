@@ -44,10 +44,10 @@
    :sftp-directory "/ymparisto"
    :case-xml-element :Ymparistolupa})
 
-(defpermit VVVL  "Vapautushakemus vesijohtaai ja viemariin liittymisesta"
+(defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :case-xml-element :Ymparistolupa})
+   :case-xml-element :Vapautus})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
