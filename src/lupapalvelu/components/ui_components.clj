@@ -146,6 +146,10 @@
                   :js ["register.js"]
                   :html ["register.html" "register2.html" "register3.html"]}
 
+   :link-account {:depends [:common]
+                  :js ["link-account.js"]
+                  :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
+
    :docgen       {:depends [:accordion :common]
                   :js ["docmodel.js" "docgen.js"]}
 
@@ -207,7 +211,7 @@
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
 
-   :welcome {:depends [:login :register :debug :user-menu :screenmessages]
+   :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages]
              :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 
