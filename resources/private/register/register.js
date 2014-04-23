@@ -22,10 +22,10 @@
   function reset(model) {
     for (var i in keys) {
       if (model[keys[i]] !== undefined) {
-      model[keys[i]]("");
+        model[keys[i]]("");
         if (model[keys[i]].isModified) {
-      model[keys[i]].isModified(false);
-    }
+          model[keys[i]].isModified(false);
+        }
       }
     }
     return false;
