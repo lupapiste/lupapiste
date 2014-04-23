@@ -95,66 +95,84 @@
                                                           :child [{:tag :etunimi}
                                                                   {:tag :sukunimi}]}]}]}]}]}])
 
-(defn get-yleiset-alueet-krysp-mapping [lupa-name-key]
-  {:tag :YleisetAlueet
-   :ns "yak"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.2")
-                 :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
-           mapping-common/common-namespaces)
+(defn get-yleiset-alueet-krysp-mapping [lupa-name-key krysp-version]
+  {:pre [krysp-version]}
+  (let [ya_to_krysp_2_1_2 {:tag :YleisetAlueet
+                           :ns "yak"
+                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.2")
+                                         :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
+                                        mapping-common/common-namespaces)
 
-   :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-           {:tag :yleinenAlueAsiatieto
-            :child [{:tag lupa-name-key
-                     :child [{:tag :kasittelytietotieto
-                              :child kasittelytieto}
-                             {:tag :luvanTunnisteTiedot
-                              :child [mapping-common/lupatunnus]}
-                             {:tag :alkuPvm}
-                             {:tag :loppuPvm}
-                             {:tag :sijaintitieto
-                              :child [mapping-common/sijantiType]}
-                             {:tag :pintaala}
-                             {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
-                              :child [{:tag :Osapuoli
-                                       :child osapuoli}]}
-                             {:tag :vastuuhenkilotieto
-                              :child vastuuhenkilo}   ;; tyomaasta-vastaavan henkilo-osa
-                             {:tag :maksajatieto
-                              :child [{:tag :Maksaja
-                                       :child maksaja}]}
-                             {:tag :liitetieto
-                              :child liitetieto}
-                             {:tag :lausuntotieto
-                              :child lausunto}
-                             {:tag :lupaAsianKuvaus}
-                             {:tag :lupakohtainenLisatietotieto
-                              :child [{:tag :LupakohtainenLisatieto
-                                       :child [{:tag :selitysteksti :ns "yht"}
-                                               {:tag :arvo :ns "yht"}]}]}
-                             {:tag :kayttojaksotieto
-                              :child [{:tag :Kayttojakso
-                                       :child [{:tag :alkuHetki :ns "yht"}
-                                               {:tag :loppuHetki :ns "yht"}]}]}
-                             {:tag :toimintajaksotieto
-                              :child [{:tag :Toimintajakso
-                                       :child [{:tag :alkuHetki :ns "yht"}
-                                               {:tag :loppuHetki :ns "yht"}]}]}
-                             {:tag :valmistumisilmoitusPvm}
-                             {:tag :lisaaikatieto
-                              :child [{:tag :Lisaaika
-                                       :child [{:tag :alkuPvm :ns "yht"}
-                                               {:tag :loppuPvm :ns "yht"}
-                                               {:tag :perustelu}]}]}
-                             {:tag :sijoituslupaviitetieto
-                              :child [{:tag :Sijoituslupaviite
-                                       :child [{:tag :vaadittuKytkin}
-                                               {:tag :tunniste}]}]}
-                             {:tag :kayttotarkoitus}
-                             {:tag :johtoselvitysviitetieto
-                              :child [{:tag :Johtoselvitysviite
-                                       :child [{:tag :vaadittuKytkin
-                                                ;:tag :tunniste
-                                                }]}]}]}]}]})
+                           :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                                   {:tag :yleinenAlueAsiatieto
+                                    :child [{:tag lupa-name-key
+                                             :child [{:tag :kasittelytietotieto
+                                                      :child kasittelytieto}
+                                                     {:tag :luvanTunnisteTiedot
+                                                      :child [mapping-common/lupatunnus]}
+                                                     {:tag :alkuPvm}
+                                                     {:tag :loppuPvm}
+                                                     {:tag :sijaintitieto
+                                                      :child [mapping-common/sijantiType]}
+                                                     {:tag :pintaala}
+                                                     {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
+                                                      :child [{:tag :Osapuoli
+                                                               :child osapuoli}]}
+                                                     {:tag :vastuuhenkilotieto
+                                                      :child vastuuhenkilo}   ;; tyomaasta-vastaavan henkilo-osa
+                                                     {:tag :maksajatieto
+                                                      :child [{:tag :Maksaja
+                                                               :child maksaja}]}
+                                                     {:tag :liitetieto
+                                                      :child liitetieto}
+                                                     {:tag :lausuntotieto
+                                                      :child lausunto}
+                                                     {:tag :lupaAsianKuvaus}
+                                                     {:tag :lupakohtainenLisatietotieto
+                                                      :child [{:tag :LupakohtainenLisatieto
+                                                               :child [{:tag :selitysteksti :ns "yht"}
+                                                                       {:tag :arvo :ns "yht"}]}]}
+                                                     {:tag :kayttojaksotieto
+                                                      :child [{:tag :Kayttojakso
+                                                               :child [{:tag :alkuHetki :ns "yht"}
+                                                                       {:tag :loppuHetki :ns "yht"}]}]}
+                                                     {:tag :toimintajaksotieto
+                                                      :child [{:tag :Toimintajakso
+                                                               :child [{:tag :alkuHetki :ns "yht"}
+                                                                       {:tag :loppuHetki :ns "yht"}]}]}
+                                                     {:tag :valmistumisilmoitusPvm}
+                                                     {:tag :lisaaikatieto
+                                                      :child [{:tag :Lisaaika
+                                                               :child [{:tag :alkuPvm :ns "yht"}
+                                                                       {:tag :loppuPvm :ns "yht"}
+                                                                       {:tag :perustelu}]}]}
+                                                     {:tag :sijoituslupaviitetieto
+                                                      :child [{:tag :Sijoituslupaviite
+                                                               :child [{:tag :vaadittuKytkin}
+                                                                       {:tag :tunniste}]}]}
+                                                     {:tag :kayttotarkoitus}
+                                                     {:tag :johtoselvitysviitetieto
+                                                      :child [{:tag :Johtoselvitysviite
+                                                               :child [{:tag :vaadittuKytkin
+                                                                        ;:tag :tunniste
+                                                                        }]}]}]}]}]}
+        ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2 (assoc-in [:attr :xsi:schemaLocation]
+                                                          (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.3"))
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :maksajatieto]
+                                       {:tag :maksajatieto
+                                        :child [{:tag :Maksaja
+                                                 :child mapping-common/maksajatype-children_213}]})
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys ]
+                                       {:tag :Yritys :child mapping-common/yritys-child_213}))]
+
+
+
+    (case (name krysp-version)
+    "2.1.2" ya_to_krysp_2_1_2
+    "2.1.3" ya_to_krysp_2_1_3
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
   ;; if we have no statement-attachments to add return the canonical map itself
@@ -178,6 +196,33 @@
       canonical
       statement-attachments)))
 
+
+(defn- map-kayttotarkoitus [canonical lupa-name-key]
+  (update-in canonical [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :kayttotarkoitus]
+             (fn [kayttotarkoitus]
+               (case kayttotarkoitus
+                 "vesihuoltoverkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 "muu" "kaivu- tai katuty\u00f6lupa"
+                 "kaukol\u00e4mp\u00f6verkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 "tietoliikenneverkostoty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 "verkoston liitosty\u00f6" "kaivu- tai katuty\u00f6lupa"
+                 kayttotarkoitus))))
+
+(defn- map-enums-212 [canonical lupa-name-key]
+  (map-kayttotarkoitus canonical lupa-name-key))
+
+(defn- map-enums
+  "Map enumerations in canonical into values supperted by given KRYSP version"
+  [canonical lupa-name-key krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" (map-enums-212 canonical lupa-name-key)
+    canonical ; default: no conversions
+    ))
+
+(defn yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
+  (element-to-xml (map-enums canonical lupa-name-key krysp-version) (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YA applications."
@@ -198,7 +243,7 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments)
-        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
+        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
     (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
 
@@ -212,6 +257,6 @@
                             (-> application :linkPermitData first :operation keyword)
                             :ya-katulupa-vesi-ja-viemarityot))
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
-          xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key))]
+          xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
       (mapping-common/write-to-disk application nil nil xml krysp-version output-dir)))
