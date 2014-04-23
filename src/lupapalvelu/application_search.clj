@@ -45,6 +45,7 @@
                             :applicant
                             :submitted
                             :indicators
+                            :attachmentsRequiringAction
                             :unseenComments
                             :modified
                             :state
