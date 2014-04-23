@@ -5,6 +5,7 @@ LUPAPISTE.MapModel = function() {
   var currentAppId = null;
   var applicationMap = null;
   var inforequestMap = null;
+  var inforequestMarkerMap = null;
   var location = null;
   var drawings = null;
   var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
@@ -20,11 +21,13 @@ LUPAPISTE.MapModel = function() {
     } else if (kind === "inforequest") {
       if (!inforequestMap) inforequestMap = createMap("inforequest-map");
       return inforequestMap;
+    } else if (kind === "inforequest-markers") {
+      if (!inforequestMarkerMap) inforequestMarkerMap = createMap("inforequest-marker-map");
+      return inforequestMarkerMap;
     } else {
       throw "Unknown kind: " + kind;
     }
   };
-
 
   self.refresh = function(application) {
     currentAppId = application.id;
@@ -33,7 +36,7 @@ LUPAPISTE.MapModel = function() {
     var x = location.x;
     var y = location.y;
 
-    if(x === 0 && y === 0) {
+    if (x === 0 && y === 0) {
       $('#application-map').css("display", "none");
     } else {
       $('#application-map').css("display", "inline-block");
@@ -43,8 +46,47 @@ LUPAPISTE.MapModel = function() {
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
     map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10).add(x, y);
-    if(drawings) {
+    if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
+    }
+    if (application.infoRequest) {
+      map = getOrCreateMap("inforequest-markers");
+      map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10); //.add(x, y);
+
+      // get relevant markers
+      ajax
+        .query("inforequest-markers", {id: currentAppId, x: x, y: y})
+        .success(function(data) {
+
+          console.log("inforequest-markers success, data: ", data);
+//          console.log("same location: ", data["sameLocation"]);
+//          console.log("same operations: ", data["sameOperation"]);
+//          console.log("others: ", data["others"]);
+
+          // TODO: Set the markers onto the map
+
+//          console.log("TEST, adding a sameOperation marker to ", x+10, ", ", y+10)
+//          map.add(x+10, y+10, "sameOperation"); // TEST
+
+          _.forEach(data["sameLocation"], function(ir) {
+            console.log("same location: ", ir.location);
+            map.add(ir.location.x, ir.location.y, "sameLocation");
+          });
+
+          _.forEach(data["sameOperation"], function(ir) {
+            console.log("same operations: ", ir.location);
+            map.add(ir.location.x, ir.location.y, "sameOperation");
+          });
+
+          _.forEach(data["others"], function(ir) {
+            console.log("others: ", ir.location);
+            map.add(ir.location.x, ir.location.y, "others");
+          });
+
+          //repository.load(currentAppId);
+        })
+        .call();
+
     }
   };
 

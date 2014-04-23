@@ -11,7 +11,13 @@ var gis = (function() {
     return new OpenLayers.Marker(pos, icon.clone());
   }
 
-  var defaultIcon = makeIcon("/img/map-marker.png", 21, 25);
+  var iconDefault = makeIcon("/img/map-marker.png", 21, 25);
+  var iconBlue = makeIcon("/img/marker-blue.png", 21, 25);
+  var iconGreen = makeIcon("/img/marker-green.png", 21, 25);
+
+  var iconMapping = {"sameLocation" :  iconDefault,
+                     "sameOperation" : iconBlue,
+                     "others" :        iconGreen};
 
   // Map initialization
 
@@ -167,8 +173,9 @@ var gis = (function() {
       return self;
     };
 
-    self.add = function(x, y, markerIcon) {
-      var icon = markerIcon || defaultIcon;
+    self.add = function(x, y, markerIconName) {
+      console.log("self.add, x: ", x, ", y: ", y, ", iconMapping[markerIconName]: ", iconMapping[markerIconName]);
+      var icon = iconMapping[markerIconName] || iconDefault;
       var marker = makeMarker(new OpenLayers.LonLat(x, y), icon);
       self.markerLayer.addMarker(marker);
       self.markers.push(marker);

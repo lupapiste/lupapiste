@@ -473,6 +473,78 @@
       {$set {:modified created
              :drawings drawings}})))
 
+(defquery inforequest-markers
+  {:parameters [:id #_location x y]
+   :roles      [#_:applicant :authority]
+   :states     [:draft :open :submitted :complement-needed :info]   ;; TODO: Mitka tilat?
+   :input-validators [(partial action/non-blank-parameters [#_:location :x :y])]
+   }
+  [{:keys [application user]}]
+
+  (println "\n inforequest-markers, x: " x ", y: " y "\n")
+  (println "\n inforequest-markers, application's operations: " (:operations application) "\n")
+
+;  (mongo/select :applications
+;    (merge (domain/application-query-for user) {:_id {$ne id}
+;                                                :state {$in ["verdictGiven" "constructionStarted"]}
+;                                                :permitType (:permitType application)
+;                                                :operations.name {$nin ["ya-jatkoaika"]}})
+;    {:_id 1 :permitType 1 :address 1 :propertyId 1})
+
+  ;; TODO: Pitaako kayttaa $elemMatchia?
+  (let [inforequests (mongo/select :applications
+                      (merge
+                        (domain/application-query-for user)
+                        {:infoRequest true})
+                      {:location 1 :operations 1})
+;       _ (do
+;           (println "inforequest-markers, inforequests: ")
+;           (clojure.pprint/pprint inforequests)
+;           (println "\n"))
+
+       same-location-irs (filter
+                           #(and (= x (-> % :location :x str)) (= y (-> % :location :y str)))
+                           inforequests)
+;       _ (do
+;           (println "inforequest-markers, same-location-irs: ")
+;           (clojure.pprint/pprint same-location-irs)
+;           (println "\n"))
+
+       remove-irs-by-id-fn (fn [target-irs irs-to-be-removed]
+                             (remove
+                               (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed))
+                               target-irs))
+
+       inforequests (remove-irs-by-id-fn inforequests same-location-irs)
+
+       application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
+;       _ (println "inforequest-markers, application-op-name: " application-op-name "\n")
+
+
+       ;; **** TODO: Tama ei viela toimi! ****
+       same-op-irs (filter
+                     (fn [ir]
+                       (some #(= application-op-name (:name %)) (:operations ir)))
+                     inforequests)
+
+;       _ (do
+;           (println "inforequest-markers, same-op-irs: ")
+;           (clojure.pprint/pprint same-op-irs)
+;           (println "\n"))
+
+       inforequests (remove-irs-by-id-fn inforequests same-op-irs)
+
+;       _ (do
+;           (println "inforequest-markers, others: ")
+;           (clojure.pprint/pprint inforequests)
+;           (println "\n"))
+       ]
+
+
+
+   (ok :sameLocation same-location-irs :sameOperation same-op-irs :others inforequests)
+   ))
+
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
