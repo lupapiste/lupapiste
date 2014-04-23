@@ -19,6 +19,13 @@ var pageutil = (function() {
     return pageMatch ? pageMatch[1] : null;
   }
 
+  function subPage() {
+    var hash = (location.hash || "").substr(3);
+    var path = hash.split("/");
+    var pagePath = path.splice(1, path.length - 1);
+    return _.first(pagePath) || undefined;
+  }
+
   var ajaxLoaderContainer;
   var ajaxLoaderTask;
 
@@ -55,6 +62,7 @@ var pageutil = (function() {
   return {
     getURLParameter:      getURLParameter,
     getPage:              getPage,
+    subPage:              subPage,
     showAjaxWait:         showAjaxWait,
     hideAjaxWait:         hideAjaxWait,
     makePendingAjaxWait:  makePendingAjaxWait

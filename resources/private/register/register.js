@@ -100,13 +100,6 @@
     model().disabled(!model.isValid() || !model().acceptTerms());
   });
 
-  function subPage() {
-    var hash = (location.hash || "").substr(3);
-    var path = hash.split("/");
-    var pagePath = path.splice(1, path.length - 1);
-    return _.first(pagePath) || undefined;
-  }
-
   hub.onPageChange("register", function() {
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
     $.get("/api/vetuma", {success: urlPrefix + "#!/register2",
@@ -117,7 +110,7 @@
                                 .attr("value",loc("register.action"))
                                 .attr("id", "vetuma-init");
     });
-    statusModel.subPage(subPage());
+    statusModel.subPage(pageutil.subPage());
 
   });
 
