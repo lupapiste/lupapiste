@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.strings :as ss]
             [cheshire.core :as json]
             [clojure.java.io :as io])
   (:import [org.joda.time.format DateTimeFormat DateTimeFormatter]))
@@ -14,7 +15,7 @@
   `(binding [context (merge context ~logging-context)]
      (do ~@body)))
 
-(defn log-prefix [{:keys [level timestamp ns]}]
+(defn- log-prefix [{:keys [level timestamp ns]}]
   (let [{:keys [sessionId applicationId userId]} context]
     (str
       (-> level name s/upper-case)
@@ -37,10 +38,10 @@
 (def ^:private ^DateTimeFormatter time-fmt (DateTimeFormat/forPattern time-format))
 (def ^:private ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
 
-(defn unsecure-log-event [level event]
+(defn- unsecure-log-event [level event]
   (.write event-log-out (str (log-prefix {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) " - " event \newline))
   (.flush event-log-out))
-  
+
 (defn log-event [level event]
   (let [stripped (-> event
                    (dissoc :application)
@@ -50,3 +51,8 @@
       (unsecure-log-event level jsoned)
       (catch Exception e
         (error e "Can't write to event log:" jsoned)))))
+
+(defn sanitize
+  "Replaces newlines and limits length"
+  [limit ^String s]
+  (ss/limit (s/replace (str s) #"[\r\n]" "\\n") limit "... (truncated)"))
