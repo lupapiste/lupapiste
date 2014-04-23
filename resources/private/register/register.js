@@ -83,14 +83,7 @@
   plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
   plainModel.confirmEmail = ko.observable().extend({equal: plainModel.email});
 
-  function StatusModel() {
-    var self = this;
-    self.subPage = ko.observable("");
-    self.isCancel = ko.computed(function() { return self.subPage() === "cancel"; });
-    self.isError = ko.computed(function() { return self.subPage() === "error"; });
-  }
-
-  var statusModel = new StatusModel();
+  var statusModel = new LUPAPISTE.StatusModel();
 
   model = ko.validatedObservable(plainModel);
   model.isValid.subscribe(function(valid) {

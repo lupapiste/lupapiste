@@ -74,7 +74,7 @@
                             :licenses :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
                   :html ["404.html" "footer.html"]}
 
