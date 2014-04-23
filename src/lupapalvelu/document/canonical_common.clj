@@ -4,7 +4,6 @@
             [swiss-arrows.core :refer [-<>]]
             [sade.strings :as ss]
             [sade.util :refer :all]
-            [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [cljts.geom :as geo]
@@ -209,7 +208,7 @@
 (defn get-state [application]
   (let [state-timestamps (-<> (all-state-timestamps application)
                            (dissoc :sent :closed) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
-                           cr/strip-nils
+                           strip-nils
                            (sort-by second <>))]
     (mapv
       (fn [[state ts]]
@@ -392,7 +391,7 @@
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
   (with-lang lang
-    (cr/strip-nils
+    (strip-nils
       (when (seq tyotehtavat)
         {:vastattavaTyotieto
          (remove nil?
@@ -438,12 +437,12 @@
              :hallintasuhde "Ei tiedossa"}})
 
 (defn- get-neighbors [neighbors]
-  (remove nil? (for [[_ neighbor] neighbors]
+  (remove nil? (for [neighbor neighbors]
                    (let [status (last (:status neighbor))
-                         propertyId (-> neighbor :neighbor :propertyId)]
+                         propertyId (:propertyId neighbor)]
                      (case (:state status)
                        "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
-                       "mark-done" (get-neighbor (-> neighbor :neighbor :owner :name) propertyId)
+                       "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
 (defn osapuolet

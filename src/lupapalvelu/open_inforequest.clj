@@ -20,7 +20,7 @@
      :info-fi (info-fn :fi)
      :info-sv (info-fn :sv)}))
 
-(def ^:private base-email-conf
+(def base-email-conf
   {:recipients-fn  notifications/from-data
    :subject-key    "applications.inforequest"
    :model-fn       base-email-model})
@@ -49,9 +49,10 @@
                                            :organization-id  organization-id
                                            :email            email
                                            :created          (now)
+                                           :reminder-sent    nil
                                            :last-used        nil})
     (notifications/notify! :open-inforequest-invite {:data {:email email :token-id token-id}
-                                                      :application application})
+                                                     :application application})
     true))
 
 (defn make-user [token]

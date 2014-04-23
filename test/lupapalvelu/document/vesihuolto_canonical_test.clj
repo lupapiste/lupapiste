@@ -130,7 +130,7 @@
                :order 5}})
 
 (def vapautus-vesijohdosta-ja-viemarista-hakemus {:sent nil,
-                                                  :neighbors {},
+                                                  :neighbors [],
                                                   :schema-version 1,
                                                   :authority {:role "authority",
                                                               :lastName "Borga",

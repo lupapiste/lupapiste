@@ -3,8 +3,7 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
-            [clojure.walk :as walk]
-            [sade.common-reader :as cr]))
+            [clojure.walk :as walk]))
 
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
@@ -301,7 +300,7 @@
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
-    (cr/strip-nils body)))
+    (strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."

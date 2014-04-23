@@ -41,7 +41,7 @@
 (fact "Meta test: meluilmo" meluilmo => valid-against-current-schema?)
 
 (def meluilmoitus-application {:sent nil,
-                               :neighbors {},
+                               :neighbors [],
                                :schema-version 1,
                                :authority
                                {:role "authority",
@@ -94,7 +94,7 @@
                                :municipality "638"})
 
 (def meluilmoitus-yritys-application {:sent nil,
-                               :neighbors {},
+                               :neighbors [],
                                :schema-version 1,
                                :authority
                                {:role "authority",

@@ -4,7 +4,7 @@ Rakennuspaikan rajanaapurina Teille ilmoitetaan, ett&auml; osoitteessa {{address
 
 {{link-fi}}
 
-Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 ---
 

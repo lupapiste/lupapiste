@@ -11,12 +11,6 @@
                      ":a:b:c" 2}) => {:c 1
                                       ":a:b:c" 2}))
 
-(fact "strip-nils"
-  (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
-
-(fact "strip-empty-maps"
-  (strip-empty-maps {:a 1 :b {} :c {:d 2 :e {}}}) => {:a 1 :c {:d 2}})
-
 (facts "to-boolean"
   (to-boolean 1) => 1
   (to-boolean true) => true

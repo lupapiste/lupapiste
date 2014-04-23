@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.subtype
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.util :refer [->int]]
+            [sade.util :refer [->int] :as util]
             [clojure.string :refer [blank?]]
             [clj-time.format :as tf]))
 
@@ -9,7 +9,7 @@
 (defmethod subtype-validation :email [_ v]
   (cond
     (blank? v) nil
-    (re-matches #".+@.+\..+" v) nil
+    (util/valid-email? v) nil
     :else [:warn "illegal-email"]))
 
 (defmethod subtype-validation :tel [_ v]

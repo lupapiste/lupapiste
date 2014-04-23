@@ -4,6 +4,7 @@
             [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [sade.env :as env]
+            [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -33,17 +34,14 @@
 ;; some utils
 ;;
 
-(defn validate-email
+(defn email-validator
   "Reads email key from action parameters and checks that it is valid email address.
    Blank address passes the validation."
-  ([command] (validate-email :email command))
+  ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (ss/blank? email)
-        (try
-          (javax.mail.internet.InternetAddress. email)
-          (when-not (ss/contains email "@") (fail :error.email))
-          (catch Exception _ (fail :error.email)))))))
+      (when-not (or (ss/blank? email) (util/valid-email? email))
+        (fail :error.email)))))
 
 ;; Notificator
 
@@ -74,6 +72,12 @@
     (with-application command
       (fn [{:keys [id]}]
         (mongo/update :applications (assoc mongo-query :_id id) changes)))))
+
+(defn application->command
+  "Creates a command data structure that is suitable for update-application and with-application functions"
+  [{id :id :as application}]
+  {:data {:id id}
+   :application application})
 
 (defn without-system-keys [application]
   (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
