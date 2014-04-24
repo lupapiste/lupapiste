@@ -8,14 +8,14 @@
     email: ko.observable("")
   };
 
-  registrationModel.plainModel.submit = function(m) {
+  registrationModel.plainModel.submit = function() {
     var error$ = $("#register-email-error");
     error$.text("");
 
-    ajax.command("register-user", registrationModel.json(m))
+    ajax.command("register-user", registrationModel.json())
       .success(function() {
         confirmModel.email(model().email());
-        registrationModel.reset(model());
+        registrationModel.reset();
         window.location.hash = "!/register3";
       })
       .error(function(e) {
@@ -31,7 +31,7 @@
       loc("register.confirm-cancel"),
       {title: loc("yes"),
        fn: function() {
-        registrationModel.reset(model());
+        registrationModel.reset();
         window.location.hash = "";
       }},
       {title: loc("no")}
@@ -55,7 +55,7 @@
   });
 
   hub.onPageChange("register2", function() {
-    registrationModel.reset(model());
+    registrationModel.reset();
     confirmModel.email("");
     ajax.get("/api/vetuma/user")
       .raw(true)

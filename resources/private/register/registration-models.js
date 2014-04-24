@@ -32,10 +32,10 @@ LUPAPISTE.RegistrationModel = function() {
     self.plainModel.disabled(!self.model.isValid() || !self.plainModel.acceptTerms());
   });
 
-  self.json = function(model) {
+  self.json = function() {
     var d = {};
     _.forEach(self.keys, function(key) {
-      d[key] = model[key]() || null;
+      d[key] = self.plainModel[key]() || null;
     });
 
     d.confirmPassword = null;
@@ -43,12 +43,12 @@ LUPAPISTE.RegistrationModel = function() {
     return d;
   };
 
-  self.reset = function(model) {
+  self.reset = function() {
     _.forEach(self.keys, function(key) {
-      if (model[key] !== undefined) {
-        model[key]("");
-        if (model[key].isModified) {
-          model[key].isModified(false);
+      if (self.plainModel[key] !== undefined) {
+        self.plainModel[key]("");
+        if (self.plainModel[key].isModified) {
+          self.plainModel[key].isModified(false);
         }
       }
     });
