@@ -1,25 +1,26 @@
 ;(function() {
   "use strict";
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", "!/welcome", "#link-account-error2",
-      ["stamp", "tokenId", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing"]);
-  var statusModel = new LUPAPISTE.StatusModel();
-
-  /*
+  var registrationModel = {};
+  var afterRegistrationSuccess = function() {
+    var username = registrationModel.plainModel.email();
+    var password = registrationModel.plainModel.password();
   ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
       .success(function(e) {
-        var applicationpage = e.applicationpage;
-        var redirectLocation = "/app/" + loc.getCurrentLanguage() + "/" + applicationpage;
-        // get the server-stored hashbang to redirect to right page (see web.clj for details)
-        ajax.get("/api/hashbang")
-          .success(function(e) { window.parent.location = redirectLocation + "#!/" + e.bang; })
-          .error(function() { window.parent.location = redirectLocation; })
-          .call();
+        window.parent.location = "/app/" + loc.getCurrentLanguage() + "/" + e.applicationpage;
       })
-      .error(function(e) { hub.send("login-failure", e); })
-      .call();
-  */
+      .error(function(e) {
+        window.location.hash = "!/welcome";
+        hub.send("login-failure", e);
+      })
+          .call();
+  };
+  var statusModel = new LUPAPISTE.StatusModel();
+
+  registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", afterRegistrationSuccess, "#link-account-error2",
+      ["stamp", "tokenId", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing"]);
+
 
   function getToken() {
     var token = pageutil.subPage();
@@ -96,6 +97,5 @@
   $(function(){
     $("#link-account").applyBindings(statusModel);
     $("#link-account-2").applyBindings(registrationModel.model);
-    $("#link-account-3").applyBindings(registrationModel.model);
   });
 })();

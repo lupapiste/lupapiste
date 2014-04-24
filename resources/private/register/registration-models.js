@@ -2,7 +2,7 @@
  * Usage: Create new instance and bind 'model' property to Knockout bindings.
  * Used keys can be set with optional last constructor parameter.
  */
-LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector, ks) {
+LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelector, ks) {
 
   var self = this;
 
@@ -32,7 +32,7 @@ LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector, ks)
           var email = _.clone(self.plainModel.email());
           self.reset();
           self.plainModel.email(email);
-          window.location.hash = nextHash;
+          afterSuccessFn();
         })
         .error(function(e) {
           error$.text(loc(e.text));
