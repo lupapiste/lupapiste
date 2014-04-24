@@ -52,12 +52,13 @@
                             :authority])
 
 (def ^:private order-by (assoc col-sources
-                          0 :infoRequest
-                          1 :address
+                          3 :infoRequest
+                          4 :address
+                          0 nil
+                          1 nil
                           2 nil
-                          3 nil
                           5 nil
-                          6 nil))
+                          5 nil))
 
 (def ^:private col-map (zipmap col-sources (map str (range))))
 
