@@ -3,7 +3,7 @@
 
   var registrationModel = new LUPAPISTE.RegistrationModel();
 
-  var model;
+  var model = registrationModel.model;
   var confirmModel = {
     email: ko.observable("")
   };
@@ -39,14 +39,6 @@
   };
 
   var statusModel = new LUPAPISTE.StatusModel();
-
-  model = ko.validatedObservable(registrationModel.plainModel);
-  model.isValid.subscribe(function(valid) {
-    model().disabled(!valid || !model().acceptTerms());
-  });
-  model().acceptTerms.subscribe(function() {
-    model().disabled(!model.isValid() || !model().acceptTerms());
-  });
 
   hub.onPageChange("register", function() {
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";

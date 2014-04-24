@@ -24,6 +24,14 @@ LUPAPISTE.RegistrationModel = function() {
   self.plainModel.confirmPassword = ko.observable().extend({equal: self.plainModel.password});
   self.plainModel.confirmEmail = ko.observable().extend({equal: self.plainModel.email});
 
+  self.model = ko.validatedObservable(self.plainModel);
+  self.model.isValid.subscribe(function(valid) {
+    self.plainModel.disabled(!valid || !self.plainModel.acceptTerms());
+  });
+  self.plainModel.acceptTerms.subscribe(function() {
+    self.plainModel.disabled(!self.model.isValid() || !self.plainModel.acceptTerms());
+  });
+
   self.json = function(model) {
     var d = {};
     _.forEach(self.keys, function(key) {
