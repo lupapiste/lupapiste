@@ -1,0 +1,1 @@
+neighbor.state.reminder-sent: Muistutus lähetetty
