@@ -24,7 +24,7 @@
   function getToken() {
     var token = pageutil.subPage();
     if (!token) {
-      window.location.hash = "#!/register";
+      window.location.hash = "!/register";
       return false;
     }
     return token;
