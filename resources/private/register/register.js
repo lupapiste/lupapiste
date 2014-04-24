@@ -25,19 +25,6 @@
     return false;
   };
 
-  registrationModel.plainModel.cancel = function() {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("register.confirm-cancel"),
-      {title: loc("yes"),
-       fn: function() {
-        registrationModel.reset();
-        window.location.hash = "";
-      }},
-      {title: loc("no")}
-    );
-  };
-
   var statusModel = new LUPAPISTE.StatusModel();
 
   hub.onPageChange("register", function() {

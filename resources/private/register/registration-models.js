@@ -19,7 +19,18 @@ LUPAPISTE.RegistrationModel = function() {
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
     submit: null,
-    cancel: null
+    cancel: function() {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("register.confirm-cancel"),
+        {title: loc("yes"),
+         fn: function() {
+          self.reset();
+          window.location.hash = "";
+        }},
+        {title: loc("no")}
+      );
+    }
   };
   self.plainModel.confirmPassword = ko.observable().extend({equal: self.plainModel.password});
   self.plainModel.confirmEmail = ko.observable().extend({equal: self.plainModel.email});
@@ -54,6 +65,5 @@ LUPAPISTE.RegistrationModel = function() {
     });
     return false;
   };
-
 
 };
