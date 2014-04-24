@@ -13,7 +13,7 @@ LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector, ks)
     firstName: ko.observable(""),
     lastName: ko.observable(""),
     stamp: ko.observable(""),
-    token: ko.observable(""),
+    tokenId: ko.observable(""),
     street: ko.observable("").extend({required: true}),
     city: ko.observable("").extend({required: true}),
     zip: ko.observable("").extend({required: true, number: true, maxLength: 5}),
@@ -84,7 +84,7 @@ LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector, ks)
         }
       }
     });
-    self.plainModel.token(pageutil.subPage());
+    self.plainModel.tokenId(pageutil.subPage());
     return false;
   };
 
@@ -96,6 +96,15 @@ LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector, ks)
     self.plainModel.city((data.city || ""));
     self.plainModel.zip((data.zip || ""));
     self.plainModel.street((data.street || ""));
+  };
+
+  self.setPhone = function(phone) {
+    self.plainModel.phone(phone);
+  };
+
+  self.setEmail = function(email) {
+    self.plainModel.email(email);
+    self.plainModel.confirmEmail(email);
   };
 
 };
