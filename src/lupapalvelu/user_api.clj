@@ -110,9 +110,6 @@
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
 
-    (when (and (boolean (:enabled user-data)) (not admin?) (not authorityAdmin?))
-      (fail! :error.unauthorized :desc "only admin and authorityAdmin can create enabled users"))
-
     (when (and (:apikey user-data) (not admin?))
       (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
 
@@ -433,7 +430,7 @@
       (fail! :error.create-user))
     (try
       (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
+      (if-let [user (create-new-user nil (merge data vetuma-data {:email email :role "applicant" :enabled true}) :send-email false)]
         (do
           (vetuma/consume-user stamp)
           (token/get-token tokenId :consume true)
