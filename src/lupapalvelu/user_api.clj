@@ -414,7 +414,30 @@
           (vetuma/consume-user stamp)
           (when (and (env/feature? :rakentajafi) (:rakentajafi data))
             (util/future* (idf/send-user-data user "rakentaja.fi")))
-          (ok :id (:_id user)))
+          (ok :id (:id user)))
+        (fail :error.create-user))
+      (catch IllegalArgumentException e
+        (fail (keyword (.getMessage e)))))))
+
+(defcommand confirm-account-link
+  {:parameters [stamp tokenId email password street zip city phone]
+   :input-validators [(partial action/non-blank-parameters [:tokenId :password])
+                      action/email-validator]}
+  [{data :data}]
+  (let [vetuma-data (vetuma/get-user stamp)
+        email (-> email ss/lower-case ss/trim)
+        token (token/get-token tokenId)]
+    (when-not (and vetuma-data
+                (= (:token-type token) :activate-linked-account)
+                (= email (get-in token [:data :email])))
+      (fail! :error.create-user))
+    (try
+      (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
+        (do
+          (vetuma/consume-user stamp)
+          (token/get-token tokenId :consume true)
+          (ok :id (:id user)))
         (fail :error.create-user))
       (catch IllegalArgumentException e
         (fail (keyword (.getMessage e)))))))
