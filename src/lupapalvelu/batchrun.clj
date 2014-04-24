@@ -87,11 +87,14 @@
                                                          {:reminder-sent nil}
                                                          {:reminder-sent (older-than timestamp-1-week-ago)}]})]
     (doseq [oir oirs]
-      (notifications/notify! :reminder-open-inforequest {:application (mongo/by-id :applications (:application-id oir))
-                                                         :data {:email (:email oir)
-                                                                :token-id (:id oir)
-                                                                :created-date (util/to-local-date (:created oir))}})
-      (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}}))))
+      (let [application (mongo/by-id :applications (:application-id oir))]
+        (when (= "info" (:state application))
+          (notifications/notify! :reminder-open-inforequest {:application application
+                                                             :data {:email (:email oir)
+                                                                    :token-id (:id oir)
+                                                                    :created-date (util/to-local-date (:created oir))}})
+          (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}})
+          )))))
 
 
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
