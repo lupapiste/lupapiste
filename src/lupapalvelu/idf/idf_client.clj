@@ -11,7 +11,8 @@
 
 (defn send-user-data [user partner-name]
   {:pre [(known-partner? partner-name)]}
-  (let [url (url-for-partner partner-name)
+  (let [app "lupapiste.fi"
+        url (url-for-partner partner-name)
         params (-> user
                  (rename-keys {:firstName :etunimi
                                :lastName  :sukunimi
@@ -24,9 +25,9 @@
                  (select-keys [:id :etunimi :sukunimi :email :puhelin
                                :katuosoite :postinumero :postitoimipaikka
                                :suoramarkkinointilupa :ammattilainen])
-                 (assoc :app "lupapiste"))
+                 (assoc :app app))
         ts (now)
-        form-params (assoc params :ts ts :mac (calculate-mac params "lupapiste" ts))
+        form-params (assoc params :ts ts :mac (calculate-mac params app ts))
         _  (debugf "Send user %s data to %s (%s)" (:email user) partner-name url)
         resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})
         body (:body resp)]
