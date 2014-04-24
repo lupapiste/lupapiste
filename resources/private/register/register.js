@@ -8,7 +8,7 @@
     email: ko.observable("")
   };
 
-  function submit(m) {
+  registrationModel.plainModel.submit = function(m) {
     var error$ = $("#register-email-error");
     error$.text("");
 
@@ -23,9 +23,9 @@
       })
       .call();
     return false;
-  }
+  };
 
-  function cancel() {
+  registrationModel.plainModel.cancel = function() {
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("register.confirm-cancel"),
@@ -36,32 +36,11 @@
       }},
       {title: loc("no")}
     );
-  }
-
-  var plainModel = {
-    personId: ko.observable(""),
-    firstName: ko.observable(""),
-    lastName: ko.observable(""),
-    stamp: ko.observable(""),
-    street: ko.observable("").extend({required: true}),
-    city: ko.observable("").extend({required: true}),
-    zip: ko.observable("").extend({required: true, number: true, maxLength: 5}),
-    phone: ko.observable("").extend({required: true}),
-    allowDirectMarketing: ko.observable(false),
-    email: ko.observable("").extend({email: true}),
-    password: ko.observable("").extend({validPassword: true}),
-    rakentajafi: ko.observable(false),
-    acceptTerms: ko.observable(false),
-    disabled: ko.observable(true),
-    submit: submit,
-    cancel: cancel
   };
-  plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
-  plainModel.confirmEmail = ko.observable().extend({equal: plainModel.email});
 
   var statusModel = new LUPAPISTE.StatusModel();
 
-  model = ko.validatedObservable(plainModel);
+  model = ko.validatedObservable(registrationModel.plainModel);
   model.isValid.subscribe(function(valid) {
     model().disabled(!valid || !model().acceptTerms());
   });
