@@ -55,9 +55,8 @@
 
 
 
-;; "Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
+;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
-  ;;
   (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
@@ -79,7 +78,7 @@
         {$set {:statements.$.reminder-sent (now)}}))))
 
 
-;; "Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
+;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
 (defn open-inforequest-reminder []
   (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
         oirs (mongo/select :open-inforequest-token {:created (older-than timestamp-1-week-ago)
@@ -95,17 +94,22 @@
       (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}}))))
 
 
-;; "Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
+;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
   (let [timestamp-1-week-ago (get-timestamp-from-now :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
-                                          :neighbors {$elemMatch {:status.state {$in ["email-sent"]}
-                                                                  :status.created (older-than timestamp-1-week-ago)}}})]
+                                          :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
+                                                                               {:created (older-than timestamp-1-week-ago)}
+                                                                               ]}}})]
     (doseq [app apps
             neighbor (:neighbors app)
             :let [statuses (:status neighbor)]]
 
-      (when (not-any? #(= "reminder-sent" (:state %)) statuses)
+      (when (not-any? #(or
+                         (= "reminder-sent" (:state %))
+                         (= "response-given-ok" (:state %))
+                         (= "response-given-comments" (:state %))) statuses)
+
         (doseq [status statuses]
 
           (when (and
@@ -122,7 +126,7 @@
                                            :created  (now)}}})))))))
 
 
-;; "Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
+;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
   (let [timestamp-1-month-ago (get-timestamp-from-now :month 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}

@@ -392,7 +392,7 @@
                      :scope [{:municipality "753" :permitType "YA"}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :krysp {:YA {:ftpUser "dev_ya_sipoo" :version "2.1.2"}}
+                     :krysp {:YA {:ftpUser "dev_ya_sipoo" :version "2.1.3"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
