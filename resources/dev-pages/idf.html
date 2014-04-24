@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>IDF</title>
+ <script src="https://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
+</head>
+<body>
+<form action="/api/id-federation" method="post">
+<input name="email" value="idf@example.com" readonly="readonly" size="30"><br>
+<input name="ts" value=""  readonly="readonly" size="30"><br>
+<input name="app" value="lupapiste"  readonly="readonly" size="30"><br>
+<input name="mac" value=""  readonly="readonly" size="30"><br>
+<input name="id" value="test_id_123"  readonly="readonly" size="30"><br>
+<input type="submit" id="submit" >
+</form>
+<pre>
+<script>
+var secret = "TAMAN-MUODOSTI-LUPAPISTE";
+var now = Date.now();
+var s = "idf@example.comlupapistetest_id_123" + now + secret;
+var hash = CryptoJS.SHA256(s);
+document.forms[0].ts.value = now;
+document.forms[0].mac.value = hash;
+document.writeln("READY");
+</script>
+</pre>
+</body>
+</html>
