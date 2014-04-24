@@ -1,1 +1,3 @@
 neighbor.state.reminder-sent: Muistutus lähetetty
+applications.newAttachments:  
+attachments.title: Hakemuksella on uusia liitteitä

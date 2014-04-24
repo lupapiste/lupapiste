@@ -60,6 +60,6 @@
   (indicator-sum {} {}) => 0
   (indicator-sum nil {:unseenStatements 1}) => 1
   (indicator-sum nil {:unseenVerdicts 1}) => 1
-  (indicator-sum nil {:attachmentsRequiringAction 1}) => 1
-  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5}) => 9
-  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5 :unseenComments 7}) => 9)
+  (indicator-sum nil {:attachmentsRequiringAction 1}) => 0
+  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5}) => 4
+  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5 :unseenComments 7}) => 4)
