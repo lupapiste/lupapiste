@@ -58,7 +58,7 @@
                           1 nil
                           2 nil
                           5 nil
-                          5 nil))
+                          6 nil))
 
 (def ^:private col-map (zipmap col-sources (map str (range))))
 
