@@ -1,6 +1,10 @@
-LUPAPISTE.RegistrationModel = function() {
+/**
+ * Usage: Create new instance and bind 'model' property to Knockout bindings
+ */
+LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector) {
 
   var self = this;
+
   self.keys = ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
 
   self.plainModel = {
@@ -18,7 +22,22 @@ LUPAPISTE.RegistrationModel = function() {
     rakentajafi: ko.observable(false),
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
-    submit: null,
+    submit: function() {
+      var error$ = $(errorSelector);
+      error$.text("");
+      ajax.command(commandName, self.json())
+        .success(function() {
+          var email = _.clone(self.plainModel.email());
+          self.reset();
+          self.plainModel.email(email);
+          window.location.hash = nextHash;
+        })
+        .error(function(e) {
+          error$.text(loc(e.text));
+        })
+        .call();
+      return false;
+    },
     cancel: function() {
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("areyousure"),
@@ -64,6 +83,16 @@ LUPAPISTE.RegistrationModel = function() {
       }
     });
     return false;
+  };
+
+  self.setVetumaData = function(data) {
+    self.plainModel.personId(data.userid);
+    self.plainModel.firstName(data.firstName);
+    self.plainModel.lastName(data.lastName);
+    self.plainModel.stamp(data.stamp);
+    self.plainModel.city((data.city || ""));
+    self.plainModel.zip((data.zip || ""));
+    self.plainModel.street((data.street || ""));
   };
 
 };

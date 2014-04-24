@@ -1,30 +1,7 @@
 ;(function() {
   "use strict";
 
-  var registrationModel = new LUPAPISTE.RegistrationModel();
-
-  var model = registrationModel.model;
-  var confirmModel = {
-    email: ko.observable("")
-  };
-
-  registrationModel.plainModel.submit = function() {
-    var error$ = $("#register-email-error");
-    error$.text("");
-
-    ajax.command("register-user", registrationModel.json())
-      .success(function() {
-        confirmModel.email(model().email());
-        registrationModel.reset();
-        window.location.hash = "!/register3";
-      })
-      .error(function(e) {
-        error$.text(loc(e.text));
-      })
-      .call();
-    return false;
-  };
-
+  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", "!/register3", "#register-email-error");
   var statusModel = new LUPAPISTE.StatusModel();
 
   hub.onPageChange("register", function() {
@@ -43,18 +20,11 @@
 
   hub.onPageChange("register2", function() {
     registrationModel.reset();
-    confirmModel.email("");
     ajax.get("/api/vetuma/user")
       .raw(true)
       .success(function(data) {
         if (data) {
-          model().personId(data.userid);
-          model().firstName(data.firstName);
-          model().lastName(data.lastName);
-          model().stamp(data.stamp);
-          model().city((data.city || ""));
-          model().zip((data.zip || ""));
-          model().street((data.street || ""));
+          registrationModel.setVetumaData(data);
         } else {
           window.location.hash = "!/register";
         }
@@ -65,8 +35,8 @@
 
   $(function(){
     $("#register").applyBindings(statusModel);
-    $("#register2").applyBindings(model);
-    $("#register3").applyBindings(confirmModel);
+    $("#register2").applyBindings(registrationModel.model);
+    $("#register3").applyBindings(registrationModel.model);
   });
 
 })();
