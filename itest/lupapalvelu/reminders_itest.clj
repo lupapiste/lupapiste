@@ -215,33 +215,31 @@
   )
 
 ;; NOTE: This does not work for some reason
-(defn- mongo-query-for-testing []
-  (let [resp (mongo/select :applications
-               {:state {$in ["open" "submitted"]}
-                :neighbors {$elemMatch
-                            {:status {$all
-                                      [
-                                       {$elemMatch  {:state {$in ["email-sent"]}
-                                                     :created {$lt (get-timestamp-from-now :week 1)}
-                                                     }}
-                                       {$elemMatch {:state {$nin ["reminder-sent"
-                                                                  "response-given-ok"
-                                                                  "response-given-comments"]}
+#_(let [resp (mongo/select :applications
+              {:state {$in ["open" "submitted"]}
+               :neighbors {$elemMatch
+                           {:status {$all
+                                     [
+                                      {$elemMatch  {:state {$in ["email-sent"]}
+                                                    :created {$lt (batchrun/get-timestamp-from-now :week 1)}
                                                     }}
-                                       ]
-                                      }}}
-                })]
-    (println "app count: " (count resp))
-    (doseq [r resp]
+                                      {$elemMatch {:state {$nin ["reminder-sent"
+                                                                 "response-given-ok"
+                                                                 "response-given-comments"]}
+                                                   }}
+                                      ]
+                                     }}}
+               })]
+   (println "app count: " (count resp))
+   (doseq [r resp]
 
-      (println "****** \n")
-      (println "\n app id: " (:id r))
-      (println "\n app neighbors: ")
-      (clojure.pprint/pprint (:neighbors r))
-      (println "\n")
+     (println "****** \n")
+     (println "\n app id: " (:id r))
+     (println "\n app neighbors: ")
+     (clojure.pprint/pprint (:neighbors r))
+     (println "\n")
 
-      ))
-  )
+     ))
 
 ;; ***  <- For testing  ***
 
