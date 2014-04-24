@@ -19,11 +19,18 @@ var pageutil = (function() {
     return pageMatch ? pageMatch[1] : null;
   }
 
-  function subPage() {
+  function pagePath() {
     var hash = (location.hash || "").substr(3);
     var path = hash.split("/");
-    var pagePath = path.splice(1, path.length - 1);
-    return _.first(pagePath) || undefined;
+    return path.splice(1, path.length - 1);
+  }
+
+  function subPage() {
+    return _.first(pagePath()) || undefined;
+  }
+
+  function lastSubPage() {
+    return _.last(pagePath()) || undefined;
   }
 
   var ajaxLoaderContainer;
@@ -63,6 +70,7 @@ var pageutil = (function() {
     getURLParameter:      getURLParameter,
     getPage:              getPage,
     subPage:              subPage,
+    lastSubPage:          lastSubPage,
     showAjaxWait:         showAjaxWait,
     hideAjaxWait:         hideAjaxWait,
     makePendingAjaxWait:  makePendingAjaxWait

@@ -5,7 +5,7 @@
   var afterRegistrationSuccess = function() {
     var username = registrationModel.plainModel.email();
     var password = registrationModel.plainModel.password();
-  ajax.postJson("/api/login", {"username": username, "password": password})
+    ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
       .success(function(e) {
         window.parent.location = "/app/" + loc.getCurrentLanguage() + "/" + e.applicationpage;
@@ -14,7 +14,7 @@
         window.location.hash = "!/welcome";
         hub.send("login-failure", e);
       })
-          .call();
+      .call();
   };
   var statusModel = new LUPAPISTE.StatusModel();
 
@@ -52,8 +52,8 @@
         if (tokenData && tokenData.email) {
           $.get("/api/vetuma",
               {success: urlPrefix + "#!/link-account-2/" + token,
-               cancel:  urlPrefix + "#!/link-account/cancel",
-               error:   urlPrefix + "#!/link-account/error"},
+               cancel:  urlPrefix + "#!/link-account/" + token + "/cancel",
+               error:   urlPrefix + "#!/link-account/" + token + "/error"},
               function(d) {
                  $("#vetuma-link-account").html(d).find(":submit")
                    .addClass("btn btn-primary")
@@ -65,7 +65,7 @@
         }
       }).call();
 
-    statusModel.subPage(pageutil.subPage());
+    statusModel.subPage(pageutil.lastSubPage());
   });
 
   hub.onPageChange("link-account-2", function() {
