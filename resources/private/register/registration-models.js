@@ -1,5 +1,6 @@
 /**
  * Usage: Create new instance and bind 'model' property to Knockout bindings.
+ * Username and password from user input are given to afterSuccessFn function.
  * Used keys can be set with optional last constructor parameter.
  */
 LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelector, ks) {
@@ -30,9 +31,10 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       ajax.command(commandName, self.json())
         .success(function() {
           var email = _.clone(self.plainModel.email());
+          var password = _.clone(self.plainModel.password());
           self.reset();
           self.plainModel.email(email);
-          afterSuccessFn();
+          afterSuccessFn(email, password);
         })
         .error(function(e) {
           error$.text(loc(e.text));
