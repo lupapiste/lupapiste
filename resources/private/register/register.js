@@ -1,44 +1,21 @@
 ;(function() {
   "use strict";
 
-  var keys = ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
+  var registrationModel = new LUPAPISTE.RegistrationModel();
+
   var model;
   var confirmModel = {
     email: ko.observable("")
   };
 
-  function json(model) {
-    var d = {};
-    for (var i in keys) {
-      var key = keys[i];
-      d[key] = model[key]() || null;
-    }
-
-    delete d.confirmPassword;
-    delete d.confirmEmail;
-    return d;
-  }
-
-  function reset(model) {
-    for (var i in keys) {
-      if (model[keys[i]] !== undefined) {
-        model[keys[i]]("");
-        if (model[keys[i]].isModified) {
-          model[keys[i]].isModified(false);
-        }
-      }
-    }
-    return false;
-  }
-
   function submit(m) {
     var error$ = $("#register-email-error");
     error$.text("");
 
-    ajax.command("register-user", json(m))
+    ajax.command("register-user", registrationModel.json(m))
       .success(function() {
         confirmModel.email(model().email());
-        reset(model());
+        registrationModel.reset(model());
         window.location.hash = "!/register3";
       })
       .error(function(e) {
@@ -54,7 +31,7 @@
       loc("register.confirm-cancel"),
       {title: loc("yes"),
        fn: function() {
-        reset(model());
+        registrationModel.reset(model());
         window.location.hash = "";
       }},
       {title: loc("no")}
@@ -77,8 +54,7 @@
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
     submit: submit,
-    cancel: cancel,
-    reset: reset
+    cancel: cancel
   };
   plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
   plainModel.confirmEmail = ko.observable().extend({equal: plainModel.email});
@@ -108,8 +84,8 @@
   });
 
   hub.onPageChange("register2", function() {
-    reset(model());
-    reset(confirmModel);
+    registrationModel.reset(model());
+    confirmModel.email("");
     ajax.get("/api/vetuma/user")
       .raw(true)
       .success(function(data) {

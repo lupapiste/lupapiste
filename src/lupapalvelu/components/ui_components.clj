@@ -143,10 +143,10 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common]
-                  :js ["register.js"]
+                  :js ["registration-models.js" "register.js"]
                   :html ["register.html" "register2.html" "register3.html"]}
 
-   :link-account {:depends [:common]
+   :link-account {:depends [:register]
                   :js ["link-account.js"]
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
