@@ -1,17 +1,19 @@
 /**
- * Usage: Create new instance and bind 'model' property to Knockout bindings
+ * Usage: Create new instance and bind 'model' property to Knockout bindings.
+ * Used keys can be set with optional last constructor parameter.
  */
-LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector) {
+LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector, ks) {
 
   var self = this;
 
-  self.keys = ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
+  self.keys = ks || ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
 
   self.plainModel = {
     personId: ko.observable(""),
     firstName: ko.observable(""),
     lastName: ko.observable(""),
     stamp: ko.observable(""),
+    token: ko.observable(""),
     street: ko.observable("").extend({required: true}),
     city: ko.observable("").extend({required: true}),
     zip: ko.observable("").extend({required: true, number: true, maxLength: 5}),
@@ -82,6 +84,7 @@ LUPAPISTE.RegistrationModel = function(commandName, nextHash, errorSelector) {
         }
       }
     });
+    self.plainModel.token(pageutil.subPage());
     return false;
   };
 
