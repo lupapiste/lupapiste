@@ -70,7 +70,7 @@
         <wfs:Query typeName=\"yak:YleisetAlueet\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
-              <ogc:PropertyName>yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
+              <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
               <ogc:Literal>" application-id "</ogc:Literal>
             </ogc:PropertyIsEqualTo>
           </ogc:Filter>
