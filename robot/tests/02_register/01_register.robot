@@ -3,7 +3,8 @@
 Documentation   Mikko registers
 Suite Setup     Apply minimal fixture now
 Suite teardown  Logout
-Resource       ../../common_resource.robot
+Resource        ../../common_resource.robot
+Resource        keywords.robot
 
 *** Test Cases ***
 
@@ -20,11 +21,10 @@ VTJ-data should be populated from Osuuspankki
   Go to register page
   Register button is visible
   Authenticate via Osuuspankki via Vetuma
-  Wait until page contains element  test-register-submit
-  Wait until  Element Should Be Disabled  test-register-submit
-  Textfield should contain  test-register-street  Sepänkatu 11 A 5
-  Textfield should contain  test-register-zip  70100
-  Textfield should contain  test-register-city  KUOPIO
+  Wait until  Submit is disabled
+  Textfield should contain  xpath=//input[@data-test-id='register-street']  Sepänkatu 11 A 5
+  Textfield should contain  xpath=//input[@data-test-id='register-zip']  70100
+  Textfield should contain  xpath=//input[@data-test-id='register-city']  KUOPIO
 
 Filling register form2
   [Tags]  integration  ie8
@@ -32,48 +32,47 @@ Filling register form2
   Go to register page
   Register button is visible
   Authenticate via Nordea via Vetuma
-  Wait until page contains element  test-register-personid
-  Wait until  Element Should Be Disabled  test-register-submit
+  Wait until page contains element  xpath=//input[@data-test-id='register-personid']
+  Submit is disabled
 
-  Input Text  test-register-street  Rambokuja 6
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-street  Rambokuja 6
+  Submit is disabled
 
-  Input Text  test-register-zip  33800
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-zip  33800
+  Submit is disabled
 
-  Input Text  test-register-city  sipoo
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-city  sipoo
+  Submit is disabled
 
-  Input Text  test-register-phone  +358554433221
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-phone  +358554433221
+  Submit is disabled
 
-  Input Text  test-register-email  vetuma@example.com
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-email  vetuma@example.com
+  Submit is disabled
 
-  Input Text  test-register-confirmEmail  vetuma@example.com
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-confirmEmail  vetuma@example.com
+  Submit is disabled
 
-  Input Text  test-register-password  vetuma69
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-password  vetuma69
+  Submit is disabled
 
-  Input Text  test-register-confirmPassword  vetuma68
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-confirmPassword  vetuma68
+  Submit is disabled
 
-  Input Text  test-register-confirmPassword  vetuma69
-  Element Should Be Disabled  test-register-submit
+  Input text by test id  register-confirmPassword  vetuma69
+  Submit is disabled
 
-  Checkbox Should Not Be Selected  allowDirectMarketing
-  Select Checkbox  allowDirectMarketing
-  Checkbox Should Be Selected  allowDirectMarketing
+  Checkbox Should Not Be Selected  registerAllowDirectMarketing
+  Select Checkbox  registerAllowDirectMarketing
+  Checkbox Should Be Selected  registerAllowDirectMarketing
 
-  Checkbox Should Not Be Selected  acceptTerms
-  Select Checkbox  acceptTerms
-  Checkbox Should Be Selected  acceptTerms
-  Element Should Be Enabled  test-register-submit
+  Checkbox Should Not Be Selected  registerAcceptTerms
+  Select Checkbox  registerAcceptTerms
+  Checkbox Should Be Selected  registerAcceptTerms
+  Click enabled by test id  register-submit
 
 Submitting form gives confirmation
   [Tags]  integration  ie8
-  Click Button  test-register-submit
   Wait until  element should be visible  xpath=//*[@data-bind="ltext: 'register.activation-email-info1'"]
   Element text should be  activation-email  vetuma@example.com
 
@@ -103,43 +102,6 @@ Go to register page
   Focus  register-button
   Click Button    register-button
 
-Register button is visible
-  Wait until page contains element  vetuma-init
-
-Cancel via vetuma
-  Click button  vetuma-init
-  Click link  << Palaa palveluun
-  Click button  Palaa palveluun
-
-Authenticate via Osuuspankki via Vetuma
-  Click button   vetuma-init
-  Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
-  Click element  xpath=//img[@alt='Pankkitunnistus']
-  Wait Until  Element Should Be Visible  xpath=//a[@class='osuuspankki']
-  Click element  xpath=//a[@class='osuuspankki']
-  Wait Until  Element Should Be Visible  xpath=//input[@class='login']
-  Input text     xpath=//input[@class='login']  123456
-  Input text     xpath=//input[@type='PASSWORD']  7890
-  Click button   xpath=//input[@name='ktunn']
-  Wait Until  Element Should Be Visible  xpath=//input[@name='avainluku']
-  Input text     xpath=//input[@name='avainluku']  1234
-  Click button   xpath=//input[@name='avainl']
-  Wait Until  Element Should Be Visible  xpath=//input[@name='act_hyvaksy']
-  Click button   xpath=//input[@name='act_hyvaksy']
-  Wait Until  Element Should Be Visible  xpath=//a[contains(text(),'Palaa palveluntarjoajan sivulle')]
-  Click link     xpath=//a[contains(text(),'Palaa palveluntarjoajan sivulle')]
-  Wait Until  Element Should Be Visible  xpath=//button[@type='submit']
-  Click element  xpath=//button[@type='submit']
-
-Authenticate via Nordea via Vetuma
-  Click button  vetuma-init
-  Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
-  Click element  xpath=//img[@alt='Pankkitunnistus']
-  Wait Until  Element Should Be Visible  xpath=//a[@class='nordea']
-  Click element  xpath=//a[@class='nordea']
-  Wait Until  Element Should Be Visible  xpath=//input[@name='Ok']
-  Click element  xpath=//input[@name='Ok']
-  Wait Until  Element Should Be Visible  xpath=//input[@type='submit']
-  Click element  xpath=//input[@type='submit']
-  Wait Until  Element Should Be Visible  xpath=//button[@type='submit']
-  Click element  xpath=//button[@type='submit']
+Submit is disabled
+  ${path} =   Set Variable  xpath=//button[@data-test-id='register-submit']
+  Wait Until  Element Should Be Disabled  ${path}
