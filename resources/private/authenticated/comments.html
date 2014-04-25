@@ -61,7 +61,7 @@
         </div>
 
         <div class="table table-striped conversation" data-test-id="comments-table">
-          <div data-bind="foreach: comments().reverse()">
+          <div data-bind="foreach: comments().slice(0).reverse()">
             <div data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
                                  'comment-for-me':     $parent.isForMe($data),
                                  'authority-comment':  $parent.isAuthorityComment($data),
