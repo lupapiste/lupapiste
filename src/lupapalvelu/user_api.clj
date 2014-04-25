@@ -527,15 +527,3 @@
                        :locked false}))))
   (ok))
 
-;;
-;; ==============================================================================
-;; Development utils:
-;; ==============================================================================
-;;
-
-; FIXME: generalize
-(env/in-dev
-
-  (defquery activations {} [query]
-    (ok :activations (activation/activations))))
-
