@@ -10,6 +10,7 @@ LUPAPISTE.MapModel = function() {
   var drawings = null;
   var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
 
+
   var createMap = function(divName) {
     return gis.makeMap(divName, false).center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
   };
@@ -22,11 +23,77 @@ LUPAPISTE.MapModel = function() {
       if (!inforequestMap) inforequestMap = createMap("inforequest-map");
       return inforequestMap;
     } else if (kind === "inforequest-markers") {
-      if (!inforequestMarkerMap) inforequestMarkerMap = createMap("inforequest-marker-map");
+      if (!inforequestMarkerMap) {
+        inforequestMarkerMap = createMap("inforequest-marker-map");
+        inforequestMarkerMap.setMarkerClickCallback(
+            function(matchingMarkerContents) {
+
+              // TODO: Testaa tama
+              if (matchingMarkerContents) {
+                $("marker-map-contents").text(matchingMarkerContents).show();
+              } else {
+                $("marker-map-contents").text("").hide();
+              }
+
+            } );
+      }
       return inforequestMarkerMap;
     } else {
       throw "Unknown kind: " + kind;
     }
+  };
+
+  var formMarkerHtmlContents = function(irs) {
+    irs = _.isArray(irs) ? irs : [irs];
+    var html = "";
+
+    _.forEach(irs, function(ir) {
+      html +=
+        '<div class="inforequest-card">' +
+          '<h4>' + ir.title + '</h4><br/>' +
+          ir.operation + '<br/>' +
+          ir.authName + '<br/>';
+
+      _.each(ir.comments, function(com) {
+        if (com.type === "authority") {
+          html += loc('inforequest.answer.title') + "(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
+        } else {
+          html += loc('inforequest.question.title') + "(" + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
+        }
+        html += '<blockquote>' + com.text + '</blockquote>';
+      });
+
+      html += '</div>';
+      html += '<br/><br/>';
+    });
+
+    return html;
+  };
+
+  var setRelevantMarkersOntoMarkerMap = function(map, appId, x, y) {
+    ajax
+    .query("inforequest-markers", {id: currentAppId, lang: loc.getCurrentLanguage(), x: x, y: y})
+    .success(function(data) {
+
+      // same location markers
+      map.add(data["sameLocation"][0].location.x,
+              data["sameLocation"][0].location.y,
+              "sameLocation",
+              formMarkerHtmlContents( data["sameLocation"] ));
+
+      // same operation markers
+      _.forEach(data["sameOperation"], function(ir) {
+        map.add(ir.location.x, ir.location.y, "sameOperation", formMarkerHtmlContents(ir));
+      });
+
+      // other markers
+      _.forEach(data["others"], function(ir) {
+        map.add(ir.location.x, ir.location.y, "others", formMarkerHtmlContents(ir));
+      });
+
+      //repository.load(currentAppId);
+    })
+    .call();
   };
 
   self.refresh = function(application) {
@@ -52,41 +119,7 @@ LUPAPISTE.MapModel = function() {
     if (application.infoRequest) {
       map = getOrCreateMap("inforequest-markers");
       map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10); //.add(x, y);
-
-      // get relevant markers
-      ajax
-        .query("inforequest-markers", {id: currentAppId, x: x, y: y})
-        .success(function(data) {
-
-          console.log("inforequest-markers success, data: ", data);
-//          console.log("same location: ", data["sameLocation"]);
-//          console.log("same operations: ", data["sameOperation"]);
-//          console.log("others: ", data["others"]);
-
-          // TODO: Set the markers onto the map
-
-//          console.log("TEST, adding a sameOperation marker to ", x+10, ", ", y+10)
-//          map.add(x+10, y+10, "sameOperation"); // TEST
-
-          _.forEach(data["sameLocation"], function(ir) {
-            console.log("same location: ", ir.location);
-            map.add(ir.location.x, ir.location.y, "sameLocation");
-          });
-
-          _.forEach(data["sameOperation"], function(ir) {
-            console.log("same operations: ", ir.location);
-            map.add(ir.location.x, ir.location.y, "sameOperation");
-          });
-
-          _.forEach(data["others"], function(ir) {
-            console.log("others: ", ir.location);
-            map.add(ir.location.x, ir.location.y, "others");
-          });
-
-          //repository.load(currentAppId);
-        })
-        .call();
-
+      setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
     }
   };
 

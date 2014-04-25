@@ -33,6 +33,7 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-search :as search]
             [lupapalvelu.application-meta-fields :as meta-fields])
   (:import [java.net URL]))
@@ -473,42 +474,36 @@
       {$set {:modified created
              :drawings drawings}})))
 
+(defn- make-marker-contents [lang app]
+  {:title       (:title app)
+   :location    (:location app)
+   :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
+   :authName    (-> (domain/get-auths-by-role app :owner)
+                  first
+                  (#(str (:firstName %) " " (:lastName %))))
+   :comments    (->> (:comments app)
+                  (filter #(not (= "system" (:type %))))
+                  (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))
+                                   :type (:type %)
+                                   :time (:created %)
+                                   :text (:text %)})))})
+
 (defquery inforequest-markers
-  {:parameters [:id #_location x y]
-   :roles      [#_:applicant :authority]
+  {:parameters [:id lang x y]
+   :roles      [:authority]
    :states     [:draft :open :submitted :complement-needed :info]   ;; TODO: Mitka tilat?
-   :input-validators [(partial action/non-blank-parameters [#_:location :x :y])]
+   :input-validators [(partial action/non-blank-parameters [:x :y])]
    }
   [{:keys [application user]}]
-
-  (println "\n inforequest-markers, x: " x ", y: " y "\n")
-  (println "\n inforequest-markers, application's operations: " (:operations application) "\n")
-
-;  (mongo/select :applications
-;    (merge (domain/application-query-for user) {:_id {$ne id}
-;                                                :state {$in ["verdictGiven" "constructionStarted"]}
-;                                                :permitType (:permitType application)
-;                                                :operations.name {$nin ["ya-jatkoaika"]}})
-;    {:_id 1 :permitType 1 :address 1 :propertyId 1})
-
-  ;; TODO: Pitaako kayttaa $elemMatchia?
   (let [inforequests (mongo/select :applications
                       (merge
                         (domain/application-query-for user)
                         {:infoRequest true})
-                      {:location 1 :operations 1})
-;       _ (do
-;           (println "inforequest-markers, inforequests: ")
-;           (clojure.pprint/pprint inforequests)
-;           (println "\n"))
+                      {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
 
        same-location-irs (filter
                            #(and (= x (-> % :location :x str)) (= y (-> % :location :y str)))
                            inforequests)
-;       _ (do
-;           (println "inforequest-markers, same-location-irs: ")
-;           (clojure.pprint/pprint same-location-irs)
-;           (println "\n"))
 
        remove-irs-by-id-fn (fn [target-irs irs-to-be-removed]
                              (remove
@@ -518,8 +513,6 @@
        inforequests (remove-irs-by-id-fn inforequests same-location-irs)
 
        application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
-;       _ (println "inforequest-markers, application-op-name: " application-op-name "\n")
-
 
        ;; **** TODO: Tama ei viela toimi! ****
        same-op-irs (filter
@@ -527,23 +520,15 @@
                        (some #(= application-op-name (:name %)) (:operations ir)))
                      inforequests)
 
-;       _ (do
-;           (println "inforequest-markers, same-op-irs: ")
-;           (clojure.pprint/pprint same-op-irs)
-;           (println "\n"))
+       others (remove-irs-by-id-fn inforequests same-op-irs)
 
-       inforequests (remove-irs-by-id-fn inforequests same-op-irs)
-
-;       _ (do
-;           (println "inforequest-markers, others: ")
-;           (clojure.pprint/pprint inforequests)
-;           (println "\n"))
+       same-location-irs (map (partial make-marker-contents lang) same-location-irs)
+       same-op-irs       (map (partial make-marker-contents lang) same-op-irs)
+       others            (map (partial make-marker-contents lang) others)
        ]
 
-
-
-   (ok :sameLocation same-location-irs :sameOperation same-op-irs :others inforequests)
-   ))
+    (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
+    ))
 
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]

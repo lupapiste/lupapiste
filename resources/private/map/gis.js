@@ -156,14 +156,17 @@ var gis = (function() {
 
     // Markers
 
-    self.markerLayer = new OpenLayers.Layer.Markers("Markers");
+    self.markerLayer = new OpenLayers.Layer.Markers(
+        "Markers"
+//        , {strategies: [new OpenLayers.Strategy.Cluster({distance: 25/*, threshold: 2*/})]}  // TODO: Ota tama kayttoon!
+    );
     self.map.addLayer(self.markerLayer);
 
     self.markers = [];
 
     self.clear = function() {
-      _.each(self.markers, function(marker) {
-        self.markerLayer.removeMarker(marker);
+      _.each(self.markers, function(markerPackage) {
+        self.markerLayer.removeMarker(markerPackage.object);
         marker.destroy();
       });
       self.markers = [];
@@ -173,13 +176,31 @@ var gis = (function() {
       return self;
     };
 
-    self.add = function(x, y, markerIconName) {
-      console.log("self.add, x: ", x, ", y: ", y, ", iconMapping[markerIconName]: ", iconMapping[markerIconName]);
+    var markerClickHandler = function(event) {
+      var matchingMarker = _.find(self.markers, function(marPkg) { return event.object === marPkg.object; })
+
+//      OpenLayers.Event.stop(event);  // TODO: Koita tata.
+
+      if (self.markerClickCallback) {
+        self.markerClickCallback( matchingMarker.contents );
+      }
+    };
+
+    self.add = function(x, y, markerIconName, markerContents) {
       var icon = iconMapping[markerIconName] || iconDefault;
       var marker = makeMarker(new OpenLayers.LonLat(x, y), icon);
+
+      // TODO: Koita "mousedown"
+      marker.events.register("click", marker, markerClickHandler, true);  // If true, adds the new listener to the front of the events queue instead of to the end.
+
       self.markerLayer.addMarker(marker);
-      self.markers.push(marker);
+      var markerPackage = {object: marker, contents: markerContents};  // TODO: Toimiiko tallainen package lahestymistapa?
+      self.markers.push(markerPackage);
       return self;
+    };
+
+    self.setMarkerClickCallback = function(handler) {
+      self.markerClickCallback = handler;
     };
 
     // Map handling functions
@@ -241,6 +262,12 @@ var gis = (function() {
         },
 
         trigger: function(e) {
+
+          // TODO: Testaa tama
+          if (self.markerClickCallback) {
+            self.markerClickCallback(null);
+          }
+
           var pos = self.map.getLonLatFromPixel(e.xy);
           handler(pos.lon, pos.lat);
         }
