@@ -43,7 +43,7 @@
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.email'"></label>
-            <input class="form-input text " data-test-id="link-account-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" disabled="disabled" />
+            <input class="form-input text " data-test-id="link-account-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" readonly="readonly" />
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.password'">Salasana</label>
@@ -58,14 +58,14 @@
         <div class="form-group">
           <div class="form-entry register-checkbox">
             <label>
-              <input type="checkbox" id="registerAcceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
+              <input type="checkbox" id="linkAccountAcceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
               <span data-bind="ltext: 'register.accept-terms.label'"></span>
               <a href="/?page_id=337" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
             </label>
           </div>
           <div class="form-entry register-checkbox">
             <label>
-              <input type="checkbox" id="registerAllowDirectMarketing" data-bind="checked: allowDirectMarketing" value="true">
+              <input type="checkbox" id="linkAccountAllowDirectMarketing" data-bind="checked: allowDirectMarketing" value="true">
               <span data-bind="ltext: 'userinfo.allowDirectMarketing'"></span>
             </label>
           </div>

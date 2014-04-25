@@ -20,7 +20,7 @@ VTJ-data should be populated from Osuuspankki
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via Osuuspankki via Vetuma
+  Authenticate via Osuuspankki via Vetuma  vetuma-init
   Wait until  Submit is disabled
   Textfield should contain  xpath=//input[@data-test-id='register-street']  Sepänkatu 11 A 5
   Textfield should contain  xpath=//input[@data-test-id='register-zip']  70100
@@ -97,6 +97,9 @@ Vetuma-guy lands to empty applications page
   Number of visible applications  0
 
 *** Keywords ***
+
+Register button is visible
+  Wait until page contains element  vetuma-init
 
 Go to register page
   Focus  register-button
