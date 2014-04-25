@@ -149,7 +149,7 @@
         </ul>
       </div>
 
-      <div class="organization-attachments" data-bind="visible: attachmentsForOp">
+      <div class="organization-attachments" data-bind="text: attachmentsForOp.length">
         <div data-bind="ltext: 'organization.attachments'"></div>
         <ul class="attachments-list" data-bind="foreach: attachmentsForOp">
           <li data-bind="text: loc(['attachmentType', group, id])" class="mandatory-attachments"></li>
