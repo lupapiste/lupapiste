@@ -1,0 +1,2 @@
+inforequest.question.title: Kysymys
+inforequest.answer.title: Vastaus
