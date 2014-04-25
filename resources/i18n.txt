@@ -1,0 +1,4 @@
+link-account.info: Tervetuloa Lupapisteen käyttäjäksi. Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa. Koska Lupapisteessä käsitellään luottamuksellisia ja luvanvaraisia tietoja, Lupapisteen käyttäjien henkilöllisyys täytyy varmistaa verkkopankkitunnusten tai mobiilivarmenteen avulla. Klikkaa "Tunnistaudu" ja lopuksi vahvista yhteystietosi.
+register.expired-link.title: Vanhentunut linkki
+register.expired-link.message: Sähköpostissasi oleva linkki on vanhentunut. Voit kuitenkin rekisteröityä tavalliseen tapaan ja syöttää sähköpostiosoitteen uudelleen. Saat rekisteröitymisen jälkeen ohjeen käyttäjätunnuksen aktivoimisesta.
+register.autologin: Kirjaudutaan sisään...

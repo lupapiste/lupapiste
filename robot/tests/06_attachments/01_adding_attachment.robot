@@ -152,4 +152,4 @@ Attachment state should be
 
 Comment count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='attachment']//div[@data-bind='foreach: comments().reverse()']/div  ${amount}
+  Xpath Should Match X Times  //section[@id='attachment']//div[@data-bind='foreach: comments().slice(0).reverse()']/div  ${amount}

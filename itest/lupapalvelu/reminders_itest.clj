@@ -369,8 +369,23 @@
     :statements [statement-non-matching]
     :neighbors [neighbor-non-matching-with-response-given]))
 
+(def ^:private reminder-application-matching-to-inforequest
+  (assoc reminder-application
+    :id "LP-732-2013-00006"
+    :state "info"
+    :infoRequest true
+    :openInfoRequest true
+    :modified timestamp-1-day-ago
+    :statements []
+    :neighbors []))
+
+(def ^:private reminder-application-non-matching-to-inforequest
+  (assoc reminder-application
+    :id "LP-732-2013-00007"
+    :state "canceled"))
+
 (def ^:private open-inforequest-entry-non-matching {:_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rrd"
-                                                    :application-id "LP-732-2013-00006"
+                                                    :application-id (:id reminder-application-matching-to-inforequest)
                                                     :created timestamp-1-day-ago
                                                     :email "reba.skebamies@example.com"
                                                     :last-used nil
@@ -382,6 +397,14 @@
       :_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rv2"
       :created timestamp-the-beginning-of-time
       :email "juba.skebamies@example.com")))
+
+(def ^:private open-inforequest-entry-with-application-with-non-matching-state
+  (-> open-inforequest-entry-non-matching
+    (assoc
+      :_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0As5"
+      :email "jyba.skebamies@example.com"
+      :application-id (:id reminder-application-non-matching-to-inforequest))))
+
 
 
 (defn- check-sent-reminder-email [to subject bodypart]
@@ -407,8 +430,11 @@
  (fixture/apply-fixture "minimal")
  (mongo/insert :applications reminder-application)
  (mongo/insert :applications reminder-application-non-matching-neighbors)
+ (mongo/insert :applications reminder-application-matching-to-inforequest)
+ (mongo/insert :applications reminder-application-non-matching-to-inforequest)
  (mongo/insert :open-inforequest-token open-inforequest-entry-non-matching)
  (mongo/insert :open-inforequest-token open-inforequest-entry-matching)
+ (mongo/insert :open-inforequest-token open-inforequest-entry-with-application-with-non-matching-state)
  (dummy-email-server/messages :reset true)  ;; clears inbox
 
 
@@ -463,7 +489,7 @@
 
        (check-sent-reminder-email
          (:email open-inforequest-entry-matching)
-         "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+         "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
          "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
        ))
 
@@ -479,7 +505,7 @@
 
        (check-sent-reminder-email
          (:email open-inforequest-entry-matching)
-         "Lupapiste.fi: Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+         "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
          "Organisaatiollasi on vastaamaton neuvontapyynt\u00f6")
        )))
 

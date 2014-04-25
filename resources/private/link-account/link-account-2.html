@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <section class="page container" id="link-account-2">
+    <div class="content">
+      <form class="register-form">
+        <h1 data-bind="ltext: 'register.header2'"></h1>
+        <p ><span data-bind="ltext: 'register.personal-info'"></span> <span data-bind="lhtml: 'required.field.desc'"></span></p>
+        <div class="form-group">
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.firstName'">Etunimi</label>
+            <input class="form-input text " data-test-id="link-account-firstName" data-bind="value: firstName" type="text" disabled="disabled" />
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.lastName'">Sukunimi</label>
+            <input class="form-input text " data-test-id="link-account-lastName" data-bind="value: lastName" type="text" disabled="disabled" />
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.personId'">Henkil&ouml;tunnus</label>
+            <input class="form-input text " data-test-id="link-account-personid" data-bind="value: personId" type="text" disabled="disabled"></input>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.street'">Katuosoite</label>
+            <input class="form-input text " data-test-id="link-account-street" data-bind="value: street" type="text" autofocus="autofocus"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.zip'">Postinumero</label>
+            <input class="form-input text " data-test-id="link-account-zip" data-bind="value: zip" type="text" />
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.city'">Postitoimipaikka</label>
+            <input class="form-input text " data-test-id="link-account-city" data-bind="value: city" type="text" />
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.phone'">Puhelinnumero</label>
+            <input class="form-input text " data-test-id="link-account-phone" data-bind="value: phone" type="text" />
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.email'"></label>
+            <input class="form-input text " data-test-id="link-account-email" data-bind="value: email" type="email" readonly="readonly" />
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.password'">Salasana</label>
+            <input class="form-input text " data-test-id="link-account-password" data-bind="value: password" type="password" required="required" />
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'userinfo.newPassword2'">Salasana uudelleen</label>
+            <input class="form-input text " data-test-id="link-account-confirmPassword" data-bind="value: confirmPassword" type="password" required="required" />
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="form-group">
+          <div class="form-entry register-checkbox">
+            <label>
+              <input type="checkbox" id="linkAccountAcceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
+              <span data-bind="ltext: 'register.accept-terms.label'"></span>
+              <a href="/?page_id=337" target="_blank" data-bind="ltext: 'register.accept-terms.link'"></a>
+            </label>
+          </div>
+          <div class="form-entry register-checkbox">
+            <label>
+              <input type="checkbox" id="linkAccountAllowDirectMarketing" data-bind="checked: allowDirectMarketing" value="true">
+              <span data-bind="ltext: 'userinfo.allowDirectMarketing'"></span>
+            </label>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <span id="link-account-error2" class="error-message register-error"></span>
+        <div>
+          <button data-test-id="link-account-submit" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">
+            <span data-bind="ltext: 'register.register-action'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+          </button>
+          <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="btn">Peruuta</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</body>
+</html>

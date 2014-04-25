@@ -122,7 +122,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
 
   self.followAppLink = function(linkId) {
     repository.load(linkId);
-    window.location.hash = "#!/application/" + linkId;
+    window.location.hash = "!/application/" + linkId;
     return false;
   };
 
