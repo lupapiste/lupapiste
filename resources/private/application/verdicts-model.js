@@ -36,7 +36,7 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.openVerdict = function(bindings) {
-    window.location.hash = "#!/verdict/" + getApplicationId(bindings);
+    window.location.hash = "!/verdict/" + getApplicationId(bindings);
     return false;
   };
 

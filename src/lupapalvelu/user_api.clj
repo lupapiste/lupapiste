@@ -110,9 +110,6 @@
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
 
-    (when (and (boolean (:enabled user-data)) (not admin?) (not authorityAdmin?))
-      (fail! :error.unauthorized :desc "only admin and authorityAdmin can create enabled users"))
-
     (when (and (:apikey user-data) (not admin?))
       (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
 
@@ -414,7 +411,30 @@
           (vetuma/consume-user stamp)
           (when (and (env/feature? :rakentajafi) (:rakentajafi data))
             (util/future* (idf/send-user-data user "rakentaja.fi")))
-          (ok :id (:_id user)))
+          (ok :id (:id user)))
+        (fail :error.create-user))
+      (catch IllegalArgumentException e
+        (fail (keyword (.getMessage e)))))))
+
+(defcommand confirm-account-link
+  {:parameters [stamp tokenId email password street zip city phone]
+   :input-validators [(partial action/non-blank-parameters [:tokenId :password])
+                      action/email-validator]}
+  [{data :data}]
+  (let [vetuma-data (vetuma/get-user stamp)
+        email (-> email ss/lower-case ss/trim)
+        token (token/get-token tokenId)]
+    (when-not (and vetuma-data
+                (= (:token-type token) :activate-linked-account)
+                (= email (get-in token [:data :email])))
+      (fail! :error.create-user))
+    (try
+      (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+      (if-let [user (create-new-user nil (merge data vetuma-data {:email email :role "applicant" :enabled true}) :send-email false)]
+        (do
+          (vetuma/consume-user stamp)
+          (token/get-token tokenId :consume true)
+          (ok :id (:id user)))
         (fail :error.create-user))
       (catch IllegalArgumentException e
         (fail (keyword (.getMessage e)))))))
@@ -506,16 +526,4 @@
                        ;:attachment-target attachment-target
                        :locked false}))))
   (ok))
-
-;;
-;; ==============================================================================
-;; Development utils:
-;; ==============================================================================
-;;
-
-; FIXME: generalize
-(env/in-dev
-
-  (defquery activations {} [query]
-    (ok :activations (activation/activations))))
 

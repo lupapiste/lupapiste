@@ -1,6 +1,6 @@
 #Kiitos rekister&ouml;itymisest&auml;, {{name}}.
 
-Tervetuloa Lupapisteen k&auml;ytt&auml;j&auml;ksi. Aktivoi k&auml;ytt&auml;j&auml;tunnuksesi t&auml;st&auml; linkist&auml;: 
+Tervetuloa Lupapisteen k&auml;ytt&auml;j&auml;ksi. Aktivoi k&auml;ytt&auml;j&auml;tunnuksesi t&auml;st&auml; linkist&auml;:
 
 {{link}}
 
@@ -10,7 +10,7 @@ Jos et ole rekister&ouml;itynyt Lupapisteeseen, voit j&auml;tt&auml;&auml; t&aum
 
 --
 
-Tack f&0ouml;r registreringen {{name}}.
+Tack f&ouml;r registreringen {{name}}.
 
 V&auml;lkommen som Lupapiste-anv&auml;ndare. Aktivera ditt avn&auml;ndar-id genom denna l&auml;nk:
 
@@ -18,4 +18,4 @@ V&auml;lkommen som Lupapiste-anv&auml;ndare. Aktivera ditt avn&auml;ndar-id geno
 
 Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;srens adressf&auml;lt.
 
-Om du inte har registrerat dig i Lupapiste beh&ouml;ver du inte bry dig om detta e-postmeddelande. 
+Om du inte har registrerat dig i Lupapiste beh&ouml;ver du inte bry dig om detta e-postmeddelande.
