@@ -30,7 +30,7 @@ LUPAPISTE.MapModel = function() {
 
               // TODO: Testaa tama
               if (matchingMarkerContents) {
-                $("#marker-map-contents").html(matchingMarkerContents).show();
+                $("#marker-map-contents").html(matchingMarkerContents).toggle();
               } else {
                 $("#marker-map-contents").html("").hide();
               }
@@ -50,15 +50,15 @@ LUPAPISTE.MapModel = function() {
     _.forEach(irs, function(ir) {
       html +=
         '<div class="inforequest-card">' +
-          '<h4>' + ir.title + '</h4><br/>' +
+          '<h3>' + ir.title + '</h3>' +
           ir.operation + '<br/>' +
           ir.authName + '<br/>';
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
-          html += loc('inforequest.answer.title') + " (" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
+          html += '<br/><b>' + loc('inforequest.answer.title') + "</b> (" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):";
         } else {
-          html += loc('inforequest.question.title') + " (" + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
+          html += '<br/><b>' + loc('inforequest.question.title') + "</b> (" + moment(com.time).format("D.M.YYYY HH:mm") + "):";
         }
         html += '<blockquote>' + com.text + '</blockquote>';
       });
