@@ -3,7 +3,7 @@
 <body>
   <section class="page container" id="register2">
     <div class="content">
-      <form id="register-form">
+      <form class="register-form">
         <h1 data-bind="ltext: 'register.header2'"></h1>
         <p ><span data-bind="ltext: 'register.personal-info'"></span> <span data-bind="lhtml: 'required.field.desc'"></span></p>
         <div class="form-group">
@@ -24,41 +24,41 @@
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.street'">Katuosoite</label>
-            <input class="form-input text " data-test-id="register-street" data-bind="value: street, valueUpdate: 'afterkeydown'" type="text" autofocus="autofocus"/>
+            <input class="form-input text " data-test-id="register-street" data-bind="value: street" type="text" autofocus="autofocus"/>
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.zip'">Postinumero</label>
-            <input class="form-input text " data-test-id="register-zip" data-bind="value: zip, valueUpdate: 'afterkeydown'" type="text" />
+            <input class="form-input text " data-test-id="register-zip" data-bind="value: zip" type="text" />
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.city'">Postitoimipaikka</label>
-            <input class="form-input text " data-test-id="register-city" data-bind="value: city, valueUpdate: 'afterkeydown'" type="text" />
+            <input class="form-input text " data-test-id="register-city" data-bind="value: city" type="text" />
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.phone'">Puhelinnumero</label>
-            <input class="form-input text " data-test-id="register-phone" data-bind="value: phone, valueUpdate: 'afterkeydown'" type="text" />
+            <input class="form-input text " data-test-id="register-phone" data-bind="value: phone" type="text" />
           </div>
           <div class="clear"></div>
         </div>
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.email'">S&auml;hk&ouml;postiosoite (samalla k&auml;ytt&auml;j&auml;tunnus)</label>
-            <input class="form-input text " data-test-id="register-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" required="required" />
+            <input class="form-input text " data-test-id="register-email" data-bind="value: email" type="email" required="required" />
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.email2'">uudelleen</label>
-            <input class="form-input text " data-test-id="register-confirmEmail" data-bind="value: confirmEmail, valueUpdate: 'afterkeydown'" type="email" required="required" />
+            <input class="form-input text " data-test-id="register-confirmEmail" data-bind="value: confirmEmail" type="email" required="required" />
           </div>
           <div class="clear"></div>
         </div>
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.password'">Salasana</label>
-            <input class="form-input text " data-test-id="register-password" data-bind="value: password, valueUpdate: 'afterkeydown'" type="password" required="required" />
+            <input class="form-input text " data-test-id="register-password" data-bind="value: password" type="password" required="required" />
           </div>
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.newPassword2'">Salasana uudelleen</label>
-            <input class="form-input text " data-test-id="register-confirmPassword" data-bind="value: confirmPassword, valueUpdate: 'afterkeydown'" type="password" required="required" />
+            <input class="form-input text " data-test-id="register-confirmPassword" data-bind="value: confirmPassword" type="password" required="required" />
           </div>
           <div class="clear"></div>
         </div>
@@ -88,9 +88,12 @@
 
           <div class="clear"></div>
         </div>
-        <span id="register-email-error" class="error-message"></span>
+        <span id="register-email-error" class="error-message register-error"></span>
         <div>
-          <button data-test-id="register-submit" data-bind="disable: disabled, click: submit, ltext: 'register.register-action'" type="submit" class="btn btn-primary">Rekister&ouml;idy</button>
+          <button data-test-id="register-submit" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">
+            <span data-bind="ltext: 'register.register-action'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+          </button>
           <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="btn">Peruuta</button>
         </div>
       </form>

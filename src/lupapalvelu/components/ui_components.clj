@@ -148,7 +148,7 @@
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
-                  :html ["link-account-1.html" "link-account-2.html"]}
+                  :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
    :docgen       {:depends [:accordion :common]
                   :js ["docmodel.js" "docgen.js"]}

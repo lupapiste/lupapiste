@@ -25,18 +25,25 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     rakentajafi: ko.observable(false),
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
+    pending: ko.observable(false),
     submit: function() {
       var error$ = $(errorSelector);
       error$.text("");
+      self.plainModel.pending(true);
+      self.plainModel.disabled(true);
       ajax.command(commandName, self.json())
         .success(function() {
           var email = _.clone(self.plainModel.email());
           var password = _.clone(self.plainModel.password());
           self.reset();
           self.plainModel.email(email);
+          self.plainModel.pending(false);
+          self.plainModel.disabled(false);
           afterSuccessFn(email, password);
         })
         .error(function(e) {
+          self.plainModel.pending(false);
+          self.plainModel.disabled(false);
           error$.text(loc(e.text));
         })
         .call();

@@ -2,6 +2,10 @@
   "use strict";
 
   var afterRegistrationSuccess = function(username, password) {
+    // Display ajax loader
+    window.location.hash = "!/link-account-3";
+
+    // Auto login
     ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
       .success(function(e) {
@@ -94,5 +98,6 @@
   $(function(){
     $("#link-account").applyBindings(statusModel);
     $("#link-account-2").applyBindings(registrationModel.model);
+    $("#link-account-3").applyBindings({});
   });
 })();
