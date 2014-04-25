@@ -140,7 +140,7 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
       <div data-bind="html: loc(['operations', operation(), 'desc'])"></div>
 
-      <div class="organization-links" data-bind="visible: organizationLinks">
+      <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
         <div data-bind="ltext: 'organization.links'"></div>
         <ul data-bind="foreach: organizationLinks">
           <li>
@@ -149,7 +149,7 @@
         </ul>
       </div>
 
-      <div class="organization-attachments" data-bind="text: attachmentsForOp.length">
+      <div class="organization-attachments" data-bind="visible: attachmentsForOp() && attachmentsForOp().length">
         <div data-bind="ltext: 'organization.attachments'"></div>
         <ul class="attachments-list" data-bind="foreach: attachmentsForOp">
           <li data-bind="text: loc(['attachmentType', group, id])" class="mandatory-attachments"></li>
