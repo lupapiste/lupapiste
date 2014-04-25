@@ -12,11 +12,11 @@ var gis = (function() {
   }
 
   var iconDefault = makeIcon("/img/map-marker.png", 21, 25);
-  var iconBlue = makeIcon("/img/map-marker-red.png", 21, 25);
-  var iconGreen = makeIcon("/img/map-marker-green.png", 21, 25);
+  var iconRed =     makeIcon("/img/map-marker-red.png", 21, 25);
+  var iconGreen =   makeIcon("/img/map-marker-green.png", 21, 25);
 
   var iconMapping = {"sameLocation" :  iconDefault,
-                     "sameOperation" : iconBlue,
+                     "sameOperation" : iconRed,
                      "others" :        iconGreen};
 
   // Map initialization
