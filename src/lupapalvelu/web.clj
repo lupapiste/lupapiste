@@ -5,6 +5,8 @@
             [clojure.string :as s]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
+            [ring.util.response :refer [resource-response]]
+            [ring.middleware.content-type :refer [content-type-response]]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
             [noir.request :as request]
@@ -519,9 +521,6 @@
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
-  (defjson "/dev/user" []
-    (user/current-user))
-
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
       (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
@@ -541,6 +540,11 @@
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
+
+  (defpage [:get "/dev-pages/:file"] {:keys [file]}
+    (->
+      (resource-response (str "dev-pages/" file))
+      (content-type-response {:uri file})))
 
   (defjson "/dev/fileinfo/:id" {:keys [id]}
     (dissoc (mongo/download id) :content))

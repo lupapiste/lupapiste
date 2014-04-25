@@ -49,7 +49,7 @@ var repository = (function() {
               return attachment.id === comment.target.id;
             });
             if (targetAttachment) {
-              comment.target.attachmentType = loc('attachmentType.' + targetAttachment.type['type-group'] + '.' + targetAttachment.type['type-id']);
+              comment.target.attachmentType = loc(['attachmentType', targetAttachment.type['type-group'], targetAttachment.type['type-id']]);
               comment.target.attachmentId = targetAttachment.id;
             }
           }

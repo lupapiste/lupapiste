@@ -393,7 +393,7 @@
                               (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
                               (let [submitted-application (mongo/by-id :submitted-applications id)]
                                 (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+              attachments-argument (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
           (do-rest-fn attachments-argument)))
       ;; SFTP user not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
