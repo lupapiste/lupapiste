@@ -30,9 +30,9 @@ LUPAPISTE.MapModel = function() {
 
               // TODO: Testaa tama
               if (matchingMarkerContents) {
-                $("marker-map-contents").text(matchingMarkerContents).show();
+                $("#marker-map-contents").html(matchingMarkerContents).show();
               } else {
-                $("marker-map-contents").text("").hide();
+                $("#marker-map-contents").html("").hide();
               }
 
             } );
@@ -56,9 +56,9 @@ LUPAPISTE.MapModel = function() {
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
-          html += loc('inforequest.answer.title') + "(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
+          html += loc('inforequest.answer.title') + " (" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
         } else {
-          html += loc('inforequest.question.title') + "(" + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
+          html += loc('inforequest.question.title') + " (" + moment(com.time).format("D.M.YYYY HH:mm") + "):<br/>";
         }
         html += '<blockquote>' + com.text + '</blockquote>';
       });

@@ -524,8 +524,7 @@
 
        same-location-irs (map (partial make-marker-contents lang) same-location-irs)
        same-op-irs       (map (partial make-marker-contents lang) same-op-irs)
-       others            (map (partial make-marker-contents lang) others)
-       ]
+       others            (map (partial make-marker-contents lang) others)]
 
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))
