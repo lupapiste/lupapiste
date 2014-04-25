@@ -2,7 +2,7 @@
   (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test :refer [kayttolupa-application]]
-            [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :refer [sijoituslupa-application]]
+            [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :refer [sijoituslupa-application valmistumisilmoitus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
              :refer [mainostus-application viitoitus-application]]
             [lupapalvelu.xml.emit :refer :all]
@@ -77,4 +77,6 @@
       (do-test mainostus-application))
 
     (fact "Viitoituslupa application -> canonical -> xml"
-      (do-test viitoitus-application)))
+      (do-test viitoitus-application))
+    (fact "Valmistumisilmoitus application -> canonical -> xml"
+      (do-test valmistumisilmoitus)))
