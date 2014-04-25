@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Identity federation test form</title>
+ <script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.3.min.js"></script>
+ <script src="//crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
+ <style>
+ input {background-color:white;width:250px;margin:5px;border:1px solid black}
+ input[readonly] {
+ background-color:silver;
+ }
+ input[type=submit] {
+ background-color:#04C714;
+ border:0;
+ padding:7px 0;color:#fff;font-weight:bold;
+ cursor:pointer;
+ }
+ </style>
+</head>
+<body>
+<form action="/api/id-federation" method="post">
+<input name="email" value="idf@example.com" onchange="refreshMac();"><br>
+<input name="puhelin" value="0400" onchange="refreshMac();"><br>
+<input name="app" value="rakentaja.fi"  readonly="readonly"><br>
+<input name="id" value="test_id_123"  onchange="refreshMac();"><br>
+<input name="ts" value=""  readonly="readonly"><br>
+<input name="mac" value=""  readonly="readonly"><br>
+<input type="submit" id="submit" >
+</form>
+<pre>
+<script>
+function refreshMac() {
+  var f = document.forms[0];
+  var secret = "TAMAN-MUODOSTI-RAKENTAJA.FI";
+  var now = Date.now();
+  var mac = CryptoJS.SHA256(f.email.value + f.puhelin.value + f.app.value + f.id.value + now + secret);
+  f.ts.value = now;
+  f.mac.value = mac;
+}
+refreshMac();
+document.writeln("READY");
+</script>
+</pre>
+</body>
+</html>

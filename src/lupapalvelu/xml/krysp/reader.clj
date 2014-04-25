@@ -64,13 +64,11 @@
         xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:ogc=\"http://www.opengis.net/ogc\"
-        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-        xsi:schemaLocation=\"http://www.opengis.net/wfs
-        http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd\">
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
         <wfs:Query typeName=\"yak:YleisetAlueet\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
-              <ogc:PropertyName>yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
+              <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
               <ogc:Literal>" application-id "</ogc:Literal>
             </ogc:PropertyIsEqualTo>
           </ogc:Filter>
