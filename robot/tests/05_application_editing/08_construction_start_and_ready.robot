@@ -86,7 +86,6 @@ Fill required fields for the parties
   Wait until  Element should be visible  //section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
   Fill in yritys info  hakija-ya
   Fill in yritys info  yleiset-alueet-maksaja
-  Fill in yritys info  tyomaastaVastaava
 
 
 Fill in yritys info
@@ -94,14 +93,15 @@ Fill in yritys info
   ## NOTE: When using another variable (i.e. ${dataDocType}) to set the value of a variable, the keyword "Set Variable" must be used.
   ${docSectionPath} =  Set Variable  //section[@data-doc-type='${dataDocType}']
   Element should be visible  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']
-  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
+
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']  John
+  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
+  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.yhteystiedot.puhelin']  0401234567
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yritysnimi']  Rambol Oy
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.liikeJaYhteisoTunnus']  1234567-1
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.osoite.katu']  Katu
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.osoite.postinumero']  98765
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.osoite.postitoimipaikannimi']  Sipoo
-  Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.yhteystiedot.puhelin']  0401234567
-  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
 
+  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
 
