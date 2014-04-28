@@ -262,12 +262,6 @@ var gis = (function() {
         },
 
         trigger: function(e) {
-
-          // TODO: Testaa tama
-          if (self.markerClickCallback) {
-            self.markerClickCallback(null);
-          }
-
           var pos = self.map.getLonLatFromPixel(e.xy);
           handler(pos.lon, pos.lat);
         }

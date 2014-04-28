@@ -36,6 +36,13 @@ LUPAPISTE.MapModel = function() {
               }
 
             } );
+
+        inforequestMarkerMap.addClickHandler(
+            function(e) {
+              $("#marker-map-contents").html("").hide();
+            }
+        );
+
       }
       return inforequestMarkerMap;
     } else {
