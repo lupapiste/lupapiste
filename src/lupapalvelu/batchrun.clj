@@ -145,12 +145,14 @@
 
 
 (defn send-reminder-emails [& args]
-  (mongo/connect!)
 
-  (statement-request-reminder)
-  (open-inforequest-reminder)
-  (neighbor-reminder)
-  (application-state-reminder)
+  (when (env/feature? :reminders)
+    (mongo/connect!)
 
-  (mongo/disconnect!))
+    (statement-request-reminder)
+    (open-inforequest-reminder)
+    (neighbor-reminder)
+    (application-state-reminder)
+
+    (mongo/disconnect!)))
 
