@@ -50,21 +50,20 @@ LUPAPISTE.MapModel = function() {
     _.forEach(irs, function(ir) {
       html +=
         '<div class="inforequest-card">' +
-          '<h3>' + ir.title + '</h3>' +
-          ir.operation + '<br/>' +
-          ir.authName + '<br/>';
+          '<h2>' + ir.title + ' - ' + ir.authName + '</h2>' +
+          '<h3>' + ir.operation + '</h3a>';
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
-          html += '<br/><b>' + loc('inforequest.answer.title') + "</b> (" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):";
+          html += '<div><b>' + loc('inforequest.answer.title') + "</b> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
         } else {
-          html += '<br/><b>' + loc('inforequest.question.title') + "</b> (" + moment(com.time).format("D.M.YYYY HH:mm") + "):";
+          html += '<div><b>' + loc('inforequest.question.title') + "</b> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
         }
-        html += '<blockquote>' + com.text + '</blockquote>';
+        html += '<blockquote>' + com.text + '</blockquote></div>';
       });
 
+      html+='<button>Avaa neuvontapyyntö</button>';
       html += '</div>';
-      html += '<br/><br/>';
     });
 
     return html;
