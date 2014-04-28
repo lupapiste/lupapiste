@@ -246,7 +246,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     function setStatus(approval) {
       if (approval) {
-        var text = loc("document." + approval.value);
+        var text = loc(["document", approval.value]);
         if (approval.user && approval.timestamp) {
           text += " (" + approval.user.firstName + " " + approval.user.lastName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
@@ -259,7 +259,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
-      var title = loc("document." + verb);
+      var title = loc(["document", verb]);
       return $(makeButton(self.docId + "_" + verb, title))
       .addClass(cssClass).addClass("btn-auto")
       .attr("data-test-id", verb + "-doc-" + self.schemaName)
@@ -387,7 +387,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       inputAndUnit.appendChild(input);
 
       unit.className = "form-string-unit";
-      unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
+      unit.appendChild(document.createTextNode(loc(["unit", subSchema.unit])));
 
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
@@ -878,7 +878,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         return makeElem(myModel, key);
       });
 
-      var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaI18name + "." + myPath.join(".") + "._append_label"));
+      var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
         var parent$ = $(this.parentNode);
@@ -1001,7 +1001,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
         if (level !== "tip") {
           var errorPanel$ = $("#" + self.docId + "-" + pathStr + "-errorPanel");
-          errorPanel$.append("<span class='" + level + "'>" + loc("error." + code) + "</span>");
+          errorPanel$.append("<span class='" + level + "'>" + loc(["error", code]) + "</span>");
         }
 
         $("#" + pathStrToLabelID(pathStr)).addClass(level);
@@ -1092,9 +1092,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     }
     var op = self.schema.info.op;
 
-    var documentName = loc(self.schemaI18name + "._group_label");
+    var documentName = loc([self.schemaI18name, "_group_label"]);
     if (op) {
-      documentName = loc(op.name + "._group_label");
+      documentName = loc([op.name, "_group_label"]);
     }
 
     function onRemovalConfirmed() {
@@ -1134,9 +1134,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     title.appendChild(icon);
 
     if (op) {
-      title.appendChild(document.createTextNode(loc(op.name + "._group_label")));
+      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
     } else {
-      title.appendChild(document.createTextNode(loc(self.schemaI18name + "._group_label")));
+      title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
     }
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);

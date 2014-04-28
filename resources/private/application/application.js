@@ -12,7 +12,7 @@
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
       {commandName         : "inform-construction-started",
-       checkIntegrationAvailability: true,
+       checkIntegrationAvailability: false,
        dateParameter       : "startedTimestampStr",
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
@@ -286,11 +286,11 @@
     self.show = function() {
       var data = _.map(applicationModel.allowedAttachmentTypes(), function(g) {
         var groupId = g[0];
-        var groupText = loc("attachmentType." + groupId + "._group_label");
+        var groupText = loc(["attachmentType", groupId, "_group_label"]);
         var attachemntIds = g[1];
         var attachments = _.map(attachemntIds, function(a) {
           var id = {"type-group": groupId, "type-id": a};
-          var text = loc("attachmentType." + groupId + "." + a);
+          var text = loc(["attachmentType", groupId, a]);
           return {id: id, text: text};
         });
         return [groupText, attachments];
