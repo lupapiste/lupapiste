@@ -334,42 +334,9 @@
                           :firstName "Sonja",
                           :id "777777777777777777000023"},
                          :documents
-                         [{:created 1398343043267,
-                           :data {:_selected {:modified 1398343045952, :value "henkilo"}},
-                           :id "535905834206f413319be7f5",
-                           :schema-info
-                           {:approvable true,
-                            :subtype "hakija",
-                            :name "hakija-ya",
-                            :removable false,
-                            :repeating false,
-                            :version 1,
-                            :type "party",
-                            :order 3}}
-                          {:created 1398343043267,
-                           :data {:_selected {:modified 1398343045959, :value "henkilo"}},
-                           :id "535905834206f413319be7f4",
-                           :schema-info
-                           {:order 61,
-                            :type "party",
-                            :version 1,
-                            :repeating false,
-                            :name "tyomaastaVastaava",
-                            :op
-                            {:id "535905834206f413319be7f3",
-                             :name "ya-katulupa-vesi-ja-viemarityot",
-                             :created 1398343043267},
-                            :removable false}}
-                          {:created 1398343043267,
-                           :data {:_selected {:modified 1398343045969, :value "henkilo"}},
-                           :id "535905834206f413319be7f7",
-                           :schema-info
-                           {:name "yleiset-alueet-maksaja",
-                            :removable false,
-                            :repeating false,
-                            :version 1,
-                            :type "party",
-                            :order 62}}
+                         [hakija
+                          tyomaasta-vastaava
+                          maksaja
                           {:id "535905834206f413319be7f8",
                            :schema-info
                            {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
