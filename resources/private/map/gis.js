@@ -167,7 +167,7 @@ var gis = (function() {
     self.clear = function() {
       _.each(self.markers, function(markerPackage) {
         self.markerLayer.removeMarker(markerPackage.object);
-        marker.destroy();
+        markerPackage.object.destroy();
       });
       self.markers = [];
 
