@@ -103,12 +103,5 @@ Fill in yritys info
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.osoite.postitoimipaikannimi']  Sipoo
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.yhteystiedot.puhelin']  0401234567
   Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
-  ## tyomaastaVastaava goes to vastuuhenkilotieto in krysp, which has more required fields. Let's fill them up.
-  Run Keyword If  '${dataDocType}' == 'tyomaastaVastaava'  Fill in additional yritys info for tyomaasta vastaava
-
-#
-## TODO: Miksi tama ei toimi ?
-#
-#  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.yhteystiedot.puhelin']  0401234567
 
 
