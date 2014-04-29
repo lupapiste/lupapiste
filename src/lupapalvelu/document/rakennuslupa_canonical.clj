@@ -317,7 +317,10 @@
                                                                                      (select-keys building [:jarjestysnumero :kiinttun])
                                                                                      (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
                                                                                      {:katselmusOsittainen (get-in % [:tila :tila])
-                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})]
+                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
+                                                                building-canonical (if (s/blank? (:kiinttun building-canonical))
+                                                                                     (assoc building-canonical :kiinttun (:propertyId application))
+                                                                                     building-canonical)]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
                                                                                 (fn [m k v] (assoc m k (to-xml-date-from-string v)))
