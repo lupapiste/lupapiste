@@ -1,23 +1,20 @@
 var gis = (function() {
   "use strict";
 
-  function makeIcon(image, w, h) {
-    var size = new OpenLayers.Size(w, h);
-    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-    return new OpenLayers.Icon(image, size, offset);
-  }
 
-  function makeMarker(pos, icon) {
-    return new OpenLayers.Marker(pos, icon.clone());
-  }
+  var iconDefault  = "/img/map-marker.png";
+  var iconRed      = "/img/map-marker-red.png";
+  var iconGreen    = "/img/map-marker-green.png";
+  var iconLila     = "/img/map-marker-lila.png";
+  var iconBlue     = "/img/map-marker-blue.png";
+  var iconMultiple = "/img/map-marker-group.png";
 
-  var iconDefault = makeIcon("/img/map-marker.png", 21, 25);
-  var iconRed =     makeIcon("/img/map-marker-red.png", 21, 25);
-  var iconGreen =   makeIcon("/img/map-marker-green.png", 21, 25);
-
-  var iconMapping = {"sameLocation" :  iconDefault,
-                     "sameOperation" : iconRed,
-                     "others" :        iconGreen};
+  var iconLocMapping = {
+      "sameLocation"          : iconDefault,
+      "sameOperation"         : iconRed,
+      "others"                : iconGreen,
+      "cluster"               : iconMultiple
+  };
 
   // Map initialization
 
@@ -144,58 +141,157 @@ var gis = (function() {
       //       would work.
       //
       self.map.events.register('zoomend', self.map, function (event) {
+
+        //
+        // TODO: Halutaanko marker contents div piilottaa zoomin jalkeen?
+        //
+        // hide marker contents div
+        if (self.markerClickCallback) {
+          self.markerClickCallback( null );
+        }
+
         if( self.map.getZoom() < 2) {
           // For some reason, calling only "self.map.zoomTo(2);" did not work here.
           // http://gis.stackexchange.com/questions/25080/why-doesnt-openlayers-zoom
           self.map.setCenter(self.map.getCenter(), 2);
         }
       });
-
     }
 
 
     // Markers
 
-    self.markerLayer = new OpenLayers.Layer.Markers(
-        "Markers"
-//        , {strategies: [new OpenLayers.Strategy.Cluster({distance: 25/*, threshold: 2*/})]}  // TODO: Ota tama kayttoon!
-    );
+
+    var context = {
+      extGraphic: function(feature) {
+//        console.log("extGraphic, feature: ", feature);
+
+        var iconPath = "img/map-marker.png";
+        if (feature.cluster) {
+          if (feature.cluster.length > 1) {
+            iconPath = iconLocMapping["cluster"];
+          } else {
+            iconPath = feature.cluster[0].attributes.isCluster ? iconLocMapping["cluster"] : feature.cluster[0].style.externalGraphic;
+          }
+        } else {
+//          console.log("extGraphic, single marker, feature: ", feature);
+          iconPath = feature.style.externalGraphic;
+        }
+
+        return iconPath || iconDefault;
+      },
+      graphicWidth: function(feature) {
+        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 21;
+      },
+      graphicHeight: function(feature) {
+        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 25;
+      }
+    };
+
+    var stylemap = new OpenLayers.StyleMap({
+      'default': new OpenLayers.Style({
+        externalGraphic: '${extGraphic}',
+        graphicWidth: '${graphicWidth}',
+        graphicHeight: '${graphicHeight}',   //alt to pointRadius
+        cursor: 'default'
+      }, {
+        context: context
+      }),
+      'select': new OpenLayers.Style({
+        // This 'select' cannot be completely removed from here, because then the markers' select functionality
+        // starts to act in an unwanted way: i.e. previously selected markers first dim and then disappear
+        // on the following selections etc.
+//        cursor: 'pointer'
+      })
+    });
+
+    var strategy = new OpenLayers.Strategy.Cluster({distance: 25/*, threshold: 2*/});
+
+    self.markerLayer = new OpenLayers.Layer.Vector( "Markers" , {strategies: [strategy], styleMap: stylemap} );
     self.map.addLayer(self.markerLayer);
 
     self.markers = [];
 
+
     self.clear = function() {
-      _.each(self.markers, function(markerPackage) {
-        self.markerLayer.removeMarker(markerPackage.object);
-        markerPackage.object.destroy();
-      });
-      self.markers = [];
+      // hide the inforequest marker div
+      if (self.markerClickCallback) {
+        self.markerClickCallback( null );
+      }
 
       self.vectorLayer.removeAllFeatures();
+
+      self.markerLayer.removeAllFeatures();
+      _.each(self.markers, function(marker) { marker.destroy(); });
+      self.markers = [];
 
       return self;
     };
 
-    var markerClickHandler = function(event) {
-      var matchingMarker = _.find(self.markers, function(marPkg) { return event.object === marPkg.object; })
 
-//      OpenLayers.Event.stop(event);  // TODO: Koita tata.
+    // Select control
 
-      if (self.markerClickCallback) {
-        self.markerClickCallback( matchingMarker.contents );
+    self.selectControl = new OpenLayers.Control.SelectFeature(self.markerLayer, {
+      autoActivate: true,
+      clickOut: true,
+      toggle: true,
+
+      onSelect: function(feature) {
+        if (self.markerClickCallback) {
+          var contents = feature.cluster ?
+            _.reduce(
+              feature.cluster,
+              function(acc, entry) {
+                return acc + entry.data.contents;
+              },
+              "") :
+            feature.data.contents;
+
+            self.markerClickCallback( contents );
+        }
+      },
+
+      onUnselect: function(feature) {
+        if (self.markerClickCallback) {
+          self.markerClickCallback( null );
+        }
       }
-    };
+    });
 
-    self.add = function(x, y, markerIconName, markerContents) {
-      var icon = iconMapping[markerIconName] || iconDefault;
-      var marker = makeMarker(new OpenLayers.LonLat(x, y), icon);
+    self.map.addControl(self.selectControl);
 
-      // TODO: Koita "mousedown"
-      marker.events.register("click", marker, markerClickHandler, true);  // If true, adds the new listener to the front of the events queue instead of to the end.
 
-      self.markerLayer.addMarker(marker);
-      var markerPackage = {object: marker, contents: markerContents};  // TODO: Toimiiko tallainen package lahestymistapa?
-      self.markers.push(markerPackage);
+    // Adding markers
+
+    self.add = function(/*x, y, markerIconName, markerContents*/ markerInfos) {
+
+      markerInfos = _.isArray(markerInfos) ? markerInfos : [markerInfos];
+
+      var newMarkers = [];
+
+      _.each(markerInfos, function(markerInfo) {
+//        console.log("handling markerInfo: ", markerInfo);
+
+        var iconName = markerInfo.isCluster ? "cluster" : markerInfo.iconName;
+        var iconPath = iconLocMapping[iconName] || iconDefault;
+//        console.log("self.add, iconName: ", iconName);
+//        console.log("self.add, x: ", markerInfo.x, ", y: ", markerInfo.y, ", iconName: ", iconName, ", iconLocMapping[iconName]: ", iconPath, ", contents: ", markerInfo.contents);
+
+        var markerFeature = new OpenLayers.Feature.Vector(
+            new OpenLayers.Geometry.Point(markerInfo.x, markerInfo.y),
+            { isCluster: markerInfo.isCluster,
+              contents: markerInfo.contents || "" },
+            { externalGraphic: iconPath});
+
+//        console.log("created markerFeature: ", markerFeature);
+
+        self.markers.push(markerFeature);
+        newMarkers.push(markerFeature);
+
+      });  //each
+
+      self.markerLayer.addFeatures(newMarkers);
+
       return self;
     };
 

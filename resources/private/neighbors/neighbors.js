@@ -38,7 +38,7 @@
         .applicationId(application.id)
         .neighbors(application.neighbors)
         .neighborId(null)
-        .map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 13 : 11).add(x, y);
+        .map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 13 : 11).add({x: x, y: y});
     };
 
     self.edit   = function(neighbor) {

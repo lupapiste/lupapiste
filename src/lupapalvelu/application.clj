@@ -474,22 +474,25 @@
       {$set {:modified created
              :drawings drawings}})))
 
-(defn- make-marker-contents [lang app]
-  {:title       (:title app)
-   :location    (:location app)
-   :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
-   :authName    (-> (domain/get-auths-by-role app :owner)
-                  first
-                  (#(str (:firstName %) " " (:lastName %))))
-   :comments    (->> (:comments app)
-                  (filter #(not (= "system" (:type %))))
-                  (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))
-                                   :type (:type %)
-                                   :time (:created %)
-                                   :text (:text %)})))})
+(defn- make-marker-contents [id lang app]
+  (merge
+    {:title       (:title app)
+     :location    (:location app)
+     :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
+     :authName    (-> (domain/get-auths-by-role app :owner)
+                    first
+                    (#(str (:firstName %) " " (:lastName %))))
+     :comments    (->> (:comments app)
+                    (filter #(not (= "system" (:type %))))
+                    (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))
+                                     :type (:type %)
+                                     :time (:created %)
+                                     :text (:text %)})))}
+    (when-not (= id (:id app))
+      {:link      (str (env/value :host) "/app/" (name lang) "/authority#!/inforequest/" (:id app))})))  ;; "authority" -> "oir"?
 
 (defquery inforequest-markers
-  {:parameters [:id lang x y]
+  {:parameters [id lang x y]
    :roles      [:authority]
    :states     [:draft :open :submitted :complement-needed :info]   ;; TODO: Mitka tilat?
    :input-validators [(partial action/non-blank-parameters [:x :y])]
@@ -522,9 +525,9 @@
 
        others (remove-irs-by-id-fn inforequests same-op-irs)
 
-       same-location-irs (map (partial make-marker-contents lang) same-location-irs)
-       same-op-irs       (map (partial make-marker-contents lang) same-op-irs)
-       others            (map (partial make-marker-contents lang) others)]
+       same-location-irs (map (partial make-marker-contents id lang) same-location-irs)
+       same-op-irs       (map (partial make-marker-contents id lang) same-op-irs)
+       others            (map (partial make-marker-contents id lang) others)]
 
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))

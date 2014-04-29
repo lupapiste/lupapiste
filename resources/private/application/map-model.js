@@ -25,24 +25,15 @@ LUPAPISTE.MapModel = function() {
     } else if (kind === "inforequest-markers") {
       if (!inforequestMarkerMap) {
         inforequestMarkerMap = createMap("inforequest-marker-map");
+
         inforequestMarkerMap.setMarkerClickCallback(
-            function(matchingMarkerContents) {
-
-              // TODO: Testaa tama
-              if (matchingMarkerContents) {
-                $("#marker-map-contents").html(matchingMarkerContents).toggle();
-              } else {
-                $("#marker-map-contents").html("").hide();
-              }
-
-            } );
-
-        inforequestMarkerMap.addClickHandler(
-            function(e) {
+          function(matchingMarkerContents) {
+            if (matchingMarkerContents) {
+              $("#marker-map-contents").html(matchingMarkerContents).toggle();
+            } else {
               $("#marker-map-contents").html("").hide();
             }
-        );
-
+          } );
       }
       return inforequestMarkerMap;
     } else {
@@ -54,7 +45,10 @@ LUPAPISTE.MapModel = function() {
     irs = _.isArray(irs) ? irs : [irs];
     var html = "";
 
-    _.forEach(irs, function(ir) {
+    _.each(irs, function(ir) {
+
+//      console.log("formMarkerHtmlContents, ir:\n", ir);
+
       html +=
         '<div class="inforequest-card">' +
           '<h2>' + ir.title + ' - ' + ir.authName + '</h2>' +
@@ -69,7 +63,11 @@ LUPAPISTE.MapModel = function() {
         html += '<blockquote>' + com.text + '</blockquote></div>';
       });
 
-      html+='<button>Avaa neuvontapyyntö</button>';
+      // no link is attached to currently opened inforequest
+      if (ir.link) {
+        html += "<a href='" + ir.link + "'>Avaa neuvontapyyntö</a>";
+      }
+
       html += '</div>';
     });
 
@@ -81,23 +79,57 @@ LUPAPISTE.MapModel = function() {
     .query("inforequest-markers", {id: currentAppId, lang: loc.getCurrentLanguage(), x: x, y: y})
     .success(function(data) {
 
+//      console.log("inforequest-markers success, data: ", data);
+//      console.log("same location: ", data["sameLocation"]);
+//      console.log("same operations: ", data["sameOperation"]);
+//      console.log("others: ", data["others"]);
+
+      var markerInfos = [];
+
       // same location markers
-      map.add(data["sameLocation"][0].location.x,
-              data["sameLocation"][0].location.y,
-              "sameLocation",
-              formMarkerHtmlContents( data["sameLocation"] ));
+      markerInfos.push({
+        x: data["sameLocation"][0].location.x,
+        y: data["sameLocation"][0].location.y,
+        iconName: "sameLocation",
+        contents: formMarkerHtmlContents( data["sameLocation"] ),
+        isCluster: data["sameLocation"].length > 1 ? true : false
+      });
 
       // same operation markers
-      _.forEach(data["sameOperation"], function(ir) {
-        map.add(ir.location.x, ir.location.y, "sameOperation", formMarkerHtmlContents(ir));
+      _.each(data["sameOperation"], function(ir) {
+        markerInfos.push({
+          x: ir.location.x,
+          y: ir.location.y,
+          iconName: "sameOperation",
+          contents: formMarkerHtmlContents(ir),
+          isCluster: false
+        });
       });
 
       // other markers
-      _.forEach(data["others"], function(ir) {
-        map.add(ir.location.x, ir.location.y, "others", formMarkerHtmlContents(ir));
+      _.each(data["others"], function(ir) {
+        markerInfos.push({
+          x: ir.location.x,
+          y: ir.location.y,
+          iconName: "others",
+          contents: formMarkerHtmlContents(ir),
+          isCluster: false
+        });
       });
 
+//      console.log(", adding markerInfos: ", markerInfos);
+      map.add(markerInfos);
+
       //repository.load(currentAppId);
+    })
+    .error(function(data) {
+      //
+      // Needed to have this error branch to prevent applicant from getting error popups on the UI.
+      //
+//      console.log("inforequest-markers error, data: ", data);
+      if (data.text !== "error.unauthorized") {
+        debug("Could not fetch inforequest markers", data);
+      }
     })
     .call();
   };
@@ -118,13 +150,13 @@ LUPAPISTE.MapModel = function() {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10).add(x, y);
+    map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10).add({x: x, y: y});
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
       map = getOrCreateMap("inforequest-markers");
-      map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10); //.add(x, y);
+      map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10); //.add({x: x, y: y});
       setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
     }
   };
