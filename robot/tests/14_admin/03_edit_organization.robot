@@ -47,7 +47,7 @@ Mikko creates an inforequest in Sipoo
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  admin${secs}
-  Create inforequest the fast way  ${appname}  753  753-416-25-30  The winter is coming
+  Create inforequest the fast way  ${appname}  753  753-416-25-30  asuinrakennus  The winter is coming
   [Teardown]  Logout
 
 Admin impersonated Sipoo authority

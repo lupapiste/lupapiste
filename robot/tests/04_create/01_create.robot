@@ -51,7 +51,7 @@ The contents of unsent inforequest's message field is resetted properly when mov
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
 
-  Create inforequest the fast way  create-info-2  753  753-416-25-22  init-comment-2
+  Create inforequest the fast way  create-info-2  753  753-416-25-22  asuinrakennus  init-comment-2
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
 
 Mikko creates new application

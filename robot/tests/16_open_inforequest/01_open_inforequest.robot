@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 Mikko creates an info request to Loppi
   Mikko logs in
   User role should be  applicant
-  Create inforequest the fast way  Ojatie 1, Loppi  433  433-406-3-229  Jiihaa
+  Create inforequest the fast way  Ojatie 1, Loppi  433  433-406-3-229  asuinrakennus  Jiihaa
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Element should not be visible  //button[@data-test-id='inforequest-convert-to-application']
 

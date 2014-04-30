@@ -13,8 +13,8 @@ Mikko creates two new inforequests
   Set Suite Variable  ${inforequest-cancelling}  ir-c${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  Jiihaa
-  Create inforequest the fast way  ${inforequest-cancelling}  753  ${propertyId}  Jiihaa
+  Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  asuinrakennus  Jiihaa
+  Create inforequest the fast way  ${inforequest-cancelling}  753  ${propertyId}  asuinrakennus  Jiihaa
   Logout
 
 Authority assigns an inforequest to herself
@@ -92,14 +92,14 @@ When Mikko adds a comment inforequest goes back to Avoin
   Add comment   tuulivoima on ok.
   Wait until  Inforequest state is  Avoin
   Logout
-  
+
 Authority cancels the inforequest
   Sonja logs in
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
-  
+
 
 *** Keywords ***
 
@@ -126,4 +126,3 @@ Add Comment
 Add Comment and Mark Answered
   [Arguments]  ${message}
   Input comment and mark answered  inforequest  ${message}
-  
