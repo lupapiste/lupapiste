@@ -51,14 +51,14 @@ LUPAPISTE.MapModel = function() {
 
       html +=
         '<div class="inforequest-card">' +
-          '<h2>' + ir.title + ' - ' + ir.authName + '</h2>' +
-          '<h3>' + ir.operation + '</h3a>';
+          '<h3>' + ir.title + ' - ' + ir.authName + '</h3>' +
+          "<h3 class='operation-type'>" + ir.operation + '</h3>';
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
-          html += '<div><b>' + loc('inforequest.answer.title') + "</b> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
+          html += "<div><span class='comment-type'>" + loc('inforequest.answer.title') + "</span> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
         } else {
-          html += '<div><b>' + loc('inforequest.question.title') + "</b> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
+          html += "<div><span class='comment-type'>" + loc('inforequest.question.title') + "</span> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
         }
         html += '<blockquote>' + com.text + '</blockquote></div>';
       });
