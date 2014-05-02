@@ -5,6 +5,8 @@
             [clojure.string :as s]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
+            [ring.util.response :refer [resource-response]]
+            [ring.middleware.content-type :refer [content-type-response]]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
             [noir.request :as request]
@@ -30,7 +32,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]))
+            [lupapalvelu.neighbors]
+            [lupapalvelu.idf.idf-server :as idf-server]))
 
 ;;
 ;; Helpers
@@ -268,10 +271,7 @@
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
-        sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
-                           (if (> (.length line) limit)
-                             (str (.substring line 0 limit) "... (truncated)")
-                             line)))
+        sanitize (partial lupapalvelu.logging/sanitize limit)
         sanitized-page (sanitize (or page "(unknown)"))
         user           (or (ss/lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
@@ -479,6 +479,21 @@
   (fn [request] (session-timeout-handler handler request)))
 
 ;;
+;; Identity federation
+;;
+
+(defpage
+  [:post "/api/id-federation"]
+  {:keys [etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac]}
+  (idf-server/handle-create-user-request etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac))
+
+;;
 ;; dev utils:
 ;;
 
@@ -506,9 +521,6 @@
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
-  (defjson "/dev/user" []
-    (user/current-user))
-
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
       (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
@@ -528,6 +540,11 @@
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
+
+  (defpage [:get "/dev-pages/:file"] {:keys [file]}
+    (->
+      (resource-response (str "dev-pages/" file))
+      (content-type-response {:uri file})))
 
   (defjson "/dev/fileinfo/:id" {:keys [id]}
     (dissoc (mongo/download id) :content))

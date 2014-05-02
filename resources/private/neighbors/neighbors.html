@@ -17,11 +17,11 @@
           </tr>
         </thead>
         <tbody data-bind="foreach: neighbors">
-          <tr data-bind="attr: {'data-test-id': 'manage-neighbors-email-' + neighbor.owner.email}">
-            <td data-bind="propertyId: neighbor.propertyId"></td>
-            <td data-bind="with: neighbor.owner">
+          <tr data-bind="attr: {'data-test-id': 'manage-neighbors-email-' + owner.email}">
+            <td data-bind="propertyId: propertyId"></td>
+            <td data-bind="with: owner">
               <!-- ko if: nameOfDeceased -->
-              <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span> 
+              <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
               -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
               <br/>
               <!-- /ko -->
@@ -62,43 +62,45 @@
           <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
           <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
         </div>
-        <table class="application-neighbors property-owners scrolling-content">
-          <thead>
-            <tr>
-              <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: allSelected" /></th>
-              <th data-bind="ltext: 'neighbors.owner'"></th>
-              <th data-bind="ltext: 'neighbors.owner.address'"></th>
-              <th data-bind="ltext: 'neighbors.owner.type'"></th>
-            </tr>
-          </thead>
-          <tbody data-bind="foreach: owners">
-            <tr>
-              <td>
-                <input class="form-input" type="checkbox" data-bind="value: $index, checked: $parent.selectedOwners, attr: {'data-test-id' : 'select-owner-' + $index()}" />
-              </td>
-              <td>
-                <!-- ko if: nameOfDeceased -->
-                <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span> 
-                -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
-                <br/>
-                <!-- /ko -->
+        <div class="scrolling-content">
+          <table class="application-neighbors property-owners">
+            <thead>
+              <tr>
+                <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: allSelected" /></th>
+                <th data-bind="ltext: 'neighbors.owner'"></th>
+                <th data-bind="ltext: 'neighbors.owner.address'"></th>
+                <th data-bind="ltext: 'neighbors.owner.type'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: owners">
+              <tr>
+                <td>
+                  <input class="form-input" type="checkbox" data-bind="value: $index, checked: $parent.selectedOwners, attr: {'data-test-id' : 'select-owner-' + $index()}" />
+                </td>
+                <td>
+                  <!-- ko if: nameOfDeceased -->
+                  <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
+                  -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
+                  <br/>
+                  <!-- /ko -->
 
-                <span data-bind="text: name" class="owner-name"></span>
+                  <span data-bind="text: name" class="owner-name"></span>
 
-                <!-- ko if: businessID -->
-                (<span data-bind="text: businessID" class="owner-businessID"></span>) 
-                <!-- /ko -->
-              </td>
-              <td>
-                <span data-bind="text: street" class="owner-street"></span>
-                <span data-bind="text: zip" class="owner-zip"></span>
-                <span data-bind="text: city" class="owner-city"></span>
-              </td>
-              <td data-bind="text: loc(['neighbors.owner.type', type])">
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <!-- ko if: businessID -->
+                  (<span data-bind="text: businessID" class="owner-businessID"></span>)
+                  <!-- /ko -->
+                </td>
+                <td>
+                  <span data-bind="text: street" class="owner-street"></span>
+                  <span data-bind="text: zip" class="owner-zip"></span>
+                  <span data-bind="text: city" class="owner-city"></span>
+                </td>
+                <td data-bind="text: loc(['neighbors.owner.type', type])">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <button data-bind="click: $root.addSelectedOwners, enable: status() === statusSelectOwners && selectedOwners().length > 0, ltext: 'neighbors.select.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.select.ok"></button>
         <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close" data-test-id="neighbors.edit.cancel"></button>
       </div>

@@ -74,7 +74,7 @@
                             :licenses :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
                   :html ["404.html" "footer.html"]}
 
@@ -143,9 +143,12 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common]
-                  :css ["register.css"]
-                  :js ["register.js"]
+                  :js ["registration-models.js" "register.js"]
                   :html ["register.html" "register2.html" "register3.html"]}
+
+   :link-account {:depends [:register]
+                  :js ["link-account.js"]
+                  :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
    :docgen       {:depends [:accordion :common]
                   :js ["docmodel.js" "docgen.js"]}
@@ -208,7 +211,7 @@
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
 
-   :welcome {:depends [:login :register :debug :user-menu :screenmessages]
+   :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages]
              :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 

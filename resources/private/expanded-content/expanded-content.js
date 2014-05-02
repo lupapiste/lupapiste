@@ -19,6 +19,6 @@ var expand = (function() {
 
   return {
     click: click
-  }
-  
+  };
+
 })();

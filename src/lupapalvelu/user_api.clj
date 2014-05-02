@@ -17,7 +17,8 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]))
@@ -37,6 +38,7 @@
   {:roles [:admin :authorityAdmin]}
   [{{:keys [role organizations]} :user data :data}]
   (ok :users (map user/non-private (-> data
+                                     (set/rename-keys {:userId :id})
                                      (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
                                      (as-> data (if (= role :authorityAdmin)
                                                   (assoc data :organizations {$in [organizations]})
@@ -108,9 +110,6 @@
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
 
-    (when (and (boolean (:enabled user-data)) (not admin?) (not authorityAdmin?))
-      (fail! :error.unauthorized :desc "only admin and authorityAdmin can create enabled users"))
-
     (when (and (:apikey user-data) (not admin?))
       (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
 
@@ -120,7 +119,8 @@
   (let [email (ss/lower-case (:email user-data))]
     (-> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization :allowDirectMarketing])
+                    :phone :city :street :zip :enabled :organization
+                    :allowDirectMarketing :architect])
       (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
       (assoc
         :email email
@@ -189,7 +189,7 @@
 (defcommand create-user
   {:parameters [:email role]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:admin :authorityAdmin]}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)]
@@ -261,7 +261,7 @@
   {:parameters       [operation email firstName lastName]
    :input-validators [valid-organization-operation?
                       (partial action/non-blank-parameters [:email :firstName :lastName])
-                      action/validate-email]
+                      action/email-validator]
    :roles            [:authorityAdmin]}
   [{caller :user}]
   (let [email            (ss/lower-case email)
@@ -307,7 +307,7 @@
 (defcommand reset-password
   {:parameters    [email]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :notified      true
    :authenticated false}
   [_]
@@ -337,7 +337,7 @@
 (defcommand set-user-enabled
   {:parameters    [email enabled]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles         [:admin]}
   [_]
   (let [email (ss/lower-case email)
@@ -398,19 +398,43 @@
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
    :input-validators [(partial action/non-blank-parameters [:email :password])
-                      action/validate-email]
+                      action/email-validator]
    :verified   true}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (-> email ss/lower-case ss/trim)]
     (when-not vetuma-data (fail! :error.create-user))
-    (when-not (ss/contains email "@") (fail! :error.email))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant"}))]
+      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
-          (ok :id (:_id user)))
+          (when (and (env/feature? :rakentajafi) (:rakentajafi data))
+            (util/future* (idf/send-user-data user "rakentaja.fi")))
+          (ok :id (:id user)))
+        (fail :error.create-user))
+      (catch IllegalArgumentException e
+        (fail (keyword (.getMessage e)))))))
+
+(defcommand confirm-account-link
+  {:parameters [stamp tokenId email password street zip city phone]
+   :input-validators [(partial action/non-blank-parameters [:tokenId :password])
+                      action/email-validator]}
+  [{data :data}]
+  (let [vetuma-data (vetuma/get-user stamp)
+        email (-> email ss/lower-case ss/trim)
+        token (token/get-token tokenId)]
+    (when-not (and vetuma-data
+                (= (:token-type token) :activate-linked-account)
+                (= email (get-in token [:data :email])))
+      (fail! :error.create-user))
+    (try
+      (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+      (if-let [user (create-new-user nil (merge data vetuma-data {:email email :role "applicant" :enabled true}) :send-email false)]
+        (do
+          (vetuma/consume-user stamp)
+          (token/get-token tokenId :consume true)
+          (ok :id (:id user)))
         (fail :error.create-user))
       (catch IllegalArgumentException e
         (fail (keyword (.getMessage e)))))))
@@ -502,16 +526,4 @@
                        ;:attachment-target attachment-target
                        :locked false}))))
   (ok))
-
-;;
-;; ==============================================================================
-;; Development utils:
-;; ==============================================================================
-;;
-
-; FIXME: generalize
-(env/in-dev
-
-  (defquery activations {} [query]
-    (ok :activations (activation/activations))))
 

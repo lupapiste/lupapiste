@@ -73,9 +73,9 @@
   (let [schema       (schemas/get-schema (:schema-info document))
          subject      (user/get-user-by-id user-id)
          with-hetu    (and
-                        (domain/has-hetu? (:body schema) [path])
+                        (model/has-hetu? (:body schema) [path])
                         (user/same-user? current-user subject))
-         person       (tools/unwrapped (domain/->henkilo subject :with-hetu with-hetu))
+         person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu))
          model        (if-not (blank? path)
                         (assoc-in {} (map keyword (split path #"\.")) person)
                         person)
@@ -179,7 +179,7 @@
 (defcommand invite
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)
@@ -238,7 +238,7 @@
 (defcommand remove-auth
   {:parameters [:id email]
    :input-validators [(partial action/non-blank-parameters [:email])
-                      action/validate-email]
+                      action/email-validator]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))
@@ -392,7 +392,7 @@
                               (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
                               (let [submitted-application (mongo/by-id :submitted-applications id)]
                                 (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+              attachments-argument (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
           (do-rest-fn attachments-argument)))
       ;; SFTP user not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
@@ -1068,7 +1068,7 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
-(defcommand "merge-details-from-krysp"
+(defcommand merge-details-from-krysp
   {:parameters [id documentId buildingId collection]
    :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]}

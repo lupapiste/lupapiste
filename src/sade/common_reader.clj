@@ -38,14 +38,6 @@
   "removes recursively all namespacey parts from map keywords keys"
   [m] (postwalk-map (partial map (fn [[k v]] [(strip-key k) v])) m))
 
-(defn strip-nils
-  "removes recursively all keys from map which have value of nil"
-  [m] (postwalk-map (partial filter (comp not nil? val)) m))
-
-(defn strip-empty-maps
-  "removes recursively all keys from map which have empty map as value"
-  [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
-
 (defn to-boolean
   "converts 'true' and 'false' strings to booleans. returns others as-are."
   [v] (condp = v

@@ -4,7 +4,6 @@
             [swiss-arrows.core :refer [-<>]]
             [sade.strings :as ss]
             [sade.util :refer :all]
-            [sade.common-reader :as cr]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [cljts.geom :as geo]
@@ -116,11 +115,11 @@
    :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
    :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
-   :ya-katulupa-vesi-ja-viemarityot "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-maalampotyot "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-kaukolampotyot "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-kaapelityot "kaivu- tai katuty\u00f6lupa"
-   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "kaivu- tai katuty\u00f6lupa"
+   :ya-katulupa-vesi-ja-viemarityot "vesihuoltoverkostoty\u00f6"
+   :ya-katulupa-maalampotyot "muu"
+   :ya-katulupa-kaukolampotyot "kaukol\u00e4mp\u00f6verkostoty\u00f6"
+   :ya-katulupa-kaapelityot "tietoliikenneverkostoty\u00f6"
+   :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat "verkoston liitosty\u00f6"
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
@@ -209,7 +208,7 @@
 (defn get-state [application]
   (let [state-timestamps (-<> (all-state-timestamps application)
                            (dissoc :sent :closed) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
-                           cr/strip-nils
+                           strip-nils
                            (sort-by second <>))]
     (mapv
       (fn [[state ts]]
@@ -220,12 +219,13 @@
       state-timestamps)))
 
 
-(defn lupatunnus [{:keys [id submitted]}]
+(defn lupatunnus [{:keys [id submitted] :as application}]
   {:pre [id]}
   {:LupaTunnus
    (assoc-when
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
-     :saapumisPvm (to-xml-date submitted))})
+     :saapumisPvm (to-xml-date submitted)
+     :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -391,7 +391,7 @@
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
   (with-lang lang
-    (cr/strip-nils
+    (strip-nils
       (when (seq tyotehtavat)
         {:vastattavaTyotieto
          (remove nil?
@@ -437,12 +437,12 @@
              :hallintasuhde "Ei tiedossa"}})
 
 (defn- get-neighbors [neighbors]
-  (remove nil? (for [[_ neighbor] neighbors]
+  (remove nil? (for [neighbor neighbors]
                    (let [status (last (:status neighbor))
-                         propertyId (-> neighbor :neighbor :propertyId)]
+                         propertyId (:propertyId neighbor)]
                      (case (:state status)
                        "response-given-ok" (get-neighbor (str (-> status :vetuma :firstName) " " (-> status :vetuma :lastName)) propertyId)
-                       "mark-done" (get-neighbor (-> neighbor :neighbor :owner :name) propertyId)
+                       "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
 (defn osapuolet

@@ -7,6 +7,7 @@
             [ring.util.codec :as codec]
             [sade.xml :refer :all]
             [sade.http :as http]
+            [sade.util :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [lupapalvelu.document.schemas :as schema]
@@ -58,18 +59,16 @@
 (defn post-body-for-ya-application [application-id]
   {:body (str "<wfs:GetFeature
       service=\"WFS\"
-        version=\"1.0.0\"
+        version=\"1.1.0\"
         outputFormat=\"GML2\"
         xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:ogc=\"http://www.opengis.net/ogc\"
-        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-        xsi:schemaLocation=\"http://www.opengis.net/wfs
-        http://schemas.opengis.net/wfs/1.0.0/WFS-basic.xsd\">
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
         <wfs:Query typeName=\"yak:YleisetAlueet\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
-              <ogc:PropertyName>yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
+              <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
               <ogc:Literal>" application-id "</ogc:Literal>
             </ogc:PropertyIsEqualTo>
           </ogc:Filter>
@@ -201,7 +200,7 @@
     (seq (select omistaja [:henkilo])) (->henkilo omistaja)
     :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
-(def cleanup (comp cr/strip-empty-maps cr/strip-nils))
+(def cleanup (comp util/strip-empty-maps util/strip-nils))
 
 (def polished  (comp cr/index-maps cleanup cr/convert-booleans))
 

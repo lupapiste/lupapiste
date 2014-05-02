@@ -12,7 +12,7 @@
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
       {commandName         : "inform-construction-started",
-       checkIntegrationAvailability: true,
+       checkIntegrationAvailability: false,
        dateParameter       : "startedTimestampStr",
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
@@ -286,11 +286,11 @@
     self.show = function() {
       var data = _.map(applicationModel.allowedAttachmentTypes(), function(g) {
         var groupId = g[0];
-        var groupText = loc("attachmentType." + groupId + "._group_label");
+        var groupText = loc(["attachmentType", groupId, "_group_label"]);
         var attachemntIds = g[1];
         var attachments = _.map(attachemntIds, function(a) {
           var id = {"type-group": groupId, "type-id": a};
-          var text = loc("attachmentType." + groupId + "." + a);
+          var text = loc(["attachmentType", groupId, a]);
           return {id: id, text: text};
         });
         return [groupText, attachments];
@@ -333,7 +333,7 @@
     self.userid = ko.observable();
 
     self.init = function(neighbor) {
-      var l = neighbor.lastStatus;
+      var l = _.last(neighbor.status());
       var u = l.vetuma || l.user;
       return self
         .state(l.state())
@@ -356,12 +356,12 @@
     },
     markDone: function(neighbor) {
       ajax
-        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id()})
         .complete(_.partial(repository.load, currentId, util.nop))
         .call();
     },
     statusCompleted: function(neighbor) {
-      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], neighbor.lastStatus.state());
+      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], _.last(neighbor.status()).state());
     },
     showStatus: function(neighbor) {
       neighborStatusModel.init(neighbor).open();
@@ -385,10 +385,10 @@
     self.open = function(neighbor) {
       self
         .id(applicationModel.id())
-        .neighborId(neighbor.neighborId())
-        .propertyId(neighbor.neighbor.propertyId())
-        .name(neighbor.neighbor.owner.name())
-        .email(neighbor.neighbor.owner.email());
+        .neighborId(neighbor.id())
+        .propertyId(neighbor.propertyId())
+        .name(neighbor.owner.name())
+        .email(neighbor.owner.email());
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 

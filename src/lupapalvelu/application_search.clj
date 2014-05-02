@@ -39,22 +39,24 @@
 ;; Table definition
 ;;
 
-(def ^:private col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
+(def ^:private col-sources [:indicators
+                            :attachmentsRequiringAction
+                            :unseenComments
+                            (fn [app] (if (:infoRequest app) "inforequest" "application"))
                             (juxt :address :municipality)
                             meta-fields/get-application-operation
                             :applicant
                             :submitted
-                            :indicators
-                            :unseenComments
                             :modified
                             :state
                             :authority])
 
 (def ^:private order-by (assoc col-sources
-                          0 :infoRequest
-                          1 :address
+                          3 :infoRequest
+                          4 :address
+                          0 nil
+                          1 nil
                           2 nil
-                          3 nil
                           5 nil
                           6 nil))
 

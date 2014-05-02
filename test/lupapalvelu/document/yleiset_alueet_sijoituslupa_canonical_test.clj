@@ -266,3 +266,104 @@
 
     ;; Hankkeen kuvaus
     (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus-sijoituslupa :data :kayttotarkoitus :value))))
+
+(def valmistumisilmoitus {:sent nil,
+                          :neighbors [],
+                          :schema-version 1,
+                          :authority {},
+                          :auth
+                          [{:lastName "Sibbo",
+                            :firstName "Sonja",
+                            :username "sonja",
+                            :type "owner",
+                            :role "owner",
+                            :id "777777777777777777000023"}],
+                          :drawings [],
+                          :submitted 1398343047691,
+                          :state :closed,
+                          :reminder-sent nil,
+                          :permitSubtype nil,
+                          :tasks [],
+                         :closedBy
+                         {:lastName "Sibbo",
+                          :firstName "Sonja",
+                          :id "777777777777777777000023"},
+                         :_verdicts-seen-by {:777777777777777777000023 1398343051151},
+                         :location {:x 10000.1, :y 6610000.0},
+                         :attachments
+                         [{:state "requires_user_action",
+                           :target nil,
+                           :op
+                           {:id "535905834206f413319be7f3",
+                            :name "ya-katulupa-vesi-ja-viemarityot",
+                            :created 1398343043267},
+                           :locked false,
+                           :type {:type-group "muut", :type-id "muu"},
+                           :applicationState "open",
+                           :modified 1398343043267,
+                           :versions [],
+                           :id "535905834206f413319be7f6"}],
+                         :statements [],
+                         :organization "753-YA",
+                         :buildings [],
+                         :title "Start_ready_app_1398343043",
+                         :started 1527897600000,
+                         :closed 1530489600000,
+                         :operations
+                         [{:id "535905834206f413319be7f3",
+                           :name "ya-katulupa-vesi-ja-viemarityot",
+                           :created 1398343043267}],
+                         :infoRequest false,
+                         :openInfoRequest false,
+                         :opened 1398343043267,
+                         :created 1398343043267,
+                         :_comments-seen-by {},
+                         :propertyId "75341600250023",
+                         :verdicts
+                         [{:kuntalupatunnus "123567890",
+                           :timestamp 1398343049972,
+                           :paatokset
+                           [{:paivamaarat {:anto 1525122000000, :lainvoimainen 1527800400000},
+                             :poytakirjat
+                             [{:paatoksentekija "Kaarina Krysp III",
+                               :status 6,
+                               :paatospvm 1525122000000,
+                               :paatoskoodi "ehdollinen"}]}]}],
+                         :startedBy
+                         {:lastName "Sibbo",
+                          :firstName "Sonja",
+                          :id "777777777777777777000023"},
+                         :documents
+                         [hakija
+                          tyomaasta-vastaava
+                          maksaja
+                          {:id "535905834206f413319be7f8",
+                           :schema-info
+                           {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
+                            :removable false,
+                            :repeating false,
+                            :version 1,
+                            :type "group",
+                            :order 60},
+                           :created 1398343043267,
+                           :data {}}
+                          {:created 1398343043267,
+                           :data
+                           {:tyoaika-alkaa-pvm {:modified 1398343045608, :value "01.05.2014"},
+                            :tyoaika-paattyy-pvm
+                            {:modified 1398343045698, :value "02.05.2014"}},
+                           :id "535905834206f413319be7f9",
+                           :schema-info
+                           {:name "tyoaika",
+                            :removable false,
+                            :repeating false,
+                            :version 1,
+                            :type "group",
+                            :order 63}}],
+                         :_statements-seen-by {},
+                         :modified 1398343053832,
+                         :comments [],
+                         :address "Start_ready_app_1398343043",
+                         :permitType "YA",
+                         :id "LP-753-2014-00005",
+                         :municipality "753"})

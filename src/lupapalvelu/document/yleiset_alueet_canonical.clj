@@ -3,8 +3,7 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
-            [clojure.walk :as walk]
-            [sade.common-reader :as cr]))
+            [clojure.walk :as walk]))
 
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
@@ -34,9 +33,8 @@
     (if postiosoite
       (merge
         yritys-basic
-        (if is-maksaja-doc
-          {:postiosoite postiosoite}
-          {:postiosoitetieto {:Postiosoite postiosoite}}))
+        {:postiosoite postiosoite}
+        {:postiosoitetieto {:Postiosoite postiosoite}})
       yritys-basic)))
 
 (defn- get-hakija [hakija-doc]
@@ -44,7 +42,8 @@
   ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
   (let [hakija (not-empty
                  (if (= "yritys" (:_selected hakija-doc))
-                   (let [yritys (get-yritys (:yritys hakija-doc) false)
+                   (let [yritys (deep-merge (:yritys (get-osapuoli-data hakija-doc :hakija ))
+                                  (get-yritys (:yritys hakija-doc) false))
                          henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo))]
                      (when (and yritys henkilo)
                        {:Osapuoli {:yritystieto {:Yritys yritys}
@@ -90,7 +89,8 @@
       (merge
         {:Vastuuhenkilo vastuuhenkilo}
         (when (= "yritys" type)
-          (when-let [yritys (get-yritys (:yritys tyomaasta-vastaava) false)]
+          (when-let [yritys (deep-merge (:yritys (get-osapuoli-data tyomaasta-vastaava :tyomaastaVastaava ))
+                                  (get-yritys (:yritys tyomaasta-vastaava) false))]
             {:Osapuoli {:yritystieto {:Yritys yritys}
                         :rooliKoodi "ty\u00f6nsuorittaja"}}))))))
 
@@ -100,7 +100,8 @@
                ;; yritys-tyyppinen hakija/maksaja, siirretaan yritysosa omaksi osapuolekseen
                (let [vastuuhenkilo-roolikoodi (if is-maksaja-doc "maksajan vastuuhenkil\u00f6" "hankkeen vastuuhenkil\u00f6")
                      vastuuhenkilo (get-vastuuhenkilo doc "yritys" vastuuhenkilo-roolikoodi)
-                     yritys (get-yritys (:yritys doc) is-maksaja-doc)]
+                     yritys (deep-merge (:yritys (get-osapuoli-data doc :tyomaastaVastaava ))
+                                        (get-yritys (:yritys doc) is-maksaja-doc))]
                  (when (and vastuuhenkilo yritys)
                    {:Vastuuhenkilo vastuuhenkilo
                     :Osapuoli {:yritystieto {:Yritys yritys}}}))
@@ -226,10 +227,9 @@
                         (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
                         (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
-        maksaja (if (:dummy-maksaja config)
-                  (merge (:Osapuoli hakija) {:laskuviite "0000000000"})
-                  (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja"))
-        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
+        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
+        maksajatieto (when maksaja {:Maksaja (deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
@@ -300,7 +300,7 @@
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
-    (cr/strip-nils body)))
+    (strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -332,7 +332,8 @@
                    (to-xml-date (:submitted application)))
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
-        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
+        maksajatieto (when maksaja {:Maksaja (deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         osapuolitieto (vec (filter :Osapuoli [hakija]))
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))

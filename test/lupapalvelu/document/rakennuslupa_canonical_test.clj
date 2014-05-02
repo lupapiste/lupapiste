@@ -961,7 +961,8 @@
                                      :zip "33456"
                                      :city "Tampere"})
 
-(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)}]))
+(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)
+                                                                                                              :kuntalupatunnus "2013-01"}]))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
            (let [application application-rakennuslupa-verdict-given
@@ -1128,9 +1129,8 @@
     ))
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [application application-rakennuslupa-verdict-given
-                 canonical (katselmus-canonical
-                             application
+           (let [canonical (katselmus-canonical
+                             application-rakennuslupa-verdict-given
                              "fi"
                              "123"
                              "Pohjakatselmus 1"
@@ -1161,6 +1161,7 @@
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
                  LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+                 kuntalupatunnus (:kuntalupatunnus LupaTunnus) => "2013-01"
                  muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
                  mt (:MuuTunnus muuTunnustieto) => truthy
 
@@ -1207,7 +1208,7 @@
   (tools/unwrapped
     {:sent nil,
      :linkPermitData [link-permit-data-kuntalupatunnus],
-     :neighbors {},
+     :neighbors [],
      :schema-version 1,
      :authority {},
      :auth [{:lastName "Panaani",

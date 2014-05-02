@@ -1,6 +1,6 @@
 (ns sade.util
   (:require [clojure.walk :refer [postwalk prewalk]]
-            [sade.strings :refer [numeric? decimal-number?]]
+            [sade.strings :refer [numeric? decimal-number?] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]))
 
@@ -19,6 +19,14 @@
     (postwalk-map (partial map (fn [[k v]] [k (f v)])) m))
   ([m pred f]
     (postwalk-map (partial map (fn [[k v]] (if (pred k v) [k (f v)] [k v]))) m)))
+
+(defn strip-empty-maps
+  "removes recursively all keys from map which have empty map as value"
+  [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
+
+(defn strip-nils
+  "removes recursively all keys from map which have value of nil"
+  [m] (postwalk-map (partial filter (comp not nil? val)) m))
 
 ; from clojure.contrib/core
 
@@ -119,6 +127,10 @@
   (let [s (str v)]
     (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
 
+(defn abs [n]
+  {:pre [(number? n)]}
+  (Math/abs n))
+
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
@@ -203,6 +215,13 @@
 (defn to-property-id [^String human-readable]
   (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
     (apply format "%03d%03d%04d%04d" parts)))
+
+(defn valid-email? [email]
+  (try
+    (javax.mail.internet.InternetAddress. email)
+    (boolean (re-matches #".+@.+\..+" email))
+    (catch Exception _
+      false)))
 
 (defn sequable?
   "Returns true if x can be converted to sequence."
