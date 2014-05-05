@@ -268,6 +268,9 @@
     (cleanup)
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+    (cr/ensure-sequental :vaadittuTyonjohtajatieto)
+    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (map (fn [x] (get-in x [:VaadittuTyonjohtaja :tyonjohtajaLaji])) (:vaadittuTyonjohtajatieto %)))) %))
+    ;(dissoc :vaadittuTyonjohtajatieto) TODO keep or dissoc?
     (cr/ensure-sequental :maarays)
     (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
     (dissoc :maarays)
