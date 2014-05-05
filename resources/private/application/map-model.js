@@ -56,9 +56,9 @@ LUPAPISTE.MapModel = function() {
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
-          html += "<div class="inforequest-comment"><span class='comment-type'>" + loc('inforequest.answer.title') + "</span> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
+          html += "<div class='inforequest-comment'><span class='comment-type'>" + loc('inforequest.answer.title') + "</span> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
         } else {
-          html += "<div class="inforequest-comment"><span class='comment-type'>" + loc('inforequest.question.title') + "</span> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
+          html += "<div class='inforequest-comment'><span class='comment-type'>" + loc('inforequest.question.title') + "</span> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
         }
         html += '<blockquote>' + com.text + '</blockquote></div>';
       });
