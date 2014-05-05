@@ -51,8 +51,8 @@ LUPAPISTE.MapModel = function() {
 
       html +=
         '<div class="inforequest-card" data-test-id="inforequest-card-' + ir.id + '">' +
-          '<h2 data-test-id="inforequest-title">' + ir.title + ' - ' + ir.authName + '</h2>' +
-          '<h3 class='operation-type' data-test-id="inforequest-operation">' + ir.operation + '</h3>';
+          '<h2 class="operation-title" data-test-id="inforequest-title">' + ir.title + ' - ' + ir.authName + '</h2>' +
+          '<h3 class="operation-type" data-test-id="inforequest-operation">' + ir.operation + '</h3>';
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
