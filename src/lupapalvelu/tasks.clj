@@ -90,6 +90,7 @@
          (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
            (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
          (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
+           ; TODO map :vaadittuTyonjohtajatieto?
            (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
              (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)")))
          ;; from YA verdict
