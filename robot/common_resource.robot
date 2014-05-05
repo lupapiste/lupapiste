@@ -215,6 +215,9 @@ Mikko logs in
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
 
+Arto logs in
+  Authority logs in  arto  arto  Arto Viranomainen
+
 Veikko logs in
   Authority logs in  veikko  veikko  Veikko Viranomainen
 
