@@ -476,7 +476,8 @@
 
 (defn- make-marker-contents [id lang app]
   (merge
-    {:title       (:title app)
+    {:id          (:id app)
+     :title       (:title app)
      :location    (:location app)
      :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
      :authName    (-> (domain/get-auths-by-role app :owner)

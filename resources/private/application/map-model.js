@@ -50,22 +50,22 @@ LUPAPISTE.MapModel = function() {
 //      console.log("formMarkerHtmlContents, ir:\n", ir);
 
       html +=
-        '<div class="inforequest-card">' +
-          '<h2>' + ir.title + ' - ' + ir.authName + '</h2>' +
-          '<h3>' + ir.operation + '</h3a>';
+        '<div class="inforequest-card" data-test-id="inforequest-card-' + ir.id + '">' +
+          '<h2 data-test-id="inforequest-title">' + ir.title + ' - ' + ir.authName + '</h2>' +
+          '<h3 data-test-id="inforequest-operation">' + ir.operation + '</h3>';
 
       _.each(ir.comments, function(com) {
         if (com.type === "authority") {
-          html += '<div><b>' + loc('inforequest.answer.title') + "</b> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
+          html += '<div class="inforequest-comment"><b>' + loc('inforequest.answer.title') + "</b> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
         } else {
-          html += '<div><b>' + loc('inforequest.question.title') + "</b> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
+          html += '<div class="inforequest-comment"><b>' + loc('inforequest.question.title') + "</b> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + "):</span>";
         }
         html += '<blockquote>' + com.text + '</blockquote></div>';
       });
 
       // no link is attached to currently opened inforequest
       if (ir.link) {
-        html += "<a href='" + ir.link + "'>Avaa neuvontapyyntö</a>";
+        html += "<a data-test-id='inforequest-link' href='" + ir.link + "'>Avaa neuvontapyyntö</a>";
       }
 
       html += '</div>';
