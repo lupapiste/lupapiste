@@ -1093,8 +1093,7 @@
 (defn- get-verdicts-with-attachments  [application user timestamp xml]
   (let [permit-type (:permitType application)
         reader (permit/get-verdict-reader permit-type)
-        element (permit/get-case-xml-element permit-type)
-        verdicts (krysp/->verdicts xml element reader)]
+        verdicts (krysp/->verdicts xml reader)]
     (map (partial verdict-attachments application user timestamp) verdicts)))
 
 (defcommand check-for-verdict
