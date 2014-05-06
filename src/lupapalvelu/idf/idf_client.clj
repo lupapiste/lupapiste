@@ -33,6 +33,6 @@
         body (:body resp)]
     (if (= 200 (:status resp))
       (let [id (-> (split-lines body) first ss/trim)]
-        (link-account! (:email user) partner-name id)
+        (link-account! (:email user) partner-name id ts false)
         true)
       (errorf "Unable link %s to %s: status=%s, body=%s" (:email user) partner-name (:status resp) (logging/sanitize 1000 body)))))

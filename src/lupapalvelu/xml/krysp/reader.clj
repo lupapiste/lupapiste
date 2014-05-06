@@ -69,7 +69,7 @@
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
-(defn post-body-for-ya-application [application-id]
+(defn- post-body-for-ya-application [application-id]
   {:body (str "<wfs:GetFeature
       service=\"WFS\"
         version=\"1.1.0\"
@@ -78,7 +78,7 @@
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:ogc=\"http://www.opengis.net/ogc\"
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
-        <wfs:Query typeName=\"yak:YleisetAlueet\">
+        <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
               <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
@@ -279,14 +279,21 @@
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
+
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+
+    ; KRYSP yhteiset 2.1.1+
     (cr/ensure-sequental :vaadittuTyonjohtajatieto)
-    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (map (fn [x] (get-in x [:VaadittuTyonjohtaja :tyonjohtajaLaji])) (:vaadittuTyonjohtajatieto %)))) %))
-    ;(dissoc :vaadittuTyonjohtajatieto) TODO keep or dissoc?
+    (update-in [:vaadittuTyonjohtajatieto] #(map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja ) %))
+    ; KRYSP yhteiset 2.1.0 and below have vaaditutTyonjohtajat key that contains the same data in a single string.
+    ; Convert the new format to the old.
+    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (:vaadittuTyonjohtajatieto %))) %))
+
     (cr/ensure-sequental :maarays)
     (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
     (dissoc :maarays)
+
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
                               :autopaikkojaRakennettava

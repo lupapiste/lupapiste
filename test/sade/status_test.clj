@@ -1,6 +1,6 @@
 (ns sade.status-test
-  (:use midje.sweet
-        sade.status))
+  (:require [midje.sweet :refer :all]
+            [sade.status :refer :all]))
 
 (facts "statuses"
 

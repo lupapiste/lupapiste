@@ -34,3 +34,8 @@
 (fact "parse notices XML bombs"
   (parse xml-bomb) => (throws org.xml.sax.SAXParseException))
 
+(fact "U+FEFF does not stop the parser"
+  (parse "\uFEFF<?xml version=\"1.0\"?>
+<ExceptionReport version=\"1.1.0\" xmlns=\"http://www.opengis.net/ows\">
+<Exception><ExceptionText>TYPENAME yak:YleisetAlueet not defined</ExceptionText></Exception>
+</ExceptionReport>") => truthy)

@@ -1,6 +1,6 @@
 (ns lupapalvelu.permit-test
-  (:use [lupapalvelu.permit]
-        [midje.sweet]))
+  (:require [lupapalvelu.permit :refer :all]
+            [midje.sweet :refer :all]))
 
 (fact "validators"
   (fact "is-not"
@@ -34,6 +34,4 @@
 
 (facts "get-sftp-directory"
   (fact "R" (get-sftp-directory "R") => "/rakennus")
-  (fact ":R" (get-sftp-directory :R) => "/rakennus")
-  )
-
+  (fact ":R" (get-sftp-directory :R) => "/rakennus"))
