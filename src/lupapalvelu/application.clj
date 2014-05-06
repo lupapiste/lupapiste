@@ -498,15 +498,20 @@
    :states     [:draft :open :submitted :complement-needed :info]   ;; TODO: Mitka tilat?
    :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
-  (let [inforequests (mongo/select :applications
-                      (merge
-                        (domain/application-query-for user)
-                        {:infoRequest true})
-                      {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
+  (let [x (util/->double x)
+        y (util/->double y)
+        inforequests (mongo/select :applications
+                       (merge
+                         (domain/application-query-for user)
+                         {:infoRequest true})
+                       {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
 
-       same-location-irs (filter
-                           #(and (= x (-> % :location :x str)) (= y (-> % :location :y str)))
-                           inforequests)
+        ;;
+        ;; TODO: Onko tassa oikein vertailla tarkkoja locationeja, vai pitaisiko verrata propertyId:ita?
+        ;;
+        same-location-irs (filter
+                            #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
+                            inforequests)
 
         remove-irs-by-id-fn (fn [target-irs irs-to-be-removed]
                               (remove
