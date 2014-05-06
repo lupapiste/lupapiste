@@ -20,7 +20,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+      cases (->verdicts xml ->verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
@@ -101,7 +101,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -151,7 +151,7 @@
 
 (facts "Tekla sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/teklap.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has one case" (count cases) => 1)
@@ -182,18 +182,18 @@
 
 (facts "case not found"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil :RakennusvalvontaAsia ->verdict)]
+  (let [cases (->verdicts nil ->verdict)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -271,7 +271,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-        cases (->verdicts xml :yleinenAlueAsiatieto ->simple-verdict)]
+        cases (->verdicts xml ->simple-verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
@@ -307,8 +307,7 @@
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["yl" "mal" "vvvl"]]
     (let [xml (sade.xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
-          case-elem (lupapalvelu.permit/get-case-xml-element (clojure.string/upper-case permit-type))
-          cases (->verdicts xml case-elem ->simple-verdict)]
+          cases (->verdicts xml ->simple-verdict)]
 
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)

@@ -31,13 +31,26 @@
        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
-(def building-type  "typeName=rakval%3AValmisRakennus")
-(def rakval-case-type      "typeName=rakval%3ARakennusvalvontaAsia")
-(def poik-case-type "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
-(def ya-type        "typeName=yak%3AYleisetAlueet")
-(def yl-case-type   "typeName=ymy%3AYmparistolupa")
-(def mal-case-type   "typeName=ymm%3AMaaAineslupaAsia")
+(def building-type    "typeName=rakval%3AValmisRakennus")
+(def rakval-case-type "typeName=rakval%3ARakennusvalvontaAsia")
+(def poik-case-type   "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
+(def ya-type          "typeName=yak%3AYleisetAlueet")
+(def yl-case-type     "typeName=ymy%3AYmparistolupa")
+(def mal-case-type    "typeName=ymm%3AMaaAineslupaAsia")
 (def vvvl-case-type   "typeName=ymv%3AVapautus")
+
+;; Object types as enlive selector
+(def case-elem-selector #{[:RakennusvalvontaAsia]
+                          [:Poikkeamisasia]
+                          [:Suunnittelutarveasia]
+                          [:Sijoituslupa]
+                          [:Kayttolupa]
+                          [:Liikennejarjestelylupa]
+                          [:Tyolupa]
+                          [:Ilmoitukset]
+                          [:Ymparistolupa]
+                          [:MaaAineslupaAsia]
+                          [:Vapautus]})
 
 ;; For building filters
 (def ^:private yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
@@ -334,7 +347,7 @@
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
                         (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
 
-(defn ->verdicts [xml for-elem ->function]
+(defn ->verdicts [xml ->function]
   (map
     (fn [asia]
       (let [verdict-model (->kuntalupatunnus asia)
@@ -346,7 +359,7 @@
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))
-    (select (cr/strip-xml-namespaces xml) for-elem)))
+    (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
 (defn- buildings-summary-for-application [xml]
   (let [summary (->buildings-summary xml)]
