@@ -279,14 +279,21 @@
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
+
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+
+    ; KRYSP yhteiset 2.1.1+
     (cr/ensure-sequental :vaadittuTyonjohtajatieto)
-    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (map (fn [x] (get-in x [:VaadittuTyonjohtaja :tyonjohtajaLaji])) (:vaadittuTyonjohtajatieto %)))) %))
-    ;(dissoc :vaadittuTyonjohtajatieto) TODO keep or dissoc?
+    (update-in [:vaadittuTyonjohtajatieto] #(map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja ) %))
+    ; KRYSP yhteiset 2.1.0 and below have vaaditutTyonjohtajat key that contains the same data in a single string.
+    ; Convert the new format to the old.
+    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (:vaadittuTyonjohtajatieto %))) %))
+
     (cr/ensure-sequental :maarays)
     (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
     (dissoc :maarays)
+
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
                               :autopaikkojaRakennettava

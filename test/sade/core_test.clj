@@ -1,7 +1,6 @@
 (ns sade.core-test
-  (:use clojure.test
-        midje.sweet
-        sade.core))
+  (:require [midje.sweet :refer :all]
+            [sade.core :refer :all]))
 
 (facts
   (ok)                 => {:ok true}

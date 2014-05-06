@@ -1,7 +1,7 @@
 (ns sade.common-reader-test
-  (:use [sade.common-reader]
-        [sade.xml]
-        [midje.sweet]))
+  (:require [sade.common-reader :refer :all]
+            [sade.xml :refer :all]
+            [midje.sweet :refer :all]))
 
 (facts "strip-keys"
   (fact "takes (recursively) last sub-keyword from keywords"
