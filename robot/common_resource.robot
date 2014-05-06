@@ -304,7 +304,7 @@ Create inforequest
   Wait Until  Element should be visible  inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
-Create first inforequest 
+Create first inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
   Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-proceed-to-inforequest
@@ -432,7 +432,7 @@ Submit application
 Open the request
   [Arguments]  ${address}
   Go to page  applications
-  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']//td
   Wait for jQuery
 
 Open application
