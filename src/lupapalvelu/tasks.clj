@@ -89,10 +89,13 @@
          (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
          (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
            (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
-         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
-           ; TODO map :vaadittuTyonjohtajatieto?
-           (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
-             (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)")))
+         (if (seq (:vaadittuTyonjohtajatieto lupamaaraykset))
+           ; KRYSP yhteiset 2.1.1+
+           (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source) (:vaadittuTyonjohtajatieto lupamaaraykset))
+           ; KRYSP yhteiset 2.1.0 and below
+           (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
+             (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
+               (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))
          ;; from YA verdict
          (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
            (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))
