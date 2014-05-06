@@ -164,8 +164,6 @@ var gis = (function() {
 
     var context = {
       extGraphic: function(feature) {
-//        console.log("extGraphic, feature: ", feature);
-
         var iconPath = "img/map-marker.png";
         if (feature.cluster) {
           if (feature.cluster.length > 1) {
@@ -174,7 +172,6 @@ var gis = (function() {
             iconPath = feature.cluster[0].attributes.isCluster ? iconLocMapping["cluster"] : feature.cluster[0].style.externalGraphic;
           }
         } else {
-//          console.log("extGraphic, single marker, feature: ", feature);
           iconPath = feature.style.externalGraphic;
         }
 
@@ -263,27 +260,18 @@ var gis = (function() {
 
     // Adding markers
 
-    self.add = function(/*x, y, markerIconName, markerContents*/ markerInfos) {
-
+    self.add = function(markerInfos) {
+      var newMarkers = [];
       markerInfos = _.isArray(markerInfos) ? markerInfos : [markerInfos];
 
-      var newMarkers = [];
-
       _.each(markerInfos, function(markerInfo) {
-//        console.log("handling markerInfo: ", markerInfo);
-
         var iconName = markerInfo.isCluster ? "cluster" : markerInfo.iconName;
         var iconPath = iconLocMapping[iconName] || iconDefault;
-//        console.log("self.add, iconName: ", iconName);
-//        console.log("self.add, x: ", markerInfo.x, ", y: ", markerInfo.y, ", iconName: ", iconName, ", iconLocMapping[iconName]: ", iconPath, ", contents: ", markerInfo.contents);
-
         var markerFeature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(markerInfo.x, markerInfo.y),
             { isCluster: markerInfo.isCluster,
               contents: markerInfo.contents || "" },
             { externalGraphic: iconPath});
-
-//        console.log("created markerFeature: ", markerFeature);
 
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);

@@ -490,14 +490,13 @@
                                      :time (:created %)
                                      :text (:text %)})))}
     (when-not (= id (:id app))
-      {:link      (str (env/value :host) "/app/" (name lang) "/authority#!/inforequest/" (:id app))})))  ;; "authority" -> "oir"?
+      {:link      (str (env/value :host) "/app/" (name lang) "/authority#!/inforequest/" (:id app))})))
 
 (defquery inforequest-markers
   {:parameters [id lang x y]
    :roles      [:authority]
    :states     [:draft :open :submitted :complement-needed :info]   ;; TODO: Mitka tilat?
-   :input-validators [(partial action/non-blank-parameters [:x :y])]
-   }
+   :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
   (let [inforequests (mongo/select :applications
                       (merge
@@ -509,26 +508,25 @@
                            #(and (= x (-> % :location :x str)) (= y (-> % :location :y str)))
                            inforequests)
 
-       remove-irs-by-id-fn (fn [target-irs irs-to-be-removed]
-                             (remove
-                               (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed))
-                               target-irs))
+        remove-irs-by-id-fn (fn [target-irs irs-to-be-removed]
+                              (remove
+                                (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed))
+                                target-irs))
 
-       inforequests (remove-irs-by-id-fn inforequests same-location-irs)
+        inforequests (remove-irs-by-id-fn inforequests same-location-irs)
 
-       application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
+        application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
 
-       ;; **** TODO: Tama ei viela toimi! ****
-       same-op-irs (filter
-                     (fn [ir]
-                       (some #(= application-op-name (:name %)) (:operations ir)))
-                     inforequests)
+        same-op-irs (filter
+                      (fn [ir]
+                        (some #(= application-op-name (:name %)) (:operations ir)))
+                      inforequests)
 
-       others (remove-irs-by-id-fn inforequests same-op-irs)
+        others (remove-irs-by-id-fn inforequests same-op-irs)
 
-       same-location-irs (map (partial make-marker-contents id lang) same-location-irs)
-       same-op-irs       (map (partial make-marker-contents id lang) same-op-irs)
-       others            (map (partial make-marker-contents id lang) others)]
+        same-location-irs (map (partial make-marker-contents id lang) same-location-irs)
+        same-op-irs       (map (partial make-marker-contents id lang) same-op-irs)
+        others            (map (partial make-marker-contents id lang) others)]
 
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))

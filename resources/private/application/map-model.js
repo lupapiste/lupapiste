@@ -46,9 +46,6 @@ LUPAPISTE.MapModel = function() {
     var html = "";
 
     _.each(irs, function(ir) {
-
-//      console.log("formMarkerHtmlContents, ir:\n", ir);
-
       html +=
         '<div class="inforequest-card" data-test-id="inforequest-card-' + ir.id + '">' +
           '<h2 class="operation-title" data-test-id="inforequest-title">' + ir.title + ' - ' + ir.authName + '</h2>' +
@@ -78,11 +75,6 @@ LUPAPISTE.MapModel = function() {
     ajax
     .query("inforequest-markers", {id: currentAppId, lang: loc.getCurrentLanguage(), x: x, y: y})
     .success(function(data) {
-
-//      console.log("inforequest-markers success, data: ", data);
-//      console.log("same location: ", data["sameLocation"]);
-//      console.log("same operations: ", data["sameOperation"]);
-//      console.log("others: ", data["others"]);
 
       var markerInfos = [];
 
@@ -117,16 +109,12 @@ LUPAPISTE.MapModel = function() {
         });
       });
 
-//      console.log(", adding markerInfos: ", markerInfos);
       map.add(markerInfos);
-
-      //repository.load(currentAppId);
     })
     .error(function(data) {
       //
       // Needed to have this error branch to prevent applicant from getting error popups on the UI.
       //
-//      console.log("inforequest-markers error, data: ", data);
       if (data.text !== "error.unauthorized") {
         debug("Could not fetch inforequest markers", data);
       }
