@@ -30,6 +30,8 @@
     (let [text (str etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts (key-for-partner app))]
       (digest/sha-256 (java.io.ByteArrayInputStream. (.getBytes text utf8))))))
 
-(defn link-account! [email app id]
-  (let [partner-id (id-for-partner app)]
-    (user/update-user-by-email email {(str "partnerApplications." partner-id ".id") id})))
+(defn link-account! [email app id timestamp origin?]
+  (let [path (str "partnerApplications." (id-for-partner app))]
+    (user/update-user-by-email email {(str path ".id") id
+                                      (str path ".created") timestamp
+                                      (str path ".origin") origin?})))
