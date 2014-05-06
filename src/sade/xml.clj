@@ -1,5 +1,6 @@
 (ns sade.xml
   (:require [clojure.xml :as xml]
+            [clojure.string :as s]
             [net.cgrand.enlive-html :as enlive])
   (:import  [org.apache.commons.lang3 StringEscapeUtils]))
 
@@ -21,9 +22,11 @@
   (xml/parse (java.io.ByteArrayInputStream. (.getBytes s encoding)) startparse-sax-no-doctype))
 
 (defn parse [^String s & {:keys [encoding] :or {encoding "UTF-8"}}]
-  (if (.startsWith (.trim s) "<")
-    (parse-string s encoding)
-    (xml/parse s startparse-sax-no-doctype)))
+  {:pre [s]}
+  (let [xml (s/replace (s/trim s) #"[\uFEFF-\uFFFF]", "")]
+    (if (.startsWith xml "<")
+      (parse-string xml encoding)
+      (xml/parse xml startparse-sax-no-doctype))))
 
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))
