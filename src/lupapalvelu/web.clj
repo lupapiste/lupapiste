@@ -514,7 +514,7 @@
     (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
           xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
-      (when (= typeName "yak:YleisetAlueet")
+      (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/yleiset alueet/ya-verdict.xml")))))))
 
 (env/in-dev
