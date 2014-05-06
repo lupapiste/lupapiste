@@ -144,7 +144,6 @@
 
       (fact "Application XML getter is set up" getter => fn?)
       (fact "Verdict reader is set ip" reader => fn?)
-      (fact "Case element is set" case-elem => keyword?)
 
       (let [xml (getter local-krysp id false)
             cases (->verdicts xml reader)]
