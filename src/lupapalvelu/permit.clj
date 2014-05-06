@@ -26,38 +26,31 @@
 
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
-   :sftp-directory   "/rakennus"
-   :case-xml-element :RakennusvalvontaAsia})
+   :sftp-directory   "/rakennus"})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes         []
-   :sftp-directory   "/yleiset_alueet"
-   :case-xml-element :yleinenAlueAsiatieto})
+   :sftp-directory   "/yleiset_alueet"})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
-   :sftp-directory "/ymparisto"
-   :case-xml-element :Ilmoitukset})
+   :sftp-directory "/ymparisto"})
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
-   :sftp-directory "/ymparisto"
-   :case-xml-element :Ymparistolupa})
+   :sftp-directory "/ymparisto"})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
-   :sftp-directory "/ymparisto"
-   :case-xml-element :Vapautus})
+   :sftp-directory "/ymparisto"})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
-   :sftp-directory   "/poikkeusasiat"
-   :case-xml-element :Popast})
+   :sftp-directory   "/poikkeusasiat"})
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
-   :sftp-directory "/ymparisto"
-   :case-xml-element :MaaAineslupaAsia})
+   :sftp-directory "/ymparisto"})
 
 ;;
 ;; Helpers
@@ -72,9 +65,6 @@
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
-
-(defn get-case-xml-element [permit-type]
-  (get-metadata permit-type :case-xml-element))
 
 (defn get-application-mapper
   "Returns a function that maps application into KRYSP XML and saves the XML to disk."
