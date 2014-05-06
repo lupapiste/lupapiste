@@ -124,31 +124,30 @@
 (fact "converting rakval verdict krysp to lupapiste domain model"
   (let [xml (rakval-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
+    (count (->verdicts xml ->verdict)) => 2))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
   (let [xml (poik-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
+    (count (->verdicts xml ->verdict)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
   (let [xml (ya-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :yleinenAlueAsiatieto ->simple-verdict)) => 1))
+    (count (->verdicts xml ->simple-verdict)) => 1))
 
 (facts "converting ymparisto verdicts  krysp to lupapiste domain model"
   (doseq [permit-type ["YL" "MAL" "VVVL"]]
     (let [getter (permit/get-application-xml-getter permit-type)
-          reader (permit/get-verdict-reader permit-type)
-          case-elem (permit/get-case-xml-element permit-type)]
+          reader (permit/get-verdict-reader permit-type)]
 
       (fact "Application XML getter is set up" getter => fn?)
       (fact "Verdict reader is set ip" reader => fn?)
       (fact "Case element is set" case-elem => keyword?)
 
       (let [xml (getter local-krysp id false)
-            cases (->verdicts xml case-elem reader)]
+            cases (->verdicts xml reader)]
         (fact "xml is parsed" cases => truthy)
         (fact "xml has 1 cases" (count cases) => 1)
         (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)

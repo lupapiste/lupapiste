@@ -347,7 +347,7 @@
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
                         (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
 
-(defn ->verdicts [xml for-elem ->function]
+(defn ->verdicts [xml ->function]
   (map
     (fn [asia]
       (let [verdict-model (->kuntalupatunnus asia)
