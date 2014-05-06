@@ -113,11 +113,11 @@ Inforequest is not visible
 
 Inforequest is not assigned
   [Arguments]  ${address}
-  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${EMPTY}
+  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']//td[@data-test-col-name='authority']  ${EMPTY}
 
 Inforequest is assigned to
   [Arguments]  ${address}  ${name}
-  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${name}
+  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']//td[@data-test-col-name='authority']  ${name}
 
 Add Comment
   [Arguments]  ${message}
