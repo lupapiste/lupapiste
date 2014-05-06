@@ -73,9 +73,6 @@
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
 
-(defn get-case-xml-element [permit-type]
-  (get-metadata permit-type :case-xml-element))
-
 (defn get-application-mapper
   "Returns a function that maps application into KRYSP XML and saves the XML to disk."
   [permit-type]
