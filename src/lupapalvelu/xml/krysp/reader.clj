@@ -279,14 +279,18 @@
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
+
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+
     (cr/ensure-sequental :vaadittuTyonjohtajatieto)
-    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (map (fn [x] (get-in x [:VaadittuTyonjohtaja :tyonjohtajaLaji])) (:vaadittuTyonjohtajatieto %)))) %))
-    ;(dissoc :vaadittuTyonjohtajatieto) TODO keep or dissoc?
+    (update-in [:vaadittuTyonjohtajatieto] #(map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja ) %))
+    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (:vaadittuTyonjohtajatieto %))) %))
+
     (cr/ensure-sequental :maarays)
     (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
     (dissoc :maarays)
+
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
                               :autopaikkojaRakennettava
