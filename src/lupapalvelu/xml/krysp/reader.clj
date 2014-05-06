@@ -69,7 +69,7 @@
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
-(defn post-body-for-ya-application [application-id]
+(defn- post-body-for-ya-application [application-id]
   {:body (str "<wfs:GetFeature
       service=\"WFS\"
         version=\"1.1.0\"
@@ -78,7 +78,7 @@
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:ogc=\"http://www.opengis.net/ogc\"
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
-        <wfs:Query typeName=\"yak:YleisetAlueet\">
+        <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
               <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
