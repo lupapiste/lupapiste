@@ -65,7 +65,7 @@
 (defn- validate-hetu-checksum [hetu]
   (let [number   (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))
         n (mod number 31)
-        checksum  (nth ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E""F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"] n)
+        checksum  (nth ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"] n)
         old-checksum (subs hetu 10 11)]
     (when (not= checksum old-checksum) [:err "illegal-hetu"])))
 
@@ -316,39 +316,42 @@
    :data         {}})
 
 ;;
-;; Blacklists
+;; Convert data
 ;;
-
-(defn strip-blacklisted-data
-  "Strips values from document data if blacklist in schema includes given blacklist-item."
-  [{data :data :as document} blacklist-item & [initial-path]]
+(defn convert-document-data
+  "Walks document data starting from initial-path.
+   If predicate matches, value is outputted using emitter function.
+   Predicate takes two parameters: element schema definition and the value.
+   Emitter takes one parameter, the value."
+  [pred emitter {data :data :as document} initial-path]
   (when data
-    (letfn [(strip [schema-body path]
+    (letfn [(doc-walk [schema-body path]
               (into {}
                 (map
-                  (fn [{:keys [name type body repeating blacklist] :as element}]
+                  (fn [{:keys [name type body repeating] :as element}]
                     (let [k (keyword name)
                           current-path (conj path k)
                           v (get-in data current-path)]
-                      (if ((set (map keyword blacklist)) (keyword blacklist-item))
-                        [k nil]
+                      (if (pred element v)
+                        [k (emitter v)]
                         (when v
                           (if (not= (keyword type) :group)
                             [k v]
                             [k (if repeating
-                                 (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
-                                 (strip body current-path))])))))
+                                 (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
+                                 (doc-walk body current-path))])))))
                   schema-body)))]
       (let [path (vec initial-path)
             schema (get-document-schema document)
             schema-body (:body (if (seq path) (find-by-name (:body schema) path) schema))]
-        (assoc-in document (concat [:data] path)
-          (strip schema-body path))))))
+        (assoc-in document (concat [:data] path) (doc-walk schema-body path))))))
 
-
-;;
-;; Turvakielto
-;;
+(defn strip-blacklisted-data
+  "Strips values from document data if blacklist in schema includes given blacklist-item."
+  [document blacklist-item & [initial-path]]
+  (let [bl-kw (keyword blacklist-item)
+        strip-if (fn [{bl :blacklist} _] ((set (map keyword bl)) bl-kw))]
+    (convert-document-data strip-if (constantly nil) document initial-path)))
 
 (defn strip-turvakielto-data [{data :data :as document}]
   (reduce
