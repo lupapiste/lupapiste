@@ -78,6 +78,8 @@
 (facts "hetu validation"
   (validate-field {:type :hetu} "") => nil?
   (validate-field {:type :hetu} "210281-9988") => nil?
+  (validate-field {:type :hetu} "210281+9988") => nil?
+  (validate-field {:type :hetu} "070550A907P") => nil?
   (validate-field {:type :hetu} "010170-960F") => nil?
   (validate-field {:type :hetu} "210281_9988") => [:err "illegal-hetu"]
   (validate-field {:type :hetu} "210281-9987") => [:err "illegal-hetu"]
@@ -359,7 +361,7 @@
           :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                                      :henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
                                                                :sukunimi {:modified 1370856477455, :value "Panaani"}
-                                                               :hetu     {:modified 1370856477455, :value "010101-1234"}
+                                                               :hetu     {:modified 1370856477455, :value "010203-040A"}
                                                                :turvakieltoKytkin {:modified 1370856477455, :value false}}
                                                :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
                                                         :postinumero {:value "10203", :modified 1370856487304}
@@ -480,7 +482,7 @@
               {:henkilotiedot
                {:etunimi "Gustav",
                 :sukunimi "Golem",
-                :hetu "000000-0000",
+                :hetu "070550A907P",
                 :turvakieltoKytkin true},
                :osoite {:katu "Katuosoite"},
                :yhteystiedot nil}})
@@ -497,7 +499,7 @@
                 {:henkilotiedot
                  {:etunimi "Gustav",
                   :sukunimi "Golem",
-                  :hetu "000000-0000",
+                  :hetu "070550-907P",
                   :turvakieltoKytkin true},
                  :osoite {:katu "Katuosoite"},
                  :yhteystiedot {}}}}})

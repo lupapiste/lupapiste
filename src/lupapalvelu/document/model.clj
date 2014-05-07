@@ -72,7 +72,7 @@
 (defmethod validate-field :hetu [_ v]
   (cond
     (blank? v) nil
-    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d+|\d\d-|[01]\dA)\d{3}[\dA-Z]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
+    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
     :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ v]
