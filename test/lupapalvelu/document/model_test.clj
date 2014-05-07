@@ -75,6 +75,14 @@
   (validate-field {:type :time} "23:60") => [:warn "illegal-value:time"]
   (validate-field {:type :time} "-1:10") => [:warn "illegal-value:time"])
 
+(facts "hetu validation"
+  (validate-field {:type :hetu} "") => nil?
+  (validate-field {:type :hetu} "210281-9988") => nil?
+  (validate-field {:type :hetu} "010170-960F") => nil?
+  (validate-field {:type :hetu} "210281_9988") => [:err "illegal-hetu"]
+  (validate-field {:type :hetu} "210281-9987") => [:err "illegal-hetu"]
+  (validate-field {:type :hetu} "300281-998V") => [:err "illegal-hetu"])
+
 ;;
 ;; validate
 ;;

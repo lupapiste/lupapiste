@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.strings :refer :all]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
             [clojure.string :as s]
@@ -11,6 +10,7 @@
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.strings :refer :all]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -50,6 +50,30 @@
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
+
+(defn- validate-hetu-date [hetu]
+  (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
+        yy (last (butlast dateparsts))
+        yyyy (str (case (last dateparsts) "+" "18" "-" "19" "20") yy)
+        basic-date (str yyyy (second dateparsts) (first dateparsts))]
+    (try
+      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
+      nil
+      (catch Exception e
+        [:err "illegal-hetu"]))))
+
+(defn- validate-hetu-checksum [hetu]
+  (let [number   (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))
+        n (mod number 31)
+        checksum  (nth ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E""F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"] n)
+        old-checksum (subs hetu 10 11)]
+    (when (not= checksum old-checksum) [:err "illegal-hetu"])))
+
+(defmethod validate-field :hetu [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d+|\d\d-|[01]\dA)\d{3}[\dA-Z]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
+    :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
