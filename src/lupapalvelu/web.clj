@@ -32,7 +32,6 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]
             [lupapalvelu.idf.idf-server :as idf-server]))
 
 ;;
