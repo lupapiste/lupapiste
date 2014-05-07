@@ -293,20 +293,16 @@ Create first application
 
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
-  Click by test id  create-proceed-to-inforequest
-  # Needed for animation to finish.
-  Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
-  Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
-  Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
-  Click by test id  create-inforequest
-  Confirm  dynamic-ok-confirm-dialog
-  Wait Until  Element should be visible  inforequest
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Do create inforequest  false  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
 
 Create first inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
-  Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Do create inforequest  true  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+
+Do create inforequest
+  [Arguments]  ${isFirstInforequest}  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+  Run Keyword If  '${isFirstInforequest}' == 'true'  Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  ...  ELSE  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
