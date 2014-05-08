@@ -814,6 +814,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   var builders = {
     group: buildGroup,
     string: buildString,
+    hetu: buildString,
     text: buildText,
     checkbox: buildCheckbox,
     select: buildSelect,

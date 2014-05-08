@@ -1,6 +1,7 @@
 (ns lupapalvelu.neighbor-itest
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.factlet :refer :all]
             [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
@@ -86,34 +87,34 @@
     n-id => neighbor-id
     token => #"[A-Za-z0-9]{48}"))
 
-(facts "neighbor invite & view on application"
+(facts* "neighbor invite & view on application"
   (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
                                       :id application-id
                                       :neighborId neighborId
-                                      :email "abba@example.com")
+                                      :email "abba@example.com") => ok?
         application     (query-application pena application-id)
         hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
-        uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))
-        _               (command pena :update-doc
-                                      :id application-id
-                                      :doc hakija-doc-id
-                                      :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
-                                                ["henkilo.henkilotiedot.sukunimi" "Zorro"]
-                                                ["henkilo.henkilotiedot.hetu"     "123456789"]
-                                                ["henkilo.yhteystiedot.puhelin"   "040-1234567"]])
-        _               (command pena :update-doc
-                                      :id application-id
-                                      :doc uusirak-doc-id
-                                      :updates [["rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"  "Gustav"]
-                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.sukunimi" "Golem"]
-                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.hetu"     "abba"]
-                                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.turvakieltoKytkin" true]
-                                                ["rakennuksenOmistajat.0.henkilo.osoite.katu"            "Katuosoite"]
-                                                ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]])]
+        uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))]
 
-    application => truthy
+        (command pena :update-doc
+                      :id application-id
+                      :doc hakija-doc-id
+                      :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
+                                ["henkilo.henkilotiedot.sukunimi" "Zorro"]
+                                ["henkilo.henkilotiedot.hetu"     "080599-9158"]
+                                ["henkilo.yhteystiedot.puhelin"   "040-1234567"]]) => ok?
+
+        (command pena :update-doc
+                      :id application-id
+                      :doc uusirak-doc-id
+                      :updates [["rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"  "Gustav"]
+                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.sukunimi" "Golem"]
+                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.hetu"     "080588-921L"]
+                                ["rakennuksenOmistajat.0.henkilo.henkilotiedot.turvakieltoKytkin" true]
+                                ["rakennuksenOmistajat.0.henkilo.osoite.katu"            "Katuosoite"]
+                                ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]]) => ok?
 
     (let [email                     (query pena :last-email)
           body                      (get-in email [:message :body :plain])
@@ -122,18 +123,18 @@
     token => truthy
     token =not=> #"="
 
-    (fact "application query returns set document info"
+    (fact "application query returns set document info with masked person ID"
      (let [application (query-application pena application-id)
            hakija-doc  (tools/unwrapped (domain/get-document-by-id application hakija-doc-id))
            uusirak-doc (tools/unwrapped (domain/get-document-by-id application uusirak-doc-id))]
 
        (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
        (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-       (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"
+       (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "080599-****"
        (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => "040-1234567"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
-       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "abba"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "080588-****"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => true
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
