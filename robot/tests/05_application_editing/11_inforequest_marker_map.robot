@@ -10,7 +10,6 @@ Setting maps enabled for these tests
   Set integration proxy on
 
 Mikko as applicant does not see the inforequest marker map
-  #TODO
   Mikko logs in
   #User role should be  applicant
   ${secs} =  Get Time  epoch
@@ -31,75 +30,68 @@ Arto (authority) sees Mikko's new inforequest as a marker on map
   Marker count by type is  1  0  0  0
 
 Arto clicks on the marker and the marker contents window is opened
-  # TODO: Talle parempi matchaus jotenkin?
-  #Click element  xpath=//div[@id='inforequest-marker-map']/image
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
   Wait until  Element should be visible  //div[@id='marker-map-contents']
   Total Inforequest info card count on map is  1
   Total inforequest comment count on the info cards is  1
 
-Arto clicks on the marker, and the opened marker contents window has correct info about the inforequest
-  ${current-app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
-  Verify info card by app id  ${current-app-id}  ${inforequest-first}  Asuinrakennuksen rakentaminen
+The opened marker contents window has correct info about the inforequest
+  ${first-app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
+  Set Suite Variable  ${first-app-id}
+  Verify info card by app id  ${first-app-id}  ${inforequest-first} - Mikko Intonen  Asuinrakennuksen rakentaminen  Jiihaa-first
 
 Arto clicks on the marker again and the marker contents window is closed
-  #Click element  xpath=//div[@id='inforequest-marker-map']/image
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
   Wait until  Element should not be visible  //div[@id='marker-map-contents']
 
 Arto adds comment and it is visible in the marker contents window
-  Add comment and Mark answered  Oletko miettinyt askeesia?
-  #Click element  xpath=//div[@id='inforequest-marker-map']/image
+  Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
+  Input comment and mark answered  inforequest  Oletko miettinyt askeesia?
+  Wait until   Element Text Should Be  test-inforequest-state  Vastattu
+
+Arto's comment is visible in the marker contents window
+  Wait until  Element should be visible  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
-  Wait until  Element should not be visible  //div[@id='marker-map-contents']
+  Wait until  Element should be visible  //div[@id='marker-map-contents']
   Total Inforequest info card count on map is  1
   Total inforequest comment count on the info cards is  2
-  #Click element  xpath=//div[@id='inforequest-marker-map']/image
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
   Wait until  Element should not be visible  //div[@id='marker-map-contents']
 
-Arto creates three new inforequests, and checks types of the created markers
-  #
-  # TODO: Testaa tama!
-  #
-
-  # 1 with same location, 1 with same operation and 1 other
-
-  # Same location
+Arto creates three new inforequests
+  # inforequest with same location
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-same-loc}  ir-same-loc-${secs}
   Set Suite Variable  ${propertyId-same-loc}  433-405-3-427
   #Set Suite Variable  ${address-same-loc}  Holvitie 4
   Create inforequest the fast way  ${inforequest-same-loc}  360383.382  6734086.21  433  ${propertyId-same-loc}  asuinrakennus  Jiihaa-loc
 
-  # Same operation
+  # inforequest with same operation
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-same-op}  ir-same-op-${secs}
   Set Suite Variable  ${propertyId-same-op}  433-405-57-8
   #Set Suite Variable  ${address-same-op}  Kauppatie 6
   Create inforequest the fast way  ${inforequest-same-op}  360365.358  6734200.355  433  ${propertyId-same-op}  asuinrakennus  Jiihaa-op
 
-  # Other
+  # other inforequest
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-other}  ir-other-${secs}
   Set Suite Variable  ${propertyId-other}  433-405-78-0
   #Set Suite Variable  ${address-other}  Kauppatie 4
   Create inforequest the fast way  ${inforequest-other}  360414.396  6734197.77  433  ${propertyId-other}  vapaa-ajan-asuinrakennus  Jiihaa-other
 
-
-  Total Inforequest info card count on map is  4
-  Total inforequest comment count on the info cards is  5
+There are correct amount of correct type of markers on the marker map
   Total marker count is  3
-  Marker count by type is  0  1  1  1
+  Marker count by type is  1  0  1  1
 
-Follow the link displayed in an info card
-  ${current-app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
-  Click element  xpath=//div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${current-app-id}']/a[@data-test-id='inforequest-link']
-  Wait until  Element text should not be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']  ${current-app-id}
-
+Open the marker contents window and follow the link displayed in an info card
+  Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-group.png']
+  Wait until  Element should be visible  //div[@id='marker-map-contents']
+  Click element  xpath=//div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${first-app-id}']/a[@data-test-id='inforequest-link']
+  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']  ${first-app-id}
   Logout
 
-Setting maps enabled again after the tests
+Setting maps disabled again after the tests
   Set integration proxy off
 
 
@@ -107,20 +99,10 @@ Setting maps enabled again after the tests
 
 Total marker count is
   [Arguments]  ${amount}
-  #Xpath Should Match X Times  //div[@id='inforequest-marker-map']//image[contains(@id, 'OpenLayers_Geometry_Point_')]  ${amount}
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]  ${amount}
 
 Marker count by type is
   [Arguments]  ${current-location-amount}  ${same-operation-amount}  ${others-amount}  ${cluster-amount}
-
-  # TODO: Miksi tassa //image... ei matchaa mihinkaan?
-  # TODO: Miksi "xlink:href" aiheuttaa virheen "... contains unresolvable namespaces"?
-
-  #Xpath Should Match X Times  //div[@id='inforequest-marker-map']//image[@xlink:href='/img/map-marker.png']  ${current-location-amount}
-  #Xpath Should Match X Times  //div[@id='inforequest-marker-map']//image[@xlink:href='/img/map-marker-red.png']  ${same-operation-amount}
-  #Xpath Should Match X Times  //div[@id='inforequest-marker-map']//image[@xlink:href='/img/map-marker-green.png']  ${others-amount}
-  #Xpath Should Match X Times  //div[@id='inforequest-marker-map']//image[@xlink:href='/img/map-marker-group.png']  ${cluster-amount}
-
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker.png']  ${current-location-amount}
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-red.png']  ${same-operation-amount}
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-green.png']  ${others-amount}
@@ -131,16 +113,16 @@ Total Inforequest info card count on map is
   Xpath Should Match X Times  //div[@id='marker-map-contents']//div[@class='inforequest-card']  ${amount}
 
 Verify info card by app id
-  [Arguments]  ${current-app-id}  ${title}  ${operation}
-  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${current-app-id}']/h2[@data-test-id='inforequest-title']  ${title}
-  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${current-app-id}']/h3[@data-test-id='inforequest-operation']  ${operation}
-  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${current-app-id}']/div[@class='inforequest-comment']/blockquote  Jiihaa
-  Element should not be visible  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${current-app-id}']/a[@data-test-id='inforequest-link']
+  [Arguments]  ${app-id}  ${title}  ${operation}  ${comment}
+  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h2[@data-test-id='inforequest-title']  ${title}
+  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h3[@data-test-id='inforequest-operation']  ${operation}
+  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/div[@class='inforequest-comment']/blockquote  ${comment}
+  Element should not be visible  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/a[@data-test-id='inforequest-link']
 
 Comment count on the info card of current inforequest is
   [Arguments]  ${amount}
-  ${current-app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
-  Xpath Should Match X Times  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${current-app-id}']//div[@class='inforequest-comment']  ${amount}
+  ${app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
+  Xpath Should Match X Times  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']//div[@class='inforequest-comment']  ${amount}
 
 Total inforequest comment count on the info cards is
   [Arguments]  ${amount}
