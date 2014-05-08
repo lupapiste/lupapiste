@@ -170,7 +170,6 @@ var gis = (function() {
         } else {
           iconPath = feature.style.externalGraphic;
         }
-
         return iconPath || iconDefault;
       },
       graphicWidth: function(feature) {
