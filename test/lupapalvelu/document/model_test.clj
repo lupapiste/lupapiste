@@ -606,7 +606,8 @@
     (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults true)
     => {:userId                        {:value "id"}
         :henkilotiedot {:etunimi       {:value ""}
-                        :sukunimi      {:value "lastName"}}
+                        :sukunimi      {:value "lastName"}
+                        :hetu          {:value ""}}
         :yhteystiedot {:email          {:value ""}
                        :puhelin        {:value ""}}
         :osoite {:katu                 {:value ""}
