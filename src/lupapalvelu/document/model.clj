@@ -380,9 +380,8 @@
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
                          companyName companyId
-                         fise degree graduatingYear]} & {:keys [with-hetu]}]
-  (letfn [(merge-hetu [m] (assoc-in m [:henkilotiedot :hetu :value] (if with-hetu personId "")))
-          (wrap [v] {:value (if (nil? v) "" v)})]
+                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults]}]
+  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
     (->
       {:userId                        (wrap id)
        :henkilotiedot {:etunimi       (wrap firstName)
@@ -397,7 +396,8 @@
        :patevyys {:koulutus           (wrap degree)
                   :valmistumisvuosi   (wrap graduatingYear)
                   :fise               (wrap fise)}}
-      merge-hetu
+      (#(if with-hetu (assoc-in % [:henkilotiedot :hetu] (wrap personId)) %))
       util/strip-nils
-      util/strip-empty-maps)))
+      util/strip-empty-maps
+      tools/wrapped)))
 

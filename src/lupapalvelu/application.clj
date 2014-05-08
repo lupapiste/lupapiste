@@ -76,7 +76,7 @@
         with-hetu    (and
                        (model/has-hetu? (:body schema) path-arr)
                        (user/same-user? current-user subject))
-        person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu))
+        person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
         model        (if (seq path-arr)
                        (assoc-in {} (map keyword path-arr) person)
                        person)
@@ -84,6 +84,7 @@
         ; Path should exist in schema!
         updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
     (when-not schema (fail! :error.schema-not-found))
+    (when-not subject (fail! :error.user-not-found))
     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
     (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
   )

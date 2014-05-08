@@ -601,6 +601,23 @@
                                         :osoite {:katu                 {:value "street"}
                                                  :postinumero          {:value "zip"}
                                                  :postitoimipaikannimi {:value "city"}}})
+
+  (fact "all fields are mapped - empty defaults"
+    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults true)
+    => {:userId                        {:value "id"}
+        :henkilotiedot {:etunimi       {:value ""}
+                        :sukunimi      {:value "lastName"}}
+        :yhteystiedot {:email          {:value ""}
+                       :puhelin        {:value ""}}
+        :osoite {:katu                 {:value ""}
+                 :postinumero          {:value ""}
+                 :postitoimipaikannimi {:value "city"}}
+        :patevyys {:fise {:value ""}
+                   :koulutus {:value ""}
+                   :valmistumisvuosi {:value ""}}
+        :yritys   {:liikeJaYhteisoTunnus {:value ""}
+                   :yritysnimi {:value ""}}} )
+
   (fact "no fields are mapped"
     (->henkilo {} => {}))
 
