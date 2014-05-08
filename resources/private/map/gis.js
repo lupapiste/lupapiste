@@ -10,10 +10,10 @@ var gis = (function() {
   var iconMultiple = "/img/map-marker-group.png";
 
   var iconLocMapping = {
-      "sameLocation"          : iconDefault,
-      "sameOperation"         : iconRed,
-      "others"                : iconGreen,
-      "cluster"               : iconMultiple
+    "sameLocation"  : iconDefault,
+    "sameOperation" : iconRed,
+    "others"        : iconGreen,
+    "cluster"       : iconMultiple
   };
 
   // Map initialization
@@ -141,11 +141,7 @@ var gis = (function() {
       //       would work.
       //
       self.map.events.register('zoomend', self.map, function (event) {
-
-        //
-        // TODO: Halutaanko marker contents div piilottaa zoomin jalkeen?
-        //
-        // hide marker contents div
+        // hide marker contents div on the inforequest markers map, because marker clustering may have been divided or merged markers
         if (self.markerClickCallback) {
           self.markerClickCallback( null );
         }

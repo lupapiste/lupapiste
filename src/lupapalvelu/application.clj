@@ -498,7 +498,7 @@
 (defquery inforequest-markers
   {:parameters [id lang x y]
    :roles      [:authority]
-   :states     [:draft :open :submitted :complement-needed :info]   ;; TODO: Mitka tilat?
+   :states     [:draft :info :answered :open :submitted :complement-needed]
    :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
   (let [x (util/->double x)
