@@ -381,22 +381,22 @@
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
                          companyName companyId
                          fise degree graduatingYear]} & {:keys [with-hetu]}]
-  (letfn [(merge-hetu [m] (assoc-in m [:henkilotiedot :hetu :value] (if with-hetu personId "")))]
+  (letfn [(merge-hetu [m] (assoc-in m [:henkilotiedot :hetu :value] (if with-hetu personId "")))
+          (wrap [v] {:value (if (nil? v) "" v)})]
     (->
-      {:userId                        {:value id}
-       :henkilotiedot {:etunimi       {:value firstName}
-                       :sukunimi      {:value lastName}}
-       :yhteystiedot {:email          {:value email}
-                      :puhelin        {:value phone}}
-       :osoite {:katu                 {:value street}
-                :postinumero          {:value zip}
-                :postitoimipaikannimi {:value city}}
-       :yritys {:yritysnimi           {:value companyName}
-                :liikeJaYhteisoTunnus {:value companyId}}
-       :patevyys {:koulutus           {:value degree}
-                  :valmistumisvuosi   {:value graduatingYear}
-                  :fise               {:value fise}
-                  }}
+      {:userId                        (wrap id)
+       :henkilotiedot {:etunimi       (wrap firstName)
+                       :sukunimi      (wrap lastName)}
+       :yhteystiedot {:email          (wrap email)
+                      :puhelin        (wrap phone)}
+       :osoite {:katu                 (wrap street)
+                :postinumero          (wrap zip)
+                :postitoimipaikannimi (wrap city)}
+       :yritys {:yritysnimi           (wrap companyName)
+                :liikeJaYhteisoTunnus (wrap companyId)}
+       :patevyys {:koulutus           (wrap degree)
+                  :valmistumisvuosi   (wrap graduatingYear)
+                  :fise               (wrap fise)}}
       merge-hetu
       util/strip-nils
       util/strip-empty-maps)))
