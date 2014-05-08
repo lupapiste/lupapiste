@@ -93,6 +93,7 @@
 
 (defn- app-post-processor [user]
   (comp
+    (fn [application] (update-in application [:documents] #(map model/mask-person-ids %)))
     without-system-keys
     (partial meta-fields/with-meta-fields user)
     meta-fields/enrich-with-link-permit-data))
