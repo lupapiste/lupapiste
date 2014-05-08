@@ -131,10 +131,9 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn ->validation-result [data path element result]
+(defn- ->validation-result [path element result]
   (when result
-    {:data    data
-     :path    (vec (map keyword path))
+    {:path    (vec (map keyword path))
      :element element
      :result  result}))
 
@@ -143,7 +142,7 @@
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
             result  (validate-field element (:value data))]
-        (->validation-result data current-path element result))
+        (->validation-result current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
@@ -160,14 +159,13 @@
     (or (get-in data (conj path :_selected :value)) (first one-of))))
 
 (defn- validate-required-fields [schema-body path data validation-errors]
-  (let [check
-        (fn [{:keys [name required body repeating] :as element}]
-          (let [kw (keyword name)
-                current-path (conj path kw)
-                validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
-                                   (->validation-result nil current-path element [:tip "illegal-value:required"]))
-                current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
-            (concat current-validation-errors
+  (let [check (fn [{:keys [name required body repeating] :as element}]
+                (let [kw (keyword name)
+                      current-path (conj path kw)
+                      validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
+                                         (->validation-result current-path element [:tip "illegal-value:required"]))
+                      current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
+                  (concat current-validation-errors
                     (if body
                       (if repeating
                         (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
