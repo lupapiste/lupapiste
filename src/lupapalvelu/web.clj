@@ -32,6 +32,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
+            [lupapalvelu.neighbors]
             [lupapalvelu.idf.idf-server :as idf-server]))
 
 ;;
@@ -555,7 +556,6 @@
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
-  (require 'lupapalvelu.neighbors)
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
