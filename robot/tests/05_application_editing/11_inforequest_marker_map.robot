@@ -17,7 +17,7 @@ Mikko as applicant does not see the inforequest marker map
   Set Suite Variable  ${inforequest-first}  ir-first-${secs}
   Set Suite Variable  ${propertyId-first}  433-405-3-427
   #Set Suite Variable  ${address-first}  Holvitie 4
-  Create inforequest the fast way  ${inforequest-first}  433  ${propertyId-first}  asuinrakennus  Jiihaa-first
+  Create inforequest the fast way  ${inforequest-first}  360383.382  6734086.21  433  ${propertyId-first}  asuinrakennus  Jiihaa-first
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Element should not be visible  //div[@id='inforequest-marker-map']
   Element should not be visible  //div[@id='marker-map-contents']
@@ -70,21 +70,21 @@ Arto creates three new inforequests, and checks types of the created markers
   Set Suite Variable  ${inforequest-same-loc}  ir-same-loc-${secs}
   Set Suite Variable  ${propertyId-same-loc}  433-405-3-427
   #Set Suite Variable  ${address-same-loc}  Holvitie 4
-  Create inforequest the fast way  ${inforequest-same-loc}  433  ${propertyId-same-loc}  asuinrakennus  Jiihaa-loc
+  Create inforequest the fast way  ${inforequest-same-loc}  360383.382  6734086.21  433  ${propertyId-same-loc}  asuinrakennus  Jiihaa-loc
 
   # Same operation
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-same-op}  ir-same-op-${secs}
   Set Suite Variable  ${propertyId-same-op}  433-405-57-8
-  #Set Suite Variable  ${address-same-op}  Tupatie 3
-  Create inforequest the fast way  ${inforequest-same-op}  433  ${propertyId-same-op}  asuinrakennus  Jiihaa-op
+  #Set Suite Variable  ${address-same-op}  Kauppatie 6
+  Create inforequest the fast way  ${inforequest-same-op}  360365.358  6734200.355  433  ${propertyId-same-op}  asuinrakennus  Jiihaa-op
 
   # Other
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-other}  ir-other-${secs}
   Set Suite Variable  ${propertyId-other}  433-405-78-0
   #Set Suite Variable  ${address-other}  Kauppatie 4
-  Create inforequest the fast way  ${inforequest-other}  433  ${propertyId-other}  vapaa-ajan-asuinrakennus  Jiihaa-other
+  Create inforequest the fast way  ${inforequest-other}  360414.396  6734197.77  433  ${propertyId-other}  vapaa-ajan-asuinrakennus  Jiihaa-other
 
 
   Total Inforequest info card count on map is  4

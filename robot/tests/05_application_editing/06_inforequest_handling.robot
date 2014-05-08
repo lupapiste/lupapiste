@@ -13,8 +13,8 @@ Mikko creates two new inforequests
   Set Suite Variable  ${inforequest-cancelling}  ir-c${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  asuinrakennus  Jiihaa
-  Create inforequest the fast way  ${inforequest-cancelling}  753  ${propertyId}  asuinrakennus  Jiihaa
+  Create inforequest the fast way  ${inforequest-handling}  360603.153  6734222.95  753  ${propertyId}  asuinrakennus  Jiihaa
+  Create inforequest the fast way  ${inforequest-cancelling}  360603.153  6734222.95  753  ${propertyId}  asuinrakennus  Jiihaa
   Logout
 
 Authority assigns an inforequest to herself
