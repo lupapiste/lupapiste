@@ -321,8 +321,8 @@
 (defn convert-document-data
   "Walks document data starting from initial-path.
    If predicate matches, value is outputted using emitter function.
-   Predicate takes two parameters: element schema definition and the value.
-   Emitter takes one parameter, the value."
+   Predicate takes two parameters: element schema definition and the value map.
+   Emitter takes one parameter, the value map."
   [pred emitter {data :data :as document} initial-path]
   (when data
     (letfn [(doc-walk [schema-body path]
@@ -365,6 +365,13 @@
           doc)))
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
+
+(defn mask-person-ids
+  "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
+  [document & [initial-path]]
+  (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
+        do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+    (convert-document-data mask-if do-mask document initial-path)))
 
 (defn has-hetu?
   ([schema]

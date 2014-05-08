@@ -578,6 +578,12 @@
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1]) => (:data stripped-hakija)
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
 
+(facts "hetu-mask"
+  (let [masked (mask-person-ids hakija)]
+    (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value])
+    (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+    (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"))
+
 (facts
   (fact "all fields are mapped"
     (->henkilo {:id        "id"
