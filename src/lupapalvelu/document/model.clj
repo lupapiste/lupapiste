@@ -381,7 +381,7 @@
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
                          companyName companyId
                          fise degree graduatingYear]} & {:keys [with-hetu]}]
-  (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
+  (letfn [(merge-hetu [m] (assoc-in m [:henkilotiedot :hetu :value] (if with-hetu personId "")))]
     (->
       {:userId                        {:value id}
        :henkilotiedot {:etunimi       {:value firstName}
