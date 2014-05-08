@@ -385,7 +385,8 @@
     (->
       {:userId                        (wrap id)
        :henkilotiedot {:etunimi       (wrap firstName)
-                       :sukunimi      (wrap lastName)}
+                       :sukunimi      (wrap lastName)
+                       :hetu          (wrap (when with-hetu personId))}
        :yhteystiedot {:email          (wrap email)
                       :puhelin        (wrap phone)}
        :osoite {:katu                 (wrap street)
@@ -396,7 +397,6 @@
        :patevyys {:koulutus           (wrap degree)
                   :valmistumisvuosi   (wrap graduatingYear)
                   :fise               (wrap fise)}}
-      (#(if with-hetu (assoc-in % [:henkilotiedot :hetu] (wrap personId)) %))
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))
