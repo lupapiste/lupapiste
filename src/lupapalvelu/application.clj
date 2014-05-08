@@ -70,21 +70,22 @@
 
 (defn- set-user-to-document [application-id document user-id path current-user timestamp]
   {:pre [document]}
-  (let [schema       (schemas/get-schema (:schema-info document))
-         subject      (user/get-user-by-id user-id)
-         with-hetu    (and
-                        (model/has-hetu? (:body schema) [path])
-                        (user/same-user? current-user subject))
-         person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu))
-         model        (if-not (blank? path)
-                        (assoc-in {} (map keyword (split path #"\.")) person)
-                        person)
-         updates      (tools/path-vals model)
-         ; Path should exist in schema!
-         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
-     (when-not schema (fail! :error.schema-not-found))
-     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-     (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
+  (let [path-arr     (if-not (blank? path) (split path #"\.") [])
+        schema       (schemas/get-schema (:schema-info document))
+        subject      (user/get-user-by-id user-id)
+        with-hetu    (and
+                       (model/has-hetu? (:body schema) path-arr)
+                       (user/same-user? current-user subject))
+        person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu))
+        model        (if (seq path-arr)
+                       (assoc-in {} (map keyword path-arr) person)
+                       person)
+        updates      (tools/path-vals model)
+        ; Path should exist in schema!
+        updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
+    (when-not schema (fail! :error.schema-not-found))
+    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+    (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
   )
 
 ;;
