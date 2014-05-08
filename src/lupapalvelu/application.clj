@@ -492,6 +492,9 @@
     (when-not (= id (:id app))
       {:link      (str (env/value :host) "/app/" (name lang) "/authority#!/inforequest/" (:id app))})))
 
+(defn- remove-irs-by-id [target-irs irs-to-be-removed]
+  (remove (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed)) target-irs))
+
 (defquery inforequest-markers
   {:parameters [id lang x y]
    :roles      [:authority]
@@ -506,19 +509,11 @@
                          {:infoRequest true})
                        {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
 
-        ;;
-        ;; TODO: Onko tassa oikein vertailla tarkkoja locationeja, vai pitaisiko verrata propertyId:ita?
-        ;;
         same-location-irs (filter
                             #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
                             inforequests)
 
-        remove-irs-by-id-fn (fn [target-irs irs-to-be-removed]
-                              (remove
-                                (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed))
-                                target-irs))
-
-        inforequests (remove-irs-by-id-fn inforequests same-location-irs)
+        inforequests (remove-irs-by-id inforequests same-location-irs)
 
         application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
 
@@ -527,7 +522,7 @@
                         (some #(= application-op-name (:name %)) (:operations ir)))
                       inforequests)
 
-        others (remove-irs-by-id-fn inforequests same-op-irs)
+        others (remove-irs-by-id inforequests same-op-irs)
 
         same-location-irs (map (partial make-marker-contents id lang) same-location-irs)
         same-op-irs       (map (partial make-marker-contents id lang) same-op-irs)
