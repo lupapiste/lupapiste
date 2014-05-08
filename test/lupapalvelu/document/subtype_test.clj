@@ -50,14 +50,6 @@
   (fact (subtype-validation {:subtype :zip} "33800") => nil?)
   (fact (subtype-validation {:subtype :zip} "123") => [:warn "illegal-zip"]))
 
-(facts "hetu validation"
-  (subtype-validation {:subtype :hetu} "") => nil?
-  (subtype-validation {:subtype :hetu} "210281-9988") => nil?
-  (subtype-validation {:subtype :hetu} "010170-960F") => nil?
-  (subtype-validation {:subtype :hetu} "210281_9988") => [:warn "illegal-hetu"]
-  (subtype-validation {:subtype :hetu} "210281-9987") => [:warn "illegal-hetu"]
-  (subtype-validation {:subtype :hetu} "300281-998V") => [:warn "illegal-hetu"])
-
 (facts "VRK compliant name validation"
   (subtype-validation {:subtype :vrk-name} "") => nil?
   (subtype-validation {:subtype :vrk-name} "Juha Jokim\u00e4ki") => nil?
