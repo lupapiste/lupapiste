@@ -19,7 +19,7 @@ Mikko as applicant does not see the inforequest marker map
   Create inforequest the fast way  ${inforequest-first}  360383.382  6734086.21  433  ${propertyId-first}  asuinrakennus  Jiihaa-first
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Element should not be visible  //div[@id='inforequest-marker-map']
-  Element should not be visible  //div[@id='marker-map-contents']
+  Element should not be visible  //div[@id='inforequest-marker-map-contents']
   Logout
 
 Arto (authority) sees Mikko's new inforequest as a marker on map
@@ -31,7 +31,7 @@ Arto (authority) sees Mikko's new inforequest as a marker on map
 
 Arto clicks on the marker and the marker contents window is opened
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
-  Wait until  Element should be visible  //div[@id='marker-map-contents']
+  Wait until  Element should be visible  //div[@id='inforequest-marker-map-contents']
   Total Inforequest info card count on map is  1
   Total inforequest comment count on the info cards is  1
 
@@ -42,7 +42,7 @@ The opened marker contents window has correct info about the inforequest
 
 Arto clicks on the marker again and the marker contents window is closed
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
-  Wait until  Element should not be visible  //div[@id='marker-map-contents']
+  Wait until  Element should not be visible  //div[@id='inforequest-marker-map-contents']
 
 Arto adds comment and it is visible in the marker contents window
   Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
@@ -52,11 +52,11 @@ Arto adds comment and it is visible in the marker contents window
 Arto's comment is visible in the marker contents window
   Wait until  Element should be visible  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
-  Wait until  Element should be visible  //div[@id='marker-map-contents']
+  Wait until  Element should be visible  //div[@id='inforequest-marker-map-contents']
   Total Inforequest info card count on map is  1
   Total inforequest comment count on the info cards is  2
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]
-  Wait until  Element should not be visible  //div[@id='marker-map-contents']
+  Wait until  Element should not be visible  //div[@id='inforequest-marker-map-contents']
 
 Arto creates three new inforequests
   # inforequest with same location
@@ -86,8 +86,8 @@ There are correct amount of correct type of markers on the marker map
 
 Open the marker contents window and follow the link displayed in an info card
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-group.png']
-  Wait until  Element should be visible  //div[@id='marker-map-contents']
-  Click element  xpath=//div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${first-app-id}']/a[@data-test-id='inforequest-link']
+  Wait until  Element should be visible  //div[@id='inforequest-marker-map-contents']
+  Click element  xpath=//div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${first-app-id}']/a[@data-test-id='inforequest-link']
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']  ${first-app-id}
   Logout
 
@@ -110,22 +110,22 @@ Marker count by type is
 
 Total Inforequest info card count on map is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //div[@id='marker-map-contents']//div[@class='inforequest-card']  ${amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@class='inforequest-card']  ${amount}
 
 Verify info card by app id
   [Arguments]  ${app-id}  ${title}  ${operation}  ${comment}
-  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h2[@data-test-id='inforequest-title']  ${title}
-  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h3[@data-test-id='inforequest-operation']  ${operation}
-  Element text should be  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/div[@class='inforequest-comment']/blockquote  ${comment}
-  Element should not be visible  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/a[@data-test-id='inforequest-link']
+  Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h2[@data-test-id='inforequest-title']  ${title}
+  Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h3[@data-test-id='inforequest-operation']  ${operation}
+  Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/div[@class='inforequest-comment']/blockquote  ${comment}
+  Element should not be visible  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/a[@data-test-id='inforequest-link']
 
 Comment count on the info card of current inforequest is
   [Arguments]  ${amount}
   ${app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
-  Xpath Should Match X Times  //div[@id='marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']//div[@class='inforequest-comment']  ${amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']//div[@class='inforequest-comment']  ${amount}
 
 Total inforequest comment count on the info cards is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //div[@id='marker-map-contents']//div[@class='inforequest-card']//div[@class='inforequest-comment']  ${amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@class='inforequest-card']//div[@class='inforequest-comment']  ${amount}
 
 

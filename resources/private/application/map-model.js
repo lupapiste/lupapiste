@@ -29,9 +29,9 @@ LUPAPISTE.MapModel = function() {
         inforequestMarkerMap.setMarkerClickCallback(
           function(matchingMarkerContents) {
             if (matchingMarkerContents) {
-              $("#marker-map-contents").html(matchingMarkerContents).toggle();
+              $("#inforequest-marker-map-contents").html(matchingMarkerContents).toggle();  // Testaa pelkkaa show:ta tassa
             } else {
-              $("#marker-map-contents").html("").hide();
+              $("#inforequest-marker-map-contents").html("").hide();
             }
           } );
       }
@@ -144,7 +144,7 @@ LUPAPISTE.MapModel = function() {
     }
     if (application.infoRequest) {
       map = getOrCreateMap("inforequest-markers");
-      map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10); //.add({x: x, y: y});
+      map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10);
       setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
     }
   };
