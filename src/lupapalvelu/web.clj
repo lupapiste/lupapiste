@@ -528,7 +528,7 @@
 
   (defpage "/dev/create" {:keys [infoRequest propertyId message]}
     (let [property (util/to-property-id propertyId)
-          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages [message]))]
+          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages (if message [message] [])))]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
