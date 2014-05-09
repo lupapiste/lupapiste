@@ -110,7 +110,7 @@
                             :type :group
                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body

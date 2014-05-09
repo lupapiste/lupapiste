@@ -75,6 +75,16 @@
   (validate-field {:type :time} "23:60") => [:warn "illegal-value:time"]
   (validate-field {:type :time} "-1:10") => [:warn "illegal-value:time"])
 
+(facts "hetu validation"
+  (validate-field {:type :hetu} "") => nil?
+  (validate-field {:type :hetu} "210281-9988") => nil?
+  (validate-field {:type :hetu} "210281+9988") => nil?
+  (validate-field {:type :hetu} "070550A907P") => nil?
+  (validate-field {:type :hetu} "010170-960F") => nil?
+  (validate-field {:type :hetu} "210281_9988") => [:err "illegal-hetu"]
+  (validate-field {:type :hetu} "210281-9987") => [:err "illegal-hetu"]
+  (validate-field {:type :hetu} "300281-998V") => [:err "illegal-hetu"])
+
 ;;
 ;; validate
 ;;
@@ -351,7 +361,7 @@
           :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                                      :henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
                                                                :sukunimi {:modified 1370856477455, :value "Panaani"}
-                                                               :hetu     {:modified 1370856477455, :value "010101-1234"}
+                                                               :hetu     {:modified 1370856477455, :value "010203-040A"}
                                                                :turvakieltoKytkin {:modified 1370856477455, :value false}}
                                                :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
                                                         :postinumero {:value "10203", :modified 1370856487304}
@@ -472,7 +482,7 @@
               {:henkilotiedot
                {:etunimi "Gustav",
                 :sukunimi "Golem",
-                :hetu "000000-0000",
+                :hetu "070550A907P",
                 :turvakieltoKytkin true},
                :osoite {:katu "Katuosoite"},
                :yhteystiedot nil}})
@@ -489,7 +499,7 @@
                 {:henkilotiedot
                  {:etunimi "Gustav",
                   :sukunimi "Golem",
-                  :hetu "000000-0000",
+                  :hetu "070550-907P",
                   :turvakieltoKytkin true},
                  :osoite {:katu "Katuosoite"},
                  :yhteystiedot {}}}}})
@@ -568,6 +578,12 @@
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :1]) => (:data stripped-hakija)
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
 
+(facts "hetu-mask"
+  (let [masked (mask-person-ids hakija)]
+    (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value])
+    (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+    (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"))
+
 (facts
   (fact "all fields are mapped"
     (->henkilo {:id        "id"
@@ -585,6 +601,24 @@
                                         :osoite {:katu                 {:value "street"}
                                                  :postinumero          {:value "zip"}
                                                  :postitoimipaikannimi {:value "city"}}})
+
+  (fact "all fields are mapped - empty defaults"
+    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults true)
+    => {:userId                        {:value "id"}
+        :henkilotiedot {:etunimi       {:value ""}
+                        :sukunimi      {:value "lastName"}
+                        :hetu          {:value ""}}
+        :yhteystiedot {:email          {:value ""}
+                       :puhelin        {:value ""}}
+        :osoite {:katu                 {:value ""}
+                 :postinumero          {:value ""}
+                 :postitoimipaikannimi {:value "city"}}
+        :patevyys {:fise {:value ""}
+                   :koulutus {:value ""}
+                   :valmistumisvuosi {:value ""}}
+        :yritys   {:liikeJaYhteisoTunnus {:value ""}
+                   :yritysnimi {:value ""}}} )
+
   (fact "no fields are mapped"
     (->henkilo {} => {}))
 

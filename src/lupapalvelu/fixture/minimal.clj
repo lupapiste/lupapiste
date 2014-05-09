@@ -12,7 +12,6 @@
     :email "admin@solita.fi"
     :enabled true
     :role :admin
-    :personId "solita123"
     :firstName "Admin"
     :lastName "Admin"
     :phone "03030303"
@@ -171,7 +170,6 @@
      :enabled true
      :role :authority
      :organizations ["564-R"]
-     :personId "kunta564"
      :firstName "Olli"
      :lastName "Ule\u00E5borg"
      :phone "121212"
@@ -280,7 +278,7 @@
               :apikey "502cb9e58426c613c8b85abb"}
     :phone "0505503171"
     :email "teppo@example.com"
-    :personId "210281-0001"
+    :personId "210281-0002"
     :role "applicant"
     :id "5073c0a1c2e6c470aef589a5"
     :street "Mutakatu 7"
@@ -312,7 +310,7 @@
     :username "pena"
     :enabled true
     :role "applicant"
-    :personId "010203-0405"
+    :personId "010203-040A"
     :firstName "Pena"
     :lastName "Panaani"
     :email "pena@example.com"
