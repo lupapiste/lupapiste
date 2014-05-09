@@ -38,16 +38,6 @@
     (fact "2.1.2: xml exist" xml-212 => truthy)
     (fact "2.1.3: xml exist" xml-213 => truthy)
 
-;    (println "\n xml-s: " xml-s "\n")
-
-;    (println "\n application: ")
-;    (clojure.pprint/pprint application)
-;    (println "\n")
-
-;    (println "\n yleiset-alueet-krysp-mapping: ")
-;    (clojure.pprint/pprint mapping)
-;    (println "\n")
-
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
     ;; TODO: own test
@@ -55,7 +45,6 @@
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (mapping-to-krysp/save-application-as-krysp
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}})
-
 
     (validator/validate xml-212s (:permitType application) "2.1.2")
     (validator/validate xml-213s (:permitType application) "2.1.3")
