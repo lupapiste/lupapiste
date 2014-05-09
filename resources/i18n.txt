@@ -1,3 +1,0 @@
-inforequest.question.title: Kysymys
-inforequest.answer.title: Vastaus
-inforequest.openlink: Avaa neuvontapyyntö
