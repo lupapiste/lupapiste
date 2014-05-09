@@ -1,6 +1,8 @@
-LUPAPISTE.MapModel = function() {
+LUPAPISTE.MapModel = function(authorizationModel) {
   "use strict";
   var self = this;
+
+  var authorizationModel = authorizationModel;
 
   var currentAppId = null;
   var applicationMap = null;
@@ -75,54 +77,48 @@ LUPAPISTE.MapModel = function() {
   };
 
   var setRelevantMarkersOntoMarkerMap = function(map, appId, x, y) {
-    ajax
-    .query("inforequest-markers", {id: currentAppId, lang: loc.getCurrentLanguage(), x: x, y: y})
-    .success(function(data) {
+    if (authorizationModel.ok("inforequest-markers")) {
+      ajax
+      .query("inforequest-markers", {id: currentAppId, lang: loc.getCurrentLanguage(), x: x, y: y})
+      .success(function(data) {
 
-      var markerInfos = [];
+        var markerInfos = [];
 
-      // same location markers
-      markerInfos.push({
-        x: data["sameLocation"][0].location.x,
-        y: data["sameLocation"][0].location.y,
-        iconName: "sameLocation",
-        contents: formMarkerHtmlContents( data["sameLocation"] ),
-        isCluster: data["sameLocation"].length > 1 ? true : false
-      });
-
-      // same operation markers
-      _.each(data["sameOperation"], function(ir) {
+        // same location markers
         markerInfos.push({
-          x: ir.location.x,
-          y: ir.location.y,
-          iconName: "sameOperation",
-          contents: formMarkerHtmlContents(ir),
-          isCluster: false
+          x: data["sameLocation"][0].location.x,
+          y: data["sameLocation"][0].location.y,
+          iconName: "sameLocation",
+          contents: formMarkerHtmlContents( data["sameLocation"] ),
+          isCluster: data["sameLocation"].length > 1 ? true : false
         });
-      });
 
-      // other markers
-      _.each(data["others"], function(ir) {
-        markerInfos.push({
-          x: ir.location.x,
-          y: ir.location.y,
-          iconName: "others",
-          contents: formMarkerHtmlContents(ir),
-          isCluster: false
+        // same operation markers
+        _.each(data["sameOperation"], function(ir) {
+          markerInfos.push({
+            x: ir.location.x,
+            y: ir.location.y,
+            iconName: "sameOperation",
+            contents: formMarkerHtmlContents(ir),
+            isCluster: false
+          });
         });
-      });
 
-      map.add(markerInfos);
-    })
-    .error(function(data) {
-      //
-      // Needed to have this error branch to prevent applicant from getting error popups on the UI.
-      //
-      if (data.text !== "error.unauthorized") {
-        debug("Could not fetch inforequest markers", data);
-      }
-    })
-    .call();
+        // other markers
+        _.each(data["others"], function(ir) {
+          markerInfos.push({
+            x: ir.location.x,
+            y: ir.location.y,
+            iconName: "others",
+            contents: formMarkerHtmlContents(ir),
+            isCluster: false
+          });
+        });
+
+        map.add(markerInfos);
+      })
+      .call();
+    }
   };
 
   self.refresh = function(application) {
