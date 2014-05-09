@@ -48,32 +48,41 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
   var formMarkerHtmlContents = function(irs) {
     irs = _.isArray(irs) ? irs : [irs];
-    var html = "";
+    var html = $("<div>");
 
     _.each(irs, function(ir) {
-      html +=
-        '<div class="inforequest-card" data-test-id="inforequest-card-' + ir.id + '">' +
-          '<h2 class="operation-title" data-test-id="inforequest-title">' + ir.title + ' - ' + ir.authName + '</h2>' +
-          '<h3 class="operation-type" data-test-id="inforequest-operation">' + ir.operation + '</h3>';
-
-      _.each(ir.comments, function(com) {
-        if (com.type === "authority") {
-          html += "<div class='inforequest-comment'><span class='comment-type'>" + loc('inforequest.answer.title') + "</span> <span class='timestamp'>(" + com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
-        } else {
-          html += "<div class='inforequest-comment'><span class='comment-type'>" + loc('inforequest.question.title') + "</span> <span class='timestamp'>(" + moment(com.time).format("D.M.YYYY HH:mm") + ")</span>";
-        }
-        html += '<blockquote>' + com.text + '</blockquote></div>';
-      });
-
+      var card          = $("<div>").attr("class", "inforequest-card").attr("data-test-id", "inforequest-card-" + ir.id);
+      var partTitle     = $("<h2>").attr("class", "operation-title").attr("data-test-id", "inforequest-title").text(ir.title + " - " + ir.authName);
+      var partOperation = $("<h3>").attr("class", "operation-type").attr("data-test-id", "inforequest-operation").text(ir.operation);
+      card.append(partTitle).append(partOperation);
       // no link is attached to currently opened inforequest
       if (ir.link) {
-        html += "<a data-test-id='inforequest-link' href='" + ir.link + "'>Avaa neuvontapyyntö</a>";
+        var partLink      = $("<a>").attr("data-test-id", "inforequest-link").attr("href", ir.link).text(loc("inforequest.openlink"));
+        card.append(partLink);
       }
 
-      html += '</div>';
+      _.each(ir.comments, function(com) {
+        var partComment = $("<div>").attr("data-test-id", "inforequest-comment");
+
+        var commentTitle         = com.type === "authority" ? loc('inforequest.answer.title') : loc('inforequest.question.title');
+        var commentTimestamp     = " (" +
+                                   (com.type === "authority" ?
+                                     com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") :
+                                     moment(com.time).format("D.M.YYYY HH:mm")) +
+                                   ")";
+        var partCommentTitle     = $("<span>").attr("class", "comment-type").text(commentTitle);
+        var partCommentTimestamp = $("<span>").attr("class", "timestamp").text(commentTimestamp);
+
+        var partCommentText = $("<blockquote>").attr("class", "inforequest-comment-text").text(com.text);
+
+        partComment = partComment.append(partCommentTitle).append(partCommentTimestamp).append(partCommentText);
+        card.append(partComment);
+      });
+
+      html.append(card);
     });
 
-    return html;
+    return html.html();
   };
 
   var setRelevantMarkersOntoMarkerMap = function(map, appId, x, y) {
