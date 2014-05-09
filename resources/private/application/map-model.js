@@ -55,11 +55,6 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       var partTitle     = $("<h2>").attr("class", "operation-title").attr("data-test-id", "inforequest-title").text(ir.title + " - " + ir.authName);
       var partOperation = $("<h3>").attr("class", "operation-type").attr("data-test-id", "inforequest-operation").text(ir.operation);
       card.append(partTitle).append(partOperation);
-      // no link is attached to currently opened inforequest
-      if (ir.link) {
-        var partLink      = $("<a>").attr("data-test-id", "inforequest-link").attr("href", ir.link).text(loc("inforequest.openlink"));
-        card.append(partLink);
-      }
 
       _.each(ir.comments, function(com) {
         var partComment = $("<div>").attr("data-test-id", "inforequest-comment");
@@ -78,6 +73,12 @@ LUPAPISTE.MapModel = function(authorizationModel) {
         partComment = partComment.append(partCommentTitle).append(partCommentTimestamp).append(partCommentText);
         card.append(partComment);
       });
+
+      // no link is attached to currently opened inforequest
+      if (ir.link) {
+        var partLink      = $("<a>").attr("data-test-id", "inforequest-link").attr("href", ir.link).text(loc("inforequest.openlink"));
+        card.append(partLink);
+      }
 
       html.append(card);
     });
