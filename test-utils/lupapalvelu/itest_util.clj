@@ -56,6 +56,7 @@
 (def admin-id    (id-for "admin"))
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
 (def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
+(def arto       (apikey-for "arto"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 

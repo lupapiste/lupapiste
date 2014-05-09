@@ -33,6 +33,7 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-search :as search]
             [lupapalvelu.application-meta-fields :as meta-fields])
   (:import [java.net URL]))
@@ -476,6 +477,63 @@
       {$set {:modified created
              :drawings drawings}})))
 
+(defn- make-marker-contents [id lang app]
+  (merge
+    {:id          (:id app)
+     :title       (:title app)
+     :location    (:location app)
+     :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
+     :authName    (-> (domain/get-auths-by-role app :owner)
+                    first
+                    (#(str (:firstName %) " " (:lastName %))))
+     :comments    (->> (:comments app)
+                    (filter #(not (= "system" (:type %))))
+                    (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))
+                                     :type (:type %)
+                                     :time (:created %)
+                                     :text (:text %)})))}
+    (when-not (= id (:id app))
+      {:link      (str (env/value :host) "/app/" (name lang) "/authority#!/inforequest/" (:id app))})))
+
+(defn- remove-irs-by-id [target-irs irs-to-be-removed]
+  (remove (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed)) target-irs))
+
+(defquery inforequest-markers
+  {:parameters [id lang x y]
+   :roles      [:authority]
+   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :input-validators [(partial action/non-blank-parameters [:x :y])]}
+  [{:keys [application user]}]
+  (let [x (util/->double x)
+        y (util/->double y)
+        inforequests (mongo/select :applications
+                       (merge
+                         (domain/application-query-for user)
+                         {:infoRequest true})
+                       {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
+
+        same-location-irs (filter
+                            #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
+                            inforequests)
+
+        inforequests (remove-irs-by-id inforequests same-location-irs)
+
+        application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
+
+        same-op-irs (filter
+                      (fn [ir]
+                        (some #(= application-op-name (:name %)) (:operations ir)))
+                      inforequests)
+
+        others (remove-irs-by-id inforequests same-op-irs)
+
+        same-location-irs (map (partial make-marker-contents id lang) same-location-irs)
+        same-op-irs       (map (partial make-marker-contents id lang) same-op-irs)
+        others            (map (partial make-marker-contents id lang) others)]
+
+    (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
+    ))
+
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
@@ -608,7 +666,7 @@
    :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
   (let [permit-type       (operations/permit-type-of-operation operation)

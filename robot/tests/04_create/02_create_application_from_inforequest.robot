@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new inforequest
   Mikko logs in
-  Create inforequest the fast way  create-app-from-info  753  753-416-25-30  Jiihaa
+  Create inforequest the fast way  create-app-from-info  360603.153  6734222.95  753  753-416-25-30  asuinrakennus  Jiihaa
 
 There are no attachments at this stage
   Element should not be visible  xpath=//*[@data-test-id='inforequest-attachments-table']
@@ -19,7 +19,7 @@ Mikko creates new application from inforequest
   Wait until  Element should be visible  application
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  753-416-25-30
   Wait until  Element should be visible  xpath=//*[contains(text(),'Hankkeen kuvaus')]
-  
+
 Proper attachment templates are present
   Open tab  attachments
   Wait until  Element should be visible  xpath=//tr[@class='attachment-group-header']

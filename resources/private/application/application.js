@@ -51,7 +51,7 @@
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskModel = new LUPAPISTE.CreateTaskModel();
-  var mapModel = new LUPAPISTE.MapModel();
+  var mapModel = new LUPAPISTE.MapModel(authorizationModel);
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
