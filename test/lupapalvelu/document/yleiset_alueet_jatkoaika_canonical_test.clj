@@ -75,7 +75,8 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot Jatkoaika) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        MuuTunnus (:MuuTunnus (first muuTunnustieto)) => truthy
+        lp-muu-tunnus (:MuuTunnus (first muuTunnustieto)) => truthy
+        viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy
 
         Jatkoaika-kayttotarkoitus (:kayttotarkoitus Jatkoaika) => truthy
 
@@ -137,8 +138,13 @@
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
-    (fact "Muu tunnus" (:tunnus MuuTunnus) => (:id link-permit-data))
-    (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
+    (fact "LP-tunnus"
+      (:tunnus lp-muu-tunnus) => (:id jatkoaika-application)
+      (:sovellus lp-muu-tunnus) => "Lupapiste")
+
+    (fact "Viitelupa"
+      (:tunnus viitelupatunnus) => (:id link-permit-data)
+      (:sovellus viitelupatunnus) => "Viitelupa")
 
     (fact "Jatkoaika-kayttotarkoitus" Jatkoaika-kayttotarkoitus => (ya-operation-type-to-usage-description
                                                                      (keyword (:operation link-permit-data))))
