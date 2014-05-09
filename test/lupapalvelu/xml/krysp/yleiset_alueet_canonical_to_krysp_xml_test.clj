@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-canonical-to-krysp-xml-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application]]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application-with-link-permit-data]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test :refer [kayttolupa-application]]
             [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :refer [sijoituslupa-application valmistumisilmoitus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
@@ -34,7 +34,6 @@
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.3")) => true)
 
-
     (fact "2.1.2: xml exist" xml-212 => truthy)
     (fact "2.1.3: xml exist" xml-213 => truthy)
 
@@ -54,7 +53,7 @@
 (facts "YA permits to canonical and then to xml with schema validation"
 
     (fact "Kaivulupa application -> canonical -> xml"
-      (do-test kaivulupa-application))
+      (do-test kaivulupa-application-with-link-permit-data))
 
     (fact "Kayttolupa application -> canonical -> xml"
       (do-test kayttolupa-application))

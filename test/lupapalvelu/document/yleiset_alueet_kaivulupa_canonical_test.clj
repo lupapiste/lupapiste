@@ -321,7 +321,7 @@
 
 
 
-(def ^:private kaivulupa-application-with-link-permit-data
+(def kaivulupa-application-with-link-permit-data
   (merge kaivulupa-application {:linkPermitData [link-permit-data]}))
 
 (facts* "Kaivulupa canonical model is correct"
