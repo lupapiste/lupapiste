@@ -49,7 +49,7 @@
           x = l.x,
           y = l.y;
 
-      self.application(a).map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 12).add(x, y);
+      self.application(a).map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 12).add({x: x, y: y});
 
       var partyDocs = _.filter(a.documents, isPartyDoc);
       var nonpartyDocs = _.filter(a.documents, isNotPartyDoc);

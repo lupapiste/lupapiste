@@ -1,6 +1,5 @@
 (ns lupapalvelu.activation
   (:require [monger.operators :refer :all]
-            [hiccup.core :refer :all]
             [sade.env :as env]
             [sade.email :as email]
             [sade.strings :refer [lower-case]]
