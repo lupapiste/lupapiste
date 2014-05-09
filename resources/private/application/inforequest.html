@@ -2,6 +2,7 @@
 <html lang="en">
 <body>
   <section class="page" id="inforequest">
+
     <div class="application_summary">
       <div class="container">
         <div class="application-map-container">
@@ -102,15 +103,16 @@
         <div class="clear"></div>
       </div>
     </div>
+
+
     <div class="container">
-      <div class="sidebar">
-        <aside class="instructions">
-          <h3 data-bind="ltext: 'help'">Ohje</h3>
-          <p data-bind="ltext: 'inforequest.helpText'"></p>
-        </aside>
+
+      <div data-bind="if: $root.authorization.ok('inforequest-markers')" class="related-map">
+        <div id="inforequest-marker-map" class="map map-large"></div>
+        <div id="inforequest-marker-map-contents"></div>
       </div>
 
-      <div class="content">
+      <div class="content-narrow">
 
         <div data-bind="visible: currentUser.get().oir">
           <h2 data-test-id="wanna-join">

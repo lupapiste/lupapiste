@@ -13,8 +13,8 @@ Mikko creates two new inforequests
   Set Suite Variable  ${inforequest-cancelling}  ir-c${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  Jiihaa
-  Create inforequest the fast way  ${inforequest-cancelling}  753  ${propertyId}  Jiihaa
+  Create inforequest the fast way  ${inforequest-handling}  360603.153  6734222.95  753  ${propertyId}  asuinrakennus  Jiihaa
+  Create inforequest the fast way  ${inforequest-cancelling}  360603.153  6734222.95  753  ${propertyId}  asuinrakennus  Jiihaa
   Logout
 
 Authority assigns an inforequest to herself
@@ -76,7 +76,7 @@ Authority can not convert the inforequest to application
 
 Authority adds a comment marking inforequest answered
   Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Add comment and Mark answered  oletko miettinyt tuulivoimaa?
+  Input comment and mark answered  inforequest  oletko miettinyt tuulivoimaa?
   Wait until  Inforequest state is  Vastattu
   Logout
 
@@ -89,17 +89,17 @@ Mikko should still be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
 
 When Mikko adds a comment inforequest goes back to Avoin
-  Add comment   tuulivoima on ok.
+  Input comment  inforequest  tuulivoima on ok.
   Wait until  Inforequest state is  Avoin
   Logout
-  
+
 Authority cancels the inforequest
   Sonja logs in
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
-  
+
 
 *** Keywords ***
 
@@ -119,11 +119,3 @@ Inforequest is assigned to
   [Arguments]  ${address}  ${name}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${name}
 
-Add Comment
-  [Arguments]  ${message}
-  Input comment  inforequest  ${message}
-
-Add Comment and Mark Answered
-  [Arguments]  ${message}
-  Input comment and mark answered  inforequest  ${message}
-  

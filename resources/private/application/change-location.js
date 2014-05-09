@@ -39,7 +39,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   });
 
   self.drawLocation = function() {
-    return self.map().clear().add(self.x, self.y);
+    return self.map().clear().add({x: self.x, y: self.y});
   };
 
   self.setXY = function(x, y) {
