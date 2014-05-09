@@ -2,18 +2,12 @@ var gis = (function() {
   "use strict";
 
 
-  var iconDefault  = "/img/map-marker.png";
-  var iconRed      = "/img/map-marker-red.png";
-  var iconGreen    = "/img/map-marker-green.png";
-  var iconLila     = "/img/map-marker-lila.png";
-  var iconBlue     = "/img/map-marker-blue.png";
-  var iconMultiple = "/img/map-marker-group.png";
-
+  var iconDefaultPath  = "/img/map-marker.png";
   var iconLocMapping = {
-    "sameLocation"  : iconDefault,
-    "sameOperation" : iconRed,
-    "others"        : iconGreen,
-    "cluster"       : iconMultiple
+    "sameLocation"  : iconDefaultPath,
+    "sameOperation" : "/img/map-marker-red.png",
+    "others"        : "/img/map-marker-green.png",
+    "cluster"       : "/img/map-marker-group.png"
   };
 
   // Map initialization
@@ -170,7 +164,7 @@ var gis = (function() {
         } else {
           iconPath = feature.style.externalGraphic;
         }
-        return iconPath || iconDefault;
+        return iconPath || iconDefaultPath;
       },
       graphicWidth: function(feature) {
         return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 21;
@@ -231,15 +225,14 @@ var gis = (function() {
       onSelect: function(feature) {
         if (self.markerClickCallback) {
           var contents = feature.cluster ?
-            _.reduce(
-              feature.cluster,
-              function(acc, entry) {
-                return acc + entry.data.contents;
-              },
-              "") :
-            feature.data.contents;
-
-            self.markerClickCallback( contents );
+                          _.reduce(
+                            feature.cluster,
+                            function(acc, entry) {
+                              return acc + entry.data.contents;
+                            },
+                            "") :
+                          feature.data.contents;
+          self.markerClickCallback(contents);
         }
       },
 
@@ -261,7 +254,7 @@ var gis = (function() {
 
       _.each(markerInfos, function(markerInfo) {
         var iconName = markerInfo.isCluster ? "cluster" : markerInfo.iconName;
-        var iconPath = iconLocMapping[iconName] || iconDefault;
+        var iconPath = iconLocMapping[iconName] || iconDefaultPath;
         var markerFeature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(markerInfo.x, markerInfo.y),
             { isCluster: markerInfo.isCluster,
