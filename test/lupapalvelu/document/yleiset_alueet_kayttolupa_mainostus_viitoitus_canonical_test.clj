@@ -81,7 +81,7 @@
         Kasittelytieto (-> Mainostuslupa :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Mainostuslupa) => nil?
+        muu-tunnustieto (get-in Mainostuslupa [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto]) => seq
 
         Mainostuslupa-kayttotarkoitus (:kayttotarkoitus Mainostuslupa) => truthy
 
@@ -186,12 +186,12 @@
         match-fn-2 #(= "Haetaan kausilupaa" (-> % :LupakohtainenLisatieto :selitysteksti))
         haetaan-kausilupaa-Lisatieto-2 (:LupakohtainenLisatieto (first (filter match-fn-2 lisatieto-vec-2))) => falsey]
 
-
-;    (println "\n canonical:")
-;    (clojure.pprint/pprint canonical)
-;    (println "\n")
-
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
+
+    (fact "lupatunnus"
+      (count muu-tunnustieto) => 1
+      (-> muu-tunnustieto first :MuuTunnus :tunnus) => (:id mainostus-application)
+      (-> muu-tunnustieto first :MuuTunnus :sovellus) => "Lupapiste")
 
     (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified mainostus-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
