@@ -29,11 +29,14 @@ LUPAPISTE.MapModel = function() {
         inforequestMarkerMap.setMarkerClickCallback(
           function(matchingMarkerContents) {
             if (matchingMarkerContents) {
-              $("#inforequest-marker-map-contents").html(matchingMarkerContents).toggle();  // Testaa pelkkaa show:ta tassa
-            } else {
-              $("#inforequest-marker-map-contents").html("").hide();
+              $("#inforequest-marker-map-contents").html(matchingMarkerContents).show();
             }
-          } );
+          }
+        );
+
+        inforequestMarkerMap.setMarkerMapCloseCallback(
+          function() { $("#inforequest-marker-map-contents").html("").hide(); }
+        );
       }
       return inforequestMarkerMap;
     } else {

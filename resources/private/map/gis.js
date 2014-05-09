@@ -136,8 +136,8 @@ var gis = (function() {
       //
       self.map.events.register('zoomend', self.map, function (event) {
         // hide marker contents div on the inforequest markers map, because marker clustering may have been divided or merged markers
-        if (self.markerClickCallback) {
-          self.markerClickCallback( null );
+        if (self.markerMapCloseCallback) {
+          self.markerMapCloseCallback();
         }
 
         if( self.map.getZoom() < 2) {
@@ -200,9 +200,8 @@ var gis = (function() {
 
 
     self.clear = function() {
-      // hide the inforequest marker div
-      if (self.markerClickCallback) {
-        self.markerClickCallback( null );
+      if (self.markerMapCloseCallback) {
+        self.markerMapCloseCallback();
       }
 
       self.vectorLayer.removeAllFeatures();
@@ -237,8 +236,8 @@ var gis = (function() {
       },
 
       onUnselect: function(feature) {
-        if (self.markerClickCallback) {
-          self.markerClickCallback( null );
+        if (self.markerMapCloseCallback) {
+          self.markerMapCloseCallback();
         }
       }
     });
@@ -273,6 +272,10 @@ var gis = (function() {
 
     self.setMarkerClickCallback = function(handler) {
       self.markerClickCallback = handler;
+    };
+
+    self.setMarkerMapCloseCallback = function(handler) {
+      self.markerMapCloseCallback = handler;
     };
 
     // Map handling functions
