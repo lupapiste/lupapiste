@@ -75,7 +75,7 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot Jatkoaika) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        MuuTunnus (:MuuTunnus (first muuTunnustieto)) => truthy
 
         Jatkoaika-kayttotarkoitus (:kayttotarkoitus Jatkoaika) => truthy
 
