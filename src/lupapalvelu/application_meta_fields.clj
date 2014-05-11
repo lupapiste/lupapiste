@@ -7,10 +7,12 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.core :refer :all]
-;            [lupapalvelu.document.canonical-common :refer [by-type]]
-;            [sade.util :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
+
+(defn applicant-index [application-after-updates]
+  (println "applicant-index")
+  )
 
 (defn get-applicant-name [_ app]
   (if (:infoRequest app)
@@ -26,7 +28,7 @@
   (let [owner (first (domain/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
-  
+
 
 (defn get-application-operation [app]
   (first (:operations app)))
