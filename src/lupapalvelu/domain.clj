@@ -70,10 +70,10 @@
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
 
-(defn get-applicant-document
-  "returns first applicant document from application"
+(defn get-applicant-documents
+  "returns applicant documents from application"
   [application]
-  (first (filter (comp (partial = "hakija") :subtype :schema-info) (:documents application))))
+  (filter (comp (partial = "hakija") :subtype :schema-info) (:documents application)))
 
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))

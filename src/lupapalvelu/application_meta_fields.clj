@@ -10,19 +10,29 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(defn- applicant-name-from-auth [application]
+  (let [owner (first (domain/get-auths-by-role application :owner))
+        {first-name :firstName last-name :lastName} owner]
+    (str first-name \space last-name)))
+
+(defn- applicant-name-from-doc [document]
+  (when-let [body (:data document)]
+    (if (= (get-in body [:_selected :value]) "yritys")
+      (get-in body [:yritys :yritysnimi :value])
+      (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+        (str (:value first-name) \space (:value last-name))))))
+
 (defn applicant-index [application-after-updates]
-  (println "applicant-index")
-  )
+  (let [applicants (map applicant-name-from-doc (:documents application-after-updates))
+        applicant (or (first applicants) (applicant-name-from-auth application-after-updates))
+        index (if (seq applicants) (s/join " " applicants) applicant)]
+    (println "applicant-index:" index)
+    ))
 
 (defn get-applicant-name [_ app]
   (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-applicant-document app))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
+    (applicant-name-from-auth app)
+    (applicant-name-from-doc (first (domain/get-applicant-documents app)))))
 
 (defn get-applicant-phone [_ app]
   (let [owner (first (domain/get-auths-by-role app :owner))
