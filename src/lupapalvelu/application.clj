@@ -69,7 +69,7 @@
 
 ;; Helpers
 
-(defn- set-user-to-document [application-id document user-id path current-user timestamp]
+(defn- set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (let [path-arr     (if-not (blank? path) (split path #"\.") [])
         schema       (schemas/get-schema (:schema-info document))
@@ -87,7 +87,7 @@
     (when-not schema (fail! :error.schema-not-found))
     (when-not subject (fail! :error.user-not-found))
     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-    (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
+    (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
   )
 
 ;;
@@ -150,7 +150,7 @@
                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
           (commands/persist-model-updates
-            (:id application)
+            application
             "documents"
             rakennuspaikka
             updates
@@ -225,7 +225,7 @@
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
-      (set-user-to-document id document (:id user) (:path my-invite) user created))))
+      (set-user-to-document application document (:id user) (:path my-invite) user created))))
 
 (defn- do-remove-auth [command email]
   (update-application command
@@ -292,7 +292,7 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (set-user-to-document id document userId path user created)
+    (set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
 
 ;;
@@ -1142,7 +1142,7 @@
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (when (seq updates)
-        (commands/persist-model-updates id collection document updates created :source "krysp"))
+        (commands/persist-model-updates application collection document updates created :source "krysp"))
       (ok))
     (fail :error.no-legacy-available)))
 
