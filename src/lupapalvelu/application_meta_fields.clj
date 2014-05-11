@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-meta-fields
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn error]]
+            [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
@@ -13,21 +14,22 @@
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
-    (str first-name \space last-name)))
+    (s/trim (str first-name \space last-name))))
 
 (defn- applicant-name-from-doc [document]
   (when-let [body (:data document)]
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-in body [:yritys :yritysnimi :value])
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (str (:value first-name) \space (:value last-name))))))
+        (s/trim (str (:value first-name) \space (:value last-name)))))))
 
 (defn applicant-index [application-after-updates]
-  (let [applicants (map applicant-name-from-doc (:documents application-after-updates))
+  (let [applicants (map applicant-name-from-doc (domain/get-applicant-documents application-after-updates))
         applicant (or (first applicants) (applicant-name-from-auth application-after-updates))
         index (if (seq applicants) (s/join " " applicants) applicant)]
-    (println "applicant-index:" index)
-    ))
+    (debugf "applicant: '%s', applicant-index: '%s'" applicant index)
+    {$set {:applicant applicant
+           :_applicantIndex index}}))
 
 (defn get-applicant-name [_ app]
   (if (:infoRequest app)
