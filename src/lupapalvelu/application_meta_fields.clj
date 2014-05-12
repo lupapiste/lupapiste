@@ -26,8 +26,8 @@
 (defn applicant-index [application]
   (let [applicants (map applicant-name-from-doc (domain/get-applicant-documents application))
         applicant (or (first applicants) (applicant-name-from-auth application))
-        index (if (seq applicants) (s/join " " applicants) applicant)]
-    (debugf "applicant: '%s', applicant-index: '%s'" applicant index)
+        index (if (seq applicants) applicants [applicant])]
+    (debugf "applicant: '%s', applicant-index: %s" applicant index)
     {:applicant applicant
      :_applicantIndex index}))
 
