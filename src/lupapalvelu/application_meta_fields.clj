@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-meta-fields
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn error]]
+  (:require [taoensso.timbre :as timbre :refer [tracef debug info warn error]]
             [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -27,7 +27,7 @@
   (let [applicants (map applicant-name-from-doc (domain/get-applicant-documents application))
         applicant (or (first applicants) (applicant-name-from-auth application))
         index (if (seq applicants) applicants [applicant])]
-    (debugf "applicant: '%s', applicant-index: %s" applicant index)
+    (tracef "applicant: '%s', applicant-index: %s" applicant index)
     {:applicant applicant
      :_applicantIndex index}))
 
