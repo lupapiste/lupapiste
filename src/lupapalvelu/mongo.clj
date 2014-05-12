@@ -257,7 +257,6 @@
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:organizations 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
-  (mc/ensure-index :applications {:_applicantIndex 1})
   (mc/ensure-index :applications {:municipality 1})
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
