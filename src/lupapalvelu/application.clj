@@ -652,14 +652,11 @@
                            :title               address
                            :auth                [owner]
                            :comments            (map make-comment messages)
-                           :schema-version      (schemas/get-latest-schema-version)})
+                           :schema-version      (schemas/get-latest-schema-version)})]
 
-          application   (merge application
-                          (when-not info-request?
+      (merge application (when-not info-request?
                             {:attachments            (make-attachments created op organization-id state)
-                             :documents              (make-documents user created op application)}))]
-
-      (merge application (meta-fields/applicant-index application)))))
+                             :documents              (make-documents user created op application)})))))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
