@@ -91,11 +91,20 @@
     (fact "Teppo must be able to comment!"
       (command teppo :add-comment :id application-id :text (email-for-key teppo) :target {:type "application"} :openApplication true) => ok?)
 
-    (fact "Mikko is the applicant" (:applicant (query-application mikko application-id) ) => "Mikko Intonen")
+    (fact "Mikko is the applicant"
+      (let [application  (query-application mikko application-id)
+            first-hakija (domain/get-document-by-name application "hakija")]
+        (:id first-hakija) =not=> hakija-doc
+        (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => nil
+        (:applicant application ) => "Mikko Intonen"))
 
     (fact "Mikko sets Teppo as co-applicant"
-      (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "") => ok?
-      (fact "Mikko is still the applicant" (:applicant (query-application mikko application-id)) => "Mikko Intonen"))
+      (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => ok?
+      (fact "Teppo is now the applicant"
+        (let [application  (query-application mikko application-id)
+              hakija (domain/get-document-by-id application hakija-doc)]
+          (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Teppo"
+          (:applicant application ) => "Teppo Nieminen")))
 
     (let [actions (:actions (query teppo :allowed-actions :id application-id))]
       (fact "Teppo should be able to do stuff."
