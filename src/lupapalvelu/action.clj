@@ -65,13 +65,17 @@
     (fail :error.missing-parameters :parameters (vec missing))))
 
 (defn update-application
-  "get current application from command (or fail) and run changes into it."
+  "Get current application from command (or fail) and run changes into it.
+   Optionally returns the number of updated applications."
   ([command changes]
-    (update-application command {} changes))
+    (update-application command {} changes false))
   ([command mongo-query changes]
+    (update-application command mongo-query changes false))
+  ([command mongo-query changes return-count?]
     (with-application command
       (fn [{:keys [id]}]
-        (mongo/update :applications (assoc mongo-query :_id id) changes)))))
+        (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+          (if return-count? n nil))))))
 
 (defn application->command
   "Creates a command data structure that is suitable for update-application and with-application functions"

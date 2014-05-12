@@ -331,7 +331,7 @@
                                       :attachments.$.state  :requires_authority_action
                                       :attachments.$.latestVersion version-model}
                                 $push {:attachments.$.versions version-model}})
-                             )]
+                             true)]
           ; Check return value and try again with new version number
           (if (pos? result-count)
             (assoc version-model :id attachment-id)
