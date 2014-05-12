@@ -108,7 +108,9 @@
   {:_statements-seen-by      {}
    :_verdicts-seen-by        {}
    :_comments-seen-by        {}
+   :_applicantIndex          []
    :address                  ""
+   :applicant                ""
    :attachments              []
    :auth                     []
    :authority                {}

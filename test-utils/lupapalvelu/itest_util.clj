@@ -218,6 +218,7 @@
   [apikey id]
   {:pre  [apikey id]
    :post [(:id %)
+          (not (s/blank? (:applicant %)))
           (:created %) (pos? (:created %))
           (:modified %) (pos? (:modified %))
           (contains? % :opened)

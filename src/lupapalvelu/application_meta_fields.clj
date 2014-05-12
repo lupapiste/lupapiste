@@ -34,11 +34,6 @@
 (defn applicant-index-mongo-update [application]
   {$set (applicant-index application)})
 
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (applicant-name-from-auth app)
-    (applicant-name-from-doc (first (domain/get-applicant-documents app)))))
-
 (defn get-applicant-phone [_ app]
   (let [owner (first (domain/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
@@ -94,8 +89,7 @@
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :applicantPhone :fn get-applicant-phone}
+(def meta-fields [{:field :applicantPhone :fn get-applicant-phone}
                   {:field :neighbors :fn neighbors/normalize-neighbors}
                   {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}
