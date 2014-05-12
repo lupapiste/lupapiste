@@ -680,7 +680,7 @@
             :approvable true
             :type :party
             :subtype :hakija
-            :after-update 'lupapalvelu.application-meta-fields/applicant-index-mongo-update
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
      :body party}
 
@@ -691,7 +691,7 @@
             :approvable true
             :type :party
             :subtype :hakija
-            :after-update 'lupapalvelu.application-meta-fields/applicant-index-mongo-update}
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"

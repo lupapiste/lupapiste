@@ -406,4 +406,4 @@
 (defmigration applicant-index
   (doseq [collection [:applications :submitted-applications]]
     (let [applications (mongo/select collection)]
-      (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-mongo-update %)) applications)))))
+      (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications)))))

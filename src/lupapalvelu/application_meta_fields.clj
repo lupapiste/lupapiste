@@ -31,7 +31,7 @@
     {:applicant applicant
      :_applicantIndex index}))
 
-(defn applicant-index-mongo-update [application]
+(defn applicant-index-update [application]
   {$set (applicant-index application)})
 
 (defn get-applicant-phone [_ app]
