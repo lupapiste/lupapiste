@@ -134,7 +134,7 @@
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row (partial meta-fields/with-meta-fields user)) apps)
+        rows        (map make-row apps)
         echo        (str (util/->int (str (:sEcho params))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
