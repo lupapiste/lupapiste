@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-search
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+            [clojure.string :as s]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.strings :as ss]
@@ -69,8 +70,7 @@
 (defn- make-free-text-query [filter-search]
   (let [or-query {$or [{:address {$regex filter-search $options "i"}}
                        {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
-                       ; TODO applicant
-                       ]}
+                       {:_applicantIndex {$regex filter-search $options "i"}}]}
         ops (operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] conj {:operations.name {$in ops}})
