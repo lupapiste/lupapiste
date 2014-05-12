@@ -5,6 +5,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-meta-fields :as app-meta-fields]
             [monger.operators :refer :all]
             [lupapalvelu.operations :as op]
             [clojure.walk :as walk]
@@ -401,3 +402,8 @@
     (when (map? (:neighbors application))
       (mongo/update-by-id collection (:id application)
         {$set {:neighbors (convert-neighbors (:neighbors application))}}))))
+
+(defmigration applicant-index
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications (mongo/select collection)]
+      (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-mongo-update %)) applications)))))

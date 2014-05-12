@@ -23,13 +23,16 @@
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
         (s/trim (str (:value first-name) \space (:value last-name)))))))
 
-(defn applicant-index [application-after-updates]
-  (let [applicants (map applicant-name-from-doc (domain/get-applicant-documents application-after-updates))
-        applicant (or (first applicants) (applicant-name-from-auth application-after-updates))
+(defn applicant-index [application]
+  (let [applicants (map applicant-name-from-doc (domain/get-applicant-documents application))
+        applicant (or (first applicants) (applicant-name-from-auth application))
         index (if (seq applicants) (s/join " " applicants) applicant)]
     (debugf "applicant: '%s', applicant-index: '%s'" applicant index)
-    {$set {:applicant applicant
-           :_applicantIndex index}}))
+    {:applicant applicant
+     :_applicantIndex index}))
+
+(defn applicant-index-mongo-update [application]
+  {$set (applicant-index application)})
 
 (defn get-applicant-name [_ app]
   (if (:infoRequest app)
