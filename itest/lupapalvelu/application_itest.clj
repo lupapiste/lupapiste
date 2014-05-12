@@ -29,7 +29,8 @@
                               :lastName "Panaani"
                               :type "owner"
                               :role "owner"})
-    (:allowedAttachmentTypes app) => (complement empty?)))
+    (fact "has applicant" (:applicant app) => "Pena Panaani")
+    (fact "has allowedAttachmentTypes" (:allowedAttachmentTypes app) => seq)))
 
 (fact "creating application with message"
   (let [application-id  (create-app-id pena :messages ["hello"])

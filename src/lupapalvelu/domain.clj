@@ -39,7 +39,7 @@
 (defn get-auths-by-role
   "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
   [{auth :auth} role]
-  (filter #(-> % :role (= (name role))) auth))
+  (filter #(= (name (:role %)) (name role)) auth))
 
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
@@ -70,10 +70,10 @@
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
 
-(defn get-applicant-document
-  "returns first applicant document from application"
+(defn get-applicant-documents
+  "returns applicant documents from application"
   [application]
-  (first (filter (comp (partial = "hakija") :subtype :schema-info) (:documents application))))
+  (filter (comp (partial = "hakija") :subtype :schema-info) (:documents application)))
 
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))
@@ -108,7 +108,9 @@
   {:_statements-seen-by      {}
    :_verdicts-seen-by        {}
    :_comments-seen-by        {}
+   :_applicantIndex          []
    :address                  ""
+   :applicant                ""
    :attachments              []
    :auth                     []
    :authority                {}

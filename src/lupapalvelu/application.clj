@@ -69,7 +69,7 @@
 
 ;; Helpers
 
-(defn- set-user-to-document [application-id document user-id path current-user timestamp]
+(defn- set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (let [path-arr     (if-not (blank? path) (split path #"\.") [])
         schema       (schemas/get-schema (:schema-info document))
@@ -87,8 +87,11 @@
     (when-not schema (fail! :error.schema-not-found))
     (when-not subject (fail! :error.user-not-found))
     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-    (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
+    (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
   )
+
+(defn- insert-application [application]
+  (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
 ;;
 ;; Query application:
@@ -150,7 +153,7 @@
                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
           (commands/persist-model-updates
-            (:id application)
+            application
             "documents"
             rakennuspaikka
             updates
@@ -225,7 +228,7 @@
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
-      (set-user-to-document id document (:id user) (:path my-invite) user created))))
+      (set-user-to-document application document (:id user) (:path my-invite) user created))))
 
 (defn- do-remove-auth [command email]
   (update-application command
@@ -292,7 +295,7 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (set-user-to-document id document userId path user created)
+    (set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
 
 ;;
@@ -649,14 +652,11 @@
                            :title               address
                            :auth                [owner]
                            :comments            (map make-comment messages)
-                           :schema-version      (schemas/get-latest-schema-version)})
+                           :schema-version      (schemas/get-latest-schema-version)})]
 
-          application   (merge application
-                          (when-not info-request?
+      (merge application (when-not info-request?
                             {:attachments            (make-attachments created op organization-id state)
-                             :documents              (make-documents user created op application)}))]
-
-      application)))
+                             :documents              (make-documents user created op application)})))))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
@@ -675,7 +675,7 @@
         open-inforequest? (and info-request? (:open-inforequest organization))
         created-application (do-create-application command)]
 
-      (mongo/insert :applications created-application)
+      (insert-application created-application)
       (when open-inforequest?
         (open-inforequest/new-open-inforequest! created-application))
       (try
@@ -853,7 +853,7 @@
                            [:attachments :statements :verdicts :comments :submitted :sent :neighbors
                             :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
-    (mongo/insert :applications muutoslupa-app)
+    (insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))
 
 
@@ -913,9 +913,8 @@
                                        (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
 
     (do-add-link-permit continuation-app (:id application))
-    (mongo/insert :applications continuation-app)
+    (insert-application continuation-app)
     (ok :id (:id continuation-app))))
-
 
 ;;
 ;; Inform construction started & ready
@@ -1142,7 +1141,7 @@
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (when (seq updates)
-        (commands/persist-model-updates id collection document updates created :source "krysp"))
+        (commands/persist-model-updates application collection document updates created :source "krysp"))
       (ok))
     (fail :error.no-legacy-available)))
 

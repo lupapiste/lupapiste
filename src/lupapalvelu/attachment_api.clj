@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for-application? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
             [lupapalvelu.organization :as organization]
@@ -309,12 +309,8 @@
 (defn- loc-organization-name [organization]
   (get-in organization [:name i18n/*lang*] (str "???ORG:" (:id organization) "???")))
 
-(defn- get-organization-name [application-id]
-  (-<> application-id
-       (mongo/by-id :applications <> [:organization])
-       (:organization)
-       (mongo/by-id :organizations <> [:name])
-       (loc-organization-name <>)))
+(defn- get-organization-name [{organization :organization :as application}]
+  (loc-organization-name (mongo/by-id :organizations organization [:name])))
 
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
@@ -330,9 +326,11 @@
            :re-stamp? re-stamp?
            :attachment-id (:id attachment))))
 
-(defn- add-stamp-comment [new-version new-file-id file-info context]
+(defn- add-stamp-comment [new-version new-file-id file-info {:keys [application] :as context}]
   ; mea culpa, but what the fuck was I supposed to do
-  (mongo/update-by-id :applications (:application-id context)
+  ; FIXME use comment/comment-mongo-update!
+  (update-application
+    (application->command application)
     {$set {:modified (:created context)}
      $push {:comments {:text    (i18n/loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
                        :created (:created context)
@@ -343,28 +341,27 @@
                                  :filename (:filename file-info)
                                  :fileId new-file-id}}}}))
 
-(defn- stamp-attachment! [stamp file-info context]
-  (let [{:keys [application-id user created]} context
-        {:keys [attachment-id contentType fileId filename re-stamp?]} file-info
+(defn- stamp-attachment! [stamp file-info {:keys [application user created] :as context}]
+  (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
     (with-open [in ((:content (mongo/download fileId)))
                 out (io/output-stream temp-file)]
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
-    (mongo/upload new-file-id filename contentType temp-file :application application-id)
+    (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp?
-                        (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
-                        (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) nil created user true))]
+                        (update-version-content application attachment-id new-file-id (.length temp-file) created)
+                        (set-attachment-version (:id application) attachment-id new-file-id filename contentType (.length temp-file) nil created user true))]
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-(defn- stamp-attachments! [file-infos {:keys [user created job-id application-id] :as context}]
+(defn- stamp-attachments! [file-infos {:keys [user created job-id application] :as context}]
   (let [stamp (stamper/make-stamp
                 (i18n/loc "stamp.verdict")
                 created
                 (str (:firstName user) \space (:lastName user))
-                (get-organization-name application-id)
+                (get-organization-name application)
                 (:transparency context))]
     (doseq [file-info (vals file-infos)]
       (try
@@ -372,7 +369,7 @@
         (stamp-attachment! stamp file-info context)
         (job/update job-id assoc (:attachment-id file-info) :done)
         (catch Exception e
-          (errorf e "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
+          (errorf e "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
           (job/update job-id assoc (:attachment-id file-info) :error))))))
 
 (defn- stamp-job-status [data]
@@ -391,7 +388,7 @@
   [{application :application {transparency :transparency} :data :as command}]
   (ok :job (make-stamp-job
              (key-by :attachment-id (map ->file-info (filter (comp (set files) :id) (:attachments application))))
-             {:application-id (:id application)
+             {:application application
               :user (:user command)
               :created (:created command)
               :x-margin (->long xMargin)

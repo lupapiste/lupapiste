@@ -11,10 +11,10 @@
 
 
 (fact "update-document"
-  (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => truthy
+  (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
   (provided
     ..application.. =contains=> {:id ..id..}
-    (mongo/update :applications {:_id ..id..} ..changes..) => true))
+    (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application validate-x validate-y)
 
