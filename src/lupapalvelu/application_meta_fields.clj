@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-meta-fields
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
+            [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
@@ -7,26 +8,37 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.core :refer :all]
-;            [lupapalvelu.document.canonical-common :refer [by-type]]
-;            [sade.util :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
 
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-applicant-document app))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
+(defn- applicant-name-from-auth [application]
+  (let [owner (first (domain/get-auths-by-role application :owner))
+        {first-name :firstName last-name :lastName} owner]
+    (s/trim (str first-name \space last-name))))
+
+(defn- applicant-name-from-doc [document]
+  (when-let [body (:data document)]
+    (if (= (get-in body [:_selected :value]) "yritys")
+      (get-in body [:yritys :yritysnimi :value])
+      (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+        (s/trim (str (:value first-name) \space (:value last-name)))))))
+
+(defn applicant-index [application]
+  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents application)))
+        applicant (or (first applicants) (applicant-name-from-auth application))
+        index (if (seq applicants) applicants [applicant])]
+    (tracef "applicant: '%s', applicant-index: %s" applicant index)
+    {:applicant applicant
+     :_applicantIndex index}))
+
+(defn applicant-index-update [application]
+  {$set (applicant-index application)})
 
 (defn get-applicant-phone [_ app]
   (let [owner (first (domain/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
-  
+
 
 (defn get-application-operation [app]
   (first (:operations app)))
@@ -77,8 +89,7 @@
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :applicantPhone :fn get-applicant-phone}
+(def meta-fields [{:field :applicantPhone :fn get-applicant-phone}
                   {:field :neighbors :fn neighbors/normalize-neighbors}
                   {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}

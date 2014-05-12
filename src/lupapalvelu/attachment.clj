@@ -5,6 +5,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.core :refer [fail fail!]]
+            [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
@@ -253,22 +254,19 @@
 
 (defn create-attachment [application attachement-type now target locked & [attachment-id]]
   {:pre [(map? application)]}
-  (let [application-id (:id application)
-        applicationState (:state application)
-        attachment (make-attachment now target locked applicationState nil attachement-type attachment-id)]
-    (mongo/update-by-id
-      :applications application-id
+  (let [attachment (make-attachment now target locked (:state application) nil attachement-type attachment-id)]
+    (update-application
+      (application->command application)
       {$set {:modified now}
        $push {:attachments attachment}})
+
     (:id attachment)))
 
 (defn create-attachments [application attachement-types now]
   {:pre [(map? application)]}
-  (let [application-id (:id application)
-        applicationState (:state application)
-        attachments (make-attachments now applicationState attachement-types)]
-    (mongo/update-by-id
-      :applications application-id
+  (let [attachments (make-attachments now (:state application) attachement-types)]
+    (update-application
+      (application->command application)
       {$set {:modified now}
        $pushAll {:attachments attachments}})
     (map :id attachments)))
@@ -321,10 +319,9 @@
                               :filename filename
                               :fileId file-id}
 
-              result-count (mongo/update-by-query
-                             :applications
-                             {:_id application-id
-                              :attachments {$elemMatch {:id attachment-id
+              result-count (update-application
+                             (application->command application)
+                             {:attachments {$elemMatch {:id attachment-id
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
                              (util/deep-merge
@@ -334,7 +331,7 @@
                                       :attachments.$.state  :requires_authority_action
                                       :attachments.$.latestVersion version-model}
                                 $push {:attachments.$.versions version-model}})
-                             )]
+                             true)]
           ; Check return value and try again with new version number
           (if (pos? result-count)
             (assoc version-model :id attachment-id)
@@ -347,15 +344,16 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-version-content [application-id attachment-id file-id size now]
-  (mongo/update-by-query :applications
-    {:_id application-id
-     :attachments {$elemMatch {:id attachment-id}}}
+(defn update-version-content [application attachment-id file-id size now]
+  (update-application
+    (application->command application
+    {:attachments {$elemMatch {:id attachment-id}}}
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.latestVersion.fileId file-id
            :attachments.$.latestVersion.size size
-           :attachments.$.latestVersion.created now}}))
+           :attachments.$.latestVersion.created now}})))
+
 
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
@@ -415,11 +413,11 @@
 
 (defn delete-attachment
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [{:keys [id attachments] :as application} attachmentId]
+  [{:keys [attachments] :as application} attachmentId]
   (info "1/3 deleting files of attachment" attachmentId)
   (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachmentId)))
   (info "2/3 deleted files of attachment" attachmentId)
-  (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
+  (update-application (application->command application) {$pull {:attachments {:id attachmentId}}})
   (info "3/3 deleted meta-data of attachment" attachmentId))
 
 (defn delete-attachment-version
@@ -429,13 +427,12 @@
     (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
     (mongo/delete-file-by-id fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
-    (mongo/update
-      :applications
-      {:_id id :attachments {$elemMatch {:id attachmentId}}}
+    (update-application
+      (application->command application)
+      {$elemMatch {:id attachmentId}}
       {$pull {:attachments.$.versions {:fileId fileId}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
-
 
 (defn get-attachment-as
   "Returns the attachment if user has access to application, otherwise nil."

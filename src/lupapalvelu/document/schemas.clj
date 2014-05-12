@@ -679,7 +679,9 @@
             :repeating true
             :approvable true
             :type :party
-            :subtype :hakija}
+            :subtype :hakija
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+            }
      :body party}
 
     {:info {:name "hakija-ya"
@@ -688,7 +690,8 @@
             :repeating false
             :approvable true
             :type :party
-            :subtype :hakija}
+            :subtype :hakija
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
