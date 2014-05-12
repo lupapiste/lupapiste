@@ -179,6 +179,11 @@
                                           :mainostus-viitoitus-lisatiedot      true}})
 
 
+(defn- get-luvan-tunniste-tiedot [application]
+  (let [base-id (update-in (lupatunnus application) [:LupaTunnus :muuTunnustieto] vector)
+        link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}}) (:linkPermitData application))]
+    (update-in base-id [:LupaTunnus :muuTunnustieto] #(into % link-permits))))
+
 (defn- permits [application]
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
@@ -186,8 +191,6 @@
   ;;
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
-
-        link-permit-data (-> application :linkPermitData first)
 
         operation-name-key (-> application :operations first :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
@@ -282,7 +285,7 @@
 
         body {permit-name-key (merge
                                 {:kasittelytietotieto (get-kasittelytieto application)
-                                 :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
+                                 :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
                                  :sijaintitieto (get-sijaintitieto application)
@@ -350,7 +353,7 @@
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
                              {:kasittelytietotieto (get-kasittelytieto application)
-                              :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
+                              :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
                               :alkuPvm alku-pvm
                               :loppuPvm loppu-pvm
                               :sijaintitieto (get-sijaintitieto application)

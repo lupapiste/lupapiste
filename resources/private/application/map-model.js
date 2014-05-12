@@ -57,7 +57,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       card.append(partTitle).append(partOperation);
 
       _.each(ir.comments, function(com) {
-        var partComment = $("<div>").attr("data-test-id", "inforequest-comment");
+        var partComment = $("<div>").attr("class", "inforequest-comment");
 
         var commentTitle         = com.type === "authority" ? loc('inforequest.answer.title') : loc('inforequest.question.title');
         var commentTimestamp     = " (" +

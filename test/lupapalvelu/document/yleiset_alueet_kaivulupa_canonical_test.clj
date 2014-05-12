@@ -72,7 +72,7 @@
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => nil?
+        luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
@@ -321,7 +321,7 @@
 
 
 
-(def ^:private kaivulupa-application-with-link-permit-data
+(def kaivulupa-application-with-link-permit-data
   (merge kaivulupa-application {:linkPermitData [link-permit-data]}))
 
 (facts* "Kaivulupa canonical model is correct"
@@ -330,8 +330,15 @@
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
         luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => truthy
-        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy]
-    (fact "kuntalupatunnus" (:kuntalupatunnus LupaTunnus) => (:id link-permit-data))
-    (fact "Sovellus" (:viittaus LupaTunnus) => "edellinen rakennusvalvonta-asia")))
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        lp-muu-tunnus (:MuuTunnus (first muuTunnustieto)) => truthy
+        viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy]
 
+    (fact "LP-tunnus"
+      (:tunnus lp-muu-tunnus) => (:id kaivulupa-application-with-link-permit-data)
+      (:sovellus lp-muu-tunnus) => "Lupapiste")
 
+    (fact "Viitelupa"
+      (:tunnus viitelupatunnus) => (:id link-permit-data)
+      (:sovellus viitelupatunnus) => "Viitelupa")))

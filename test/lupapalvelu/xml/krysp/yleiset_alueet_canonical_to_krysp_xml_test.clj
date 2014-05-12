@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-canonical-to-krysp-xml-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
-            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application]]
+            [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test :refer [kaivulupa-application-with-link-permit-data]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test :refer [kayttolupa-application]]
             [lupapalvelu.document.yleiset-alueet-sijoituslupa-canonical-test :refer [sijoituslupa-application valmistumisilmoitus]]
             [lupapalvelu.document.yleiset-alueet-kayttolupa-mainostus-viitoitus-canonical-test
@@ -14,7 +14,8 @@
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [midje.sweet :refer :all]
             [clojure.data.xml :refer :all]
-            [clojure.java.io :refer :all]))
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]))
 
 (defn- do-test [application]
   (let [operation-name-key (-> application :operations first :name keyword)
@@ -23,8 +24,9 @@
         xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")
         xml-213 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.3")
         xml-212s (indent-str xml-212)
-        xml-213s (indent-str xml-213)]
-
+        xml-213s (indent-str xml-213)
+        lp-xml-212 (cr/strip-xml-namespaces (xml/parse xml-212s))
+        lp-xml-213 (cr/strip-xml-namespaces (xml/parse xml-213s))]
 
     (fact ":tag is set"
       (xml-test-common/has-tag
@@ -34,19 +36,8 @@
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.3")) => true)
 
-
     (fact "2.1.2: xml exist" xml-212 => truthy)
     (fact "2.1.3: xml exist" xml-213 => truthy)
-
-;    (println "\n xml-s: " xml-s "\n")
-
-;    (println "\n application: ")
-;    (clojure.pprint/pprint application)
-;    (println "\n")
-
-;    (println "\n yleiset-alueet-krysp-mapping: ")
-;    (clojure.pprint/pprint mapping)
-;    (println "\n")
 
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
@@ -56,16 +47,25 @@
     (mapping-to-krysp/save-application-as-krysp
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}})
 
-
     (validator/validate xml-212s (:permitType application) "2.1.2")
     (validator/validate xml-213s (:permitType application) "2.1.3")
-   ))
+
+    (fact "LP-tunnus"
+      (xml/get-text lp-xml-212 [:MuuTunnus :tunnus]) => (:id application)
+      (xml/get-text lp-xml-213 [:MuuTunnus :sovellus]) => "Lupapiste")
+
+    (when (:linkPermitData application)
+      (fact "Link permit"
+        (let [muut-tunnukset (xml/select lp-xml-213 [:MuuTunnus])
+              link-permit (second muut-tunnukset)]
+          (xml/get-text link-permit [:tunnus]) => (-> application :linkPermitData first :id)
+          (xml/get-text link-permit [:sovellus]) => "Viitelupa")))))
 
 
 (facts "YA permits to canonical and then to xml with schema validation"
 
     (fact "Kaivulupa application -> canonical -> xml"
-      (do-test kaivulupa-application))
+      (do-test kaivulupa-application-with-link-permit-data))
 
     (fact "Kayttolupa application -> canonical -> xml"
       (do-test kayttolupa-application))

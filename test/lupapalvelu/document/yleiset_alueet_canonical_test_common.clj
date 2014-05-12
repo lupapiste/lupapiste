@@ -128,30 +128,6 @@
                          :accepted nil,
                          :user pena})
 
-;(def ^:private attachment-version-authority (assoc attachment-version-user :user sonja))
-;
-;(def attachments [{:id "52380cb594a74fc25bb4ba70",
-;                   :type {:type-group "yleiset-alueet",
-;                          :type-id "suunnitelmakartta"},
-;                   :modified 1379404981309,
-;                   :state "requires_authority_action",
-;                   :target nil,
-;                   :op nil,
-;                   :locked false,
-;                   :latestVersion attachment-version-user,
-;                   :versions [attachment-version-user]},
-;                  {:id "52382d0e94a74fc25bb4be74",
-;                   :type {:type-group "muut",
-;                          :type-id "muu"},
-;                   :modified 1379413262223,
-;                   :state "requires_authority_action",
-;                   :target {:id "52382cea94a74fc25bb4be5d",
-;                            :type "statement"},
-;                   :op nil,
-;                   :locked true,
-;                   :latestVersion attachment-version-authority,
-;                   :versions [attachment-version-authority]}])
-
 ;; Statements
 
 (def statements [{:id "52382cea94a74fc25bb4be5d"
