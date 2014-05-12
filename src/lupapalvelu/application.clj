@@ -90,6 +90,9 @@
     (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
   )
 
+(defn- insert-application [application]
+  (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
+
 ;;
 ;; Query application:
 ;;
@@ -675,7 +678,7 @@
         open-inforequest? (and info-request? (:open-inforequest organization))
         created-application (do-create-application command)]
 
-      (mongo/insert :applications created-application)
+      (insert-application created-application)
       (when open-inforequest?
         (open-inforequest/new-open-inforequest! created-application))
       (try
@@ -836,26 +839,24 @@
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (make-application-id (:municipality application))
-        muutoslupa-app (as->
-                         (merge application
-                           {:id                  muutoslupa-app-id
-                            :created             created
-                            :opened              created
-                            :modified            created
-                            :documents           (into [] (map
-                                                            #(assoc % :id (mongo/create-id))
-                                                            (:documents application)))
-                            :state               (cond
-                                                   (user/authority? user)  :open
-                                                   :else                   :draft)
-                            :permitSubtype       :muutoslupa}
-                           (select-keys
-                             domain/application-skeleton
-                             [:attachments :statements :verdicts :comments :submitted :sent :neighbors
-                              :_statements-seen-by :_comments-seen-by :_verdicts-seen-by])) app
-                         (merge app (meta-fields/applicant-index app)))]
+        muutoslupa-app (merge application
+                         {:id                  muutoslupa-app-id
+                          :created             created
+                          :opened              created
+                          :modified            created
+                          :documents           (into [] (map
+                                                          #(assoc % :id (mongo/create-id))
+                                                          (:documents application)))
+                          :state               (cond
+                                                 (user/authority? user)  :open
+                                                 :else                   :draft)
+                          :permitSubtype       :muutoslupa}
+                         (select-keys
+                           domain/application-skeleton
+                           [:attachments :statements :verdicts :comments :submitted :sent :neighbors
+                            :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
-    (mongo/insert :applications muutoslupa-app)
+    (insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))
 
 
@@ -912,13 +913,11 @@
                            :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
                                        tyo-aika-for-jatkoaika-doc
                                        (domain/get-document-by-name application "hakija-ya")
-                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])
-        continuation-app (merge continuation-app (meta-fields/applicant-index continuation-app))]
+                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
 
     (do-add-link-permit continuation-app (:id application))
-    (mongo/insert :applications continuation-app)
+    (insert-application continuation-app)
     (ok :id (:id continuation-app))))
-
 
 ;;
 ;; Inform construction started & ready
