@@ -113,16 +113,6 @@
                                           {:laskuviite (-> doc :laskuviite)}
                                           {:rooliKoodi "hakija"})))))
 
-(defn- get-lisatietoja-sijoituskohteesta [data]
-  (when-let [arvo (-> data :lisatietoja-sijoituskohteesta)]
-    {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta" :arvo arvo}))
-
-(defn- get-sijoituksen-tarkoitus [data]
-  (when-let [arvo (if (= "other" (:sijoituksen-tarkoitus data))
-                    (-> data :muu-sijoituksen-tarkoitus)
-                    (-> data :sijoituksen-tarkoitus))]
-    {:selitysteksti "Sijoituksen tarkoitus" :arvo arvo}))
-
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
   {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-alkaa-pvm))
                    :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm))}})
@@ -156,16 +146,13 @@
   {:Kayttolupa                  default-config
 
    :Tyolupa                     (merge default-config
-                                  {:sijoitus-lisatiedot                        true
-                                   :tyomaasta-vastaava                         true
-                                   :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
+                                  {:tyomaasta-vastaava                         true
                                    :johtoselvitysviitetieto                    true})
 
 
    :Sijoituslupa                (merge default-config
                                   {:tyoaika                                    false
-                                   :dummy-alku-and-loppu-pvm                   true
-                                   :sijoitus-lisatiedot                        true})
+                                   :dummy-alku-and-loppu-pvm                   true})
 
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
@@ -263,13 +250,6 @@
                                           (when-let [erikoiskuvaus-operaatiosta (ya-operation-type-to-additional-usage-description operation-name-key)]
                                             {:LupakohtainenLisatieto {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta"
                                                                       :arvo erikoiskuvaus-operaatiosta}})
-                                          (when (:sijoitus-lisatiedot config)
-                                            (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
-                                              (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)]
-                                                [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}])
-                                              (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                                [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                                 {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])))
                                           (when (:mainostus-viitoitus-lisatiedot config)
                                             (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
 
@@ -279,9 +259,7 @@
                                                         :tunniste tunniste}}))
 
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
-                                  {:Johtoselvitysviite {:vaadittuKytkin false
-                                                        ;:tunniste "..."
-                                                        }})
+                                  {:Johtoselvitysviite {:vaadittuKytkin false}})
 
         body {permit-name-key (merge
                                 {:kasittelytietotieto (get-kasittelytieto application)
