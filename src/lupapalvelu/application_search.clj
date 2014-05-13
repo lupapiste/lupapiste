@@ -83,22 +83,24 @@
     :else (make-free-text-query filter-search)))
 
 (defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user]} user]
-  (merge
-    query
-    (case filter-kind
-      "applications" {:infoRequest false}
-      "inforequests" {:infoRequest true}
-      nil) ; defaults to both
-    (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
-      (case filter-state
-       "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
-       "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
-       "canceled"          {:state "canceled"}
-       all))
-    (when-not (contains? #{nil "0"} filter-user)
-      {$or [{"auth.id" filter-user}
-            {"authority.id" filter-user}]})
-    (when-not (ss/blank? filter-search) (make-text-query (ss/trim filter-search)))))
+  {$and
+   (filter seq
+     [query
+      (when-not (ss/blank? filter-search) (make-text-query (ss/trim filter-search)))
+      (merge
+        (case filter-kind
+          "applications" {:infoRequest false}
+          "inforequests" {:infoRequest true}
+          nil) ; defaults to both
+        (let [all (if (applicant? user) {:state {$ne "canceled"}} {:state {$nin ["draft" "canceled"]}})]
+          (case filter-state
+           "application"       {:state {$in ["open" "submitted" "sent" "complement-needed" "info"]}}
+           "construction"      {:state {$in ["verdictGiven" "constructionStarted"]}}
+           "canceled"          {:state "canceled"}
+           all))
+        (when-not (contains? #{nil "0"} filter-user)
+          {$or [{"auth.id" filter-user}
+                {"authority.id" filter-user}]}))])})
 
 (defn- make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
