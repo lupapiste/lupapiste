@@ -33,6 +33,7 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-search :as search]
             [lupapalvelu.application-meta-fields :as meta-fields])
   (:import [java.net URL]))
@@ -68,24 +69,29 @@
 
 ;; Helpers
 
-(defn- set-user-to-document [application-id document user-id path current-user timestamp]
+(defn- set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
-  (let [schema       (schemas/get-schema (:schema-info document))
-         subject      (user/get-user-by-id user-id)
-         with-hetu    (and
-                        (model/has-hetu? (:body schema) [path])
-                        (user/same-user? current-user subject))
-         person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu))
-         model        (if-not (blank? path)
-                        (assoc-in {} (map keyword (split path #"\.")) person)
-                        person)
-         updates      (tools/path-vals model)
-         ; Path should exist in schema!
-         updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
-     (when-not schema (fail! :error.schema-not-found))
-     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-     (commands/persist-model-updates application-id "documents" document updates timestamp)) ; TODO support for collection parameter
+  (let [path-arr     (if-not (blank? path) (split path #"\.") [])
+        schema       (schemas/get-schema (:schema-info document))
+        subject      (user/get-user-by-id user-id)
+        with-hetu    (and
+                       (model/has-hetu? (:body schema) path-arr)
+                       (user/same-user? current-user subject))
+        person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
+        model        (if (seq path-arr)
+                       (assoc-in {} (map keyword path-arr) person)
+                       person)
+        updates      (tools/path-vals model)
+        ; Path should exist in schema!
+        updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
+    (when-not schema (fail! :error.schema-not-found))
+    (when-not subject (fail! :error.user-not-found))
+    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+    (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
   )
+
+(defn- insert-application [application]
+  (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
 ;;
 ;; Query application:
@@ -93,6 +99,7 @@
 
 (defn- app-post-processor [user]
   (comp
+    (fn [application] (update-in application [:documents] #(map model/mask-person-ids %)))
     without-system-keys
     (partial meta-fields/with-meta-fields user)
     meta-fields/enrich-with-link-permit-data))
@@ -146,7 +153,7 @@
                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
                                                               (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
           (commands/persist-model-updates
-            (:id application)
+            application
             "documents"
             rakennuspaikka
             updates
@@ -221,7 +228,7 @@
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
-      (set-user-to-document id document (:id user) (:path my-invite) user created))))
+      (set-user-to-document application document (:id user) (:path my-invite) user created))))
 
 (defn- do-remove-auth [command email]
   (update-application command
@@ -288,7 +295,7 @@
    :authenticated true}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (set-user-to-document id document userId path user created)
+    (set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
 
 ;;
@@ -473,6 +480,63 @@
       {$set {:modified created
              :drawings drawings}})))
 
+(defn- make-marker-contents [id lang app]
+  (merge
+    {:id          (:id app)
+     :title       (:title app)
+     :location    (:location app)
+     :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
+     :authName    (-> (domain/get-auths-by-role app :owner)
+                    first
+                    (#(str (:firstName %) " " (:lastName %))))
+     :comments    (->> (:comments app)
+                    (filter #(not (= "system" (:type %))))
+                    (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))
+                                     :type (:type %)
+                                     :time (:created %)
+                                     :text (:text %)})))}
+    (when-not (= id (:id app))
+      {:link      (str (env/value :host) "/app/" (name lang) "/authority#!/inforequest/" (:id app))})))
+
+(defn- remove-irs-by-id [target-irs irs-to-be-removed]
+  (remove (fn [ir] (some #(= (:id ir) (:id %)) irs-to-be-removed)) target-irs))
+
+(defquery inforequest-markers
+  {:parameters [id lang x y]
+   :roles      [:authority]
+   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :input-validators [(partial action/non-blank-parameters [:x :y])]}
+  [{:keys [application user]}]
+  (let [x (util/->double x)
+        y (util/->double y)
+        inforequests (mongo/select :applications
+                       (merge
+                         (domain/application-query-for user)
+                         {:infoRequest true})
+                       {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
+
+        same-location-irs (filter
+                            #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
+                            inforequests)
+
+        inforequests (remove-irs-by-id inforequests same-location-irs)
+
+        application-op-name (-> application :operations first :name)  ;; an inforequest can only have one operation
+
+        same-op-irs (filter
+                      (fn [ir]
+                        (some #(= application-op-name (:name %)) (:operations ir)))
+                      inforequests)
+
+        others (remove-irs-by-id inforequests same-op-irs)
+
+        same-location-irs (map (partial make-marker-contents id lang) same-location-irs)
+        same-op-irs       (map (partial make-marker-contents id lang) same-op-irs)
+        others            (map (partial make-marker-contents id lang) others)]
+
+    (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
+    ))
+
 (defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
   (let [organization (organization/get-organization organization-id)]
     (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
@@ -588,14 +652,11 @@
                            :title               address
                            :auth                [owner]
                            :comments            (map make-comment messages)
-                           :schema-version      (schemas/get-latest-schema-version)})
+                           :schema-version      (schemas/get-latest-schema-version)})]
 
-          application   (merge application
-                          (when-not info-request?
+      (merge application (when-not info-request?
                             {:attachments            (make-attachments created op organization-id state)
-                             :documents              (make-documents user created op application)}))]
-
-      application)))
+                             :documents              (make-documents user created op application)})))))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
@@ -605,7 +666,7 @@
    :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
   (let [permit-type       (operations/permit-type-of-operation operation)
@@ -614,7 +675,7 @@
         open-inforequest? (and info-request? (:open-inforequest organization))
         created-application (do-create-application command)]
 
-      (mongo/insert :applications created-application)
+      (insert-application created-application)
       (when open-inforequest?
         (open-inforequest/new-open-inforequest! created-application))
       (try
@@ -792,7 +853,7 @@
                            [:attachments :statements :verdicts :comments :submitted :sent :neighbors
                             :_statements-seen-by :_comments-seen-by :_verdicts-seen-by]))]
     (do-add-link-permit muutoslupa-app (:id application))
-    (mongo/insert :applications muutoslupa-app)
+    (insert-application muutoslupa-app)
     (ok :id muutoslupa-app-id)))
 
 
@@ -852,9 +913,8 @@
                                        (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
 
     (do-add-link-permit continuation-app (:id application))
-    (mongo/insert :applications continuation-app)
+    (insert-application continuation-app)
     (ok :id (:id continuation-app))))
-
 
 ;;
 ;; Inform construction started & ready
@@ -1081,7 +1141,7 @@
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (when (seq updates)
-        (commands/persist-model-updates id collection document updates created :source "krysp"))
+        (commands/persist-model-updates application collection document updates created :source "krysp"))
       (ok))
     (fail :error.no-legacy-available)))
 

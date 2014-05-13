@@ -527,9 +527,9 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId]}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message]}
     (let [property (util/to-property-id propertyId)
-          response (execute-command "create-application" (assoc (from-query) :propertyId property))]
+          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages (if message [message] [])))]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
@@ -556,7 +556,6 @@
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
-  (require 'lupapalvelu.neighbors)
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))

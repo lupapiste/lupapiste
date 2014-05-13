@@ -110,7 +110,7 @@
                             :type :group
                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
@@ -679,7 +679,9 @@
             :repeating true
             :approvable true
             :type :party
-            :subtype :hakija}
+            :subtype :hakija
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+            }
      :body party}
 
     {:info {:name "hakija-ya"
@@ -688,7 +690,8 @@
             :repeating false
             :approvable true
             :type :party
-            :subtype :hakija}
+            :subtype :hakija
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
