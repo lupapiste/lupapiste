@@ -23,9 +23,6 @@
                                               :order 60},
                                 :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
                                        :sijoitusLuvanTunniste {:value "LP-753-2013-00002"}
-                                       :sijoituksen-tarkoitus {:value "other"},
-                                       ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
-                                       :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
                                        :varattava-pinta-ala {:value "333"}}})
 
 (def ^:private tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
@@ -61,7 +58,7 @@
 
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical
-  get-yritys-and-henkilo get-tyomaasta-vastaava get-sijoituksen-tarkoitus get-hakija)
+  get-yritys-and-henkilo get-tyomaasta-vastaava get-hakija)
 
 (facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical kaivulupa-application "fi")
@@ -165,16 +162,7 @@
         hakija-yksityinen-osoite (:osoite hakija-yksityinen-Henkilo) => truthy
 
         pinta-ala (:pintaala Tyolupa) => truthy
-
-        ;; Lisatiedot
-        lupakohtainenLisatietotieto (-> Tyolupa :lupakohtainenLisatietotieto) => truthy
-        lisatietoja-filter-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
-        sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
-
-        ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
-        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
-                                        (tools/unwrapped
-                                          (assoc-in (:data hankkeen-kuvaus) [:sijoituksen-tarkoitus :value] "liikennevalo"))) => truthy]
+        ]
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
@@ -315,8 +303,6 @@
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
-      (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :muu-sijoituksen-tarkoitus :value))
-      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
       (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))
 
 
