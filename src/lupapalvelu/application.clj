@@ -473,7 +473,7 @@
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed :info]}
+   :states     [:draft :info :open :submitted :complement-needed]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (update-application command
@@ -693,7 +693,7 @@
 (defcommand add-operation
   {:parameters [id operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]
+   :states     [:draft :open :submitted :complement-needed]
    :input-validators [operation-validator]
    :pre-checks [add-operation-allowed?]}
   [{:keys [application created] :as command}]
@@ -715,13 +715,13 @@
 (defcommand link-permit-required
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]
+   :states     [:draft :open :submitted :complement-needed]
    :pre-checks [link-permit-required?]})
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]
+   :states     [:draft :open :submitted :complement-needed]
    :pre-checks [permit/validate-permit-has-subtypes]}
   [{:keys [application created] :as command}]
   (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
@@ -733,7 +733,7 @@
 (defcommand change-location
   {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed :submitted]
+   :states     [:draft :info :answered :open :submitted :complement-needed]
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
@@ -809,7 +809,7 @@
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]
+   :states     [:draft :open :submitted :complement-needed]
    :pre-checks [validate-jatkolupa-zero-link-permits]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])]}
   [{application :application}]
@@ -818,7 +818,7 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :submitted]}
+   :states     [:draft :open :submitted :complement-needed]}
   [{application :application}]
   (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
     (ok)

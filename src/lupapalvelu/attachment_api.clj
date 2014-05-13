@@ -115,7 +115,7 @@
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -126,7 +126,7 @@
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -141,7 +141,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application attachment-types created)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
