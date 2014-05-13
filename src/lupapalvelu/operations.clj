@@ -200,8 +200,7 @@
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                         :permit-type permit/YA
-                                        :required (conj common-yleiset-alueet-schemas
-                                                    "sijoituslupa-sijoituksen-tarkoitus")
+                                        :required common-yleiset-alueet-schemas
                                         :attachments []
                                         :add-operation-allowed false
                                         :link-permit-required false})
