@@ -265,7 +265,7 @@
                 (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
+   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]
    :notified   true
    :on-success [(fn [command _] (notifications/notify! :new-comment command))
                 open-inforequest/notify-on-comment]
