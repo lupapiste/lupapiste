@@ -71,6 +71,10 @@
       :id test-application-id
       :linkPermitId verdict-given-application-id) => (partial expected-failure? "error.command-illegal-state")
 
+    (fact "Authority gives verdict and adds link permit"
+      (command sonja :give-verdict :id test-application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (command sonja :add-link-permit :id test-application-id :linkPermitId verdict-given-application-id) => ok?)
+
     (let [app (query-application apikey test-application-id) => truthy]
       (-> app first :appsLinkingToUs) => nil?
       (count (:linkPermitData app)) => 1
