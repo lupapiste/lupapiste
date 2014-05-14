@@ -807,7 +807,7 @@
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]
+   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :pre-checks [validate-jatkolupa-zero-link-permits]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
@@ -817,7 +817,7 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application}]
   (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
     (ok)
