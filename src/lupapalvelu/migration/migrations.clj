@@ -407,3 +407,17 @@
   (doseq [collection [:applications :submitted-applications]]
     (let [applications (mongo/select collection)]
       (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications)))))
+
+(defmigration remove-sijoituksen-and-tyon-tarkoitus
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications-to-update (mongo/select collection {:documents {$elemMatch {$or [{:schema-info.name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"}
+                                                                                        {:schema-info.name "sijoituslupa-sijoituksen-tarkoitus"}]}}})]
+      (doseq [application applications-to-update]
+        (let [new-documents (map
+                              #(if (= "yleiset-alueet-hankkeen-kuvaus-kaivulupa" (-> % :schema-info :name))
+                                 (update-in % [:data] dissoc :sijoituksen-tarkoitus)
+                                 %)
+                              (:documents application))
+              new-documents (remove #(= "sijoituslupa-sijoituksen-tarkoitus" (-> % :schema-info :name)) new-documents)]
+          (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
+
