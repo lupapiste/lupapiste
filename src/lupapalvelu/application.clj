@@ -712,7 +712,7 @@
                 (:operations application)))
     (fail :error.link-permit-not-required)))
 
-(defcommand link-permit-required
+(defquery link-permit-required
   {:parameters [id]
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed]
