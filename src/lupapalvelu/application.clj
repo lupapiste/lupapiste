@@ -757,7 +757,8 @@
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$in ["verdictGiven" "constructionStarted"]}
+                                                              :state {$nin ["draft"]}
+                                                              :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
@@ -770,8 +771,7 @@
                            results)
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
-        without-same-property-id (sort-by :text
-                                   (vec (filter (comp not same-property-id-fn) enriched-results)))
+        without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
         final-results (map #(select-keys % [:id :text]) organized-results)]
     (ok :app-links final-results)))
@@ -782,16 +782,16 @@
     (str link-permit-id "|" app-id)))
 
 
-(defn- do-add-link-permit [application link-permit-id]
-  {:pre [(mongo/valid-key? link-permit-id)]}
-  (let [id (:id application)
-        db-id (make-mongo-id-for-link-permit id link-permit-id)]
+(defn- do-add-link-permit [{:keys [id propertyId operations]} link-permit-id]
+  {:pre [(mongo/valid-key? link-permit-id)
+         (not= id link-permit-id)]}
+  (let [db-id (make-mongo-id-for-link-permit id link-permit-id)]
     (mongo/update-by-id :app-links db-id
       {:_id  db-id
        :link [id link-permit-id]
        id    {:type "application"
-               :apptype (-> application :operations first :name)
-               :propertyId (:propertyId application)}
+               :apptype (:name (first operations))
+               :propertyId propertyId}
        link-permit-id {:type "linkpermit"
                       :linkpermittype (if (.startsWith link-permit-id "LP-")
                                         "lupapistetunnus"
