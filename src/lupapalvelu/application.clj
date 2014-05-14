@@ -504,7 +504,7 @@
 (defquery inforequest-markers
   {:parameters [id lang x y]
    :roles      [:authority]
-   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :states     [:info :answered]
    :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
   (let [x (util/->double x)
