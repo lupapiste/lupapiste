@@ -454,7 +454,7 @@
 (defcommand submit-application
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open]
+   :states     [:draft :open]
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [validate-owner-or-writer]}
