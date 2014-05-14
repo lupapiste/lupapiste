@@ -790,12 +790,12 @@
       {:_id  db-id
        :link [id link-permit-id]
        id    {:type "application"
-               :apptype (:name (first operations))
-               :propertyId propertyId}
+              :apptype (:name (first operations))
+              :propertyId propertyId}
        link-permit-id {:type "linkpermit"
-                      :linkpermittype (if (.startsWith link-permit-id "LP-")
-                                        "lupapistetunnus"
-                                        "kuntalupatunnus")}}
+                       :linkpermittype (if (.startsWith link-permit-id "LP-")
+                                         "lupapistetunnus"
+                                         "kuntalupatunnus")}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
