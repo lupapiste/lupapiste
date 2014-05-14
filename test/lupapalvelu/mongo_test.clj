@@ -34,3 +34,12 @@
     (provided (gfs/remove ...query...) => nil)
   (mongo/delete-file-by-id ...id...) => nil
     (provided (gfs/remove {:_id ...id...}) => nil))
+
+(facts "valid key"
+  (mongo/valid-key? (mongo/create-id)) => true
+  (mongo/valid-key? (org.bson.types.ObjectId.)) => true
+  (mongo/valid-key? nil) => false
+  (mongo/valid-key? "") => false
+  (mongo/valid-key? "\u0000") => false
+  (mongo/valid-key? "$var") => false
+  (mongo/valid-key? "path.path") => false)
