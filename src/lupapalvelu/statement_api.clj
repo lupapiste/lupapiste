@@ -41,9 +41,7 @@
     (if-let [user (user/get-user-by-email email)]
       (do
       (when-not (user/authority? user) (fail! :error.not-authority))
-      (mongo/update
-        :organizations
-        {:_id organization-id}
+      (mongo/update-by-id :organizations organization-id
         {$push {:statementGivers {:id statement-giver-id
                                   :text text
                                   :email email
@@ -57,10 +55,7 @@
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
-  (mongo/update
-    :organizations
-    {:_id organization-id}
-    {$pull {:statementGivers {:id personId}}})))
+  (mongo/update-by-id :organizations organization-id {$pull {:statementGivers {:id personId}}})))
 
 ;;
 ;; Authority operations

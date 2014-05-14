@@ -25,19 +25,32 @@
     (try
      (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
        (or
-         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml version=\"1.0\""))
+         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml "))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
      (catch Exception e
        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
 
 ;; Object types (URL encoded)
-(def building-type  "typeName=rakval%3AValmisRakennus")
-(def rakval-case-type      "typeName=rakval%3ARakennusvalvontaAsia")
-(def poik-case-type "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
-(def ya-type        "typeName=yak%3AYleisetAlueet")
-(def yl-case-type   "typeName=ymy%3AYmparistolupa")
-(def mal-case-type   "typeName=ymm%3AMaaAineslupaAsia")
+(def building-type    "typeName=rakval%3AValmisRakennus")
+(def rakval-case-type "typeName=rakval%3ARakennusvalvontaAsia")
+(def poik-case-type   "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
+(def ya-type          "typeName=yak%3AYleisetAlueet")
+(def yl-case-type     "typeName=ymy%3AYmparistolupa")
+(def mal-case-type    "typeName=ymm%3AMaaAineslupaAsia")
 (def vvvl-case-type   "typeName=ymv%3AVapautus")
+
+;; Object types as enlive selector
+(def case-elem-selector #{[:RakennusvalvontaAsia]
+                          [:Poikkeamisasia]
+                          [:Suunnittelutarveasia]
+                          [:Sijoituslupa]
+                          [:Kayttolupa]
+                          [:Liikennejarjestelylupa]
+                          [:Tyolupa]
+                          [:Ilmoitukset]
+                          [:Ymparistolupa]
+                          [:MaaAineslupaAsia]
+                          [:Vapautus]})
 
 ;; For building filters
 (def ^:private yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
@@ -56,7 +69,7 @@
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
-(defn post-body-for-ya-application [application-id]
+(defn- post-body-for-ya-application [application-id]
   {:body (str "<wfs:GetFeature
       service=\"WFS\"
         version=\"1.1.0\"
@@ -65,7 +78,7 @@
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:ogc=\"http://www.opengis.net/ogc\"
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
-        <wfs:Query typeName=\"yak:YleisetAlueet\">
+        <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
               <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
@@ -266,11 +279,21 @@
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
+
     (cr/ensure-sequental :vaaditutKatselmukset)
     (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+
+    ; KRYSP yhteiset 2.1.1+
+    (cr/ensure-sequental :vaadittuTyonjohtajatieto)
+    (update-in [:vaadittuTyonjohtajatieto] #(map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja ) %))
+    ; KRYSP yhteiset 2.1.0 and below have vaaditutTyonjohtajat key that contains the same data in a single string.
+    ; Convert the new format to the old.
+    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (:vaadittuTyonjohtajatieto %))) %))
+
     (cr/ensure-sequental :maarays)
     (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
     (dissoc :maarays)
+
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
                               :autopaikkojaRakennettava
@@ -331,7 +354,7 @@
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
                         (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
 
-(defn ->verdicts [xml for-elem ->function]
+(defn ->verdicts [xml ->function]
   (map
     (fn [asia]
       (let [verdict-model (->kuntalupatunnus asia)
@@ -343,7 +366,7 @@
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))
-    (select (cr/strip-xml-namespaces xml) for-elem)))
+    (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
 (defn- buildings-summary-for-application [xml]
   (let [summary (->buildings-summary xml)]

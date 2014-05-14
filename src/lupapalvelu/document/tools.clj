@@ -20,6 +20,7 @@
     :personSelector   "123"
     :buildingSelector "001"
     :newBuildingSelector "1"
+    :hetu             "210281-9988"
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
@@ -28,7 +29,6 @@
                         :digit            "1"
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"
-                        :hetu             "210281-9988"
                         :vrk-address      "Ranta\"tie\" 66:*"
                         :vrk-name         "Ilkka"
                         :y-tunnus         "2341528-4"

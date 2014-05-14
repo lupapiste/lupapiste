@@ -514,7 +514,7 @@
     (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
           xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
-      (when (= typeName "yak:YleisetAlueet")
+      (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/yleiset alueet/ya-verdict.xml")))))))
 
 (env/in-dev
@@ -527,9 +527,9 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId]}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message]}
     (let [property (util/to-property-id propertyId)
-          response (execute-command "create-application" (assoc (from-query) :propertyId property))]
+          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages (if message [message] [])))]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
@@ -556,7 +556,6 @@
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
-  (require 'lupapalvelu.neighbors)
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))

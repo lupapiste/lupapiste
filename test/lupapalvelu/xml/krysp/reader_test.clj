@@ -20,7 +20,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+      cases (->verdicts xml ->verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
@@ -101,7 +101,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -149,20 +149,51 @@
           (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
           (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))
 
+(facts "Tekla sample verdict"
+  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/teklap.xml"))
+        cases (->verdicts xml ->verdict)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "xml has one case" (count cases) => 1)
+    (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
+
+    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "109-2014-140")
+
+    (let [verdict        (-> cases first :paatokset first)
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)
+          katselmukset   (:vaaditutKatselmukset lupamaaraykset)
+          maaraykset     (:maaraykset lupamaaraykset)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:kerrosala lupamaaraykset) => "134.000"
+        (:kokonaisala lupamaaraykset) => "134.000"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "Vastaava ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, IV-ty\u00f6njohtaja"
+        (facts "katselmukset"
+          (count katselmukset) => 4
+          (:katselmuksenLaji (first katselmukset)) => "aloituskokous"
+          (:katselmuksenLaji (last katselmukset)) => "loppukatselmus")
+        (facts "m\u00e4\u00e4r\u00e4ykset"
+          (count maaraykset) => 3
+          (:sisalto (first maaraykset)) => "Vastaavan ty\u00f6njohtajan on yll\u00e4pidett\u00e4v\u00e4 rakennusty\u00f6n tarkastusasiakirjaa, johon eri rakennusvaiheiden vastuuhenkil\u00f6t ja ty\u00f6vaiheiden tarkastuksia suorittavat henkil\u00f6t varmentavat tekem\u00e4ns\u00e4 tarkastukset (MRL 150 \u00a7 3. mom., MRA 77 \u00a7)."))
+      )))
+
 (facts "case not found"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil :RakennusvalvontaAsia ->verdict)]
+  (let [cases (->verdicts nil ->verdict)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -240,7 +271,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-        cases (->verdicts xml :yleinenAlueAsiatieto ->simple-verdict)]
+        cases (->verdicts xml ->simple-verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
@@ -276,8 +307,7 @@
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["yl" "mal" "vvvl"]]
     (let [xml (sade.xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
-          case-elem (lupapalvelu.permit/get-case-xml-element (clojure.string/upper-case permit-type))
-          cases (->verdicts xml case-elem ->simple-verdict)]
+          cases (->verdicts xml ->simple-verdict)]
 
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)

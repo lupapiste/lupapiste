@@ -31,6 +31,10 @@
                         (one-result? response)
                         (= (get-in response [:data :aaData 0 :id]) application-id)))]
 
+    (facts "by applicant"
+      (fact "no matches" (search "Pena") => no-results?)
+      (fact "one match" (search "Mikko") => id-matches?))
+
     (facts "by address"
       (fact "no matches" (search "hakukatu") => no-results?)
       (fact "one match" (search "hakukuja") => id-matches?))
