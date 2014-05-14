@@ -111,6 +111,13 @@
     pena =not=> (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http404?))
 
+(defn- poll-job [id version limit]
+  (when (pos? limit)
+    (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]
+      (when-not (= (get-in resp [:job :status]) "done")
+        (Thread/sleep 200)
+        (poll-job id (get-in resp [:job :version]) (dec limit))))))
+
 (facts "Stamping"
   (let [application (create-and-submit-application sonja :municipality sonja-muni)
         application-id (:id application)
@@ -121,13 +128,8 @@
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
 
-    (when-not (= "done" (:status job))
-      (fact "Job is done after 1 s"
-        (Thread/sleep 1000)
-        (let [resp (query sonja :stamp-attachments-job :job-id (:id job) :version (:version job))]
-          resp => ok?
-          (:result resp) => "update"
-          (get-in resp [:job :status]) => "done")))
+    ; Poll for 5 seconds
+    (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
 
     (fact "Attachment has stamp"
       (let [attachment (get-attachment-by-id sonja application-id (:id attachment))]
