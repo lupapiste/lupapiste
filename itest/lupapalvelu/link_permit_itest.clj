@@ -60,6 +60,10 @@
     (count matches) => 1
     (-> matches first :id) => verdict-given-application-id
 
+    (fact "Can not insert invalid key"
+      (command apikey :add-link-permit :id test-application-id :linkPermitId "foo.bar") => fail?
+      (command apikey :add-link-permit :id test-application-id :linkPermitId " ") => fail?)
+
     (command apikey :add-link-permit :id test-application-id :linkPermitId verdict-given-application-id) => ok?
     (generate-documents test-application apikey)
     (command apikey :approve-application :id test-application-id :lang "fi") => ok?

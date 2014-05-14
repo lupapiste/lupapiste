@@ -781,19 +781,21 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defn- do-add-link-permit [application linkPermitId]
+
+(defn- do-add-link-permit [application link-permit-id]
+  {:pre [(mongo/valid-key? link-permit-id)]}
   (let [id (:id application)
-        db-id (make-mongo-id-for-link-permit id linkPermitId)]
+        db-id (make-mongo-id-for-link-permit id link-permit-id)]
     (mongo/update-by-id :app-links db-id
-      {:_id db-id
-       :link [id linkPermitId]
-       (keyword id) {:type "application"
-                     :apptype (-> application :operations first :name)
-                     :propertyId (:propertyId application)}
-       (keyword linkPermitId) {:type "linkpermit"
-                               :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
-                                                 "lupapistetunnus"
-                                                 "kuntalupatunnus")}}
+      {:_id  db-id
+       :link [id link-permit-id]
+       id    {:type "application"
+               :apptype (-> application :operations first :name)
+               :propertyId (:propertyId application)}
+       link-permit-id {:type "linkpermit"
+                      :linkpermittype (if (.startsWith link-permit-id "LP-")
+                                        "lupapistetunnus"
+                                        "kuntalupatunnus")}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
@@ -807,9 +809,10 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [validate-jatkolupa-zero-link-permits]
-   :input-validators [(partial action/non-blank-parameters [:linkPermitId])]}
+   :input-validators [(partial action/non-blank-parameters [:linkPermitId])
+                      (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
   [{application :application}]
-  (do-add-link-permit application linkPermitId))
+  (do-add-link-permit application (ss/trim linkPermitId)))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
