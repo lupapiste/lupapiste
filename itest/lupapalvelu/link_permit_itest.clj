@@ -51,14 +51,19 @@
         ;; The "matches", i.e. the contents of the dropdown selection component in the link-permit dialog
         ;; is allowed to have only these kind of applications:
         ;;    - different id than current application has, but same permit-type
-        ;;    - is in "verdictGiven"- or "constructionStarted" state
+        ;;    - not in draft state
         ;;    - whose operation is not of type "ya-jatkoaika"
         ;;
         matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
         matches (:app-links matches-resp)]
 
-    (count matches) => 1
-    (-> matches first :id) => verdict-given-application-id
+    (count matches) => 2
+    (-> matches first :id) => approved-application-id
+    (-> matches second :id) => verdict-given-application-id
+
+    (fact "Can not insert invalid key"
+      (command apikey :add-link-permit :id test-application-id :linkPermitId "foo.bar") => fail?
+      (command apikey :add-link-permit :id test-application-id :linkPermitId " ") => fail?)
 
     (command apikey :add-link-permit :id test-application-id :linkPermitId verdict-given-application-id) => ok?
     (generate-documents test-application apikey)
@@ -67,10 +72,13 @@
       :id test-application-id
       :linkPermitId verdict-given-application-id) => (partial expected-failure? "error.command-illegal-state")
 
+    (fact "Authority gives verdict and adds link permit"
+      (command sonja :add-link-permit :id verdict-given-application-id :linkPermitId approved-application-id) => ok?)
+
     (let [app (query-application apikey test-application-id) => truthy]
       (-> app first :appsLinkingToUs) => nil?
       (count (:linkPermitData app)) => 1
       (let [link-permit-data (-> app :linkPermitData first)]
-        (:id link-permit-data)        => "LP-753-2014-00002"
+        (:id link-permit-data)        => verdict-given-application-id
         (:type link-permit-data)      => "lupapistetunnus"
         (:operation link-permit-data) => "ya-katulupa-vesi-ja-viemarityot"))))
