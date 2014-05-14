@@ -122,8 +122,8 @@
     (fact "Job id is returned" (:id job) => truthy)
 
     (when-not (= "done" (:status job))
-      (fact "Job is done after 500 ms"
-        (Thread/sleep 500)
+      (fact "Job is done after 1 s"
+        (Thread/sleep 1000)
         (let [resp (query sonja :stamp-attachments-job :job-id (:id job) :version (:version job))]
           resp => ok?
           (:result resp) => "update"
