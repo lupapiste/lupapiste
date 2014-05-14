@@ -1,1 +1,0 @@
-error.invalid-db-key: Tunnus ei saa sisältää pisteitä tai $-merkkejä
