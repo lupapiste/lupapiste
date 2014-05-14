@@ -258,7 +258,7 @@
   (when (string? target)
     (fail :error.unknown-type)))
 
-(defcommand can-target-comment-to-authority
+(defquery can-target-comment-to-authority
   {:roles [:authority]
    :pre-checks  [not-open-inforequest-user-validator]
    :description "Dummy command for UI logic"})
@@ -742,13 +742,13 @@
 ;;
 
 (defquery link-permit-required
-  {:parameters [:id]
+  {:description "Dummy command for UI logic: returns falsey if link permit is not required."
+   :parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]}
-  [{application :application}]
-  (if (is-link-permit-required application)
-    (ok)
-    (fail :error.link-permit-not-required)))
+   :states     [:draft :open :submitted :complement-needed]
+   :pre-checks [(fn [_ application]
+                  (when-not (is-link-permit-required application)
+                    (fail :error.link-permit-not-required)))]})
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
