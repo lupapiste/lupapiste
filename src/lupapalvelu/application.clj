@@ -473,7 +473,7 @@
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :submitted :complement-needed]}
+   :states     [:draft :info :answered :open :submitted :complement-needed]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (update-application command
