@@ -705,15 +705,6 @@
                                            :attachments (make-attachments created op (:organization application) (:state application))}
                                  $set {:modified created}})))
 
-(defquery link-permit-required
-  {:parameters [:id]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]}
-  [{application :application}]
-  (if (is-link-permit-required application)
-    (ok)
-    (fail :error.link-permit-not-required)))
-
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :roles      [:applicant :authority]
@@ -749,6 +740,15 @@
 ;;
 ;; Link permits
 ;;
+
+(defquery link-permit-required
+  {:parameters [:id]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :submitted :complement-needed]}
+  [{application :application}]
+  (if (is-link-permit-required application)
+    (ok)
+    (fail :error.link-permit-not-required)))
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
