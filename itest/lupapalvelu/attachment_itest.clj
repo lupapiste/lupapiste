@@ -102,7 +102,18 @@
               pena-email  (email-for "pena")]
           (count emails) => 1
           email => (partial contains-application-link-with-tab? application-id "conversation")
-          (:to email) => pena-email)))))
+          (:to email) => pena-email))
+
+      (fact "Pena signes attachments"
+        (fact "Signing fails if password is incorrect"
+          (command pena :sign-attachments :id application-id :files attachment-ids :password "not-pena") => (partial expected-failure? "error.login"))
+
+        (fact "Signing succeeds if password is correct"
+          (command pena :sign-attachments :id application-id :files attachment-ids :password "pena") => ok?
+          )
+        )
+
+      )))
 
 (fact "pdf does not work with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")

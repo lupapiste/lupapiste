@@ -9,6 +9,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for-application? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
+            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.attachment :as attachment]
@@ -401,4 +402,17 @@
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
+
+(defcommand sign-attachments
+  {:description "Designers can sign blueprints and other attachments. LUPA-1241"
+   :parameters [:id files password]
+   :roles [:applicant]}
+  [{application :application user :user}]
+  (if (user/get-user-with-password (:username user) password)
+    (do
+      (debug "Password OK")
+      )
+    (fail :error.login))
+  )
+
 
