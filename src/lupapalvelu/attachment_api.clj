@@ -406,6 +406,7 @@
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id files password]
+   :feature :attachmentsignature
    :roles [:applicant]}
   [{application :application u :user :as command}]
   (if (user/get-user-with-password (:username u) password)
