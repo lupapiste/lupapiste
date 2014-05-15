@@ -4,8 +4,7 @@
             [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [apikey application-id attachment-id]
-  (let [application     (query-application apikey application-id)]
-    (some #(when (= (:id %) attachment-id) %) (:attachments application))))
+  (get-attachment-info (query-application apikey application-id) attachment-id))
 
 (defn- approve-attachment [application-id attachment-id]
   (command veikko :approve-attachment :id application-id :attachmentId attachment-id) => ok?
@@ -104,14 +103,27 @@
           email => (partial contains-application-link-with-tab? application-id "conversation")
           (:to email) => pena-email))
 
-      (fact "Pena signes attachments"
+      (fact "Pena signs attachments"
+        (fact "meta" attachment-ids => seq)
+
         (fact "Signing fails if password is incorrect"
           (command pena :sign-attachments :id application-id :files attachment-ids :password "not-pena") => (partial expected-failure? "error.login"))
 
         (fact "Signing succeeds if password is correct"
-          (command pena :sign-attachments :id application-id :files attachment-ids :password "pena") => ok?
-          )
-        )
+          (command pena :sign-attachments :id application-id :files attachment-ids :password "pena") => ok?)
+
+        (fact "Signature is set"
+          (let [application (query-application pena application-id)
+                attachments (get-attachments-infos application attachment-ids)]
+            (doseq [{signatures :signatures latest :latestVersion} attachments]
+              (count signatures) => 1
+              (let [{:keys [user created version]} (first signatures)]
+                (:username user) => "pena"
+                (:id user) => pena-id
+                (:firstName user) => "Pena"
+                (:lastName user) => "Panaani"
+                created => pos?
+                version => (:version latest))))))
 
       )))
 

@@ -245,6 +245,7 @@
    :state :requires_user_action
    :target target
    :op op
+   :signatures []
    :versions []})
 
 (defn make-attachments
@@ -382,10 +383,15 @@
   (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
     (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type)))
 
+(defn get-attachments-infos
+  "gets attachments from application"
+  [application attachment-ids]
+  (let [ids (set attachment-ids)] (filter (comp ids :id) (:attachments application))))
+
 (defn get-attachment-info
   "gets an attachment from application or nil"
-  [{:keys [attachments]} attachmentId]
-  (first (filter #(= (:id %) attachmentId) attachments)))
+  [application attachment-id]
+  (first (get-attachments-infos application [attachment-id])))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
