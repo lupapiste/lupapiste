@@ -35,7 +35,7 @@
         .url("#!/application/" + application.id);
       var id = application.id;
       ajax
-        .query("operations", {permitType: application.permitType})
+        .query("addable-operations", {id: id})
         .pending(self.waitingOperations)
         .success(function (data) {
           if (self.application.id === id) {
