@@ -50,17 +50,17 @@
 (facts "operations-for-permit-type"
 
   (fact "poikkarit"
-    (operations-for-permit-type "P") => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]])
+    (operations-for-permit-type "P" false) => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]])
 
 
   (when (env/feature? :ymparisto)
     (fact "meluilmoitus"
-          (operations-for-permit-type "YI") => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]]))
+          (operations-for-permit-type "YI" false) => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]]))
 
   (when (env/feature? :ymparisto)
     (fact "ymparistolupa"
-          (operations-for-permit-type "YL") => [["Ymp\u00e4rist\u00f6luvat"
-                                                 [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
-                                                                                     ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-                                                                                     ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])))
+          (operations-for-permit-type "YL" false) => [["Ymp\u00e4rist\u00f6luvat"
+                                                       [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
+                                                                                           ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+                                                                                           ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])))
 
