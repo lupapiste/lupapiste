@@ -116,7 +116,7 @@
   true)
 
 (defn- create-new-user-entity [user-data]
-  (let [email (ss/lower-case (:email user-data))]
+  (let [email (-> user-data :email ss/lower-case ss/trim)]
     (-> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :organization
