@@ -421,3 +421,19 @@
               new-documents (remove #(= "sijoituslupa-sijoituksen-tarkoitus" (-> % :schema-info :name)) new-documents)]
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
+
+(defmigration move-operations-flags-into-their-scope
+  (doseq [organization (mongo/select :organizations)
+          permit-type (map :permitType (:scope organization))]
+    (mongo/update-by-query :organizations
+      {:_id (:id organization)
+       :scope {$elemMatch {:permitType permit-type}}}
+      {$unset {:inforequest-enabled ""
+               :new-application-enabled ""
+               :open-inforequest ""
+               :open-inforequest-email ""}
+       $set {:scope.$.inforequest-enabled     (or (:inforequest-enabled organization) false)
+             :scope.$.new-application-enabled (or (:new-application-enabled organization) false)
+             :scope.$.open-inforequest        (or (:open-inforequest organization) false)
+             :scope.$.open-inforequest-email  (:open-inforequest-email organization)}})))
+
