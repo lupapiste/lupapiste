@@ -11,6 +11,8 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :refer :all]
+;            [lupapalvelu.domain :as domain]
+;            [lupapalvelu.user :refer [get-user-by-id] :as user]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -107,7 +109,23 @@
 
 ;; FIXME https://support.solita.fi/browse/LUPA-1454
 ;; implement validator (mongo id, check that user exists)
-(defmethod validate-field :personSelector [elem v] nil)
+(defmethod validate-field :personSelector [elem v]
+
+  ;; Tanne ei tarvi tehda mitaan, koska tarkistukset on jo application.clj:n funktiossa "set-user-to-document"?
+
+;  (println "validate-field :personSelector, elem: " elem "\n")
+;  (println "validate-field :personSelector, v: " v "\n")
+;  (println "validate-field :personSelector, user: " (user/get-user-by-id v) "\n")
+
+  #_(let [has-auth? (first (domain/has-auth? app v))
+        user      (user/get-user-by-id v)]
+    (when-not (and user has-auth?)
+     [:warn "illegal-value:personSelector"]
+     )
+  )
+
+  nil
+  )
 
 (defmethod validate-field nil [_ _]
   [:err "illegal-key"])
