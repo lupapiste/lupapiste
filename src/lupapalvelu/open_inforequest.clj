@@ -39,7 +39,7 @@
   (assert application-id)
   (assert organization-id)
   (let [organization    (organization/get-organization organization-id)
-        email           (:open-inforequest-email organization)
+        email           (-> organization :scope :open-inforequest-email)
         token-id        (random-password 48)]
     (when-not organization (fail! :error.unknown-organization))
     (when-not email (fail! :error.missing-organization-email))

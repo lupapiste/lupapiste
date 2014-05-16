@@ -19,17 +19,46 @@
               <th >Kirjaudu oikeuksin</th>
             </tr>
           </thead>
-          <tbody data-bind="foreach: organizationsModel.organizations">
-            <tr>
-              <td data-bind="text: $data.id"></td>
-              <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
-              <td data-bind="text: $data['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + $data.id}"></td>
-              <td data-bind="text: $data['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + $data.id}"></td>
-              <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + $data.id}"></td>
-              <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.id}"></td>
-              <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.id}" class="modal"></a>]</td>
-              <td>[<a href="#" data-bind="click: $parent.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': $data.id}"></a>]</td>
-            </tr>
+
+<!--                     Esimerkki:   kts "attachments" -->
+
+<!--                         <tbody data-bind="foreach: $data.poytakirjat"> -->
+<!--                           <tr class="statement-row" > -->
+<!--                             <td data-bind="if: $data.status"> -->
+<!--                               <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td> -->
+<!--                             <td data-bind="text: $data.paatos" class="verdict-text"></td> -->
+<!--                             <td data-bind="text: $data.pykala"></td> -->
+<!--                             <td data-bind="text: $data.paatoksentekija"></td> -->
+<!--                             <td data-bind="dateString: $data.paatospvm"></td> -->
+<!--                             <td data-bind="foreach: $data.attachments"> -->
+<!--                               <span data-bind="with: $data.latestVersion"> -->
+<!--                                 <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/> -->
+<!--                                   <i data-bind="ltext: contentType"></i> -->
+<!--                                   <i data-bind="size: size"></i><br/> -->
+<!--                               </span> -->
+<!--                             </td> -->
+<!--                           </tr> -->
+<!--                         </tbody> -->
+
+          <!-- TODO: Tassa vaiheessako OrganizationsModel.organizationsia ei ole viela ladattu? -->
+
+          <tbody data-bind="foreach: { data: organizationsModel.organizations, as: 'organization' }">
+
+            <!-- TODO: Tassa pitaa nyt loopata lapi kaikki scope-arrayssa olevat scopet! -->
+            <!-- TODO: Testaa tama: -->
+
+            <div data-bind="foreach: { data: organization.scope, as: 'scope' }">
+              <tr>
+                <td data-bind="text: organization.id"></td>
+                <td data-bind="text: organization.name[loc.getCurrentLanguage()]"></td>
+                <td data-bind="text: scope['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + organization.id}"></td>
+                <td data-bind="text: scope['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + organization.id}"></td>
+                <td data-bind="text: scope['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + organization.id}"></td>
+                <td data-bind="text: scope['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + organization.id}"></td>
+                <td>[<a href="#" data-bind="click: $root.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + organization.id}" class="modal"></a>]</td>
+                <td>[<a href="#" data-bind="click: $root.loginAsModel.open(organization.id), ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]</td>
+              </tr>
+            <div>
           </tbody>
         </table>
 

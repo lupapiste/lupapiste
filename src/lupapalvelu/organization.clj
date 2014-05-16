@@ -79,14 +79,16 @@
 
 (defcommand update-organization
   {:description "Update organization details."
-   :parameters [organizationId inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
+   :parameters [organizationScope inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
    :roles [:admin]
    :verified true}
   [_]
-  (mongo/update-by-id :organizations organizationId {$set {"inforequest-enabled" inforequestEnabled
-                                                           "new-application-enabled" applicationEnabled
-                                                           "open-inforequest" openInforequestEnabled
-                                                           "open-inforequest-email" openInforequestEmail}})
+  (mongo/update-by-query :organizations
+      {:scope {$elemMatch {:permitType (:permitType organizationScope) :municipality (:municipality organizationScope)}}}
+      {$set {:scope.$.inforequest-enabled inforequestEnabled
+             :scope.$.new-application-enabled applicationEnabled
+             :scope.$.open-inforequest openInforequestEnabled
+             :scope.$.open-inforequest-email openInforequestEmail}})
   (ok))
 
 (defcommand add-organization-link
@@ -162,19 +164,18 @@
    :verified true}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
-    (if-let [result (mongo/select-one
-                      :organizations
+    (if-let [result (mongo/select-one :organizations
                       {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
                       {"name" 1
                        "links" 1
                        "operations-attachments" 1
-                       "inforequest-enabled" 1
-                       "new-application-enabled" 1})]
-      (ok
-        :inforequests-disabled (not (:inforequest-enabled result))
-        :new-applications-disabled (not (:new-application-enabled result))
-        :links (:links result)
-        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
+                       "scope" 1})]
+      (let [scope (first (filter #(= permit-type (:permitType %)) (:scope result)))]
+        (ok
+         :inforequests-disabled (not (:inforequest-enabled scope))
+         :new-applications-disabled (not (:new-application-enabled scope))
+         :links (:links result)
+         :attachmentsForOp (-> result :operations-attachments ((keyword operation)))))
 
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 

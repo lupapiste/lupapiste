@@ -609,16 +609,16 @@
         organization      (organization/resolve-organization municipality permit-type)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest organization))]
+        open-inforequest? (and info-request? (-> organization :scope :open-inforequest))]
 
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
-      (when-not (:inforequest-enabled organization)
+      (when-not (-> organization :scope :inforequest-enabled)
         (fail! :error.inforequests-disabled))
-      (when-not (:new-application-enabled organization)
+      (when-not (-> organization :scope :new-application-enabled)
         (fail! :error.new-applications-disabled)))
 
     (let [id            (make-application-id municipality)
@@ -672,7 +672,7 @@
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest organization))
+        open-inforequest? (and info-request? (-> organization :scope :open-inforequest))
         created-application (do-create-application command)]
 
       (insert-application created-application)
@@ -987,9 +987,10 @@
     (ok :integrationAvailable ftp-user?)))
 
 
-(defn- validate-new-applications-enabled [command {:keys [organization]}]
-  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
-    (when-not (= (:new-application-enabled org) true)
+(defn- validate-new-applications-enabled [command {:keys [organization permitType]}]
+  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})
+        scope (first (filter #(= permitType (:permitType %)) (:scope organization)))]
+    (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
 (defcommand convert-to-application
