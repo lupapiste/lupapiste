@@ -355,9 +355,12 @@
    that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (handler (assoc request :user
-                    (or (user/get-user-with-apikey (get-apikey request))
-                        (session/get :user))))))
+    (let [api-key-auth (user/get-user-with-apikey (get-apikey request))
+          session-user (session/get :user)]
+      (debug "api-key-auth: " api-key-auth)
+      (debug "session-user: " session-user)
+      (debug "ring session: " (:session request))
+      (handler (assoc request :user (or api-key-auth session-user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -571,3 +574,5 @@
                "on"   true
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
+
+"ok"
