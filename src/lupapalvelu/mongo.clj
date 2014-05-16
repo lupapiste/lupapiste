@@ -36,6 +36,17 @@
 (defn create-id []
   (str (ObjectId.)))
 
+; http://docs.mongodb.org/manual/reference/limits/#Restrictions-on-Field-Names
+(def key-pattern #"^[^\.\$\u0000]+$")
+
+(defn valid-key? [k]
+  (if k
+    (if (instance? ObjectId k)
+      true
+      (let [key (name k)]
+        (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
+    false))
+
 ;;
 ;; Database Api
 ;;

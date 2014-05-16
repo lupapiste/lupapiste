@@ -152,6 +152,10 @@ var gis = (function() {
     // Markers
 
 
+    var getIconHeight = function(feature) {
+      return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 25;
+    };
+
     var context = {
       extGraphic: function(feature) {
         var iconPath = "img/map-marker.png";
@@ -170,7 +174,10 @@ var gis = (function() {
         return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 21;
       },
       graphicHeight: function(feature) {
-        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 25;
+        return getIconHeight(feature);
+      },
+      graphicYOffset: function(feature) {
+        return -1 * getIconHeight(feature);
       }
     };
 
@@ -179,6 +186,7 @@ var gis = (function() {
         externalGraphic: '${extGraphic}',
         graphicWidth: '${graphicWidth}',
         graphicHeight: '${graphicHeight}',   //alt to pointRadius
+        graphicYOffset: '${graphicYOffset}',
         cursor: 'default'
       }, {
         context: context
@@ -256,9 +264,9 @@ var gis = (function() {
         var iconPath = iconLocMapping[iconName] || iconDefaultPath;
         var markerFeature = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(markerInfo.x, markerInfo.y),
-            { isCluster: markerInfo.isCluster,
-              contents: markerInfo.contents || "" },
-            { externalGraphic: iconPath});
+            {isCluster: markerInfo.isCluster || false,
+             contents: markerInfo.contents || "" },
+            {externalGraphic: iconPath});
 
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);

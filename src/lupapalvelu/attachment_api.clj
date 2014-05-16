@@ -115,7 +115,7 @@
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -126,7 +126,7 @@
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -141,7 +141,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :info :open :complement-needed :submitted :verdictGiven :constructionStarted]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application attachment-types created)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
@@ -155,7 +155,7 @@
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
    :extra-auth-roles [:statementGiver]
-   :states      [:draft :info :open :submitted :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -265,7 +265,7 @@
                 (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:draft :info :open :submitted :complement-needed :answered :sent :verdictGiven :constructionStarted]
+   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]
    :notified   true
    :on-success [(fn [command _] (notifications/notify! :new-comment command))
                 open-inforequest/notify-on-comment]
