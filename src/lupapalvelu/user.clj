@@ -44,7 +44,7 @@
 ;;
 
 (defn- user-query [query]
-  (assert (map? query))
+  {:pre [(map? query)]}
   (let [query (if-let [id (:id query)]
                 (-> query
                   (assoc :_id id)
@@ -121,11 +121,13 @@
   (to-date (time/minus (time/now) (time/seconds (env/value :login :throttle-expires)))))
 
 (defn throttle-login? [username]
+  {:pre [username]}
   (mongo/any? :logins {:_id (ss/lower-case username)
                        :failed-logins {$gte (env/value :login :allowed-failures)}
                        :locked {$gt (logins-lock-expires-date)}}))
 
 (defn login-failed [username]
+  {:pre [username]}
   (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
   (mongo/update :logins {:_id (ss/lower-case username)}
                 {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
@@ -133,6 +135,7 @@
                 :upsert true))
 
 (defn clear-logins [username]
+  {:pre [username]}
   (mongo/remove :logins (ss/lower-case username)))
 
 ;;
@@ -142,20 +145,24 @@
 ;;
 
 (defn get-user-by-id [id]
+  {:pre [id]}
   (non-private (find-user {:id id})))
 
 (defn get-user-by-email [email]
+  {:pre [email]}
   (non-private (find-user {:email email})))
 
 (defn get-user-with-password [username password]
-  (let [user (find-user {:username username})]
-    (when (and user (:enabled user) (security/check-password password (get-in user [:private :password])))
-      (non-private user))))
+  (when-not (or (ss/blank? username) (ss/blank? password))
+    (let [user (find-user {:username username})]
+     (when (and user (:enabled user) (security/check-password password (get-in user [:private :password])))
+       (non-private user)))))
 
 (defn get-user-with-apikey [apikey]
-  (let [user (find-user {:private.apikey apikey})]
-    (when (:enabled user)
-      (non-private user))))
+  (when-not (ss/blank? apikey)
+    (let [user (find-user {:private.apikey apikey})]
+      (when (:enabled user)
+        (non-private user)))))
 
 (defmacro with-user-by-email [email & body]
   `(let [~'user (get-user-by-email ~email)]
