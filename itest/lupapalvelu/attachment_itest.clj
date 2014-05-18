@@ -91,18 +91,6 @@
       (fact "Veikko can still reject attachment"
         (reject-attachment application-id (first attachment-ids)))
 
-      (fact "Veikko upload a new version, Pena receives email pointing to comment page"
-        (last-email) ; Inbox zero
-
-        (upload-attachment veikko application-id (first (:attachments (query-application veikko application-id))) true)
-
-        (let [emails (sent-emails)
-              email  (first emails)
-              pena-email  (email-for "pena")]
-          (count emails) => 1
-          email => (partial contains-application-link-with-tab? application-id "conversation")
-          (:to email) => pena-email))
-
       (fact "Pena signs attachments"
         (fact "meta" attachment-ids => seq)
 
@@ -125,7 +113,37 @@
                 created => pos?
                 version => (:version latest))))))
 
-      )))
+      (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
+        (last-email) ; Inbox zero
+        (fact "Meta"
+          (get-in versioned-attachment [:latestVersion :version :major]) => 1
+          (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
+
+        (fact "Veikko upload a new version"
+         (upload-attachment veikko application-id versioned-attachment true)
+         (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+           (get-in updated-attachment [:latestVersion :version :major]) => 1
+           (get-in updated-attachment [:latestVersion :version :minor]) => 1
+
+           (fact "Pena receives email pointing to comment page"
+             (let [emails (sent-emails)
+                   email  (first emails)
+                   pena-email  (email-for "pena")]
+               (count emails) => 1
+               email => (partial contains-application-link-with-tab? application-id "conversation")
+               (:to email) => pena-email))
+
+           (fact "Delete version"
+             (command veikko :delete-attachment-version :id application-id
+               :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
+             (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+               (get-in ver-del-attachment [:latestVersion :version :major]) => 1
+               (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
+
+           (fact "Delete attachment"
+             (command veikko :delete-attachment :id application-id
+               :attachmentId (:id versioned-attachment)) => ok?
+             (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)))))))
 
 (fact "pdf does not work with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")
