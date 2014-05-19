@@ -429,7 +429,7 @@
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
     (update-application
       (application->command application)
-      {$elemMatch {:id attachmentId}}
+      {:attachments {$elemMatch {:id attachmentId}}}
       {$pull {:attachments.$.versions {:fileId fileId}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
