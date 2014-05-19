@@ -37,8 +37,8 @@
 
     self.reset = function(organizationScope) {
       self.organizationScope = organizationScope;
-      self.applicationEnabled(organizationScope['new-application-enabled']);
-      self.inforequestEnabled(organizationScope['inforequest-enabled']);
+      self.applicationEnabled(organizationScope['new-application-enabled'] || false);
+      self.inforequestEnabled(organizationScope['inforequest-enabled'] || false);
       self.openInforequestEnabled(organizationScope['open-inforequest'] || false);
       self.openInforequestEmail(organizationScope['open-inforequest-email'] || "");
       self.processing(false);
