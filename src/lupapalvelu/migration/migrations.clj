@@ -423,17 +423,19 @@
 
 
 (defmigration move-operations-flags-into-their-scope
-  (doseq [organization (mongo/select :organizations)
-          permit-type (map :permitType (:scope organization))]
-    (mongo/update-by-query :organizations
-      {:_id (:id organization)
-       :scope {$elemMatch {:permitType permit-type}}}
-      {$unset {:inforequest-enabled ""
-               :new-application-enabled ""
-               :open-inforequest ""
-               :open-inforequest-email ""}
-       $set {:scope.$.inforequest-enabled     (or (:inforequest-enabled organization) false)
-             :scope.$.new-application-enabled (or (:new-application-enabled organization) false)
-             :scope.$.open-inforequest        (or (:open-inforequest organization) false)
-             :scope.$.open-inforequest-email  (:open-inforequest-email organization)}})))
+  {:apply-when (pos? (mongo/count :organizations {:new-application-enabled {$exists true}}))}
+  ;; Let's expect all (un-migrated) organizations to have the "new-application-enabled" flag.
+ (doseq [organization (mongo/select :organizations {:new-application-enabled {$exists true}})
+         permit-type (map :permitType (:scope organization))]
+   (mongo/update-by-query :organizations
+     {:_id (:id organization)
+      :scope {$elemMatch {:permitType permit-type}}}
+     {$unset {:inforequest-enabled ""
+              :new-application-enabled ""
+              :open-inforequest ""
+              :open-inforequest-email ""}
+      $set {:scope.$.inforequest-enabled     (or (:inforequest-enabled organization) false)
+            :scope.$.new-application-enabled (or (:new-application-enabled organization) false)
+            :scope.$.open-inforequest        (or (:open-inforequest organization) false)
+            :scope.$.open-inforequest-email  (:open-inforequest-email organization)}})))
 
