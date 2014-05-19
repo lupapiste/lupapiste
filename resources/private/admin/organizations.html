@@ -36,9 +36,9 @@
               <td>
                 [<a href="#" data-bind="click: $root.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.municipality + '-' + $data.permitType}" class="modal"></a>]
               </td>
-              <td data-bind="text: $data['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
-              <td data-bind="text: $data['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
-              <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['inforequest-enabled'] || false, attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
             </tr>
             <!-- /ko -->
