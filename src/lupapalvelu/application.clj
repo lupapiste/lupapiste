@@ -607,18 +607,18 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
+        scope             (first (filter #(= permit-type (:permitType %)) (:scope organization)))
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (-> organization :scope :open-inforequest))]
-
+        open-inforequest? (and info-request? (:open-inforequest scope))]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
-      (when-not (-> organization :scope :inforequest-enabled)
+      (when-not (:inforequest-enabled scope)
         (fail! :error.inforequests-disabled))
-      (when-not (-> organization :scope :new-application-enabled)
+      (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
 
     (let [id            (make-application-id municipality)
@@ -671,8 +671,9 @@
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
+        scope             (first (filter #(= permit-type (:permitType %)) (:scope organization)))
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (-> organization :scope :open-inforequest))
+        open-inforequest? (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
       (insert-application created-application)

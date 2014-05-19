@@ -19,18 +19,20 @@
 
 (fact "update organization"
   (let [organization         (first (:organizations (query admin :organizations)))
+        orig-scope           (first (:scope organization))
         organization-id      (:id organization)
         resp                 (command admin :update-organization
-                               :organizationScope (:scope organization)
-                               :inforequestEnabled (not (-> organization :scope :inforequest-enabled))
-                               :applicationEnabled (not (-> organization :scope :new-application-enabled))
-                               :openInforequestEnabled (not (-> organization :scope :open-inforequest))
+                               :organizationScope orig-scope
+                               :inforequestEnabled (not (:inforequest-enabled orig-scope))
+                               :applicationEnabled (not (:new-application-enabled orig-scope))
+                               :openInforequestEnabled (not (:open-inforequest orig-scope))
                                :openInforequestEmail "someone@localhost")
-        updated-organization (query admin :organization-by-id :organizationId organization-id)]
-    (:inforequest-enabled updated-organization) => (not (-> organization :scope :inforequest-enabled))
-    (:new-application-enabled updated-organization) => (not (-> organization :scope :new-application-enabled))
-    (:open-inforequest updated-organization) => (not (-> organization :scope :open-inforequest))
-    (:open-inforequest-email updated-organization) => "someone@localhost"))
+        updated-organization (query admin :organization-by-id :organizationId organization-id)
+        updated-scope        (first (filter #(= (:permitType orig-scope) (:permitType %)) (:scope updated-organization)))]
+    (fact "inforequest-enabled" (:inforequest-enabled updated-scope) => (not (:inforequest-enabled orig-scope)))
+    (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
+    (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
+    (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
 
 (fact* "Tampere-ya sees (only) YA operations and attachments (LUPA-917, LUPA-1006)"
   (let [resp (query tampere-ya :organization-by-user) => ok?
