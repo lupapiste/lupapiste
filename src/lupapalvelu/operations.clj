@@ -132,10 +132,10 @@
 (def operation-tree
   (filterv identity
     [operation-tree-for-R
-    operation-tree-for-environment-R
-    operation-tree-for-P
-    (when (env/feature? :ymparisto) operation-tree-for-Y)
-    operation-tree-for-YA]))
+     operation-tree-for-environment-R
+     operation-tree-for-P
+     (when (env/feature? :ymparisto) operation-tree-for-Y)
+     operation-tree-for-YA]))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] operation-tree)
