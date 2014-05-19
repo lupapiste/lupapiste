@@ -529,10 +529,8 @@
 
                     ;; Naantali R
                     {:id "529-R"
-                     :inforequest-enabled true
-                     :new-application-enabled true
                      :name {:fi "Naantalin rakennusvalvonta"}
-                     :scope [{:municipality "529" :permitType "R"}]}
+                     :scope [{:municipality "529" :permitType "R" :inforequest-enabled true :new-application-enabled true}]}
 
                     ;; Peruspalvelukuntayhtyma Selanne R
                     {:id "069-R"
