@@ -1,0 +1,2 @@
+login.with-rights: Kirjaudu oikeuksin
+organization.scope: Viitekehys

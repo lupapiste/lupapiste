@@ -11,54 +11,37 @@
             <tr>
               <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
+              <th data-bind="ltext: 'edit'"></th>
+              <th data-bind="ltext: 'admin.municipality'"></th>
+              <th data-bind="ltext: 'organization.scope'"></th>
+              <th data-bind="ltext: 'login.with-rights'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.application.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
-              <th data-bind="ltext: 'edit'"></th>
-              <th >Kirjaudu oikeuksin</th>
             </tr>
           </thead>
-
-<!--                     Esimerkki:   kts "attachments" -->
-
-<!--                         <tbody data-bind="foreach: $data.poytakirjat"> -->
-<!--                           <tr class="statement-row" > -->
-<!--                             <td data-bind="if: $data.status"> -->
-<!--                               <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td> -->
-<!--                             <td data-bind="text: $data.paatos" class="verdict-text"></td> -->
-<!--                             <td data-bind="text: $data.pykala"></td> -->
-<!--                             <td data-bind="text: $data.paatoksentekija"></td> -->
-<!--                             <td data-bind="dateString: $data.paatospvm"></td> -->
-<!--                             <td data-bind="foreach: $data.attachments"> -->
-<!--                               <span data-bind="with: $data.latestVersion"> -->
-<!--                                 <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/> -->
-<!--                                   <i data-bind="ltext: contentType"></i> -->
-<!--                                   <i data-bind="size: size"></i><br/> -->
-<!--                               </span> -->
-<!--                             </td> -->
-<!--                           </tr> -->
-<!--                         </tbody> -->
-
-          <!-- TODO: Tassa vaiheessako OrganizationsModel.organizationsia ei ole viela ladattu? -->
-
           <tbody data-bind="foreach: { data: organizationsModel.organizations, as: 'organization' }">
-
-            <!-- TODO: Tassa pitaa nyt loopata lapi kaikki scope-arrayssa olevat scopet! -->
-            <!-- TODO: Testaa tama: -->
-
-            <div data-bind="foreach: { data: organization.scope, as: 'scope' }">
-              <tr>
-                <td data-bind="text: organization.id"></td>
-                <td data-bind="text: organization.name[loc.getCurrentLanguage()]"></td>
-                <td data-bind="text: scope['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + organization.id}"></td>
-                <td data-bind="text: scope['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + organization.id}"></td>
-                <td data-bind="text: scope['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + organization.id}"></td>
-                <td data-bind="text: scope['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + organization.id}"></td>
-                <td>[<a href="#" data-bind="click: $root.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + organization.id}" class="modal"></a>]</td>
-                <td>[<a href="#" data-bind="click: $root.loginAsModel.open(organization.id), ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]</td>
-              </tr>
-            </div>
+            <!-- ko foreach: scope -->
+            <tr>
+              <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
+                <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
+                <td data-bind="text: organization.name[loc.getCurrentLanguage()], attr: {'rowspan': organization.scope.length}"></td>
+                <td data-bind="attr: {'rowspan': organization.scope.length}">
+                  [<a href="#" data-bind="click: $root.loginAsModel.open(organization.id), ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
+                </td>
+              <!-- /ko -->
+              <td data-bind="text: $data.municipality"></td>
+              <td data-bind="text: $data.permitType"></td>
+              <td>
+                [<a href="#" data-bind="click: $root.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + organization.id + '-' + $data.permitType}" class="modal"></a>]
+              </td>
+              <td data-bind="text: $data['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + organization.id + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + organization.id + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + organization.id + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + organization.id + '-' + $data.permitType}"></td>
+            </tr>
+            <!-- /ko -->
           </tbody>
         </table>
 
