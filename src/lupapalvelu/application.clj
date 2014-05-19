@@ -988,9 +988,9 @@
     (ok :integrationAvailable ftp-user?)))
 
 
-(defn- validate-new-applications-enabled [command {:keys [organization permitType]}]
-  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})
-        scope (first (filter #(= permitType (:permitType %)) (:scope organization)))]
+(defn- validate-new-applications-enabled [command {:keys [organization permitType municipality]}]
+  (let [org (mongo/by-id :organizations organization {:scope 1})
+        scope (first (filter #(and (= permitType (:permitType %)) (= municipality (:municipality %))) (:scope org)))]
     (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
