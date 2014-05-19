@@ -552,7 +552,7 @@
                     ;; Sipoo R - New applications disabled
                     {:id "997-R-TESTI-1"
                      :name {:fi "Sipoon rakennusvalvonta"}
-                     :scope [{:municipality "997" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
+                     :scope [{:municipality "997" :permitType "R" :inforequest-enabled true :new-application-enabled false}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
