@@ -39,7 +39,8 @@
   (assert application-id)
   (assert organization-id)
   (let [organization    (organization/get-organization organization-id)
-        email           (-> organization :scope :open-inforequest-email)
+        scope           (first (filter #(= (:permitType application) (:permitType %)) (:scope organization)))
+        email           (:open-inforequest-email scope)
         token-id        (random-password 48)]
     (when-not organization (fail! :error.unknown-organization))
     (when-not email (fail! :error.missing-organization-email))
