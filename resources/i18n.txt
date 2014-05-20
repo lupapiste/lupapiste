@@ -6,3 +6,6 @@ signAttachment.select: Allekirjoita
 signAttachment.verifyPassword: Vahvista allekirjoitus salasanallasi:
 signAttachment.sign: Allekirjoita valitut liitteet
 error.password: Salasana on väärin
+login.with-rights: Kirjaudu oikeuksin
+organization.scope: Konfiguraatio
+admin.admin-password: Admin-salasana
