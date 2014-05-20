@@ -84,6 +84,13 @@ Sign attachment
   Click enabled by test id  do-sign-attachments
   Wait Until   Element should not be visible  signAttachmentPassword
 
+Signature is visible
+  Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//td[@data-bind="fullName: user"]  1
+  Element text should be  xpath=//section[@id="attachment"]//td[@data-bind="fullName: user"]  Mikko Intonen
+  Element text should be  xpath=//section[@id="attachment"]//td[@data-bind="version: version"]  1.0
+  Element should be visible  xpath=//section[@id="attachment"]//td[@data-bind="dateTimeString: created"]
+
 Switch user
   [Tags]  attachments
   Logout
