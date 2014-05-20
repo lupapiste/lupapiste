@@ -102,15 +102,23 @@
 
 (defn validate-permit-type-is-not [validator-permit-type]
   (fn [_ application]
-    (let [application-permit-type (permit-type application)]
-      (when (= (keyword application-permit-type) (keyword validator-permit-type))
-        (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
+    ;;
+    ;; TODO: Pitaisiko tassa heittaa fail, jos application on nil?
+    ;;
+    (when application
+      (let [application-permit-type (permit-type application)]
+        (when (= (keyword application-permit-type) (keyword validator-permit-type))
+          (fail :error.invalid-permit-type :permit-type validator-permit-type))))))
 
 (defn validate-permit-type-is [validator-permit-type]
   (fn [_ application]
-    (let [application-permit-type (permit-type application)]
-      (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
-        (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
+    ;;
+    ;; TODO: Pitaisiko tassa heittaa fail, jos application on nil?
+    ;;
+    (when application
+      (let [application-permit-type (permit-type application)]
+        (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
+          (fail :error.invalid-permit-type :permit-type validator-permit-type))))))
 
 (defn is-valid-subtype [permitSubtype {permitType :permitType}]
   (when-not (some #(= permitSubtype %) (permit-subtypes permitType))
