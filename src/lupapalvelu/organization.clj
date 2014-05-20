@@ -79,12 +79,12 @@
 
 (defcommand update-organization
   {:description "Update organization details."
-   :parameters [organizationScope inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
+   :parameters [permitType municipality inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
    :roles [:admin]
    :verified true}
   [_]
   (mongo/update-by-query :organizations
-      {:scope {$elemMatch {:permitType (:permitType organizationScope) :municipality (:municipality organizationScope)}}}
+      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
       {$set {:scope.$.inforequest-enabled inforequestEnabled
              :scope.$.new-application-enabled applicationEnabled
              :scope.$.open-inforequest openInforequestEnabled

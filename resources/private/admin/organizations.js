@@ -27,7 +27,7 @@
 
     // Model
 
-    self.organizationScope = null;  //{};  // TODO: Mika tahan?
+    self.organizationScope = null;
     self.applicationEnabled = ko.observable(false);
     self.inforequestEnabled = ko.observable(false);
     self.openInforequestEnabled = ko.observable(false);
@@ -67,7 +67,8 @@
     };
 
     self.updateOrganization = function() {
-      var data = {organizationScope : self.organizationScope,
+      var data = {permitType: self.organizationScope.permitType,
+                  municipality: self.organizationScope.municipality,
                   inforequestEnabled: self.inforequestEnabled(),
                   applicationEnabled: self.applicationEnabled(),
                   openInforequestEnabled: self.openInforequestEnabled(),
