@@ -75,6 +75,15 @@ Change attachment type
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
+Sign attachment
+  [Tags]  attachments
+  Tab should be visible  attachments
+  Click enabled by test id  application-sign-attachments-btn
+  Wait Until   Element should be visible  signAttachmentPassword
+  Input text by test id  signAttachmentPassword  mikko123
+  Click enabled by test id  do-sign-attachments
+  Wait Until   Element should not be visible  signAttachmentPassword
+
 Switch user
   [Tags]  attachments
   Logout

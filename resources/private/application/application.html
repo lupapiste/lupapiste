@@ -1025,7 +1025,7 @@
             </div>
 
             <label for="signAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
-            <input id="signAttachmentPassword" type="password" data-bind="value: password" class="form-input text ">
+            <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="value: password" class="form-input text ">
 
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>
