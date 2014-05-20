@@ -11,92 +11,96 @@
             <tr>
               <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
+              <th data-bind="ltext: 'login.with-rights'"></th>
+              <th data-bind="ltext: 'admin.municipality'"></th>
+              <th data-bind="ltext: 'organization.scope'"></th>
+              <th data-bind="ltext: 'edit'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.application.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
-              <th data-bind="ltext: 'edit'"></th>
-              <th >Kirjaudu oikeuksin</th>
             </tr>
           </thead>
-          <tbody data-bind="foreach: organizationsModel.organizations">
+          <tbody data-bind="foreach: { data: organizationsModel.organizations, as: 'organization' }">
+            <!-- ko foreach: scope -->
             <tr>
-              <td data-bind="text: $data.id"></td>
-              <td data-bind="text: $data.name[loc.getCurrentLanguage()]"></td>
-              <td data-bind="text: $data['inforequest-enabled'], attr: {'data-test-id': 'inforequest-enabled-' + $data.id}"></td>
-              <td data-bind="text: $data['new-application-enabled'], attr: {'data-test-id': 'application-enabled-' + $data.id}"></td>
-              <td data-bind="text: $data['open-inforequest'], attr: {'data-test-id': 'open-inforequest-' + $data.id}"></td>
-              <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.id}"></td>
-              <td>[<a href="#" data-bind="click: $parent.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.id}" class="modal"></a>]</td>
-              <td>[<a href="#" data-bind="click: $parent.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': $data.id}"></a>]</td>
+              <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
+                <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
+                <td data-bind="text: organization.name[loc.getCurrentLanguage()], attr: {'rowspan': organization.scope.length}"></td>
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
+                </td>
+              <!-- /ko -->
+              <td data-bind="text: $data.municipality"></td>
+              <td data-bind="text: $data.permitType"></td>
+              <td>
+                [<a href="#" data-bind="click: $root.editOrganizationModel.open, ltext: 'edit', attr: {'data-test-id': 'edit-organization-' + $data.municipality + '-' + $data.permitType}" class="modal"></a>]
+              </td>
+              <td data-bind="text: $data['inforequest-enabled'] || false, attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
             </tr>
+            <!-- /ko -->
           </tbody>
         </table>
 
       </div>
 
-      <div id="dialog-edit-organization" class="window autosized">
-        <div data-bind="with: editOrganizationModel">
-          <div class="dialog-header">
-            <p data-bind="ltext: 'edit'"></p>
-            <p class="dialog-close close">X</p>
+      <div id="dialog-edit-organization" class="window autosized" data-bind="with: editOrganizationModel">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'edit'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+
+        <div class="dialog-content">
+          <div>
+            <input type="checkbox" data-bind="checked: inforequestEnabled" data-test-id="inforequest-enabled" class="form-input" id="inforequest-enabled"></input>
+            <label for="inforequest-enabled" class="form-label" data-bind ="ltext: 'organization.inforequest.enabled'"></label>
           </div>
 
-          <div class="dialog-content">
-
-            <div>
-              <div>
-                <input type="checkbox" data-bind="checked: inforequestEnabled" data-test-id="inforequest-enabled" class="form-input" id="inforequest-enabled"></input>
-                <label for="inforequest-enabled" class="form-label" data-bind ="ltext: 'organization.inforequest.enabled'"></label>
-              </div>
-
-              <div>
-                <input type="checkbox" data-bind="checked: applicationEnabled" data-test-id="application-enabled" class="form-input" id="application-enabled"></input>
-                <label class="form-label" for="application-enabled" data-bind ="ltext: 'organization.application.enabled'"></label>
-              </div>
-
-              <div>
-                <input type="checkbox" data-bind="checked: openInforequestEnabled" class="form-input" id="open-inforequest"></input>
-                <label class="form-label" for="open-inforequest" data-bind ="ltext: 'organization.openinforequest.enabled'"></label>
-              </div>
-
-              <div>
-                <label class="form-label" for="open-inforequest-email" data-bind ="ltext: 'organization.openinforequest.email'"></label>
-                <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
-              </div>
-
-              <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">
-                <span data-bind="ltext: 'save'"></span>
-                <em data-bind="visible: pending" class="button-loader"></em>
-              </button>
-
-              <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
-            </div>
-
+          <div>
+            <input type="checkbox" data-bind="checked: applicationEnabled" data-test-id="application-enabled" class="form-input" id="application-enabled"></input>
+            <label class="form-label" for="application-enabled" data-bind ="ltext: 'organization.application.enabled'"></label>
           </div>
+
+          <div>
+            <input type="checkbox" data-bind="checked: openInforequestEnabled" class="form-input" id="open-inforequest"></input>
+            <label class="form-label" for="open-inforequest" data-bind ="ltext: 'organization.openinforequest.enabled'"></label>
+          </div>
+
+          <div>
+            <label class="form-label" for="open-inforequest-email" data-bind ="ltext: 'organization.openinforequest.email'"></label>
+            <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
+          </div>
+
+          <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">
+            <span data-bind="ltext: 'save'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+          </button>
+
+          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
         </div>
       </div>
 
 
-      <div id="dialog-login-as" class="window autosized">
-        <div data-bind="with: loginAsModel">
-          <div class="dialog-header">
-            <p data-bind="ltext: 'loginframe.login'"></p>
-            <p class="dialog-close close">X</p>
+      <div id="dialog-login-as" class="window autosized" data-bind="with: loginAsModel">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'loginframe.login'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+
+        <div class="dialog-content">
+          <div>
+            <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
+            <input type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input" id="login-as-password" ></input>
           </div>
 
-          <div class="dialog-content">
-            <div>
-              <label class="form-label" for="login-as-password">Admin-salasana</label>
-              <input type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input" id="login-as-password" ></input>
-            </div>
+          <button data-bind="click: login, ltext: 'loginframe.login'"
+                  data-test-id="submit-login-as"
+                  class="btn btn-primary btn-dialog" ></button>
 
-            <button data-bind="click: login, ltext: 'loginframe.login'"
-                    data-test-id="submit-login-as"
-                    class="btn btn-primary btn-dialog" ></button>
-
-            <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
-          </div>
+          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
         </div>
       </div>
 

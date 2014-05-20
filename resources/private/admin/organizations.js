@@ -27,7 +27,7 @@
 
     // Model
 
-    self.id = 0;
+    self.organizationScope = null;
     self.applicationEnabled = ko.observable(false);
     self.inforequestEnabled = ko.observable(false);
     self.openInforequestEnabled = ko.observable(false);
@@ -35,12 +35,12 @@
     self.processing = ko.observable();
     self.pending = ko.observable();
 
-    self.reset = function(organization) {
-      self.id = organization.id;
-      self.applicationEnabled(organization['new-application-enabled']);
-      self.inforequestEnabled(organization['inforequest-enabled']);
-      self.openInforequestEnabled(organization['open-inforequest'] || false);
-      self.openInforequestEmail(organization['open-inforequest-email'] || "");
+    self.reset = function(organizationScope) {
+      self.organizationScope = organizationScope;
+      self.applicationEnabled(organizationScope['new-application-enabled'] || false);
+      self.inforequestEnabled(organizationScope['inforequest-enabled'] || false);
+      self.openInforequestEnabled(organizationScope['open-inforequest'] || false);
+      self.openInforequestEmail(organizationScope['open-inforequest-email'] || "");
       self.processing(false);
       self.pending(false);
     };
@@ -51,8 +51,8 @@
 
     // Open the dialog
 
-    self.open = function(organization) {
-      self.reset(organization);
+    self.open = function(organizationScope) {
+      self.reset(organizationScope);
       LUPAPISTE.ModalDialog.open(self.dialogSelector);
     };
 
@@ -67,7 +67,8 @@
     };
 
     self.updateOrganization = function() {
-      var data = {organizationId: self.id,
+      var data = {permitType: self.organizationScope.permitType,
+                  municipality: self.organizationScope.municipality,
                   inforequestEnabled: self.inforequestEnabled(),
                   applicationEnabled: self.applicationEnabled(),
                   openInforequestEnabled: self.openInforequestEnabled(),
