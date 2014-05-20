@@ -1,1 +1,3 @@
 application.signAttachments: Allekirjoita liitteet
+signAttachment.select: Allekirjoita
+signAttachment.sign: Allekirjoita valitut liitteet
