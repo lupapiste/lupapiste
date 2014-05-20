@@ -19,7 +19,8 @@
                  [clj-time "0.6.0"]
                  [org.apache.commons/commons-lang3 "3.2.1"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
-                 [com.lowagie/itext "4.2.1"]
+                 [com.lowagie/itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14]]
+                 [org.bouncycastle/bctsp-jdk16 "1.46"]
                  [org.clojure/data.zip "0.1.1"]
                  [de.ubercode.clostache/clostache "1.3.1"]
                  [endophile "0.1.2" :exclusions [hiccup]]
