@@ -33,7 +33,6 @@
                  [fi.sito/oskari "0.9.32"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
-                 [digest "1.4.3"]
                  [org.clojure/tools.trace "0.7.6"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
   :profiles {:dev {:dependencies [[midje "1.6.0"]
