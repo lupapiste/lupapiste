@@ -172,8 +172,8 @@
         (ok
          :inforequests-disabled (not (:inforequest-enabled scope))
          :new-applications-disabled (not (:new-application-enabled scope))
-         :links (:links result)
-         :attachmentsForOp (-> result :operations-attachments ((keyword operation)))))
+         :links (:links organization)
+         :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
 
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 

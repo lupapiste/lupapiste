@@ -22,7 +22,8 @@
         orig-scope           (first (:scope organization))
         organization-id      (:id organization)
         resp                 (command admin :update-organization
-                               :organizationScope orig-scope
+                               :permitType (:permitType orig-scope)
+                               :municipality (:municipality orig-scope)
                                :inforequestEnabled (not (:inforequest-enabled orig-scope))
                                :applicationEnabled (not (:new-application-enabled orig-scope))
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
