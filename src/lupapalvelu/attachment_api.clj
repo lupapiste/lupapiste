@@ -421,5 +421,7 @@
           command
           {:attachments {$elemMatch {:id attachment-id}}}
           {$push {:attachments.$.signatures (assoc signature :version version)}})))
-    (fail :error.login)))
-
+    (do
+      ; Throttle giving information about incorrect password
+      (Thread/sleep 2000)
+      (fail :error.password))))

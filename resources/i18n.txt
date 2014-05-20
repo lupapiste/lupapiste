@@ -1,3 +1,5 @@
 application.signAttachments: Allekirjoita liitteet
 signAttachment.select: Allekirjoita
+signAttachment.verifyPassword: Vahvista allekirjoitus salasanallasi:
 signAttachment.sign: Allekirjoita valitut liitteet
+error.password: Salasana on väärin

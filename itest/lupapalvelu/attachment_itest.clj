@@ -95,7 +95,7 @@
         (fact "meta" attachment-ids => seq)
 
         (fact "Signing fails if password is incorrect"
-          (command pena :sign-attachments :id application-id :files attachment-ids :password "not-pena") => (partial expected-failure? "error.login"))
+          (command pena :sign-attachments :id application-id :files attachment-ids :password "not-pena") => (partial expected-failure? "error.password"))
 
         (fact "Signing succeeds if password is correct"
           (command pena :sign-attachments :id application-id :files attachment-ids :password "pena") => ok?)
