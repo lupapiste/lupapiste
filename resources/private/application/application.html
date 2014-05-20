@@ -12,7 +12,7 @@
             <!-- /ko -->
           </div>
         </div>
-        <div data-bind="with: application" class="application_summary_info">
+        <div class="application_summary_info" data-bind="with: application">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
              data-bind="ltext: 'edit.address', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
@@ -153,7 +153,7 @@
 
 
         <!-- Actions: -->
-        <div data-bind="with: application" class="application_actions">
+        <div class="application_actions" data-bind="with: application">
           <div class="muncipality-info">
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
@@ -981,13 +981,15 @@
       </div>
 
       <div id="dialog-sign-attachments" class="window autosized">
-        <div class="dialog-header">
+        <div data-bind="with: $root.signingModel">
+          <div class="dialog-header">
             <p data-bind="ltext: 'application.signAttachments'"></p>
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
 
           </div>
+        </div>
       </div>
 
       <div id="dialog-stamp-attachments" class="window autosized">
