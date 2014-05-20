@@ -420,7 +420,7 @@
                                             :versionumero 1
                                             :tyyppi "hakemus_vireilletullessa"}}
                                           {:Liite
-                                           {:kuvaus "Lupapisteest\u00e4 k\u00e4sittelyyn siirretty hakemus"
+                                           {:kuvaus "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
                                             :muokkausHetki (to-xml-datetime (now))
                                             :versionumero 1
