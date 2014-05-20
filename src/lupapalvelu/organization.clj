@@ -16,7 +16,7 @@
 ;;
 
 (defn get-organization [id]
-  (and id (mongo/select-one :organizations {:_id id})))
+  (and id (mongo/by-id :organizations id)))
 
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
