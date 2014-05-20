@@ -104,6 +104,7 @@ var attachment = (function() {
     filename:       ko.observable(),
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
+    signatures:     ko.observableArray([]),
     type:           ko.observable(),
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray(),
@@ -188,7 +189,7 @@ var attachment = (function() {
 
   function showAttachment(application) {
     if (!applicationId || !attachmentId) { return; }
-    var attachment = _.filter(application.attachments, function(value) {return value.id === attachmentId;})[0];
+    var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
       return;
@@ -198,6 +199,7 @@ var attachment = (function() {
 
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
+    model.signatures(attachment.signatures || []);
     model.filename(attachment.filename);
     model.type(attachment.type);
 

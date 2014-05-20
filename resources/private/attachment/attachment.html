@@ -65,7 +65,7 @@
               <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></td>
               <td data-bind="size: size"></td>
               <td data-bind="version: version"></td>
-              <td data-bind="dateTimeString: created">31.10.2012</td>
+              <td data-bind="dateTimeString: created"></td>
               <td>
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)
@@ -82,6 +82,27 @@
             data-bind="click: newAttachmentVersion, ltext: 'attachment.addVersion', visible: $root.authorization.ok('upload-attachment'),  enable: $root.authorization.ok('upload-attachment')">
           Lis&auml;&auml; uusi versio
         </button>
+      </div>
+
+      <div class="attachment-file-versions" data-bind="if: signatures && signatures().length > 0">
+        <h3 data-bind="ltext: 'attachment.signatures'"></h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'attachment.signer'"></th>
+              <th data-bind="ltext: 'attachment.version'"></th>
+              <th data-bind="ltext: 'attachment.signedDate'"></th>
+
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: signatures">
+            <tr >
+              <td data-bind="fullName: user"></td>
+              <td data-bind="version: version"></td>
+              <td data-bind="dateTimeString: created"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="attachment-file-conversation">

@@ -1,4 +1,7 @@
 application.signAttachments: Allekirjoita liitteet
+attachment.signatures: Allekirjoitukset
+attachment.signer: Allekirjoittaja
+attachment.signedDate: Allekirjoituksen päivämäärä
 signAttachment.select: Allekirjoita
 signAttachment.verifyPassword: Vahvista allekirjoitus salasanallasi:
 signAttachment.sign: Allekirjoita valitut liitteet
