@@ -1,1 +1,4 @@
 error.application-does-not-have-given-user: "Hakemukselle ei ole liitetty valittua käyttäjää"
+login.with-rights: Kirjaudu oikeuksin
+organization.scope: Konfiguraatio
+admin.admin-password: Admin-salasana

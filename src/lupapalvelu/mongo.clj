@@ -82,8 +82,8 @@
 (defn by-id
   ([collection id]
     (with-id (mc/find-one-as-map collection {:_id id})))
-  ([collection id fields]
-    (with-id (mc/find-one-as-map collection {:_id id} fields))))
+  ([collection id projection]
+    (with-id (mc/find-one-as-map collection {:_id id} projection))))
 
 (defn select
   "returns multiple entries by matching the monger query"
