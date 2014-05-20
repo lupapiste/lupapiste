@@ -27,8 +27,8 @@
               <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
                 <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
                 <td data-bind="text: organization.name[loc.getCurrentLanguage()], attr: {'rowspan': organization.scope.length}"></td>
-                <td data-bind="attr: {'rowspan': organization.scope.length}">
-                  [<a href="#" data-bind="click: $root.loginAsModel.open(organization.id), ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
                 </td>
               <!-- /ko -->
               <td data-bind="text: $data.municipality"></td>

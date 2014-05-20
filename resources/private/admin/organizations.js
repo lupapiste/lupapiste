@@ -90,8 +90,8 @@
     self.password = ko.observable("");
     self.organizationId = null;
 
-    self.open = function(organizationId) {
-      self.organizationId = organizationId;
+    self.open = function(organization) {
+      self.organizationId = organization.id;
       self.password("");
       LUPAPISTE.ModalDialog.open("#dialog-login-as");
     };
