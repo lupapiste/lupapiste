@@ -346,13 +346,13 @@
 
 (defn update-version-content [application attachment-id file-id size now]
   (update-application
-    (application->command application
+    (application->command application)
     {:attachments {$elemMatch {:id attachment-id}}}
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.latestVersion.fileId file-id
            :attachments.$.latestVersion.size size
-           :attachments.$.latestVersion.created now}})))
+           :attachments.$.latestVersion.created now}}))
 
 
 (defn update-or-create-attachment
@@ -429,7 +429,7 @@
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
     (update-application
       (application->command application)
-      {$elemMatch {:id attachmentId}}
+      {:attachments {$elemMatch {:id attachmentId}}}
       {$pull {:attachments.$.versions {:fileId fileId}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))

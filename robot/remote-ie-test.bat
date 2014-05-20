@@ -4,7 +4,7 @@
 @set server=%2
 @if [%server%]==[] set server=https://www-dev.lupapiste.fi
 
-set hubert=192.168.7.223
+set hubert=hubert.solita.fi
 
 set remote=%hubert%
 

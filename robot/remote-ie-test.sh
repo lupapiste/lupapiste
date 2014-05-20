@@ -11,7 +11,7 @@ if [ -z $server ] ; then
 	server="https://www-dev.lupapiste.fi"
 fi
 
-hubert='192.168.7.223'
+hubert='hubert.solita.fi'
 bianca='192.168.7.253'
 
 #remote=$bianca

@@ -10,6 +10,7 @@
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
 
 (def default-description "operations.tree.default-description")
@@ -131,10 +132,10 @@
 (def operation-tree
   (filterv identity
     [operation-tree-for-R
-    operation-tree-for-environment-R
-    operation-tree-for-P
-    (when (env/feature? :ymparisto) operation-tree-for-Y)
-    operation-tree-for-YA]))
+     operation-tree-for-environment-R
+     operation-tree-for-P
+     (when (env/feature? :ymparisto) operation-tree-for-Y)
+     operation-tree-for-YA]))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] operation-tree)
@@ -200,8 +201,7 @@
 
 (def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                         :permit-type permit/YA
-                                        :required (conj common-yleiset-alueet-schemas
-                                                    "sijoituslupa-sijoituksen-tarkoitus")
+                                        :required common-yleiset-alueet-schemas
                                         :attachments []
                                         :add-operation-allowed false
                                         :link-permit-required false})
@@ -538,13 +538,21 @@
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
 
-(defn operations-for-permit-type [permit-type]
+(defn- is-add-operation-allowed-for-operation [operation]
+  (:add-operation-allowed (operations (keyword operation))))
+
+(defn operations-for-permit-type [permit-type only-addable?]
   (clojure.walk/postwalk
     (fn [node]
       (if (keyword? node)
         (when (= (name permit-type) (permit-type-of-operation node))
-          ; Return operation keyword if permit type matches, or nil
-          node)
+          ; Return operation keyword if permit type matches,
+          ; and if the only-addable filtering is required, apply that.
+          ; Otherwise return nil.
+          (if only-addable?
+            (when (is-add-operation-allowed-for-operation node)
+              node)
+            node))
         (if (string? node)
           ; A step in a path is returned as is
           node
@@ -572,9 +580,12 @@
   {:description "returns operations: without parameters all, with permitType-parameter just those operations"}
   [{{:keys [permitType]} :data}]
   (if permitType
-    (ok :operations (operations-for-permit-type permitType))
+    (ok :operations (operations-for-permit-type permitType false))
     (ok :operations operation-tree)))
 
-
-
+(defquery "addable-operations"
+  {:description "returns operations addable for the application whose id is given as parameter"
+   :parameters [:id]}
+  [{{:keys [permitType] :as application} :application}]
+  (ok :operations (operations-for-permit-type permitType true)))
 

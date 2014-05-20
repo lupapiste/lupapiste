@@ -355,9 +355,10 @@
    that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (handler (assoc request :user
-                    (or (user/get-user-with-apikey (get-apikey request))
-                        (session/get :user))))))
+    (let [api-key (get-apikey request)
+          api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
+          session-user (session/get :user)]
+      (handler (assoc request :user (or api-key-auth session-user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))

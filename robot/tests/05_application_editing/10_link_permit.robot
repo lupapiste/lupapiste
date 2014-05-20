@@ -15,8 +15,6 @@ Sonja prepares the application that will later act as link permit
   Create application the fast way  ${appname}  753  ${propertyid}  asuinrakennus
   Submit application
   Click enabled by test id  approve-application
-  Throw in a verdict
-  Wait until  Application state should be  verdictGiven
 
   ${linkPermitAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${linkPermitAppId}

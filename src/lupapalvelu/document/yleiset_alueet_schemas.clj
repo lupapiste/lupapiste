@@ -25,24 +25,8 @@
 ;; Kaivulupa
 ;;
 
-(def tyon-tarkoitus-dropdown
-  [{:name "sijoituksen-tarkoitus" :type :select :other-key "muu-sijoituksen-tarkoitus"
-    :body [{:name "jakokaappi-(tele/sahko)"}
-           {:name "jate--tai-sadevesi"}
-           {:name "kaivo-(kaukolampo)"}
-           {:name "kaivo-(tele/sahko)"}
-           {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
-           {:name "katuvalo"}
-           {:name "kaukolampo"}
-           {:name "liikennevalo"}
-           {:name "sahko"}
-           {:name "tele"}
-           {:name "vesijohto"}]}
-   {:name "muu-sijoituksen-tarkoitus" :type :string }])
-
 (def hankkeen-kuvaus-kaivulupa
   (body
-    tyon-tarkoitus-dropdown
     hankkeen-kuvaus-kayttolupa
     {:name "sijoitusLuvanTunniste" :type :string :size "l"}))   ;; sijoituslupaviitetietoType
 
@@ -162,23 +146,13 @@
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}))   ;; LupaAsianKuvaus
 
-(def sijoituslupa-sijoituksen-tarkoitus
-  (body
-    (update-in tyon-tarkoitus-dropdown [0 :body] conj {:name "kunnallistekniset-liittymat"})  ;; lupakohtainenLisatietotieto
-    {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}))   ;; lupakohtainenLisatietotieto
-
 (defschemas
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :removable false
            :repeating false
            :order 65}
-    :body hankkeen-kuvaus-sijoituslupa}
-   {:info {:name "sijoituslupa-sijoituksen-tarkoitus"
-           :removable false
-           :repeating false
-           :order 66}
-    :body sijoituslupa-sijoituksen-tarkoitus}])
+    :body hankkeen-kuvaus-sijoituslupa}])
 
 
 
