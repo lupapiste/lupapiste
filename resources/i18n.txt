@@ -1,0 +1,3 @@
+login.with-rights: Kirjaudu oikeuksin
+organization.scope: Konfiguraatio
+admin.admin-password: Admin-salasana
