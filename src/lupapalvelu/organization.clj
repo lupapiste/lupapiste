@@ -192,7 +192,7 @@
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
-    (if-let [organization (mongo/by-id :organizations organization-id {:krysp 1, :scope 1})]
+    (if-let [organization (get-organization organization-id)]
       (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
