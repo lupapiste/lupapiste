@@ -45,7 +45,7 @@
                              [lein-nitpicker "0.4.0"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]]
                    :resource-paths ["dev-resources"]
-                   :source-paths ["test-utils"]
+                   :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
                               "-Xmx1G" "-XX:MaxPermSize=256M"]}
              :uberjar  {:source-paths ["main-src"]
