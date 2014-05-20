@@ -1,2 +1,3 @@
 login.with-rights: Kirjaudu oikeuksin
 organization.scope: Viitekehys
+admin.admin-password: Admin-salasana
