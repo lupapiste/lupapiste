@@ -414,13 +414,13 @@
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                           {:Liite
-                                           {:kuvaus "Application when submitted"
+                                           {:kuvaus "Vireille tullut hakemus"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-submitted-filename (:id application)))
                                             :muokkausHetki (to-xml-datetime (:submitted application))
                                             :versionumero 1
                                             :tyyppi "hakemus_vireilletullessa"}}
                                           {:Liite
-                                           {:kuvaus "Application when sent from Lupapiste"
+                                           {:kuvaus "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
                                             :muokkausHetki (to-xml-datetime (now))
                                             :versionumero 1
