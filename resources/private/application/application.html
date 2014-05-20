@@ -174,7 +174,7 @@
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: function(){alert('!')},    visible: $root.authorization.ok('sign-attachments'),     enable: $root.authorization.ok('sign-attachments')"     data-test-id="application-sign-attachments-btn"  class="btn">
+          <button data-bind="click: $root.signingModel.init,   visible: $root.authorization.ok('sign-attachments'),     enable: $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
             <span data-bind="ltext: 'application.signAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
