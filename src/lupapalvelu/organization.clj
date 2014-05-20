@@ -152,6 +152,9 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
+(defn resolve-organization-scope [organization municipality permit-type]
+  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+
 (defquery organization-by-id
   {:parameters [organizationId]
    :roles [:admin]
@@ -164,13 +167,8 @@
    :verified true}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
-    (if-let [result (mongo/select-one :organizations
-                      {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
-                      {"name" 1
-                       "links" 1
-                       "operations-attachments" 1
-                       "scope" 1})]
-      (let [scope (first (filter #(= permit-type (:permitType %)) (:scope result)))]
+    (if-let [organization (resolve-organization municipality permit-type)]
+      (let [scope (resolve-organization-scope organization municipality permit-type)]
         (ok
          :inforequests-disabled (not (:inforequest-enabled scope))
          :new-applications-disabled (not (:new-application-enabled scope))

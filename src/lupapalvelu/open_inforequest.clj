@@ -38,7 +38,7 @@
 (defn new-open-inforequest! [{application-id :id organization-id :organization municipality :municipality permit-type :permitType :as application}]
   {:pre [application-id organization-id municipality permit-type]}
   (let [organization    (organization/get-organization organization-id)
-        scope           (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))
+        scope           (organization/resolve-organization-scope organization municipality permit-type)
         email           (:open-inforequest-email scope)
         token-id        (random-password 48)]
     (when-not organization (fail! :error.unknown-organization))

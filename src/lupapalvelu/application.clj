@@ -607,7 +607,7 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
-        scope             (first (filter #(= permit-type (:permitType %)) (:scope organization)))
+        scope             (organization/resolve-organization-scope organization municipality permit-type)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
@@ -671,7 +671,7 @@
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
-        scope             (first (filter #(= permit-type (:permitType %)) (:scope organization)))
+        scope             (organization/resolve-organization-scope organization municipality permit-type)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
@@ -988,9 +988,9 @@
     (ok :integrationAvailable ftp-user?)))
 
 
-(defn- validate-new-applications-enabled [command {:keys [organization permitType municipality]}]
-  (let [org (mongo/by-id :organizations organization {:scope 1})
-        scope (first (filter #(and (= permitType (:permitType %)) (= municipality (:municipality %))) (:scope org)))]
+(defn- validate-new-applications-enabled [command {:keys [permitType municipality]}]
+  (let [org   (organization/resolve-organization municipality permitType)
+        scope (organization/resolve-organization-scope org municipality permitType)]
     (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
