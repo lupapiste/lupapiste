@@ -6,6 +6,7 @@ attachment.signLatest: Allekirjoita uusin versio
 signAttachment.select: Allekirjoita
 signAttachment.verifyPassword: Vahvista allekirjoitus salasanallasi:
 signAttachment.sign: Allekirjoita valitut liitteet
+signAttachment.ok: Valitut liitteet allekirjoitettu onnistuneesti
 error.password: Salasana on väärin
 login.with-rights: Kirjaudu oikeuksin
 organization.scope: Konfiguraatio
