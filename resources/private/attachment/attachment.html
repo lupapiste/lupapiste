@@ -103,9 +103,7 @@
           </tbody>
         </table>
 
-        <button
-            id="signLatestAttachmentVersion"
-            class="btn"
+        <button data-test-id="signLatestAttachmentVersion" class="btn"
             data-bind="click: sign, ltext: 'attachment.signLatest', visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
         </button>
 

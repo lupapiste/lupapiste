@@ -75,7 +75,7 @@ Change attachment type
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
-Sign attachment
+Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
   Click enabled by test id  application-sign-attachments-btn
@@ -90,6 +90,16 @@ Signature is visible
   Element text should be  xpath=//section[@id="attachment"]//td[@data-bind="fullName: user"]  Mikko Intonen
   Element text should be  xpath=//section[@id="attachment"]//td[@data-bind="version: version"]  1.0
   Element should be visible  xpath=//section[@id="attachment"]//td[@data-bind="dateTimeString: created"]
+
+Sign single attachment
+  Click enabled by test id  signLatestAttachmentVersion
+  Wait Until   Element should be visible  signSingleAttachmentPassword
+  Input text by test id  signSingleAttachmentPassword  mikko123
+  Click enabled by test id  do-sign-attachment
+  Wait Until   Element should not be visible  signSingleAttachmentPassword
+
+Two signatures are visible
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//td[@data-bind="fullName: user"]  2
 
 Switch user
   [Tags]  attachments
