@@ -95,10 +95,10 @@
         (fact "meta" attachment-ids => seq)
 
         (fact "Signing fails if password is incorrect"
-          (command pena :sign-attachments :id application-id :files attachment-ids :password "not-pena") => (partial expected-failure? "error.password"))
+          (command pena :sign-attachments :id application-id :attachmentIds attachment-ids :password "not-pena") => (partial expected-failure? "error.password"))
 
         (fact "Signing succeeds if password is correct"
-          (command pena :sign-attachments :id application-id :files attachment-ids :password "pena") => ok?)
+          (command pena :sign-attachments :id application-id :attachmentIds attachment-ids :password "pena") => ok?)
 
         (fact "Signature is set"
           (let [application (query-application pena application-id)

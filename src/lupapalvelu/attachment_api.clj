@@ -405,12 +405,12 @@
 
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
-   :parameters [:id files password]
+   :parameters [:id attachmentIds password]
    :feature :attachmentsignature
    :roles [:applicant]}
   [{application :application u :user :as command}]
   (if (user/get-user-with-password (:username u) password)
-    (let [attachments (a/get-attachments-infos application files)
+    (let [attachments (a/get-attachments-infos application attachmentIds)
           signature {:user (user/summary u)
                      :created (:created command)}]
 

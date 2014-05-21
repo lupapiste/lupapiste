@@ -3,8 +3,8 @@ LUPAPISTE.SigningModel = function() {
   var self = this;
   self.application = null;
   self.password = ko.observable("");
-  self.files = ko.observable(null);
-  self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
+  self.attachments = ko.observable(null);
+  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
   self.errorMessage = ko.observable("");
@@ -30,13 +30,13 @@ LUPAPISTE.SigningModel = function() {
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
-    self.files(_(application.attachments()).filter(function(a) {return a.versions().length;}).map(normalizeAttachment).value());
+    self.attachments(_(application.attachments()).filter(function(a) {return a.versions().length;}).map(normalizeAttachment).value());
     LUPAPISTE.ModalDialog.open("#dialog-sign-attachments");
   };
 
   self.sign = function() {
     self.errorMessage("");
-    var data = {id: self.application.id(), files: _.map(self.selectedFiles(), "id"), password: self.password()};
+    var data = {id: self.application.id(), attachmentIds: _.map(self.selectedAttachments(), "id"), password: self.password()};
     ajax.command("sign-attachments", data)
       .processing(self.processing)
       .pending(self.pending)
@@ -50,11 +50,21 @@ LUPAPISTE.SigningModel = function() {
       .call();
   };
 
-  function selectAllFiles(value) {
-    _.each(self.files(), function(f) { f.selected(value); });
+  function selectAllAttachments(value) {
+    _.each(self.attachments(), function(f) { f.selected(value); });
   }
 
-  self.selectAll = _.partial(selectAllFiles, true);
-  self.selectNone = _.partial(selectAllFiles, false);
+  self.selectAll = _.partial(selectAllAttachments, true);
+  self.selectNone = _.partial(selectAllAttachments, false);
+
+  self.setSelectedAttachmentId = function(attachmentId) {
+    self.selectNone();
+    var a = _.find(self.attachments(), function(a) {return a.id() === attachmentId;});
+    if (a) {
+      a.selected(true);
+    } else {
+      error("Attachment not found", attachmentId);
+    }
+  };
 
 };
