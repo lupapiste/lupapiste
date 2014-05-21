@@ -48,7 +48,7 @@
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
-  var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments");
+  var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskModel = new LUPAPISTE.CreateTaskModel();

@@ -1,7 +1,8 @@
-LUPAPISTE.SigningModel = function(dialogSelector) {
+LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   "use strict";
   var self = this;
   self.dialogSelector = dialogSelector;
+  self.confirmSuccess = confirmSuccess;
   self.application = null;
   self.password = ko.observable("");
   self.attachments = ko.observable([]);
@@ -48,8 +49,10 @@ LUPAPISTE.SigningModel = function(dialogSelector) {
       .success(function() {
         self.password("");
         repository.load(id);
-        // TODO notification?
         LUPAPISTE.ModalDialog.close();
+        if (self.confirmSuccess) {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));
+        }
       })
       .error(function(e) {self.errorMessage(e.text);})
       .call();

@@ -9,7 +9,7 @@ var attachment = (function() {
   var commentsModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
-  var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment");
+  var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
 
   function deleteAttachmentFromServer() {
     ajax

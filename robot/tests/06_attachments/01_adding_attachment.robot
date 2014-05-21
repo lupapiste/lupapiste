@@ -83,6 +83,7 @@ Sign all attachments
   Input text by test id  signAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachments
   Wait Until   Element should not be visible  signAttachmentPassword
+  Confirm  dynamic-ok-confirm-dialog
 
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
