@@ -106,7 +106,7 @@
         <button
             id="signLatestAttachmentVersion"
             class="btn"
-            data-bind="click: newAttachmentVersion, ltext: 'attachment.signLatest', visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
+            data-bind="click: sign, ltext: 'attachment.signLatest', visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
         </button>
 
       </div>

@@ -9,7 +9,7 @@ var attachment = (function() {
   var commentsModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
-  var signingModel = new LUPAPISTE.SigningModel();
+  var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment");
 
   function deleteAttachmentFromServer() {
     ajax
@@ -97,7 +97,7 @@ var attachment = (function() {
   }
 
   model = {
-    attachmentId:   ko.observable(),
+    id:   ko.observable(),
     application: {
       id:     ko.observable(),
       title:  ko.observable()
@@ -135,7 +135,7 @@ var attachment = (function() {
     },
 
     newAttachmentVersion: function() {
-      initFileUpload(model.application.id(), model.attachmentId(), model.attachmentType(), false);
+      initFileUpload(applicationId, attachmentId, model.attachmentType(), false);
 
       model.previewDisabled(true);
 
@@ -154,6 +154,11 @@ var attachment = (function() {
       deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
       model.previewDisabled(true);
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment-version");
+    },
+
+    sign: function() {
+      model.previewDisabled(true);
+      signingModel.init({id: applicationId, attachments:[model]});
     }
   };
 
@@ -172,16 +177,16 @@ var attachment = (function() {
       loader$.show();
       ajax
         .command("set-attachment-type",
-          {id:              model.application.id(),
-           attachmentId:    model.attachmentId(),
+          {id:              applicationId,
+           attachmentId:    attachmentId,
            attachmentType:  attachmentType})
         .success(function() {
           loader$.hide();
-          repository.load(model.application.id());
+          repository.load(applicationId);
         })
         .error(function(e) {
           loader$.hide();
-          repository.load(model.application.id());
+          repository.load(applicationId);
           error(e.text);
         })
         .call();
@@ -216,7 +221,7 @@ var attachment = (function() {
 
     model.application.id(applicationId);
     model.application.title(application.title);
-    model.attachmentId(attachmentId);
+    model.id = attachmentId;
 
     commentsModel.refresh(application, {type: "attachment", id: attachmentId});
 
@@ -257,6 +262,9 @@ var attachment = (function() {
   hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment-version"}, function() {
     model.previewDisabled(false);
   });
+  hub.subscribe({type: "dialog-close", id : "dialog-sign-attachment"}, function() {
+    model.previewDisabled(false);
+  });
 
   $(function() {
     $("#attachment").applyBindings({
@@ -266,6 +274,7 @@ var attachment = (function() {
       commentsModel: commentsModel
     });
     $("#upload-page").applyBindings({});
+    $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using

@@ -5,7 +5,7 @@
       <div id="dialog-sign-attachment" class="window autosized">
         <div data-bind="with: $root.signingModel">
           <div class="dialog-header">
-            <p data-bind="ltext: 'application.signAttachments'"></p>
+            <p data-bind="ltext: 'attachment.signLatest'"></p>
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
@@ -19,7 +19,7 @@
 
             <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments'), disable: processing" class="btn btn-primary btn-dialog" style="width:auto"
                     data-test-id="do-sign-attachments">
-              <span data-bind="ltext: 'signAttachment.sign'"></span>
+              <span data-bind="ltext: 'attachment.signLatest'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
 

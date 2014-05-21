@@ -1,9 +1,10 @@
-LUPAPISTE.SigningModel = function() {
+LUPAPISTE.SigningModel = function(dialogSelector) {
   "use strict";
   var self = this;
+  self.dialogSelector = dialogSelector;
   self.application = null;
   self.password = ko.observable("");
-  self.attachments = ko.observable(null);
+  self.attachments = ko.observable([]);
   self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
@@ -26,13 +27,15 @@ LUPAPISTE.SigningModel = function() {
 
   self.init = function(application) {
     var app = ko.toJS(application);
+    var attachments = _(app.attachments || []).filter(function(a) {return a.versions && a.versions.length;}).map(normalizeAttachment).value();
+
     self.application = app;
     self.password("");
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
-    self.attachments(_(app.attachments).filter(function(a) {return a.versions.length;}).map(normalizeAttachment).value());
-    LUPAPISTE.ModalDialog.open("#dialog-sign-attachments");
+    self.attachments(attachments);
+    LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
   self.sign = function() {
@@ -58,15 +61,5 @@ LUPAPISTE.SigningModel = function() {
 
   self.selectAll = _.partial(selectAllAttachments, true);
   self.selectNone = _.partial(selectAllAttachments, false);
-
-  self.setSelectedAttachmentId = function(attachmentId) {
-    self.selectNone();
-    var a = _.find(self.attachments(), function(a) {return a.id() === attachmentId;});
-    if (a) {
-      a.selected(true);
-    } else {
-      error("Attachment not found", attachmentId);
-    }
-  };
 
 };
