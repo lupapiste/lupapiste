@@ -13,10 +13,12 @@ var repository = (function() {
   }
 
   function schemaNotFound(schemas, name, version) {
-    // TODO, now what?
     var message = "unknown schema, name='" + name + "', version='" + version + "'";
     error(message);
-    throw message;
+  }
+
+  function calculateAttachmentStateIndicators(attachment) {
+
   }
 
   function load(id, pending) {
@@ -54,6 +56,7 @@ var repository = (function() {
             }
           }
         });
+        _.each(application.attachments ||[], calculateAttachmentStateIndicators);
         hub.send("application-loaded", {applicationDetails: loading});
       };
     });
