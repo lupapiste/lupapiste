@@ -31,7 +31,7 @@
 ;; Every document is valid.
 
 (defmonster applications-documents-are-valid
-  (documents-are-valid @applications "illegal-hetu"))
+  (documents-are-valid @applications))
 
 (defmonster submitted-applications-documents-are-valid
   (documents-are-valid @submitted-applications "illegal-hetu"))
