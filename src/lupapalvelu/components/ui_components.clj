@@ -112,7 +112,7 @@
                   :css ["accordion.css"]}
 
    :signing      {:depends [:common]
-                  :html ["signing-multi-dialog.html"]
+                  :html ["signing-dialogs.html"]
                   :js ["signing-model.js"]}
 
    :attachment   {:depends [:common :repository :signing]
