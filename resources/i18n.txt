@@ -1,2 +1,1 @@
 
-hakija.henkilo.henkilotiedot.hetu.help: Syötä tähän kenttään henkilötunnus kokonaisuudessaan. Henkilötunnuksen kirjoittaja näkee henkilötunnuksen kokonaisuudessaan lisäämisen yhteydessä, mutta siitä eteenpäin käyttäjät näkevät Lupapisteessä tunnuksen loppuosan ****-merkkijonona.
