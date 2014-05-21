@@ -103,8 +103,8 @@ var attachment = (function() {
       title:  ko.observable()
     },
     filename:       ko.observable(),
-    latestVersion:  ko.observable(),
-    versions:       ko.observable(),
+    latestVersion:  ko.observable({}),
+    versions:       ko.observable([]),
     signatures:     ko.observableArray([]),
     type:           ko.observable(),
     attachmentType: ko.observable(),
