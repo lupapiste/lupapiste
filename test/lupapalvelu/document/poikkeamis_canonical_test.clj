@@ -179,8 +179,7 @@
                                      :yritys {:liikeJaYhteisoTunnus {:value "1743842-0"}
                                               :yritysnimi {:value "ewq"}}}})
 
-(def ^:private lisaosa {
-                        :id "523844e1da063788effc1c5f"
+(def ^:private lisaosa {:id "523844e1da063788effc1c5f"
                         :created 1379419361123
                         :schema-info {:name "suunnittelutarveratkaisun-lisaosa"
                                       :version 1
@@ -257,8 +256,7 @@
      :permitSubtype "poikkeamislupa"
      :id "LP-753-2013-00001"
      :municipality "753"
-     :neighbors neighbors
-     }))
+     :neighbors neighbors}))
 
 (def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
 

@@ -37,7 +37,7 @@
                                   :street "Paapankuja 12",
                                   :phone "0102030405",
                                   :email "pena@example.com",
-                                  :personId "010203-0405",
+                                  :personId "010203-040A",
                                   :role "applicant",
                                   :zip "10203",
                                   :id "777777777777777777000020"}}]}
@@ -62,7 +62,7 @@
                                   :street "Paapankuja 12",
                                   :phone "0102030405",
                                   :email "pena@example.com",
-                                  :personId "010203-0405",
+                                  :personId "010203-040A",
                                   :role "applicant",
                                   :zip "10203",
                                   :id "777777777777777777000020"}}]}],
@@ -148,7 +148,7 @@
                                   :street "Paapankuja 12",
                                   :phone "0102030405",
                                   :email "pena@example.com",
-                                  :personId "010203-0405",
+                                  :personId "010203-040A",
                                   :role "applicant",
                                   :zip "10203",
                                   :id "777777777777777777000020"}}
@@ -271,7 +271,7 @@
                     :street "Paapankuja 12"
                     :phone "0102030405"
                     :email "pena@example.com"
-                    :personId "010203-0405"
+                    :personId "010203-040A"
                     :role "applicant"
                     :zip "10203"
                     :id "777777777777777777000020"}}]})

@@ -324,24 +324,22 @@
 
 ;TODO LIITETIETO
 
-(def documents
-  [hankkeen-kuvaus
-   hakija-henkilo
-   hakija-yritys
-   paasuunnittelija
-   suunnittelija1
-   suunnittelija2
-   maksaja-henkilo
-   maksaja-yritys
-   tyonjohtaja
-   rakennuspaikka
-   rakennuksen-muuttaminen
-   uusi-rakennus
-   laajentaminen
-   aidan-rakentaminen
-   puun-kaataminen
-   purku
-   ])
+(def documents [hankkeen-kuvaus
+                hakija-henkilo
+                hakija-yritys
+                paasuunnittelija
+                suunnittelija1
+                suunnittelija2
+                maksaja-henkilo
+                maksaja-yritys
+                tyonjohtaja
+                rakennuspaikka
+                rakennuksen-muuttaminen
+                uusi-rakennus
+                laajentaminen
+                aidan-rakentaminen
+                puun-kaataminen
+                purku])
 
 (fact "Meta test: hakija-henkilo"   hakija-henkilo   => valid-against-current-schema?)
 (fact "Meta test: hakija-yritys"    hakija-yritys    => valid-against-current-schema?)
@@ -364,40 +362,40 @@
 
 (def application-rakennuslupa
   (tools/unwrapped
-  {:id "LP-753-2013-00001"
-   :permitType "R"
-   :municipality municipality
-   :auth [{:lastName "Panaani"
-           :firstName "Pena"
-           :username "pena"
-           :type "owner"
-           :role "owner"
-           :id "777777777777777777000020"}]
-   :state "open"
-   :opened 1354532324658
-   :location {:x 408048, :y 6693225},
-   :attachments [],
-   :authority {:id "777777777777777777000023"
-               :username "sonja"
-               :firstName "Sonja"
-               :lastName "Sibbo"
-               :role "authority"}
-   :title "s"
-   :created 1354532324658
-   :documents documents
-   :propertyId "21111111111111"
-   :modified 1354532324691
-   :address "Katutie 54"
-   :statements [{:given 1368080324142
-                 :id "518b3ee60364ff9a63c6d6a1"
-                 :person {:text "Paloviranomainen"
-                          :name "Sonja Sibbo"
-                          :email "sonja.sibbo@sipoo.fi"
-                          :id "516560d6c2e6f603beb85147"}
-                 :requested 1368080102631
-                 :status "condition"
-                   :text "Savupiippu pit\u00e4\u00e4 olla."}]
-   :neighbors neighbors}))
+    {:id "LP-753-2013-00001"
+     :permitType "R"
+     :municipality municipality
+     :auth [{:id "777777777777777777000020"}]
+             :firstName "Pena"
+             :lastName "Panaani"
+             :username "pena"
+             :type "owner"
+             :role "owner"
+     :state "open"
+     :opened 1354532324658
+     :location {:x 408048, :y 6693225},
+     :attachments [],
+     :authority {:id "777777777777777777000023"
+                 :username "sonja"
+                 :firstName "Sonja"
+                 :lastName "Sibbo"
+                 :role "authority"}
+     :title "s"
+     :created 1354532324658
+     :documents documents
+     :propertyId "21111111111111"
+     :modified 1354532324691
+     :address "Katutie 54"
+     :statements [{:given 1368080324142
+                   :id "518b3ee60364ff9a63c6d6a1"
+                   :person {:text "Paloviranomainen"
+                            :name "Sonja Sibbo"
+                            :email "sonja.sibbo@sipoo.fi"
+                            :id "516560d6c2e6f603beb85147"}
+                   :requested 1368080102631
+                   :status "condition"
+                     :text "Savupiippu pit\u00e4\u00e4 olla."}]
+     :neighbors neighbors}))
 
 (def application-tyonjohtajan-nimeaminen
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
@@ -611,7 +609,11 @@
     (fact "vastattavaTyo"
       (map (comp :vastattavaTyo :VastattavaTyo) (-> tyonjohtaja-model :vastattavaTyotieto))
       =>
-      (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen", "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen", "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"}))))
+      (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen"
+              "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen"
+              "Maanrakennusty\u00f6"
+              "Muu tyotehtava"
+              "Rakennelma tai laitos"}))))
 
 (facts "Canonical maksaja/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-henkilo))
@@ -961,24 +963,27 @@
                                      :zip "33456"
                                      :city "Tampere"})
 
-(def application-rakennuslupa-verdict-given (assoc application-rakennuslupa :state "verdictGiven" :verdicts [{:timestamp (:modified application-rakennuslupa)
-                                                                                                              :kuntalupatunnus "2013-01"}]))
+(def application-rakennuslupa-verdict-given
+  (assoc application-rakennuslupa
+    :state "verdictGiven"
+    :verdicts [{:timestamp (:modified application-rakennuslupa)
+                :kuntalupatunnus "2013-01"}]))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
            (let [application application-rakennuslupa-verdict-given
                  canonical (katselmus-canonical
                              application
                              "sv"
-                    "123"
-                    "Aloitusilmoitus 1"
+                             "123"
+                             "Aloitusilmoitus 1"
                              1354532324658
-                    [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
-                     {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
+                             [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
+                              {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
                              authority-user-jussi
-                    "Aloitusilmoitus"
-                    :katselmus
-                    ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
-                    nil         nil    nil        nil          nil         nil)
+                             "Aloitusilmoitus"
+                             :katselmus
+                             ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
+                             nil nil nil nil nil nil)
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
                  kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
@@ -1014,57 +1019,57 @@
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
                  jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
                  rakennusnumero (:rakennusnro rakennustunnus) => "002"
-        kiinttun (:kiinttun rakennustunnus) => "21111111111111"]
+                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"]
 
-    (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
-    (:katselmuksenLaji Katselmus)  => "ei tiedossa"
-    (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1"
-    (:pitoPvm Katselmus) => "2012-12-03"
+             (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
+             (:katselmuksenLaji Katselmus)  => "ei tiedossa"
+             (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1"
+             (:pitoPvm Katselmus) => "2012-12-03"
 
-    (fact "KRYSP 2.1.3 data is present"
-      (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
-      (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
-        (fact "has 2 buildings" (count rakennukset) => 2)
-        (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
-        (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
-        (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
+             (fact "KRYSP 2.1.3 data is present"
+               (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
+               (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
+                 (fact "has 2 buildings" (count rakennukset) => 2)
+                 (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
+                 (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
+                 (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
-           (let [application application-rakennuslupa-verdict-given
-                 canonical (unsent-attachments-to-canonical application "sv")
+  (let [application application-rakennuslupa-verdict-given
+        canonical (unsent-attachments-to-canonical application "sv")
 
-                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
-                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
-                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
-                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
+        Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+        RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+        kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+        Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
 
-                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
-                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-                 mt (:MuuTunnus muuTunnustieto) => truthy
+        luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        mt (:MuuTunnus muuTunnustieto) => truthy
 
-                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
-                 Osapuolet (:Osapuolet osapuolettieto) => truthy
-                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
-                 Osapuoli (:Osapuoli osapuolitieto) => truthy
-                 henkilo (:henkilo Osapuoli) => truthy
-                 nimi (:nimi henkilo) => truthy
-                 osoite (:osoite henkilo) => truthy]
+        osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+        Osapuolet (:Osapuolet osapuolettieto) => truthy
+        osapuolitieto (:osapuolitieto Osapuolet) => truthy
+        Osapuoli (:Osapuoli osapuolitieto) => truthy
+        henkilo (:henkilo Osapuoli) => truthy
+        nimi (:nimi henkilo) => truthy
+        osoite (:osoite henkilo) => truthy]
 
-             (fact "tila" (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu")
-             (fact "tunnus" (:tunnus mt) => "LP-753-2013-00001")
-             (fact "sovellus" (:sovellus mt) => "Lupapiste")
-             (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")
+    (fact "tila" (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu")
+    (fact "tunnus" (:tunnus mt) => "LP-753-2013-00001")
+    (fact "sovellus" (:sovellus mt) => "Lupapiste")
+    (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")
 
-             (facts "Osapuolet"
-               (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
-               (fact "etunimi" (:etunimi nimi) => "Pena")
-               (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
-               (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
-               (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
+    (facts "Osapuolet"
+      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
+      (fact "etunimi" (:etunimi nimi) => "Pena")
+      (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
+      (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
+      (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
 
 
 
@@ -1072,55 +1077,54 @@
 
 (def jatkolupa-application
   (tools/unwrapped
-  {:schema-version 1,
-   :auth [{:lastName "Panaani",
-           :firstName "Pena",
-           :username "pena",
-           :type "owner",
-           :role "owner",
-           :id "777777777777777777000020"}],
-   :submitted 1384167310181,
-   :state "submitted",
-   :permitSubtype nil,
-   :location {:x 411063.82824707, :y 6685145.8129883},
-   :attachments [],
-   :organization "753-R",
-   :title "It\u00e4inen Hangelbyntie 163",
-   :operations [{:id "5280b764420622588b2f04fc",
-                 :name "jatkoaika",
-                 :created 1384167268234}],
-   :infoRequest false,
-   :openInfoRequest false,
-   :opened 1384167310181,
-   :created 1384167268234,
-   :propertyId "75340800010051",
-   :documents [{:created 1384167268234,
-                :data {:kuvaus {:modified 1384167309006,
-                                :value
-                                "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
-                :id "5280b764420622588b2f04fd",
-                :schema-info {:order 1,
-                              :version 1,
-                              :name "hankkeen-kuvaus-minimum",
-                              :approvable true,
-                              :op {:id "5280b764420622588b2f04fc",
-                                   :name "jatkoaika",
-                                   :created 1384167268234},
-                              :removable true}}
-               hakija-henkilo],
-   :_software_version "1.0.5",
-   :modified 1384167309006,
-   :comments [],
-   :address "It\u00e4inen Hangelbyntie 163",
-   :permitType "R",
-   :id "LP-753-2013-00005",
-   :municipality "753"
-   :authority {:id "777777777777777777000023"
-               :username "sonja"
-               :firstName "Sonja"
-               :lastName "Sibbo"
-               :role "authority"}
-     :linkPermitData [link-permit-data-lupapistetunnus]}))
+    {:schema-version 1,
+     :auth [{:lastName "Panaani",
+             :firstName "Pena",
+             :username "pena",
+             :type "owner",
+             :role "owner",
+             :id "777777777777777777000020"}],
+     :submitted 1384167310181,
+     :state "submitted",
+     :permitSubtype nil,
+     :location {:x 411063.82824707, :y 6685145.8129883},
+     :attachments [],
+     :organization "753-R",
+     :title "It\u00e4inen Hangelbyntie 163",
+     :operations [{:id "5280b764420622588b2f04fc",
+                   :name "jatkoaika",
+                   :created 1384167268234}],
+     :infoRequest false,
+     :openInfoRequest false,
+     :opened 1384167310181,
+     :created 1384167268234,
+     :propertyId "75340800010051",
+     :documents [{:created 1384167268234,
+                  :data {:kuvaus {:modified 1384167309006,
+                                  :value "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
+                  :id "5280b764420622588b2f04fd",
+                  :schema-info {:order 1,
+                                :version 1,
+                                :name "hankkeen-kuvaus-minimum",
+                                :approvable true,
+                                :op {:id "5280b764420622588b2f04fc",
+                                     :name "jatkoaika",
+                                     :created 1384167268234},
+                                :removable true}}
+                 hakija-henkilo],
+     :_software_version "1.0.5",
+     :modified 1384167309006,
+     :comments [],
+     :address "It\u00e4inen Hangelbyntie 163",
+     :permitType "R",
+     :id "LP-753-2013-00005",
+     :municipality "753"
+     :authority {:id "777777777777777777000023"
+                 :username "sonja"
+                 :firstName "Sonja"
+                 :lastName "Sibbo"
+                 :role "authority"}
+       :linkPermitData [link-permit-data-lupapistetunnus]}))
 
 (fl/facts* "Canonical model for jatkoaika is correct"
   (let [canonical (application-to-canonical jatkolupa-application "sv")]
@@ -1241,22 +1245,8 @@
      :_comments-seen-by {},
      :propertyId "75341900080007",
      :verdicts [],
-     :documents [{:created 1388660240013,
-                  :data
-                  {:_selected {:value "henkilo"},
-                   :henkilo
-                   {:henkilotiedot
-                    {:etunimi {:modified 1388660303335, :value "Pena"},
-                     :hetu {:modified
-                            1388660303335, :value "010203-0405"},
-                     :sukunimi {:modified 1388660303335, :value "Panaani"}},
-                    :osoite {:katu {:modified 1388660303335, :value "Paapankuja 12"},
-                                 :postinumero {:modified 1388660303335, :value "10203"},
-                             :postitoimipaikannimi {:modified 1388660303335, :value "Piippola"}},
-                    :userId {:modified 1388660303402, :value "777777777777777777000020"},
-                    :yhteystiedot {:email {:modified 1388660303335, :value "pena@example.com"},
-                                   :puhelin {:modified 1388660303335, :value "0102030405"}}}},
-                  :id "52c5461042065cf9f379de8d",
+     :documents [{:id "52c5461042065cf9f379de8d",
+                  :created 1388660240013,
                   :schema-info {:approvable true,
                                 :subtype "hakija",
                                 :name "hakija",
@@ -1264,19 +1254,31 @@
                                 :repeating true,
                                 :version 1,
                                 :type "party",
-                                :order 3}}
-                 {:created 1388660240013,
-                  :data {:kuvaus {:modified 1388667082757,
-                                  :value "Tarttis aloitta asp rakentaminen."}},
-                  :id "52c5461042065cf9f379de8c",
+                                :order 3}
+                  :data {:_selected {:value "henkilo"},
+                         :henkilo {:henkilotiedot {:etunimi {:modified 1388660303335, :value "Pena"},
+                                                   :hetu {:modified
+                                                          1388660303335, :value "010203-0405"},
+                                                   :sukunimi {:modified 1388660303335, :value "Panaani"}},
+                                   :osoite {:katu {:modified 1388660303335, :value "Paapankuja 12"},
+                                            :postinumero {:modified 1388660303335, :value "10203"},
+                                            :postitoimipaikannimi {:modified 1388660303335, :value "Piippola"}},
+                                   :userId {:modified 1388660303402, :value "777777777777777777000020"},
+                                   :yhteystiedot {:email {:modified 1388660303335, :value "pena@example.com"},
+                                                  :puhelin {:modified 1388660303335, :value "0102030405"}}}}}
+                 {:id "52c5461042065cf9f379de8c",
+                  :created 1388660240013,
                   :schema-info {:version 1,
                                 :name "aloitusoikeus",
                                 :approvable true,
                                 :op {:id "52c5461042065cf9f379de8b",
                                      :name "aloitusoikeus",
                                      :created 1388660240013},
-                                :removable false}}
+                                :removable false}
+                  :data {:kuvaus {:modified 1388667082757,
+                                  :value "Tarttis aloitta asp rakentaminen."}}}
                  {:id "52c5461042065cf9f379de8e",
+                  :created 1388660240013,
                   :schema-info {:approvable true,
                                 :name "maksaja",
                                 :removable true,
@@ -1284,7 +1286,6 @@
                                 :version 1,
                                 :type "party",
                                 :order 6},
-                  :created 1388660240013,
                   :data {}}],
      :_statements-seen-by {:777777777777777777000020 1388664440961},
      :_software_version "0",

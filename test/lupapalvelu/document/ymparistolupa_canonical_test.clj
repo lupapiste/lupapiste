@@ -15,14 +15,13 @@
                  :version 1
                  :removable true}
    :data {:kuvaus {:value "Hankkeen kuvauskentan sisalto" :modified 1392811539061}
-          :peruste {:value "Hankkeen peruste" :modified 1392811539061}}
-   })
+          :peruste {:value "Hankkeen peruste" :modified 1392811539061}}})
 
 (fact "Meta test: kuvaus" kuvaus => valid-against-current-schema?)
 
 (def application {:id "LP-638-2014-00001"
                   :attachments []
-                  :auth [{:lastName "Borga" :firstName "Pekka" :username "pekka" :type "owner" :role "owner" :id "777777777777777777000033"}]
+                  :auth [{:id "777777777777777777000033" :firstName "Pekka" :lastName "Borga" :username "pekka" :type "owner" :role "owner"}]
                   :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
