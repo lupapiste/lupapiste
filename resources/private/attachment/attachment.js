@@ -9,6 +9,7 @@ var attachment = (function() {
   var commentsModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
+  var signingModel = new LUPAPISTE.SigningModel();
 
   function deleteAttachmentFromServer() {
     ajax
@@ -107,7 +108,7 @@ var attachment = (function() {
     signatures:     ko.observableArray([]),
     type:           ko.observable(),
     attachmentType: ko.observable(),
-    allowedAttachmentTypes: ko.observableArray(),
+    allowedAttachmentTypes: ko.observableArray([]),
     previewDisabled: ko.observable(false),
 
     hasPreview: function() {
