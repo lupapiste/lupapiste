@@ -446,6 +446,7 @@
     $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
+    $("#signing-multi-dialog").applyBindings({signingModel: signingModel, authorization: authorizationModel});
     attachmentTemplatesModel.init();
   });
 
