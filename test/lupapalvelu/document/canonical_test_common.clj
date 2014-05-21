@@ -8,7 +8,7 @@
 ;; Document validator predicate
 ;;
 
-(defn validate-against-current-schema
+(defn- validate-against-current-schema
   "Validates document against the latest schema and returns list of errors."
   [document]
   (validate document (get-document-schema document)))
