@@ -1,4 +1,4 @@
-error.application-does-not-have-given-user: "Hakemukselle ei ole liitetty valittua käyttäjää"
+error.application-does-not-have-given-auth: Valittua käyttäjää ei ole valtuutettu hakemukselle
 login.with-rights: Kirjaudu oikeuksin
 organization.scope: Konfiguraatio
 admin.admin-password: Admin-salasana

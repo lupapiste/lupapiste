@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
-            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
@@ -10,9 +9,8 @@
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [sade.util :as util]
-            [sade.strings :refer :all]
-;            [lupapalvelu.domain :as domain]
-;            [lupapalvelu.user :refer [get-user-by-id] :as user]
+            [sade.strings :as ss]
+            [lupapalvelu.user :refer [get-user-by-id] :as user]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -73,7 +71,7 @@
 
 (defmethod validate-field :hetu [_ v]
   (cond
-    (blank? v) nil
+    (ss/blank? v) nil
     (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
     :else [:err "illegal-hetu"]))
 
@@ -82,12 +80,12 @@
 
 (defmethod validate-field :date [_ v]
   (try
-    (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
+    (or (ss/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
 (defmethod validate-field :time [_ v]
-  (when-not (s/blank? v)
+  (when-not (ss/blank? v)
     (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
       (let [h (util/->int (first matches))
             m (util/->int (second matches))]
@@ -97,7 +95,7 @@
 (defmethod validate-field :select [{:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
         accepted-values (if other-key (conj accepted-values "other") accepted-values)]
-    (when-not (or (s/blank? v) (contains? accepted-values v))
+    (when-not (or (ss/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
 ;; FIXME https://support.solita.fi/browse/LUPA-1453
@@ -107,25 +105,12 @@
 (defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
 (defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
 
-;; FIXME https://support.solita.fi/browse/LUPA-1454
-;; implement validator (mongo id, check that user exists)
+;;
+;; TODO: Improve validation functionality so that it could take application as a parameter.
+;;
 (defmethod validate-field :personSelector [elem v]
-
-  ;; Tanne ei tarvi tehda mitaan, koska tarkistukset on jo application.clj:n funktiossa "set-user-to-document"?
-
-;  (println "validate-field :personSelector, elem: " elem "\n")
-;  (println "validate-field :personSelector, v: " v "\n")
-;  (println "validate-field :personSelector, user: " (user/get-user-by-id v) "\n")
-
-  #_(let [has-auth? (first (domain/has-auth? app v))
-        user      (user/get-user-by-id v)]
-    (when-not (and user has-auth?)
-     [:warn "illegal-value:personSelector"]
-     )
-  )
-
-  nil
-  )
+  (when-not (and (not (ss/blank? v)) (user/get-user-by-id v) #_(domain/has-auth? application v))
+    [:err "application-does-not-have-given-auth"]))
 
 (defmethod validate-field nil [_ _]
   [:err "illegal-key"])
@@ -143,7 +128,7 @@
     (if (nil? ks)
       elem
       (if (:repeating elem)
-        (when (numeric? (name (first ks)))
+        (when (ss/numeric? (name (first ks)))
           (if (seq (rest ks))
             (find-by-name (:body elem) (rest ks))
             elem))
@@ -180,7 +165,7 @@
   (let [check (fn [{:keys [name required body repeating] :as element}]
                 (let [kw (keyword name)
                       current-path (conj path kw)
-                      validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
+                      validation-error (when (and required (ss/blank? (get-in data (conj current-path :value))))
                                          (->validation-result current-path element [:tip "illegal-value:required"]))
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
