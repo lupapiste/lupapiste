@@ -86,7 +86,7 @@
         updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
     (when-not schema (fail! :error.schema-not-found))
     (when-not subject (fail! :error.user-not-found))
-    (when-not (domain/has-auth? application user-id) (fail! :error.application-does-not-have-given-user))   ;; TODO: Onko tama ok taalla, eika "defmethod validate-field :personSelector":ssa?
+    (when-not (domain/has-auth? application user-id) (fail! :error.application-does-not-have-given-auth))
     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
     (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
   )
