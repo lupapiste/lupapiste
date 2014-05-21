@@ -10,39 +10,41 @@ LUPAPISTE.SigningModel = function() {
   self.errorMessage = ko.observable("");
 
   function normalizeAttachment(a) {
-    var versions = _(a.versions()).reverse().value(),
+    var versions = _(a.versions).reverse().value(),
         latestVersion = versions[0];
 
     return {
-      id:           a.id(),
-      type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
-      contentType:  latestVersion.contentType(),
-      filename:     latestVersion.filename(),
-      version:      { major: latestVersion.version.major(), minor: latestVersion.version.minor() },
-      size:         latestVersion.size(),
+      id:           a.id,
+      type:         { "type-group": a.type["type-group"], "type-id": a.type["type-id"] },
+      contentType:  latestVersion.contentType,
+      filename:     latestVersion.filename,
+      version:      { major: latestVersion.version.major, minor: latestVersion.version.minor },
+      size:         latestVersion.size,
       selected:     ko.observable(true)
     };
   }
 
   self.init = function(application) {
-    self.application = application;
+    var app = ko.toJS(application);
+    self.application = app;
     self.password("");
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
-    self.attachments(_(application.attachments()).filter(function(a) {return a.versions().length;}).map(normalizeAttachment).value());
+    self.attachments(_(app.attachments).filter(function(a) {return a.versions.length;}).map(normalizeAttachment).value());
     LUPAPISTE.ModalDialog.open("#dialog-sign-attachments");
   };
 
   self.sign = function() {
     self.errorMessage("");
-    var data = {id: self.application.id(), attachmentIds: _.map(self.selectedAttachments(), "id"), password: self.password()};
+    var id = self.application.id;
+    var data = {id: id, attachmentIds: _.map(self.selectedAttachments(), "id"), password: self.password()};
     ajax.command("sign-attachments", data)
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
         self.password("");
-        repository.load(self.application.id());
+        repository.load(id);
         // TODO notification?
         LUPAPISTE.ModalDialog.close();
       })
