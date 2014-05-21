@@ -18,7 +18,14 @@ var repository = (function() {
   }
 
   function calculateAttachmentStateIndicators(attachment) {
-
+    attachment.signed = false;
+    var versionsByApplicants = _(attachment.versions || []).filter(function(v) {return v.user.role === "applicant";}).value();
+    if (versionsByApplicants && versionsByApplicants.length) {
+      var lastVersionByApplicant = _.last(versionsByApplicants).version;
+      if (_.find(attachment.signatures || [], function(s) {return _.isEqual(lastVersionByApplicant, s.version);})) {
+        attachment.signed = true;
+      }
+    }
   }
 
   function load(id, pending) {
