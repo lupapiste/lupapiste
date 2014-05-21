@@ -8,6 +8,6 @@ signAttachment.verifyPassword: Vahvista allekirjoitus salasanallasi:
 signAttachment.sign: Allekirjoita valitut liitteet
 signAttachment.ok: Valitut liitteet allekirjoitettu onnistuneesti
 error.password: Salasana on väärin
-login.with-rights: Kirjaudu oikeuksin
-organization.scope: Konfiguraatio
-admin.admin-password: Admin-salasana
+
+
+hakija.henkilo.henkilotiedot.hetu.help: Syötä tähän kenttään henkilötunnus kokonaisuudessaan. Henkilötunnuksen kirjoittaja näkee henkilötunnuksen kokonaisuudessaan lisäämisen yhteydessä, mutta siitä eteenpäin käyttäjät näkevät Lupapisteessä tunnuksen loppuosan ****-merkkijonona.
