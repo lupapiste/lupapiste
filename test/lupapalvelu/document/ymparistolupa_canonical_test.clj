@@ -82,8 +82,8 @@
         hakijat (:hakija ymparistolupa) => seq
         luvat (get-in ymparistolupa [:voimassaOlevatLuvat :luvat :lupa]) => seq
 
-        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy
-        ]
+        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy]
+
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
@@ -149,9 +149,5 @@
         (:henkilotunnus maksaja) => "210354-947E"
         (:sahkopostiosoite maksaja) => "pappa@example.com"
         (:puhelinnumero maksaja) => "0400-123456"
-        (:laskuviite maksaja) => "1686343528523")
-
-      )
-
-     ;(clojure.pprint/pprint canonical)
-))
+        (:laskuviite maksaja) => "1686343528523"))
+    ))

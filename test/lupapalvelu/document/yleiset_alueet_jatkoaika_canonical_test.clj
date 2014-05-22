@@ -31,8 +31,8 @@
                            hankkeen-kuvaus-jatkoaika
                            tyoaika-jatkoaika])
 
-(def jatkoaika-application {:schema-version 1
-                            :id "LP-753-2013-00005"
+(def jatkoaika-application {:id "LP-753-2013-00005"
+                            :schema-version 1
                             :created 1386918874564
                             :opened 1386920752686
                             :modified 1386920727373

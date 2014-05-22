@@ -79,10 +79,12 @@
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(-> % :email (= (lower-case email))) (invites application))))
+  (first (filter #(= (lower-case email) (:email %)) (invites application))))
 
-(defn invited? [{invites :invites} email]
-  (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
+(defn invite-accepted-by-user [application user-id]
+  (and
+    (has-auth? application user-id)
+    (not-any? #(= user-id (-> % :user :id)) (invites application))))
 
 ;;
 ;; Verdict model

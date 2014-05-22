@@ -194,8 +194,8 @@
    :verified   true}
   [{:keys [created user application] :as command}]
   (let [email (-> email ss/lower-case ss/trim)]
-    (if (domain/invited? application email)
-      (fail :invite.already-invited)
+    (if (domain/invite application email)
+      (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
@@ -226,10 +226,14 @@
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
               :auth.$ (user/user-in-role user :writer)}})
-    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-      ; It's not possible to combine Mongo writes here,
-      ; because only the last $elemMatch counts.
-      (set-user-to-document application document (:id user) (:path my-invite) user created))))
+
+    ;; TODO: Hae paivitetty application ennen passamista "set-user-to-document":lle
+    (let [application (mongo/by-id :applications (:id application))]
+
+      (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
+       ; It's not possible to combine Mongo writes here,
+       ; because only the last $elemMatch counts.
+       (set-user-to-document application document (:id user) (:path my-invite) user created)))))
 
 (defn- do-remove-auth [command email]
   (update-application command

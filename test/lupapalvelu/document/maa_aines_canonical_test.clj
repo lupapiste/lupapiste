@@ -19,8 +19,17 @@
 
 (def application {:id "LP-638-2014-00001"
                   :attachments []
-                  :auth [{:lastName "Borga" :firstName "Pekka" :username "pekka" :type "owner" :role "owner" :id "777777777777777777000033"}]
-                  :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
+                  :auth [{:id "777777777777777777000033"
+                          :firstName "Pekka"
+                          :lastName "Borga"
+                          :username "pekka"
+                          :type "owner"
+                          :role "owner"}]
+                  :authority {:id "777777777777777777000033"
+                              :firstName "Pekka"
+                              :lastName "Borga"
+                              :role "authority"
+                              :username "pekka"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
                   :documents [maa-aineslupa-kuvaus
@@ -74,8 +83,7 @@
         varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
         lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
-        hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq
-        ]
+        hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq]
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
@@ -88,17 +96,14 @@
       (:asianKuvaus maa-aineslupa) => "Hankkeen synopsis")
 
     (fact "hakija"
-      (first (:hakija hakemus))
-      =>
-      {:yTunnus "1060155-5"
-       :yrityksenNimi "Yrtti Oy"
-       :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
-       :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
-                              :postitoimipaikannimi "kuuva",
-                              :postinumero "43640"}}
-       :puhelinnumero "060222155"
-       :sahkopostiosoite "tew@gjr.fi"})
-
+      (first (:hakija hakemus)) => {:yTunnus "1060155-5"
+                                    :yrityksenNimi "Yrtti Oy"
+                                    :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
+                                    :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+                                                           :postitoimipaikannimi "kuuva",
+                                                           :postinumero "43640"}}
+                                    :puhelinnumero "060222155"
+                                    :sahkopostiosoite "tew@gjr.fi"})
 
     (facts "maksaja"
       (let [maksaja (get-in maa-aineslupa [:maksajatieto :Maksaja]) => truthy
@@ -121,5 +126,4 @@
 
           (:osoitenimi osoite) => {:teksti "Londb\u00f6lentie 97"}
           (:piste sijainti) => {:Point {:pos "428195.77099609 6686701.3931274"}})))
-
     ))

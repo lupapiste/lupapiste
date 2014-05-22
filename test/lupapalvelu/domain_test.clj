@@ -31,10 +31,6 @@
     (fact "jabba@example.com has no invite" (invite app "jabba@example.com") => nil)))
 
 (facts
-  (fact (invited? {:invites [{:user {:username "mikko@example.com"}}]} "mikko@example.com") => true)
-  (fact (invited? {:invites []} "mikko@example.com") => false))
-
-(facts
   (let [owner   {:id 1 :role "owner"}
         writer1 {:id 2 :role "writer"}
         writer2 {:id 3 :role "writer"}

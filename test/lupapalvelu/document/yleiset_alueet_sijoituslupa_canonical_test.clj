@@ -46,7 +46,7 @@
                                :operations [operation],
                                :propertyId "75342300010054",
                                :documents documents,
-                               ; :neighbors neighbors,
+                               :neighbors [],
                                :municipality municipality,
                                :statements statements})
 
