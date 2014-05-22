@@ -18,7 +18,7 @@
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:auto"
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:20em"
                     data-test-id="do-sign-attachment">
               <span data-bind="ltext: 'attachment.signLatest'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
@@ -53,7 +53,7 @@
                 <tbody data-bind="foreach: attachments">
                   <tr>
                     <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
-                    <td><label data-bind="text: filename, attr: {for: 'sign' + id}"></label></td>
+                    <td><label data-bind="text: filename"></label></td>
                     <td>
                       <span data-bind="version: version"></span>
                     </td>
@@ -82,7 +82,7 @@
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:auto"
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:20em;"
                     data-test-id="do-sign-attachments">
               <span data-bind="ltext: 'signAttachment.sign'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>

@@ -478,14 +478,12 @@
   [options]
   {:pre [(map? (:application options))]}
   (let [file-id (mongo/create-id)
+        {:keys [filename content user]} options
         application-id (-> options :application :id)
-        filename (:filename options)
-        content (:content options)
-        user (:user options)
         sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)
         options (merge options {:file-id file-id
-                                :sanitazed-filename sanitazed-filename
+                                :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
     (update-or-create-attachment options)))
