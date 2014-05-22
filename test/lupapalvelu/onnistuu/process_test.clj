@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [cheshire.core :as json]
+            [lupapalvelu.onnistuu.crypt :as c]
             [lupapalvelu.onnistuu.process :refer :all]))
 
 ;
@@ -34,3 +35,28 @@
   (validate-process-update! nil ..irrelevant..) => (throws not-found?)
   (validate-process-update! {:status "created"} :start) => truthy
   (validate-process-update! {:status "created"} :document) => (throws bad-request?))
+
+;
+; Jump data:
+;
+
+(testable-privates lupapalvelu.onnistuu.process jump-data)
+
+(facts jump-data
+  (let [crypto-iv  (byte-array (map byte (range 32)))
+        crypto-key (-> (byte-array (map byte (range 32)))
+                       c/base64-encode
+                       bytes->str)]
+    (jump-data {:process       {:stamp "process-stamp"
+                                :company {:y "company-y"}}
+               :success-url   "success-url"
+               :document-url  "document-url"
+               :crypto-iv     crypto-iv
+               :crypto-key    crypto-key
+               :customer-id   "customer-id"
+               :post-to       "target-url"})
+    => (contains {:data       string?
+                  :iv         string?
+                  :customer   "customer-id"
+                  :post-to    "target-url"})))
+
