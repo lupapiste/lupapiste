@@ -42,20 +42,22 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   self.sign = function() {
     self.errorMessage("");
     var id = self.application.id;
-    var data = {id: id, attachmentIds: _.map(self.selectedAttachments(), "id"), password: self.password()};
-    ajax.command("sign-attachments", data)
-      .processing(self.processing)
-      .pending(self.pending)
-      .success(function() {
-        self.password("");
-        repository.load(id);
-        LUPAPISTE.ModalDialog.close();
-        if (self.confirmSuccess) {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));
-        }
-      })
-      .error(function(e) {self.errorMessage(e.text);})
-      .call();
+    var attachmentIds = _.map(self.selectedAttachments(), "id");
+    if (attachmentIds && attachmentIds.length) {
+      ajax.command("sign-attachments", {id: id, attachmentIds: attachmentIds, password: self.password()})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function() {
+          self.password("");
+          repository.load(id);
+          LUPAPISTE.ModalDialog.close();
+          if (self.confirmSuccess) {
+            LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));
+          }
+        })
+        .error(function(e) {self.errorMessage(e.text);})
+        .call();
+    }
   };
 
   function selectAllAttachments(value) {
