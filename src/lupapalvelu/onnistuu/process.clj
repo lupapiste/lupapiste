@@ -11,6 +11,8 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.onnistuu.crypt :as c]))
 
+(set! *warn-on-reflection* true)
+
 ;;
 ;; Onnistuu.fi integration: Process handling
 ;;
@@ -21,9 +23,6 @@
 
 ; Encode Java arrays to JSON just like any sequence.
 (cheshire/add-encoder (Class/forName "[B") cheshire/encode-seq)
-
-; Give processes 1h to finish:
-
 
 ;
 ; Process FSM:
@@ -52,11 +51,15 @@
 (defn find-sign-process! [id]
   (or (find-sign-process id) (fail! :not-found)))
 
-(defn- process-update! [process status ts & user-id]
+(defn- validate-process-update! [process status]
   (if-not process
     (fail! :not-found))
   (if-not (-> process :status keyword process-state status)
     (fail! :bad-request))
+  process)
+
+(defn- process-update! [process status ts & user-id]
+  (validate-process-update! process status)
   (mongo/update :sign-processes
                 {:_id (:id process)}
                 {$set  {:status status}
@@ -88,7 +91,6 @@
 ;
 
 (defn- jump-data [{:keys [process success-url document-url crypto-iv crypto-key customer-id post-to]}]
-  (println [process success-url document-url crypto-iv crypto-key customer-id post-to])
   (assert (and process success-url document-url crypto-iv crypto-key customer-id post-to))
   {:data      (->> {:stamp           (-> process :stamp)
                     :return_success  success-url
@@ -96,13 +98,13 @@
                     :requirements    [{:type       :company
                                        :identifier (-> process :company :y)}]}
                    (json/encode)
-                   (.getBytes)
-                   (c/encrypt (-> crypto-key (.getBytes) (c/base64-decode)) crypto-iv)
+                   (str->bytes)
+                   (c/encrypt (-> crypto-key (str->bytes) (c/base64-decode)) crypto-iv)
                    (c/base64-encode)
-                   (String.))
+                   (bytes->str))
    :iv        (-> crypto-iv
                   (c/base64-encode)
-                  (String.))
+                  (bytes->str))
    :customer  customer-id
    :post-to   post-to})
 
@@ -136,13 +138,13 @@
 (defn success [id data iv ts]
   (let [process (find-sign-process! id)
         data    (->> data
-                     (.getBytes)
+                     (str->bytes)
                      (c/base64-decode)
                      (c/decrypt (-> (:crypto-key config)
-                                    (.getBytes)
+                                    (str->bytes)
                                     (c/base64-decode))
                                 (-> iv
-                                    (.getBytes)
+                                    (str->bytes)
                                     (c/base64-decode)))
                      (json/decode)
                      (walk/keywordize-keys))]
