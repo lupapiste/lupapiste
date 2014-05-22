@@ -10,5 +10,8 @@
             [monger.gridfs :as gfs]
             [monger.command :refer [server-status]]))
 
+(defn disable-anti-csrf []
+  (env/enable-feature! :disable-anti-csrf))
+
 (def go server/-main)
-(println "Ready")
+(println "Ready! To start Lupapiste server eval (go)")
