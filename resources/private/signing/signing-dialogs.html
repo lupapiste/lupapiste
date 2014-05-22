@@ -12,13 +12,13 @@
             <p data-bind="ltext: 'signAttachment.description'"></p>
 
             <label for="signSingleAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
-            <input id="signSingleAttachmentPassword" data-test-id="signSingleAttachmentPassword" type="password" data-bind="value: password" class="form-input text ">
+            <input id="signSingleAttachmentPassword" data-test-id="signSingleAttachmentPassword" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input text ">
 
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments'), disable: processing" class="btn btn-primary btn-dialog" style="width:auto"
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:auto"
                     data-test-id="do-sign-attachment">
               <span data-bind="ltext: 'attachment.signLatest'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
@@ -76,13 +76,13 @@
             </div>
 
             <label for="signAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
-            <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="value: password" class="form-input text ">
+            <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input text ">
 
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments'), disable: processing" class="btn btn-primary btn-dialog" style="width:auto"
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:auto"
                     data-test-id="do-sign-attachments">
               <span data-bind="ltext: 'signAttachment.sign'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
