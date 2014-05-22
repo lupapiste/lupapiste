@@ -407,6 +407,7 @@
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
    :feature :attachmentsignature
+   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
    :roles [:applicant]}
   [{application :application u :user :as command}]
   (if (user/get-user-with-password (:username u) password)
