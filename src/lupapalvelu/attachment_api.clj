@@ -413,15 +413,18 @@
   (if (user/get-user-with-password (:username u) password)
     (let [attachments (a/get-attachments-infos application attachmentIds)
           signature {:user (user/summary u)
-                     :created (:created command)}]
+                     :created (:created command)}
+          updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
+                            (merge m (a/create-update-statements
+                                       (:attachments application)
+                                       #(= (:id %) attachment-id)
+                                       :signatures (assoc signature :version version))))
+                    {} attachments)]
 
-      ; $-operator matches only one item in an array, so this doseq is required.
-      ; Command is not transactional, so yes, I know this is bad.
-      (doseq [{attachment-id :id {version :version} :latestVersion} attachments]
-        (update-application
-          command
-          {:attachments {$elemMatch {:id attachment-id}}}
-          {$push {:attachments.$.signatures (assoc signature :version version)}})))
+      ; Indexes are calculated on the fly so there is a small change of
+      ; a concurrency issue.
+      ; FIXME should implement optimistic locking
+      (update-application command {$push updates}))
     (do
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)
