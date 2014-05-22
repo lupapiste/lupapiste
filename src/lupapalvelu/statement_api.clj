@@ -68,7 +68,7 @@
 (defcommand request-for-statement
   {:parameters  [id personIds]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed]
+   :states      [:draft :open :submitted :complement-needed]
    :notified    true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
@@ -95,7 +95,7 @@
 
 (defcommand delete-statement
   {:parameters [id statementId]
-   :states     [:draft :info :open :submitted :complement-needed]
+   :states     [:draft :open :submitted :complement-needed]
    :roles      [:authority]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
@@ -104,7 +104,7 @@
   {:parameters  [id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
-   :states      [:draft :info :open :submitted :complement-needed]
+   :states      [:draft :open :submitted :complement-needed]
    :roles       [:authority]
    :extra-auth-roles [:statementGiver]
    :notified    true

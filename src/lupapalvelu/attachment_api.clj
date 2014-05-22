@@ -155,7 +155,7 @@
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
    :extra-auth-roles [:statementGiver]
-   :states      [:draft :info :open :submitted :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))

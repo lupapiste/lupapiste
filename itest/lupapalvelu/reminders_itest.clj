@@ -459,7 +459,7 @@
    (fact "the \"reminder-sent\" timestamp already exists"
      (update-application
        (application->command reminder-application)
-       {:statements {$elemMatch {:id (-> statement-matching :id)}}}
+       {:statements {$elemMatch {:id (:id statement-matching)}}}
        {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
 
      (batchrun/statement-request-reminder)

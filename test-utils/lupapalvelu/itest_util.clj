@@ -286,9 +286,8 @@
 ;; Stuffin' data in
 ;;
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed]
-  (let [filename    "dev-resources/test-attachment.txt"
-        uploadfile  (io/file filename)
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename] :or {filename "dev-resources/test-attachment.txt"}}]
+  (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
@@ -339,7 +338,7 @@
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
-    (upload-attachment pena (:id application) attachment true)))
+    (upload-attachment apikey (:id application) attachment true)))
 
 
 (defn generate-documents [application apikey]

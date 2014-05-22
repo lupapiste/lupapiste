@@ -36,6 +36,17 @@
 (defn create-id []
   (str (ObjectId.)))
 
+; http://docs.mongodb.org/manual/reference/limits/#Restrictions-on-Field-Names
+(def key-pattern #"^[^\.\$\u0000]+$")
+
+(defn valid-key? [k]
+  (if k
+    (if (instance? ObjectId k)
+      true
+      (let [key (name k)]
+        (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
+    false))
+
 ;;
 ;; Database Api
 ;;
@@ -71,8 +82,8 @@
 (defn by-id
   ([collection id]
     (with-id (mc/find-one-as-map collection {:_id id})))
-  ([collection id fields]
-    (with-id (mc/find-one-as-map collection {:_id id} fields))))
+  ([collection id projection]
+    (with-id (mc/find-one-as-map collection {:_id id} projection))))
 
 (defn select
   "returns multiple entries by matching the monger query"

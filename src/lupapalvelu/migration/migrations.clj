@@ -407,3 +407,35 @@
   (doseq [collection [:applications :submitted-applications]]
     (let [applications (mongo/select collection)]
       (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications)))))
+
+(defmigration remove-sijoituksen-and-tyon-tarkoitus
+  (doseq [collection [:applications :submitted-applications]]
+    (let [applications-to-update (mongo/select collection {:documents {$elemMatch {$or [{:schema-info.name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"}
+                                                                                        {:schema-info.name "sijoituslupa-sijoituksen-tarkoitus"}]}}})]
+      (doseq [application applications-to-update]
+        (let [new-documents (map
+                              #(if (= "yleiset-alueet-hankkeen-kuvaus-kaivulupa" (-> % :schema-info :name))
+                                 (update-in % [:data] dissoc :sijoituksen-tarkoitus)
+                                 %)
+                              (:documents application))
+              new-documents (remove #(= "sijoituslupa-sijoituksen-tarkoitus" (-> % :schema-info :name)) new-documents)]
+          (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
+
+
+(defmigration move-operations-flags-into-their-scope
+  {:apply-when (pos? (mongo/count :organizations {:new-application-enabled {$exists true}}))}
+  ;; Let's expect all (un-migrated) organizations to have the "new-application-enabled" flag.
+ (doseq [organization (mongo/select :organizations {:new-application-enabled {$exists true}})]
+   (let [new-scopes (map
+                      #(merge % {:inforequest-enabled     (or (:inforequest-enabled organization) false)
+                                 :new-application-enabled (or (:new-application-enabled organization) false)
+                                 :open-inforequest        (or (:open-inforequest organization) false)
+                                 :open-inforequest-email  (:open-inforequest-email organization)})
+                      (:scope organization))]
+     (mongo/update-by-id :organizations (:id organization)
+      {$unset {:inforequest-enabled ""
+               :new-application-enabled ""
+               :open-inforequest ""
+               :open-inforequest-email ""}
+       $set {:scope new-scopes}}))))
+

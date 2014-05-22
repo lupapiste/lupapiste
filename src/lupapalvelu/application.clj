@@ -258,7 +258,7 @@
   (when (string? target)
     (fail :error.unknown-type)))
 
-(defcommand can-target-comment-to-authority
+(defquery can-target-comment-to-authority
   {:roles [:authority]
    :pre-checks  [not-open-inforequest-user-validator]
    :description "Dummy command for UI logic"})
@@ -454,7 +454,7 @@
 (defcommand submit-application
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open]
+   :states     [:draft :open]
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [validate-owner-or-writer]}
@@ -473,7 +473,7 @@
 (defcommand save-application-drawings
   {:parameters [:id drawings]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :submitted :complement-needed]}
+   :states     [:draft :info :answered :open :submitted :complement-needed]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (update-application command
@@ -504,7 +504,7 @@
 (defquery inforequest-markers
   {:parameters [id lang x y]
    :roles      [:authority]
-   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :states     [:info :answered]
    :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
   (let [x (util/->double x)
@@ -607,18 +607,18 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope organization municipality permit-type)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest organization))]
-
+        open-inforequest? (and info-request? (:open-inforequest scope))]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
-      (when-not (:inforequest-enabled organization)
+      (when-not (:inforequest-enabled scope)
         (fail! :error.inforequests-disabled))
-      (when-not (:new-application-enabled organization)
+      (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
 
     (let [id            (make-application-id municipality)
@@ -671,8 +671,9 @@
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope organization municipality permit-type)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest organization))
+        open-inforequest? (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
       (insert-application created-application)
@@ -704,19 +705,6 @@
                                  $pushAll {:documents new-docs
                                            :attachments (make-attachments created op (:organization application) (:state application))}
                                  $set {:modified created}})))
-
-(defn- link-permit-required? [_ application]
-  (when (nil? (some
-                (fn [{op-name :name}]
-                  (:link-permit-required ((keyword op-name) operations/operations)))
-                (:operations application)))
-    (fail :error.link-permit-not-required)))
-
-(defcommand link-permit-required
-  {:parameters [id]
-   :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]
-   :pre-checks [link-permit-required?]})
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
@@ -754,6 +742,15 @@
 ;; Link permits
 ;;
 
+(defquery link-permit-required
+  {:description "Dummy command for UI logic: returns falsey if link permit is not required."
+   :parameters [:id]
+   :roles      [:applicant :authority]
+   :states     [:draft :open :submitted :complement-needed]
+   :pre-checks [(fn [_ application]
+                  (when-not (is-link-permit-required application)
+                    (fail :error.link-permit-not-required)))]})
+
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :verified   true
@@ -761,7 +758,8 @@
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$in ["verdictGiven" "constructionStarted"]}
+                                                              :state {$nin ["draft"]}
+                                                              :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
@@ -774,8 +772,7 @@
                            results)
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
-        without-same-property-id (sort-by :text
-                                   (vec (filter (comp not same-property-id-fn) enriched-results)))
+        without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
         final-results (map #(select-keys % [:id :text]) organized-results)]
     (ok :app-links final-results)))
@@ -785,19 +782,21 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defn- do-add-link-permit [application linkPermitId]
-  (let [id (:id application)
-        db-id (make-mongo-id-for-link-permit id linkPermitId)]
+
+(defn- do-add-link-permit [{:keys [id propertyId operations]} link-permit-id]
+  {:pre [(mongo/valid-key? link-permit-id)
+         (not= id link-permit-id)]}
+  (let [db-id (make-mongo-id-for-link-permit id link-permit-id)]
     (mongo/update-by-id :app-links db-id
-      {:_id db-id
-       :link [id linkPermitId]
-       (keyword id) {:type "application"
-                     :apptype (-> application :operations first :name)
-                     :propertyId (:propertyId application)}
-       (keyword linkPermitId) {:type "linkpermit"
-                               :linkpermittype (if (>= (.indexOf linkPermitId "LP-") 0)
-                                                 "lupapistetunnus"
-                                                 "kuntalupatunnus")}}
+      {:_id  db-id
+       :link [id link-permit-id]
+       id    {:type "application"
+              :apptype (:name (first operations))
+              :propertyId propertyId}
+       link-permit-id {:type "linkpermit"
+                       :linkpermittype (if (.startsWith link-permit-id "LP-")
+                                         "lupapistetunnus"
+                                         "kuntalupatunnus")}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
@@ -809,16 +808,17 @@
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]
+   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :pre-checks [validate-jatkolupa-zero-link-permits]
-   :input-validators [(partial action/non-blank-parameters [:linkPermitId])]}
+   :input-validators [(partial action/non-blank-parameters [:linkPermitId])
+                      (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
   [{application :application}]
-  (do-add-link-permit application linkPermitId))
+  (do-add-link-permit application (ss/trim linkPermitId)))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application}]
   (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
     (ok)
@@ -988,15 +988,16 @@
     (ok :integrationAvailable ftp-user?)))
 
 
-(defn- validate-new-applications-enabled [command {:keys [organization]}]
-  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
-    (when-not (= (:new-application-enabled org) true)
+(defn- validate-new-applications-enabled [command {:keys [permitType municipality]}]
+  (let [org   (organization/resolve-organization municipality permitType)
+        scope (organization/resolve-organization-scope org municipality permitType)]
+    (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
 (defcommand convert-to-application
   {:parameters [id]
    :roles      [:applicant]
-   :states     [:draft :info :answered]
+   :states     [:info :answered]
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))]
@@ -1164,20 +1165,3 @@
    :verified true}
   [{user :user}]
   (ok :data (search/applications-for-user user params)))
-
-;;
-;; Query that returns number of applications or info-requests user has:
-;;
-
-(defquery applications-count
-  {:parameters [kind]
-   :authenticated true
-   :verified true}
-  [{:keys [user]}]
-  (let [base-query (domain/application-query-for user)
-        query (condp = kind
-                "inforequests" (assoc base-query :infoRequest true)
-                "applications" (assoc base-query :infoRequest false)
-                "both"         base-query
-                {:_id -1})]
-    (ok :data (mongo/count :applications query))))
