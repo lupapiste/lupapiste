@@ -365,12 +365,12 @@
     {:id "LP-753-2013-00001"
      :permitType "R"
      :municipality municipality
-     :auth [{:id "777777777777777777000020"}]
+     :auth [{:id "777777777777777777000020"
              :firstName "Pena"
              :lastName "Panaani"
              :username "pena"
              :type "owner"
-             :role "owner"
+             :role "owner"}]
      :state "open"
      :opened 1354532324658
      :location {:x 408048, :y 6693225},
