@@ -287,8 +287,6 @@
 ;; Change and reset password:
 ;;
 
-;; TODO: Remove this, change all password changes to use 'reset-password'.
-;; Note: When this is removed, remove user/change-password too.
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
    :authenticated true
@@ -302,6 +300,8 @@
         (ok))
       (do
         (warn "Password change: failed: old password does not match, user-id:" user-id)
+        ; Throttle giving information about incorrect password
+        (Thread/sleep 2000)
         (fail :mypage.old-password-does-not-match)))))
 
 (defcommand reset-password
