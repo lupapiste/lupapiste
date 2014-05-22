@@ -126,7 +126,7 @@
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
-    (when-not (apply env/feature? feature)
+    (when-not (env/feature? feature)
       (fail :error.missing-feature))))
 
 (defn invalid-type [{type :type :as command}]
