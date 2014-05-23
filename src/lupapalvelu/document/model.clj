@@ -134,18 +134,23 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- ->validation-result [path element result]
+(defn- ->validation-result [data path element result]
   (when result
-    {:path    (vec (map keyword path))
-     :element element
-     :result  result}))
+    (let [result {:data    data
+                  :path    (vec (map keyword path))
+                  :element element
+                  :result  result}]
+      ; Return results without :data.
+      ; Data is handy when hacking in REPL, though.
+      ; See also mongo_scripts/prod/hetu-cleanup.js.
+      (dissoc result :data))))
 
 (defn- validate-fields [application schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
             result  (validate-field application element (:value data))]
-        (->validation-result current-path element result))
+        (->validation-result data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
@@ -166,7 +171,7 @@
                 (let [kw (keyword name)
                       current-path (conj path kw)
                       validation-error (when (and required (ss/blank? (get-in data (conj current-path :value))))
-                                         (->validation-result current-path element [:tip "illegal-value:required"]))
+                                         (->validation-result nil current-path element [:tip "illegal-value:required"]))
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
                     (if body
