@@ -1,0 +1,3 @@
+application.createChangePermit.areyousure.title: Tarvitsetko varmasti muutosluvan?
+application.createChangePermit.areyousure.message: Erillistä muutoslupahakemusta ei tarvita vähäisten rakentamisen aikaisten muutosten yhteydessä. Muistathan aina tarkistaa viranomaiselta, onko uusi hakemus tarpeellinen vai riittääkö muutospiirustusten toimittaminen.
+application.createChangePermit.areyousure.ok: Hae muutoslupaa
