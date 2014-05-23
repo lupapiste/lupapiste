@@ -105,9 +105,6 @@
 (defmethod validate-field :buildingSelector [_ elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
-;;
-;; TODO: Improve validation functionality so that it could take application as a parameter.
-;;
 (defmethod validate-field :personSelector [application elem v]
   (when-not (and (not (ss/blank? v)) (domain/invite-accepted-by-user application v))
     [:err "application-does-not-have-given-auth"]))
