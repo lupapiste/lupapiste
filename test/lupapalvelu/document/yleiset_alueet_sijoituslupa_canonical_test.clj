@@ -3,6 +3,7 @@
             [lupapalvelu.factlet :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
@@ -28,16 +29,23 @@
                            maksaja
                            hankkeen-kuvaus-sijoituslupa])
 
+
 (def sijoituslupa-application {:schema-version 1,
                                :id "LP-753-2013-00003",
                                :created 1379592634015,
                                :opened 1379592902883,
                                :modified 1379592969636,
                                :submitted 1379592916811,
+                               :auth [{:lastName "Panaani"
+                                       :firstName "Pena"
+                                       :username "pena"
+                                       :type "owner"
+                                       :role "owner"
+                                       :id "777777777777777777000020"}]
+                               :authority sonja,
                                :permitType "YA",
                                :organization "753-YA",
                                :infoRequest false,
-                               :authority sonja,
                                :state "submitted",
                                :title "Hirvim\u00e4entie 112",
                                :address "Hirvim\u00e4entie 112",
@@ -49,6 +57,8 @@
                                :neighbors [],
                                :municipality municipality,
                                :statements statements})
+
+;(ctc/validate-all-documents sijoituslupa-application)
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical get-yritys-and-henkilo get-hakija)
 
@@ -238,12 +248,18 @@
                           :neighbors []
                           :schema-version 1
                           :authority {}
-                          :auth [{:lastName "Sibbo"
-                                  :firstName "Sonja"
-                                  :username "sonja"
+                          :auth [{:id "777777777777777777000020"
+                                  :firstName "Pena"
+                                  :lastName "Panaani"
+                                  :username "pena"
                                   :type "owner"
-                                  :role "owner"
-                                  :id "777777777777777777000023"}]
+                                  :role "owner"}
+                                 {:id "777777777777777777000023"
+                                  :firstName "Sonja"
+                                  :lastName "Sibbo"
+                                  :username "sonja"
+                                  :role "statementGiver"
+                                  :statementId "537c655dbc45cf55abf434a6"}]
                           :drawings []
                           :submitted 1398343047691
                           :state :closed
@@ -321,3 +337,6 @@
                           :permitType "YA"
                           :id "LP-753-2014-00005"
                           :municipality "753"})
+
+(ctc/validate-all-documents valmistumisilmoitus)
+

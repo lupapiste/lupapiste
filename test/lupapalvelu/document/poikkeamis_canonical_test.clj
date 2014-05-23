@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.poikkeamis-canonical-test
   (:require [lupapalvelu.factlet :as fl]
-            [lupapalvelu.document.canonical-test-common :refer :all]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.poikkeamis-canonical :refer :all]
             [lupapalvelu.document.poikkeamis-schemas :refer :all]
             [lupapalvelu.document.tools :as tools]
@@ -219,48 +219,47 @@
                                         suunnittelija
                                         lisaosa])
 
-(fact "Meta test: hakija"          hakija           => valid-against-current-schema?)
-(fact "Meta test: uusi"            uusi             => valid-against-current-schema?)
-(fact "Meta test: maksaja"         maksaja          => valid-against-current-schema?)
-(fact "Meta test: rakennusapikka"  rakennuspaikka   => valid-against-current-schema?)
-(fact "Meta test: paasunnitelija"  paasuunnittelija => valid-against-current-schema?)
-(fact "Meta test: suunnittelija"   suunnittelija    => valid-against-current-schema?)
-(fact "Meta test: lisaosa"         lisaosa          => valid-against-current-schema?)
-(fact "Meta test: laajennus"       laajennus        => valid-against-current-schema?)
-
-
 (def poikkari-hakemus
-  (tools/unwrapped
-    {:schema-version 1
-     :submitted 1379422973832
-     :state "submitted"
-     :location {:x 404174.92749023
-                :y 6690687.4923706}
-     :attachments []
-     :statements statements
-     :organization "753-P"
-     :title "S\u00f6derkullantie 146"
-     :operations [{:id "523844e1da063788effc1c56"
-                   :name "poikkeamis"
-                   :created 1379419361123}]
-     :infoRequest false
-     :opened 1379422973832
-     :created 1379419361123
-     :propertyId "75342700020063"
-     :documents documents
-     :_statements-seen-by {:777777777777777777000023 1379423134104}
-     :_software_version "1.0.5"
-     :modified 1379423133065
-     :address "S\u00f6derkullantie 146"
-     :permitType "P"
-     :permitSubtype "poikkeamislupa"
-     :id "LP-753-2013-00001"
-     :municipality "753"
-     :neighbors neighbors}))
+  {:schema-version 1
+   :submitted 1379422973832
+   :state "submitted"
+   :auth [{:lastName "Panaani",
+           :firstName "Pena",
+           :username "pena",
+           :type "owner",
+           :role "owner",
+           :id "777777777777777777000020"}]
+   :location {:x 404174.92749023
+              :y 6690687.4923706}
+   :attachments []
+   :statements ctc/statements
+   :organization "753-P"
+   :title "S\u00f6derkullantie 146"
+   :operations [{:id "523844e1da063788effc1c56"
+                 :name "poikkeamis"
+                 :created 1379419361123}]
+   :infoRequest false
+   :opened 1379422973832
+   :created 1379419361123
+   :propertyId "75342700020063"
+   :documents documents
+   :_statements-seen-by {:777777777777777777000023 1379423134104}
+   :_software_version "1.0.5"
+   :modified 1379423133065
+   :address "S\u00f6derkullantie 146"
+   :permitType "P"
+   :permitSubtype "poikkeamislupa"
+   :id "LP-753-2013-00001"
+   :municipality "753"
+   :neighbors ctc/neighbors})
+
+(ctc/validate-all-documents poikkari-hakemus)
+
 
 (def suunnitelutarveratkaisu (assoc poikkari-hakemus :permitSubtype "suunnittelutarveratkaisu"))
 
-(validate-all-documents documents)
+(ctc/validate-all-documents suunnitelutarveratkaisu)
+
 
 (testable-privates lupapalvelu.document.poikkeamis-canonical get-toimenpiteet)
 

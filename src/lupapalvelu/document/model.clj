@@ -10,7 +10,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.user :refer [get-user-by-id] :as user]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -32,12 +32,12 @@
 ;; Field validation
 ;;
 
-(defmulti validate-field (fn [elem _] (keyword (:type elem))))
+(defmulti validate-field (fn [_ elem _] (keyword (:type elem))))
 
-(defmethod validate-field :group [_ v]
+(defmethod validate-field :group [_ _ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
-(defmethod validate-field :string [{:keys [max-len min-len] :as elem} v]
+(defmethod validate-field :string [_ {:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
@@ -45,7 +45,7 @@
     (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
 
-(defmethod validate-field :text [elem v]
+(defmethod validate-field :text [_ elem v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
@@ -69,22 +69,22 @@
         old-checksum (subs hetu 10 11)]
     (when (not= checksum old-checksum) [:err "illegal-hetu"])))
 
-(defmethod validate-field :hetu [_ v]
+(defmethod validate-field :hetu [_ _ v]
   (cond
     (ss/blank? v) nil
     (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
     :else [:err "illegal-hetu"]))
 
-(defmethod validate-field :checkbox [_ v]
+(defmethod validate-field :checkbox [_ _ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate-field :date [_ v]
+(defmethod validate-field :date [_ _ v]
   (try
     (or (ss/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
-(defmethod validate-field :time [_ v]
+(defmethod validate-field :time [_ _ v]
   (when-not (ss/blank? v)
     (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
       (let [h (util/->int (first matches))
@@ -92,7 +92,7 @@
         (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))
       [:warn "illegal-value:time"])))
 
-(defmethod validate-field :select [{:keys [body other-key]} v]
+(defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
         accepted-values (if other-key (conj accepted-values "other") accepted-values)]
     (when-not (or (ss/blank? v) (contains? accepted-values v))
@@ -100,22 +100,22 @@
 
 ;; FIXME https://support.solita.fi/browse/LUPA-1453
 ;; implement validator, the same as :select?
-(defmethod validate-field :radioGroup [elem v] nil)
+(defmethod validate-field :radioGroup [_ elem v] nil)
 
-(defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
-(defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
+(defmethod validate-field :buildingSelector [_ elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
 ;;
 ;; TODO: Improve validation functionality so that it could take application as a parameter.
 ;;
-(defmethod validate-field :personSelector [elem v]
-  (when-not (and (not (ss/blank? v)) (user/get-user-by-id v) #_(domain/has-auth? application v))
+(defmethod validate-field :personSelector [application elem v]
+  (when-not (and (not (ss/blank? v)) (domain/invite-accepted-by-user application v))
     [:err "application-does-not-have-given-auth"]))
 
-(defmethod validate-field nil [_ _]
+(defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
 
-(defmethod validate-field :default [elem _]
+(defmethod validate-field :default [_ elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
 
@@ -140,16 +140,16 @@
      :element element
      :result  result}))
 
-(defn- validate-fields [schema-body k data path]
+(defn- validate-fields [application schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
-            result  (validate-field element (:value data))]
+            result  (validate-field application element (:value data))]
         (->validation-result current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
-               (validate-fields schema-body k2 v2 current-path)) data)))))
+               (validate-fields application schema-body k2 v2 current-path)) data)))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -188,16 +188,16 @@
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
    If schema is not given, uses schema defined in document."
-  ([document]
-    (validate document nil))
-  ([document schema]
+  ([application document]
+    (validate application document nil))
+  ([application document schema]
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           schema-body (:body schema)]
       (when data
         (flatten
           (concat
-            (validate-fields schema-body nil data [])
+            (validate-fields application schema-body nil data [])
             (validate-required-fields schema-body [] data [])
             (validator/validate document)))))))
 

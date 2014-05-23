@@ -3,7 +3,7 @@
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as yic]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.factlet :as fl]
-            [lupapalvelu.document.canonical-test-common :refer :all]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.ymparisto-schemas]))
 
 (def ^:private kesto {:id "52ef4ef14206428d3c0394b7"
@@ -15,8 +15,6 @@
                                 :arki {:arkiAlkuAika "7:00", :arkiLoppuAika "21:30:00"}
                                 :lauantai {:lauantaiAlkuAika "8:00", :lauantaiLoppuAika "20:00:00.0"}
                                 :sunnuntai {:sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}}})})
-
-(fact "Meta test: kesto" kesto => valid-against-current-schema?)
 
 (def ^:private meluilmo
   {:id "52ef4ef14206428d3c0394b5"
@@ -33,8 +31,6 @@
           :tapahtuma {:kuvaus {:value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"}
                       :nimi {:value "Louhijouden saunailta"}
                       :ulkoilmakonsertti {:value true}}}})
-
-(fact "Meta test: meluilmo" meluilmo => valid-against-current-schema?)
 
 (def meluilmoitus-application {:sent nil,
                                :neighbors [],
@@ -58,7 +54,7 @@
                                :_verdicts-seen-by {},
                                :location {:x 428195.77099609, :y 6686701.3931274},
                                :attachments [],
-                               :statements statements,
+                               :statements ctc/statements,
                                :organization "638-R",
                                :buildings [],
                                :title "Londb\u00f6lentie 97",
@@ -74,7 +70,7 @@
                                :_comments-seen-by {},
                                :propertyId "63844900010004",
                                :verdicts [],
-                               :documents [henkilohakija
+                               :documents [ctc/henkilohakija
                                            meluilmo
                                            kesto],
                                :_statements-seen-by {},
@@ -84,6 +80,8 @@
                                :permitType "YI",
                                :id "LP-638-2014-00001",
                                :municipality "638"})
+
+(ctc/validate-all-documents meluilmoitus-application)
 
 (def meluilmoitus-yritys-application {:sent nil,
                                :neighbors [],
@@ -107,7 +105,7 @@
                                :_verdicts-seen-by {},
                                :location {:x 428195.77099609, :y 6686701.3931274},
                                :attachments [],
-                               :statements statements,
+                               :statements ctc/statements,
                                :organization "638-R",
                                :buildings [],
                                :title "Londb\u00f6lentie 97",
@@ -123,7 +121,7 @@
                                :_comments-seen-by {},
                                :propertyId "63844900010004",
                                :verdicts [],
-                               :documents [yrityshakija
+                               :documents [ctc/yrityshakija
                                            meluilmo
                                            kesto],
                                :_statements-seen-by {},
@@ -134,8 +132,7 @@
                                :id "LP-638-2014-00001",
                                :municipality "638"})
 
-(fact "Meta test: kesto"           kesto          => valid-against-current-schema?)
-(fact "Meta test: meluilmo"        meluilmo       => valid-against-current-schema?)
+(ctc/validate-all-documents meluilmoitus-yritys-application)
 
 (fl/facts* "Meluilmoitus to canonical"
   (let [canonical (yic/meluilmoitus-canonical meluilmoitus-application "fi") => truthy
@@ -228,9 +225,7 @@
       (:lauantaiLoppuAika toiminnanKesto) => "20:00:00.0"
       (:sunnuntaiAlkuAika toiminnanKesto) => "12:00:00"
       (:sunnuntaiLoppuAika toiminnanKesto) => "18:00:00")
-
-    ; (clojure.pprint/pprint canonical)
-))
+    ))
 
 (fl/facts* "Meluilmoitus yrityshakija to canonical"
   (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
@@ -258,4 +253,3 @@
                                    :puhelinnumero "060222155"
                                    :sahkopostiosoite "tew@gjr.fi"})
     ))
-

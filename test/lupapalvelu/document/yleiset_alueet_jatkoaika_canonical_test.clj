@@ -5,6 +5,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [jatkoaika-to-canonical]]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [sade.util :refer :all]))
 
 
@@ -37,6 +38,12 @@
                             :opened 1386920752686
                             :modified 1386920727373
                             :submitted 1386920752686
+                            :auth [{:lastName "Panaani",
+                                    :firstName "Pena",
+                                    :username "pena",
+                                    :type "owner",
+                                    :role "owner",
+                                    :id "777777777777777777000020"}]
                             :permitType "YA"
                             :organization "753-YA"
                             :linkPermitData [link-permit-data],
@@ -53,6 +60,8 @@
                             :documents documents
                             :municipality "753"
                             :statements statements})
+
+(ctc/validate-all-documents jatkoaika-application)
 
 ;;*******************
 ;; TODO:

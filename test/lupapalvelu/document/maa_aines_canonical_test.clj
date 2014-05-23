@@ -3,19 +3,15 @@
             [sade.util :as util]
             [lupapalvelu.document.maa-aines-canonical :as mac]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.document.canonical-test-common :refer :all]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.ymparisto-schemas]))
 
 (def schema-version 1)
 
-(def maksaja (assoc henkilohakija :schema-info {:name "ymp-maksaja" :type "party" :version schema-version}))
-
-(fact "Meta test: maksaja" maksaja => valid-against-current-schema?)
+(def maksaja (assoc ctc/henkilohakija :schema-info {:name "ymp-maksaja" :type "party" :version schema-version}))
 
 (def maa-aineslupa-kuvaus {:schema-info {:name "maa-aineslupa-kuvaus" :version schema-version}
                            :data {:kuvaus {:value "Hankkeen synopsis"}}})
-
-(fact "Meta test: maa-aineslupa-kuvaus" maa-aineslupa-kuvaus => valid-against-current-schema?)
 
 (def application {:id "LP-638-2014-00001"
                   :attachments []
@@ -32,10 +28,10 @@
                               :username "pekka"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
-                  :documents [maa-aineslupa-kuvaus
-                              yrityshakija
+                  :documents [ctc/yrityshakija
+                              maa-aineslupa-kuvaus
                               maksaja]
-                  :drawings drawings
+                  :drawings ctc/drawings
                   :infoRequest false
                   :location {:x 428195.77099609 :y 6686701.3931274}
                   :neighbors []
@@ -52,9 +48,11 @@
                   :sent nil
                   :started nil
                   :state "submitted"
-                  :statements statements
+                  :statements ctc/statements
                   :submitted 1391415717396
                   :title "Londb\u00f6lentie 97"})
+
+(ctc/validate-all-documents application)
 
 (facts* "maa-aineslupa to canonical"
   (let [canonical (mac/maa-aines-canonical application "fi") => truthy

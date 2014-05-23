@@ -2,9 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.document.vesihuolto-canonical :as yic]
             [lupapalvelu.factlet :as fl]
-            [lupapalvelu.document.canonical-test-common :refer :all]
-            [lupapalvelu.document.vesihuolto-canonical :as vc]
-            ))
+            [lupapalvelu.document.canonical-test-common :as ctc]
+            [lupapalvelu.document.vesihuolto-canonical :as vc]))
 
 (def hakija {:id "532bddd0da068d67611f92f2",
              :created 1395383760912,
@@ -119,7 +118,7 @@
                                                   :_verdicts-seen-by {},
                                                   :location {:x 410169.875, :y 6692360.0},
                                                   :attachments [],
-                                                  :statements statements,
+                                                  :statements ctc/statements,
                                                   :organization "753-R",
                                                   :buildings [],
                                                   :title "Ampumaradantie 113",
@@ -149,18 +148,7 @@
                                                   :id "LP-753-2014-00001",
                                                   :municipality "753"})
 
-
-
-
-
-
-
-
-(fact "Meta test for hakija: "           hakija          => valid-against-current-schema?)
-(fact "Meta test for talousvedet: "      talousvedet     => valid-against-current-schema?)
-(fact "Meta test for kuvaus: "           kuvaus          => valid-against-current-schema?)
-(fact "Meta test for rakennukset: "      rakennukset     => valid-against-current-schema?)
-(fact "Meta test for viemari: "          viemari         => valid-against-current-schema?)
+(ctc/validate-all-documents vapautus-vesijohdosta-ja-viemarista-hakemus)
 
 (fl/facts* "Vesijohto ja viemari"
   (let [canonical (vc/vapautus-canonical vapautus-vesijohdosta-ja-viemarista-hakemus "fi") => truthy
