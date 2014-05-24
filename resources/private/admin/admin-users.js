@@ -26,7 +26,15 @@
                .command("reset-password", {email: email})
                .success(function() { callback(true); })
                .call();
-           }}]
+           }},
+           {name: "toAuthority",
+            showFor: function(user) {return user.enabled && user.role === "applicant";},
+            operation: function(email, callback) {
+             ajax
+               .command("applicant-to-authority", {email: email})
+               .success(function() { callback(true); })
+               .call();
+            }}]
   };
 
   hub.onPageChange("users", function() {

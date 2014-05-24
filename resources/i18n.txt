@@ -1,0 +1,3 @@
+users.op.toAuthority: Muuta viranomaiseksi
+users.op.toAuthority.title: Muuta viranomaiseksi
+users.op.toAuthority.message: Haluatko varmasti muuttaa hakijan {0} viranomaiseksi?
