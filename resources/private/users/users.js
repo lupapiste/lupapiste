@@ -38,11 +38,12 @@ var users = (function() {
           td = $(td);
       _.each(opts.ops, function(op) {
         if (op.showFor(user)) {
-          td.append($("<botton>")
-            .attr("class", "btn btn-auto")
-            .attr("style", "display:inline-block;margin-right:3px")
+          td.append("[")
+           .append($("<a>")
+            .attr("href", "#")
             .attr("data-op", op.name)
-            .text(loc(["users.op", op.name])));
+            .text(loc(["users.op", op.name])))
+           .append("] ");
         }
       });
     };
