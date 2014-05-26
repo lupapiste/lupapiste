@@ -3,7 +3,7 @@
             [sade.util :as util]
             [lupapalvelu.document.ymparistolupa-canonical :as ylc]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.document.canonical-test-common :refer :all]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.ymparisto-schemas]))
 
 (def kuvaus
@@ -15,22 +15,28 @@
                  :version 1
                  :removable true}
    :data {:kuvaus {:value "Hankkeen kuvauskentan sisalto" :modified 1392811539061}
-          :peruste {:value "Hankkeen peruste" :modified 1392811539061}}
-   })
-
-(fact "Meta test: kuvaus" kuvaus => valid-against-current-schema?)
+          :peruste {:value "Hankkeen peruste" :modified 1392811539061}}})
 
 (def application {:id "LP-638-2014-00001"
                   :attachments []
-                  :auth [{:lastName "Borga" :firstName "Pekka" :username "pekka" :type "owner" :role "owner" :id "777777777777777777000033"}]
-                  :authority {:role "authority" :lastName "Borga" :firstName "Pekka" :username "pekka" :id "777777777777777777000033"}
+                  :auth [{:id "777777777777777777000033"
+                          :firstName "Pekka"
+                          :lastName "Borga"
+                          :username "pekka"
+                          :type "owner"
+                          :role "owner"}]
+                  :authority {:id "777777777777777777000033"
+                              :firstName "Pekka"
+                              :lastName "Borga"
+                              :role "authority"
+                              :username "pekka"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
                   :documents [kuvaus
-                              henkilohakija
-                              (select-keys henkilohakija [:schema-info])
-                              yrityshakija
-                              henkilomaksaja]
+                              ctc/henkilohakija
+                              (select-keys ctc/henkilohakija [:schema-info])
+                              ctc/yrityshakija
+                              ctc/henkilomaksaja]
                   :drawings []
                   :infoRequest false
                   :linkPermitData [{:id "LP-638-2013-00099" :type "lupapistetunnus"} {:id "kuntalupa-123" :type "kuntalupatunnus"}]
@@ -49,9 +55,11 @@
                   :sent nil
                   :started nil
                   :state "submitted"
-                  :statements statements
+                  :statements ctc/statements
                   :submitted 1391415717396
                   :title "Londb\u00f6lentie 97"})
+
+(ctc/validate-all-documents application)
 
 (facts* "ymparistolupa to canonical"
   (let [canonical (ylc/ymparistolupa-canonical application "fi") => truthy
@@ -83,8 +91,8 @@
         hakijat (:hakija ymparistolupa) => seq
         luvat (get-in ymparistolupa [:voimassaOlevatLuvat :luvat :lupa]) => seq
 
-        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy
-        ]
+        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy]
+
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
@@ -150,9 +158,5 @@
         (:henkilotunnus maksaja) => "210354-947E"
         (:sahkopostiosoite maksaja) => "pappa@example.com"
         (:puhelinnumero maksaja) => "0400-123456"
-        (:laskuviite maksaja) => "1686343528523")
-
-      )
-
-     ;(clojure.pprint/pprint canonical)
-))
+        (:laskuviite maksaja) => "1686343528523"))
+    ))

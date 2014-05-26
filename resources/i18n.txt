@@ -1,0 +1,4 @@
+error.application-does-not-have-given-auth: Valittua käyttäjää ei ole valtuutettu hakemukselle
+login.with-rights: Kirjaudu oikeuksin
+organization.scope: Konfiguraatio
+admin.admin-password: Admin-salasana
