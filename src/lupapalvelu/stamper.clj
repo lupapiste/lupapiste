@@ -81,7 +81,12 @@
 (defn- transparency->opacity [transparency]
   (- 1.0 (/ (double transparency) 255.0)))
 
-(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
+(defn- get-sides [itext-bean]
+  (select-keys (bean itext-bean) [:top :right :bottom :left]))
+
+(defn- stamp-pdf
+  "About calculating stamp location, see http://support.itextpdf.com/node/106"
+  [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
@@ -92,16 +97,18 @@
                    (.setFillOpacity opacity)
                    (.setStrokeOpacity opacity))]
       (doseq [page (range (.getNumberOfPages reader))]
-        (let [page-size (.getPageSizeWithRotation reader (inc page))
-              ; http://support.itextpdf.com/node/106
-              cropbox (.getCropBox reader (inc page))
-              rot (.getPageRotation reader (inc page))
-              use-cropbox? (and cropbox (= 0 rot))
-              _ (debug "Rotation: " rot)
-              max-x (if use-cropbox? (.getRight cropbox) (.getRight page-size))
-              min-y (if use-cropbox? (.getBottom cropbox) (.getBottom page-size))
+        (let [visible-area (.getCropBox reader (inc page))
+              rotation (.getPageRotation reader (inc page))
+              rotate? (pos? (mod rotation 180))
+              sides   (get-sides visible-area)
+              _ (debug "Rotation:" rotation)
+              _ (debug "page-size with rotation:" (get-sides (.getPageSizeWithRotation reader (inc page))))
+              _ (debug "visible-area without rotation:" sides)
+              max-x (if rotate? (:top sides) (:right sides))
+              min-y (if rotate? (:left sides) (:bottom sides))
               x (- max-x stamp-width (mm->u x-margin))
-              y (+ min-y (mm->u y-margin))]
+              y (+ min-y (mm->u y-margin))
+              _ (debug "Stamp location" x y)]
           (doto (.getOverContent stamper (inc page))
             (.saveState)
             (.setGState gstate)
