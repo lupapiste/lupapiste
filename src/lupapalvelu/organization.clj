@@ -16,7 +16,7 @@
 ;;
 
 (defn get-organization [id]
-  (and id (mongo/select-one :organizations {:_id id})))
+  (and id (mongo/by-id :organizations id)))
 
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
@@ -79,14 +79,16 @@
 
 (defcommand update-organization
   {:description "Update organization details."
-   :parameters [organizationId inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
+   :parameters [permitType municipality inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
    :roles [:admin]
    :verified true}
   [_]
-  (mongo/update-by-id :organizations organizationId {$set {"inforequest-enabled" inforequestEnabled
-                                                           "new-application-enabled" applicationEnabled
-                                                           "open-inforequest" openInforequestEnabled
-                                                           "open-inforequest-email" openInforequestEmail}})
+  (mongo/update-by-query :organizations
+      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
+      {$set {:scope.$.inforequest-enabled inforequestEnabled
+             :scope.$.new-application-enabled applicationEnabled
+             :scope.$.open-inforequest openInforequestEnabled
+             :scope.$.open-inforequest-email openInforequestEmail}})
   (ok))
 
 (defcommand add-organization-link
@@ -150,6 +152,9 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
+(defn resolve-organization-scope [organization municipality permit-type]
+  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+
 (defquery organization-by-id
   {:parameters [organizationId]
    :roles [:admin]
@@ -162,19 +167,13 @@
    :verified true}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
-    (if-let [result (mongo/select-one
-                      :organizations
-                      {:scope {$elemMatch {:municipality municipality :permitType permit-type}}}
-                      {"name" 1
-                       "links" 1
-                       "operations-attachments" 1
-                       "inforequest-enabled" 1
-                       "new-application-enabled" 1})]
-      (ok
-        :inforequests-disabled (not (:inforequest-enabled result))
-        :new-applications-disabled (not (:new-application-enabled result))
-        :links (:links result)
-        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
+    (if-let [organization (resolve-organization municipality permit-type)]
+      (let [scope (resolve-organization-scope organization municipality permit-type)]
+        (ok
+         :inforequests-disabled (not (:inforequest-enabled scope))
+         :new-applications-disabled (not (:new-application-enabled scope))
+         :links (:links organization)
+         :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
 
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 
@@ -193,7 +192,7 @@
    :verified true}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
-    (if-let [organization (mongo/by-id :organizations organization-id {:krysp 1, :scope 1})]
+    (if-let [organization (get-organization organization-id)]
       (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))

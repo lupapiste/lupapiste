@@ -1,7 +1,7 @@
 var taskUtil = (function() {
 
   function getTaskName(task) {
-    return task.taskname || loc(task.schema.info.name + "._group_label");
+    return task.taskname || loc([task.schema.info.name, "_group_label"]);
   }
 
   function shortDisplayName(task) {

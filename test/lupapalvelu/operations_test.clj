@@ -2,7 +2,8 @@
   (:require [lupapalvelu.operations :refer :all]
             [lupapalvelu.test-util :refer :all]
             [midje.sweet :refer :all]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.env :as env]))
 
 (facts "check that every operation refers to existing schema"
   (doseq [[op {:keys [schema required]}] operations
@@ -48,17 +49,60 @@
 
 (facts "operations-for-permit-type"
 
+  (fact "rakval, only addable operations included"
+    (operations-for-permit-type "R" true) => (filterv identity     ; TODO remove filtering after pima featura is in production
+                                               [["Rakentaminen ja purkaminen"
+                                                [["Uuden rakennuksen rakentaminen"
+                                                  [["Asuinrakennus" :asuinrakennus]
+                                                   ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
+                                                   ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
+                                                   ["Julkinen rakennus" :julkinen-rakennus]
+                                                   ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
+                                                 ["Rakennuksen korjaaminen tai muuttaminen"
+                                                  [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
+                                                   ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
+                                                   ["Kayttotarkoituksen muutos" :kayttotark-muutos]
+                                                   ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
+                                                   ["Asuinhuoneiston jakaminen tai yhdistaminen"
+                                                    :jakaminen-tai-yhdistaminen]
+                                                   ["Markatilan laajentaminen" :markatilan-laajentaminen]
+                                                   ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+                                                   ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
+                                                   ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
+                                                 ["Rakennelman rakentaminen"
+                                                  [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
+                                                   ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
+                                                   ["Mainoslaite" :mainoslaite]
+                                                   ["Aita" :aita]
+                                                   ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
+                                                   ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
+                                                   ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
+                                                 ["Rakennuksen purkaminen" :purkaminen]]]
+                                               ["Elinympariston muuttaminen"
+                                                [["Maisemaa muutava toimenpide"
+                                                  [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
+                                                   ["Puun kaataminen" :puun-kaataminen]
+                                                   ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
+                                                 ["Tontti tai korttelialueen jarjestelymuutos"
+                                                  [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
+                                                   ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
+                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
+                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]
+                                               (when (env/feature? :pima)
+                                                 ["Ymp\u00e4rist\u00f6luvat" [["Pima" :pima]]])]))
+
   (fact "poikkarit"
-    (operations-for-permit-type "P") => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]])
+    (operations-for-permit-type "P" false) => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]])
 
-  (fact "meluilmoitus"
-    (operations-for-permit-type "YI") => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]])
 
-  (fact "ymparistolupa"
-    (operations-for-permit-type "YL") => [["Ymp\u00e4rist\u00f6luvat"
-                                           [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
-                                                                               ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-                                                                               ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])
+  (when (env/feature? :ymparisto)
+    (fact "meluilmoitus"
+          (operations-for-permit-type "YI" false) => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]]))
 
-  )
+  (when (env/feature? :ymparisto)
+    (fact "ymparistolupa"
+          (operations-for-permit-type "YL" false) => [["Ymp\u00e4rist\u00f6luvat"
+                                                       [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
+                                                                                           ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+                                                                                           ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])))
 

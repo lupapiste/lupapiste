@@ -77,7 +77,6 @@ var comments = (function() {
       return model.user && model.user.role && model.user.role() === "authority";
     };
     self.isForAttachment = function(model) {
-      
       return model && model.target && model.target.type() === "attachment";
     };
   }

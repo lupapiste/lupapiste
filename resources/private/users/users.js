@@ -5,21 +5,21 @@ var users = (function() {
   function toActive(data, type, row) { return loc(["users.data.enabled", data]); }
   function toOrgs(data, type, row) { return data ? data.join(", ") : ""; }
   function rowCreated(row, data) { $(row).attr("data-user-email", data[0]); }
-  
+
   function UsersModel(component, opts) {
     var self = this;
-    
+
     self.component = component;
     self.table$ = $("table", component);
-    
+
     self.availableRoles = _([null, "admin", "authority", "authorityAdmin", "applicant", "dummy"])
       .map(function(id) { return {id: id, name: loc(id ? id : "users.filters.role.all")}; })
       .value();
-    
+
     self.availableEnableds = _([null, true, false])
       .map(function(id) { return {id: id, name: loc(id === null ? "users.filters.enabled.all" : "users.data.enabled." + id)}; })
       .value();
-    
+
     self.filters = {
       role:     ko.observable(),
       enabled:  ko.observable(),
@@ -38,14 +38,16 @@ var users = (function() {
           td = $(td);
       _.each(opts.ops, function(op) {
         if (op.showFor(user)) {
-          td.append($("<a>")
+          td.append("[")
+           .append($("<a>")
             .attr("href", "#")
             .attr("data-op", op.name)
-            .text("[" + loc("users.op." + op.name) + "]"));
+            .text(loc(["users.op", op.name])))
+           .append("] ");
         }
       });
     };
-    
+
     self.userToRow = function(user) {
       return {user: user,
               0: user.email,
@@ -53,9 +55,9 @@ var users = (function() {
               2: user.role,
               3: user.organizations ? user.organizations : [],
               4: user.enabled,
-              5: ""}; // column 5 will be set by toOps 
+              5: ""}; // column 5 will be set by toOps
     };
-    
+
     self.processResults = function(r) {
       var data = r.data;
       return {aaData:               _.map(data.rows, self.userToRow),
@@ -63,7 +65,7 @@ var users = (function() {
               iTotalDisplayRecords: data.display,
               sEcho:                data.echo};
     };
-    
+
     self.fetch = function(source, data, callback) {
       var params = _(data)
         .concat(_.map(self.filters, function(v, k) { return {name: "filter-" + k, value: v()}; }))
@@ -77,7 +79,7 @@ var users = (function() {
 
     self.redraw = function() { self.dataTable.fnDraw(true); };
     self.redrawCallback = function(redraw) { if (redraw) self.redraw(); };
-    
+
     self.table$.click(function(e) {
       var target = $(e.target),
           opName = target.attr("data-op"),
@@ -85,8 +87,8 @@ var users = (function() {
           email = target.parent().parent().attr("data-user-email");
       if (!op || !email) return false;
       LUPAPISTE.ModalDialog.showDynamicYesNo(
-          loc("users.op." + op.name + ".title"),
-          loc("users.op." + op.name + ".message"),
+          loc(["users.op", op.name, "title"]),
+          loc(["users.op", op.name, "message"], email),
           {title: loc("yes"), fn: function() { op.operation(email, self.redrawCallback); }},
           {title: loc("cancel")});
       return false;
@@ -120,7 +122,7 @@ var users = (function() {
     component.applyBindings(self);
     return self;
   }
-  
+
   return {
     create: function(targetOrId, opts) {
       var component = $("#users-templates .users-table").clone();

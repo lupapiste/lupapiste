@@ -5,6 +5,8 @@
             [clojure.string :as s]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
+            [ring.util.response :refer [resource-response]]
+            [ring.middleware.content-type :refer [content-type-response]]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
             [noir.request :as request]
@@ -30,7 +32,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors]))
+            [lupapalvelu.neighbors]
+            [lupapalvelu.idf.idf-server :as idf-server]))
 
 ;;
 ;; Helpers
@@ -268,10 +271,7 @@
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
-        sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
-                           (if (> (.length line) limit)
-                             (str (.substring line 0 limit) "... (truncated)")
-                             line)))
+        sanitize (partial lupapalvelu.logging/sanitize limit)
         sanitized-page (sanitize (or page "(unknown)"))
         user           (or (ss/lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
@@ -355,9 +355,10 @@
    that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (handler (assoc request :user
-                    (or (user/get-user-with-apikey (get-apikey request))
-                        (session/get :user))))))
+    (let [api-key (get-apikey request)
+          api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
+          session-user (session/get :user)]
+      (handler (assoc request :user (or api-key-auth session-user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -479,6 +480,21 @@
   (fn [request] (session-timeout-handler handler request)))
 
 ;;
+;; Identity federation
+;;
+
+(defpage
+  [:post "/api/id-federation"]
+  {:keys [etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac]}
+  (idf-server/handle-create-user-request etunimi sukunimi
+          email puhelin katuosoite postinumero postitoimipaikka
+          suoramarkkinointilupa ammattilainen
+          app id ts mac))
+
+;;
 ;; dev utils:
 ;;
 
@@ -487,8 +503,11 @@
     (if-not (s/blank? typeName)
       (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
+                  "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
+                  "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
+                  "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
                   "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}]
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (get xmls typeName)))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName)))))
       (when (= r "GetCapabilities")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
 
@@ -496,15 +515,12 @@
     (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
           xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
-      (when (= typeName "yak:YleisetAlueet")
+      (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/yleiset alueet/ya-verdict.xml")))))))
 
 (env/in-dev
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
-
-  (defjson "/dev/user" []
-    (user/current-user))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [response (execute-query "apply-fixture" {:name name})]
@@ -512,10 +528,9 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId]}
-    (let [parts    (vec (map #(Integer/parseInt %) (rest (re-matches #"(\d+)-(\d+)-(\d+)-(\d+)" propertyId))))
-          property (format "%03d%03d%04d%04d" (get parts 0) (get parts 1) (get parts 2) (get parts 3))
-          response (execute-command "create-application" (assoc (from-query) :propertyId property))]
+  (defpage "/dev/create" {:keys [infoRequest propertyId message]}
+    (let [property (util/to-property-id propertyId)
+          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages (if message [message] [])))]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
@@ -527,6 +542,11 @@
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
+  (defpage [:get "/dev-pages/:file"] {:keys [file]}
+    (->
+      (resource-response (str "dev-pages/" file))
+      (content-type-response {:uri file})))
+
   (defjson "/dev/fileinfo/:id" {:keys [id]}
     (dissoc (mongo/download id) :content))
 
@@ -537,7 +557,6 @@
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
-  (require 'lupapalvelu.neighbors)
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))

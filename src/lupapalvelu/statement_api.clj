@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application executed]]
+            [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]
@@ -29,6 +29,8 @@
 
 (defcommand create-statement-giver
   {:parameters [email text]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
    :notified   true
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
@@ -36,27 +38,24 @@
         organization    (mongo/select-one :organizations {:_id organization-id})
         email           (ss/lower-case email)
         statement-giver-id (mongo/create-id)]
-    (with-user-by-email email
+    (if-let [user (user/get-user-by-email email)]
+      (do
       (when-not (user/authority? user) (fail! :error.not-authority))
-      (mongo/update
-        :organizations
-        {:_id organization-id}
+      (mongo/update-by-id :organizations organization-id
         {$push {:statementGivers {:id statement-giver-id
-                                   :text text
-                                   :email email
-                                   :name (str (:firstName user) " " (:lastName user))}}})
+                                  :text text
+                                  :email email
+                                  :name (str (:firstName user) " " (:lastName user))}}})
       (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
-      (ok :id statement-giver-id))))
+        (ok :id statement-giver-id))
+      (fail :error.user-not-found))))
 
 (defcommand delete-statement-giver
   {:parameters [personId]
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
-  (mongo/update
-    :organizations
-    {:_id organization-id}
-    {$pull {:statementGivers {:id personId}}})))
+  (mongo/update-by-id :organizations organization-id {$pull {:statementGivers {:id personId}}})))
 
 ;;
 ;; Authority operations
@@ -69,7 +68,7 @@
 (defcommand request-for-statement
   {:parameters  [id personIds]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed]
+   :states      [:draft :open :submitted :complement-needed]
    :notified    true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
@@ -84,18 +83,19 @@
                                              :person    statement-giver
                                              :requested now
                                              :given     nil
+                                             :reminder-sent nil
                                              :status    nil}
                                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                                 :mail-list (assoc user :email (:email %))}) persons)
+                                 :email (:email %)}) persons)
             statements (map :statement details)
             auth       (map :auth details)
-            mail-list  (map :mail-list details)]
+            mail-list  (map :email details)]
           (update-application command {$pushAll {:statements statements :auth auth}})
-          (notifications/notify! :request-statement (assoc command :data {:users mail-list}))))))
+          (notifications/notify! :request-statement (assoc command :data {:email mail-list}))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
-   :states     [:draft :info :open :submitted :complement-needed]
+   :states     [:draft :open :submitted :complement-needed]
    :roles      [:authority]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
@@ -104,7 +104,7 @@
   {:parameters  [id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
-   :states      [:draft :info :open :submitted :complement-needed]
+   :states      [:draft :open :submitted :complement-needed]
    :roles       [:authority]
    :extra-auth-roles [:statementGiver]
    :notified    true

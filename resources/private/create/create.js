@@ -133,7 +133,7 @@
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
-    self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
+    self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
@@ -192,7 +192,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); }
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
@@ -210,11 +210,11 @@
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
       [{kind: "address"}, comp(fillAddress, self.searchNow)],
-      [{kind: "address", type: "street"}, zoomer(10)],
-      [{kind: "address", type: "street-city"}, zoomer(10)],
-      [{kind: "address", type: "street-number"}, zoomer(11)],
-      [{kind: "address", type: "street-number-city"}, zoomer(11)],
-      [{kind: "property-id"}, comp(zoomer(12), self.searchNow)]
+      [{kind: "address", type: "street"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
+      [{kind: "address", type: "street-city"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
+      [{kind: "address", type: "street-number"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
+      [{kind: "address", type: "street-number-city"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
+      [{kind: "property-id"}, comp(zoomer(features.enabled("use-wmts-map") ? 14 : 12), self.searchNow)]
     ];
 
     var renderers = [
@@ -267,7 +267,7 @@
             self
               .useManualEntry(false)
               .setXY(x, y)
-              .center(x, y, 11)
+              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
@@ -285,7 +285,7 @@
             self
               .useManualEntry(false)
               .setXY(x, y)
-              .center(x, y, 11)
+              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .propertyId(id)
               .beginUpdateRequest()
               .searchAddress(x, y);
@@ -392,9 +392,15 @@
       baseModel: model
     });
 
-    hub.subscribe({type: "keyup", keyCode: 37}, tree.back);  // left arrow
-    hub.subscribe({type: "keyup", keyCode: 33}, tree.start); // page up
-    hub.subscribe({type: "keyup", keyCode: 36}, tree.start); // home
+    function ifStep2(fn) {
+      if ($("#create-part-2:visible").length === 1) {
+        fn();
+      }
+    }
+
+    hub.subscribe({type: "keyup", keyCode: 37}, _.partial(ifStep2, tree.back));  // left arrow
+    hub.subscribe({type: "keyup", keyCode: 33}, _.partial(ifStep2, tree.start)); // page up
+    hub.subscribe({type: "keyup", keyCode: 36}, _.partial(ifStep2, tree.start)); // home
 
   });
 

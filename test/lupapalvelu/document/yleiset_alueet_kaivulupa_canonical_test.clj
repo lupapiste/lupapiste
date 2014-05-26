@@ -23,9 +23,6 @@
                                               :order 60},
                                 :data {:kayttotarkoitus {:value "Hankkeen kuvaus."},
                                        :sijoitusLuvanTunniste {:value "LP-753-2013-00002"}
-                                       :sijoituksen-tarkoitus {:value "other"},
-                                       ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
-                                       :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}
                                        :varattava-pinta-ala {:value "333"}}})
 
 (def ^:private tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
@@ -61,7 +58,7 @@
 
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical
-  get-yritys-and-henkilo get-tyomaasta-vastaava get-sijoituksen-tarkoitus get-hakija)
+  get-yritys-and-henkilo get-tyomaasta-vastaava get-hakija)
 
 (facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical kaivulupa-application "fi")
@@ -70,10 +67,9 @@
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
-        _ (clojure.pprint/pprint Kasittelytieto)
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => nil?
+        luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
@@ -166,27 +162,14 @@
         hakija-yksityinen-osoite (:osoite hakija-yksityinen-Henkilo) => truthy
 
         pinta-ala (:pintaala Tyolupa) => truthy
-
-        ;; Lisatiedot
-        lupakohtainenLisatietotieto (-> Tyolupa :lupakohtainenLisatietotieto) => truthy
-        lisatietoja-filter-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
-        sijoituksen-tark (-> (filter lisatietoja-filter-fn lupakohtainenLisatietotieto) first :LupakohtainenLisatieto :arvo) => truthy
-
-        ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
-        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
-                                        (tools/unwrapped
-                                          (assoc-in (:data hankkeen-kuvaus) [:sijoituksen-tarkoitus :value] "liikennevalo"))) => truthy]
-
-;      (println "\n canonical: ")
-;      (clojure.pprint/pprint canonical)
-;      (println "\n")
+        ]
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
       (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified kaivulupa-application)))
       (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
       (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id kaivulupa-application))
-      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened kaivulupa-application)))
+      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:submitted kaivulupa-application)))
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
@@ -320,13 +303,11 @@
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
       (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)
       (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
-      (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> hankkeen-kuvaus :data :muu-sijoituksen-tarkoitus :value))
-      (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
       (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))
 
 
 
-(def ^:private kaivulupa-application-with-link-permit-data
+(def kaivulupa-application-with-link-permit-data
   (merge kaivulupa-application {:linkPermitData [link-permit-data]}))
 
 (facts* "Kaivulupa canonical model is correct"
@@ -335,8 +316,15 @@
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
         luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => truthy
-        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy]
-    (fact "kuntalupatunnus" (:kuntalupatunnus LupaTunnus) => (:id link-permit-data))
-    (fact "Sovellus" (:viittaus LupaTunnus) => "edellinen rakennusvalvonta-asia")))
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        lp-muu-tunnus (:MuuTunnus (first muuTunnustieto)) => truthy
+        viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy]
 
+    (fact "LP-tunnus"
+      (:tunnus lp-muu-tunnus) => (:id kaivulupa-application-with-link-permit-data)
+      (:sovellus lp-muu-tunnus) => "Lupapiste")
 
+    (fact "Viitelupa"
+      (:tunnus viitelupatunnus) => (:id link-permit-data)
+      (:sovellus viitelupatunnus) => "Viitelupa")))

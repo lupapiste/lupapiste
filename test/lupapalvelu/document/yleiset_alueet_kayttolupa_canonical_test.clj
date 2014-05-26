@@ -66,7 +66,7 @@
         Kasittelytieto (-> Kayttolupa :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Kayttolupa) => nil?
+        muu-tunnustieto (get-in Kayttolupa [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto]) => seq
 
         Kayttolupa-kayttotarkoitus (:kayttotarkoitus Kayttolupa) => truthy
 
@@ -152,11 +152,12 @@
 
         pinta-ala (:pintaala Kayttolupa) => truthy]
 
-;    (println "\n canonical:")
-;    (clojure.pprint/pprint canonical)
-;    (println "\n")
-
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
+
+    (fact "lupatunnus"
+      (count muu-tunnustieto) => 1
+      (-> muu-tunnustieto first :MuuTunnus :tunnus) => (:id kayttolupa-application)
+      (-> muu-tunnustieto first :MuuTunnus :sovellus) => "Lupapiste")
 
     (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified kayttolupa-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")

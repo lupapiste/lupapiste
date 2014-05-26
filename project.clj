@@ -30,12 +30,12 @@
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.28"]
+                 [fi.sito/oskari "0.9.32"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
                  [digest "1.4.3"]
                  [org.clojure/tools.trace "0.7.6"]
-                 [cljts "0.2.0"]]
+                 [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
   :profiles {:dev {:dependencies [[midje "1.6.0"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]]
@@ -65,4 +65,6 @@
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
+  :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
+                [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.0.0")

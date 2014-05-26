@@ -39,22 +39,22 @@
         .pending(self.pending)
         .call();
     };
-    
+
     function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
     function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
-    
+
     self.success = function(data) {
       var a = data.application,
           l = a.location,
           x = l.x,
           y = l.y;
-      
-      self.application(a).map.updateSize().clear().center(x, y, 12).add(x, y);
+
+      self.application(a).map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 12).add({x: x, y: y});
 
       var partyDocs = _.filter(a.documents, isPartyDoc);
       var nonpartyDocs = _.filter(a.documents, isNotPartyDoc);
       var options = {disabled: true, validate: false};
-      
+
       docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel, options);
       docgen.displayDocuments("#neighborPartiesDocgen", a, partyDocs, authorizationModel, options);
 
@@ -63,9 +63,9 @@
         a.latestVersion = _.last(a.versions);
         return a;
       }));
-      
+
       self.operationsCount(_.map(_.countBy(a.operations, "name"), function(v, k) { return {name: k, count: v}; }));
-      
+
       return self;
     };
 
@@ -137,7 +137,7 @@
   });
 
   $(function() {
-    model.map = gis.makeMap("neighbor-map", false).updateSize().center(404168, 6693765, 12);
+    model.map = gis.makeMap("neighbor-map", false).updateSize().center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
     $("#neighbor-show").applyBindings(model);
   });
 

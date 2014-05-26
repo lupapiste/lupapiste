@@ -80,6 +80,7 @@
                                                :target nil
                                                :type :a
                                                :applicationState :draft
+                                               :signatures []
                                                :versions []}
                                               {:id "123"
                                                :locked false
@@ -89,6 +90,7 @@
                                                :target nil
                                                :type :b
                                                :applicationState :draft
+                                               :signatures []
                                                :versions []}])
   (provided
     (mongo/create-id) => "123"))

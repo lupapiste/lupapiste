@@ -1,14 +1,28 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [sade.env :as env]
             [clojure.data.zip.xml :refer [xml-> text]]
+            [sade.env :as env]
+            [sade.xml]
             [sade.strings :refer [starts-with-i]]
             [sade.util :refer [future*]]))
+
+
+;; SAX options
+(defn startparse-sax-non-validating [s ch]
+  (.. (doto (javax.xml.parsers.SAXParserFactory/newInstance)
+        (.setValidating false)
+        (.setFeature javax.xml.XMLConstants/FEATURE_SECURE_PROCESSING true)
+        (.setFeature "http://apache.org/xml/features/nonvalidating/load-dtd-grammar" false)
+        (.setFeature "http://apache.org/xml/features/nonvalidating/load-external-dtd" false)
+        (.setFeature "http://xml.org/sax/features/validation" false)
+        (.setFeature "http://xml.org/sax/features/external-general-entities" false)
+        (.setFeature "http://xml.org/sax/features/external-parameter-entities" false))
+    (newSAXParser) (parse s ch)))
 
 ;;
 ;; config:
@@ -194,7 +208,7 @@
                      (s/replace "UTF-8" "ISO-8859-1")
                      (.getBytes "ISO-8859-1")
                      java.io.ByteArrayInputStream.
-                     xml/parse
+                     (xml/parse sade.xml/startparse-sax-no-doctype)
                      zip/xml-zip)]
       (xml-> features :gml:featureMember))))
 
@@ -293,6 +307,27 @@
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
+
+(defn getcapabilities [request]
+  (let [host (env/value :geoserver :host) ; local IP from Chef environment
+        path (env/value :geoserver :wms :path)]
+    (assert (and host path))
+    (:body (http/get (str host path)
+             {:query-params {"version" "1.1.1"
+                             "request" "GetCapabilities"}
+              :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
+
+(defn capabilities-to-layers [capabilities]
+  (when capabilities
+    (let [caps (zip/xml-zip
+                 (xml/parse
+                   (java.io.ByteArrayInputStream. (.getBytes capabilities))
+                   startparse-sax-non-validating))]
+      (xml-> caps :Capability :Layer :Layer))))
+
+(defn layer-to-name [layer]
+  (first (xml-> layer :Name text)))
+
 ;;
 ;; Raster images:
 ;;
@@ -306,6 +341,7 @@
                :as :stream})
       "wms" (let [{:keys [host path]} (env/value :geoserver :wms)
                   wms-url (str host path)]
+              (assert (and host path))
               (http/get wms-url
                 {:query-params (:params request)
                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}

@@ -3,6 +3,7 @@
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
+            [lupapalvelu.xml.krysp.validator :as validator]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
@@ -26,8 +27,11 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
-(defn loc->js []
+(defn- loc->js []
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+
+(defn- schema-versions-by-permit-type []
+  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-versions-by-permit-type) ";"))
 
 (def ui-components
   {;; 3rd party libs
@@ -70,12 +74,12 @@
                             :licenses :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
                   :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers-2.13_20140220.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers-2.13_20140428.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common]
                   :js ["mypage.js"]
@@ -107,7 +111,11 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :attachment   {:depends [:common :repository]
+   :signing      {:depends [:common]
+                  :html ["signing-dialogs.html"]
+                  :js ["signing-model.js"]}
+
+   :attachment   {:depends [:common :repository :signing]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
@@ -115,7 +123,7 @@
                   :js ["task.js"]
                   :html ["task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :modal-datepicker]
+   :application  {:depends [:common :repository :tree :task :modal-datepicker :signing]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "create-task-model.js" "application-model.js" "application.js"]
@@ -139,12 +147,15 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common]
-                  :css ["register.css"]
-                  :js ["register.js"]
+                  :js ["registration-models.js" "register.js"]
                   :html ["register.html" "register2.html" "register3.html"]}
 
+   :link-account {:depends [:register]
+                  :js ["link-account.js"]
+                  :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
+
    :docgen       {:depends [:accordion :common]
-                  :js ["docgen.js"]}
+                  :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common]
                   :js ["create.js"]
@@ -189,7 +200,7 @@
                   :html ["index.html"]}
 
    :authority-admin {:depends [:common :authenticated :admins :mypage :user-menu :debug]
-                     :js ["admin.js"]
+                     :js ["admin.js" schema-versions-by-permit-type]
                      :html ["index.html" "admin.html"]}
 
    :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
@@ -204,7 +215,7 @@
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
 
-   :welcome {:depends [:login :register :debug :user-menu :screenmessages]
+   :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages]
              :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 

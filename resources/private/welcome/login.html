@@ -5,25 +5,16 @@
     <div class="welcome_top">
       <div class="welcome_top_content">
         <div class="welcome_sections">
-          <div class="todo welcome_section">
-            <h3>Tarvitseeko minun hakea lupaa?</h3>
-            <p>
-              Joko tied&auml;t, onko suunnittelemasi toiminta luvanvaraista? Ent&auml; mit&auml; kaikkea tietoja ja
-              suunnitelmia lupahakemukseen tarvitaan? Voit hakea tietoa my&ouml;s kirjautumatta.
-            </p>
-            <p><a href="#" class="btn btn-primary">Aloita tiedonhaku t&auml;st&auml;</a></p>
-          </div>
-
           <div id="login-form" class="welcome_section">
             <img src="/img/icon-info.png" class="welcome_info" alt="?" width="55" height="62">
             <section class="welcome-register-section">
-              <h3>Ei tunnuksia?</h3>
-              <p>Jos sinulla ei viel&auml; ole tunnuksia, aloita asiointi rekister&ouml;itym&auml;ll&auml; palveluun.</p>
-              <button id="register-button" class="btn btn-success">Rekister&ouml;idy</button>
+              <h3 data-bind="ltext: 'welcome.notRegistered.title'">Ei tunnuksia?</h3>
+              <p data-bind="ltext: 'welcome.notRegistered.desc'">Jos sinulla ei viel&auml; ole tunnuksia, aloita asiointi rekister&ouml;itym&auml;ll&auml; palveluun.</p>
+              <button id="register-button" data-bind="ltext: 'welcome.register'" class="btn btn-success">Rekister&ouml;idy</button>
             </section>
             <section class="welcome-login-section">
-              <h3>Haluan kirjautua palveluun</h3>
-              <p>
+              <h3 data-bind="ltext: 'welcome.login.title'">Haluan kirjautua palveluun</h3>
+              <p data-bind="ltext: 'welcome.login.desc'">
                 Voit tehd&auml; hakemuksia ja ilmoituksia s&auml;hk&ouml;isess&auml; asiointij&auml;rjestelm&auml;ss&auml;.
                 Asiointij&auml;rjestelm&auml;n k&auml;ytt&ouml; vaatii kirjautumisen. K&auml;ytt&auml;j&auml;tunnuksena toimii s&auml;hk&ouml;postiosoitteesi.
               </p>
@@ -31,7 +22,7 @@
               <input class="form-input" id="login-username" type="text" data-bind="attr: {placeholder: loc('userinfo.username')}" name="username" autofocus="autofocus">
               <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
               <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
-              <button id="login-button" class="btn btn-primary">Kirjaudu</button>
+              <button id="login-button" class="btn btn-primary" data-bind="ltext: 'welcome.login'">Kirjaudu</button>
               <span id="login-message" style="display: none; color: red"></span>
               <div class="passwd-reset">
                 <a href="#!/reset" data-bind="ltext: 'login.reset-question'"></a>
@@ -41,18 +32,6 @@
               <a href="#!/licenses" data-bind="ltext: 'license.link'">Tietoja Lupapisteest&auml;</a>
             </section>
           </div>
-          <div class=" todo welcome_section">
-            <h3>Mik&auml; on Lupapiste</h3>
-            <p>
-                Lupapiste on uudenlainen s&auml;hk&ouml;inen palvelu, jossa kansalaiset, yritykset ja yhteis&ouml;t hoitavat lupa- ja ilmoitusasiansa
-                vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa.
-            </p>
-            <p>Palvelu on suunniteltu yhdess&auml; tulevien k&auml;ytt&auml;jien, eli luvanhakijoiden, suunnittelijoiden, kuntien ja ELY-keskusten kanssa.
-                  Lupapisteen k&auml;yt&ouml;st&auml; hy&ouml;tyv&auml;t kaikki.
-            </p>
-            <p><a href="#" class="btn">Tutustu palveluun vierailijana</a></p>
-          </div>
-
         </div>
       </div>
     </div>
@@ -71,7 +50,7 @@
 
       <div data-bind="ltext: 'reset.sent.1', visible: sent" class="reset-sent-1"></div>
       <div data-bind="ltext: 'reset.sent.2', visible: sent" class="reset-sent-2"></div>
-      <div data-bind="text: loc(['reset.fail', fail()]), visible: fail" class="reset-fail"></div>
+      <div data-bind="html: loc(['reset.fail', fail()]), visible: fail" class="reset-fail"></div>
 
     </form>
   </section>

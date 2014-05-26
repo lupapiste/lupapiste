@@ -100,8 +100,8 @@
             (.setRemoveFormAttributes true)      ; remove optional attributes from form tags
             (.setSimpleBooleanAttributes true)   ; remove values from boolean tag attributes
             (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
-            (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
-            (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
+            (.setRemoveHttpProtocol false)       ; do not replace "http://" with "//" inside tag attributes
+            (.setRemoveHttpsProtocol false)      ; do not replace "https://" with "//" inside tag attributes
             (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX)  ; remove spaces around provided tags
             (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
     (.compress c html)))

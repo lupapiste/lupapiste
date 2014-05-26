@@ -10,12 +10,13 @@
   [mapping-common/yksilointitieto
    mapping-common/alkuHetki
    {:tag :kasittelytietotieto :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
+   {:tag :kiinteistotunnus}
    {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
-   {:tag :lausuntotieto :child [mapping-common/lausunto]}
+   {:tag :lausuntotieto :child [mapping-common/lausunto_213]}
 
    {:tag :hakemustieto
     :child [{:tag :Hakemus
-             :child [{:tag :hakija :child mapping-common/henkilo-child-ns-yht}
+             :child [{:tag :hakija :child mapping-common/yhteystietotype-children_213}
                      {:tag :omistaja :child mapping-common/henkilo-child-ns-yht} ; property owner
                      {:tag :ottamistoiminnanYhteyshenkilo :child mapping-common/henkilo-child-ns-yht}
                      {:tag :alueenKiinteistonSijainti :child [(assoc mapping-common/sijantiType :ns "yht")]}
@@ -25,7 +26,7 @@
                               {:tag :ottamisaika} ; vuotta
                               ]}
                      {:tag :paatoksenToimittaminen} ; string enumeration: Noudetaan, Postitetaan, ei tiedossa
-                     {:tag :viranomaismaksujenSuorittaja :child mapping-common/henkilo-child-ns-yht}
+                     ; {:tag :viranomaismaksujenSuorittaja :child mapping-common/henkilo-child-ns-yht} REMOVED, using maksajatieto from 2.1.2 onwards
                      {:tag :ottamissuunnitelmatieto
                       :child [{:tag :Ottamissuunnitelma
                                :child [mapping-common/yksilointitieto
@@ -47,18 +48,16 @@
                                        {:tag :toimenpidealue :child [mapping-common/sijantiType]}
                                        ]}]}]}]}
 
+   {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_213}]}
    (mapping-common/sijaintitieto "yht")
    {:tag :koontiKentta}
-
-   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]}])
+   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]}
+   {:tag :asianKuvaus}])
 
 (def maa-aines_to_krysp
   {:tag :MaaAinesluvat
    :ns "ymm"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat
-                      http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat/2.1.1/maaAinesluvat.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/maa_ainesluvat" "2.1.2")
                  :xmlns:ymm "http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}

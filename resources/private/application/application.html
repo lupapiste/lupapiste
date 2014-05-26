@@ -12,10 +12,10 @@
             <!-- /ko -->
           </div>
         </div>
-        <div data-bind="with: application" class="application_summary_info">
+        <div class="application_summary_info" data-bind="with: application">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
-             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-bind="ltext: 'edit.address', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
           </h1>
 
@@ -104,36 +104,35 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
-          <!-- ko if: linkPermitData -->
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-
               <span data-bind="visible: $data.type() === 'lupapistetunnus'">
-
                 <a data-bind="text: $data.id,
                               click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
                               attr: {'data-test-app-link-permit': $data.id}"
                    data-test-id="test-application-link-permit-lupapistetunnus"
-                   href="#" class="link-permit-item"></a>
-
-                <a data-bind="visible: !_.contains(['sent', 'verdictGiven', 'closed'], $root.application.state()),
+                   class="link-permit-item"></a>
+                <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
                               ltext: 'application.linkPermitRemoveSelected',
                               click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
                    data-test-id="test-remove-link-permit"
                    href="#" class="remove-link-permit"></a>
               </span>
-
-              <span data-bind="visible: $data.type() === 'kuntalupatunnus',
-                               text: $data.id,
+              <span data-bind="visible: $data.type() === 'kuntalupatunnus'">
+                <span data-bind="text: $data.id,
                                attr: {'data-test-app-link-permit': $data.id}"
                     data-test-id="test-application-link-permit-kuntalupatunnus"
-                    href="#" class="link-permit-item"></span>
-
-
+                    class="link-permit-item">
+                </span>
+                <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
+                              ltext: 'application.linkPermitRemoveSelected',
+                              click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                  data-test-id="test-remove-link-permit"
+                  href="#" class="remove-link-permit"></a>
+              </span>
             </span>
           </div>
-          <!-- /ko -->
 
           <!-- Applications linking to us: -->
           <!-- ko if: appsLinkingToUs -->
@@ -153,7 +152,7 @@
 
 
         <!-- Actions: -->
-        <div data-bind="with: application" class="application_actions">
+        <div class="application_actions" data-bind="with: application">
           <div class="muncipality-info">
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
@@ -173,6 +172,10 @@
           <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
+          </button>
+          <button data-bind="click: $root.signingModel.init,   visible: $root.authorization.ok('sign-attachments'),     enable: $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
+            <span data-bind="ltext: 'application.signAttachments'"></span>
+            <span class="icon stamp left-align"></span>
           </button>
           <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export'),     enable: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
@@ -266,7 +269,7 @@
           <h3 data-bind="ltext: 'help'">Ohje</h3>
           <span class="icon drill-down-grey" onclick="expand.click(this)"> </span>
           <div class="expanded-content expand">
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.helpText')"></p>
+            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.helpText'"></p>
           </div>
         </aside>
       </div>
@@ -275,17 +278,21 @@
 
         <div id="application-info-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.applicationInfoDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'" class="tab-info"></p>
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <div data-bind="with: application">
-            <p data-bind="visible: $root.authorization.ok('add-operation'), html: loc('help.' + $root.application.permitType() + '.AddOperations')"> </p>
-            <button data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: $root.authorization.ok('add-operation')" class="btn-primary">
-             <span data-bind="ltext: 'application.addOperation'"></span> <span class="icon add left-align"></span>
-            </button>
-            <p data-bind="visible: $root.authorization.ok('link-permit-required'), ltext: 'help.AddPermit'"> </p>
-            <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('link-permit-required'), enable: $root.authorization.ok('link-permit-required')" class="btn-primary">
-             <span data-bind="ltext: 'application.addLinkPermit'"></span> <span class="icon add left-align"></span>
-            </button>
+            <div data-bind="if: $root.authorization.ok('add-operation')">
+              <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
+              <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
+               <span data-bind="ltext: 'application.addOperation'"></span> <span class="icon add left-align"></span>
+              </button>
+            </div>
+            <div data-bind="if: $root.authorization.ok('link-permit-required')">
+              <p data-bind="ltext: 'help.AddPermit'"></p>
+              <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, enable: $root.authorization.ok('link-permit-required')" class="btn-primary">
+               <span data-bind="ltext: 'application.addLinkPermit'"></span> <span class="icon add left-align"></span>
+              </button>
+            </div>
           </div>
           <!-- docgen generated content: -->
           <div class="application_section">
@@ -299,21 +306,23 @@
         </div>
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.PartiesDesc')" class="tab-info"></p>
-          <p data-bind="lhtml: 'required.field.desc'"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.PartiesDesc'" class="tab-info"></p>
           <div class="application_section" data-bind="with: application">
-            <h2 class="application_section_header " onclick="accordion.click();">
-              <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
             <div class="application_section_content content_expanded">
               <div>
-                <h3 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h3>
-                <div data-bind="with: $root.application">
+                <h2 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h2>
+                <div data-bind="with: $root.application" class="parties-list">
                   <ul data-bind="foreach: roles">
-                    <li>
-                      <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
-                      (<span data-bind="text: username"></span>)
-                      <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                      <i><span data-bind="if: $data.invite"><span class="user-invite" data-bind="text: loc('invited')"></span></span></i>
+                    <li class="party">
+                      <span class="person">
+                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        (<span data-bind="text: username"></span>)
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                      </span>
+                      <span class="invite-state">
+                        <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
+                        <span data-bind="if: !$data.invite"><span data-bind="ltext: 'accepted'"></span></span>
+                      </span>
                       <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                     </li>
                   </ul>
@@ -322,7 +331,7 @@
               </div>
             </div>
           </div>
-
+          <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="partiesDocgen" class="docgen-content">
@@ -344,7 +353,7 @@
 
         <div id="application-attachments-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.attachmentsDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc'" class="tab-info"></p>
           <div class="attachment-legend">
             <span class="ok icon"></span>
             <span data-bind="ltext: 'ok.title'"></span>
@@ -449,7 +458,7 @@
 
               <!-- ko foreach: attachments -->
               <tr style="cursor: pointer;">
-                <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span> </td>
+                <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span><span class="icon signed" data-bind="visible:$data.signed"></span></td>
                 <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                   <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                     <span data-bind="if: type">
@@ -466,7 +475,7 @@
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                   </span>
-                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAdd', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">
@@ -490,7 +499,7 @@
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.verdictDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'" class="tab-info"></p>
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
@@ -627,7 +636,7 @@
                           <tr class="statement-row" >
                             <td data-bind="if: $data.status">
                               <span data-bind="ltext: 'verdict.status.'+$data.status"></span></td>
-                            <td data-bind="text: $data.paatos"></td>
+                            <td data-bind="text: $data.paatos" class="verdict-text"></td>
                             <td data-bind="text: $data.pykala"></td>
                             <td data-bind="text: $data.paatoksentekija"></td>
                             <td data-bind="dateString: $data.paatospvm"></td>
@@ -671,7 +680,7 @@
           <div data-bind="with: application" class="application-statements">
 
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <p data-bind="html: loc('help.' + permitType() + '.statementsDesc')" class="tab-info"></p>
+            <p data-bind="lhtml: 'help.' + permitType() + '.statementsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -716,13 +725,13 @@
 
           <div data-bind="with: application" class="application-neighbors">
 
-            <h1 data-bind="html: loc('application.' + $root.application.permitType() + '.neighbors')">Naapurit</h1>
-            <p data-bind="html: loc('help.' + $root.application.permitType() + '.neighborsDesc')" class="tab-info"></p>
+            <h1 data-bind="lhtml: 'application.' + $root.application.permitType() + '.neighbors'">Naapurit</h1>
+            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
 
-            <div data-bind="if: neighbors() && neighbors().length>0">
+            <div data-bind="if: neighbors() && neighbors().length > 0">
               <table>
                 <thead>
                   <tr>
@@ -733,9 +742,9 @@
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: neighbors">
-                  <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + neighbor.owner.email()}">
-                    <td data-bind="text: neighbor.propertyId"></td>
-                    <td data-bind="with: neighbor.owner">
+                  <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + owner.email()}">
+                    <td data-bind="text: propertyId"></td>
+                    <td data-bind="with: owner">
                       <span data-bind="text: name" class="owner-name"></span>
                       <span data-bind="text: address.street" class="owner-street"></span>
                       <span data-bind="text: address.zip" class="owner-zip"></span>
@@ -745,16 +754,16 @@
                     <td>
                       <a data-bind="visible: $root.neighbor.statusCompleted($data),
                                     click: $root.neighbor.showStatus,
-                                    attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
+                                    attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
                          href="#">
-                        <span data-bind="text: loc(['neighbor.state', lastStatus.state()])" class="status-state"></span>
+                        <span data-bind="text: loc(['neighbor.state', _.last(status()).state()])" class="status-state"></span>
                       </a>
                       <span data-bind="visible: !$root.neighbor.statusCompleted($data),
-                                       text: loc(['neighbor.state', lastStatus.state()]),
-                                       attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
+                                       text: loc(['neighbor.state', _.last(status()).state()]),
+                                       attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
                             class="status-state">
                       </span>
-                      <span data-bind="dateTimeString: lastStatus.created" class="status-time"></span>
+                      <span data-bind="dateTimeString: _.last(status()).created()" class="status-time"></span>
                     </td>
                     <td>
                       <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
@@ -766,7 +775,7 @@
                            href="#">
                         </a>
                         <a data-bind="click: $root.neighbor.markDone,
-                                      visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
+                                      visible: _.last(status()).state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
                                       ltext: 'neighbors.actions.markDone',
                                       clickBubble: false"
                            data-test-id="neighbor-row-mark-done"
@@ -886,9 +895,9 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: tasks">
-                <tr data-bind="attr: {'data-test-type': schema.info.name}, click: openTask" style="cursor: pointer;">
+                <tr data-bind="attr: {'data-test-type': schema.info.name}">
                   <td><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span></td>
-                  <td data-bind="text: displayName"></td>
+                  <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
                   <td data-bind="dateString: $data.closed"></td>
                 </tr>
               </tbody>
@@ -905,7 +914,7 @@
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
-          <p data-bind="html: loc('help.' + $root.application.permitType() + '.conversationDesc')" class="tab-info"></p>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.conversationDesc'" class="tab-info"></p>
           <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
           <div class="process-nav"></div>
         </div>
@@ -1059,9 +1068,6 @@
                 <span>/</span>
                 <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
               </div>
-
-              <form class="stamp-files-select-all-none">
-              </form>
             </div>
 
             <div class="stamp-status">

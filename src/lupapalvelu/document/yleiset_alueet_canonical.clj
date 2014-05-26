@@ -3,19 +3,18 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
-            [clojure.walk :as walk]
-            [sade.common-reader :as cr]))
+            [clojure.walk :as walk]))
 
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
-           :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
-           :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date ((state-timestamps (keyword (:state application))) application))
-           :kasittelija (let [handler (:authority application)]
-                          (if (seq handler)
-                            {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                                             :sukunimi (:lastName handler)}}}}
-                            empty-tag))}})
+                    :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
+                    :asiatunnus (:id application)
+                    :paivaysPvm (to-xml-date (state-timestamp application))
+                    :kasittelija (let [handler (:authority application)]
+                                   (if (seq handler)
+                                     {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
+                                                                      :sukunimi (:lastName handler)}}}}
+                                     empty-tag))}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu))]
@@ -34,9 +33,8 @@
     (if postiosoite
       (merge
         yritys-basic
-        (if is-maksaja-doc
-          {:postiosoite postiosoite}
-          {:postiosoitetieto {:Postiosoite postiosoite}}))
+        {:postiosoite postiosoite}
+        {:postiosoitetieto {:Postiosoite postiosoite}})
       yritys-basic)))
 
 (defn- get-hakija [hakija-doc]
@@ -44,7 +42,8 @@
   ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
   (let [hakija (not-empty
                  (if (= "yritys" (:_selected hakija-doc))
-                   (let [yritys (get-yritys (:yritys hakija-doc) false)
+                   (let [yritys (deep-merge (:yritys (get-osapuoli-data hakija-doc :hakija ))
+                                  (get-yritys (:yritys hakija-doc) false))
                          henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo))]
                      (when (and yritys henkilo)
                        {:Osapuoli {:yritystieto {:Yritys yritys}
@@ -84,23 +83,25 @@
       (merge content {:rooliKoodi roolikoodi}))))
 
 (defn- get-tyomaasta-vastaava [tyomaasta-vastaava]
-  (let [type (-> tyomaasta-vastaava :_selected)
+  (let [type (:_selected tyomaasta-vastaava)
         vastuuhenkilo (get-vastuuhenkilo tyomaasta-vastaava type "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")]
     (when vastuuhenkilo
       (merge
         {:Vastuuhenkilo vastuuhenkilo}
         (when (= "yritys" type)
-          (when-let [yritys (get-yritys (:yritys tyomaasta-vastaava) false)]
+          (when-let [yritys (deep-merge (:yritys (get-osapuoli-data tyomaasta-vastaava :tyomaastaVastaava ))
+                                  (get-yritys (:yritys tyomaasta-vastaava) false))]
             {:Osapuoli {:yritystieto {:Yritys yritys}
                         :rooliKoodi "ty\u00f6nsuorittaja"}}))))))
 
 (defn- get-yritys-and-henkilo [doc doc-type]
-  (let [is-maksaja-doc (true? (= "maksaja" doc-type))
-        info (if (= (-> doc :_selected) "yritys")
+  (let [is-maksaja-doc (= "maksaja" doc-type)
+        info (if (= (:_selected doc) "yritys")
                ;; yritys-tyyppinen hakija/maksaja, siirretaan yritysosa omaksi osapuolekseen
                (let [vastuuhenkilo-roolikoodi (if is-maksaja-doc "maksajan vastuuhenkil\u00f6" "hankkeen vastuuhenkil\u00f6")
                      vastuuhenkilo (get-vastuuhenkilo doc "yritys" vastuuhenkilo-roolikoodi)
-                     yritys (get-yritys (:yritys doc) is-maksaja-doc)]
+                     yritys (deep-merge (:yritys (get-osapuoli-data doc :tyomaastaVastaava ))
+                                        (get-yritys (:yritys doc) is-maksaja-doc))]
                  (when (and vastuuhenkilo yritys)
                    {:Vastuuhenkilo vastuuhenkilo
                     :Osapuoli {:yritystieto {:Yritys yritys}}}))
@@ -112,29 +113,19 @@
                                           {:laskuviite (-> doc :laskuviite)}
                                           {:rooliKoodi "hakija"})))))
 
-(defn- get-lisatietoja-sijoituskohteesta [data]
-  (when-let [arvo (-> data :lisatietoja-sijoituskohteesta)]
-    {:selitysteksti "Lis\u00e4tietoja sijoituskohteesta" :arvo arvo}))
-
-(defn- get-sijoituksen-tarkoitus [data]
-  (when-let [arvo (if (= "other" (:sijoituksen-tarkoitus data))
-                    (-> data :muu-sijoituksen-tarkoitus)
-                    (-> data :sijoituksen-tarkoitus))]
-    {:selitysteksti "Sijoituksen tarkoitus" :arvo arvo}))
-
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
-  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-alkaa-pvm))
-                   :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :mainostus-paattyy-pvm))}})
+  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (:tapahtuma-aika-alkaa-pvm mainostus-viitoitus-tapahtuma))
+                   :loppuHetki (to-xml-datetime-from-string (:tapahtuma-aika-paattyy-pvm mainostus-viitoitus-tapahtuma))}})
 
 (defn- get-mainostus-viitoitus-lisatiedot [mainostus-viitoitus-tapahtuma]
   [{:LupakohtainenLisatieto
-    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :tapahtuman-nimi)]
+    (when-let [arvo (:tapahtuman-nimi mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Tapahtuman nimi" :arvo arvo})}
    {:LupakohtainenLisatieto
-    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :tapahtumapaikka)]
+    (when-let [arvo (:tapahtumapaikka mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Tapahtumapaikka" :arvo arvo})}
    {:LupakohtainenLisatieto
-    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa)]
+    (when-let [arvo (:haetaan-kausilupaa mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
 (defn- get-construction-ready-info [application]
@@ -155,16 +146,13 @@
   {:Kayttolupa                  default-config
 
    :Tyolupa                     (merge default-config
-                                  {:sijoitus-lisatiedot                        true
-                                   :tyomaasta-vastaava                         true
-                                   :hankkeen-kuvaus-with-sijoituksen-tarkoitus true
+                                  {:tyomaasta-vastaava                         true
                                    :johtoselvitysviitetieto                    true})
 
 
    :Sijoituslupa                (merge default-config
                                   {:tyoaika                                    false
-                                   :dummy-alku-and-loppu-pvm                   true
-                                   :sijoitus-lisatiedot                        true})
+                                   :dummy-alku-and-loppu-pvm                   true})
 
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
@@ -178,6 +166,11 @@
                                           :mainostus-viitoitus-lisatiedot      true}})
 
 
+(defn- get-luvan-tunniste-tiedot [application]
+  (let [base-id (update-in (lupatunnus application) [:LupaTunnus :muuTunnustieto] vector)
+        link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}}) (:linkPermitData application))]
+    (update-in base-id [:LupaTunnus :muuTunnustieto] #(into % link-permits))))
+
 (defn- permits [application]
   ;;
   ;; Sijoituslupa: Maksaja, alkuPvm and loppuPvm are not filled in the application, but are requested by schema
@@ -185,8 +178,6 @@
   ;;
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
-
-        link-permit-data (-> application :linkPermitData first)
 
         operation-name-key (-> application :operations first :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
@@ -209,20 +200,26 @@
         main-viit-tapahtuma (when main-viit-tapahtuma-doc
                              (main-viit-tapahtuma-doc main-viit-tapahtuma-name))
 
+        ;; Note: Agreed with Vianova 5.3.2014 that:
+        ;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
+        ;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
                    (to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                     (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm))
+                     (or
+                       (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-alkaa-pvm))
+                       (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm)))
                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm))))
         loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
                     (to-xml-date (:modified application))
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                      (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm))
+                      (or
+                        (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
+                        (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
                       (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
-        maksaja (if (:dummy-maksaja config)
-                  (merge (:Osapuoli hakija) {:laskuviite "0000000000"})
-                  (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja"))
-        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
+        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
+        maksajatieto (when maksaja {:Maksaja (deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
@@ -253,13 +250,6 @@
                                           (when-let [erikoiskuvaus-operaatiosta (ya-operation-type-to-additional-usage-description operation-name-key)]
                                             {:LupakohtainenLisatieto {:selitysteksti "Lis\u00e4tietoja k\u00e4ytt\u00f6tarkoituksesta"
                                                                       :arvo erikoiskuvaus-operaatiosta}})
-                                          (when (:sijoitus-lisatiedot config)
-                                            (if (:hankkeen-kuvaus-with-sijoituksen-tarkoitus config)
-                                              (let [sijoituksen-tarkoitus-doc (-> documents-by-type :yleiset-alueet-hankkeen-kuvaus-kaivulupa first :data)]
-                                                [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}])
-                                              (let [sijoituksen-tarkoitus-doc (-> documents-by-type :sijoituslupa-sijoituksen-tarkoitus first :data)]
-                                                [{:LupakohtainenLisatieto (get-sijoituksen-tarkoitus sijoituksen-tarkoitus-doc)}
-                                                 {:LupakohtainenLisatieto (get-lisatietoja-sijoituskohteesta sijoituksen-tarkoitus-doc)}])))
                                           (when (:mainostus-viitoitus-lisatiedot config)
                                             (get-mainostus-viitoitus-lisatiedot main-viit-tapahtuma)))))
 
@@ -269,13 +259,11 @@
                                                         :tunniste tunniste}}))
 
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
-                                  {:Johtoselvitysviite {:vaadittuKytkin false
-                                                        ;:tunniste "..."
-                                                        }})
+                                  {:Johtoselvitysviite {:vaadittuKytkin false}})
 
         body {permit-name-key (merge
                                 {:kasittelytietotieto (get-kasittelytieto application)
-                                 :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
+                                 :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
                                  :alkuPvm alku-pvm
                                  :loppuPvm loppu-pvm
                                  :sijaintitieto (get-sijaintitieto application)
@@ -293,7 +281,7 @@
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
-    (cr/strip-nils body)))
+    (strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -325,7 +313,8 @@
                    (to-xml-date (:submitted application)))
         loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
-        maksajatieto (when maksaja {:Maksaja (:Osapuoli maksaja)})
+        maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
+        maksajatieto (when maksaja {:Maksaja (deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         osapuolitieto (vec (filter :Osapuoli [hakija]))
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))
@@ -342,7 +331,7 @@
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :yleinenAlueAsiatieto {permit-name-key
                              {:kasittelytietotieto (get-kasittelytieto application)
-                              :luvanTunnisteTiedot (get-viitelupatieto link-permit-data)
+                              :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
                               :alkuPvm alku-pvm
                               :loppuPvm loppu-pvm
                               :sijaintitieto (get-sijaintitieto application)

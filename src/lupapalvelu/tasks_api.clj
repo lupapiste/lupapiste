@@ -35,7 +35,7 @@
 (defcommand create-task
   {:parameters [id taskName schemaName]
    :roles      [:authority]
-   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created application user] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
     (fail! :illegal-schema))
@@ -49,7 +49,7 @@
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles      [:authority]
-   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{created :created :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
   (update-application command
@@ -61,7 +61,7 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles       [:authority]
-   :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [command]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
   (set-state command taskId :ok))
@@ -71,7 +71,7 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :roles       [:authority]
-   :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [command]
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
@@ -82,7 +82,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [(permit/validate-permit-type-is permit/R)] ; KRYPS mapping currently implemented only for R
    :roles       [:authority]
-   :states      [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)]

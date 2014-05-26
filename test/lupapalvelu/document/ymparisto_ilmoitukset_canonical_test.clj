@@ -1,60 +1,47 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as yic]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.canonical-test-common :refer :all]
             [lupapalvelu.document.ymparisto-schemas]))
 
-(def ^:private kesto {:created 1391415025497,
+(def ^:private kesto {:id "52ef4ef14206428d3c0394b7"
+                      :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}
                       :data
-                      {:kesto
-                       {:alku {:modified 1391415615718, :value "03.02.2014"},
-                        :kello
-                        {:arkisin {:modified 1391415637288, :value "07.00 - 16:00"},
-                         :lauantait {:modified 1391415639677, :value "-"},
-                         :pyhat {:modified 1391415640276, :value "-"}},
-                        :loppu {:modified 1391415618809, :value "07.02.2014"}}},
-                      :id "52ef4ef14206428d3c0394b7",
-                      :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}})
+                      (tools/wrapped
+                        {:kesto
+                         {:alku "03.02.2014"
+                          :loppu "7.2.2014"
+                          :arki {:arkiAlkuAika "7:00", :arkiLoppuAika "21:30:00"}
+                          :lauantai {:lauantaiAlkuAika "8:00", :lauantaiLoppuAika "20:00:00.0"}
+                          :sunnuntai {:sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}}})})
 
-(def ^:private meluilmo {:created 1391415025497,
-               :data
-               {:melu
-                {:melu10mdBa {:modified 1391415596372, :value "150"},
-                 :mittaus {:modified 1391415612510, :value "dbsid?"},
-                 :paivalla {:modified 1391415601672
-                            :value "150"},
-                 :yolla {:modified 1391415602101, :value "0"}},
-                :rakentaminen
-                {:koneet
-                 {:modified 1391415557870,
-                  :value
-                  "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "},
-                 :kuvaus
-                 {:modified 1391415519512,
-                  :value
-                  "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"},
-                 :melua-aihettava-toiminta
-                 {:modified 1391415423129, :value "louhinta"}},
-                :tapahtuma
-                {:kuvaus
-                 {:modified 1391415593261,
-                  :value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"},
-                 :nimi {:modified 1391415570121, :value "Louhijouden saunailta"},
-                 :ulkoilmakonsertti {:modified 1391415571551, :value true}}},
-               :id "52ef4ef14206428d3c0394b5",
-               :schema-info
-               {:order 50,
-                :version 1,
-                :name "meluilmoitus",
-                :op
-                {:id "52ef4ef14206428d3c0394b4",
-                 :name "meluilmoitus",
-                 :created 1391415025497},
-                :removable true}})
+(fact "Meta test: kesto" kesto => valid-against-current-schema?)
+
+(def ^:private meluilmo
+  {:id "52ef4ef14206428d3c0394b5"
+   :created 1391415025497
+   :schema-info {:name "meluilmoitus", :version 1, :op {:id "52ef4ef14206428d3c0394b4", :name "meluilmoitus", :created 1391415025497}}
+   :data
+   {:melu
+    {:melu10mdBa {:value "150"}
+     :mittaus {:value "dbsid?"}
+     :paivalla {:value "150"}
+     :yolla {:value "0"}}
+    :rakentaminen
+    {:koneet {:value "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "}
+     :kuvaus {:value "Meluilmoitus louhinnasta, rammeroinnista ja murskauksesta"}
+     :melua-aihettava-toiminta {:value "louhinta"}}
+    :tapahtuma {:kuvaus {:value "V\u00e4h\u00e4n virkistyst\u00e4 t\u00e4h\u00e4n v\u00e4liin"}
+                :nimi {:value "Louhijouden saunailta"}
+                :ulkoilmakonsertti {:value true}}}
+   })
+
+(fact "Meta test: meluilmo" meluilmo => valid-against-current-schema?)
 
 (def meluilmoitus-application {:sent nil,
-                               :neighbors {},
+                               :neighbors [],
                                :schema-version 1,
                                :authority
                                {:role "authority",
@@ -107,7 +94,7 @@
                                :municipality "638"})
 
 (def meluilmoitus-yritys-application {:sent nil,
-                               :neighbors {},
+                               :neighbors [],
                                :schema-version 1,
                                :authority
                                {:role "authority",
@@ -190,21 +177,8 @@
                  lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
                  ilmoittaja (:ilmoittaja Melutarina) => truthy
-                 nimi (:nimi ilmoittaja) => "Yksityishenkil\u00f6"
-                 postiosoite (:postiosoite ilmoittaja) => truthy
-                 osoitenimi (:osoitenimi postiosoite) => truthy
-                 teksti (:teksti osoitenimi) => "Murskaajankatu 5"
-                 postinumero (:postinumero postiosoite) => "36570"
-                 postitoimipaikannimi (:postitoimipaikannimi postiosoite) => "Kaivanto"
 
-                 yhteyshenkilo (:yhteyshenkilo ilmoittaja) => truthy
-                 nimi (:nimi yhteyshenkilo) => {:etunimi "Pekka" :sukunimi "Borga"}
-                 sahkopostiosoite (:sahkopostiosoite yhteyshenkilo) => "pekka.borga@porvoo.fi"
-                 puhelin (:puhelin yhteyshenkilo) => "121212"
-
-                 liikeJaYhteisotunnus (:liikeJaYhteisotunnus ilmoittaja) => nil
-
-                 toiminnanSijainti (:toiminnanSijainti Melutarina) => truthy
+                 toiminnanSijainti (-> Melutarina :toiminnanSijaintitieto first :ToiminnanSijainti) => truthy
                  Osoite (:Osoite toiminnanSijainti) => truthy
                  osoitenimi (:osoitenimi Osoite) => {:teksti "Londb\u00f6lentie 97"}
                  kunta (:kunta Osoite) => "638"
@@ -230,48 +204,72 @@
                  muu (:muu tapahtuma) => nil
 
                  toiminnanKesto (:toiminnanKesto Melutarina) => truthy
-                 alkuHetki (:alkuHetki toiminnanKesto) => "2014-02-03T00:00:00"
-                 loppuHetki (:loppuHetki toiminnanKesto) => "2014-02-07T00:00:00"
-                 arkisin (:arkisin toiminnanKesto) => "07.00 - 16:00"
-                 lauantaisin (:lauantaisin toiminnanKesto) => "-"
-                 pyhisin (:pyhisin toiminnanKesto) => "-"
 
                  melutiedot (:melutiedot Melutarina) => truthy
-                 koneidenLkm (:koneidenLkm melutiedot) => nil
+                 koneidenLkm (:koneidenLkm melutiedot) => "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. " ; TODO was nil, why?
                  melutaso (:melutaso melutiedot) => truthy
                  db (:db melutaso) => "150"
                  paiva (:paiva melutaso) => "150"
                  yo (:yo melutaso) => "0"
                  mittaaja (:mittaaja melutaso) => "dbsid?"]
 
-;                 (clojure.pprint/pprint canonical)
+
+             (facts "ilmoittaja"
+               (let [postiosoite (get-in ilmoittaja [:osoitetieto :Osoite]) => truthy
+                     osoitenimi (:osoitenimi postiosoite) => truthy]
+
+                 (:yhteyshenkilonNimi ilmoittaja) => nil
+                 (:yrityksenNimi ilmoittaja) => nil
+                 (:yTunnus ilmoittaja) => nil
+
+                 (:teksti osoitenimi) => "Murskaajankatu 5"
+                 (:postinumero postiosoite) => "36570"
+                 (:postitoimipaikannimi postiosoite) => "Kaivanto"
+                 (:etunimi ilmoittaja) => "Pekka"
+                 (:sukunimi ilmoittaja) => "Borga"
+                 (:sahkopostiosoite ilmoittaja) => "pekka.borga@porvoo.fi"
+                 (:puhelinnumero ilmoittaja) => "121212"))
+
+             (fact "toiminnan kesto"
+               (:alkuPvm toiminnanKesto) => "2014-02-03"
+               (:loppuPvm toiminnanKesto) => "2014-02-07"
+
+               (:arkiAlkuAika toiminnanKesto) => "07:00:00"
+               (:arkiLoppuAika toiminnanKesto) => "21:30:00"
+               (:lauantaiAlkuAika toiminnanKesto) => "08:00:00"
+               (:lauantaiLoppuAika toiminnanKesto) => "20:00:00.0"
+               (:sunnuntaiAlkuAika toiminnanKesto) => "12:00:00"
+               (:sunnuntaiLoppuAika toiminnanKesto) => "18:00:00")
+
+             ; (clojure.pprint/pprint canonical)
 ))
 
 (fl/facts* "Meluilmoitus yrityshakija to canonical"
-           (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
-                 Ilmoitukset (:Ilmoitukset canonical) => truthy
-                 toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
-                 aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
+  (let [canonical (yic/meluilmoitus-canonical meluilmoitus-yritys-application "fi") => truthy
+        Ilmoitukset (:Ilmoitukset canonical) => truthy
+        toimutuksenTiedot (:toimituksenTiedot Ilmoitukset) => truthy
+        aineistonnimi (:aineistonnimi toimutuksenTiedot) => (:title meluilmoitus-application)
 
-                 melutarina (-> Ilmoitukset :melutarina :Melutarina) => truthy
-                 kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
+        melutarina (-> Ilmoitukset :melutarina :Melutarina) => truthy
+        kasittelytietotieto (:kasittelytietotieto melutarina) => truthy
 
-                 luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
-                 LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
-                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-                 MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-                 tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
-                 sovellus (:sovellus MuuTunnus) => "Lupapiste"
-                 ilmoittaja (:ilmoittaja melutarina) => {:nimi "Yrtti Oy",
-                                                         :postiosoite
-                                                         {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
+        luvanTunnistetiedot (:luvanTunnistetiedot melutarina) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        tunnus (:tunnus MuuTunnus) => (:id meluilmoitus-application)
+        sovellus (:sovellus MuuTunnus) => "Lupapiste"]
+
+    (fact "yritys-ilmoittaja"
+      (:ilmoittaja melutarina) => {:yTunnus "1060155-5"
+                                   :yrityksenNimi "Yrtti Oy"
+                                   :yhteyshenkilonNimi "Pertti Yritt\u00e4j\u00e4"
+                                   :osoitetieto {:Osoite {:osoitenimi {:teksti "H\u00e4meenkatu 3 "},
                                                           :postitoimipaikannimi "kuuva",
-                                                          :postinumero "43640"},
-                                                         :yhteyshenkilo
-                                                         {:nimi {:sukunimi "Yritt\u00e4j\u00e4", :etunimi "Pertti"},
-                                                          :puhelin "060222155",
-                                                          :sahkopostiosoite "tew@gjr.fi"},
-                                                         :liikeJaYhteisotunnus "1060155-5"}]))
+                                                          :postinumero "43640"}}
+                                   :puhelinnumero "060222155"
+                                   :sahkopostiosoite "tew@gjr.fi"})
+    ))
 
 
 

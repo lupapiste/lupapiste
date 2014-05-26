@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [jatkoaika-to-canonical]]
             [sade.util :refer :all]))
 
@@ -27,7 +28,7 @@
                                          :tyoaika-paattyy-pvm {:value "30.12.2013"}}})
 
 (def ^:private  documents [hakija
-                           maksaja
+                           (assoc-in maksaja [:data :_selected :value] "henkilo")
                            hankkeen-kuvaus-jatkoaika
                            tyoaika-jatkoaika])
 
@@ -75,7 +76,8 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot Jatkoaika) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
+        lp-muu-tunnus (:MuuTunnus (first muuTunnustieto)) => truthy
+        viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy
 
         Jatkoaika-kayttotarkoitus (:kayttotarkoitus Jatkoaika) => truthy
 
@@ -88,15 +90,8 @@
         osapuolet-vec (-> Jatkoaika :osapuolitieto) => truthy
         vastuuhenkilot-vec (-> Jatkoaika :vastuuhenkilotieto) => truthy
 
-        ;; maksajan yritystieto-osa
-        Maksaja (-> Jatkoaika :maksajatieto :Maksaja) => truthy
-        maksaja-Yritys (-> Maksaja :yritystieto :Yritys) => truthy
-        maksaja-Yritys-postiosoite (-> maksaja-Yritys :postiosoite) => truthy
-        ;; maksajan henkilotieto-osa
-        rooliKoodi-maksajan-vastuuhenkilo "maksajan vastuuhenkil\u00f6"
-        maksaja-filter-fn #(= (-> % :Vastuuhenkilo :rooliKoodi) rooliKoodi-maksajan-vastuuhenkilo)
-        maksaja-Vastuuhenkilo (:Vastuuhenkilo (first (filter maksaja-filter-fn vastuuhenkilot-vec)))
-        maksaja-Vastuuhenkilo-osoite (-> maksaja-Vastuuhenkilo :osoitetieto :osoite) => truthy
+        maksaja (-> Jatkoaika :maksajatieto :Maksaja) => truthy
+
 
         Lisaaika (-> Jatkoaika :lisaaikatieto :Lisaaika) => truthy
         perustelu (:perustelu Lisaaika) => truthy
@@ -137,8 +132,13 @@
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
-    (fact "Muu tunnus" (:tunnus MuuTunnus) => (:id link-permit-data))
-    (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
+    (fact "LP-tunnus"
+      (:tunnus lp-muu-tunnus) => (:id jatkoaika-application)
+      (:sovellus lp-muu-tunnus) => "Lupapiste")
+
+    (fact "Viitelupa"
+      (:tunnus viitelupatunnus) => (:id link-permit-data)
+      (:sovellus viitelupatunnus) => "Viitelupa")
 
     (fact "Jatkoaika-kayttotarkoitus" Jatkoaika-kayttotarkoitus => (ya-operation-type-to-usage-description
                                                                      (keyword (:operation link-permit-data))))
@@ -149,23 +149,21 @@
     (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> jatkoaika-application :location :x) " " (-> jatkoaika-application :location :y)))
 
     ;; Maksajan tiedot
-    (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))
-    (fact "maksaja-rooliKoodi" (:rooliKoodi maksaja-Vastuuhenkilo) => rooliKoodi-maksajan-vastuuhenkilo)
-    (fact "maksaja-henkilo-etunimi" (:etunimi maksaja-Vastuuhenkilo) => (-> nimi :etunimi :value))
-    (fact "maksaja-henkilo-sukunimi" (:sukunimi maksaja-Vastuuhenkilo) => (-> nimi :sukunimi :value))
-    (fact "maksaja-henkilo-sahkopostiosoite" (:sahkopostiosoite maksaja-Vastuuhenkilo) => (-> yhteystiedot :email :value))
-    (fact "maksaja-henkilo-puhelinnumero" (:puhelinnumero maksaja-Vastuuhenkilo) => (-> yhteystiedot :puhelin :value))
-    (fact "maksaja-henkilo-osoite-osoitenimi"
-      (-> maksaja-Vastuuhenkilo-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
-    (fact "maksaja-henkilo-osoite-postinumero"
-      (:postinumero maksaja-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
-    (fact "maksaja-henkilo-osoite-postitoimipaikannimi"
-      (:postitoimipaikannimi maksaja-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
-    (fact "maksaja-yritys-nimi" (:nimi maksaja-Yritys) => (-> yritys-nimi-ja-tunnus :yritysnimi :value))
-    (fact "maksaja-yritys-liikeJaYhteisotunnus" (:liikeJaYhteisotunnus maksaja-Yritys) => (-> yritys-nimi-ja-tunnus :liikeJaYhteisoTunnus :value))
-    (fact "maksaja-yritys-osoitenimi" (-> maksaja-Yritys-postiosoite :osoitenimi :teksti) => (-> osoite :katu :value))
-    (fact "maksaja-yritys-postinumero" (:postinumero maksaja-Yritys-postiosoite) => (-> osoite :postinumero :value))
-    (fact "maksaja-yritys-postitoimipaikannimi" (:postitoimipaikannimi maksaja-Yritys-postiosoite) => (-> osoite :postitoimipaikannimi :value))
+    (fact "Henkilomaksaja 2.1.2"
+      (get-in maksaja [:henkilotieto :Henkilo :nimi]) => (tools/unwrapped nimi)
+      (get-in maksaja [:henkilotieto :Henkilo :osoite]) => {:osoitenimi {:teksti "Paapankuja 12"}, :postinumero "33800", :postitoimipaikannimi "Piippola"}
+      (get-in maksaja [:henkilotieto :Henkilo :puhelin]) => (:puhelin (tools/unwrapped yhteystiedot))
+      (get-in maksaja [:henkilotieto :Henkilo :henkilotunnus]) (:hetu (tools/unwrapped henkilotiedot))
+      (get-in maksaja [:henkilotieto :Henkilo :sahkopostiosoite]) => (:email (tools/unwrapped yhteystiedot))
+      )
+
+    (fact "Henkilomaksaja 2.1.3"
+      (select-keys maksaja [:etunimi :sukunimi]) => (tools/unwrapped nimi)
+      (:puhelinnumero maksaja) => (:puhelin (tools/unwrapped yhteystiedot))
+      (:henkilotunnus maksaja) => (:hetu (tools/unwrapped henkilotiedot))
+      (:sahkopostiosoite maksaja) => (:email (tools/unwrapped yhteystiedot))
+      (:laskuviite maksaja) => (tools/unwrapped _laskuviite)
+      (get-in maksaja [:osoitetieto :Osoite]) => {:osoitenimi {:teksti "Paapankuja 12"}, :postinumero "33800", :postitoimipaikannimi "Piippola"})
 
 ;    ;; Osapuoli: Hakija
 ;    (fact "hakija-vastuuhenkilo-rooliKoodi" (:rooliKoodi hakija-Vastuuhenkilo) => rooliKoodi-hankkeen-vastuuhenkilo)

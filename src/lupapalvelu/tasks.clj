@@ -41,7 +41,7 @@
             [{:name "pitoPvm" :type :date}
             {:name "pitaja" :type :string}
             {:name "huomautukset" :type :group
-             :body [{:name "kuvaus" :required true :type :text}
+             :body [{:name "kuvaus" :required true :type :text :max-len 4000}
                     {:name "maaraAika" :type :date}
                     {:name "toteaja" :type :string}
                     {:name "toteamisHetki" :type :date}]}
@@ -54,8 +54,8 @@
            {:name "asiointitunnus" :type :string :max-len 17}]}
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
-    :body [{:name "maarays" :type :text :readonly true :layout :full-width}
-           {:name "kuvaus"  :type :text :max-len 4000  :layout :full-width}]}])
+    :body [{:name "maarays" :type :text :max-len 4000 :readonly true :layout :full-width}
+           {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}]}])
 
 (defn new-task [schema-name task-name data {:keys [created assignee] :as meta} source]
   {:pre [schema-name
@@ -89,9 +89,13 @@
          (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
          (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
            (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
-         (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
-           (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
-             (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)")))
+         (if (seq (:vaadittuTyonjohtajatieto lupamaaraykset))
+           ; KRYSP yhteiset 2.1.1+
+           (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source) (:vaadittuTyonjohtajatieto lupamaaraykset))
+           ; KRYSP yhteiset 2.1.0 and below
+           (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
+             (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
+               (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))
          ;; from YA verdict
          (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
            (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))

@@ -2,9 +2,10 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.itest-util :refer :all]))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
 
 (def id "75300301050006")
 
@@ -120,19 +121,33 @@
                                        :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"}})))))
 
-(fact "converting verdict krysp to lupapiste domain model"
-  (let [xml (application-xml local-krysp id false)]
+(fact "converting rakval verdict krysp to lupapiste domain model"
+  (let [xml (rakval-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :RakennusvalvontaAsia ->verdict)) => 2))
+    (count (->verdicts xml ->verdict)) => 2))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (application-xml poik-case-type poik-lp-lupatunnus local-krysp id false)]
+  (let [xml (poik-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :Poikkeamisasia ->verdict)) => 1))
+    (count (->verdicts xml ->verdict)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
   (let [xml (ya-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)) => 1))
+    (count (->verdicts xml ->simple-verdict)) => 1))
 
+(facts "converting ymparisto verdicts  krysp to lupapiste domain model"
+  (doseq [permit-type ["YL" "MAL" "VVVL"]]
+    (let [getter (permit/get-application-xml-getter permit-type)
+          reader (permit/get-verdict-reader permit-type)]
+
+      (fact "Application XML getter is set up" getter => fn?)
+      (fact "Verdict reader is set ip" reader => fn?)
+
+      (let [xml (getter local-krysp id false)
+            cases (->verdicts xml reader)]
+        (fact "xml is parsed" cases => truthy)
+        (fact "xml has 1 cases" (count cases) => 1)
+        (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+        (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))))))

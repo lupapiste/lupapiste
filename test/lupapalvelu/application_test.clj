@@ -9,27 +9,12 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]))
 
-(facts "sorting parameter parsing"
-  (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}
-  (make-sort {:iSortCol_0 1 :sSortDir_0 "desc"}) => {:address -1}
-  (make-sort {:iSortCol_0 2 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 3 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 4 :sSortDir_0 "asc"})  => {:submitted 1}
-  (make-sort {:iSortCol_0 5 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 6 :sSortDir_0 "desc"}) => {}
-  (make-sort {:iSortCol_0 7 :sSortDir_0 "asc"})  => {:modified 1}
-  (make-sort {:iSortCol_0 8 :sSortDir_0 "asc"})  => {:state 1}
-  (make-sort {:iSortCol_0 9 :sSortDir_0 "asc"})  => {:authority 1}
-  (make-sort {:iSortCol_0 {:injection "attempt"}
-              :sSortDir_0 "; drop database;"})   => {}
-  (make-sort {})                                 => {}
-  (make-sort nil)                                => {})
 
 (fact "update-document"
-  (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => truthy
+  (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
   (provided
     ..application.. =contains=> {:id ..id..}
-    (mongo/update :applications {:_id ..id..} ..changes..) => true))
+    (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application validate-x validate-y)
 
@@ -53,12 +38,6 @@
   (domain/get-document-by-name {:documents docs} schema-name))
 
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
-
-(fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
-  (make-query {} {:filter-kind  "both"
-                  :filter-state "all"
-                  :filter-user  "123"}
-              {:role "authority"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
 
 (facts filter-repeating-party-docs
   (filter-repeating-party-docs 1 ["a" "b" "c"]) => (just "a")

@@ -1,5 +1,6 @@
 (ns sade.xml
   (:require [clojure.xml :as xml]
+            [clojure.string :as s]
             [net.cgrand.enlive-html :as enlive])
   (:import  [org.apache.commons.lang3 StringEscapeUtils]))
 
@@ -8,8 +9,24 @@
   "http://commons.apache.org/proper/commons-lang/javadocs/api-3.1/org/apache/commons/lang3/StringEscapeUtils.html#escapeXml(java.lang.String)"
   [^String s] (StringEscapeUtils/escapeXml s))
 
-(defn parse-string [^String s encoding] (xml/parse (java.io.ByteArrayInputStream. (.getBytes s encoding))))
-(defn parse [^String s & {:keys [encoding] :or {encoding "UTF-8"}}] (if (.startsWith (.trim s) "<") (parse-string s encoding) (xml/parse s)))
+;; Safer version of clojure.xml/startparse-sax
+(defn startparse-sax-no-doctype [s ch]
+  (..
+    (doto (javax.xml.parsers.SAXParserFactory/newInstance)
+      (.setFeature javax.xml.XMLConstants/FEATURE_SECURE_PROCESSING true)
+      (.setFeature "http://apache.org/xml/features/disallow-doctype-decl" true))
+    (newSAXParser)
+    (parse s ch)))
+
+(defn parse-string [^String s encoding]
+  (xml/parse (java.io.ByteArrayInputStream. (.getBytes s encoding)) startparse-sax-no-doctype))
+
+(defn parse [^String s & {:keys [encoding] :or {encoding "UTF-8"}}]
+  {:pre [s]}
+  (let [xml (s/replace (s/trim s) #"[\uFEFF-\uFFFF]", "")]
+    (if (.startsWith xml "<")
+      (parse-string xml encoding)
+      (xml/parse xml startparse-sax-no-doctype))))
 
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))

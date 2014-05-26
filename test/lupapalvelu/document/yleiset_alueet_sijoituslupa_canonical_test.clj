@@ -24,23 +24,9 @@
                  :op operation}
    :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}}})
 
-(def ^:private sijoituksen-tarkoitus
-  {:id "523ae9ba94a7542b3520e64c"
-   :created 1379592634015
-   :schema-info {:name "sijoituslupa-sijoituksen-tarkoitus"
-                 :removable false
-                 :repeating false
-                 :version 1
-                 :order 66}
-   :data {:lisatietoja-sijoituskohteesta {:value "Lis\u00e4tietoja."}
-          :sijoituksen-tarkoitus {:value "other"},
-          ;; Huom: tama nakyy vain, jos yllaolevan :sijoituksen-tarkoitus:n value on "other"
-          :muu-sijoituksen-tarkoitus {:value "Muu sijoituksen tarkoitus."}}})
-
 (def ^:private  documents [hakija
                            maksaja
-                           hankkeen-kuvaus-sijoituslupa
-                           sijoituksen-tarkoitus])
+                           hankkeen-kuvaus-sijoituslupa])
 
 (def sijoituslupa-application {:schema-version 1,
                                :id "LP-753-2013-00003",
@@ -64,7 +50,7 @@
                                :municipality municipality,
                                :statements statements})
 
-(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-yritys-and-henkilo get-sijoituksen-tarkoitus get-hakija)
+(testable-privates lupapalvelu.document.yleiset-alueet-canonical get-yritys-and-henkilo get-hakija)
 
 (facts* "Sijoituslupa canonical model is correct"
   (let [canonical (application-to-canonical sijoituslupa-application "fi")
@@ -75,7 +61,7 @@
         Kasittelytieto (-> Sijoituslupa :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Sijoituslupa) => nil?
+        muu-tunnustieto (get-in Sijoituslupa [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto]) => seq
 
         Sijoituslupa-kayttotarkoitus (:kayttotarkoitus Sijoituslupa) => truthy
 
@@ -148,28 +134,13 @@
         hakija-yksityinen-nimi (:nimi hakija-yksityinen-Henkilo) => truthy
         hakija-yksityinen-osoite (:osoite hakija-yksityinen-Henkilo) => truthy
 
-        lisatieto-vec (-> Sijoituslupa :lupakohtainenLisatietotieto) => truthy
-
-        match-fn #(= "Sijoituksen tarkoitus" (-> % :LupakohtainenLisatieto :selitysteksti))
-        sijoituksen-tarkoitus-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        sijoituksen-tark (:arvo sijoituksen-tarkoitus-Lisatieto) => truthy
-
-        ;; Testataan muunnosfunktiota muulla kuin "other" sijoituksen-tarkoituksella
-        sijoituksen-tark-liikennevalo (get-sijoituksen-tarkoitus
-                                       (tools/unwrapped
-                                         (assoc-in (:data sijoituksen-tarkoitus) [:sijoituksen-tarkoitus :value] "liikennevalo"))) => truthy
-
-        match-fn #(= "Lis\u00e4tietoja sijoituskohteesta" (-> % :LupakohtainenLisatieto :selitysteksti))
-        lisatietoja-sijoituskohteesta-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
-        lisatietoja-sijoituskohteesta(:arvo lisatietoja-sijoituskohteesta-Lisatieto) => truthy
-
         pinta-ala (:pintaala Sijoituslupa) => falsey]
 
-;    (println "\n canonical:")
-;    (clojure.pprint/pprint canonical)
-;    (println "\n")
-
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
+    (fact "lupatunnus"
+      (count muu-tunnustieto) => 1
+      (-> muu-tunnustieto first :MuuTunnus :tunnus) => (:id sijoituslupa-application)
+      (-> muu-tunnustieto first :MuuTunnus :sovellus) => "Lupapiste")
 
     (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified sijoituslupa-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
@@ -256,13 +227,97 @@
     (fact "hakija-yksityinen-puhelin" (:puhelin hakija-yksityinen-Henkilo) => (-> yhteystiedot :puhelin :value))
     (fact "hakija-yksityinen-henkilotunnus" (:henkilotunnus hakija-yksityinen-Henkilo) => (-> henkilotiedot :hetu :value))
 
-    (fact "lisatietoja-sijoituskohteesta" sijoituksen-tark => (-> sijoituksen-tarkoitus :data :muu-sijoituksen-tarkoitus :value))
-    (fact "lisatietoja-sijoituskohteesta-liikennevalo" (:arvo sijoituksen-tark-liikennevalo) => "liikennevalo")
-    (fact "lisatietoja-sijoituskohteesta" lisatietoja-sijoituskohteesta => (-> sijoituksen-tarkoitus :data :lisatietoja-sijoituskohteesta :value))
-
     ;; Kayton alku/loppu pvm  (just something in Sijoituslupa, because schema requests it)
     (fact "alkuPvm" alkuPvm => truthy)
     (fact "loppuPvm" loppuPvm => truthy)
 
     ;; Hankkeen kuvaus
     (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus-sijoituslupa :data :kayttotarkoitus :value))))
+
+(def valmistumisilmoitus {:sent nil
+                          :neighbors []
+                          :schema-version 1
+                          :authority {}
+                          :auth [{:lastName "Sibbo"
+                                  :firstName "Sonja"
+                                  :username "sonja"
+                                  :type "owner"
+                                  :role "owner"
+                                  :id "777777777777777777000023"}]
+                          :drawings []
+                          :submitted 1398343047691
+                          :state :closed
+                          :reminder-sent nil
+                          :permitSubtype nil
+                          :tasks []
+                          :closedBy {:lastName "Sibbo"
+                                     :firstName "Sonja"
+                                     :id "777777777777777777000023"}
+                          :_verdicts-seen-by {:777777777777777777000023 1398343051151}
+                          :location {:x 10000.1, :y 6610000.0}
+                          :attachments [{:state "requires_user_action"
+                                         :target nil
+                                         :op {:id "535905834206f413319be7f3"
+                                              :name "ya-katulupa-vesi-ja-viemarityot"
+                                              :created 1398343043267}
+                                         :locked false
+                                         :type {:type-group "muut", :type-id "muu"}
+                                         :applicationState "open"
+                                         :modified 1398343043267
+                                         :versions []
+                                         :id "535905834206f413319be7f6"}]
+                          :statements []
+                          :organization "753-YA"
+                          :buildings []
+                          :title "Start_ready_app_1398343043"
+                          :started 1527897600000
+                          :closed 1530489600000
+                          :operations [{:id "535905834206f413319be7f3"
+                                        :name "ya-katulupa-vesi-ja-viemarityot"
+                                        :created 1398343043267}]
+                          :infoRequest false
+                          :openInfoRequest false
+                          :opened 1398343043267
+                          :created 1398343043267
+                          :_comments-seen-by {}
+                          :propertyId "75341600250023"
+                          :verdicts [{:kuntalupatunnus "123567890"
+                                      :timestamp 1398343049972
+                                      :paatokset [{:paivamaarat {:anto 1525122000000
+                                                                 :lainvoimainen 1527800400000}
+                                                   :poytakirjat [{:paatoksentekija "Kaarina Krysp III"
+                                                                  :status 6
+                                                                  :paatospvm 1525122000000
+                                                                  :paatoskoodi "ehdollinen"}]}]}]
+                          :startedBy {:lastName "Sibbo"
+                                      :firstName "Sonja"
+                                      :id "777777777777777777000023"}
+                          :documents [hakija
+                                      tyomaasta-vastaava
+                                      maksaja
+                                      {:id "535905834206f413319be7f8"
+                                       :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                                     :removable false
+                                                     :repeating false
+                                                     :version 1
+                                                     :type "group"
+                                                     :order 60}
+                                       :created 1398343043267
+                                       :data {}}
+                                      {:created 1398343043267
+                                       :data {:tyoaika-alkaa-pvm {:modified 1398343045608 :value "01.05.2014"}
+                                              :tyoaika-paattyy-pvm {:modified 1398343045698 :value "02.05.2014"}}
+                                       :id "535905834206f413319be7f9"
+                                       :schema-info {:name "tyoaika"
+                                                     :removable false
+                                                     :repeating false
+                                                     :version 1
+                                                     :type "group"
+                                                     :order 63}}]
+                          :_statements-seen-by {}
+                          :modified 1398343053832
+                          :comments []
+                          :address "Start_ready_app_1398343043"
+                          :permitType "YA"
+                          :id "LP-753-2014-00005"
+                          :municipality "753"})

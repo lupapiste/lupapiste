@@ -10,7 +10,7 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->ya-verdict)
+(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -20,7 +20,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+      cases (->verdicts xml ->verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
@@ -43,16 +43,16 @@
         (:autopaikkojaUlkopuolella lupamaaraykset) => 3
         (:kerrosala lupamaaraykset) => "100"
         (:kokonaisala lupamaaraykset) => "110"
-        (:vaaditutTyonjohtajat lupamaaraykset) => "vastaava ylijohtaja, vastaava varajohtaja, altavastaava johtaja"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "Vastaava ty\u00f6njohtaja, Vastaava IV-ty\u00f6njohtaja, Ty\u00f6njohtaja"
         (let [katselmukset (:vaaditutKatselmukset lupamaaraykset)
               maaraykset   (:maaraykset lupamaaraykset)]
           (facts "katselmukset"
             (count katselmukset) => 2
             (:katselmuksenLaji (first katselmukset)) => "aloituskokous"
-            (:tarkastuksenTaiKatselmuksenNimi (last katselmukset)) => "katselmus2")
+            (:tarkastuksenTaiKatselmuksenNimi (last katselmukset)) => "K\u00e4ytt\u00f6\u00f6nottotarkastus")
           (facts "m\u00e4\u00e4r\u00e4ykset"
             (count maaraykset) => 2
-            (:sisalto (first maaraykset)) => "Maarays 1"
+            (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
             (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
             (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))
 
@@ -101,7 +101,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -149,20 +149,51 @@
           (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
           (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))
 
+(facts "Tekla sample verdict"
+  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/teklap.xml"))
+        cases (->verdicts xml ->verdict)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "xml has one case" (count cases) => 1)
+    (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
+
+    (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "109-2014-140")
+
+    (let [verdict        (-> cases first :paatokset first)
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)
+          katselmukset   (:vaaditutKatselmukset lupamaaraykset)
+          maaraykset     (:maaraykset lupamaaraykset)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:kerrosala lupamaaraykset) => "134.000"
+        (:kokonaisala lupamaaraykset) => "134.000"
+        (:vaaditutTyonjohtajat lupamaaraykset) => "Vastaava ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, IV-ty\u00f6njohtaja"
+        (facts "katselmukset"
+          (count katselmukset) => 4
+          (:katselmuksenLaji (first katselmukset)) => "aloituskokous"
+          (:katselmuksenLaji (last katselmukset)) => "loppukatselmus")
+        (facts "m\u00e4\u00e4r\u00e4ykset"
+          (count maaraykset) => 3
+          (:sisalto (first maaraykset)) => "Vastaavan ty\u00f6njohtajan on yll\u00e4pidett\u00e4v\u00e4 rakennusty\u00f6n tarkastusasiakirjaa, johon eri rakennusvaiheiden vastuuhenkil\u00f6t ja ty\u00f6vaiheiden tarkastuksia suorittavat henkil\u00f6t varmentavat tekem\u00e4ns\u00e4 tarkastukset (MRL 150 \u00a7 3. mom., MRA 77 \u00a7)."))
+      )))
+
 (facts "case not found"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil :RakennusvalvontaAsia ->verdict)]
+  (let [cases (->verdicts nil ->verdict)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
-        cases (->verdicts xml :RakennusvalvontaAsia ->verdict)]
+        cases (->verdicts xml ->verdict)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -173,7 +204,8 @@
         buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
-        schema       (schemas/get-schema (schemas/get-latest-schema-version) "purku")]
+        schema       (schemas/get-schema (schemas/get-latest-schema-version) "rakennuksen-muuttaminen")]
+    (fact "Meta: schema is found" schema => truthy)
     (fact "xml is parsed" buildings => truthy)
     (fact "xml has 2 buildings" (count buildings) => 2)
     (fact "Kiinteistotunnus" (:propertyId (first buildings)) => "63845900130022")
@@ -239,7 +271,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-        cases (->verdicts xml :yleinenAlueAsiatieto ->ya-verdict)]
+        cases (->verdicts xml ->simple-verdict)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
@@ -272,6 +304,42 @@
           (:muokkausHetki liite) => (to-timestamp "2014-01-29T13:58:15")
           (:tyyppi liite) => "Muu liite")))))
 
+(facts "Ymparisto verdicts"
+  (doseq [permit-type ["yl" "mal" "vvvl"]]
+    (let [xml (sade.xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
+          cases (->verdicts xml ->simple-verdict)]
+
+      (fact "xml is parsed" cases => truthy)
+      (fact "xml has 1 cases" (count cases) => 1)
+      (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+
+      (fact "kuntalupatunnus"
+        (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          paivamaarat    (:paivamaarat verdict)
+          poytakirjat    (:poytakirjat verdict)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:takuuaikaPaivat lupamaaraykset) => "5"
+        (let [muutMaaraykset (:muutMaaraykset lupamaaraykset)]
+          muutMaaraykset => sequential?
+          (count muutMaaraykset) => 1
+          (last muutMaaraykset) => "Lupaehdot vapaana tekstin\u00e4"))
+
+      (facts "paivamaarat data is correct"
+        paivamaarat => truthy
+        (:paatosdokumentinPvm paivamaarat) => (to-timestamp "2014-04-11"))
+
+      (facts "p\u00f6yt\u00e4kirjat data is correct"
+        (let [pk1   (first poytakirjat)
+              liite (:liite pk1)]
+          (:kuvaus liite) => "paatoksenTiedot"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/img/under-construction.gif"
+          (:muokkausHetki liite) => (to-timestamp "2014-03-29T13:58:15")
+          (:tyyppi liite) => "Muu liite"))))))
 
 (facts "Buildings from verdict message"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
@@ -284,6 +352,6 @@
     (:rakennusnro building1) => "123"))
 
 (facts "wfs-krysp-url works correctly"
-  (fact "without ? returns url with ?" (wfs-krysp-url "http://localhost" case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
-  (fact "with ? returns url with ?" (wfs-krysp-url "http://localhost" case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
-  (fact "without extraparam returns correct" (wfs-krysp-url "http://localhost?output=KRYSP" case-type (property-equals "test" "lp-1")) =>  "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
+  (fact "without ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+  (fact "with ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+  (fact "without extraparam returns correct" (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))

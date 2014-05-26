@@ -1,7 +1,7 @@
 (ns sade.common-reader-test
-  (:use [sade.common-reader]
-        [sade.xml]
-        [midje.sweet]))
+  (:require [sade.common-reader :refer :all]
+            [sade.xml :refer :all]
+            [midje.sweet :refer :all]))
 
 (facts "strip-keys"
   (fact "takes (recursively) last sub-keyword from keywords"
@@ -10,12 +10,6 @@
         (strip-keys {:a:b:c 1
                      ":a:b:c" 2}) => {:c 1
                                       ":a:b:c" 2}))
-
-(fact "strip-nils"
-  (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
-
-(fact "strip-empty-maps"
-  (strip-empty-maps {:a 1 :b {} :c {:d 2 :e {}}}) => {:a 1 :c {:d 2}})
 
 (facts "to-boolean"
   (to-boolean 1) => 1

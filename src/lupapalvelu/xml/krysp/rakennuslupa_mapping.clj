@@ -94,10 +94,21 @@
                      :child [{:tag :kuntaRooliKoodi :ns "yht"}
                              {:tag :VRKrooliKoodi :ns "yht"}
                              mapping-common/henkilo
-                             mapping-common/yritys
+                             mapping-common/yritys_211
                              {:tag :omistajalaji :ns "rakval"
                               :child [{:tag :muu}
                                       {:tag :omistajalaji}]}]}]}]})
+
+(def ^:private rakennus_215
+  (update-in rakennus [:child] mapping-common/update-child-element
+      [:omistajatieto :Omistaja]
+      {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                              {:tag :VRKrooliKoodi :ns "yht"}
+                              mapping-common/henkilo
+                              mapping-common/yritys_213
+                              {:tag :omistajalaji :ns "rakval"
+                               :child [{:tag :muu}
+                                       {:tag :omistajalaji}]}]}))
 
 (def ^:private katselmustieto
   {:tag :katselmustieto
@@ -115,7 +126,7 @@
                                       {:tag :maaraAika}
                                       {:tag :toteamisHetki}
                                       {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja :child mapping-common/liite-children}
+                    {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
@@ -123,10 +134,7 @@
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.0
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "rakennusvalvonta" "2.1.2")
                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -167,7 +175,7 @@
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
                              katselmustieto
-                             {:tag :lausuntotieto :child [mapping-common/lausunto]}
+                             {:tag :lausuntotieto :child [mapping-common/lausunto_211]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
@@ -178,17 +186,7 @@
                                                {:tag :vakuudenmaara}
                                                {:tag :vakuuspaatospykala}]}]}]}
                              {:tag :liitetieto
-                              :child [{:tag :Liite
-                                       :child [{:tag :kuvaus :ns "yht"}
-                                               {:tag :linkkiliitteeseen :ns "yht"}
-                                               {:tag :muokkausHetki :ns "yht"}
-                                               {:tag :versionumero :ns "yht"}
-                                               {:tag :tekija :ns "yht"
-                                                :child [{:tag :kuntaRooliKoodi}
-                                                        {:tag :VRKrooliKoodi}
-                                                        mapping-common/henkilo
-                                                        mapping-common/yritys]}
-                                               {:tag :tyyppi :ns "yht"}]}]}
+                              :child [{:tag :Liite :child mapping-common/liite-children_211}]}
                              {:tag :kayttotapaus}
                              {:tag :asianTiedot
                               :child [{:tag :Asiantiedot
@@ -210,16 +208,19 @@
                                                                          {:tag :maaraAika}
                                                                          {:tag :toteamisHetki}
                                                                          {:tag :toteaja}]}]}
-                    {:tag :katselmuspoytakirja :child mapping-common/liite-children}
+                    {:tag :katselmuspoytakirja :child mapping-common/liite-children_211}
                     {:tag :tarkastuksenTaiKatselmuksenNimi}
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
 
+(def ^:private katselmus_215
+  (update-in katselmus_213 [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuspoytakirja]
+      {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
+
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation]
-      (str mapping-common/schemalocation-yht-2.1.1
-        "\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.3/rakennusvalvonta.xsd"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "rakennusvalvonta" "2.1.3"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
       katselmus_213)
@@ -230,12 +231,46 @@
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
       #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
 
+(def rakennuslupa_to_krysp_214
+  (-> rakennuslupa_to_krysp_213
+    (assoc-in [:attr :xsi:schemaLocation]
+      (mapping-common/schemalocation "rakennusvalvonta" "2.1.4"))
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
+
+(def rakennuslupa_to_krysp_215
+  (-> rakennuslupa_to_krysp_214
+    (assoc-in [:attr :xsi:schemaLocation]
+      (mapping-common/schemalocation "rakennusvalvonta" "2.1.5"))
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_213]})
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
+      {:tag :Liite :child mapping-common/liite-children_213})
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+      katselmus_215)
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]
+      {:tag :lausuntotieto :child [mapping-common/lausunto_213]})
+
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
+      {:tag :rakennustieto :child [rakennus_215]})))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
     "2.1.3" rakennuslupa_to_krysp_213
+    "2.1.4" rakennuslupa_to_krysp_214
+    "2.1.5" rakennuslupa_to_krysp_215
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
@@ -343,6 +378,31 @@
 
     (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
 
+(defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
+    #(map (fn [tj]
+            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
+              (fn [luokka]
+                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+                  luokka))))
+       %)))
+
+(defn- map-enums-212 [canonical]
+  (map-tyonjohtaja-patevyysvaatimusluokka canonical))
+
+(defn- map-enums
+  "Map enumerations in canonical into values supperted by given KRYSP version"
+  [canonical krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "2.1.2" (map-enums-212 canonical)
+    canonical ; default: no conversions
+    ))
+
+(defn- rakennuslupa-element-to-xml [canonical krysp-version]
+  (element-to-xml (map-enums canonical krysp-version) (get-mapping krysp-version)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
@@ -354,13 +414,13 @@
         attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                           {:Liite
-                                           {:kuvaus "Application when submitted"
+                                           {:kuvaus "Vireille tullut hakemus"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-submitted-filename (:id application)))
                                             :muokkausHetki (to-xml-datetime (:submitted application))
                                             :versionumero 1
                                             :tyyppi "hakemus_vireilletullessa"}}
                                           {:Liite
-                                           {:kuvaus "Application when sent from Lupapiste"
+                                           {:kuvaus "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
                                             :muokkausHetki (to-xml-datetime (now))
                                             :versionumero 1
@@ -373,7 +433,7 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (rakennuslupa-element-to-xml canonical krysp-version)]
 
     (mapping-common/write-to-disk
       application attachments

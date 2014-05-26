@@ -36,6 +36,17 @@
 (defn create-id []
   (str (ObjectId.)))
 
+; http://docs.mongodb.org/manual/reference/limits/#Restrictions-on-Field-Names
+(def key-pattern #"^[^\.\$\u0000]+$")
+
+(defn valid-key? [k]
+  (if k
+    (if (instance? ObjectId k)
+      true
+      (let [key (name k)]
+        (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
+    false))
+
 ;;
 ;; Database Api
 ;;
@@ -71,8 +82,8 @@
 (defn by-id
   ([collection id]
     (with-id (mc/find-one-as-map collection {:_id id})))
-  ([collection id fields]
-    (with-id (mc/find-one-as-map collection {:_id id} fields))))
+  ([collection id projection]
+    (with-id (mc/find-one-as-map collection {:_id id} projection))))
 
 (defn select
   "returns multiple entries by matching the monger query"
@@ -269,12 +280,7 @@
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
-  (mc/ensure-index :app-links {:link 1})
-  (try
-    (mc/drop-index :users "personId_1")
-    (catch Exception e
-      (warn "Unable to drop personId_1 index" (.getMessage e))))
-  )
+  (mc/ensure-index :app-links {:link 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

@@ -108,9 +108,9 @@
                                             :extra-auth-roles [:any]}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
                                                                                                   :auth [{:id "user123" :role "someRole"}]}
-    
+
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :applicant}) => {:organization "999-R" :auth []}
-    
+
     (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
                                                                                               :auth [{:id "user123" :role "someRole"}]}
 
@@ -221,15 +221,15 @@
 
 (facts "feature requirements"
  (against-background
-   (get-actions) => {:test-command1 {:feature [:abba :jabba]}})
+   (get-actions) => {:test-command1 {:feature :abba}})
 
  (fact "without correct feature error is given"
    (execute {:action "test-command1"}) => {:ok false, :text "error.missing-feature"}
-   (provided (env/feature? :abba :jabba) => false))
+   (provided (env/feature? :abba) => false))
 
  (fact "with correct feature command is executed"
    (execute {:action "test-command1"}) => {:ok true}
-   (provided (env/feature? :abba :jabba) => true)))
+   (provided (env/feature? :abba) => true)))
 
 (def ok-status   {:ok true})
 (def fail-status {:ok false})

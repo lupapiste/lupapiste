@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.strings :refer :all]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
             [clojure.string :as s]
@@ -10,6 +9,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
+            [sade.util :as util]
+            [sade.strings :refer :all]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -50,14 +51,46 @@
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
+(defn- validate-hetu-date [hetu]
+  (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
+        yy (last (butlast dateparsts))
+        yyyy (str (case (last dateparsts) "+" "18" "-" "19" "20") yy)
+        basic-date (str yyyy (second dateparsts) (first dateparsts))]
+    (try
+      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
+      nil
+      (catch Exception e
+        [:err "illegal-hetu"]))))
+
+(defn- validate-hetu-checksum [hetu]
+  (let [number   (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))
+        n (mod number 31)
+        checksum  (nth ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"] n)
+        old-checksum (subs hetu 10 11)]
+    (when (not= checksum old-checksum) [:err "illegal-hetu"])))
+
+(defmethod validate-field :hetu [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
+    :else [:err "illegal-hetu"]))
+
 (defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate-field :date [elem v]
+(defmethod validate-field :date [_ v]
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
+
+(defmethod validate-field :time [_ v]
+  (when-not (s/blank? v)
+    (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
+      (let [h (util/->int (first matches))
+            m (util/->int (second matches))]
+        (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))
+      [:warn "illegal-value:time"])))
 
 (defmethod validate-field :select [{:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
@@ -65,13 +98,15 @@
     (when-not (or (s/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
-;; FIXME implement validator, the same as :select?
+;; FIXME https://support.solita.fi/browse/LUPA-1453
+;; implement validator, the same as :select?
 (defmethod validate-field :radioGroup [elem v] nil)
 
 (defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
 (defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
 
-;; FIXME implement validator (mongo id, check that user exists)
+;; FIXME https://support.solita.fi/browse/LUPA-1454
+;; implement validator (mongo id, check that user exists)
 (defmethod validate-field :personSelector [elem v] nil)
 
 (defmethod validate-field nil [_ _]
@@ -96,12 +131,16 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn ->validation-result [data path element result]
+(defn- ->validation-result [data path element result]
   (when result
-    {:data    data
-     :path    (vec (map keyword path))
-     :element element
-     :result  result}))
+    (let [result {:data    data
+                  :path    (vec (map keyword path))
+                  :element element
+                  :result  result}]
+      ; Return results without :data.
+      ; Data is handy when hacking in REPL, though.
+      ; See also mongo_scripts/prod/hetu-cleanup.js.
+      (dissoc result :data))))
 
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
@@ -125,14 +164,13 @@
     (or (get-in data (conj path :_selected :value)) (first one-of))))
 
 (defn- validate-required-fields [schema-body path data validation-errors]
-  (let [check
-        (fn [{:keys [name required body repeating] :as element}]
-          (let [kw (keyword name)
-                current-path (conj path kw)
-                validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
-                                   (->validation-result nil current-path element [:tip "illegal-value:required"]))
-                current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
-            (concat current-validation-errors
+  (let [check (fn [{:keys [name required body repeating] :as element}]
+                (let [kw (keyword name)
+                      current-path (conj path kw)
+                      validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
+                                         (->validation-result nil current-path element [:tip "illegal-value:required"]))
+                      current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
+                  (concat current-validation-errors
                     (if body
                       (if repeating
                         (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
@@ -281,39 +319,42 @@
    :data         {}})
 
 ;;
-;; Blacklists
+;; Convert data
 ;;
-
-(defn strip-blacklisted-data
-  "Strips values from document data if blacklist in schema includes given blacklist-item."
-  [{data :data :as document} blacklist-item & [initial-path]]
+(defn convert-document-data
+  "Walks document data starting from initial-path.
+   If predicate matches, value is outputted using emitter function.
+   Predicate takes two parameters: element schema definition and the value map.
+   Emitter takes one parameter, the value map."
+  [pred emitter {data :data :as document} initial-path]
   (when data
-    (letfn [(strip [schema-body path]
+    (letfn [(doc-walk [schema-body path]
               (into {}
                 (map
-                  (fn [{:keys [name type body repeating blacklist] :as element}]
+                  (fn [{:keys [name type body repeating] :as element}]
                     (let [k (keyword name)
                           current-path (conj path k)
                           v (get-in data current-path)]
-                      (if ((set (map keyword blacklist)) (keyword blacklist-item))
-                        [k nil]
+                      (if (pred element v)
+                        [k (emitter v)]
                         (when v
                           (if (not= (keyword type) :group)
                             [k v]
                             [k (if repeating
-                                 (into {} (map (fn [k2] [k2 (strip body (conj current-path k2))]) (keys v)))
-                                 (strip body current-path))])))))
+                                 (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
+                                 (doc-walk body current-path))])))))
                   schema-body)))]
       (let [path (vec initial-path)
             schema (get-document-schema document)
             schema-body (:body (if (seq path) (find-by-name (:body schema) path) schema))]
-        (assoc-in document (concat [:data] path)
-          (strip schema-body path))))))
+        (assoc-in document (concat [:data] path) (doc-walk schema-body path))))))
 
-
-;;
-;; Turvakielto
-;;
+(defn strip-blacklisted-data
+  "Strips values from document data if blacklist in schema includes given blacklist-item."
+  [document blacklist-item & [initial-path]]
+  (let [bl-kw (keyword blacklist-item)
+        strip-if (fn [{bl :blacklist} _] ((set (map keyword bl)) bl-kw))]
+    (convert-document-data strip-if (constantly nil) document initial-path)))
 
 (defn strip-turvakielto-data [{data :data :as document}]
   (reduce
@@ -327,4 +368,41 @@
           doc)))
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
+
+(defn mask-person-ids
+  "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
+  [document & [initial-path]]
+  (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
+        do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+    (convert-document-data mask-if do-mask document initial-path)))
+
+(defn has-hetu?
+  ([schema]
+    (has-hetu? schema [:henkilo]))
+  ([schema-body base-path]
+    (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
+      (boolean (find-by-name schema-body full-path)))))
+
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+                         companyName companyId
+                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults]}]
+  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
+    (->
+      {:userId                        (wrap id)
+       :henkilotiedot {:etunimi       (wrap firstName)
+                       :sukunimi      (wrap lastName)
+                       :hetu          (wrap (when with-hetu personId))}
+       :yhteystiedot {:email          (wrap email)
+                      :puhelin        (wrap phone)}
+       :osoite {:katu                 (wrap street)
+                :postinumero          (wrap zip)
+                :postitoimipaikannimi (wrap city)}
+       :yritys {:yritysnimi           (wrap companyName)
+                :liikeJaYhteisoTunnus (wrap companyId)}
+       :patevyys {:koulutus           (wrap degree)
+                  :valmistumisvuosi   (wrap graduatingYear)
+                  :fise               (wrap fise)}}
+      util/strip-nils
+      util/strip-empty-maps
+      tools/wrapped)))
 

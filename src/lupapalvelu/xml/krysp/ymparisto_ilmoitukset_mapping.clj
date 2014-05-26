@@ -8,10 +8,7 @@
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
    :ns "ymi"
-   :attr (merge {:xsi:schemaLocation
-                 (str mapping-common/schemalocation-yht-2.1.1
-                   "\nhttp://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset
-                      http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset/2.1.1/ilmoitukset.xsd")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/ilmoitukset" "2.1.2")
                  :xmlns:ymi "http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset"}
            mapping-common/common-namespaces)
 
@@ -22,17 +19,20 @@
                      :child [{:tag :yksilointitieto :ns "yht"}
                              {:tag :alkuHetki :ns "yht"}
                              {:tag :kasittelytietotieto
-                              :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children}]}
+                              :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
                              {:tag :luvanTunnistetiedot
                               :child [mapping-common/lupatunnus]}
                              {:tag :lausuntotieto
-                              :child [mapping-common/lausunto]}
-                             {:tag :ilmoittaja
-                              :child mapping-common/ymp-osapuoli-children}
-                             {:tag :toiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
-                                                              {:tag :Kunta}
-                                                              mapping-common/sijantiType
-                                                              {:tag :Kiinteistorekisterinumero}]}
+                              :child [mapping-common/lausunto_213]}
+                             {:tag :toiminnanSijaintitieto
+                              :child [{:tag :ToiminnanSijainti :child [{:tag :Osoite :child mapping-common/postiosoite-children-ns-yht}
+                                                                       {:tag :Kunta}
+                                                                       mapping-common/sijantiType
+                                                                       {:tag :Kiinteistorekisterinumero}]}]}
+
+                             {:tag :ilmoittaja :child mapping-common/yhteystietotype-children_213}
+                             {:tag :jatkoIlmoitusKytkin} ; boolean
+                             {:tag :asianKuvaus} ; String
                              {:tag :toimintatieto :child [{:tag :Toiminta :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
                                                                                   {:tag :rakentaminen :child [{:tag :louhinta}
@@ -41,15 +41,21 @@
                                                                                                               {:tag :muu}]}
                                                                           {:tag :tapahtuma :child [{:tag :ulkoilmakonsertti}
                                                                                                    {:tag :muu}]}]}]}
-                             {:tag :toiminnanKesto :child [{:tag :alkuHetki}
-                                                           {:tag :loppuHetki}]}
+                             {:tag :toiminnanKesto :child [{:tag :alkuPvm}
+                                                           {:tag :loppuPvm}
+                                                           {:tag :arkiAlkuAika}
+                                                           {:tag :arkiLoppuAika}
+                                                           {:tag :lauantaiAlkuAika}
+                                                           {:tag :lauantaiLoppuAika}
+                                                           {:tag :sunnuntaiAlkuAika}
+                                                           {:tag :sunnuntaiLoppuAika}]}
                              {:tag :melutiedot :child [{:tag :koneidenLkm}
                                                        {:tag :melutaso :child [{:tag :db}
                                                                                {:tag :paiva}
                                                                                {:tag :yo}
                                                                                {:tag :mittaaja}]}]}
                              {:tag :koontikentta}
-                             {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children}]} ]}]}]})
+                             {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_213}]} ]}]}]})
 
 
 (defn save-application-as-krysp

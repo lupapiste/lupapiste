@@ -215,6 +215,9 @@ Mikko logs in
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
 
+Arto logs in
+  Authority logs in  arto  arto  Arto Viranomainen
+
 Veikko logs in
   Authority logs in  veikko  veikko  Veikko Viranomainen
 
@@ -264,13 +267,13 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${operation}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&y=6610000&x=10000.1
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create inforequest the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=asuinrakennus&y=6610000&x=10000.1
+  [Arguments]  ${address}  ${x}  ${y}  ${municipality}  ${propertyId}  ${operation}  ${message}
+  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&x=${x}&y=${y}&message=${message}
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
   Kill dev-box
 
@@ -281,9 +284,25 @@ Create application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
+Create first application
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Click by test id  create-application
+  Wait Until  Element should be visible  application
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Do create inforequest  false  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+
+Create first inforequest
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+  Do create inforequest  true  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+
+Do create inforequest
+  [Arguments]  ${isFirstInforequest}  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
+  Run Keyword If  '${isFirstInforequest}' == 'true'  Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  ...  ELSE  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
@@ -298,6 +317,19 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
+  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
+  Input text by test id  create-address  ${address}
+  Set animations off
+  Click enabled by test id  create-continue
+  Select operation path by permit type  ${permitType}
+  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Set animations on
+
+Prepare first request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
+  Go to page  applications
+  Click by test id  applications-create-new-inforequest
   Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
   Input text by test id  create-address  ${address}
@@ -355,7 +387,7 @@ Select operations path YA kayttolupa kaivu
 Select operations path YA kayttolupa mainostus-viitoitus
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
   Click tree item by text  "Yleisten alueiden tai muiden kunnan omistamien alueiden käyttö (tapahtumat, mainokset, yms.)"
-  Click tree item by text  "Mainoksien sijoittaminen"
+  Click tree item by text  "Mainoslaitteiden ja opasteviittojen sijoittaminen"
 
 Select operations path YA sijoituslupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
@@ -453,6 +485,9 @@ Input comment and mark answered
   [Arguments]  ${section}  ${message}
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='comment-request-mark-answered']
+  Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Comment count is

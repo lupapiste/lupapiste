@@ -4,18 +4,14 @@
             [clojure.string :as s]
             [lupapalvelu.core :refer [now]]
             [sade.strings :refer :all]
-            [sade.common-reader :as cr]
             [sade.util :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]))
 
-;; Macro to get values from
-;(defmacro value [m & path] `(-> ~m ~@path :value))
-
 (defn- get-huoneisto-data [huoneistot]
-  (for [huoneisto (vals huoneistot)
+  (for [huoneisto (vals (into (sorted-map) huoneistot))
         :let [tyyppi (:huoneistonTyyppi huoneisto)
               varusteet (:varusteet huoneisto)
               huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero)
@@ -35,7 +31,7 @@
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
-                     (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
+                     (when (not-empty huoneistoPorras) {:porras (s/upper-case huoneistoPorras)})
                      (when (not-empty jakokirjain) {:jakokirjain (lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
@@ -159,7 +155,21 @@
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
                                    {:purkamisenSyy (-> toimenpide :poistumanSyy)}
                                    {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta))})
-                  :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
+                  :rakennustieto (update-in
+                                   (get-rakennus-data toimenpide application purku-doc)
+                                   [:Rakennus :rakennuksenTiedot]
+                                   (fn [m]
+                                     (-> m
+                                       ; Cleanup top level keys that will bi nil anyway.
+                                       ; Recursive strip-nils would be too much.
+                                       (dissoc :verkostoliittymat)
+                                       (dissoc :energialuokka )
+                                       (dissoc :energiatehokkuusluku)
+                                       (dissoc :energiatehokkuusluvunYksikko)
+                                       (dissoc :paloluokka)
+                                       (dissoc :lammitystapa)
+                                       (dissoc :varusteet)
+                                       (dissoc :liitettyJatevesijarjestelmaanKytkin))))}
      :created (:created purku-doc)}))
 
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
@@ -183,9 +193,12 @@
 
 (defn- get-operations [documents application]
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
+                                               (map #(get-uusi-toimenpide % application) (:uusi-rakennus-ei-huoneistoa documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
-                                               (map #(get-purku-toimenpide % application) (:purku documents))
+                                               (map #(get-purku-toimenpide % application) (:purkaminen documents))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
@@ -229,8 +242,8 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
-                      :osapuolettieto (osapuolet documents)
+                      :luvanTunnisteTiedot (lupatunnus application)
+                      :osapuolettieto (osapuolet documents (:neighbors application) lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name
@@ -260,15 +273,16 @@
   (if (= :tarkastus tyyppi)
     "muu tarkastus"
     (case nimi
-    "Aloitusilmoitus" "ei tiedossa"
-    "muu katselmus" "muu katselmus"
-    "aloituskokous" "aloituskokous"
-    "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
-    "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
-    "pohjakatselmus" "pohjakatselmus"
-    "rakennekatselmus" "rakennekatselmus"
-    "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
-    "osittainen loppukatselmus" "osittainen loppukatselmus"
+      "Aloitusilmoitus" "ei tiedossa"
+      "muu katselmus" "muu katselmus"
+      "muu tarkastus" "muu tarkastus"
+      "aloituskokous" "aloituskokous"
+      "rakennuksen paikan merkitseminen" "rakennuksen paikan merkitseminen"
+      "rakennuksen paikan tarkastaminen" "rakennuksen paikan tarkastaminen"
+      "pohjakatselmus" "pohjakatselmus"
+      "rakennekatselmus" "rakennekatselmus"
+      "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus" "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+      "osittainen loppukatselmus" "osittainen loppukatselmus"
       "loppukatselmus" "loppukatselmus"
       "ei tiedossa")))
 
@@ -282,7 +296,7 @@
 (defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
-        katselmus (cr/strip-nils
+        katselmus (strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
                        :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
@@ -294,11 +308,19 @@
                        :poikkeamat poikkeamat}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
-                        {:rakennustunnus (select-keys (:rakennus (first buildings)) [:jarjestysnumero :kiinttun :rakennusnro]) ; v2.1.2
-                         :katselmuksenRakennustieto (map #(let [building-canonical (merge
-                                                                                     (select-keys (:rakennus %) [:jarjestysnumero :kiinttun :rakennusnro])
+                        {:rakennustunnus (let [building (-> buildings first :rakennus)]
+                                           (merge
+                                             (select-keys building [:jarjestysnumero :kiinttun])
+                                             (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)}))) ; v2.1.2
+                         :katselmuksenRakennustieto (map #(let [building (:rakennus %)
+                                                                building-canonical (merge
+                                                                                     (select-keys building [:jarjestysnumero :kiinttun])
+                                                                                     (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
                                                                                      {:katselmusOsittainen (get-in % [:tila :tila])
-                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})]
+                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
+                                                                building-canonical (if (s/blank? (:kiinttun building-canonical))
+                                                                                     (assoc building-canonical :kiinttun (:propertyId application))
+                                                                                     building-canonical)]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
                                                                                 (fn [m k v] (assoc m k (to-xml-date-from-string v)))
@@ -309,7 +331,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       ; Osapuoli is not required in KRYSP 2.1.3
                       :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
                                                                               :henkilo {:nimi {:etunimi (:firstName user)
@@ -336,7 +358,7 @@
                     :rakennusvalvontaAsiatieto
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus (:id application))
+                      :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"

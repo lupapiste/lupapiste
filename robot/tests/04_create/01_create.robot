@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
-  Create application  create-app  753  753-416-17-15  R
+  Create first application  create-app  753  753-416-17-15  R
   It is possible to add operation
 
 Mikko sees application in list
@@ -51,12 +51,12 @@ The contents of unsent inforequest's message field is resetted properly when mov
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
 
-  Create inforequest the fast way  create-info-2  753  753-416-25-22  init-comment-2
+  Create inforequest the fast way  create-info-2  360603.153  6734222.95  753  753-416-25-22  asuinrakennus  init-comment-2
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
 
 Mikko creates new application
   Go to page  applications
-  Wait until  Element should be visible  xpath=//*[@data-test-id='applications-create-new']
+  Applications page should be open
   Create application the fast way  create-app-2  753  753-416-25-22  asuinrakennus
   Go to page  applications
   Request should be visible  create-app

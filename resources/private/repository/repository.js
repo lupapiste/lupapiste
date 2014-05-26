@@ -13,10 +13,19 @@ var repository = (function() {
   }
 
   function schemaNotFound(schemas, name, version) {
-    // TODO, now what?
     var message = "unknown schema, name='" + name + "', version='" + version + "'";
     error(message);
-    throw message;
+  }
+
+  function calculateAttachmentStateIndicators(attachment) {
+    attachment.signed = false;
+    var versionsByApplicants = _(attachment.versions || []).filter(function(v) {return v.user.role === "applicant";}).value();
+    if (versionsByApplicants && versionsByApplicants.length) {
+      var lastVersionByApplicant = _.last(versionsByApplicants).version;
+      if (_.find(attachment.signatures || [], function(s) {return _.isEqual(lastVersionByApplicant, s.version);})) {
+        attachment.signed = true;
+      }
+    }
   }
 
   function load(id, pending) {
@@ -44,16 +53,17 @@ var repository = (function() {
         _.each(application.documents || [], setSchema);
         _.each(application.tasks || [], setSchema);
         _.each(application.comments || [], function(comment) {
-          if (comment.target && comment.target.type === 'attachment' && comment.target.fileId) {
+          if (comment.target && comment.target.type === 'attachment' && comment.target.id) {
             var targetAttachment = _.find(application.attachments || [], function(attachment) {
-              return _.some(attachment.versions || [], function(ver) {return comment.target.fileId === ver.fileId;});
+              return attachment.id === comment.target.id;
             });
             if (targetAttachment) {
-              comment.target.attachmentType = loc('attachmentType.' + targetAttachment.type['type-group'] + '.' + targetAttachment.type['type-id']);
+              comment.target.attachmentType = loc(['attachmentType', targetAttachment.type['type-group'], targetAttachment.type['type-id']]);
               comment.target.attachmentId = targetAttachment.id;
             }
           }
         });
+        _.each(application.attachments ||[], calculateAttachmentStateIndicators);
         hub.send("application-loaded", {applicationDetails: loading});
       };
     });
