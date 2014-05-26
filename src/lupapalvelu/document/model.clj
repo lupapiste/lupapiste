@@ -32,7 +32,7 @@
 ;; Field validation
 ;;
 
-(defmulti validate-field (fn [_ elem _] (keyword (:type elem))))
+(defmulti validate-field (fn [application elem value] (keyword (:type elem))))
 
 (defmethod validate-field :group [_ _ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
