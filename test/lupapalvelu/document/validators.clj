@@ -2,7 +2,6 @@
   (:require [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.tools :refer :all]
-            [lupapalvelu.itest-util :refer [pena-id]]
             [midje.sweet :refer :all]))
 
 (defn valid? [document]
@@ -33,6 +32,6 @@
 
 (defn dummy-doc [schema-name]
   (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
-        data   (create-document-data schema (partial dummy-values pena-id))]
+        data   (create-document-data schema (partial dummy-values nil))]
     {:schema-info (:info schema)
      :data        data}))
