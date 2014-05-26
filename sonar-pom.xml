@@ -14,7 +14,7 @@
     <sonar.host.url>http://sonar.solita.fi/</sonar.host.url>
     <sonar.language>js</sonar.language>
     <!-- Exclude 3rd party libraries. Exclusions are relative to sourceDirectory. -->
-    <sonar.exclusions>public/lib/html5shiv*,private/jquery/*,private/jquery-upload/*,private/cdn-fallback/*,private/underscore/*,private/lo-dash/*,private/knockout/*,private/map/openlayers.*,/private/moment/moment.min.js</sonar.exclusions>
+    <sonar.exclusions>public/lib/html5shiv*,private/jquery/*,private/jquery-upload/*,private/cdn-fallback/*,private/underscore/*,private/lo-dash/*,private/knockout/*,private/map/openlayers*,/private/moment/moment.min.js</sonar.exclusions>
   </properties>
   
   <build>
