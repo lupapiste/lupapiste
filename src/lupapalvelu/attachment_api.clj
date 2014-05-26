@@ -357,13 +357,10 @@
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-(defn- stamp-attachments! [file-infos {:keys [user created job-id application] :as context}]
-  (let [stamp (stamper/make-stamp
-                (i18n/loc "stamp.verdict")
-                created
-                (str (:firstName user) \space (:lastName user))
-                (get-organization-name application)
-                (:transparency context))]
+(defn- stamp-attachments! [file-infos {:keys [text user created organization transparency job-id application] :as context}]
+  {:pre [text (pos? created) text organization]}
+  (let [signature (str (:firstName user) \space (:lastName user))
+        stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit signature 100) (ss/limit organization 100) transparency)]
     (doseq [file-info (vals file-infos)]
       (try
         (job/update job-id assoc (:attachment-id file-info) :working)
@@ -382,7 +379,7 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id files xMargin yMargin]
+  {:parameters [:id timestamp text organization files xMargin yMargin]
    :roles      [:authority]
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
@@ -391,7 +388,9 @@
              (key-by :attachment-id (map ->file-info (a/get-attachments-infos application files)))
              {:application application
               :user (:user command)
-              :created (:created command)
+              :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+              :organization (if-not (ss/blank? organization) organization (get-organization-name application))
+              :created (if-not (ss/blank? timestamp) (->long timestamp) (:created command))
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))})))
