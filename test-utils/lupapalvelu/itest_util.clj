@@ -19,6 +19,7 @@
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn find-user-from-minimal-by-apikey [apikey] (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
+(defn id-for-key [apikey] (:id (find-user-from-minimal-by-apikey apikey)))
 (defn apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (defn email-for [username] (:email (find-user-from-minimal username)))
@@ -343,7 +344,7 @@
 
 (defn generate-documents [application apikey]
   (doseq [document (:documents application)]
-    (let [data    (tools/create-document-data (model/get-document-schema document) tools/dummy-values)
+    (let [data    (tools/create-document-data (model/get-document-schema document) (partial tools/dummy-values (id-for-key apikey)))
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]
