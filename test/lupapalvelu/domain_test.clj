@@ -1,8 +1,8 @@
 (ns lupapalvelu.domain-test
-  (:use lupapalvelu.domain
-        clojure.test
-        midje.sweet)
-  (:require [lupapalvelu.document.schemas :as schemas]))
+  (:require [lupapalvelu.domain :refer :all]
+            [lupapalvelu.document.schemas :as schemas]
+            [clojure.test :refer :all]
+            [midje.sweet :refer :all]))
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
