@@ -357,10 +357,9 @@
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-(defn- stamp-attachments! [file-infos {:keys [text user created organization transparency job-id application] :as context}]
-  {:pre [text (pos? created) text organization]}
-  (let [signature (str (:firstName user) \space (:lastName user))
-        stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit signature 100) (ss/limit organization 100) transparency)]
+(defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
+  {:pre [text organization (pos? created)]}
+  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
     (doseq [file-info (vals file-infos)]
       (try
         (job/update job-id assoc (:attachment-id file-info) :working)

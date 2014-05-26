@@ -29,12 +29,11 @@
 (defn draw-text [g text x y]
   (.draw text g x y))
 
-(defn make-stamp [verdict created username municipality transparency]
+(defn make-stamp [verdict created municipality transparency]
   (let [font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (map (fn [text] (TextLayout. text font frc))
                    [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
-                    username
                     municipality
                     "LUPAPISTE.fi"])
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
