@@ -23,7 +23,7 @@
 (defn apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (defn email-for [username] (:email (find-user-from-minimal username)))
-(defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
+(defn email-for-key [apikey] (:email (find-user-from-minimal-by-apikey apikey)))
 
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
