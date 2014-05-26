@@ -8,16 +8,19 @@
 (def applications (delay (mongo/select :applications)))
 (def submitted-applications (delay (mongo/select :submitted-applications)))
 
-(defn- validate-doc [ignored-errors {id :id schema-info :schema-info :as doc}]
+(defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
     (let [ignored (set ignored-errors)
-          results (filter (fn [{result :result}] (and (= :err (first result)) (not (ignored (second result))))) (model/validate doc))]
+          results (filter
+                    (fn [{result :result}]
+                      (and (= :err (first result)) (not (ignored (second result)))))
+                    (model/validate application doc))]
       (when (seq results)
         {:document-id id :schema-info schema-info :results results}))
     {:document-id id :schema-info schema-info :results "Schema name or version missing"}))
 
-(defn- validate-documents [ignored-errors {id :id state :state documents :documents}]
-  (let [results (filter seq (map (partial validate-doc ignored-errors) documents))]
+(defn- validate-documents [ignored-errors {id :id state :state documents :documents :as application}]
+  (let [results (filter seq (map (partial validate-doc ignored-errors application) documents))]
     (when (seq results)
       {:id id
        :state state

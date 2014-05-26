@@ -116,9 +116,9 @@
                                 ["rakennuksenOmistajat.0.henkilo.osoite.katu"            "Katuosoite"]
                                 ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]]) => ok?
 
-    (let [email                     (query pena :last-email)
-          body                      (get-in email [:message :body :plain])
-          [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+    (let [email               (query pena :last-email)
+          body                (get-in email [:message :body :plain])
+          [_ a-id n-id token] (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
     token => truthy
     token =not=> #"="

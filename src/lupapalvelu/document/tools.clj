@@ -9,7 +9,7 @@
 (defn missing [element]
   (throw (UnsupportedOperationException. (str element))))
 
-(defn dummy-values [{:keys [type subtype case name body] :as element}]
+(defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
   (condp = (keyword type)
     :text             "text"
     :checkbox         true
@@ -17,7 +17,7 @@
     :time             "16:10"
     :select           (-> body first :name)
     :radioGroup       (-> body first :name)
-    :personSelector   "123"
+    :personSelector   user-id
     :buildingSelector "001"
     :newBuildingSelector "1"
     :hetu             "210281-9988"

@@ -1,8 +1,8 @@
 (ns lupapalvelu.domain-test
-  (:use lupapalvelu.domain
-        clojure.test
-        midje.sweet)
-  (:require [lupapalvelu.document.schemas :as schemas]))
+  (:require [lupapalvelu.domain :refer :all]
+            [lupapalvelu.document.schemas :as schemas]
+            [clojure.test :refer :all]
+            [midje.sweet :refer :all]))
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -29,10 +29,6 @@
     (fact "has two invites" (invites app) => (just invite1 invite2))
     (fact "abba@example.com has one invite" (invite app "abba@example.com") => invite1)
     (fact "jabba@example.com has no invite" (invite app "jabba@example.com") => nil)))
-
-(facts
-  (fact (invited? {:invites [{:user {:username "mikko@example.com"}}]} "mikko@example.com") => true)
-  (fact (invited? {:invites []} "mikko@example.com") => false))
 
 (facts
   (let [owner   {:id 1 :role "owner"}
