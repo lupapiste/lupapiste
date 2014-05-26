@@ -1,0 +1,4 @@
+stamp.information: Leiman sisältö
+stamp.text: Teksti
+stamp.organization: Viranomainen
+stamp.date: Päivämäärä
