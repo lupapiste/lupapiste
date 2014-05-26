@@ -164,7 +164,7 @@
         application-id (:id application)
         attachment (first (:attachments application))
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
-        {job :job :as resp} (command sonja :stamp-attachments :id application-id :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
