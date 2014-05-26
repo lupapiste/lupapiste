@@ -226,14 +226,13 @@
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
               :auth.$ (user/user-in-role user :writer)}})
-
-    ;; TODO: Hae paivitetty application ennen passamista "set-user-to-document":lle
-    (let [application (mongo/by-id :applications (:id application))]
-
-      (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-       ; It's not possible to combine Mongo writes here,
-       ; because only the last $elemMatch counts.
-       (set-user-to-document application document (:id user) (:path my-invite) user created)))))
+    ;; TODO: Onko ok hakea paivitetty application ennen passamista "set-user-to-document":lle
+    (let [application (mongo/by-id :applications (:id application))
+          document (domain/get-document-by-id application (:documentId my-invite))]
+      (when document
+        ; It's not possible to combine Mongo writes here,
+        ; because only the last $elemMatch counts.
+        (set-user-to-document application document (:id user) (:path my-invite) user created)))))
 
 (defn- do-remove-auth [command email]
   (update-application command
