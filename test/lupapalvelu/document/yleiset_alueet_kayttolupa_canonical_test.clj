@@ -4,7 +4,7 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
-            [lupapalvelu.document.canonical-test-common :refer [drawings]]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]))
@@ -38,10 +38,16 @@
                              :opened 1379404981309,
                              :modified 1379405054747,
                              :submitted 1379405092649,
+                             :auth [{:lastName "Panaani",
+                                     :firstName "Pena",
+                                     :username "pena",
+                                     :type "owner",
+                                     :role "owner",
+                                     :id "777777777777777777000020"}]
+                             :authority sonja,
                              :permitType "YA",
                              :organization "753-YA",
                              :infoRequest false,
-                             :authority sonja,
                              :state "submitted",
                              :title "Latokuja 1",
                              :address "Latokuja 1",
@@ -51,9 +57,10 @@
                              :propertyId "75341600550007",
                              :documents documents,
                              :municipality municipality,
-                             :statements statements
-                             :drawings drawings})
+                             :statements ctc/statements
+                             :drawings ctc/drawings})
 
+(ctc/validate-all-documents kayttolupa-application)
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical get-yritys-and-henkilo get-hakija)
 
