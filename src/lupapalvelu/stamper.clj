@@ -75,7 +75,7 @@
 ;; Stamp PDF:
 ;;
 
-; iText uses points as units, 1 mm is 2.835 points 
+; iText uses points as units, 1 mm is 2.835 points
 (defn- mm->u [mm] (* 2.835 mm))
 
 (defn- transparency->opacity [transparency]
@@ -93,13 +93,20 @@
                    (.setStrokeOpacity opacity))]
       (doseq [page (range (.getNumberOfPages reader))]
         (let [page-size (.getPageSizeWithRotation reader (inc page))
-              page-width (.getWidth page-size)
-              page-height (.getHeight page-size)]
+              ; http://support.itextpdf.com/node/106
+              cropbox (.getCropBox reader (inc page))
+              rot (.getPageRotation reader (inc page))
+              use-cropbox? (and cropbox (= 0 rot))
+              _ (debug "Rotation: " rot)
+              max-x (if use-cropbox? (.getRight cropbox) (.getRight page-size))
+              min-y (if use-cropbox? (.getBottom cropbox) (.getBottom page-size))
+              x (- max-x stamp-width (mm->u x-margin))
+              y (+ min-y (mm->u y-margin))]
           (doto (.getOverContent stamper (inc page))
             (.saveState)
             (.setGState gstate)
-            (.addImage stamp stamp-width 0 0 stamp-height (- page-width stamp-width (mm->u x-margin)) (mm->u y-margin))
-            (.restoreState))))))) 
+            (.addImage stamp stamp-width 0 0 stamp-height x y)
+            (.restoreState)))))))
 
 ;;
 ;; Stamp raster image:
@@ -126,7 +133,7 @@
       (.drawImage stamp x y nil)
       (.dispose))))
 
-; Images are (usually?) printed in 72 DPI. That means 1 mm is 2.835 points. 
+; Images are (usually?) printed in 72 DPI. That means 1 mm is 2.835 points.
 (defn- mm->p [mm] (int (* 2.835 mm)))
 
 ;;
@@ -134,7 +141,7 @@
 ;;
 
 (comment
-  
+
   (defn- paint-component [g w h]
     (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO" 255)
           iw (.getWidth i)
@@ -142,7 +149,7 @@
       (.setColor g Color/GRAY)
       (.fillRect g 0 0 w h)
       (.drawImage g i (int (/ (- w iw) 2)) (int (/ (- h ih) 2)) nil)))
-  
+
   (defn make-frame []
     (let [watch-these [#'make-stamp #'paint-component]
           frame (javax.swing.JFrame. "heelo")]
@@ -158,7 +165,7 @@
                 (add-watch v :repaint (fn [_ _ _ _] (javax.swing.SwingUtilities/invokeLater (fn [] (.repaint frame)))))))
             (windowClosing [_]
               (doseq [v watch-these]
-                (remove-watch v :repaint)))))  
+                (remove-watch v :repaint)))))
         (.setMinimumSize (java.awt.Dimension. 100 100))
         (.setDefaultCloseOperation javax.swing.JFrame/DISPOSE_ON_CLOSE)
         (.setAlwaysOnTop true)
