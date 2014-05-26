@@ -125,7 +125,7 @@
                        :propertyId "75312312341234"
                        :x 444444 :y 6666666
                        :address "foo 42, bar"
-                       :municipality sonja-muni})
+                       :municipality (or (muni-for-key apikey) sonja-muni)})
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
