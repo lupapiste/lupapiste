@@ -81,10 +81,8 @@
 (defn invite [application email]
   (first (filter #(= (lower-case email) (:email %)) (invites application))))
 
-(defn invite-accepted-by-user [application user-id]
-  (and
-    (has-auth? application user-id)
-    (not-any? #(= user-id (-> % :user :id)) (invites application))))
+(defn no-pending-invites [application user-id]
+  (not-any? #(= user-id (-> % :user :id)) (invites application)))
 
 ;;
 ;; Verdict model
