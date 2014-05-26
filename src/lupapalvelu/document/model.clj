@@ -188,6 +188,8 @@
       (map #(check (sub-schema-by-name schema-body %)) sub-schemas-to-validate)))
 
 (defn get-document-schema [{schema-info :schema-info}]
+  {:pre [schema-info]
+   :post [%]}
   (schemas/get-schema schema-info))
 
 (defn validate
