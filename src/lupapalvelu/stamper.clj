@@ -53,9 +53,8 @@
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER))
       (.setFont font)
       (draw-text (nth texts 0) 22 27)
-      (draw-text (nth texts 1) 22 43)
-      (draw-text (nth texts 2) 22 55)
-      (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 70)
+      (draw-text (nth texts 1) 22 48)
+      (draw-text (nth texts 2) (int (/ (- width (nth text-widths 2)) 2)) 70)
       (.dispose))
     i))
 
