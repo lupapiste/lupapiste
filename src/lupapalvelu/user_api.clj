@@ -249,6 +249,18 @@
         (ok))
       (fail :not-found :email email))))
 
+(defcommand applicant-to-authority
+  {:parameters [email]
+   :roles [:admin]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :description "Changes applicant account into authority"}
+  [_]
+  (let [user (user/get-user-by-email email)]
+    (if (= "applicant" (:role user))
+      (mongo/update :users {:email email} {$set {:role "authority"}})
+      (fail :error.user-not-found))))
+
 ;;
 ;; Change organization data:
 ;;
