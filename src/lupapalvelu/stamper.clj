@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [slingshot.slingshot :refer [throw+]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
@@ -43,7 +44,7 @@
     (doto (.createGraphics i)
       (.setColor (Color. 255 255 255 (- 255 transparency)))
       (.fillRect 0 0 width height)
-      (.drawImage (qrcode "http://lupapiste.fi" 70) (- width 70) (int 5) nil)
+      (.drawImage (qrcode (env/value :host) 70) (- width 70) (int 5) nil)
       (.translate 0 70)
       (.setStroke (BasicStroke. 2.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
