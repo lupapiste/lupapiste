@@ -307,12 +307,6 @@
         stamped      (:stamped latest)]
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
-(defn- loc-organization-name [organization]
-  (get-in organization [:name i18n/*lang*] (str "???ORG:" (:id organization) "???")))
-
-(defn- get-organization-name [{organization :organization :as application}]
-  (loc-organization-name (mongo/by-id :organizations organization [:name])))
-
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
 
@@ -388,8 +382,11 @@
              {:application application
               :user (:user command)
               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :organization (if-not (ss/blank? organization) organization (get-organization-name application))
-              :created (if-not (ss/blank? timestamp) (->long timestamp) (:created command))
+              :organization (if-not (ss/blank? organization) organization (organization/get-organization-name application))
+              :created (cond
+                         (number? timestamp) (long timestamp)
+                         (ss/blank? timestamp) (:created command)
+                         :else (->long timestamp))
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))})))

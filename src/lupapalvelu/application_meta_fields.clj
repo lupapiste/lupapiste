@@ -5,6 +5,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.core :refer :all]
@@ -86,22 +87,35 @@
     (reduce + 0 (vals (:documentModificationsPerDoc app)))
     0))
 
+(defn- organization-name [_ app]
+  (organization/get-organization-name app))
+
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
 
-(def meta-fields [{:field :applicantPhone :fn get-applicant-phone}
-                  {:field :neighbors :fn neighbors/normalize-neighbors}
-                  {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
-                  {:field :documentModifications :fn count-document-modifications}
-                  {:field :unseenComments :fn count-unseen-comment}
-                  {:field :unseenStatements :fn count-unseen-statements}
-                  {:field :unseenVerdicts :fn count-unseen-verdicts}
-                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
-                  {:field :indicators :fn indicator-sum}])
+(def indicator-meta-fields [{:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
+                            {:field :documentModifications :fn count-document-modifications}
+                            {:field :unseenComments :fn count-unseen-comment}
+                            {:field :unseenStatements :fn count-unseen-statements}
+                            {:field :unseenVerdicts :fn count-unseen-verdicts}
+                            {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
+                            {:field :indicators :fn indicator-sum}])
 
-(defn with-meta-fields [user app]
-  (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
+(def meta-fields (conj indicator-meta-fields
+                   {:field :applicantPhone :fn get-applicant-phone}
+                   {:field :organizationName :fn organization-name}
+                   {:field :neighbors :fn neighbors/normalize-neighbors}))
 
+(defn- enrich-with-meta-fields [fields user app]
+  (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app fields))
+
+(def with-indicators
+  "Enriches application with indicators that can be calculated without extra database lookups"
+  (partial enrich-with-meta-fields indicator-meta-fields))
+
+(def with-meta-fields
+  "Enriches application with all meta fields. Causes database lookups."
+  (partial enrich-with-meta-fields meta-fields))
 
 (defn enrich-with-link-permit-data [app]
   (let [app-id (:id app)
