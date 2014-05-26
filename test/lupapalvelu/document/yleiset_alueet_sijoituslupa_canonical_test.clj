@@ -58,7 +58,7 @@
                                :municipality municipality,
                                :statements statements})
 
-;(ctc/validate-all-documents sijoituslupa-application)
+(ctc/validate-all-documents sijoituslupa-application)
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical get-yritys-and-henkilo get-hakija)
 
