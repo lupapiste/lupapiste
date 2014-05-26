@@ -226,7 +226,6 @@
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
               :auth.$ (user/user-in-role user :writer)}})
-    ;; TODO: Onko ok hakea paivitetty application ennen passamista "set-user-to-document":lle
     (let [application (mongo/by-id :applications (:id application))
           document (domain/get-document-by-id application (:documentId my-invite))]
       (when document
