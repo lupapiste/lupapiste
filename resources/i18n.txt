@@ -1,4 +1,0 @@
-register.rakentajafi-popup.1: Rakentaja.fi-palvelu on rakentajille, remontoijille sekä alan ammattilaisille suunniteltu kaiken kattava tietopankki. Palvelu tarjoaa rakentajien ja remontoijien hankkeisiin mm. neuvoja ja opastusta, työohjeita sekä tuotetietoutta.
-register.rakentajafi-popup.2: Liittymällä Rakentaja.fi-palvelun jäseneksi saat 150 € arvoisen tietopaketin.
-register.rakentajafi-popup.3: Tietopaketti sisältää Rakenna & Remontoi -e-kirjan sekä käyttöoikeudet rakentajan ja remontoijan kustannusarvio-ohjelmiin, huoltokirjaan ja sisustusgalleriaan.
-register.rakentajafi-popup.4: Rakentaja.fi-palvelun jäsenyys on maksutonta eikä se sido sinua mihinkään.
