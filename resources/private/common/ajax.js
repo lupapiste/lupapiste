@@ -47,7 +47,7 @@ var ajax = (function() {
       notify.error(loc("error.dialog.title"), loc(e.text));
       };
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
-      if (jqXHR && jqXHR.status > 0 && jqXHR.readyState > 0) {
+      if (jqXHR && jqXHR.status > 0 &&jqXHR.status !== 403 && jqXHR.readyState > 0) {
         error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
       }
     };
