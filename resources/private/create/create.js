@@ -89,8 +89,8 @@
     };
 
     self.findOperations = function(code) {
-      municipalities.operationsForMunicipality(code, function(opearations) {
-        self.operations(opearations);
+      municipalities.operationsForMunicipality(code, function(operations) {
+        self.operations(operations);
       });
       return self;
     };
