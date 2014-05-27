@@ -546,6 +546,21 @@
                      :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
                      :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]}
 
+                    ;; Loppi R
+                    ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynnon-avaus" system.
+                    ;; Nice address for testing "Ojatie 1, Loppi"
+                    {:id "433-R"
+                     :name {:fi "Takahiki\u00e4n rakennusvalvonta"}
+                     :scope [{:municipality "433"
+                              :permitType "R"
+                              :new-application-enabled false
+                              :inforequest-enabled true
+                              :open-inforequest true
+                              :open-inforequest-email "erajorma@takahikia.fi"}]
+                     :links [{:name {:fi "Takahiki\u00e4", :sv "Tillbakasvettas"}
+                              :url "http://urbaanisanakirja.com/word/takahikia/"}]}
+
+
                     ;;
                     ;; Testeissa kaytettavia organisaatioita
                     ;;
@@ -591,21 +606,7 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
-
-                    ;; Loppi R
-                    ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynnon-avaus" system.
-                    ;; Nice address for testing "Ojatie 1, Loppi"
-                    {:id "433-R"
-                     :name {:fi "Takahiki\u00e4n rakennusvalvonta"}
-                     :scope [{:municipality "433"
-                              :permitType "R"
-                              :new-application-enabled false
-                              :inforequest-enabled true
-                              :open-inforequest true
-                              :open-inforequest-email "erajorma@takahikia.fi"}]
-                     :links [{:name {:fi "Takahiki\u00e4", :sv "Tillbakasvettas"}
-                              :url "http://urbaanisanakirja.com/word/takahikia/"}]}])
+                                         :name "Sonja Sibbo"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
