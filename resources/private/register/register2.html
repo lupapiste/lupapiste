@@ -80,9 +80,10 @@
           <div class="form-entry register-checkbox">
             <label>
               <input type="checkbox" id="rakentajafi" data-bind="checked: rakentajafi" value="true">
-              <span data-bind="ltext: 'register.rakentajafi'"></span>
+              <span data-bind="lhtml: 'register.rakentajafi'"></span>
+              &nbsp;
+              <span class="icon info-big right-align"  data-bind="click: showRakentajafiInfo" style="cursor: pointer;"></span>
             </label>
-              <a href="#" data-bind="click: showRakentajafiInfo">Rakentaja.fi</a>
           </div>
           </div>
 
@@ -105,7 +106,20 @@
         <p class="dialog-close close">X</p>
       </div>
       <div class="dialog-content">
-
+        <p>
+        <img alt="R & R kansikuva" src="/img/rr_tietopaketti_kansi_201405.jpg" align="right">
+        Rakentaja.fi-palvelu on rakentajille, remontoijille sekä alan
+        ammattilaisille suunniteltu kaiken kattava tietopankki. Palvelu tarjoaa
+        rakentajien ja remontoijien hankkeisiin mm. neuvoja ja opastusta,
+        työohjeita sekä tuotetietoutta.</p>
+        <p>
+        <strong>Liittymällä Rakentaja.fi-palvelun jäseneksi saat 150 &euro; arvoisen
+        tietopaketin.</strong></p>
+        <p>Tietopaketti sisältää Rakenna & Remontoi -e-kirjan sekä käyttöoikeudet
+        rakentajan ja remontoijan kustannusarvio-ohjelmiin, huoltokirjaan ja
+        sisustusgalleriaan.</p>
+        <p>Rakentaja.fi-palvelun jäsenyys on maksutonta eikä se sido sinua mihinkään.</p>
+        <button class="btn btn-primary btn-dialog close" >OK</button>
       </div>
     </div>
 
