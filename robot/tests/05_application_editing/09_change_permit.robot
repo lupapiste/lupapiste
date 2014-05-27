@@ -35,6 +35,7 @@ Sonja creates a change permit
 
   # Create and open the change permit by pressing button
   Click enabled by test id  change-permit-create-btn
+  Confirm  dynamic-yes-no-confirm-dialog
 
   Wait until  Application state should be  open
   Element Should Not Be Visible  xpath=//*[@data-test-id='change-permit-create-btn']
