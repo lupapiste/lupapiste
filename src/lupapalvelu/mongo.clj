@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
+            [sade.util :as util]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -46,6 +47,13 @@
       (let [key (name k)]
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
+
+(defn create-update-statements
+  "Returns a map of mongo updates to be used as $set value.
+   E.g., {attachments.0.k v
+          attachments.5.k v}"
+  [attachments pred k v]
+  (reduce (fn [m i] (assoc m (str "attachments." i \. (name k)) v)) {} (util/positions pred attachments)))
 
 ;;
 ;; Database Api

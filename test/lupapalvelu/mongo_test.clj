@@ -43,3 +43,12 @@
   (mongo/valid-key? "\u0000") => false
   (mongo/valid-key? "$var") => false
   (mongo/valid-key? "path.path") => false)
+
+(let [attachments [{:id 1 :versions [{:fileId "11"} {:fileId "21"}]}
+                   {:id 2 :versions [{:fileId "12"} {:fileId "22"}]}
+                   {:id 3 :versions [{:fileId "13"} {:fileId "23"}]}]]
+
+  (facts "create-update-statements"
+    (mongo/create-update-statements attachments #(= (:id %) 1) "foo" "bar") => {"attachments.0.foo" "bar"}
+    (mongo/create-update-statements attachments #(#{1 3} (:id %)) "foo" "bar") => {"attachments.0.foo" "bar"
+                                                                             "attachments.2.foo" "bar"}))
