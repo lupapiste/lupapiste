@@ -11,7 +11,7 @@
    {:id "777777777777777777000099"
     :email "admin@solita.fi"
     :enabled true
-    :role :admin
+    :role "admin"
     :firstName "Admin"
     :lastName "Admin"
     :phone "03030303"
@@ -25,7 +25,7 @@
     :firstName "Judge"
     :lastName "Dread"
     :email "judge.dread@example.com"
-    :role :admin
+    :role "admin"
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
 
    ;; Tampere
@@ -34,7 +34,7 @@
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["837-R"]
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -52,7 +52,7 @@
     :street "Paapankuja 12"
     :phone "0102030405"
     :email "tampere-ya"
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :zip "10203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
@@ -60,7 +60,7 @@
    {:id "777777777777777777000017"
     :email "jussi.viranomainen@tampere.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :username "jussi"
     :organizations ["837-YA"]
     :firstName "Jussi"
@@ -78,7 +78,7 @@
    {:id "77777777777777777700669"
     :email "sakari.viranomainen@kuopio.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :username "sakari"
     :organizations ["297-YA"]
     :firstName "Sakari"
@@ -98,7 +98,7 @@
     :street "Paapankuja 12"
     :phone "0102030405"
     :email "kuopio-ya"
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :zip "10203"
     :organizations ["297-YA"]
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
@@ -109,7 +109,7 @@
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :organizations ["753-R"]
     :firstName "Simo"
     :lastName "Suurvisiiri"
@@ -120,7 +120,7 @@
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti:  sonja / sonja
    {:id "777777777777777777000023"
     :username "sonja"
-    :role :authority
+    :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
     :organizations ["753-R" "753-YA" "998-R-TESTI-2"]
@@ -135,7 +135,7 @@
    ;; Ronja Sibbo - Sipoon lupa-arkkitehti:  ronja / sonja
    {:id "777777777777777777000024"
     :username "ronja"
-    :role :authority
+    :role "authority"
     :enabled true
     :email "ronja.sibbo@sipoo.fi"
     :organizations ["753-R"]
@@ -154,7 +154,7 @@
    {:id "777777777777777777000033"
      :email "pekka.borga@porvoo.fi"
      :enabled true
-     :role :authority
+     :role "authority"
      :organizations ["638-R"]
      :firstName "Pekka"
      :lastName "Borga"
@@ -169,7 +169,7 @@
    {:id "777777777777777777000034"
      :email "olli.uleaborg@ouka.fi"
      :enabled true
-     :role :authority
+     :role "authority"
      :organizations ["564-R"]
      :firstName "Olli"
      :lastName "Ule\u00E5borg"
@@ -184,7 +184,7 @@
    {:id "50ac77ecd2e6c2ea6e73f83f"
     :email "admin@naantali.fi"
     :enabled true
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :organizations ["529-R"]
     :firstName "Admin"
     :lastName "Naantali"
@@ -195,7 +195,7 @@
    {:id "50ac77ecd2e6c2ea6e73f840"
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["529-R"]
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
@@ -206,7 +206,7 @@
    {:id "50ac77ecd2e6c2ea6e73f841"
     :email "lupasihteeri@naantali.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["529-R"]
     :firstName "Lupasihteeri"
     :lastName "Naantali"
@@ -220,7 +220,7 @@
    {:id "50ac77ecd2e6c2ea6e73f850"
     :email "admin@jarvenpaa.fi"
     :enabled true
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :organizations ["186-R"]
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -231,7 +231,7 @@
    {:id "50ac77ecd2e6c2ea6e73f851"
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["186-R"]
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -242,7 +242,7 @@
    {:id "50ac77ecd2e6c2ea6e73f852"
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["186-R"]
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -256,7 +256,7 @@
    {:id "77775577777777777700769"
     :email "arto.viranomainen@loppi.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :username "arto"
     :organizations ["433-R"]
     :firstName "Arto"
@@ -280,7 +280,7 @@
     :phone "0505503171"
     :email "teppo@example.com"
     :personId "210281-0002"
-    :role :applicant
+    :role "applicant"
     :id "5073c0a1c2e6c470aef589a5"
     :street "Mutakatu 7"
     :zip "33560"
@@ -289,7 +289,7 @@
    {:id "777777777777777777000010"
     :username "mikko@example.com"
     :enabled true
-    :role :applicant
+    :role "applicant"
     :personId "210281-0002"
     :firstName "Mikko"
     :lastName "Intonen"
@@ -310,7 +310,7 @@
    {:id "777777777777777777000020"
     :username "pena"
     :enabled true
-    :role :applicant
+    :role "applicant"
     :personId "010203-040A"
     :firstName "Pena"
     :lastName "Panaani"
@@ -333,7 +333,7 @@
     :email  "dummy@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
-    :role  :applicant}
+    :role "applicant"}
    ;; Dummy hakija 2: pena / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
@@ -342,7 +342,7 @@
     :lastName "Dummy2"
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
-    :role  :applicant}
+    :role "applicant"}
    ;; Dummy hakija 3: pena / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
@@ -351,7 +351,7 @@
     :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
-    :role  :applicant}
+    :role "applicant"}
    ])
 
 (def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
