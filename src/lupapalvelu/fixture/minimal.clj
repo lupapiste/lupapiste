@@ -11,7 +11,7 @@
    {:id "777777777777777777000099"
     :email "admin@solita.fi"
     :enabled true
-    :role :admin
+    :role "admin"
     :firstName "Admin"
     :lastName "Admin"
     :phone "03030303"
@@ -25,7 +25,7 @@
     :firstName "Judge"
     :lastName "Dread"
     :email "judge.dread@example.com"
-    :role :admin
+    :role "admin"
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
 
    ;; Tampere
@@ -34,7 +34,7 @@
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["837-R"]
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -109,18 +109,20 @@
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :organizations ["753-R"]
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
     :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
               :apikey "50ac788ec2e6c2ea6e73f83f"}}
+
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti:  sonja / sonja
    {:id "777777777777777777000023"
-    :email "sonja.sibbo@sipoo.fi"
+    :username "sonja"
+    :role "authority"
     :enabled true
-    :role :authority
+    :email "sonja.sibbo@sipoo.fi"
     :organizations ["753-R" "753-YA" "998-R-TESTI-2"]
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -128,14 +130,14 @@
     :street "Katuosoite 1 a 1"
     :zip "33456"
     :city "Sipoo"
-    :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9d1"}}
    ;; Ronja Sibbo - Sipoon lupa-arkkitehti:  ronja / sonja
    {:id "777777777777777777000024"
-    :email "ronja.sibbo@sipoo.fi"
+    :username "ronja"
+    :role "authority"
     :enabled true
-    :role :authority
+    :email "ronja.sibbo@sipoo.fi"
     :organizations ["753-R"]
     :firstName "Ronja"
     :lastName "Sibbo"
@@ -143,7 +145,6 @@
     :street "Katuosoite 1 a 1"
     :zip "33456"
     :city "Sipoo"
-    :username "ronja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
 
@@ -153,7 +154,7 @@
    {:id "777777777777777777000033"
      :email "pekka.borga@porvoo.fi"
      :enabled true
-     :role :authority
+     :role "authority"
      :organizations ["638-R"]
      :firstName "Pekka"
      :lastName "Borga"
@@ -168,7 +169,7 @@
    {:id "777777777777777777000034"
      :email "olli.uleaborg@ouka.fi"
      :enabled true
-     :role :authority
+     :role "authority"
      :organizations ["564-R"]
      :firstName "Olli"
      :lastName "Ule\u00E5borg"
@@ -183,7 +184,7 @@
    {:id "50ac77ecd2e6c2ea6e73f83f"
     :email "admin@naantali.fi"
     :enabled true
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :organizations ["529-R"]
     :firstName "Admin"
     :lastName "Naantali"
@@ -194,7 +195,7 @@
    {:id "50ac77ecd2e6c2ea6e73f840"
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["529-R"]
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
@@ -205,7 +206,7 @@
    {:id "50ac77ecd2e6c2ea6e73f841"
     :email "lupasihteeri@naantali.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["529-R"]
     :firstName "Lupasihteeri"
     :lastName "Naantali"
@@ -219,7 +220,7 @@
    {:id "50ac77ecd2e6c2ea6e73f850"
     :email "admin@jarvenpaa.fi"
     :enabled true
-    :role :authorityAdmin
+    :role "authorityAdmin"
     :organizations ["186-R"]
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -230,7 +231,7 @@
    {:id "50ac77ecd2e6c2ea6e73f851"
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["186-R"]
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -241,7 +242,7 @@
    {:id "50ac77ecd2e6c2ea6e73f852"
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
-    :role :authority
+    :role "authority"
     :organizations ["186-R"]
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -332,7 +333,7 @@
     :email  "dummy@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
-    :role  "applicant"}
+    :role "applicant"}
    ;; Dummy hakija 2: pena / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
@@ -341,7 +342,7 @@
     :lastName "Dummy2"
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
-    :role  "applicant"}
+    :role "applicant"}
    ;; Dummy hakija 3: pena / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
@@ -350,7 +351,7 @@
     :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
-    :role  "applicant"}
+    :role "applicant"}
    ])
 
 (def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
@@ -545,6 +546,21 @@
                      :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
                      :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]}
 
+                    ;; Loppi R
+                    ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynnon-avaus" system.
+                    ;; Nice address for testing "Ojatie 1, Loppi"
+                    {:id "433-R"
+                     :name {:fi "Takahiki\u00e4n rakennusvalvonta"}
+                     :scope [{:municipality "433"
+                              :permitType "R"
+                              :new-application-enabled false
+                              :inforequest-enabled true
+                              :open-inforequest true
+                              :open-inforequest-email "erajorma@takahikia.fi"}]
+                     :links [{:name {:fi "Takahiki\u00e4", :sv "Tillbakasvettas"}
+                              :url "http://urbaanisanakirja.com/word/takahikia/"}]}
+
+
                     ;;
                     ;; Testeissa kaytettavia organisaatioita
                     ;;
@@ -590,21 +606,7 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
-
-                    ;; Loppi R
-                    ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynnon-avaus" system.
-                    ;; Nice address for testing "Ojatie 1, Loppi"
-                    {:id "433-R"
-                     :name {:fi "Takahiki\u00e4n rakennusvalvonta"}
-                     :scope [{:municipality "433"
-                              :permitType "R"
-                              :new-application-enabled false
-                              :inforequest-enabled true
-                              :open-inforequest true
-                              :open-inforequest-email "erajorma@takahikia.fi"}]
-                     :links [{:name {:fi "Takahiki\u00e4", :sv "Tillbakasvettas"}
-                              :url "http://urbaanisanakirja.com/word/takahikia/"}]}])
+                                         :name "Sonja Sibbo"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

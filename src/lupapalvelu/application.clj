@@ -86,6 +86,7 @@
         updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
     (when-not schema (fail! :error.schema-not-found))
     (when-not subject (fail! :error.user-not-found))
+    (when-not (domain/has-auth? application user-id) (fail! :error.application-does-not-have-given-auth))
     (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
     (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
   )
@@ -193,8 +194,8 @@
    :verified   true}
   [{:keys [created user application] :as command}]
   (let [email (-> email ss/lower-case ss/trim)]
-    (if (domain/invited? application email)
-      (fail :invite.already-invited)
+    (if (domain/invite application email)
+      (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
@@ -225,10 +226,12 @@
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
               :auth.$ (user/user-in-role user :writer)}})
-    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-      ; It's not possible to combine Mongo writes here,
-      ; because only the last $elemMatch counts.
-      (set-user-to-document application document (:id user) (:path my-invite) user created))))
+    (let [application (mongo/by-id :applications (:id application))
+          document (domain/get-document-by-id application (:documentId my-invite))]
+      (when document
+        ; It's not possible to combine Mongo writes here,
+        ; because only the last $elemMatch counts.
+        (set-user-to-document application document (:id user) (:path my-invite) user created)))))
 
 (defn- do-remove-auth [command email]
   (update-application command
