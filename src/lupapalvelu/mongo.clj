@@ -49,11 +49,11 @@
     false))
 
 (defn create-update-statements
-  "Returns a map of mongo updates to be used as $set value.
-   E.g., {attachments.0.k v
-          attachments.5.k v}"
-  [attachments pred k v]
-  (reduce (fn [m i] (assoc m (str "attachments." i \. (name k)) v)) {} (util/positions pred attachments)))
+  "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
+   E.g., (create-update-statements :attachments [true nil nil true nil] true? \"k\" \"v\")
+         => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
+  [array-name array pred k v]
+  (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
 
 ;;
 ;; Database Api
