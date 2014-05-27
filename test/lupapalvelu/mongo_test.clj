@@ -48,6 +48,6 @@
                    {:id 2 :versions [{:fileId "12"} {:fileId "22"}]}
                    {:id 3 :versions [{:fileId "13"} {:fileId "23"}]}]]
 
-  (facts "create-update-statements"
-    (mongo/create-update-statements :attachments attachments #(= (:id %) 1) "foo" "bar") => {"attachments.0.foo" "bar"}
-    (mongo/create-update-statements :attachments attachments #(#{1 3} (:id %)) "foo" "bar") => {"attachments.0.foo" "bar", "attachments.2.foo" "bar"}))
+  (facts "generate-array-updates"
+    (mongo/generate-array-updates :attachments attachments #(= (:id %) 1) "foo" "bar") => {"attachments.0.foo" "bar"}
+    (mongo/generate-array-updates :attachments attachments #(#{1 3} (:id %)) "foo" "bar") => {"attachments.0.foo" "bar", "attachments.2.foo" "bar"}))

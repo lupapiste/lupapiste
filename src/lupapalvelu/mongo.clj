@@ -48,9 +48,9 @@
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
 
-(defn create-update-statements
+(defn generate-array-updates
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
-   E.g., (create-update-statements :attachments [true nil nil true nil] true? \"k\" \"v\")
+   E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
          => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
   [array-name array pred k v]
   (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))

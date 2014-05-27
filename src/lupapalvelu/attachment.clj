@@ -209,7 +209,7 @@
     (some #(file-id-set %) attachment-file-ids)))
 
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
-  (mongo/create-update-statements :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
+  (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"

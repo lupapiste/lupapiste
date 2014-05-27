@@ -411,7 +411,7 @@
            signature {:user (user/summary u)
                       :created (:created command)}
            updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
-                             (merge m (mongo/create-update-statements
+                             (merge m (mongo/generate-array-updates
                                         :attachments
                                         (:attachments application)
                                         #(= (:id %) attachment-id)
