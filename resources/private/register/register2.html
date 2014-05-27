@@ -80,9 +80,9 @@
           <div class="form-entry register-checkbox">
             <label>
               <input type="checkbox" id="rakentajafi" data-bind="checked: rakentajafi" value="true">
-              <span data-bind="ltext: 'register.rakentajafi'"></span>
-              <a href="http://www.rakentaja.fi/suorakanava/jasenrekisterointi/" target="_blank">Rakentaja.fi</a>
+              <span data-bind="lhtml: 'register.rakentajafi'"></span>
             </label>
+            <span class="icon info-indicator"  data-bind="click: showRakentajafiInfo" style="cursor: pointer;vertical-align: bottom;"></span>
           </div>
           </div>
 
@@ -98,6 +98,23 @@
         </div>
       </form>
     </div>
+
+    <div id="dialogRakentajafi" class="window autosized">
+      <div class="dialog-header">
+        <p>Rakentaja.fi</p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        <p>
+        <img alt="R & R" src="/img/rr_tietopaketti_kansi_201405.jpg" align="right">
+        <span data-bind="ltext: 'register.rakentajafi-popup.1'"></span></p>
+        <p><strong data-bind="ltext: 'register.rakentajafi-popup.2'"></strong></p>
+        <p data-bind="ltext: 'register.rakentajafi-popup.3'"></p>
+        <p data-bind="ltext: 'register.rakentajafi-popup.4'"></p>
+        <button class="btn btn-primary btn-dialog close" >OK</button>
+      </div>
+    </div>
+
   </section>
 </body>
 </html>
