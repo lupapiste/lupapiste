@@ -245,11 +245,17 @@
     flatten
     (zipmap <> (repeat ""))))
 
-(defn- do-remove-auth [command email]
+(defn- do-remove-auth [{application :application :as command} email]
+  (let [email (-> email ss/lower-case ss/trim)
+        user-pred #(when (and (= (:username %) email) (not= (:type %) "owner")) %)]
+    (when (some user-pred (:auth application))
+      (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
+            doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
   (update-application command
-      {$pull {:auth {$and [{:username (ss/lower-case email)}
-                           {:type {$ne :owner}}]}}
-       $set  {:modified (:created command)}}))
+          (merge
+            {$pull {:auth {$and [{:username email}, {:type {$ne :owner}}]}}
+             $set  {:modified (:created command)}}
+            (when (seq doc-updates) {$unset doc-updates})))))))
 
 (defcommand decline-invitation
   {:parameters [:id]
@@ -259,8 +265,7 @@
 
 (defcommand remove-auth
   {:parameters [:id email]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
+   :input-validators [(partial action/non-blank-parameters [:email])]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))
