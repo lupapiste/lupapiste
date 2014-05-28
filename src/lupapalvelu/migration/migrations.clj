@@ -1,15 +1,15 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
+            [clojure.walk :as walk]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils]]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
-            [monger.operators :refer :all]
-            [lupapalvelu.operations :as op]
-            [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils]]))
+            [lupapalvelu.operations :as op]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -439,3 +439,9 @@
                :open-inforequest-email ""}
        $set {:scope new-scopes}}))))
 
+(defmigration unset-invalid-user-ids
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection)]
+    (let [updates (a/generate-remove-invalid-user-from-docs-updates application)]
+      (when (seq updates)
+        (mongo/update-by-id collection (:id application) {$unset updates})))))

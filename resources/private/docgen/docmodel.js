@@ -777,6 +777,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         if (selectedOption === value) {
           option.selected = "selected";
         }
+        if (user.invite) {
+          option.disabled = true;
+        }
         select.appendChild(option);
       }
     });
