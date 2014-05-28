@@ -16,7 +16,7 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? generate-remove-invalid-user-from-docs-updates)
+(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed?)
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
