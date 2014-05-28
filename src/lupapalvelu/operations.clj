@@ -589,13 +589,6 @@
 ;; Actions
 ;;
 
-(defquery "operations"
-  {:description "returns operations: without parameters all, with permitType-parameter just those operations"}
-  [{{:keys [permitType]} :data}]
-  (if permitType
-    (ok :operations (operations-for-permit-type permitType false))
-    (ok :operations operation-tree)))
-
 (defquery "addable-operations"
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters [:id]}
