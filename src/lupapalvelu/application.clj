@@ -72,25 +72,26 @@
 
 (defn- set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
-  (let [path-arr     (if-not (blank? path) (split path #"\.") [])
-        schema       (schemas/get-schema (:schema-info document))
-        subject      (user/get-user-by-id user-id)
-        with-hetu    (and
-                       (model/has-hetu? (:body schema) path-arr)
-                       (user/same-user? current-user subject))
-        person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
-        model        (if (seq path-arr)
-                       (assoc-in {} (map keyword path-arr) person)
-                       person)
-        updates      (tools/path-vals model)
-        ; Path should exist in schema!
-        updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-    (when-not schema (fail! :error.schema-not-found))
-    (when-not subject (fail! :error.user-not-found))
-    (when-not (domain/has-auth? application user-id) (fail! :error.application-does-not-have-given-auth))
-    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-    (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
-  )
+  (when-not (ss/blank? user-id)
+    (let [path-arr     (if-not (blank? path) (split path #"\.") [])
+          schema       (schemas/get-schema (:schema-info document))
+          subject      (user/get-user-by-id user-id)
+          with-hetu    (and
+                         (model/has-hetu? (:body schema) path-arr)
+                         (user/same-user? current-user subject))
+          person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
+          model        (if (seq path-arr)
+                         (assoc-in {} (map keyword path-arr) person)
+                         person)
+          updates      (tools/path-vals model)
+          ; Path should exist in schema!
+          updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
+      (when-not schema (fail! :error.schema-not-found))
+      (when-not subject (fail! :error.user-not-found))
+      (when-not (and (domain/has-auth? application user-id) (domain/no-pending-invites application user-id))
+        (fail! :error.application-does-not-have-given-auth))
+      (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+      (commands/persist-model-updates application "documents" document updates timestamp)))) ; TODO support for collection parameter
 
 (defn- insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
@@ -251,7 +252,7 @@
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
             doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
-  (update-application command
+        (update-application command
           (merge
             {$pull {:auth {$and [{:username email}, {:type {$ne :owner}}]}}
              $set  {:modified (:created command)}}
