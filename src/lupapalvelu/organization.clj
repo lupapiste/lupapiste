@@ -188,10 +188,9 @@
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]
    :roles [:authorityAdmin]}
-  [{user :user}]
+  [{{:keys [organizations]} :user}]
   ; FIXME: validate operation and attachments
-  (let [organizations (:organizations user)
-        organization  (first organizations)]
+  (let [organization (first organizations)]
     (mongo/update-by-id :organizations organization {$set {(str "operations-attachments." operation) attachments}})
     (ok)))
 
