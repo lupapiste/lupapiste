@@ -583,15 +583,6 @@
           filtering-fn (fn [node] (contains? selected-operations node))]
       (operations-filtered filtering-fn false))))
 
-
-;;
-;; Actions
-;;
-
-(defquery "addable-operations"
-  {:description "returns operations addable for the application whose id is given as parameter"
-   :parameters [:id]}
-  [{{:keys [permitType] :as application} :application}]
-  (let [filtering-fn (fn [node] (= (name permitType) (permit-type-of-operation node)))]
-    (ok :operations (operations-filtered filtering-fn true))))
-
+(defn addable-operations [selected-operations permit-type]
+  (let [filtering-fn (fn [node] (and (contains? selected-operations node) (= (name permit-type) (permit-type-of-operation node))))]
+    (operations-filtered filtering-fn true)))

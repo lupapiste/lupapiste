@@ -65,6 +65,15 @@
 (defn get-organization-name [{organization-id :organization :as application}]
   (loc-organization-name (get-organization organization-id)))
 
+(defn resolve-organization [municipality permit-type]
+  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality :permitType permit-type}}})]
+    (when (> (count organizations) 1)
+      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
+    (first organizations)))
+
+(defn resolve-organization-scope [organization municipality permit-type]
+  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+
 ;;
 ;; Actions
 ;;
@@ -155,14 +164,13 @@
   [_]
   (ok :operations (operations/municipality-operations municipality)))
 
-(defn resolve-organization [municipality permit-type]
-  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality :permitType permit-type}}})]
-    (when (> (count organizations) 1)
-      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
-    (first organizations)))
-
-(defn resolve-organization-scope [organization municipality permit-type]
-  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+(defquery "addable-operations"
+  {:description "returns operations addable for the application whose id is given as parameter"
+   :parameters [:id]}
+  [{{:keys [permitType municipality] :as application} :application}]
+  (when-let [organization (resolve-organization municipality permitType)]
+    (let [selected-operations (set (map #(keyword %) (:selected-operations organization)))]
+      (ok :operations (operations/addable-operations selected-operations permitType)))))
 
 (defquery organization-by-id
   {:parameters [organizationId]
