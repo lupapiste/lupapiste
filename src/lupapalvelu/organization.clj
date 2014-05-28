@@ -48,7 +48,7 @@
   [{scope :scope}]
   (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
 
-(defn- organization-operations
+(defn- organization-operations-with-attachments
   "Returns a map where key is permit type, value is a list of operations for the permit type"
   [{scope :scope :as organization}]
   (reduce
@@ -91,8 +91,8 @@
   [{{:keys [organizations] :as user} :user}]
   (let [orgs (mongo/select :organizations {:_id {$in (:organizations user)}})
         organization (first orgs)
-        ops (organization-operations organization)]
-    (ok :organization (assoc organization :operations-attachments ops)
+        ops-with-attachments (organization-operations-with-attachments organization)]
+    (ok :organization (assoc organization :operations-attachments ops-with-attachments)
         :attachmentTypes (organization-attachments organization))))
 
 (defcommand update-organization
