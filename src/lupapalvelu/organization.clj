@@ -37,10 +37,11 @@
       (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
-  (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
+  (let [organizations (mongo/select :organizations {} {:scope 1})]
     (distinct
-      (for [{id :id scopes :scope} id-and-scopes
-            {:keys [municipality]} scopes] municipality))))
+      (for [{scopes :scope} organizations
+            {municipality :municipality} scopes]
+        municipality))))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
