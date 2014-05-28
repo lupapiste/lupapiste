@@ -1,6 +1,7 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
+            [swiss-arrows.core :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -232,6 +233,17 @@
         ; It's not possible to combine Mongo writes here,
         ; because only the last $elemMatch counts.
         (set-user-to-document application document (:id user) (:path my-invite) user created)))))
+
+(defn- generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
+  (-<>> docs
+    (map-indexed
+      (fn [i doc]
+        (->> (model/validate application doc)
+          (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
+          (map (comp (partial map name) :path))
+          (map (comp (partial join ".") (partial concat ["documents" i "data"]))))))
+    flatten
+    (zipmap <> (repeat ""))))
 
 (defn- do-remove-auth [command email]
   (update-application command
