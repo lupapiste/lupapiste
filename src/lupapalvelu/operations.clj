@@ -578,9 +578,8 @@
 
 (defn municipality-operations [municipality]
   (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality}}} {:selected-operations 1})]
-    (let [selected-operations (map :selected-operations organizations)
-          selected-operations (reduce #(flatten (conj %1 %2)) selected-operations)
-          selected-operations (set (map #(keyword %) (distinct selected-operations)))
+    (let [selected-operations (reduce #(apply conj %1 %2) #{} (map :selected-operations organizations))
+          selected-operations (set (map #(keyword %) selected-operations))
           filtering-fn (fn [node] (contains? selected-operations node))]
       (operations-filtered filtering-fn false))))
 
