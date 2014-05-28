@@ -235,7 +235,7 @@
         ; because only the last $elemMatch counts.
         (set-user-to-document application document (:id user) (:path my-invite) user created)))))
 
-(defn- generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
+(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs
     (map-indexed
       (fn [i doc]
