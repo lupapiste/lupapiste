@@ -10,6 +10,7 @@
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
 
@@ -137,8 +138,6 @@
      (when (env/feature? :ymparisto) operation-tree-for-Y)
      operation-tree-for-YA]))
 
-;; TODO: implement
-(defn municipality-operations [municipality] operation-tree)
 
 (def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
 
@@ -535,17 +534,21 @@
     ya-operations
     yl-operations))
 
+;;
+;; Functions
+;;
+
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
 
 (defn- is-add-operation-allowed-for-operation [operation]
   (:add-operation-allowed (operations (keyword operation))))
 
-(defn operations-for-permit-type [permit-type only-addable?]
+(defn operations-filtered [filtering-fn only-addable?]
   (clojure.walk/postwalk
     (fn [node]
       (if (keyword? node)
-        (when (= (name permit-type) (permit-type-of-operation node))
+        (when (filtering-fn node)
           ; Return operation keyword if permit type matches,
           ; and if the only-addable filtering is required, apply that.
           ; Otherwise return nil.
@@ -572,6 +575,16 @@
               (conj result operation)
               result)) #{} operations))
 
+
+(defn municipality-operations [municipality]
+  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality}}} {:selected-operations 1})]
+    (let [selected-operations (map :selected-operations organizations)
+          selected-operations (reduce #(flatten (conj %1 %2)) selected-operations)
+          selected-operations (set (map #(keyword %) (distinct selected-operations)))
+          filtering-fn (fn [node] (contains? selected-operations node))]
+      (operations-filtered filtering-fn false))))
+
+
 ;;
 ;; Actions
 ;;
@@ -587,5 +600,6 @@
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters [:id]}
   [{{:keys [permitType] :as application} :application}]
-  (ok :operations (operations-for-permit-type permitType true)))
+  (let [filtering-fn (fn [node] (= (name permitType) (permit-type-of-operation node)))]
+    (ok :operations (operations-filtered filtering-fn true))))
 
