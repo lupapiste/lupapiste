@@ -5,6 +5,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]))
 
@@ -47,11 +48,17 @@
    :opened 1379920714420,
    :modified 1379920824001,
    :submitted 1379920746800,
+   :auth [{:lastName "Panaani",
+             :firstName "Pena",
+             :username "pena",
+             :type "owner",
+             :role "owner",
+             :id "777777777777777777000020"}]
+   :authority sonja,
    :permitType "YA",
    :organization "753-YA",
    :infoRequest false,
    :openInfoRequest false,
-   :authority sonja,
    :state "submitted",
    :title "Latokuja 1",
    :address "Latokuja 1",
@@ -63,12 +70,16 @@
    :municipality municipality,
    :statements statements})
 
+(ctc/validate-all-documents mainostus-application)
+
 (def viitoitus-application (assoc
                              (assoc mainostus-application :documents
                                [hakija
                                 maksaja
                                 (assoc-in tapahtuma-info [:data :_selected :value] "viitoitus-tapahtuma-valinta")])
                              :id "LP-753-2013-00005"))
+
+(ctc/validate-all-documents viitoitus-application)
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical get-yritys-and-henkilo get-hakija)
 

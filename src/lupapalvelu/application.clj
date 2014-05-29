@@ -1,6 +1,7 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
+            [swiss-arrows.core :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -71,24 +72,26 @@
 
 (defn- set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
-  (let [path-arr     (if-not (blank? path) (split path #"\.") [])
-        schema       (schemas/get-schema (:schema-info document))
-        subject      (user/get-user-by-id user-id)
-        with-hetu    (and
-                       (model/has-hetu? (:body schema) path-arr)
-                       (user/same-user? current-user subject))
-        person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
-        model        (if (seq path-arr)
-                       (assoc-in {} (map keyword path-arr) person)
-                       person)
-        updates      (tools/path-vals model)
-        ; Path should exist in schema!
-        updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-    (when-not schema (fail! :error.schema-not-found))
-    (when-not subject (fail! :error.user-not-found))
-    (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-    (commands/persist-model-updates application "documents" document updates timestamp)) ; TODO support for collection parameter
-  )
+  (when-not (ss/blank? user-id)
+    (let [path-arr     (if-not (blank? path) (split path #"\.") [])
+          schema       (schemas/get-schema (:schema-info document))
+          subject      (user/get-user-by-id user-id)
+          with-hetu    (and
+                         (model/has-hetu? (:body schema) path-arr)
+                         (user/same-user? current-user subject))
+          person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
+          model        (if (seq path-arr)
+                         (assoc-in {} (map keyword path-arr) person)
+                         person)
+          updates      (tools/path-vals model)
+          ; Path should exist in schema!
+          updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
+      (when-not schema (fail! :error.schema-not-found))
+      (when-not subject (fail! :error.user-not-found))
+      (when-not (and (domain/has-auth? application user-id) (domain/no-pending-invites application user-id))
+        (fail! :error.application-does-not-have-given-auth))
+      (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
+      (commands/persist-model-updates application "documents" document updates timestamp)))) ; TODO support for collection parameter
 
 (defn- insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
@@ -193,8 +196,8 @@
    :verified   true}
   [{:keys [created user application] :as command}]
   (let [email (-> email ss/lower-case ss/trim)]
-    (if (domain/invited? application email)
-      (fail :invite.already-invited)
+    (if (domain/invite application email)
+      (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email)
             invite  {:title        title
                      :application  id
@@ -225,16 +228,35 @@
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
               :auth.$ (user/user-in-role user :writer)}})
-    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-      ; It's not possible to combine Mongo writes here,
-      ; because only the last $elemMatch counts.
-      (set-user-to-document application document (:id user) (:path my-invite) user created))))
+    (let [application (mongo/by-id :applications (:id application))
+          document (domain/get-document-by-id application (:documentId my-invite))]
+      (when document
+        ; It's not possible to combine Mongo writes here,
+        ; because only the last $elemMatch counts.
+        (set-user-to-document application document (:id user) (:path my-invite) user created)))))
 
-(defn- do-remove-auth [command email]
-  (update-application command
-      {$pull {:auth {$and [{:username (ss/lower-case email)}
-                           {:type {$ne :owner}}]}}
-       $set  {:modified (:created command)}}))
+(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
+  (-<>> docs
+    (map-indexed
+      (fn [i doc]
+        (->> (model/validate application doc)
+          (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
+          (map (comp (partial map name) :path))
+          (map (comp (partial join ".") (partial concat ["documents" i "data"]))))))
+    flatten
+    (zipmap <> (repeat ""))))
+
+(defn- do-remove-auth [{application :application :as command} email]
+  (let [email (-> email ss/lower-case ss/trim)
+        user-pred #(when (and (= (:username %) email) (not= (:type %) "owner")) %)]
+    (when (some user-pred (:auth application))
+      (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
+            doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
+        (update-application command
+          (merge
+            {$pull {:auth {$and [{:username email}, {:type {$ne :owner}}]}}
+             $set  {:modified (:created command)}}
+            (when (seq doc-updates) {$unset doc-updates})))))))
 
 (defcommand decline-invitation
   {:parameters [:id]
@@ -244,8 +266,7 @@
 
 (defcommand remove-auth
   {:parameters [:id email]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
+   :input-validators [(partial action/non-blank-parameters [:email])]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))
@@ -607,18 +628,18 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope organization municipality permit-type)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest organization))]
-
+        open-inforequest? (and info-request? (:open-inforequest scope))]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
-      (when-not (:inforequest-enabled organization)
+      (when-not (:inforequest-enabled scope)
         (fail! :error.inforequests-disabled))
-      (when-not (:new-application-enabled organization)
+      (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
 
     (let [id            (make-application-id municipality)
@@ -671,8 +692,9 @@
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope organization municipality permit-type)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest organization))
+        open-inforequest? (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
       (insert-application created-application)
@@ -987,9 +1009,10 @@
     (ok :integrationAvailable ftp-user?)))
 
 
-(defn- validate-new-applications-enabled [command {:keys [organization]}]
-  (let [org (mongo/by-id :organizations organization {:new-application-enabled 1})]
-    (when-not (= (:new-application-enabled org) true)
+(defn- validate-new-applications-enabled [command {:keys [permitType municipality]}]
+  (let [org   (organization/resolve-organization municipality permitType)
+        scope (organization/resolve-organization-scope org municipality permitType)]
+    (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
 (defcommand convert-to-application

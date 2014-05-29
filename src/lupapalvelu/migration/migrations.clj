@@ -1,15 +1,15 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
+            [clojure.walk :as walk]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils]]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
-            [monger.operators :refer :all]
-            [lupapalvelu.operations :as op]
-            [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils]]))
+            [lupapalvelu.operations :as op]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -421,3 +421,27 @@
               new-documents (remove #(= "sijoituslupa-sijoituksen-tarkoitus" (-> % :schema-info :name)) new-documents)]
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
+
+(defmigration move-operations-flags-into-their-scope
+  {:apply-when (pos? (mongo/count :organizations {:new-application-enabled {$exists true}}))}
+  ;; Let's expect all (un-migrated) organizations to have the "new-application-enabled" flag.
+ (doseq [organization (mongo/select :organizations {:new-application-enabled {$exists true}})]
+   (let [new-scopes (map
+                      #(merge % {:inforequest-enabled     (or (:inforequest-enabled organization) false)
+                                 :new-application-enabled (or (:new-application-enabled organization) false)
+                                 :open-inforequest        (or (:open-inforequest organization) false)
+                                 :open-inforequest-email  (:open-inforequest-email organization)})
+                      (:scope organization))]
+     (mongo/update-by-id :organizations (:id organization)
+      {$unset {:inforequest-enabled ""
+               :new-application-enabled ""
+               :open-inforequest ""
+               :open-inforequest-email ""}
+       $set {:scope new-scopes}}))))
+
+(defmigration unset-invalid-user-ids
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection)]
+    (let [updates (a/generate-remove-invalid-user-from-docs-updates application)]
+      (when (seq updates)
+        (mongo/update-by-id collection (:id application) {$unset updates})))))

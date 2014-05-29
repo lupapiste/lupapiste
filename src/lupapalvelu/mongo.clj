@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
+            [sade.util :as util]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -47,6 +48,13 @@
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
 
+(defn generate-array-updates
+  "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
+   E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
+         => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
+  [array-name array pred k v]
+  (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
+
 ;;
 ;; Database Api
 ;;
@@ -82,8 +90,8 @@
 (defn by-id
   ([collection id]
     (with-id (mc/find-one-as-map collection {:_id id})))
-  ([collection id fields]
-    (with-id (mc/find-one-as-map collection {:_id id} fields))))
+  ([collection id projection]
+    (with-id (mc/find-one-as-map collection {:_id id} projection))))
 
 (defn select
   "returns multiple entries by matching the monger query"

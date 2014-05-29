@@ -249,6 +249,18 @@
         (ok))
       (fail :not-found :email email))))
 
+(defcommand applicant-to-authority
+  {:parameters [email]
+   :roles [:admin]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :description "Changes applicant account into authority"}
+  [_]
+  (let [user (user/get-user-by-email email)]
+    (if (= "applicant" (:role user))
+      (mongo/update :users {:email email} {$set {:role "authority"}})
+      (fail :error.user-not-found))))
+
 ;;
 ;; Change organization data:
 ;;
@@ -287,8 +299,6 @@
 ;; Change and reset password:
 ;;
 
-;; TODO: Remove this, change all password changes to use 'reset-password'.
-;; Note: When this is removed, remove user/change-password too.
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
    :authenticated true
@@ -302,6 +312,8 @@
         (ok))
       (do
         (warn "Password change: failed: old password does not match, user-id:" user-id)
+        ; Throttle giving information about incorrect password
+        (Thread/sleep 2000)
         (fail :mypage.old-password-does-not-match)))))
 
 (defcommand reset-password

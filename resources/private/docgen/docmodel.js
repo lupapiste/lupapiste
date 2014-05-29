@@ -750,12 +750,14 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var event = getEvent(e);
       var target = event.target;
       var userId = target.value;
-      ajax
+      if (!_.isEmpty(userId)) {
+        ajax
         .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
           save(event, function () { repository.load(self.appId); });
         })
         .call();
+      }
       return false;
     };
     option.value = "";
@@ -774,6 +776,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         option.appendChild(document.createTextNode(user.firstName + " " + user.lastName));
         if (selectedOption === value) {
           option.selected = "selected";
+        }
+        if (user.invite) {
+          option.disabled = true;
         }
         select.appendChild(option);
       }

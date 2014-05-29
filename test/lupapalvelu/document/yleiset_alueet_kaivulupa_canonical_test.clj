@@ -6,6 +6,7 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [sade.util :refer :all]))
 
 
@@ -39,6 +40,12 @@
                             :opened 1372331643985
                             :modified 1372342070624
                             :submitted 1379405092649
+                            :auth [{:lastName "Panaani",
+                                    :firstName "Pena",
+                                    :username "pena",
+                                    :type "owner",
+                                    :role "owner",
+                                    :id "777777777777777777000020"}]
                             :authority sonja
                             :state "submitted"
                             :title "Latokuja 1"
@@ -50,6 +57,8 @@
                             :documents documents
                             :municipality municipality
                             :statements statements})
+
+(ctc/validate-all-documents kaivulupa-application)
 
 
 (def ^:private link-permit-data {:id "LP-753-2013-00003"
@@ -309,6 +318,8 @@
 
 (def kaivulupa-application-with-link-permit-data
   (merge kaivulupa-application {:linkPermitData [link-permit-data]}))
+
+(ctc/validate-all-documents kaivulupa-application-with-link-permit-data)
 
 (facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical kaivulupa-application-with-link-permit-data "fi")

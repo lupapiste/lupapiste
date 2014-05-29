@@ -368,18 +368,16 @@
     (let [org-id (str kuntano "-YMP")
           email  (str "ymp-admin@" kuntano ".fi")
           org {:_id org-id
-               :inforequest-enabled true
-               :new-application-enabled true
                :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")}
-                     :scope [{:municipality kuntano :permitType "YI"}
-                             {:municipality kuntano :permitType "YL"}
-                             {:municipality kuntano :permitType "VVVL"}
-                             {:municipality kuntano :permitType "MAL"}]
-                     :links []
-                     :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                             :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                             :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                             :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}}}
+               :scope [{:municipality kuntano :permitType "YI" :inforequest-enabled true :new-application-enabled true}
+                       {:municipality kuntano :permitType "YL" :inforequest-enabled true :new-application-enabled true}
+                       {:municipality kuntano :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
+                       {:municipality kuntano :permitType "MAL" :inforequest-enabled true :new-application-enabled true}]
+               :links []
+               :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                       :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                       :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                       :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}}}
           ]
       (mongo/insert :organizations org)
       (user-api/create-new-user
