@@ -76,7 +76,8 @@
               <span data-bind="ltext: 'userinfo.allowDirectMarketing'"></span>
             </label>
           </div>
-          <div data-bind="if: features.enabled('rakentajafi')" class="feature">
+          <div data-bind="if: features.enabled('rakentajafi')">
+          <div class="feature">
           <div class="form-entry register-checkbox">
             <label>
               <input type="checkbox" id="rakentajafi" data-bind="checked: rakentajafi" value="true">
@@ -84,7 +85,8 @@
               <span class="icon info-indicator"  data-bind="click: showRakentajafiInfo" style="cursor: pointer;vertical-align: bottom;"></span>
             </label>
           </div>
-          </div>
+          </div><!-- /feature class-->
+          </div><!-- /feature flag-->
 
           <div class="clear"></div>
         </div>
