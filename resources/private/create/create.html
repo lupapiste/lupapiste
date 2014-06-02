@@ -60,7 +60,7 @@
 
         <button
             data-bind="enable: addressOk, click: goPhase2"
-            class="btn btn-primary"
+            class="btn btn-primary btn-nav-forward"
             data-test-id="create-continue"
             id="create-location-continue">
           <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
@@ -103,9 +103,9 @@
         </button>
       </form>
       <br>
-       <button data-bind="click: returnPhase2" class="btn" data-test-id="create-back" id="create-inforequest-back">
-         <span class="icon inline-left drill-left-black"></span>
+       <button data-bind="click: returnPhase2" class="btn btn-nav-back" data-test-id="create-back" id="create-inforequest-back">
          <span data-bind="ltext: 'tree.back'">Takaisin</span>
+         <span class="icon drill-left-black-bigger left-align"></span>
       </button>
     </div>
   </section>
