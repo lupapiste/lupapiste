@@ -8,7 +8,8 @@
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :refer [attach-file! get-attachment-info parse-attachment-type allowed-attachment-type-for-application? create-attachments delete-attachment delete-attachment-version file-id-in-application? output-attachment get-attachment-as update-version-content set-attachment-version]]
+            [lupapalvelu.attachment :as a]
+            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.attachment :as attachment]
@@ -27,7 +28,7 @@
 ;; Validators
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (get-attachment-info application attachmentId) :locked (= true))
+  (when (-> (a/get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
 (defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
@@ -40,7 +41,7 @@
 
 (defn- attachment-editable-by-applicationState? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
-      (let [attachment (get-attachment-info application attachmentId)
+      (let [attachment (a/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
             currentState (keyword (:state application))]
         (or (not (post-verdict-states currentState))
@@ -98,8 +99,8 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
-  (let [attachment-type (parse-attachment-type attachmentType)]
-    (if (allowed-attachment-type-for-application? application attachment-type)
+  (let [attachment-type (a/parse-attachment-type attachmentType)]
+    (if (a/allowed-attachment-type-for-application? application attachment-type)
       (update-application command
         {:attachments {$elemMatch {:id attachmentId}}}
         {$set {:attachments.$.type attachment-type}})
@@ -143,7 +144,7 @@
    :roles       [:authority]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (create-attachments application attachment-types created)]
+  (if-let [attachment-ids (a/create-attachments application attachment-types created)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
@@ -161,7 +162,7 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
-  (delete-attachment application attachmentId)
+  (a/delete-attachment application attachmentId)
   (ok))
 
 (defcommand delete-attachment-version
@@ -174,8 +175,8 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
-  (if (file-id-in-application? application attachmentId fileId)
-    (delete-attachment-version application attachmentId fileId)
+  (if (a/file-id-in-application? application attachmentId fileId)
+    (a/delete-attachment-version application attachmentId fileId)
     (fail :file_not_linked_to_the_document)))
 
 ;;
@@ -184,7 +185,7 @@
 
 (defn- output-attachment-if-logged-in [attachment-id download? user]
   (if user
-    (output-attachment attachment-id download? (partial get-attachment-as user))
+    (a/output-attachment attachment-id download? (partial a/get-attachment-as user))
     {:status 401
      :headers {"Content-Type" "text/plain"}
      :body "401 Unauthorized"}))
@@ -272,7 +273,7 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (when-not (allowed-attachment-type-for-application? application attachmentType)
+  (when-not (a/allowed-attachment-type-for-application? application attachmentType)
     (fail! :error.illegal-attachment-type))
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -282,7 +283,7 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (when-not (attach-file! {:application application
+  (when-not (a/attach-file! {:application application
                            :filename filename
                            :size size
                            :content tempfile
@@ -305,12 +306,6 @@
         content-type (:contentType latest)
         stamped      (:stamped latest)]
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
-
-(defn- loc-organization-name [organization]
-  (get-in organization [:name i18n/*lang*] (str "???ORG:" (:id organization) "???")))
-
-(defn- get-organization-name [{organization :organization :as application}]
-  (loc-organization-name (mongo/by-id :organizations organization [:name])))
 
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
@@ -351,18 +346,14 @@
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp?
-                        (update-version-content application attachment-id new-file-id (.length temp-file) created)
-                        (set-attachment-version (:id application) attachment-id new-file-id filename contentType (.length temp-file) nil created user true))]
+                        (a/update-version-content application attachment-id new-file-id (.length temp-file) created)
+                        (a/set-attachment-version (:id application) attachment-id new-file-id filename contentType (.length temp-file) nil created user true))]
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-(defn- stamp-attachments! [file-infos {:keys [user created job-id application] :as context}]
-  (let [stamp (stamper/make-stamp
-                (i18n/loc "stamp.verdict")
-                created
-                (str (:firstName user) \space (:lastName user))
-                (get-organization-name application)
-                (:transparency context))]
+(defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
+  {:pre [text organization (pos? created)]}
+  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
     (doseq [file-info (vals file-infos)]
       (try
         (job/update job-id assoc (:attachment-id file-info) :working)
@@ -381,16 +372,21 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id files xMargin yMargin]
+  {:parameters [:id timestamp text organization files xMargin yMargin]
    :roles      [:authority]
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (ok :job (make-stamp-job
-             (key-by :attachment-id (map ->file-info (filter (comp (set files) :id) (:attachments application))))
+             (key-by :attachment-id (map ->file-info (a/get-attachments-infos application files)))
              {:application application
               :user (:user command)
-              :created (:created command)
+              :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+              :organization (if-not (ss/blank? organization) organization (organization/get-organization-name application))
+              :created (cond
+                         (number? timestamp) (long timestamp)
+                         (ss/blank? timestamp) (:created command)
+                         :else (->long timestamp))
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))})))
@@ -402,3 +398,31 @@
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
 
+(defcommand sign-attachments
+  {:description "Designers can sign blueprints and other attachments. LUPA-1241"
+   :parameters [:id attachmentIds password]
+   :feature :attachmentsignature
+   :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
+   :roles [:applicant]}
+  [{application :application u :user :as command}]
+  (when (seq attachmentIds)
+    (if (user/get-user-with-password (:username u) password)
+     (let [attachments (a/get-attachments-infos application attachmentIds)
+           signature {:user (user/summary u)
+                      :created (:created command)}
+           updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
+                             (merge m (mongo/generate-array-updates
+                                        :attachments
+                                        (:attachments application)
+                                        #(= (:id %) attachment-id)
+                                        :signatures (assoc signature :version version))))
+                     {} attachments)]
+
+       ; Indexes are calculated on the fly so there is a small change of
+       ; a concurrency issue.
+       ; FIXME should implement optimistic locking
+       (update-application command {$push updates}))
+     (do
+       ; Throttle giving information about incorrect password
+       (Thread/sleep 2000)
+       (fail :error.password)))))

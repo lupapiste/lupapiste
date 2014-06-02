@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
+            [sade.util :as util]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -46,6 +47,13 @@
       (let [key (name k)]
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
+
+(defn generate-array-updates
+  "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
+   E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
+         => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
+  [array-name array pred k v]
+  (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
 
 ;;
 ;; Database Api

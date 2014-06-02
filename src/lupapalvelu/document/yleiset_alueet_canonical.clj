@@ -83,7 +83,7 @@
       (merge content {:rooliKoodi roolikoodi}))))
 
 (defn- get-tyomaasta-vastaava [tyomaasta-vastaava]
-  (let [type (-> tyomaasta-vastaava :_selected)
+  (let [type (:_selected tyomaasta-vastaava)
         vastuuhenkilo (get-vastuuhenkilo tyomaasta-vastaava type "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")]
     (when vastuuhenkilo
       (merge
@@ -95,8 +95,8 @@
                         :rooliKoodi "ty\u00f6nsuorittaja"}}))))))
 
 (defn- get-yritys-and-henkilo [doc doc-type]
-  (let [is-maksaja-doc (true? (= "maksaja" doc-type))
-        info (if (= (-> doc :_selected) "yritys")
+  (let [is-maksaja-doc (= "maksaja" doc-type)
+        info (if (= (:_selected doc) "yritys")
                ;; yritys-tyyppinen hakija/maksaja, siirretaan yritysosa omaksi osapuolekseen
                (let [vastuuhenkilo-roolikoodi (if is-maksaja-doc "maksajan vastuuhenkil\u00f6" "hankkeen vastuuhenkil\u00f6")
                      vastuuhenkilo (get-vastuuhenkilo doc "yritys" vastuuhenkilo-roolikoodi)
@@ -114,18 +114,18 @@
                                           {:rooliKoodi "hakija"})))))
 
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
-  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-alkaa-pvm))
-                   :loppuHetki (to-xml-datetime-from-string (-> mainostus-viitoitus-tapahtuma :tapahtuma-aika-paattyy-pvm))}})
+  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (:tapahtuma-aika-alkaa-pvm mainostus-viitoitus-tapahtuma))
+                   :loppuHetki (to-xml-datetime-from-string (:tapahtuma-aika-paattyy-pvm mainostus-viitoitus-tapahtuma))}})
 
 (defn- get-mainostus-viitoitus-lisatiedot [mainostus-viitoitus-tapahtuma]
   [{:LupakohtainenLisatieto
-    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :tapahtuman-nimi)]
+    (when-let [arvo (:tapahtuman-nimi mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Tapahtuman nimi" :arvo arvo})}
    {:LupakohtainenLisatieto
-    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :tapahtumapaikka)]
+    (when-let [arvo (:tapahtumapaikka mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Tapahtumapaikka" :arvo arvo})}
    {:LupakohtainenLisatieto
-    (when-let [arvo (-> mainostus-viitoitus-tapahtuma :haetaan-kausilupaa)]
+    (when-let [arvo (:haetaan-kausilupaa mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
 (defn- get-construction-ready-info [application]

@@ -13,27 +13,21 @@
   var model = new function() {
     var self = this;
 
-    self.goPhase1 = function() {
-      // $('.selected-location').hide();
-      $('.selected-location').show();
-      $("#create-part-1").show();
-      $("#create-part-2").hide();
-      $("#create-part-3").hide();
-      $("#create-search").focus();
+    self.goPhase1 = function() { 
+      window.location = "#!/create-part-1";
       self.map.updateSize();
-    };
+     };
+      
 
     self.goPhase2 = function() {
+      window.location = "#!/create-part-2";
       tree.reset(_.map(self.operations(), operations2tree));
-      $("#create-part-1").hide();
-      $("#create-part-2").show();
       window.scrollTo(0, 0);
     };
 
     self.goPhase3 = function() {
+      window.location = "#!/create-part-3";
       if (!self.inforequestsDisabled()) {
-        $("#create-part-2").hide();
-        $("#create-part-3").show();
         window.scrollTo(0, 0);
       } else {
         LUPAPISTE.ModalDialog.showDynamicOk(
@@ -44,9 +38,7 @@
     };
 
      self.returnPhase2 = function() {
-      $("#create-part-1").hide();
-      $("#create-part-3").hide();
-      $("#create-part-2").show();
+      window.location = "#!/create-part-2";
       window.scrollTo(0, 0);
     };
 
@@ -89,8 +81,8 @@
     };
 
     self.findOperations = function(code) {
-      municipalities.operationsForMunicipality(code, function(opearations) {
-        self.operations(opearations);
+      municipalities.operationsForMunicipality(code, function(operations) {
+        self.operations(operations);
       });
       return self;
     };
@@ -129,7 +121,6 @@
         .municipalityCode(null)
         .message("")
         .requestType(null)
-        .goPhase1();
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
@@ -340,20 +331,21 @@
       .pending(self.pending)
       .success(function(data) {
         setTimeout(self.clear, 0);
-        window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
+        window.location = (infoRequest ? "#!/inforequest/" : "#!/application/") + data.id;
       })
       .call();
     };
-
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
 
   }();
 
-  hub.onPageChange("create", model.clear);
+  hub.onPageChange("create-part-1", model.clear);
 
   $(function() {
-    $("#create").applyBindings(model);
+    $("#create-part-1").applyBindings(model);
+    $("#create-part-2").applyBindings(model);
+    $("#create-part-3").applyBindings(model);
 
     $("#create-search")
         .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
@@ -365,7 +357,7 @@
         })
         .data("ui-autocomplete")._renderItem = model.autocompleteRender;
 
-    tree = $("#create .operation-tree").selectTree({
+    tree = $("#create-part-2 .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) {
         if (v) {

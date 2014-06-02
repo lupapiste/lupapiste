@@ -55,35 +55,35 @@
 ; field type validation
 
 (facts "dates"
-  (validate-field {:type :date} "abba") => [:warn "illegal-value:date"]
-  (validate-field {:type :date} "") => nil
-  (validate-field {:type :date} "11.12.2013") => nil)
+  (validate-field {} {:type :date} "abba") => [:warn "illegal-value:date"]
+  (validate-field {} {:type :date} "") => nil
+  (validate-field {} {:type :date} "11.12.2013") => nil)
 
 (facts "times"
-  (validate-field {:type :time} "abba") => [:warn "illegal-value:time"]
-  (validate-field {:type :time} "") => nil
-  (validate-field {:type :time} "11:12") => nil
-  (validate-field {:type :time} "1:2") => nil
-  (validate-field {:type :time} "1:20") => nil
-  (validate-field {:type :time} "00:00") => nil
-  (validate-field {:type :time} "00:00:00") => nil
-  (validate-field {:type :time} "00:00:00.1") => nil
-  (validate-field {:type :time} "23:59") => nil
-  (validate-field {:type :time} "23:59:59") => nil
-  (validate-field {:type :time} "23:59:59.9") => nil
-  (validate-field {:type :time} "24:00") => [:warn "illegal-value:time"]
-  (validate-field {:type :time} "23:60") => [:warn "illegal-value:time"]
-  (validate-field {:type :time} "-1:10") => [:warn "illegal-value:time"])
+  (validate-field {} {:type :time} "abba") => [:warn "illegal-value:time"]
+  (validate-field {} {:type :time} "") => nil
+  (validate-field {} {:type :time} "11:12") => nil
+  (validate-field {} {:type :time} "1:2") => nil
+  (validate-field {} {:type :time} "1:20") => nil
+  (validate-field {} {:type :time} "00:00") => nil
+  (validate-field {} {:type :time} "00:00:00") => nil
+  (validate-field {} {:type :time} "00:00:00.1") => nil
+  (validate-field {} {:type :time} "23:59") => nil
+  (validate-field {} {:type :time} "23:59:59") => nil
+  (validate-field {} {:type :time} "23:59:59.9") => nil
+  (validate-field {} {:type :time} "24:00") => [:warn "illegal-value:time"]
+  (validate-field {} {:type :time} "23:60") => [:warn "illegal-value:time"]
+  (validate-field {} {:type :time} "-1:10") => [:warn "illegal-value:time"])
 
 (facts "hetu validation"
-  (validate-field {:type :hetu} "") => nil?
-  (validate-field {:type :hetu} "210281-9988") => nil?
-  (validate-field {:type :hetu} "210281+9988") => nil?
-  (validate-field {:type :hetu} "070550A907P") => nil?
-  (validate-field {:type :hetu} "010170-960F") => nil?
-  (validate-field {:type :hetu} "210281_9988") => [:err "illegal-hetu"]
-  (validate-field {:type :hetu} "210281-9987") => [:err "illegal-hetu"]
-  (validate-field {:type :hetu} "300281-998V") => [:err "illegal-hetu"])
+  (validate-field {} {:type :hetu} "") => nil?
+  (validate-field {} {:type :hetu} "210281-9988") => nil?
+  (validate-field {} {:type :hetu} "210281+9988") => nil?
+  (validate-field {} {:type :hetu} "070550A907P") => nil?
+  (validate-field {} {:type :hetu} "010170-960F") => nil?
+  (validate-field {} {:type :hetu} "210281_9988") => [:err "illegal-hetu"]
+  (validate-field {} {:type :hetu} "210281-9987") => [:err "illegal-hetu"]
+  (validate-field {} {:type :hetu} "300281-998V") => [:err "illegal-hetu"])
 
 ;;
 ;; validate
@@ -91,12 +91,14 @@
 
 (facts "validate"
   (validate
+    {}
     {:data {:a {:aa {:value "kukka"}
                 :ab {:value "123"}}}}
     {:body [{:name "a" :type :group
              :body [{:name "aa" :type :string}
                     {:name "ab" :type :string :min-len 2 :max-len 3}]}]}) => empty?
   (validate
+    {}
     {:data {:a {:aa {:value "kukka"}
                 :ab {:value "1234"}}}}
     {:body [{:name "a" :type :group
@@ -356,7 +358,17 @@
     (approvable? document schema-with-approvals [:repeats :0 :single3]) => false))
 
 (def uusiRakennus
-  {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
+  {:schema-info {:name "uusiRakennus",
+                 :version 1
+                 :removable true
+                 :approvable true,
+                 :op {:id "51b59c112438736b8f1b9d0d",
+                      :name "asuinrakennus",
+                      :created 1370856465069}}
+   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
+                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
+                                                 :timestamp 1370856511356}}}}
+   :data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
           :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
           :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                                      :henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
@@ -368,11 +380,7 @@
                                                         :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
                                                :userId {:value "777777777777777777000020", :modified 1370856477473}
                                                :yhteystiedot {:email {:modified 1370856477455, :value "pena@example.com"}
-                                                              :puhelin {:modified 1370856477455, :value "0102030405"}}}}}},
-   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
-                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
-                                                 :timestamp 1370856511356}}}}
-   :schema-info {:version 1 :approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}})
+                                                              :puhelin {:modified 1370856477455, :value "0102030405"}}}}}}})
 
 (facts "modifications-since-approvals"
   (with-timestamp 10
@@ -454,8 +462,20 @@
              :data (get-in uusiRakennus [:data :rakennuksenOmistajat :0])})
 
 (facts "meta tests"
-  (has-errors? (validate uusiRakennus)) => false
-  (has-errors? (validate hakija)) => false)
+  (let [app {:auth [{:id "777777777777777777000020"
+                     :firstName "Pena"
+                     :lastName "Panaani"
+                     :username "pena"
+                     :type "owner"
+                     :role "owner"}
+                     {:id "777777777777777777000023"
+                      :firstName "Sonja"
+                      :lastName "Sibbo"
+                      :username "sonja"
+                      :role "statementGiver"
+                      :statementId "537c655dbc45cf55abf434a6"}]}]
+    (has-errors? (validate app uusiRakennus))
+    (has-errors? (validate app hakija))))
 
 (facts "blacklists"
   (fact "no blacklist, no changes"
@@ -504,7 +524,7 @@
                  :osoite {:katu "Katuosoite"},
                  :yhteystiedot {}}}}})
      :schema-info {:name "uusiRakennus" :version 1}}]
-    (has-errors? (validate doc)) => false
+    (has-errors? (validate {} doc)) => false
     (strip-turvakielto-data doc) =>
     {:data {:rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:value "Gustav"}, :hetu nil, :sukunimi {:value "Golem"}, :turvakieltoKytkin nil}, :osoite nil, :yhteystiedot nil}}}},
      :schema-info {:name "uusiRakennus" :version 1}}))
@@ -518,8 +538,14 @@
      :3 (:data hakija-with-turvakielto)}))
 
 (fact "Meta test: fixture is valid"
-  (has-errors? (validate hakija-with-turvakielto)) => false
-  (has-errors? (validate uusiRakennus-with-turvakielto)) => false)
+  (let [app {:auth [{:lastName "Panaani",
+                     :firstName "Pena",
+                     :username "pena",
+                     :type "owner",
+                     :role "owner",
+                     :id "777777777777777777000020"}]}]
+    (has-errors? (validate app hakija-with-turvakielto)) => false
+    (has-errors? (validate app uusiRakennus-with-turvakielto)) => false))
 
 (facts "turvakielto"
 
@@ -537,8 +563,14 @@
       (:schema-info stripped-uusirakennus) => (:schema-info uusiRakennus))
 
     (facts "stripped documents are valid"
-      (has-errors? (validate stripped-hakija)) => false
-      (has-errors? (validate stripped-uusirakennus)) => false)
+      (let [app {:auth [{:lastName "Panaani",
+                     :firstName "Pena",
+                     :username "pena",
+                     :type "owner",
+                     :role "owner",
+                     :id "777777777777777777000020"}]}]
+        (has-errors? (validate app stripped-hakija)) => false
+        (has-errors? (validate app stripped-uusirakennus)) => false))
 
     (fact "meta test: turvakielto is set, there is data to be filtered"
       (get-in hakija-with-turvakielto [:data :henkilo :henkilotiedot :turvakieltoKytkin :value]) => true

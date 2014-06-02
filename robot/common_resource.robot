@@ -323,7 +323,7 @@ Prepare new request
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
 Prepare first request
@@ -336,7 +336,7 @@ Prepare first request
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
 
@@ -397,7 +397,7 @@ Select operations path YA sijoituslupa
 
 Click tree item by text
   [Arguments]  ${itemName}
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()=${itemName}]
+  Wait and click  //section[@id="create-part-2"]//div[@class="tree-content"]//*[text()=${itemName}]
 
 
 # Closes the application that is currently open by clicking cancel button

@@ -31,7 +31,7 @@
 
 (def henkilotiedot (merge
                      nimi
-                     {:hetu {:modified 1372341952297, :value "260886-027R"}}))
+                     {:hetu {:modified 1372341952297, :value "010203-040A"}}))
 
 (def osoite {:katu {:modified 1372341939920, :value "Paapankuja 12"},
              :postinumero {:modified 1372341955504, :value "33800"},
@@ -58,6 +58,8 @@
               {:osoite osoite,
                :yhteyshenkilo {:henkilotiedot nimi,
                                :yhteystiedot yhteystiedot}}))
+
+;; Document: Hakija
 
 (def hakija {:id "52380c6894a74fc25bb4ba48",
              :created 1379404904514,
@@ -119,14 +121,14 @@
 ;; Attachments
 
 (def attachment-version-user {:fileId "52380cb594a74fc25bb4ba6d",
-                         :version {:major 1, :minor 0},
-                         :size 44755,
-                         :created 1379404981309,
-                         :filename "lupapiste-attachment-testi.pdf",
-                         :contentType "application/pdf",
-                         :stamped false,
-                         :accepted nil,
-                         :user pena})
+                              :version {:major 1, :minor 0},
+                              :size 44755,
+                              :created 1379404981309,
+                              :filename "lupapiste-attachment-testi.pdf",
+                              :contentType "application/pdf",
+                              :stamped false,
+                              :accepted nil,
+                              :user pena})
 
 ;; Statements
 
