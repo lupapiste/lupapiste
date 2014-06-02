@@ -228,12 +228,11 @@
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
               :auth.$ (user/user-in-role user :writer)}})
-    (let [application (mongo/by-id :applications (:id application))
-          document (domain/get-document-by-id application (:documentId my-invite))]
-      (when document
-        ; It's not possible to combine Mongo writes here,
-        ; because only the last $elemMatch counts.
-        (set-user-to-document application document (:id user) (:path my-invite) user created)))))
+    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
+      ; Document can be undefined in invite or removed by the time invite is approved.
+      ; It's not possible to combine Mongo writes here,
+      ; because only the last $elemMatch counts.
+      (set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs
