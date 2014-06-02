@@ -1,124 +1,114 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page container" id="create">
-    <section id="create-part-1">
+  <!-- Phase 1: -->
+  <section class="page container" id="create-part-1">
+    
+    <h1 data-bind="ltext: 'newRequest.topic'"></h1>
+    <div class="create-application-search-box">
+      <p data-bind="ltext: 'newRequest.locationInfo'"></p>
+      <input data-bind="value: search, valueUpdate: 'afterkeydown', attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
+      <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
+        <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
+      </button>
+    </div>
+    <div class="selected-location">
+      <div class="map-select-info">
+        <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
+        <p data-bind="ltext: 'create.search-check-prompt'"></p>
 
-      <!-- Phase 1: -->
+        <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
+        <div data-bind="visible: !municipalitySupported(), ltext: 'municipalityNotSupported'"></div>
 
-      <h1 data-bind="ltext: 'newRequest.topic'"></h1>
-      <div class="create-application-search-box">
-        <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-        <input data-bind="value: search, valueUpdate: 'afterkeydown', attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
-        <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
-          <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
-        </button>
-      </div>
-      <div class="selected-location">
-        <div class="map-select-info">
-          <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
-          <p data-bind="ltext: 'create.search-check-prompt'"></p>
-
-          <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
-          <div data-bind="visible: !municipalitySupported(), ltext: 'municipalityNotSupported'"></div>
-
-          <div class="form-entry">
-            <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-            <input
-              data-bind="value: addressString, valueUpdate: 'afterkeydown'"
-              data-test-id="create-address"
-              type="text"
-              class="form-input text long"></input>
-          </div>
-
-          <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
-            <select
-              data-bind="visible: useManualEntry,
-                         options: municipalities.municipalities,
-                         optionsText: function(m) { return loc(['municipality', m.id]); },
-                         optionsValue: 'id',
-                         value: municipalityCode,
-                         optionsCaption: loc('choose')"
-              data-test-id="create-municipality-select"
-              class="form-select form-input combobox long">
-            </select>
-            <input
-              data-bind="visible: !useManualEntry(), value: municipalityName"
-              disabled="disabled"
-              type="text"
-              class="form-input text long">
-
-            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
-            <input
-              data-bind="value: propertyId,
-                         valueUpdate: 'afterkeydown',
-                         enable: useManualEntry,
-                         readonly: !currentUser.isAuthority()"
-              data-test-id="create-property-id"
-              type="text"
-              class="form-input text long">
-          </div>
-
-          <button
-              data-bind="enable: addressOk, click: goPhase2"
-              class="btn btn-primary"
-              data-test-id="create-continue"
-              id="create-location-continue">
-            <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
-          </button>
+        <div class="form-entry">
+          <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+          <input
+            data-bind="value: addressString, valueUpdate: 'afterkeydown'"
+            data-test-id="create-address"
+            type="text"
+            class="form-input text long"></input>
         </div>
-        <div id="create-map" class="map create-application-map" style="width: 75%; height: 580px;"></div>
-      </div>
-    </section>
 
-    <!-- Phase 2: -->
+        <div class="form-entry">
+          <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
+          <select
+            data-bind="visible: useManualEntry,
+                       options: municipalities.municipalities,
+                       optionsText: function(m) { return loc(['municipality', m.id]); },
+                       optionsValue: 'id',
+                       value: municipalityCode,
+                       optionsCaption: loc('choose')"
+            data-test-id="create-municipality-select"
+            class="form-select form-input combobox long">
+          </select>
+          <input
+            data-bind="visible: !useManualEntry(), value: municipalityName"
+            disabled="disabled"
+            type="text"
+            class="form-input text long">
 
-    <section id="create-part-2">
+          <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
+          <input
+            data-bind="value: propertyId,
+                       valueUpdate: 'afterkeydown',
+                       enable: useManualEntry,
+                       readonly: !currentUser.isAuthority()"
+            data-test-id="create-property-id"
+            type="text"
+            class="form-input text long">
+        </div>
 
-      <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
-      <span class="icon info-big right-align"></span>
-      <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text" >
-      </p>
-
-      <div class="operation-tree tree-control"></div>
-
-    </section>
-
-    <!-- Phase 3: -->
-
-    <section id="create-part-3" class="accordion">
-
-      <h1 data-bind="ltext: 'createApplication.project-description-header'"></h1>
-      <div>
-        <p class="tab-info" data-bind="ltext: 'newRequest.create.desc'"></p>
-        <form class="tree-intend">
-          <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
-          <textarea
-              class="form-input tree-width"
-              data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, value: message, valueUpdate: 'afterkeydown'"
-              rows="3"
-              data-test-id="create-inforequest-message">
-          </textarea>
-          <button
-              data-bind="click: createInfoRequest, enable: message().length > 0"
-              class="btn btn-primary"
-              data-test-id="create-inforequest">
-              <span data-bind="ltext: 'application.startConversation'"></span>
-              <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
-        </form>
-        <br>
-         <button data-bind="click: returnPhase2" class="btn" data-test-id="create-back" id="create-inforequest-back">
-           <span class="icon inline-left drill-left-black"></span>
-           <span data-bind="ltext: 'tree.back'">Takaisin</span>
+        <button
+            data-bind="enable: addressOk, click: goPhase2"
+            class="btn btn-primary btn-nav-forward"
+            data-test-id="create-continue"
+            id="create-location-continue">
+          <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
         </button>
       </div>
+      <div id="create-map" class="map create-application-map" style="width: 75%; height: 580px;"></div>
+    </div>   
+  </section>
+  <!-- Phase 2: -->
+  <section class="page container" id="create-part-2">
+  
+    <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
+    <span class="icon info-big right-align"></span>
+    <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text" >
+    </p>
 
-    </section>
+    <div class="operation-tree tree-control"></div>
 
   </section>
 
+  <!-- Phase 3: -->
+  <section class="page container" id="create-part-3">
+    <h1 data-bind="ltext: 'createApplication.project-description-header'"></h1>
+    <div>
+      <p class="tab-info" data-bind="ltext: 'newRequest.create.desc'"></p>
+      <form class="tree-intend">
+        <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
+        <textarea
+            class="form-input tree-width"
+            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, value: message, valueUpdate: 'afterkeydown'"
+            rows="3"
+            data-test-id="create-inforequest-message">
+        </textarea>
+        <button
+            data-bind="click: createInfoRequest, enable: message().length > 0"
+            class="btn btn-primary"
+            data-test-id="create-inforequest">
+            <span data-bind="ltext: 'application.startConversation'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+        </button>
+      </form>
+      <br>
+       <button data-bind="click: returnPhase2" class="btn btn-nav-back" data-test-id="create-back" id="create-inforequest-back">
+         <span data-bind="ltext: 'tree.back'">Takaisin</span>
+         <span class="icon drill-left-black-bigger left-align"></span>
+      </button>
+    </div>
+  </section>
   <section class="page" id="create-templates">
 
     <div class="tree-title" style="padding-left: 10px;">
