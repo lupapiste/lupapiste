@@ -28,7 +28,7 @@
                  (assoc :app app))
         ts (now)
         form-params (assoc params :ts ts :mac (calculate-mac params partner-name ts :send))
-        _  (debugf "Send user %s data to %s (%s)" (:email user) partner-name url)
+        _  (debugf "Send user %s / %s data to %s (%s)" (:id user) (:email user) partner-name url)
         resp (http/post url {:form-params form-params, :follow-redirects false, :throw-exceptions false})
         body (:body resp)]
     (if (= 200 (:status resp))
