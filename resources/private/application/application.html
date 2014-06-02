@@ -329,12 +329,12 @@
                       <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                     </li>
                   </ul>
-                </div>
-                <button class="btn-primary"
+
+                  <button class="btn-primary"
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 
-                <br/>
+                </div>
               </div>
             </div>
           </div>
