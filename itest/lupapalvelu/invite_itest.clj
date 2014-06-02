@@ -164,4 +164,9 @@
       (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?)))
+      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?)
+
+    (fact "Invite without document"
+      (invite sonja id "" "" (email-for-key teppo)) => ok?
+      (count (:invites (query teppo :invites))) => 1
+      (command teppo :approve-invite :id id) => ok?)))

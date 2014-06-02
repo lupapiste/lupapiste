@@ -301,7 +301,10 @@
             </div>
           </div>
           <div class="process-nav">
-            <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="parties"><span data-bind="ltext: 'application.next-tab'"></span><span class="icon drill-right-orange inline-right"></span></a>
+            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
+              <span data-bind="ltext: 'application.next-tab'"></span>
+              <span class="icon drill-right-orange right-align"></span>
+            </a>
           </div>
         </div>
         <div id="application-parties-tab" class="tab-content">
@@ -326,8 +329,12 @@
                       <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                     </li>
                   </ul>
+
+                  <button class="btn-primary"
+                        data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
+                        onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
+
                 </div>
-                <br/>
               </div>
             </div>
           </div>
@@ -346,8 +353,14 @@
           </button>
 
           <div class="process-nav">
-            <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments"><span data-bind="ltext: 'application.next-tab'"></span><span class="icon drill-right-orange inline-right"></span></a>
-            <a class="btn process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="info"><span data-bind="ltext: 'application.previous-tab'"></span><span class="icon drill-left-black-bigger inline-left"></span></a>
+            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+              <span data-bind="ltext: 'application.next-tab'"></span>
+              <span class="icon drill-right-orange right-align"></span>
+            </a>
+            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="info">
+              <span data-bind="ltext: 'application.previous-tab'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
           </div>
         </div>
 
@@ -435,9 +448,15 @@
             <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
           </div>
-          <div class="process-nav">
-            <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="conversation"><span data-bind="ltext: 'application.next-tab'"></span><span class="icon drill-right-orange inline-right"></span></a>
-            <a class="btn process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="parties"><span data-bind="ltext: 'application.previous-tab'"></span><span class="icon drill-left-black-bigger inline-left"></span></a>
+          <div class="process-nav btn-nav-forward">
+            <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="conversation">
+              <span data-bind="ltext: 'application.next-tab'"></span>
+              <span class="icon drill-right-orange right-align"></span>
+            </a>
+            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
+              <span data-bind="ltext: 'application.previous-tab'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
           </div>
         </div>
 

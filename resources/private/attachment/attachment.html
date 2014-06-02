@@ -14,7 +14,10 @@
         <p data-bind="lhtml: 'attachment.view.desc'"  class="tab-info"></p>
          <button class="attachment-delete inline-block" data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
           style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
-        <a class="btn attachment-back inline-block" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment"> <span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a>
+        <a class="btn attachment-back inline-block btn-nav-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment">
+          <span data-bind =" ltext: 'attachment.return'"></span>
+          <span class="icon drill-left-black-bigger left-align"></span>
+        </a>
         <div data-bind="with: $root.approve" class="inline-block">
           <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
           <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
