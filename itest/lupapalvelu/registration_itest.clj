@@ -10,7 +10,7 @@
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
                                             admin query command
                                             last-email apply-remote-minimal
-                                            ok? fail? http200?
+                                            ok? fail? http200? http302?
                                             ]]
             [lupapalvelu.vetuma :as vetuma]
             ))
@@ -23,14 +23,14 @@
 
 (defn- decode-body [resp] (:body (decode-response resp)))
 
-(def token-query {:query-params {:success "/app/fi/welcome#%23!/register2"
-                                 :cancel "/app/fi/welcome#!/register/cancel"
-                                 :error "/app/fi/welcome#!/register/error"}})
+(def token-query {:query-params {:success "/success"
+                                 :cancel "/cancel"
+                                 :error "/error"}})
 
-(defn- vetumu-init [request-opts]
+(defn- vetuma-init [request-opts]
   (http/get vetuma-endpoint (merge request-opts token-query)))
 
-(defn- vetumu-finish [request-opts]
+(defn- vetuma-finish [request-opts]
   (let [base-post (assoc (zipmap vetuma/response-mac-keys (repeat "0"))
                     :trid "123456"
                     :subjectdata "etunimi=Jukka, sukunimi=Palmu"
@@ -63,42 +63,43 @@
        params {:cookie-store (->cookie-store store)
                :follow-redirects false
                :throw-exceptions false}
-       resp (vetumu-init params) => http200?
+       resp (vetuma-init params) => http200?
        body (:body resp) => (contains "***REMOVED***1")
        form (xml/parse body)]
 
    (fact "Form contains standard error url" (xml/select1-attribute-value form [(e/attr= :id "ERRURL")] :value) => (contains "/api/vetuma/error"))
    (fact "Form contains standard cancel url" (xml/select1-attribute-value form [(e/attr= :id "CANURL")] :value) => (contains "/api/vetuma/cancel"))
 
-   (let [resp (vetumu-finish params)]
-     (fact "Vetuma redirect"
-       (:status resp) => 302
-       (get-in resp [:headers "location"]) => (contains (get-in token-query [:query-params :success]))))
+   (fact "Vetuma redirect"
+     (let [resp (vetuma-finish params)  => http302?]
+         (get-in resp [:headers "location"]) => (contains (get-in token-query [:query-params :success]))))
 
    (last-email) ; Inbox zero
 
-   (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user")))) => string?
+   (let [vetuma-data (decode-body (http/get (str (server-address) "/api/vetuma/user")))
+         stamp (:stamp vetuma-data) => string?
+         person-id (:userid vetuma-data) => string?
          new-user-email "jukka@example.com"
          new-user-pw "salasana"
+         new-user-phone "0500"
          cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
-         resp (register cmd-opts {:stamp stamp :phone "040", :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"})
-         user-id (:id resp)
+         resp (register cmd-opts {:stamp stamp :phone new-user-phone, :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"})
+         user-id (:id resp) => string?
          email (last-email)
          body (:body email)]
 
      (fact "Registration OK" resp => ok?)
-     (fact "Got ID" user-id => string?)
 
      (facts "New user data"
        (let [new-user (first (:users (query admin :users :userId user-id)))]
         (fact "username" (:username new-user) => new-user-email)
         (fact "email" (:email new-user) => new-user-email)
-        (fact "personId" (:personId new-user) => "123456-7890")
+        (fact "personId" (:personId new-user) => person-id)
         (fact "enabled" (:enabled new-user) => false)
         (fact "role" (:role new-user) => "applicant")
         (fact "organizations" (:organizations new-user) => empty?)
-        (fact "phone" (:phone new-user) => "040")))
+        (fact "phone" (:phone new-user) => new-user-phone)))
 
      (fact "New user got email"
        (:to email) => new-user-email
@@ -112,17 +113,17 @@
      (fact "Register again with the same email"
        (last-email) ; Inbox zero
        (swap! store (constantly {})) ; clear cookies
-       (vetumu-init params)
-       (vetumu-finish params)
+       (vetuma-init params)
+       (vetuma-finish params)
 
        (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user")))) => string?
-         new-user-email "jukka@example.com"
-         new-user-pw "salasana"
-         cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
+             new-user-email "jukka@example.com"
+             new-user-pw "salasana"
+             cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
-         resp (register cmd-opts {:stamp stamp :phone "040", :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"}) => ok?
-         email (last-email)
-         body (:body email)]
+             resp (register cmd-opts {:stamp stamp :phone "040", :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"}) => ok?
+             email (last-email)
+             body (:body email)]
 
          (fact "New user got email"
            (:to email) => new-user-email
@@ -138,9 +139,8 @@
            (fact "First link contains activation token" first-href =>
              (contains "/app/security/activate/"))
 
-
            (fact "Activate account"
-             (http/get first-href) => http200?)
+             (http/get first-href {:follow-redirects false}) => http302?)
 
            (fact "Log in"
              (login new-user-email new-user-pw) => ok?)))))))
