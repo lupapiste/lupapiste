@@ -15,10 +15,13 @@
                       :name (:firstName user)})})
 
 (defn send-activation-mail-for [user]
-  (let [key     (security/random-password)
-        userid  (or (:_id user) (:id user))
-        email   (:email user)]
-    (mongo/insert :activation {:user-id userid :email email :activation-key key})
+  (let [userid  (or (:_id user) (:id user))
+        email   (:email user)
+        key     (if-let [old-activation (mongo/select-one :activation {:user-id userid :email email})]
+                  (:activation-key old-activation)
+                  (let [new-key (security/random-password)]
+                    (mongo/insert :activation {:user-id userid :email email :activation-key new-key})
+                    new-key))]
     (notifications/notify! :account-activation {:user user :data {:key key}})))
 
 (defn activate-account [activation-key]
