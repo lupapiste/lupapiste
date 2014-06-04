@@ -1,6 +1,6 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count remove])
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -249,18 +249,23 @@
           ssl  (:ssl conf)]
       (connect! (m/server-address host port) db user pw ssl)))
   ([servers db username password ssl]
-    (if @connected
-      (debug "Already connected!")
-      (do
-        (debug "Connecting to MongoDB:" servers (if ssl "using ssl" "without encryption"))
-        (m/connect! servers (mongo-options :ssl ssl))
-        (reset! connected true)
-        (m/set-default-write-concern! WriteConcern/SAFE)
-        (when (and username password)
-          (m/authenticate (m/get-db db) username (.toCharArray password))
-          (debugf "Authenticated to DB '%s' as '%s'" db username))
-        (m/use-db! db)
-        (debugf "MongoDB %s mode is %s" (.getName (m/get-db)) (db-mode))))))
+    (let [servers (if (string? servers)
+                    (let [[host port] (clojure.string/split servers #":")]
+                      (m/server-address host (Long/parseLong port)))
+                    servers  )]
+      (if @connected
+       (debug "Already connected!")
+       (do
+         (debug "Connecting to MongoDB:" servers (if ssl "using ssl" "without encryption"))
+         (m/connect! servers (mongo-options :ssl ssl))
+         (reset! connected true)
+         (m/set-default-write-concern! WriteConcern/SAFE)
+         (when (and username password)
+           (if (m/authenticate (m/get-db db) username (.toCharArray password))
+             (debugf "Authenticated to DB '%s' as '%s'" db username)
+             (errorf "Authentication to DB '%s' as '%s' failed!" db username)))
+         (m/use-db! db)
+         (debugf "MongoDB %s mode is %s" (.getName (m/get-db)) (db-mode)))))))
 
 (defn disconnect! []
   (debug "Disconnecting")
