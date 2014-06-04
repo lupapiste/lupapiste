@@ -409,7 +409,7 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
-   :input-validators [(partial action/non-blank-parameters [:email :password])
+   :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
                       action/email-validator]
    :verified   true}
   [{data :data}]
