@@ -109,25 +109,38 @@
        (fact "html" (:html body) => string?)
        (fact "plain text" (:plain body) => string?))
 
-     (let [mail-html (xml/parse (:html body))
-           links (xml/select mail-html [:a])
-           first-href (-> links first xml/attr :href)]
+     (fact "Register again with the same email"
+       (last-email) ; Inbox zero
+       (swap! store (constantly {})) ; clear cookies
+       (vetumu-init params)
+       (vetumu-finish params)
 
-       (fact "First link contains activation token" first-href =>
-         (contains "/app/security/activate/"))
+       (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user")))) => string?
+         new-user-email "jukka@example.com"
+         new-user-pw "salasana"
+         cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
+                   :headers {"x-anti-forgery-token" "123"}}
+         resp (register cmd-opts {:stamp stamp :phone "040", :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"}) => ok?
+         email (last-email)
+         body (:body email)]
 
-       (fact "Can NOT log in"
-         (login new-user-email new-user-pw) => fail?)
+         (fact "New user got email"
+           (:to email) => new-user-email
+           (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
 
-       (fact "Activate account"
-         (http/get first-href) => http200?)
+         (fact "Can NOT log in"
+           (login new-user-email new-user-pw) => fail?)
 
-       (fact "Log in"
-         (login new-user-email new-user-pw) => ok?))
+         (let [mail-html (xml/parse (:html body))
+               links (xml/select mail-html [:a])
+               first-href (-> links first xml/attr :href)]
 
-     (last-email) ; Inbox zero
+           (fact "First link contains activation token" first-href =>
+             (contains "/app/security/activate/"))
 
-     (fact "Register again with same ")
-     )
-   )
- )
+
+           (fact "Activate account"
+             (http/get first-href) => http200?)
+
+           (fact "Log in"
+             (login new-user-email new-user-pw) => ok?)))))))
