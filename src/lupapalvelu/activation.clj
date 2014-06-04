@@ -1,5 +1,6 @@
 (ns lupapalvelu.activation
   (:require [monger.operators :refer :all]
+            [sade.core :refer [now]]
             [sade.env :as env]
             [sade.email :as email]
             [sade.strings :refer [lower-case]]
@@ -20,7 +21,7 @@
         key     (if-let [old-activation (mongo/select-one :activation {:user-id userid :email email})]
                   (:activation-key old-activation)
                   (let [new-key (security/random-password)]
-                    (mongo/insert :activation {:user-id userid :email email :activation-key new-key})
+                    (mongo/insert :activation {:user-id userid :email email :activation-key new-key :_created (now)})
                     new-key))]
     (notifications/notify! :account-activation {:user user :data {:key key}})))
 
