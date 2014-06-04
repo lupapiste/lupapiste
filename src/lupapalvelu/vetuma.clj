@@ -117,6 +117,7 @@
   {:userid (last (string/split s #"="))})
 
 (defn- extract-request-id [{id :trid}]
+  {:pre [id]}
   {:stamp id})
 
 (defn user-extracted [m]
