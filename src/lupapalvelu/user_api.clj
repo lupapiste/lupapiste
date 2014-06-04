@@ -418,7 +418,12 @@
     (when-not vetuma-data (fail! :error.create-user))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
+      (if-let [user (create-new-user
+                      (user/current-user)
+                      (merge
+                        (dissoc data :personId)
+                        (set/rename-keys vetuma-data {:userid :personId})
+                        {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
           (when (:rakentajafi data)
