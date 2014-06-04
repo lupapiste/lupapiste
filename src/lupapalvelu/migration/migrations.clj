@@ -447,6 +447,6 @@
         (mongo/update-by-id collection (:id application) {$unset updates})))))
 
 (defmigration cleanup-activation-collection
-  (let [active-applicants (map :email (mongo/select :users {:enabled true, :role "applicant"}))]
+  (let [active-applicants (map :email (mongo/select :users {:enabled true, :role "applicant"} {:email 1}))]
     (mongo/remove-many :activation {:email {$in active-applicants}})))
 
