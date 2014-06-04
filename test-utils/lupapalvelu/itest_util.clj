@@ -178,6 +178,9 @@
 (defn http200? [{:keys [status]}]
   (= status 200))
 
+(defn http302? [{:keys [status]}]
+  (= status 302))
+
 (defn http401? [{:keys [status]}]
   (= status 401))
 
