@@ -451,6 +451,20 @@
       (catch IllegalArgumentException e
         (fail (keyword (.getMessage e)))))))
 
+(defcommand retry-rakentajafi
+  {:parameters [email]
+   :roles [:admin]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :description "Admin can retry sending data to rakentaja.fi, if account is not linked"}
+  [_]
+  (if-let [user (user/get-user-by-email email)]
+    (when-not (get-in user [:partnerApplications :rakentajafi])
+      (if (idf/send-user-data user "rakentaja.fi")
+        (ok)
+        (fail :error.unknown)))
+    (fail :error.user-not-found)))
+
 ;;
 ;; ==============================================================================
 ;; User attachments:

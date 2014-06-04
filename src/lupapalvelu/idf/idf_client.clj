@@ -35,4 +35,4 @@
       (let [id (-> (split-lines body) first ss/trim)]
         (link-account! (:email user) partner-name id ts false)
         true)
-      (errorf "Unable link %s to %s: status=%s, body=%s" (:email user) partner-name (:status resp) (logging/sanitize 1000 body)))))
+      (errorf "Unable link %s to %s: request: %s, status=%s, body=%s" (:email user) partner-name (logging/sanitize 1000 (str form-params)) (:status resp) (logging/sanitize 1000 body)))))
