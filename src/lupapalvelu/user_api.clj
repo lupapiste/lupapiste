@@ -160,8 +160,12 @@
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
         ; LUPA-1146
-        (when (or (:enabled old-user) (not= (:personId old-user) (:personId new-user)))
-          (fail! :error.duplicate-email)))
+        "applicant" (if (and (= (:personId old-user) (:personId new-user)) (not (:enabled old-user)))
+                      (do
+                        (info "rewriting over inactive applicant user:" old-id (dissoc new-user :private :id))
+                        (mongo/update-by-id :users old-id (dissoc new-user :id)))
+                      (fail! :error.duplicate-email))
+        (fail! :error.duplicate-email))
 
       (when (and send-email (not= "dummy" (name (:role new-user))))
         (activation/send-activation-mail-for new-user))
