@@ -119,11 +119,17 @@
        (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user")))) => string?
              new-user-email "jukka@example.com"
              new-user-pw "salasana"
+             new-user-phone2 "046"
              cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
-             resp (register cmd-opts {:stamp stamp :phone "040", :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"}) => ok?
+             resp (register cmd-opts {:stamp stamp :phone new-user-phone2, :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"}) => ok?
+             user-id (:id resp) => string?
              email (last-email)
              body (:body email)]
+
+         (facts "New user data is overwritten"
+           (let [new-user (first (:users (query admin :users :userId user-id)))]
+             (fact "phone" (:phone new-user) => new-user-phone2)))
 
          (fact "New user got email"
            (:to email) => new-user-email
