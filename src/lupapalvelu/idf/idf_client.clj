@@ -9,23 +9,26 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.idf.idf-core :refer :all]))
 
+(defn- ->params [user app]
+  (-> user
+    (rename-keys {:firstName :etunimi
+                  :lastName  :sukunimi
+                  :phone     :puhelin
+                  :city      :postitoimipaikka
+                  :street    :katuosoite
+                  :zip       :postinumero
+                  :allowDirectMarketing :suoramarkkinointilupa
+                  :architect :ammattilainen})
+    (select-keys [:id :etunimi :sukunimi :email :puhelin
+                  :katuosoite :postinumero :postitoimipaikka
+                  :suoramarkkinointilupa :ammattilainen])
+    (assoc :app app)))
+
 (defn send-user-data [user partner-name]
   {:pre [(known-partner? partner-name)]}
   (let [app (send-app-for-partner partner-name)
         url (url-for-partner partner-name)
-        params (-> user
-                 (rename-keys {:firstName :etunimi
-                               :lastName  :sukunimi
-                               :phone     :puhelin
-                               :city      :postinumero
-                               :street    :katuosoite
-                               :zip       :postitoimipaikka
-                               :allowDirectMarketing :suoramarkkinointilupa
-                               :architect :ammattilainen})
-                 (select-keys [:id :etunimi :sukunimi :email :puhelin
-                               :katuosoite :postinumero :postitoimipaikka
-                               :suoramarkkinointilupa :ammattilainen])
-                 (assoc :app app))
+        params (->params user app)
         ts (now)
         form-params (assoc params :ts ts :mac (calculate-mac params partner-name ts :send))
         _  (debugf "Send user %s / %s data to %s (%s)" (:id user) (:email user) partner-name url)
@@ -35,4 +38,4 @@
       (let [id (-> (split-lines body) first ss/trim)]
         (link-account! (:email user) partner-name id ts false)
         true)
-      (errorf "Unable link %s to %s: status=%s, body=%s" (:email user) partner-name (:status resp) (logging/sanitize 1000 body)))))
+      (errorf "Unable link %s to %s: request: %s, status=%s, body=%s" (:email user) partner-name (logging/sanitize 1000 (str form-params)) (:status resp) (logging/sanitize 1000 body)))))
