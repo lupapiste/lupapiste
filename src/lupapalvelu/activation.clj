@@ -21,9 +21,6 @@
     (mongo/insert :activation {:user-id userid :email email :activation-key key})
     (notifications/notify! :account-activation {:user user :data {:key key}})))
 
-(defn get-activation-key [userid]
-  (mongo/select-one :activation {:user-id userid}))
-
 (defn activate-account [activation-key]
   (let [act     (mongo/select-one :activation {:activation-key activation-key})
         userid  (:user-id act)
@@ -32,6 +29,3 @@
       (user/clear-logins (:username updated-user))
       (mongo/remove :activation (:_id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
-
-(defn activations []
-  (mongo/select :activation))
