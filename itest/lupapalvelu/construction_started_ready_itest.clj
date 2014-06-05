@@ -4,16 +4,24 @@
             [lupapalvelu.factlet :refer :all]))
 
 (fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
-  (let [application    (create-and-submit-application sonja
-                         :operation "ya-katulupa-vesi-ja-viemarityot"
-                         :municipality sonja-muni
-                         :address "Paatoskuja 11") => truthy
-        application-id (:id application)
-        _              (generate-documents application sonja)
+  (let [initial-application (create-and-submit-application sonja
+                              :operation "ya-katulupa-vesi-ja-viemarityot"
+                              :municipality sonja-muni
+                              :address "Paatoskuja 11") => truthy
+        application-id (:id initial-application)
+        _              (generate-documents initial-application sonja)
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
+        documents-after-approve (:documents (query-application sonja application-id)) => seq
         _              (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.command-illegal-state")
         _              (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
         application    (query-application sonja application-id) => truthy]
+
+    (facts "Documents got an indicator reset timestamp"
+      (fact "had not before"
+        (:documents initial-application) => seq
+        (:documents initial-application) => (has every? #(nil? (get-in % [:meta :_indicator_reset]))))
+      (fact "have now"
+        documents-after-approve => (has every? #(pos? (get-in % [:meta :_indicator_reset])))))
 
     (:state application) => "verdictGiven"
     sonja => (allowed? :create-continuation-period-permit :id application-id)
