@@ -311,6 +311,11 @@
                   (if (and current-approvable (> (get-in data (conj current-path :modified) 0) (max-timestamp current-path))) 1 0))))]
       (reduce + 0 (map count-mods schema-body)))))
 
+(defn mark-approval-indicators-seen-update
+  "Generates update map for marking document approval indicators seen. Merge into $set statement."
+  [{documents :documents} timestamp]
+  (mongo/generate-array-updates :documents documents (constantly true) "meta._indicator_reset" timestamp))
+
 ;;
 ;; Create
 ;;

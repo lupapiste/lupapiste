@@ -419,8 +419,8 @@
                               (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
                               (let [submitted-application (mongo/by-id :submitted-applications id)]
                                 (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-argument (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
-          (do-rest-fn attachments-argument)))
+              attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
+          (do-rest-fn attachments-updates)))
       ;; SFTP user not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
 
@@ -449,11 +449,12 @@
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
-        do-update (fn [attachments-argument]
+        document-updates (model/mark-approval-indicators-seen-update application created)
+        do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$set (merge app-updates attachments-argument)})
-                    (ok :integrationAvailable (not (nil? attachments-argument))))]
+                      {$set (merge app-updates attachments-updates document-updates)})
+                    (ok :integrationAvailable (not (nil? attachments-updates))))]
 
     (do-approve application created id lang jatkoaika-app? do-update)))
 
