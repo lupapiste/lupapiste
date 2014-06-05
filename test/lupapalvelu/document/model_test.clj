@@ -423,7 +423,11 @@
           (apply-approval [:repeats :0] "approved" {} 11)
           (apply-update [:single2] "")
           (apply-update [:repeats :0 :single3] "")
-          (apply-update [:repeats :1 :single3] ""))) => 1))
+          (apply-update [:repeats :1 :single3] ""))) => 1
+
+      (fact "meta._indicator_reset.timestamp overrides approval indicator"
+        (modifications-since-approvals (assoc-in base-doc [:meta :_indicator_reset :timestamp] 9)) => 1
+        (modifications-since-approvals (assoc-in base-doc [:meta :_indicator_reset :timestamp] 10)) => 0)))
 
   (fact "real world uusiRakennus document has no modifications since approvals"
     (modifications-since-approvals uusiRakennus) => 0))

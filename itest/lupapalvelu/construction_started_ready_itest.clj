@@ -19,9 +19,9 @@
     (facts "Documents got an indicator reset timestamp"
       (fact "had not before"
         (:documents initial-application) => seq
-        (:documents initial-application) => (has every? #(nil? (get-in % [:meta :_indicator_reset]))))
+        (:documents initial-application) => (has every? #(nil? (get-in % [:meta :_indicator_reset :timestamp]))))
       (fact "have now"
-        documents-after-approve => (has every? #(pos? (get-in % [:meta :_indicator_reset])))))
+        documents-after-approve => (has every? #(pos? (get-in % [:meta :_indicator_reset :timestamp])))))
 
     (:state application) => "verdictGiven"
     sonja => (allowed? :create-continuation-period-permit :id application-id)
