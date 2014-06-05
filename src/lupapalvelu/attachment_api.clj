@@ -33,7 +33,7 @@
 
 (defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
   (when (and
-          (not= (:role user) "authority")
+          (not (user/authority? user)
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 

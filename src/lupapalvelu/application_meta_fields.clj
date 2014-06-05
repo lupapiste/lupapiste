@@ -62,7 +62,7 @@
     0))
 
 (defn- count-unseen-verdicts [user app]
-  (if (and (= (:role user) "applicant") (not (:infoRequest app)))
+  (if (and (user/applicant? user) (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
@@ -83,13 +83,13 @@
     0))
 
 (defn- count-document-modifications-per-doc [user app]
-  (if (and (= (:role user) "authority") (not (:infoRequest app)))
+  (if (and (user/authority? user) (not (:infoRequest app)))
     (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
     {}))
 
 
 (defn- count-document-modifications [user app]
-  (if (and (= (:role user) "authority") (not (:infoRequest app)))
+  (if (and (user/authority? user) (not (:infoRequest app)))
     (reduce + 0 (vals (:documentModificationsPerDoc app)))
     0))
 
