@@ -45,7 +45,9 @@
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 1
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action", :latestVersion {:created 1}, :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:sent 1, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:sent 2, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0

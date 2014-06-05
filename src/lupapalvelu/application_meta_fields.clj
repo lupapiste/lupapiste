@@ -44,7 +44,7 @@
 (defn get-application-operation [app]
   (first (:operations app)))
 
-(defn- count-unseen-comment [user app]
+(defn- count-unseen-comments [user app]
   (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
     (count (filter (fn [comment]
                      (and (> (:created comment) last-seen)
@@ -67,13 +67,19 @@
       (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
 
-(defn- count-attachments-requiring-action [user app]
-  (if-not (:infoRequest app)
-    (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
-      (case (keyword (:role user))
-        :applicant (count-attachments "requires_user_action")
-        :authority (count-attachments "requires_authority_action")
-        0))
+(defn- state-base-filter [required-state {:keys [state versions]}]
+  (and (= state required-state) (seq versions)))
+
+(defn- count-attachments-requiring-action [user {:keys [infoRequest attachments sent] :or {sent 0}}]
+  (if-not infoRequest
+    (let [requires-user-action (partial state-base-filter "requires_user_action")
+          requires-authority-action (partial state-base-filter "requires_authority_action")]
+      (count
+       (case (keyword (:role user))
+         :applicant (filter requires-user-action attachments)
+         :authority (filter #(and (requires-authority-action %)
+                               (> (get-in % [:latestVersion :created] 0) sent)) attachments)
+        nil)))
     0))
 
 (defn- count-document-modifications-per-doc [user app]
@@ -95,7 +101,7 @@
 
 (def indicator-meta-fields [{:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                             {:field :documentModifications :fn count-document-modifications}
-                            {:field :unseenComments :fn count-unseen-comment}
+                            {:field :unseenComments :fn count-unseen-comments}
                             {:field :unseenStatements :fn count-unseen-statements}
                             {:field :unseenVerdicts :fn count-unseen-verdicts}
                             {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
