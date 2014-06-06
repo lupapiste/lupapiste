@@ -392,11 +392,11 @@
                 data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
                 class="btn">
               </button>
-              <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" data-test-id="application-stamp-btn"  class="btn">
+              <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" class="btn">
                 <span data-bind="ltext: 'application.stampAttachments'"></span>
                 <span class="icon stamp left-align"></span>
               </button>
-              <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
+              <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')" class="btn">
                 <span data-bind="ltext: 'application.signAttachments'"></span>
                 <span class="icon stamp left-align"></span>
               </button>
