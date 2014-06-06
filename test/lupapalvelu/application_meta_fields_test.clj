@@ -3,15 +3,15 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.application-meta-fields]))
 
-(testable-privates lupapalvelu.application-meta-fields count-unseen-comment count-unseen-statements count-unseen-verdicts count-attachments-requiring-action indicator-sum)
+(testable-privates lupapalvelu.application-meta-fields count-unseen-comments count-unseen-statements count-unseen-verdicts count-attachments-requiring-action indicator-sum)
 
-(facts "count-unseen-comment"
-  (count-unseen-comment nil nil) => 0
-  (count-unseen-comment {} {}) => 0
-  (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "a" :user {:id "user2"}}]}) => 1
-  (count-unseen-comment {:id ..id..} {:comments [{:created 10 :text "a" :user {:id ..id..}}]}) => 0
-  (count-unseen-comment {:id "user1"} {:comments [{:created 0 :text "a" :user {:id "user2"}}]}) => 0
-  (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
+(facts "count-unseen-comments"
+  (count-unseen-comments nil nil) => 0
+  (count-unseen-comments {} {}) => 0
+  (count-unseen-comments {:id "user1"} {:comments [{:created 10 :text "a" :user {:id "user2"}}]}) => 1
+  (count-unseen-comments {:id ..id..} {:comments [{:created 10 :text "a" :user {:id ..id..}}]}) => 0
+  (count-unseen-comments {:id "user1"} {:comments [{:created 0 :text "a" :user {:id "user2"}}]}) => 0
+  (count-unseen-comments {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
 
 (facts "count-unseen-statements"
   (count-unseen-statements nil nil) => 0
@@ -46,8 +46,8 @@
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action", :latestVersion {:created 1}, :versions [{:version {}}]}]}) => 1
-  (count-attachments-requiring-action {:role "authority"} {:sent 1, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 1
-  (count-attachments-requiring-action {:role "authority"} {:sent 2, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 1, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 2, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0

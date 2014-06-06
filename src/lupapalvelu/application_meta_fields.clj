@@ -70,15 +70,16 @@
 (defn- state-base-filter [required-state {:keys [state versions]}]
   (and (= state required-state) (seq versions)))
 
-(defn- count-attachments-requiring-action [user {:keys [infoRequest attachments sent] :or {sent 0}}]
+(defn- count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset] :as application}]
   (if-not infoRequest
     (let [requires-user-action (partial state-base-filter "requires_user_action")
-          requires-authority-action (partial state-base-filter "requires_authority_action")]
+          requires-authority-action (partial state-base-filter "requires_authority_action")
+          attachment-indicator-reset (or _attachment_indicator_reset 0)]
       (count
        (case (keyword (:role user))
          :applicant (filter requires-user-action attachments)
          :authority (filter #(and (requires-authority-action %)
-                               (> (get-in % [:latestVersion :created] 0) sent)) attachments)
+                               (> (get-in % [:latestVersion :created] 0) attachment-indicator-reset)) attachments)
         nil)))
     0))
 
