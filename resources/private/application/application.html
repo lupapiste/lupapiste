@@ -157,51 +157,51 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
-          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
+          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: !processing() && $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
             <span data-bind="ltext: 'application.submitApplication'"></span>
             <span class="icon send left-align"></span>
           </button>
-          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
+          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
+          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
             <span data-bind="ltext: 'application.requestForComplement'"></span>
             <span class="icon complement left-align"></span>
           </button>
-          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
+          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: !processing() && $root.authorization.ok('add-operation')"  data-test-id="add-operation">
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: $root.signingModel.init,   visible: $root.authorization.ok('sign-attachments'),     enable: $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
+          <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
             <span data-bind="ltext: 'application.signAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
-          <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export'),     enable: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
+          <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export'),             enable: !processing() && $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
           </button>
-          <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,  visible: $root.authorization.ok('add-link-permit'),        enable: $root.authorization.ok('add-link-permit')"        data-test-id="application-add-link-permit-btn">
+          <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')"        data-test-id="application-add-link-permit-btn">
             <span data-bind="ltext: 'application.addLinkPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: createChangePermit,    visible: $root.authorization.ok('create-change-permit'),     enable: $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
+          <button data-bind="click: createChangePermit,   visible: $root.authorization.ok('create-change-permit'),   enable: !processing() && $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
             <span data-bind="ltext: 'application.createChangePermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'),     enable: $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
+          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'), enable: !processing() && $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
             <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
+          <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: !processing() && $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-          <button data-bind="click: $root.stampModel.init, visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
+          <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'),      enable: !processing() && $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
-          <button data-bind="click: refreshKTJ,    visible: $root.authorization.ok('refresh-ktj'),     enable: $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
+          <button data-bind="click: refreshKTJ,           visible: $root.authorization.ok('refresh-ktj'),            enable: !processing() && $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
           </button>
