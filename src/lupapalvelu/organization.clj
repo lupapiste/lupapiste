@@ -3,7 +3,7 @@
             [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
@@ -52,10 +52,31 @@
   "Returns a map where key is permit type, value is a list of operations for the permit type"
   [{scope :scope :as organization}]
   (reduce
-    #(assoc %1 %2 (let [operation-names (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations))
-                        empty-operation-attachments (zipmap operation-names (repeat []))
-                        saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)]
-                    (merge empty-operation-attachments saved-operation-attachments))) {}
+    #(if-not (get-in %2 [%1])
+       (assoc %1 %2 (let [operation-names (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations))
+                          empty-operation-attachments (zipmap operation-names (repeat []))
+                          saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)]
+                      (merge empty-operation-attachments saved-operation-attachments)))
+       %1)
+    {}
+    (map :permitType scope)))
+
+(defn- selected-operations-with-permit-types
+  "Returns a map where key is permit type, value is a list of operations for the permit type"
+  [{scope :scope selected-ops :selected-operations :as organization}]
+  (reduce
+    #(if-not (get-in %2 [%1])
+       (let [
+             selected-operations (set (map keyword selected-ops))
+             operation-names (keys (filter
+                                     (fn [[name op]]
+                                       (and
+                                         (= %2 (:permit-type op))
+                                         (or (empty? selected-operations) (selected-operations name))))
+                                     operations/operations))]
+         (if operation-names (assoc %1 %2 operation-names) %1))
+       %1)
+    {}
     (map :permitType scope)))
 
 (defn loc-organization-name [organization]
@@ -91,8 +112,14 @@
   [{{:keys [organizations] :as user} :user}]
   (let [orgs (mongo/select :organizations {:_id {$in (:organizations user)}})
         organization (first orgs)
-        ops-with-attachments (organization-operations-with-attachments organization)]
-    (ok :organization (assoc organization :operations-attachments ops-with-attachments)
+        ops-with-attachments (organization-operations-with-attachments organization)
+        selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
+    (ok :organization (-> organization
+                        (assoc :operationsAttachments ops-with-attachments
+                               :selectedOperations selected-operations-with-permit-type
+;                               :operationTreeTitlesByPermitType operations/operation-tree-titles-by-permit-type-mapping
+                               )
+                        (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
 
 (defcommand update-organization
@@ -157,19 +184,24 @@
   [_]
   (ok :municipalities (municipalities-with-organization)))
 
-(defquery operations-for-municipality
+(defquery operations-for-organization
+  {:description "returns operations that match the permit types of of the organization whose id is given as parameter"
+   :parameters [organizationId]}
+  (ok :operations (operations/operations-for-organization organizationId)))
+
+(defquery selected-operations-for-municipality
   {:parameters [municipality]
    :authenticated true
    :verified true}
   [_]
-  (ok :operations (operations/municipality-operations municipality)))
+  (ok :operations (operations/selected-operations-for-municipality municipality)))
 
 (defquery "addable-operations"
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters [:id]}
   [{{:keys [permitType municipality] :as application} :application}]
   (when-let [organization (resolve-organization municipality permitType)]
-    (let [selected-operations (set (map #(keyword %) (:selected-operations organization)))]
+    (let [selected-operations (map keyword (:selected-operations organization))]
       (ok :operations (operations/addable-operations selected-operations permitType)))))
 
 (defquery organization-by-id
@@ -193,6 +225,15 @@
          :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
 
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
+
+(defcommand set-organization-selected-operations
+  {:parameters [operations]
+   :roles [:authorityAdmin]
+   :input-validators  [(partial non-blank-parameters [:operations])]}
+  [{{:keys [organizations]} :user}]
+  (let [organization-id (first organizations)]
+    (mongo/update-by-id :organizations organization-id {$set {:selected-operations operations}})
+    (ok)))
 
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]
