@@ -107,8 +107,7 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Run Keyword Unless  '${SERVER}'=='http://localhost:8000'  Wait Until  Page should contain  Etusivu
-  Go to login page
+  Wait Until  Page should contain  Haluan kirjautua palveluun
 
 #
 # Login stuff
