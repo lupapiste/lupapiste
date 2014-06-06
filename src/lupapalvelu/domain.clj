@@ -105,42 +105,43 @@
 ;;
 
 (def application-skeleton
-  {:_statements-seen-by      {}
-   :_verdicts-seen-by        {}
+  {:_applicantIndex          []
+   :_attachment_indicator_reset nil ; timestamp
    :_comments-seen-by        {}
-   :_applicantIndex          []
+   :_statements-seen-by      {}
+   :_verdicts-seen-by        {}
    :address                  ""
    :applicant                ""
    :attachments              []
    :auth                     []
    :authority                {}
    :buildings                []
-   :closed                   nil
+   :closed                   nil ; timestamp
    :closedBy                 {}
    :comments                 []
-   :created                  nil
+   :created                  nil ; timestamp
    :documents                []
    :drawings                 []
    :infoRequest              false
    :location                 {}
-   :modified                 nil
+   :modified                 nil ; timestamp
    :municipality             ""
    :neighbors                []
-   :opened                   nil
+   :opened                   nil ; timestamp
    :openInfoRequest          false
    :operations               []
    :organization             ""
    :propertyId               ""
    :permitSubtype            ""
    :permitType               ""
-   :reminder-sent            nil
-   :schema-version           nil
-   :sent                     nil
+   :reminder-sent            nil ; timestamp
+   :schema-version           nil ; Long
+   :sent                     nil ; timestamp
    :started                  nil ; construction started
    :startedBy                {}
    :state                    ""
    :statements               []
-   :submitted                nil
+   :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
    :verdicts                 []})

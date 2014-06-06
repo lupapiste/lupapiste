@@ -16,7 +16,7 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed?)
+(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? mark-indicators-seen-updates)
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
@@ -33,6 +33,16 @@
   (validate-y {:data {:y "6610000"}}) => nil
   (validate-y {:data {:y "7780000"}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-y {:data {:y "7779999"}}) => nil)
+
+(facts "mark-indicators-seen-updates"
+  (let [timestamp 123
+        expected-seen-bys {"_comments-seen-by.pena" timestamp, "_statements-seen-by.pena" timestamp, "_verdicts-seen-by.pena" timestamp}
+        expected-attachment (assoc expected-seen-bys :_attachment_indicator_reset timestamp)
+        expected-docs (assoc expected-attachment "documents.0.meta._indicator_reset.timestamp" timestamp)]
+    (mark-indicators-seen-updates {} {:id "pena"} timestamp) => expected-seen-bys
+    (mark-indicators-seen-updates {:documents []} {:id "pena", :role "authority"} timestamp) => expected-attachment
+    (mark-indicators-seen-updates {:documents [{}]} {:id "pena", :role "authority"} timestamp) => expected-docs))
+
 
 (facts "generate-remove-invalid-user-from-docs-updates"
   (generate-remove-invalid-user-from-docs-updates nil) => empty?

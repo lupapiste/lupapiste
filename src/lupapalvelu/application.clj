@@ -96,6 +96,18 @@
 (defn- insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
+(def collections-to-be-seen #{"comments" "statements" "verdicts"})
+
+(defn- mark-collection-seen-update [{id :id} timestamp collection]
+  {:pre [(collections-to-be-seen collection) id timestamp]}
+  {(str "_" collection "-seen-by." id) timestamp})
+
+(defn- mark-indicators-seen-updates [application user timestamp]
+  (merge
+    (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
+    (when (user/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
+    (when (user/authority? user) {:_attachment_indicator_reset timestamp})))
+
 ;;
 ;; Query application:
 ;;
@@ -304,11 +316,17 @@
         (when openApplication {$set {:state :open, :opened created}})))))
 
 (defcommand mark-seen
-  {:parameters [:id :type]
-   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
+  {:parameters [:id type]
+   :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
    :authenticated true}
   [{:keys [data user created] :as command}]
-  (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
+  (update-application command {$set (mark-collection-seen-update user created type)}))
+
+(defcommand mark-everything-seen
+  {:parameters [:id]
+   :authenticated true}
+  [{:keys [application user created] :as command}]
+  (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
@@ -419,8 +437,8 @@
                               (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
                               (let [submitted-application (mongo/by-id :submitted-applications id)]
                                 (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-argument (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
-          (do-rest-fn attachments-argument)))
+              attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
+          (do-rest-fn attachments-updates)))
       ;; SFTP user not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
 
@@ -449,11 +467,12 @@
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
-        do-update (fn [attachments-argument]
+        indicator-updates (mark-indicators-seen-updates application user created)
+        do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$set (merge app-updates attachments-argument)})
-                    (ok :integrationAvailable (not (nil? attachments-argument))))]
+                      {$set (merge app-updates attachments-updates indicator-updates)})
+                    (ok :integrationAvailable (not (nil? attachments-updates))))]
 
     (do-approve application created id lang jatkoaika-app? do-update)))
 
