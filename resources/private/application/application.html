@@ -415,30 +415,41 @@
               <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
-              <button
-                  data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+
+              <div data-bind="with: application">
+                <button
+                  data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
                   data-window-id="upload-dialog"
                   class="btn btn-primary modal"
                   data-test-id="add-attachment">
-              </button>
-              <button
-                  data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+                </button>
+                <button
+                  data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
                   class="btn btn-primary"
                   data-test-id="attachments-copy-own">
-              </button>
-              <button
-                  data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
+                </button>
+                <button
+                  data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
                   class="btn">
-              </button>
-              <button
-                  data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
-                             disable: application.sendUnsentAttachmentsButtonDisabled,
-                             visible: $root.authorization.ok('move-attachments-to-backing-system')"
-                  class="btn btn-primary modal"
-                  data-test-id="send-unsent-attachments">
-                  <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
-                  <em data-bind="visible: application.pending" class="button-loader"></em>
-              </button>
+                </button>
+                <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" data-test-id="application-stamp-btn"  class="btn">
+                  <span data-bind="ltext: 'application.stampAttachments'"></span>
+                  <span class="icon stamp left-align"></span>
+                </button>
+                <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
+                  <span data-bind="ltext: 'application.signAttachments'"></span>
+                  <span class="icon stamp left-align"></span>
+                </button>
+                <button
+                    data-bind="click: sendUnsentAttachmentsToBackingSystem,
+                               disable: sendUnsentAttachmentsButtonDisabled,
+                               visible: $root.authorization.ok('move-attachments-to-backing-system')"
+                    class="btn btn-primary modal"
+                    data-test-id="send-unsent-attachments">
+                    <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
+                    <em data-bind="visible: pending" class="button-loader"></em>
+                </button>
+              </div>
             </div>
 
             <!-- ko if: postVerdict() -->
