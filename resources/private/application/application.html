@@ -198,6 +198,11 @@
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
           </button>
+
+          <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
+            <span data-bind="ltext: 'application.reset-indicators'"></span>
+            <span class="icon mark-seen left-align"></span>
+          </button>
         </div>
 
         <!-- Tabs: -->
