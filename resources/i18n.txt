@@ -1,0 +1,1 @@
+auth-admin.selected-operations: Käyttöön valitut toimenpiteet
