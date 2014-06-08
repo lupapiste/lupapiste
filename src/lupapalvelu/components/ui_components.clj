@@ -144,8 +144,9 @@
 
    :register     {:depends [:common]
                   :js ["registration-models.js" "register.js"
-                       "comppany-registration.js"]
-                  :html ["register.html" "register2.html" "register3.html"]}
+                       "company-registration.js"]
+                  :html ["register.html" "register2.html" "register3.html"
+                         "register-company.html"]}
    
    :link-account {:depends [:register]
                   :js ["link-account.js"]
