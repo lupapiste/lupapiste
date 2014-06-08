@@ -12,6 +12,13 @@
       <div data-bind="if: isError">
         <div id="register-error" data-bind="ltext: 'register.error'" class="context-error"></div>
       </div>
+      
+      <h1 data-bind="ltext: 'register.company.header'"></h1>
+      <p data-bind="ltext: 'register.company.info'" class="register-info"></p>
+      <a data-bind="attr: {href: '#!/register-company'}, ltext: 'register.company.register'"
+         href="#"
+         class="btn btn-primary">
+      </a>
     </div>
   </section>
 </body>
