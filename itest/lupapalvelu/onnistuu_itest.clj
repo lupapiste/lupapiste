@@ -18,13 +18,13 @@
                           :status  "created"})
     
     (fact "start-process"
-      (let [resp    (http/get (str (u/server-address) "/sign/start/" id))
+      (let [resp    (http/get (str (u/server-address) "/api/sign/start/" id))
             process (p/find-sign-process id)]
         (-> resp :status) => 200
         (-> process :status) => "start"))
     
     (fact "onnisttu.fi fetches the document"
-      (let [resp    (http/get (str (u/server-address) "/sign/document/" id))
+      (let [resp    (http/get (str (u/server-address) "/api/sign/document/" id))
             process (p/find-sign-process id)]
         (-> resp :status) => 200
         (-> process :status) => "document"))))
