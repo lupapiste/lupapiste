@@ -74,7 +74,7 @@
 (defn init-sign-process [comppany-name y user-id ts]
   (let [id     (random-password 40)
         stamp  (random-password 40)]
-    (infof "sign:init-sign-process:%s: company-name [%s], y [%s], user-id [%s]" id comppany-name y user-id)
+    (infof "sign:init-sign-process:%s: comppany-name [%s], y [%s], user-id [%s]" id comppany-name y user-id)
     (mongo/insert :sign-processes {:id        id
                                    :stamp     stamp
                                    :company   {:name  comppany-name
