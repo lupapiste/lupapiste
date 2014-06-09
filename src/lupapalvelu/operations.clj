@@ -580,7 +580,7 @@
         filtering-fn (fn [node] (permitTypes (permit-type-of-operation node)))]
     (operations-filtered filtering-fn false)))
 
-(defn operations-for-organization [org-id]
+(defn all-operations-for-organization [org-id]
   (when-let [org (mongo/by-id :organizations org-id {:scope 1})]
     (organization-operations org)))
 

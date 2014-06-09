@@ -181,11 +181,11 @@
   [_]
   (ok :municipalities (municipalities-with-organization)))
 
-(defquery operations-for-organization
+(defquery all-operations-for-organization
   {:description "returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
    :input-validators  [(partial non-blank-parameters [:organizationId])]}
-  (ok :operations (operations/operations-for-organization organizationId)))
+  (ok :operations (operations/all-operations-for-organization organizationId)))
 
 (defquery selected-operations-for-municipality
   {:parameters [municipality]
