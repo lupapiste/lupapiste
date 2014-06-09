@@ -584,22 +584,20 @@
   (when-let [org (mongo/by-id :organizations org-id {:scope 1})]
     (organization-operations org)))
 
-(defn selected-operations-for-municipality [municipality]
-  (when-let [organizations (mongo/select :organizations {:scope {$elemMatch {:municipality municipality}}} {:selected-operations 1 :scope 1})]
-    (let [orgs-with-selected-ops (filter #(:selected-operations %) organizations)
-          orgs-without-selected-ops (filter #(not (:selected-operations %)) organizations)
-          ;; Resolving operation tree for organizations with "selected-operations" defined in db
-          selected-operations-array (map :selected-operations orgs-with-selected-ops)
-          selected-operations (reduce #(apply conj %1 %2) #{} selected-operations-array)
-          selected-operations (set (map keyword selected-operations))
-          filtering-fn (fn [node] (selected-operations node))
-          op-tree-only-selecteds (operations-filtered filtering-fn false)
-          ;; Operation tree for organizations with no "selected-operations" defined in db
-          op-tree-all-ops-for-org-array (map #(organization-operations %) orgs-without-selected-ops)
-          ]
-      ;; The trees combined
-      (map first (cons op-tree-only-selecteds op-tree-all-ops-for-org-array))  ;; TODO: Voiko tata tehda helpommin?
-      )))
+(defn selected-operations-for-organizations [organizations]
+  (let [orgs-with-selected-ops (filter #(:selected-operations %) organizations)
+        orgs-without-selected-ops (filter #(not (:selected-operations %)) organizations)
+        ;; Resolving operation tree for organizations with "selected-operations" defined in db
+        selected-operations-array (map :selected-operations orgs-with-selected-ops)
+        selected-operations (reduce #(apply conj %1 %2) #{} selected-operations-array)
+        selected-operations (set (map keyword selected-operations))
+        filtering-fn (fn [node] (selected-operations node))
+        op-tree-only-selecteds (operations-filtered filtering-fn false)
+        ;; Operation tree for organizations with no "selected-operations" defined in db
+        op-tree-all-ops-for-org-array (map #(organization-operations %) orgs-without-selected-ops)]
+    ;; The trees combined
+    (map first (cons op-tree-only-selecteds op-tree-all-ops-for-org-array))  ;; TODO: Voiko tata tehda helpommin?
+    ))
 
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
