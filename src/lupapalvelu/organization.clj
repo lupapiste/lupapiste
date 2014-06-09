@@ -116,9 +116,7 @@
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
     (ok :organization (-> organization
                         (assoc :operationsAttachments ops-with-attachments
-                               :selectedOperations selected-operations-with-permit-type
-;                               :operationTreeTitlesByPermitType operations/operation-tree-titles-by-permit-type-mapping
-                               )
+                               :selectedOperations selected-operations-with-permit-type)
                         (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
 
