@@ -1,5 +1,6 @@
 (ns lupapalvelu.activation
   (:require [monger.operators :refer :all]
+            [sade.core :refer [now]]
             [sade.env :as env]
             [sade.email :as email]
             [sade.strings :refer [lower-case]]
@@ -15,14 +16,14 @@
                       :name (:firstName user)})})
 
 (defn send-activation-mail-for [user]
-  (let [key     (security/random-password)
-        userid  (or (:_id user) (:id user))
-        email   (:email user)]
-    (mongo/insert :activation {:user-id userid :email email :activation-key key})
+  (let [userid  (or (:_id user) (:id user))
+        email   (:email user)
+        key     (if-let [old-activation (mongo/select-one :activation {:user-id userid :email email})]
+                  (:activation-key old-activation)
+                  (let [new-key (security/random-password)]
+                    (mongo/insert :activation {:user-id userid :email email :activation-key new-key :_created (now)})
+                    new-key))]
     (notifications/notify! :account-activation {:user user :data {:key key}})))
-
-(defn get-activation-key [userid]
-  (mongo/select-one :activation {:user-id userid}))
 
 (defn activate-account [activation-key]
   (let [act     (mongo/select-one :activation {:activation-key activation-key})
@@ -32,6 +33,3 @@
       (user/clear-logins (:username updated-user))
       (mongo/remove :activation (:_id act))
       (merge (user/non-private (mongo/select-one :users {:_id userid})) {:id userid}))))
-
-(defn activations []
-  (mongo/select :activation))

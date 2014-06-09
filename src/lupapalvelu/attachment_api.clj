@@ -33,7 +33,7 @@
 
 (defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
   (when (and
-          (not= (:role user) "authority")
+          (not (user/authority? user))
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
@@ -307,12 +307,6 @@
         stamped      (:stamped latest)]
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
-(defn- loc-organization-name [organization]
-  (get-in organization [:name i18n/*lang*] (str "???ORG:" (:id organization) "???")))
-
-(defn- get-organization-name [{organization :organization :as application}]
-  (loc-organization-name (mongo/by-id :organizations organization [:name])))
-
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
 
@@ -357,13 +351,9 @@
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-(defn- stamp-attachments! [file-infos {:keys [user created job-id application] :as context}]
-  (let [stamp (stamper/make-stamp
-                (i18n/loc "stamp.verdict")
-                created
-                (str (:firstName user) \space (:lastName user))
-                (get-organization-name application)
-                (:transparency context))]
+(defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
+  {:pre [text organization (pos? created)]}
+  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
     (doseq [file-info (vals file-infos)]
       (try
         (job/update job-id assoc (:attachment-id file-info) :working)
@@ -382,7 +372,7 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id files xMargin yMargin]
+  {:parameters [:id timestamp text organization files xMargin yMargin]
    :roles      [:authority]
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
@@ -391,7 +381,12 @@
              (key-by :attachment-id (map ->file-info (a/get-attachments-infos application files)))
              {:application application
               :user (:user command)
-              :created (:created command)
+              :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+              :organization (if-not (ss/blank? organization) organization (organization/get-organization-name application))
+              :created (cond
+                         (number? timestamp) (long timestamp)
+                         (ss/blank? timestamp) (:created command)
+                         :else (->long timestamp))
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))})))
@@ -416,7 +411,8 @@
            signature {:user (user/summary u)
                       :created (:created command)}
            updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
-                             (merge m (a/create-update-statements
+                             (merge m (mongo/generate-array-updates
+                                        :attachments
                                         (:attachments application)
                                         #(= (:id %) attachment-id)
                                         :signatures (assoc signature :version version))))

@@ -28,6 +28,7 @@ Sonja logs in and throws in a verdict
   Can't regive verdict
 
 Stamping dialog opens and closes
+  Open tab  attachments
   Element should be visible  xpath=//section[@id='application']//button[@data-test-id='application-stamp-btn']
   Click enabled by test id  application-stamp-btn
   Wait Until  Element should be visible  dialog-stamp-attachments
@@ -35,6 +36,7 @@ Stamping dialog opens and closes
   Wait Until  Element should not be visible  dialog-stamp-attachments
 
 Sonja fetches verdict from municipality KRYSP service
+  Open tab  verdict
   Click enabled by test id  fetch-verdict
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
   Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.

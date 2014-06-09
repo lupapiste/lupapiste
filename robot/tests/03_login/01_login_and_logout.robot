@@ -60,15 +60,15 @@ Mikko logs in
 
 Mikko thinks he's Swedish
   [Tags]  ie8
-  Page Should Not Contain  Suomeksi >>
+  Page Should Not Contain  Suomeksi
   Click link  xpath=//*[@data-test-id='lang-sv']
-  Wait Until  Page Should Contain  Suomeksi >>
+  Wait Until  Page Should Contain  Suomeksi
 
 Mikko remembers he's Finnish
   [Tags]  ie8
-  Page Should Not Contain  På svenska >>
+  Page Should Not Contain  På svenska
   Click link  xpath=//*[@data-test-id='lang-fi']
-  Wait Until  Page Should Contain  På svenska >>
+  Wait Until  Page Should Contain  På svenska
   [Teardown]  logout
 
 Mikko is logged out

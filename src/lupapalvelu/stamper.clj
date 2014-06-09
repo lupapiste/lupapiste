@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [slingshot.slingshot :refer [throw+]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
@@ -29,12 +30,11 @@
 (defn draw-text [g text x y]
   (.draw text g x y))
 
-(defn make-stamp [verdict created username municipality transparency]
+(defn make-stamp [verdict created municipality transparency]
   (let [font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (map (fn [text] (TextLayout. text font frc))
                    [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
-                    username
                     municipality
                     "LUPAPISTE.fi"])
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
@@ -44,7 +44,7 @@
     (doto (.createGraphics i)
       (.setColor (Color. 255 255 255 (- 255 transparency)))
       (.fillRect 0 0 width height)
-      (.drawImage (qrcode "http://lupapiste.fi" 70) (- width 70) (int 5) nil)
+      (.drawImage (qrcode (env/value :host) 70) (- width 70) (int 5) nil)
       (.translate 0 70)
       (.setStroke (BasicStroke. 2.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
@@ -53,9 +53,8 @@
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER))
       (.setFont font)
       (draw-text (nth texts 0) 22 27)
-      (draw-text (nth texts 1) 22 43)
-      (draw-text (nth texts 2) 22 55)
-      (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 70)
+      (draw-text (nth texts 1) 22 48)
+      (draw-text (nth texts 2) (int (/ (- width (nth text-widths 2)) 2)) 70)
       (.dispose))
     i))
 

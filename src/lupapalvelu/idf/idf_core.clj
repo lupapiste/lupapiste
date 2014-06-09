@@ -6,6 +6,8 @@
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
+(def send-or-receive-set #{:send :receive} )
+
 (def ^:private config (reduce (fn [m [k v]] (assoc m (:name v) (assoc v :id (name k)))) {} (env/value :idf)))
 
 (defn known-partner? [partner-name]
@@ -17,17 +19,27 @@
 
 (defn url-for-partner [partner-name]
   {:pre [(known-partner? partner-name)], :post [%]}
-  (:url (config partner-name)))
+  (get-in (config partner-name) [:send :url]))
+
+(defn send-app-for-partner [partner-name]
+  {:pre [(known-partner? partner-name)], :post [%]}
+  (get-in (config partner-name) [:send :app]))
 
 (defn- key-for-partner [partner-name] (:key (config partner-name)))
+(defn- send-key-for-partner [partner-name] (get-in (config partner-name) [:send :key]))
 
 (defn calculate-mac
-  ([{:keys [etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen id] :as query-params} app ts]
-    {:pre [(known-partner? app)]}
-    (calculate-mac etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts))
-  ([etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts]
-    {:pre [(known-partner? app)]}
-    (let [text (str etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts (key-for-partner app))]
+  ([{:keys [etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen id] :as query-params} partner-name ts send-or-receive]
+    {:pre [(known-partner? partner-name)]}
+    (calculate-mac etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen partner-name id ts send-or-receive))
+  ([etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen partner-name id ts send-or-receive]
+    {:pre [(known-partner? partner-name)
+           (send-or-receive-set send-or-receive)]}
+    (let [[app key] (if (= :receive send-or-receive)
+                      [partner-name (key-for-partner partner-name)]
+                      [(send-app-for-partner partner-name) (send-key-for-partner partner-name)])
+          text (str etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts key)]
+      (assert key (str "key, parter/app=" partner-name " " app))
       (digest/sha-256 (java.io.ByteArrayInputStream. (.getBytes text utf8))))))
 
 (defn link-account! [email app id timestamp origin?]
