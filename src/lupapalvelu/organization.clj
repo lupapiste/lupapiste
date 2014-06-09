@@ -194,7 +194,7 @@
   [_]
   (ok :operations (operations/selected-operations-for-municipality municipality)))
 
-(defquery "addable-operations"
+(defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters [:id]}
   [{{:keys [permitType municipality] :as application} :application}]
