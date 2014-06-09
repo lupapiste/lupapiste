@@ -296,8 +296,9 @@
 
 (defn modifications-since-approvals
   ([{:keys [schema-info data meta]}]
-    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))]
-      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0))))
+    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))
+          timestamp (max (get-in meta [:_approved :timestamp] 0) (get-in meta [:_indicator_reset :timestamp] 0))]
+      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) timestamp)))
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
@@ -310,6 +311,11 @@
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
                   (if (and current-approvable (> (get-in data (conj current-path :modified) 0) (max-timestamp current-path))) 1 0))))]
       (reduce + 0 (map count-mods schema-body)))))
+
+(defn mark-approval-indicators-seen-update
+  "Generates update map for marking document approval indicators seen. Merge into $set statement."
+  [{documents :documents} timestamp]
+  (mongo/generate-array-updates :documents documents (constantly true) "meta._indicator_reset.timestamp" timestamp))
 
 ;;
 ;; Create

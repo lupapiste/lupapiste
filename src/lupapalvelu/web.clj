@@ -332,7 +332,8 @@
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
-      (landing-page))
+      (let [application-page (user/applicationpage-for (:role user))]
+        (redirect default-lang application-page)))
     (do
       (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
       (landing-page))))

@@ -31,7 +31,7 @@ Mikko still can't approve application
 Sonja logs in for approval
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  
+
 Sonja rejects hankkeen-kuvaus
   Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
   Wait Until  Element should be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
@@ -44,14 +44,19 @@ Sonja approves hankkeen-kuvaus
   Wait Until  Element should not be visible  xpath=//button[@data-test-id='approve-doc-hankkeen-kuvaus']
   Wait Until  Element should be visible  xpath=//button[@data-test-id='reject-doc-hankkeen-kuvaus']
 
+Party tab has indicators
+  Wait Until  Element should be visible  applicationPartyDocumentIndicator
+
 Sonja approves application
   Click enabled by test id  approve-application
 
 Sonja cant re-approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
 
+Party tab indicators have been reset
+  Element should not be visible  applicationPartyDocumentIndicator
+
 Sonja sees that some completion is needed
-  Open application  ${appname}  753-416-25-30
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complement-needed
   [Teardown]  logout

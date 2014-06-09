@@ -159,6 +159,12 @@
         "dummy" (do
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
+        ; LUPA-1146
+        "applicant" (if (and (= (:personId old-user) (:personId new-user)) (not (:enabled old-user)))
+                      (do
+                        (info "rewriting over inactive applicant user:" old-id (dissoc new-user :private :id))
+                        (mongo/update-by-id :users old-id (dissoc new-user :id)))
+                      (fail! :error.duplicate-email))
         (fail! :error.duplicate-email))
 
       (when (and send-email (not= "dummy" (name (:role new-user))))
@@ -323,7 +329,7 @@
    :notified      true
    :authenticated false}
   [_]
-  (let [email (ss/lower-case email)]
+  (let [email (ss/lower-case (ss/trim email))]
     (infof "Password reset request: email=%s" email)
     (let [user (mongo/select-one :users {:email email})]
       (if (and user (not= "dummy" (:role user)))
@@ -409,7 +415,7 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
-   :input-validators [(partial action/non-blank-parameters [:email :password])
+   :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
                       action/email-validator]
    :verified   true}
   [{data :data}]
@@ -418,10 +424,13 @@
     (when-not vetuma-data (fail! :error.create-user))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user (user/current-user) (merge data vetuma-data {:email email :role "applicant" :enabled false}))]
+      (if-let [user (create-new-user nil (merge
+                                           (dissoc data :personId)
+                                           (set/rename-keys vetuma-data {:userid :personId})
+                                           {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
-          (when (and (env/feature? :rakentajafi) (:rakentajafi data))
+          (when (:rakentajafi data)
             (util/future* (idf/send-user-data user "rakentaja.fi")))
           (ok :id (:id user)))
         (fail :error.create-user))
@@ -450,6 +459,20 @@
         (fail :error.create-user))
       (catch IllegalArgumentException e
         (fail (keyword (.getMessage e)))))))
+
+(defcommand retry-rakentajafi
+  {:parameters [email]
+   :roles [:admin]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :description "Admin can retry sending data to rakentaja.fi, if account is not linked"}
+  [_]
+  (if-let [user (user/get-user-by-email email)]
+    (when-not (get-in user [:partnerApplications :rakentajafi])
+      (if (idf/send-user-data user "rakentaja.fi")
+        (ok)
+        (fail :error.unknown)))
+    (fail :error.user-not-found)))
 
 ;;
 ;; ==============================================================================
