@@ -56,13 +56,16 @@
       (fail :error.application-not-found :id id))
     (fail :error.application-not-found :id nil)))
 
+(defn non-matching-parameters [pred params]
+  (when-let [non-matching (seq (filter pred params))]
+    (debug "non-matching parameters:" (s/join ", " non-matching))
+    (fail :error.missing-parameters :parameters (vec non-matching))))
+
 (defn non-blank-parameters [params command]
-  (when-let [missing (seq (filter
-                            #(let [s (get-in command [:data %])]
-                               (or (nil? s) (and (string? s) (s/blank? s))))
-                            params))]
-    (info "blank parameters:" (s/join ", " missing))
-    (fail :error.missing-parameters :parameters (vec missing))))
+  (non-matching-parameters #(let [s (get-in command [:data %])] (or (nil? s) (and (string? s) (s/blank? s)))) params))
+
+(defn boolean-parameters [params command]
+  (non-matching-parameters #(not (instance? Boolean (get-in command [:data %]))) params))
 
 (defn update-application
   "Get current application from command (or fail) and run changes into it.

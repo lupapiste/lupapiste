@@ -5,9 +5,10 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.application :as application]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :as krysp])
@@ -98,6 +99,59 @@
   (when (or (< status 1) (> status 42))
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
+(defcommand save-verdict-draft
+  {:parameters [id verdictId status name section agreement text given official]
+   :input-validators [validate-status
+                      (partial action/non-blank-parameters [:verdictId])
+                      (partial action/boolean-parameters [:agreement])]
+   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :roles      [:authority]}
+  [{:keys [application created] :as command}]
+  (let [old-verdicts (filter #(= verdictId (:kuntalupatunnus %)) (:verdicts application))
+        verdict (domain/->paatos
+                         {:id verdictId        ; Kuntalupatunnus
+                          :timestamp created   ; tekninen Lupapisteen aikaleima
+                          :agreement agreement
+                          :draft true
+                          :name name           ; poytakirjat[] / paatoksentekija
+                          :given given         ; paivamaarat / antoPvm
+                          :text text           ; poytakirjat[] / paatos
+                          :status status       ; poytakirjat[] / paatoskoodi
+                          :section section     ; poytakirjat[] / pykala
+                          :official official})]; paivamaarat / lainvoimainenPvm
+
+    (when (> (count old-verdicts) 1) (fail :error.unknown)) ; Corrupt data!
+
+    (if (seq old-verdicts)
+      (update-application command
+        {:verdicts {$elemMatch {:kuntalupatunnus originalVerdictId}}}
+        {$set {(str "verdicts.$") verdict}})
+      (update-application command {$push {:verdicts verdict}})
+      )))
+
+(defcommand publish-verdict
+  {:parameters [id verdictId status name given official]
+   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :notified   true
+   :on-success (notify :application-verdict)
+   :roles      [:authority]}
+  [{:keys [application created] :as command}]
+  (update-application command
+    {:verdicts {$elemMatch {:kuntalupatunnus verdictId}}}
+    {$set {:modified created
+           :state    :verdictGiven
+           :verdicts.$.draft false}}))
+
+(defcommand delete-verdict
+  {:parameters [id verdictId]
+   :input-validators [(partial action/non-blank-parameters [:verdictId])]
+   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :roles      [:authority]}
+  [{:keys [application created] :as command}]
+  ; TODO pull from verdicts, tasks, auth-comments; delete attachments
+  )
+
+;; Deprecated old command
 (defcommand give-verdict
   {:parameters [id verdictId status name given official]
    :input-validators [validate-status]

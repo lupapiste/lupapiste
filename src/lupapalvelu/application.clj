@@ -125,7 +125,8 @@
 (defn- app-post-processor [user]
   (comp
     (fn [application] (update-in application [:documents] #(map model/mask-person-ids %)))
-    (fn [application] (update-in application [:verdicts] (partial only-authority-sees-drafts)))
+    (fn [application] (update-in application [:verdicts] (partial only-authority-sees-drafts user)))
+    ; TODO filter attachments that are related to verdict drafts
     without-system-keys
     (partial meta-fields/with-meta-fields user)
     meta-fields/enrich-with-link-permit-data))

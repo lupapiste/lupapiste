@@ -90,15 +90,17 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [id timestamp name given status official]}]
+  [{:keys [id timestamp name given status official text section draft]}]
   {:kuntalupatunnus id
-   :draft false
+   :draft (if (nil? draft) false draft)
    :timestamp timestamp
    :paatokset [{:paivamaarat {:anto             given
                               :lainvoimainen    official}
                 :poytakirjat [{:paatoksentekija name
                                :status          status
+                               :paatos          text ; Only in rakennusvalvonta KRYSP
                                :paatospvm       given
+                               :pykala          section
                                :paatoskoodi     (verdict/verdict-name status)}]}]})
 
 ;;
