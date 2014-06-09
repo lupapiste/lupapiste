@@ -65,9 +65,8 @@
   "Returns a map where key is permit type, value is a list of operations for the permit type"
   [{scope :scope selected-ops :selected-operations :as organization}]
   (reduce
-    #(if-not (get-in %2 [%1])
-       (let [
-             selected-operations (set (map keyword selected-ops))
+    #(if-not (get-in %1 [%2])
+       (let [selected-operations (set (map keyword selected-ops))
              operation-names (keys (filter
                                      (fn [[name op]]
                                        (and
@@ -183,14 +182,16 @@
   (ok :municipalities (municipalities-with-organization)))
 
 (defquery operations-for-organization
-  {:description "returns operations that match the permit types of of the organization whose id is given as parameter"
-   :parameters [organizationId]}
+  {:description "returns operations that match the permit types of the organization whose id is given as parameter"
+   :parameters [organizationId]
+   :input-validators  [(partial non-blank-parameters [:organizationId])]}
   (ok :operations (operations/operations-for-organization organizationId)))
 
 (defquery selected-operations-for-municipality
   {:parameters [municipality]
    :authenticated true
-   :verified true}
+   :verified true
+   :input-validators [(partial non-blank-parameters [:municipality])]}
   [_]
   (ok :operations (operations/selected-operations-for-municipality municipality)))
 
