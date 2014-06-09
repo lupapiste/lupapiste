@@ -16,7 +16,24 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? mark-indicators-seen-updates)
+(testable-privates lupapalvelu.application only-authority-sees-drafts validate-x validate-y add-operation-allowed? mark-indicators-seen-updates)
+
+(facts "only-authority-sees-drafts"
+  (only-authority-sees-drafts {:role "authority"} [{:draft true}]) => [{:draft true}]
+  (only-authority-sees-drafts {:role "not-authority"} [{:draft true}]) => []
+  (only-authority-sees-drafts {:role "authority"} [{:draft false}]) => [{:draft false}]
+  (only-authority-sees-drafts {:role "not-authority"} [{:draft false}]) => [{:draft false}]
+
+  (only-authority-sees-drafts nil [{:draft false}]) => [{:draft false}]
+  (only-authority-sees-drafts nil [{:draft true}]) => empty?
+  (only-authority-sees-drafts {:role "authority"} []) => empty?
+  (only-authority-sees-drafts {:role "non-authority"} []) => empty?
+  (only-authority-sees-drafts {:role "authority"} nil) => empty?
+  (only-authority-sees-drafts {:role "non-authority"} nil) => empty?
+  (only-authority-sees-drafts {:role "authority"} [{:draft nil}]) => [{:draft nil}]
+  (only-authority-sees-drafts {:role "non-authority"} [{:draft nil}]) => [{:draft nil}]
+  (only-authority-sees-drafts {:role "authority"} [{}]) => [{}]
+  (only-authority-sees-drafts {:role "nono-authority"} [{}]) => [{}])
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil

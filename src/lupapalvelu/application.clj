@@ -112,9 +112,13 @@
 ;; Query application:
 ;;
 
+(defn- only-authority-sees-drafts [user verdicts]
+  (filter (fn [verdict] (not (and (not (user/authority? user)) (:draft verdict)))) verdicts))
+
 (defn- app-post-processor [user]
   (comp
     (fn [application] (update-in application [:documents] #(map model/mask-person-ids %)))
+    (fn [application] (update-in application [:verdicts] (partial only-authority-sees-drafts)))
     without-system-keys
     (partial meta-fields/with-meta-fields user)
     meta-fields/enrich-with-link-permit-data))

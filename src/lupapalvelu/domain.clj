@@ -92,6 +92,7 @@
   "Returns a verdict data structure, compatible with KRYSP schema"
   [{:keys [id timestamp name given status official]}]
   {:kuntalupatunnus id
+   :draft false
    :timestamp timestamp
    :paatokset [{:paivamaarat {:anto             given
                               :lainvoimainen    official}
