@@ -100,10 +100,10 @@
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
 (defcommand save-verdict-draft
-  {:parameters [id verdictId status name section agreement text given official]
+  {:parameters [:id verdictId add status name section agreement text given official]
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
-                      (partial action/boolean-parameters [:agreement])]
+                      (partial action/boolean-parameters [:add :agreement])]
    :states     [:submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]}
   [{:keys [application created] :as command}]
@@ -120,13 +120,16 @@
                           :section section     ; poytakirjat[] / pykala
                           :official official})]; paivamaarat / lainvoimainenPvm
 
-    (when (> (count old-verdicts) 1) (fail :error.unknown)) ; Corrupt data!
+    (when (> (count old-verdicts) 1) (fail! :error.unknown)) ; non-unique id!
+    (when (and add (pos? (count old-verdicts))) (fail! :error.unknown)) ; non-unique id!
 
-    (if (seq old-verdicts)
+    (when-not (:draft (first old-verdicts)) (fail! :error.unknown)) ; TODO error message
+
+    (if add
+      (update-application command {$push {:verdicts verdict}})
       (update-application command
         {:verdicts {$elemMatch {:kuntalupatunnus originalVerdictId}}}
         {$set {(str "verdicts.$") verdict}})
-      (update-application command {$push {:verdicts verdict}})
       )))
 
 (defcommand publish-verdict
