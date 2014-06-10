@@ -23,16 +23,6 @@
     (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
                                                                          :documents (map drop-schema-data (:documents application))}})))
 
-(defn verdict-to-verdics [{verdict :verdict}]
-  {$set {:verdicts (map domain/->paatos verdict)}
-   $unset {:verdict 1}})
-
-(defmigration verdicts-migraation
-  {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
-  (let [applications (mongo/select :applications {:verdict {$exists true}})]
-    (doall (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications))))
-
-
 (defn fix-invalid-schema-infos [{documents :documents operations :operations :as application}]
   (let [updated-documents (doall (for [o operations]
                                    (let [operation-name (keyword (:name o))
