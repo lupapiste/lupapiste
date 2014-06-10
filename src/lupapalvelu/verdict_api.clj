@@ -167,25 +167,3 @@
       (update-application command {$pull {:verdicts {:id verdictId}}}))
       ; TODO pull from tasks, auth-comments; delete attachments
     ))
-
-;; Deprecated old command
-(defcommand give-verdict
-  {:parameters [id verdictId status name given official]
-   :input-validators [validate-status]
-   :states     [:submitted :complement-needed :sent]
-   :notified   true
-   :on-success (notify :application-verdict)
-   :roles      [:authority]}
-  [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :state    :verdictGiven}
-     $push {:verdicts (domain/->paatos
-                        {:backendId verdictId; Kuntalupatunnus
-                         :timestamp created ; tekninen Lupapisteen aikaleima
-                         :name name         ; poytakirjat[] / paatoksentekija
-                         :given given       ; paivamaarat / antoPvm
-                         :status status     ; poytakirjat[] / paatoskoodi
-                         :official official ; paivamaarat / lainvoimainenPvm
-                         })}}))
-

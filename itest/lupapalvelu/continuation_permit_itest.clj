@@ -48,7 +48,5 @@
       ;; When a jatkoaika application is approved it goes straight into the state "closed".
       ;; It is forbidden to add jatkolupa for a jatkolupa, but already the wrong state blocks the try.
       (:state jatkoaika-application) => "closed"
-      (command apikey :give-verdict :id jatkoaika-application-id
-                                    :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                    :given 123 :official 124) => (partial expected-failure? "error.command-illegal-state")
+      (give-verdict apikey jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state")
       (command apikey :create-continuation-period-permit :id jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state"))))
