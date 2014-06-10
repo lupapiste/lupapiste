@@ -93,7 +93,7 @@
   )
 
 (defn resolve-organization [municipality permit-type]
-  {:pre  [municipality permit-type]}
+  {:pre  [municipality (not (s/blank? permit-type))]}
   (when-let [organizations (resolve-organizations municipality permit-type)]
     (when (> (count organizations) 1)
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
