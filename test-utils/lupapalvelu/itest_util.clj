@@ -256,7 +256,10 @@
     (query-application apikey id)))
 
 (defn give-verdict [apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
-  (command apikey :give-verdict :id application-id :verdictId verdictId :status status :name name :given given :official official))
+  (let [new-verdict-resp (command apikey :new-verdict-draft :id application-id)
+        verdict-id (:verdictId new-verdict-resp)]
+    (command apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+    (command apikey :publish-verdict :id application-id :verdictId verdict-id)))
 
 (defn allowed? [action & args]
   (fn [apikey]

@@ -18,13 +18,13 @@
       (get-in email [:body :plain]) => (contains "Vireill\u00e4")
       email => (partial contains-application-link? application-id)
 
-      (let [resp        (give-verdict sonja application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (let [new-verdict-resp (command sonja :new-verdict-draft :id application-id) => ok?
+            verdict-id (:verdictId new-verdict-resp) => truthy
+            resp        (command sonja :save-verdict-draft :id application-id :verdictId verdict-id :backendId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
             application (query-application sonja application-id)
             verdict     (first (:verdicts application))
             paatos      (first (:paatokset verdict))
-            poytakirja  (first (:poytakirjat paatos))
-            email       (last-email)]
-        (:state application) => "verdictGiven"
+            poytakirja  (first (:poytakirjat paatos))]
         (count (:verdicts application)) => 1
         (count (:paatokset verdict)) => 1
         (count (:poytakirjat paatos)) => 1
@@ -35,13 +35,18 @@
         (get-in paatos [:paivamaarat :anto]) => 123
         (get-in paatos [:paivamaarat :lainvoimainen]) => 124
 
-        (let [first-attachment (get-in application [:attachments 0])]
-          (upload-attachment sonja (:id application) first-attachment true)
-          (upload-attachment pena (:id application) first-attachment false))
+        (fact "publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id) => ok?)
+        (let [application (query-application sonja application-id)
+              first-attachment (get-in application [:attachments 0])]
 
-        (:to email) => (email-for-key user)
-        (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
-        email => (partial contains-application-link-with-tab? application-id "verdict")))))
+          (let [email (last-email)]
+            (:to email) => (email-for-key user)
+            (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
+            email => (partial contains-application-link-with-tab? application-id "verdict"))
+
+          (:state application) => "verdictGiven"
+          (upload-attachment sonja (:id application) first-attachment true)
+          (upload-attachment pena (:id application) first-attachment false))))))
 
 (fact "Applicant receives email after verdict has been fetched from KRYSP backend"
   (last-email) ; Inbox zero
