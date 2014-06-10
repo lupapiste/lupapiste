@@ -52,7 +52,7 @@
   "Returns a map where key is permit type, value is a list of operations for the permit type"
   [{scope :scope :as organization}]
   (reduce
-    #(if-not (get-in %2 [%1])
+    #(if-not (get-in %1 [%2])
        (assoc %1 %2 (let [operation-names (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations))
                           empty-operation-attachments (zipmap operation-names (repeat []))
                           saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)]
