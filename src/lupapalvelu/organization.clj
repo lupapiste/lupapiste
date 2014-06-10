@@ -16,8 +16,21 @@
 ;; local api
 ;;
 
+(defn get-organizations
+  ([]
+    (get-organizations {}))
+  ([query]
+    (get-organizations query {}))
+  ([query projection]
+    (mongo/select :organizations query projection)))
+
 (defn get-organization [id]
-  (and id (mongo/by-id :organizations id)))
+  {:pre [(not (s/blank? id))]}
+  (mongo/by-id :organizations id))
+
+(defn update-organization [id changes]
+  {:pre [(not (s/blank? id))]}
+  (mongo/update-by-id :organizations id changes))
 
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
@@ -31,13 +44,13 @@
   ([{:keys [organization permitType] :as application}]
     (get-krysp-wfs organization permitType))
   ([organization-id permit-type]
-  (let [organization (mongo/by-id :organizations organization-id)
+  (let [organization (get-organization organization-id)
         krysp-config (get-in organization [:krysp (keyword permit-type)])]
     (when-not (s/blank? (:url krysp-config))
       (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
-  (let [organizations (mongo/select :organizations {} {:scope 1})]
+  (let [organizations (get-organizations {} {:scope 1})]
     (distinct
       (for [{scopes :scope} organizations
             {municipality :municipality} scopes]
@@ -89,8 +102,7 @@
   ([municipality]
     (resolve-organizations municipality nil))
   ([municipality permit-type]
-    (mongo/select :organizations {:scope {$elemMatch (merge {:municipality municipality} (when permit-type {:permitType permit-type}))}}))
-  )
+    (get-organizations {:scope {$elemMatch (merge {:municipality municipality} (when permit-type {:permitType permit-type}))}})))
 
 (defn resolve-organization [municipality permit-type]
   {:pre  [municipality (not (s/blank? permit-type))]}
@@ -116,8 +128,8 @@
   {:description "Lists all organization users by organization."
    :roles [:authorityAdmin]
    :verified true}
-  [{{:keys [organizations] :as user} :user}]
-  (let [orgs (mongo/select :organizations {:_id {$in (:organizations user)}})
+  [{{:keys [organizations]} :user}]
+  (let [orgs (get-organizations {:_id {$in organizations}})
         organization (first orgs)
         ops-with-attachments (organization-operations-with-attachments organization)
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
@@ -147,9 +159,8 @@
    :roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
-  (let [organization (first organizations)]
-    (mongo/update-by-id :organizations organization {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
-    (ok)))
+  (update-organization (first organizations) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (ok))
 
 (defcommand update-organization-link
   {:description "Updates organization link."
@@ -157,9 +168,8 @@
    :roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
-  (let [organization (first organizations)]
-    (mongo/update-by-id :organizations organization {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
-    (ok)))
+  (update-organization (first organizations) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
+  (ok))
 
 (defcommand remove-organization-link
   {:description "Removes organization link."
@@ -167,22 +177,21 @@
    :roles [:authorityAdmin]
    :verified true}
   [{{:keys [organizations]} :user}]
-  (let [organization (first organizations)]
-    (mongo/update-by-id :organizations organization {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
-    (ok)))
+  (update-organization (first organizations) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (ok))
 
 (defquery organizations
   {:roles       [:admin]
    :authenticated true
    :verified true}
   [{user :user}]
-  (ok :organizations (mongo/select :organizations {})))
+  (ok :organizations (get-organizations)))
 
 (defquery organization-names
   {:authenticated true
    :verified true}
   [{user :user}]
-  (ok :organizations (mongo/select :organizations {} {:name 1})))
+  (ok :organizations (get-organizations {} {:name 1})))
 
 (defquery "municipalities-with-organization"
   {:verified true}
@@ -192,8 +201,9 @@
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
-   :input-validators  [(partial non-blank-parameters [:organizationId])]}
-  (ok :operations (operations/all-operations-for-organization organizationId)))
+   :input-validators [(partial non-blank-parameters [:organizationId])]}
+  (when-let [org (get-organization organizationId)]
+    (ok :operations (operations/organization-operations org))))
 
 (defquery selected-operations-for-municipality
   {:description "Returns selected operations of all the organizations who have a scope with the given municipality.
@@ -209,8 +219,8 @@
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters [:id]}
-  [{{:keys [permitType municipality] :as application} :application}]
-  (when-let [organization (resolve-organization municipality permitType)]
+  [{{:keys [organisation permitType]} :application}]
+  (when-let [organization (get-organization organisation)]
     (let [selected-operations (map keyword (:selected-operations organization))]
       (ok :operations (operations/addable-operations selected-operations permitType)))))
 
@@ -219,7 +229,7 @@
    :roles [:admin]
    :verified true}
   [_]
-  (mongo/by-id :organizations organizationId))
+  (get-organization organizationId))
 
 (defquery organization-details
   {:parameters [municipality operation lang]
@@ -239,20 +249,19 @@
 (defcommand set-organization-selected-operations
   {:parameters [operations]
    :roles [:authorityAdmin]
-   :input-validators  [(partial non-blank-parameters [:operations])]}
+   :input-validators  [(partial non-blank-parameters [:operations])
+                       (partial vector-parameters [:operations])]}
   [{{:keys [organizations]} :user}]
-  (let [organization-id (first organizations)]
-    (mongo/update-by-id :organizations organization-id {$set {:selected-operations operations}})
-    (ok)))
+  (update-organization (first organizations) {$set {:selected-operations operations}})
+  (ok))
 
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]
    :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   ; FIXME: validate operation and attachments
-  (let [organization (first organizations)]
-    (mongo/update-by-id :organizations organization {$set {(str "operations-attachments." operation) attachments}})
-    (ok)))
+  (update-organization (first organizations) {$set {(str "operations-attachments." operation) attachments}})
+  (ok))
 
 (defquery krysp-config
   {:roles [:authorityAdmin]
@@ -267,17 +276,16 @@
 (defcommand set-krysp-endpoint
   {:parameters [url permitType version]
    :roles      [:authorityAdmin]
-   :input-validators [(fn [{{permit-type :permitType} :data}]
-                        (when-not (contains? (permit/permit-types) permit-type)
-                          (warn "invalid permit type" permit-type)
-                          (fail :error.missing-parameters :parameters [:permitType])))]
-   :verified   true}
+   :verified   true
+   :input-validators [(fn [{{:keys [url permitType]} :data}]
+                        (when-not (or (s/blank? url) (krysp/wfs-is-alive? url))
+                          (fail :auth-admin.legacyNotResponding))
+                        (when-not (contains? (permit/permit-types) permitType)
+                          (warn "invalid permit type" permitType)
+                          (fail :error.missing-parameters :parameters [:permitType])))]}
   [{{:keys [organizations] :as user} :user}]
-  (let [organization (first organizations)]
-    (if (or (s/blank? url) (krysp/wfs-is-alive? url))
-      (mongo/update-by-id :organizations organization {$set {(str "krysp." permitType ".url") url
-                                                             (str "krysp." permitType ".version") version}})
-      (fail :auth-admin.legacyNotResponding))))
+  (update-organization (first organizations) {$set {(str "krysp." permitType ".url") url
+                                                    (str "krysp." permitType ".version") version}}))
 
 ;;
 ;; Helpers

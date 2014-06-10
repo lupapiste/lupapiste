@@ -575,14 +575,10 @@
               filtered)))))
     operation-tree))
 
-(defn- organization-operations [org]
-  (let [permitTypes (set (map :permitType (:scope org)))
+(defn organization-operations [organization]
+  (let [permitTypes (->> organization :scope (map :permitType) set)
         filtering-fn (fn [node] (permitTypes (permit-type-of-operation node)))]
     (operations-filtered filtering-fn false)))
-
-(defn all-operations-for-organization [org-id]
-  (when-let [org (mongo/by-id :organizations org-id {:scope 1})]
-    (organization-operations org)))
 
 (defn selected-operations-for-organizations [organizations]
   (let [orgs-with-selected-ops (filter #(:selected-operations %) organizations)
