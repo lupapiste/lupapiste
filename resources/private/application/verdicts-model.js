@@ -11,19 +11,13 @@ LUPAPISTE.VerdictsModel = function() {
   self.pending = ko.observable(false);
 
   self.refresh = function(application) {
-    var manuallyUploadedAttachments = _.filter(application.attachments, function(attachment) {
-      return _.isEqual(attachment.target, {type: "verdict"});});
-
     var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
+
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-          var myId = {type: "verdict", id: pk.urlHash};
+          var myId = {type: "verdict", id: verdict.id, urlHash: pk.urlHash};
           var myAttachments = _.filter(application.attachments || [], function(attachment) {return _.isEqual(attachment.target, myId);}) || [];
           pk.attachments = myAttachments;
-          if (manuallyUploadedAttachments) {
-            pk.attachments = pk.attachments.concat(manuallyUploadedAttachments);
-            manuallyUploadedAttachments = null;
-          }
           return pk;
         });
         paatos.poytakirjat = poytakirjat;

@@ -9,6 +9,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :as krysp])
@@ -17,49 +18,49 @@
 ;;
 ;; KRYSP verdicts
 ;;
+
+(defn- get-poytakirja [application user timestamp verdict-id pk]
+  (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
+    (do
+      (debug "Download" url)
+      (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+
+            resp            (http/get url :as :stream :throw-exceptions false)
+            header-filename  (when (get (:headers resp) "content-disposition")
+                               (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
+
+            content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+            urlhash         (digest/sha1 url)
+            attachment-id   urlhash
+            attachment-type {:type-group "muut" :type-id "muu"}
+            target          {:type "verdict" :id verdict-id :urlHash urlhash}
+            locked          true
+            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
+        ; If the attachment-id, i.e., hash of the URL matches
+        ; any old attachment, a new version will be added
+        (if (= 200 (:status resp))
+          (attachment/attach-file! {:application application
+                                    :filename (or header-filename filename)
+                                    :size content-length
+                                    :content (:body resp)
+                                    :attachment-id attachment-id
+                                    :attachment-type attachment-type
+                                    :target target
+                                    :locked locked
+                                    :user user
+                                    :created attachment-time})
+          (error (str (:status resp) " - unable to download " url ": " resp)))
+        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+    pk))
+
 (defn verdict-attachments [application user timestamp verdict]
   {:pre [application]}
-  (assoc verdict
-         :timestamp timestamp
-         :paatokset (map
-                      (fn [paatos]
-                        (assoc paatos :poytakirjat
-                               (map
-                                 (fn [pk]
-                                   (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-                                     (do
-                                       (debug "Download" url)
-                                       (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
-
-                                             resp            (http/get url :as :stream :throw-exceptions false)
-                                             header-filename  (when (get (:headers resp) "content-disposition")
-                                                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
-
-                                             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                                             urlhash         (digest/sha1 url)
-                                             attachment-id   urlhash
-                                             attachment-type {:type-group "muut" :type-id "muu"}
-                                             target          {:type "verdict" :id urlhash}
-                                             locked          true
-                                             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
-                                         ; If the attachment-id, i.e., hash of the URL matches
-                                         ; any old attachment, a new version will be added
-                                         (if (= 200 (:status resp))
-                                           (attachment/attach-file! {:application application
-                                                                     :filename (or header-filename filename)
-                                                                     :size content-length
-                                                                     :content (:body resp)
-                                                                     :attachment-id attachment-id
-                                                                     :attachment-type attachment-type
-                                                                     :target target
-                                                                     :locked locked
-                                                                     :user user
-                                                                     :created attachment-time})
-                                           (error (str (:status resp) " - unable to download " url ": " resp)))
-                                         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
-                                     pk))
-                                 (:poytakirjat paatos))))
-                      (:paatokset verdict))))
+  (let [verdict-id (mongo/create-id)]
+    (->
+      (assoc verdict :id verdict-id, :timestamp timestamp)
+      (update-in [:paatokset]
+        (fn [paatokset]
+          (map (fn [paatos] (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %))) paatokset))))))
 
 (defn- get-verdicts-with-attachments  [application user timestamp xml]
   (let [permit-type (:permitType application)
@@ -100,14 +101,14 @@
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
 (defcommand save-verdict-draft
-  {:parameters [:id backendId add status name section agreement text given official]
+  {:parameters [:id verdictId backendId add status name section agreement text given official]
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:add :agreement])]
    :states     [:submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]}
   [{:keys [application created] :as command}]
-  (let [old-verdicts (filter #(= verdictId (:kuntalupatunnus %)) (:verdicts application))
+  (let [old-verdicts (filter #(= verdictId (:id %)) (:verdicts application))
         verdict (domain/->paatos
                          {:backendId backendId ; Kuntalupatunnus
                           :timestamp created   ; tekninen Lupapisteen aikaleima
@@ -125,11 +126,13 @@
 
     (when-not (:draft (first old-verdicts)) (fail! :error.unknown)) ; TODO error message
 
-    (if add
+    (if (ss/blank? add)
+      (do
+        (when (ss/blank? verdictId) (fail! :error.missing-parameters :parameters [:verdictId]))
+        (update-application command
+          {:verdicts {$elemMatch {:id verdictId}}}
+          {$set {(str "verdicts.$") verdict}}))
       (update-application command {$push {:verdicts verdict}})
-      (update-application command
-        {:verdicts {$elemMatch {:kuntalupatunnus originalVerdictId}}}
-        {$set {(str "verdicts.$") verdict}})
       )))
 
 (defcommand publish-verdict
@@ -167,7 +170,7 @@
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdicts (domain/->paatos
-                        {:id verdictId      ; Kuntalupatunnus
+                        {:backendId verdictId; Kuntalupatunnus
                          :timestamp created ; tekninen Lupapisteen aikaleima
                          :name name         ; poytakirjat[] / paatoksentekija
                          :given given       ; paivamaarat / antoPvm
