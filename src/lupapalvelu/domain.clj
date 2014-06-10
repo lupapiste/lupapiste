@@ -91,18 +91,20 @@
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
   [{:keys [backendId timestamp name given status official text section draft]}]
-  {:id (mongo/create-id)
-   :kuntalupatunnus backendId
-   :draft (if (nil? draft) false draft)
-   :timestamp timestamp
-   :paatokset [{:paivamaarat {:anto             given
-                              :lainvoimainen    official}
-                :poytakirjat [{:paatoksentekija name
-                               :status          status
-                               :paatos          text ; Only in rakennusvalvonta KRYSP
-                               :paatospvm       given
-                               :pykala          section
-                               :paatoskoodi     (verdict/verdict-name status)}]}]})
+  (let [verdict-id (mongo/create-id)]
+    {:id verdict-id
+    :kuntalupatunnus backendId
+    :draft (if (nil? draft) false draft)
+    :timestamp timestamp
+    :paatokset [{:paivamaarat {:anto             given
+                               :lainvoimainen    official}
+                 :poytakirjat [{:paatoksentekija name
+                                :urlHash         verdict-id
+                                :status          status
+                                :paatos          text ; Only in rakennusvalvonta KRYSP
+                                :paatospvm       given
+                                :pykala          section
+                                :paatoskoodi     (when status (verdict/verdict-name status))}]}]}))
 
 ;;
 ;; Application skeleton with default values
