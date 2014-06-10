@@ -48,7 +48,7 @@
 (facts "Selected operations"
 
   (fact* "For an organization which has no selected operations, all operations are returned"
-    (:selected-operations (resolve-organization "753" "YA")) => nil?
+    (:selected-operations (query admin "organization-by-id" :organizationId "753-YA")) => nil?
     (let [resp (query sipoo "all-operations-for-organization" :organizationId "753-YA") => ok?
           operations (:operations resp)]
       ;; All the YA operations (and only those) are received here.
@@ -56,17 +56,14 @@
       (-> operations first first) => "yleisten-alueiden-luvat"))
 
   (fact* "Set selected operations"
-    (let [resp (command pena "set-organization-selected-operations" :operations ["asuinrakennus" "jatkoaika"]) => unauthorized?
-          resp (command sipoo "set-organization-selected-operations" :operations ["asuinrakennus" "jatkoaika"]) => ok?]))
+    (command pena "set-organization-selected-operations" :operations ["asuinrakennus" "jatkoaika"]) => unauthorized?
+    (command sipoo "set-organization-selected-operations" :operations ["asuinrakennus" "jatkoaika"]) => ok?)
 
   (fact* "Query selected operations"
-    (let [resp (query pena "selected-operations-for-municipality" :municipality "753") => unauthorized?
-          resp (query sipoo "selected-operations-for-municipality" :municipality "753") => ok?]
-      ;;
-      ;; TODO: Saisiko tahan "testable-privaten avulla haettua operaatiopuun sisallon suoraan "operations"-namespacesta"?
-      ;;       Olisi parempi yllapidon kannalta.
-      ;;
-      ;; The two selected operations plus all the YA operations are received here.
+    (query pena "selected-operations-for-municipality" :municipality "753") => ok?
+    (let [resp (query sipoo "selected-operations-for-municipality" :municipality "753")]
+      resp => ok?
+      ;; Received the two selected R operations plus all the YA operations.
       (:operations resp) => [["Rakentaminen ja purkaminen"
                               [["Uuden rakennuksen rakentaminen"
                                 [["Asuinrakennus" "asuinrakennus"]]]
