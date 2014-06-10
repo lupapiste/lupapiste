@@ -18,7 +18,7 @@
       (get-in email [:body :plain]) => (contains "Vireill\u00e4")
       email => (partial contains-application-link? application-id)
 
-      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (let [resp        (give-verdict sonja application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
             application (query-application sonja application-id)
             verdict     (first (:verdicts application))
             paatos      (first (:paatokset verdict))

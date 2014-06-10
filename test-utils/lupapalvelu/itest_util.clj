@@ -255,6 +255,9 @@
     resp => ok?
     (query-application apikey id)))
 
+(defn give-verdict [apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
+  (command apikey :give-verdict :id application-id :verdictId verdictId :status status :name name :given given :official official))
+
 (defn allowed? [action & args]
   (fn [apikey]
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)

@@ -25,15 +25,11 @@
     (command apikey :approve-application :id verdict-given-application-ya-id :lang "fi") => ok?
     ;; Jatkoaika permit can be applied only for applications in state "verdictGiven or "constructionStarted
     (command apikey :create-continuation-period-permit :id verdict-given-application-ya-id) => (partial expected-failure? "error.command-illegal-state")
-    (command apikey :give-verdict :id verdict-given-application-ya-id
-                                  :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                  :given 123 :official 124) => ok?
+    (give-verdict apikey verdict-given-application-ya-id) => ok?
     ;; R app
     (generate-documents verdict-given-application-r apikey)
     (command apikey :approve-application :id verdict-given-application-r-id :lang "fi") => ok?
-    (command apikey :give-verdict :id verdict-given-application-r-id
-                                  :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                  :given 123 :official 124) => ok?
+    (give-verdict apikey verdict-given-application-r-id) => ok?
     ;; Jatkoaika permit can be applied only for YA type of applications
     (command apikey :create-continuation-period-permit :id verdict-given-application-r-id) => (partial expected-failure? "error.invalid-permit-type")
 
