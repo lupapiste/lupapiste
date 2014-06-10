@@ -109,7 +109,7 @@
   [{:keys [application created] :as command}]
   (let [old-verdicts (filter #(= verdictId (:kuntalupatunnus %)) (:verdicts application))
         verdict (domain/->paatos
-                         {:id verdictId        ; Kuntalupatunnus
+                         {:verdictId verdictId ; Kuntalupatunnus
                           :timestamp created   ; tekninen Lupapisteen aikaleima
                           :agreement agreement
                           :draft true
