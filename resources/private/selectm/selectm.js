@@ -10,15 +10,15 @@
     return f;
   }
 
-  function localize() {
+  function localize(prefix) {
     var e = $(this),
         t = e.attr("data-loc");
     if (t) {
-      if (e.is("input")) { e.attr("placeholder", loc(t)); } else { e.text(loc(t)); }
+      if (e.is("input")) { e.attr("placeholder", loc([t, prefix])); } else { e.text(loc([t, prefix])); }
     }
   }
 
-  $.fn.selectm = function(template) {
+  $.fn.selectm = function(template, prefix) {
     var self = {};
 
     self.data = [];
@@ -29,7 +29,7 @@
       .children()
       .first()
       .clone()
-      .find("*").each(localize).end());
+      .find("*").each(_.partial(localize, prefix)).end());
 
     self.$filter = $("input", this);
     self.$source = $(".selectm-source", this);
