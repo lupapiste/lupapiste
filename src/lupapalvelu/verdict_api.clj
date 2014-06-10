@@ -100,40 +100,44 @@
   (when (or (< status 1) (> status 42))
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
+(defcommand new-verdict-draft
+  {:parameters [:id]
+   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :roles      [:authority]}
+  [command]
+  (let [blank-verdict (domain/->paatos {:draft true})]
+    (update-application command {$push {:verdicts blank-verdict}})
+    (ok :verdictId (:id blank-verdict))))
+
+(defn- find-verdict [{verdicts :verdicts} id]
+  (some #(when (= id (:id %)) %) verdicts))
+
 (defcommand save-verdict-draft
-  {:parameters [:id verdictId backendId add status name section agreement text given official]
+  {:parameters [:id verdictId backendId status name section agreement text given official]
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
-                      (partial action/boolean-parameters [:add :agreement])]
+                      (partial action/boolean-parameters [:agreement])]
    :states     [:submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]}
   [{:keys [application created] :as command}]
-  (let [old-verdicts (filter #(= verdictId (:id %)) (:verdicts application))
+  (let [old-verdict (find-verdict application verdictId)
         verdict (domain/->paatos
-                         {:backendId backendId ; Kuntalupatunnus
-                          :timestamp created   ; tekninen Lupapisteen aikaleima
-                          :agreement agreement
-                          :draft true
-                          :name name           ; poytakirjat[] / paatoksentekija
-                          :given given         ; paivamaarat / antoPvm
-                          :text text           ; poytakirjat[] / paatos
-                          :status status       ; poytakirjat[] / paatoskoodi
-                          :section section     ; poytakirjat[] / pykala
-                          :official official})]; paivamaarat / lainvoimainenPvm
+                  {:backendId backendId ; Kuntalupatunnus
+                   :timestamp created   ; tekninen Lupapisteen aikaleima
+                   :agreement agreement
+                   :draft true
+                   :name name           ; poytakirjat[] / paatoksentekija
+                   :given given         ; paivamaarat / antoPvm
+                   :text text           ; poytakirjat[] / paatos
+                   :status status       ; poytakirjat[] / paatoskoodi
+                   :section section     ; poytakirjat[] / pykala
+                   :official official})]; paivamaarat / lainvoimainenPvm
 
-    (when (> (count old-verdicts) 1) (fail! :error.unknown)) ; non-unique id!
-    (when (and add (pos? (count old-verdicts))) (fail! :error.unknown)) ; non-unique id!
+    (when-not (:draft old-verdict) (fail! :error.unknown)) ; TODO error message
 
-    (when-not (:draft (first old-verdicts)) (fail! :error.unknown)) ; TODO error message
-
-    (if (ss/blank? add)
-      (do
-        (when (ss/blank? verdictId) (fail! :error.missing-parameters :parameters [:verdictId]))
-        (update-application command
-          {:verdicts {$elemMatch {:id verdictId}}}
-          {$set {(str "verdicts.$") verdict}}))
-      (update-application command {$push {:verdicts verdict}})
-      )))
+    (update-application command
+      {:verdicts {$elemMatch {:id verdictId}}}
+      {$set {(str "verdicts.$") verdict}})))
 
 (defcommand publish-verdict
   {:parameters [id verdictId status name given official]
@@ -142,11 +146,14 @@
    :on-success (notify :application-verdict)
    :roles      [:authority]}
   [{:keys [application created] :as command}]
-  (update-application command
-    {:verdicts {$elemMatch {:kuntalupatunnus verdictId}}}
-    {$set {:modified created
-           :state    :verdictGiven
-           :verdicts.$.draft false}}))
+  (if-let [verdict (find-verdict application verdictId)]
+    (update-application command
+      {:verdicts {$elemMatch {:kuntalupatunnus verdictId}}}
+      {$set {:modified created
+             :state    :verdictGiven
+             :verdicts.$.draft false}})
+    (fail :error.unknown) ; TODO
+    ))
 
 (defcommand delete-verdict
   {:parameters [id verdictId]
@@ -154,8 +161,11 @@
    :states     [:submitted :complement-needed :sent :verdictGiven]
    :roles      [:authority]}
   [{:keys [application created] :as command}]
-  ; TODO pull from verdicts, tasks, auth-comments; delete attachments
-  )
+  (when-let [verdict (find-verdict application verdictId)]
+    (do
+      (update-application command {$pull {:verdicts {:id verdictId}}}))
+      ; TODO pull from tasks, auth-comments; delete attachments
+    ))
 
 ;; Deprecated old command
 (defcommand give-verdict
