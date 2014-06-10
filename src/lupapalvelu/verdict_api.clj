@@ -100,7 +100,7 @@
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
 (defcommand save-verdict-draft
-  {:parameters [:id verdictId add status name section agreement text given official]
+  {:parameters [:id backendId add status name section agreement text given official]
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:add :agreement])]
@@ -109,7 +109,7 @@
   [{:keys [application created] :as command}]
   (let [old-verdicts (filter #(= verdictId (:kuntalupatunnus %)) (:verdicts application))
         verdict (domain/->paatos
-                         {:verdictId verdictId ; Kuntalupatunnus
+                         {:backendId backendId ; Kuntalupatunnus
                           :timestamp created   ; tekninen Lupapisteen aikaleima
                           :agreement agreement
                           :draft true

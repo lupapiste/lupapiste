@@ -90,9 +90,9 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [verdictId timestamp name given status official text section draft]}]
+  [{:keys [backendId timestamp name given status official text section draft]}]
   {:id (mongo/create-id)
-   :kuntalupatunnus verdictId
+   :kuntalupatunnus backendId
    :draft (if (nil? draft) false draft)
    :timestamp timestamp
    :paatokset [{:paivamaarat {:anto             given
