@@ -56,13 +56,25 @@
       (fail :error.application-not-found :id id))
     (fail :error.application-not-found :id nil)))
 
+(defn- filter-params-of-command [params command filter-fn]
+  (seq (filter
+         #(let [s (get-in command [:data %])] (filter-fn s))
+         params)))
+
 (defn non-blank-parameters [params command]
-  (when-let [missing (seq (filter
-                            #(let [s (get-in command [:data %])]
-                               (or (nil? s) (and (string? s) (s/blank? s))))
-                            params))]
-    (info "blank parameters:" (s/join ", " missing))
-    (fail :error.missing-parameters :parameters (vec missing))))
+  (when-let [non-matching (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))))]
+    (info "blank parameters:" (s/join ", " non-matching))
+    (fail :error.missing-parameters :parameters (vec non-matching))))
+
+(defn vector-parameters [params command]
+  (when-let [non-matching (filter-params-of-command params command #(vector? %))]
+    (info "non-vector parameters:" (s/join ", " non-matching))
+    (fail :error.non-vector-parameters :parameters (vec non-matching))))
+
+(defn boolean-parameters [params command]
+  (when-let [non-matching (filter-params-of-command params command #(not (instance? Boolean %)))]
+    (info "non-boolean parameters:" (s/join ", " non-matching))
+    (fail :error.non-boolean-parameters :parameters (vec non-matching))))
 
 (defn update-application
   "Get current application from command (or fail) and run changes into it.
