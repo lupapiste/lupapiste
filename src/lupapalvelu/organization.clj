@@ -190,7 +190,7 @@
   (ok :municipalities (municipalities-with-organization)))
 
 (defquery all-operations-for-organization
-  {:description "returns operations that match the permit types of the organization whose id is given as parameter"
+  {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
    :input-validators  [(partial non-blank-parameters [:organizationId])]}
   (ok :operations (operations/all-operations-for-organization organizationId)))
@@ -219,7 +219,7 @@
    :roles [:admin]
    :verified true}
   [_]
-  (mongo/select-one :organizations {:_id organizationId}))
+  (mongo/by-id :organizations organizationId))
 
 (defquery organization-details
   {:parameters [municipality operation lang]
