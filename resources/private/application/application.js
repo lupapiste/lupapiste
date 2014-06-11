@@ -317,7 +317,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors","task"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
