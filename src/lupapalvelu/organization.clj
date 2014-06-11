@@ -277,15 +277,15 @@
   {:parameters [url permitType version]
    :roles      [:authorityAdmin]
    :verified   true
-   :input-validators [(fn [{{:keys [url permitType]} :data}]
-                        (when-not (or (s/blank? url) (krysp/wfs-is-alive? url))
-                          (fail :auth-admin.legacyNotResponding))
+   :input-validators [(fn [{{:keys [permitType]} :data}]
                         (when-not (contains? (permit/permit-types) permitType)
                           (warn "invalid permit type" permitType)
                           (fail :error.missing-parameters :parameters [:permitType])))]}
   [{{:keys [organizations] :as user} :user}]
-  (update-organization (first organizations) {$set {(str "krysp." permitType ".url") url
-                                                    (str "krysp." permitType ".version") version}}))
+  (if (or (s/blank? url) (krysp/wfs-is-alive? url))
+    (mongo/update-by-id :organizations (first organizations) {$set {(str "krysp." permitType ".url") url
+                                                                    (str "krysp." permitType ".version") version}})
+    (fail :auth-admin.legacyNotResponding)))
 
 ;;
 ;; Helpers
