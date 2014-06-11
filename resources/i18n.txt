@@ -1,0 +1,21 @@
+auth-admin.selected-operations: Käyttöön valitut toimenpiteet
+error.non-vector-parameters: Parametrit eivät ole vektorityyppiä
+error.non-boolean-parameters: Parametrit eivät ole Boolean-tyyppiä
+
+selectm.filter.label.edit-selected-operations: Etsi toimenpiteen nimellä
+selectm.source.label.edit-selected-operations: Toimenpiteet
+selectm.add.edit-selected-operations: Lisää
+selectm.target.label.edit-selected-operations: Valitut
+selectm.remove.edit-selected-operations: Poista
+selectm.ok.edit-selected-operations: Ok
+selectm.cancel.edit-selected-operations: Peruuta
+selectm.filter.placeholder.edit-selected-operations: Toimenpiteen nimi
+
+selectm.filter.label.edit-attachments: Etsi liitteen nimellä
+selectm.source.label.edit-attachments: Liitepohjat
+selectm.add.edit-attachments: Lisää
+selectm.target.label.edit-attachments: Valitut
+selectm.remove.edit-attachments: Poista
+selectm.ok.edit-attachments: Ok
+selectm.cancel.edit-attachments: Peruuta
+selectm.filter.placeholder.edit-attachments: Liitteen nimi
