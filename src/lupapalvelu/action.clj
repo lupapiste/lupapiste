@@ -67,7 +67,7 @@
     (fail :error.missing-parameters :parameters (vec non-matching))))
 
 (defn vector-parameters [params command]
-  (when-let [non-matching (filter-params-of-command params command #(vector? %))]
+  (when-let [non-matching (filter-params-of-command params command #(not (vector? %)))]
     (info "non-vector parameters:" (s/join ", " non-matching))
     (fail :error.non-vector-parameters :parameters (vec non-matching))))
 
