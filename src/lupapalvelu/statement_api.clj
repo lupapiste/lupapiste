@@ -23,7 +23,7 @@
 (defquery get-statement-givers
   {:roles [:authority :authorityAdmin]}
   [{{:keys [organizations]} :user}]
-  (let [organization (mongo/select-one :organizations {:_id (first organizations)})
+  (let [organization (organization/get-organization (first organizations))
         permitPersons (or (:statementGivers organization) [])]
     (ok :data permitPersons)))
 
@@ -35,18 +35,17 @@
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)
-        organization    (mongo/select-one :organizations {:_id organization-id})
+        organization    (organization/get-organization organization-id)
         email           (ss/lower-case email)
         statement-giver-id (mongo/create-id)]
     (if-let [user (user/get-user-by-email email)]
       (do
-      (when-not (user/authority? user) (fail! :error.not-authority))
-      (mongo/update-by-id :organizations organization-id
-        {$push {:statementGivers {:id statement-giver-id
-                                  :text text
-                                  :email email
-                                  :name (str (:firstName user) " " (:lastName user))}}})
-      (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
+        (when-not (user/authority? user) (fail! :error.not-authority))
+        (organization/update-organization organization-id {$push {:statementGivers {:id statement-giver-id
+                                                                                    :text text
+                                                                                    :email email
+                                                                                    :name (str (:firstName user) " " (:lastName user))}}})
+        (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
         (ok :id statement-giver-id))
       (fail :error.user-not-found))))
 
@@ -54,8 +53,7 @@
   {:parameters [personId]
    :roles      [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
-  (let [organization-id (first organizations)]
-  (mongo/update-by-id :organizations organization-id {$pull {:statementGivers {:id personId}}})))
+  (organization/update-organization (first organizations) {$pull {:statementGivers {:id personId}}}))
 
 ;;
 ;; Authority operations
