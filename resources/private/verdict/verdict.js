@@ -1,7 +1,8 @@
-(function() {
+var verdictPageController = (function() {
   "use strict";
 
-  var applicationId = null;
+  var currentApplicationId = null;
+  var currentVerdictId = null;
 
   function VerdictEditModel() {
     var self = this;
@@ -11,12 +12,13 @@
     self.statuses = _.range(1,43); // 42 different values in verdict in krysp (verdict.clj)
 
     self.verdictId = ko.observable();
+    self.backendId = ko.observable();
     self.status = ko.observable();
     self.name = ko.observable();
     self.given = ko.observable();
     self.official = ko.observable();
 
-    self.refresh = function(application) {
+    self.refresh = function(application, verdictId) {
       self.application(ko.mapping.fromJS(application));
       if (application.verdict) {
         self.reset(application.verdict);
@@ -35,7 +37,7 @@
       var givenMillis = new Date(self.given()).getTime();
       var officialMillis = new Date(self.official()).getTime();
       ajax
-        .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), status: self.status(), name: self.name(), given: givenMillis, official: officialMillis})
+        .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), backendId: self.backendId(), status: self.status(), name: self.name(), given: givenMillis, official: officialMillis})
         .success(function() {
           repository.load(applicationId);
           self.reset({});
@@ -53,19 +55,31 @@
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "verdict", id: "TODO", urlHash: "TODO"}, "muut.muu");
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
+
+  function refresh(application, verdictId) {
+    currentApplicationId = application.id;
+    currentVerdictId = verdictId;
+
+    authorizationModel.refresh(application);
+    verdictModel.refresh(application, verdictId);
+    attachmentsModel.refresh(application, {type: "verdict", id: verdictId, urlHash: verdictId});
+  }
 
   repository.loaded(["verdict"], function(application) {
-    if (applicationId === application.id) {
-      authorizationModel.refresh(application);
-      verdictModel.refresh(application);
-      attachmentsModel.refresh(application);
+    if (currentApplicationId === application.id) {
+      refresh(application, currentVerdictId);
     }
   });
 
   hub.onPageChange("verdict", function(e) {
-    applicationId = e.pagePath[0];
-    repository.load(applicationId);
+    var applicationId = e.pagePath[0];
+    currentVerdictId = e.pagePath[1];
+    // Reload application only if needed
+    if (currentApplicationId !== applicationId) {
+      repository.load(applicationId);
+    }
+    currentApplicationId = applicationId;
   });
 
   $(function() {
@@ -75,5 +89,9 @@
       attachmentsModel: attachmentsModel
     });
   });
+
+  return {
+    setApplicationModelAndVerdictId: refresh
+  };
 
 })();
