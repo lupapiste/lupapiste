@@ -28,7 +28,7 @@ var repository = (function() {
     }
   }
 
-  function load(id, pending) {
+  function load(id, pending, callback) {
     var loadingApp = ajax
       .query("application", {id: id})
       .pending(pending)
@@ -65,6 +65,9 @@ var repository = (function() {
         });
         _.each(application.attachments ||[], calculateAttachmentStateIndicators);
         hub.send("application-loaded", {applicationDetails: loading});
+        if (_.isFunction(callback)) {
+          callback(application);
+        }
       };
     });
   }
