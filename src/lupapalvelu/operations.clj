@@ -590,10 +590,10 @@
         filtering-fn (fn [node] (selected-operations node))
         op-tree-only-selecteds (operations-filtered filtering-fn false)
         ;; Operation tree for organizations with no "selected-operations" defined in db
-        op-tree-all-ops-for-org-array (map #(organization-operations %) orgs-without-selected-ops)]
-    ;; The trees combined
-    (map first (cons op-tree-only-selecteds op-tree-all-ops-for-org-array))  ;; TODO: Voiko tata tehda helpommin?
-    ))
+        op-tree-all-ops-for-org-array (map #(organization-operations %) orgs-without-selected-ops)
+        ;; TODO: Voiko tata tehda helpommin?
+        combined (map first (cons op-tree-only-selecteds op-tree-all-ops-for-org-array))]
+    (keep identity combined)))
 
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
