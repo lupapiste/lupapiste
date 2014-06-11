@@ -219,9 +219,9 @@
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters [:id]}
-  [{{:keys [organisation permitType]} :application}]
-  (when-let [organization (get-organization organisation)]
-    (let [selected-operations (map keyword (:selected-operations organization))]
+  [{{:keys [organization permitType]} :application}]
+  (when-let [org (get-organization organization)]
+    (let [selected-operations (map keyword (:selected-operations org))]
       (ok :operations (operations/addable-operations selected-operations permitType)))))
 
 (defquery organization-by-id
