@@ -97,7 +97,7 @@
 ;;
 
 (defn- validate-status [{{:keys [status]} :data}]
-  (when (or (< status 1) (> status 42))
+  (when (and status (or (< status 1) (> status 42)))
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
 (defcommand new-verdict-draft
@@ -113,7 +113,7 @@
   (some #(when (= id (:id %)) %) verdicts))
 
 (defcommand save-verdict-draft
-  {:parameters [:id verdictId :backendId :status :name :section :agreement :text :given :official]
+  {:parameters [:id verdictId :backendId #_:status :name :section :agreement :text :given :official]
    :description  "backendId = Kuntalupatunnus, status = poytakirjat[] / paatoskoodi,
                   name = poytakirjat[] / paatoksentekija, section = poytakirjat[] / pykala
                   agreement = (sopimus), text =  poytakirjat[] / paatos

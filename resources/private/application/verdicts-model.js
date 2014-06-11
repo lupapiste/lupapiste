@@ -49,13 +49,11 @@ LUPAPISTE.VerdictsModel = function() {
     return false;
   };
 
-  // TODO rewrite
-  /*
-  self.openVerdict = function(bindings) {
-    window.location.hash = "!/verdict/" + getApplicationId(bindings);
+  self.openVerdict = function(bindings, verdict) {
+    var applicationId = getApplicationId(bindings);
+    window.location.hash = "!/verdict/" + applicationId + "/" + verdict.id;
     return false;
   };
-  */
 
   self.checkVerdict = function(bindings){
     var applicationId = getApplicationId(bindings);

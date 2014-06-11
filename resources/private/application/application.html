@@ -555,6 +555,11 @@
                   <span data-bind="text: $index() + 1"></span>
                 </h2>
                 <div class="accordion_content expanded">
+
+                  <div data-bind="with: $parent">
+                    <button data-bind="visible: $data.draft && $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'" class="btn btn-primary"></button>
+                  </div>
+
                   <div class="accordion-fields">
                     <!--  ko if:  $data.paivamaarat -->
                     <div data-bind="if: paivamaarat.anto" class="key-value-pair">

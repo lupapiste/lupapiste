@@ -5,20 +5,17 @@
 
     <div class="headerarea">
       <h1>
-        <span data-bind="with: application">
-          <span data-bind="text: title"></span>:
-        </span>
+        <span data-bind="text: applicationTitle"></span>:
         <span data-bind="ltext: 'application.verdict.title'"></span>
       </h1>
-      <span data-bind="with: application" class="attachment-back ">
-        <a class="btn" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/verdict' }, ltext: 'attachment.return'"></a>
+      <span class="attachment-back ">
+        <a class="btn" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + applicationId() + '/verdict' }, ltext: 'attachment.return'"></a>
       </span>
       <hr/>
     </div>
 
     <div class="statement-info clear-fix" style="float: left; width:48%">
-      <form data-bind="with: $root.verdictModel">
-
+      <form>
         <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
         <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: backendId, disable: !$root.authorization.ok('save-verdict-draft')" id="backend-id"></input>
 
@@ -43,12 +40,12 @@
         <label class="form-label" data-bind="ltext: 'verdict.agreement'"></label><br/>
         <input type="checkbox" class="form-input" data-bind="value: section, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"></input><br/>
 
-        <button
-          data-bind="disable: disabled, click: submit, ltext: 'save', visible: $root.authorization.ok('save-verdict-draft')"
-          id="verdict-submit"
-          data-test-id="verdict-submit"
-          type="submit"
-          class="btn btn-primary">
+        <button data-bind="click: submit, disable: processing, ltext: 'save', visible: $root.authorization.ok('save-verdict-draft')"
+            data-test-id="verdict-save" type="submit" class="btn btn-primary">
+        </button>
+        <button data-bind="disable: disabled, click: publish, ltext: 'verdict.submit', visible: $data.draft() && $root.authorization.ok('publish-verdict')"
+            data-test-id="verdict-publish"
+            type="submit" class="btn btn-primary">
         </button>
       </form>
     </div>
