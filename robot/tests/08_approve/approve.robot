@@ -54,7 +54,7 @@ Sonja cant re-approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
 
 Party tab indicators have been reset
-  Element should not be visible  applicationPartyDocumentIndicator
+  Wait Until  Element should not be visible  applicationPartyDocumentIndicator
 
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
