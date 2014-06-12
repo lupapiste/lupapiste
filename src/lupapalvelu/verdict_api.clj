@@ -163,7 +163,8 @@
    :roles      [:authority]}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
-    (do
-      (update-application command {$pull {:verdicts {:id verdictId}}}))
-      ; TODO pull from tasks, auth-comments; delete attachments
-    ))
+    (let [attachments (filter #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)}) (:attachments application))]
+      (update-application command {$pull {:verdicts {:id verdictId}}})
+      ; TODO pull from tasks, auth-comments
+      (doseq [{attachment-id :id} attachments]
+        (attachment/delete-attachment application attachment-id)))))
