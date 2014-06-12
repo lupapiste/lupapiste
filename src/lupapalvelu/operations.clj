@@ -465,7 +465,7 @@
                                    :add-operation-allowed false
                                    :link-permit-required false}
      :pima                        {:schema "pima"
-                                   :permit-type permit/R ; TODO
+                                   :permit-type permit/YL ; TODO
                                    :required ["ymp-ilm-kesto-mini"]
                                    :attachments []
                                    :add-operation-allowed true
