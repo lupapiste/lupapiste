@@ -240,10 +240,6 @@
    :ya-sijoituslupa-jatekatoksien-sijoittaminen                       ya-sijoituslupa-general
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
-;  :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
-;                                          :permit-type permit/YA
-;                                          :required common-yleiset-alueet-schemas
-;                                          :attachments []}
    :ya-jatkoaika                          {:schema "hankkeen-kuvaus-jatkoaika"
                                            :permit-type permit/YA
                                            :required (conj common-yleiset-alueet-schemas
@@ -584,16 +580,22 @@
   (let [orgs-with-selected-ops (filter #(:selected-operations %) organizations)
         orgs-without-selected-ops (filter #(not (:selected-operations %)) organizations)
         ;; Resolving operation tree for organizations with "selected-operations" defined in db
-        selected-operations-array (map :selected-operations orgs-with-selected-ops)
-        selected-operations (reduce #(apply conj %1 %2) #{} selected-operations-array)
-        selected-operations (set (map keyword selected-operations))
-        filtering-fn (fn [node] (selected-operations node))
-        op-tree-only-selecteds (operations-filtered filtering-fn false)
+        op-trees-for-orgs-with-selected-ops (if-not (empty? orgs-with-selected-ops)
+                                                    (let [selected-operations-arrays (map :selected-operations orgs-with-selected-ops)
+                                                          selected-operations (-> selected-operations-arrays
+                                                                                (#(apply concat %))
+                                                                                (#(map keyword %))
+                                                                                set)
+                                                          filtering-fn (fn [node] (selected-operations node))]
+                                                      (operations-filtered filtering-fn false))
+                                                    [])
         ;; Operation tree for organizations with no "selected-operations" defined in db
-        op-tree-all-ops-for-org-array (map #(organization-operations %) orgs-without-selected-ops)
-        ;; TODO: Voiko tata tehda helpommin?
-        combined (map first (cons op-tree-only-selecteds op-tree-all-ops-for-org-array))]
-    (keep identity combined)))
+        op-trees-for-orgs-without-selected-ops (if-not (empty? orgs-without-selected-ops)
+                                                 (-> orgs-without-selected-ops
+                                                   (#(map organization-operations %))
+                                                   (#(apply concat %)))
+                                                 [])]
+    (concat op-trees-for-orgs-with-selected-ops op-trees-for-orgs-without-selected-ops)))
 
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
