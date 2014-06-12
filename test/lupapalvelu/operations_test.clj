@@ -90,8 +90,8 @@
                                                         ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
                                                         ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                         ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]
-                                                    (when (env/feature? :pima)
-                                                      ["Ymp\u00e4rist\u00f6luvat" [["Pima" :pima]]])])))
+                                                    #_(when (env/feature? :pima)
+                                                       ["Ymp\u00e4rist\u00f6luvat" [["Pima" :pima]]])])))
 
   (fact "poikkarit"
     (let [filtering-fn (fn [node] (= "P" (permit-type-of-operation node)))]
