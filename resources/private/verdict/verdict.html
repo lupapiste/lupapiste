@@ -14,7 +14,7 @@
       <hr/>
     </div>
 
-    <div class="statement-info clear-fix" style="float: left; width:48%">
+    <div style="float: left; width:48%">
       <form>
         <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
         <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: backendId, disable: !$root.authorization.ok('save-verdict-draft')" id="backend-id"></input>
@@ -37,8 +37,12 @@
         <label class="form-label" data-bind="ltext: 'verdict.section'"></label><br/>
         <input type="text" class="form-input" data-bind="value: section, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-section"></input>
 
-        <label class="form-label" data-bind="ltext: 'verdict.agreement'"></label><br/>
-        <input type="checkbox" class="form-input" data-bind="value: section, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"></input><br/>
+        <div>
+          <label class="form-entry form-label">
+            <input type="checkbox" class="form-input" data-bind="value: section, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"></input>
+            <span data-bind="ltext: 'verdict.agreement'"></span>
+          </label>
+        </div>
 
         <button data-bind="click: submit, disable: processing, ltext: 'save', visible: $root.authorization.ok('save-verdict-draft')"
             data-test-id="verdict-save" type="submit" class="btn btn-primary">
