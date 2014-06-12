@@ -464,12 +464,12 @@
                                    :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                    :add-operation-allowed false
                                    :link-permit-required false}
-     :pima                        {:schema "pima"
-                                   :permit-type permit/YL ; TODO
-                                   :required ["ymp-ilm-kesto-mini"]
-                                   :attachments []
-                                   :add-operation-allowed true
-                                   :link-permit-required false}
+;     :pima                        {:schema "pima"
+;                                   :permit-type permit/YL ; TODO
+;                                   :required ["ymp-ilm-kesto-mini"]
+;                                   :attachments []
+;                                   :add-operation-allowed true
+;                                   :link-permit-required false}
      :maa-aineslupa               {:schema "maa-aineslupa-kuvaus"
                                    :permit-type permit/MAL
                                    :required ["ymp-maksaja" "rakennuspaikka"]
