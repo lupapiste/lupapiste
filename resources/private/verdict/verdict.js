@@ -8,7 +8,6 @@ var verdictPageController = (function() {
   function VerdictEditModel() {
     var self = this;
 
-    self.applicationId = ko.observable();
     self.applicationTitle = ko.observable();
 
     self.processing = ko.observable();
@@ -42,8 +41,7 @@ var verdictPageController = (function() {
     };
 
     self.refresh = function(application, verdictId) {
-      //var app = ko.mapping.toJS(application);
-      self.applicationId(application.id);
+
       self.applicationTitle(application.title);
 
       var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
@@ -53,6 +51,10 @@ var verdictPageController = (function() {
         history.back();
         repository.load(application.id);
       }
+    };
+
+    self.returnToApplication = function() {
+      window.location.hash = "!/application/" + currentApplicationId + "/verdict";
     };
 
     self.save = function(onSuccess) {
