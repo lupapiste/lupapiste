@@ -440,3 +440,23 @@
   (let [users (map :email (mongo/select :users {} {:email 1}))]
     (mongo/remove-many :activation {:email {$nin users}})))
 
+(defmigration generate-verdict-ids
+  (doseq [application (mongo/select :applications {"verdicts.0" {$exists true}} {:verdicts 1, :attachments 1})]
+    (let [verdicts (map #(assoc % :id (mongo/create-id)) (:verdicts application))
+          id-for-urlhash (reduce
+                            #(let [hashes (->> %2 :paatokset (map :poytakirjat) flatten (map :urlHash) (remove nil?))]
+                               (merge %1 (zipmap hashes (repeat (:id %2)))))
+                            {} verdicts)
+          attachments (map
+                        (fn [{:keys [target] :as a}]
+                          (if (= "verdict" (:type target ))
+                            (if-let [hash (:id target)]
+                              ; Attachment for verdict from krysp
+                              (assoc a :target (assoc target :id (id-for-urlhash hash) :urlHash hash))
+                              ; Attachment for manual verdict
+                              (assoc a :target (assoc target :id (:id (first verdicts)))))
+                            a))
+                        (:attachments application))]
+
+      (mongo/update-by-id :applications (:id application) {$set {:verdicts verdicts, :attachments attachments}}))))
+
