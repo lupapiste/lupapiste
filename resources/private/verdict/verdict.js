@@ -81,17 +81,23 @@ var verdictPageController = (function() {
       });
     };
 
+    self.commandAndBack = function(cmd) {
+      ajax
+      .command(cmd, {id: currentApplicationId, verdictId: currentVerdictId})
+      .success(function() {
+        repository.load(currentApplicationId);
+        window.location.hash = "!/application/" + currentApplicationId + "/verdict";
+      })
+      .processing(self.processing)
+      .call();
+    };
+
     self.publish = function() {
-      self.save(function() {
-        ajax
-        .command("publish-verdict", {id: currentApplicationId, verdictId: currentVerdictId})
-        .success(function() {
-          repository.load(currentApplicationId);
-          window.location.hash = "!/application/" + currentApplicationId + "/verdict";
-        })
-        .processing(self.processing)
-        .call();
-      });
+      self.save(_.partial(self.commandAndBack, "publish-verdict"));
+    };
+
+    self.deleteVerdict = function() {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("areyousure.message"), {title: loc("yes"), fn: _.partial(self.commandAndBack, "delete-verdict")});
     };
 
     self.disabled = ko.computed(function() {

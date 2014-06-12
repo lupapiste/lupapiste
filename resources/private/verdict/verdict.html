@@ -15,6 +15,8 @@
           data-test-id="verdict-publish"
           type="submit" class="btn btn-primary">
       </button>
+
+      <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'" class="btn" style="float:right"></button>
     </div>
 
     <div style="float: left; width:48%">
