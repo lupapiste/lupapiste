@@ -378,10 +378,12 @@
                                             :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             [[:muut :muu]]
                                             :ya-sijoituslupa-maalampoputkien-sijoittaminen                     [[:muut :muu]]
                                             :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      [[:muut :muu]]
+                                            :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen            [[:muut :muu]]
                                             :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        [[:muut :muu]]
                                             :ya-sijoituslupa-muuntamoiden-sijoittaminen                        [[:muut :muu]]
                                             :ya-sijoituslupa-jatekatoksien-sijoittaminen                       [[:muut :muu]]
                                             :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        [[:muut :muu]]
+                                            :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen          [[:muut :muu]]
                                             :ya-sijoituslupa-muu-sijoituslupa                                  [[:muut :muu]]
                                             :ya-jatkoaika                                                      [[:muut :muu]]})
 
