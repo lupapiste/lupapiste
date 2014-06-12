@@ -96,7 +96,7 @@
     :kuntalupatunnus backendId
     :draft (if (nil? draft) false draft)
     :timestamp timestamp
-    :sopimus agreement
+    :sopimus agreement ; not in KRYSP
     :paatokset [{:paivamaarat {:anto             given
                                :lainvoimainen    official}
                  :poytakirjat [{:paatoksentekija name
