@@ -240,10 +240,6 @@
    :ya-sijoituslupa-jatekatoksien-sijoittaminen                       ya-sijoituslupa-general
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
-;  :ya-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"
-;                                          :permit-type permit/YA
-;                                          :required common-yleiset-alueet-schemas
-;                                          :attachments []}
    :ya-jatkoaika                          {:schema "hankkeen-kuvaus-jatkoaika"
                                            :permit-type permit/YA
                                            :required (conj common-yleiset-alueet-schemas
