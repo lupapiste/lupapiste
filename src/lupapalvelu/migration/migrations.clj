@@ -460,3 +460,17 @@
 
       (mongo/update-by-id :applications (:id application) {$set {:verdicts verdicts, :attachments attachments}}))))
 
+(defmigration convert-task-source-ids
+  (doseq [application (mongo/select :applications {"verdicts.0" {$exists true} "tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
+    (let [id-for-kuntalupatunnus (reduce #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1) {} (:verdicts application))
+          tasks (map
+                  (fn [{:keys [source] :as task} ]
+                    (if (= "verdict" (:type source))
+                      (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
+                            verdict-id (id-for-kuntalupatunnus kuntalupatunnus)]
+                        (assert verdict-id (str "Unable to resolve source id: " task))
+                        (assoc task :source (assoc source :id id)))
+                      task))
+                  (:tasks application))]
+      (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
+
