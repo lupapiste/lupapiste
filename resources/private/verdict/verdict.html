@@ -54,9 +54,28 @@
         </button>
       </form>
 
+  <!-- TODO  -->
+      <div>
+        <table data-bind="foreach: taskGroups">
+          <thead>
+            <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+            <tr>
+              <th data-bind="ltext: 'application.taskDisplayName'"></th>
+              <th data-bind="ltext: 'remove'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: tasks">
+            <tr data-bind="attr: {'data-test-type': schema.info.name}">
+              <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
+              <td><a href="#" data-bind="click: openTask, ltext: 'remove'"></a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <button class="btn btn-primary"
         data-test-id="verdict-new-task"
-        data-bind="click: $root.createTaskModel.createTask,
+        data-bind="click: $root.createTask.createTask,
                    ltext: 'task.create',
                    visible: $root.authorization.ok('create-task'),
                    enable: $root.authorization.ok('create-task')"></button>
