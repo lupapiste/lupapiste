@@ -126,12 +126,12 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :modal-datepicker :signing]
+   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
-                       "create-task-model.js" "application-model.js" "application.js"]
+                       "application-model.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "create-task.html"]}
+                         "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]
