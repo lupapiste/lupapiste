@@ -51,6 +51,7 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.openVerdict = function(bindings, verdict) {
     var applicationId = getApplicationId(bindings);
+    LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(bindings.application._js, verdict.id);
     window.location.hash = "!/verdict/" + applicationId + "/" + verdict.id;
     return false;
   };
