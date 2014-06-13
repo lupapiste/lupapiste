@@ -26,7 +26,7 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen (mökit, omakotitalot, saunat,
 
   # ** TODO: Korjaa tama! **
   # Total count of operations is 44
-  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  44
+  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  43
 
   Click by test id  authadmin-edit-selected-operations
 

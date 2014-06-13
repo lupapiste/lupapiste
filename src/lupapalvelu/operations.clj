@@ -67,12 +67,14 @@
        [["vesi-ja-viemarijohtojen-sijoittaminen" :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen]
         ["maalampoputkien-sijoittaminen" :ya-sijoituslupa-maalampoputkien-sijoittaminen]
         ["kaukolampoputkien-sijoittaminen" :ya-sijoituslupa-kaukolampoputkien-sijoittaminen]
-        ["sahko-data-ja-muiden-kaapelien-sijoittaminen" :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen]]]
+        ["sahko-data-ja-muiden-kaapelien-sijoittaminen" :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen]
+        ["rakennuksen-tai-sen-osan-sijoittaminen" :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen]]]
       ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen"
        [["ilmajohtojen-sijoittaminen" :ya-sijoituslupa-ilmajohtojen-sijoittaminen]
         ["muuntamoiden-sijoittaminen" :ya-sijoituslupa-muuntamoiden-sijoittaminen]
         ["jatekatoksien-sijoittaminen" :ya-sijoituslupa-jatekatoksien-sijoittaminen]
-        ["leikkipaikan-tai-koiratarhan-sijoittaminen" :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen]]]
+        ["leikkipaikan-tai-koiratarhan-sijoittaminen" :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen]
+        ["rakennuksen-pelastuspaikan-sijoittaminen" :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen]]]
      ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
     ["katulupa"
      [["kaivaminen-yleisilla-alueilla"
@@ -235,10 +237,12 @@
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                     ya-sijoituslupa-general
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                   ya-sijoituslupa-general
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      ya-sijoituslupa-general
+   :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen            ya-sijoituslupa-general
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        ya-sijoituslupa-general
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                        ya-sijoituslupa-general
    :ya-sijoituslupa-jatekatoksien-sijoittaminen                       ya-sijoituslupa-general
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        ya-sijoituslupa-general
+   :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen          ya-sijoituslupa-general
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
    :ya-jatkoaika                          {:schema "hankkeen-kuvaus-jatkoaika"
                                            :permit-type permit/YA
