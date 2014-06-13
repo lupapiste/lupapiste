@@ -27,15 +27,23 @@
       :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
       {})))
 
+(defn- only-authority-sees [user checker items]
+  (filter (fn [m] (not (and (not (user/authority? user)) (checker m)))) items))
+
 (defn- only-authority-sees-drafts [user verdicts]
-  (filter (fn [verdict] (not (and (not (user/authority? user)) (:draft verdict)))) verdicts))
+  (only-authority-sees user :draft verdicts))
 
 (defn get-application-as [application-id user]
   {:pre [user]}
-  (when-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
+  (let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})
+        draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
+        relates-to-draft (fn [m]
+                           (let [reference (or (:target m) (:source m))]
+                             (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
     (-> application
       (update-in [:verdicts] (partial only-authority-sees-drafts user))
-      ; TODO filter attachments that are related to verdict drafts
+      (update-in [:attachments] (partial  only-authority-sees user relates-to-draft))
+      (update-in [:tasks] (partial  only-authority-sees user relates-to-draft))
       )))
 
 (defn get-application-no-access-checking [application-id]
