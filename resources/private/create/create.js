@@ -13,11 +13,11 @@
   var model = new function() {
     var self = this;
 
-    self.goPhase1 = function() { 
+    self.goPhase1 = function() {
       window.location = "#!/create-part-1";
       self.map.updateSize();
      };
-      
+
 
     self.goPhase2 = function() {
       window.location = "#!/create-part-2";

@@ -137,7 +137,10 @@
   });
 
   $(function() {
-    model.map = gis.makeMap("neighbor-map", false).updateSize().center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
+    model.map = gis
+      .makeMap("neighbor-map", false)
+      .updateSize()
+      .center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
     $("#neighbor-show").applyBindings(model);
   });
 
