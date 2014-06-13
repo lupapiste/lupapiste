@@ -1,8 +1,10 @@
 (ns lupapalvelu.domain-test
-  (:require [lupapalvelu.domain :refer :all]
-            [lupapalvelu.document.schemas :as schemas]
-            [clojure.test :refer :all]
-            [midje.sweet :refer :all]))
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [lupapalvelu.domain :refer :all]
+            [lupapalvelu.document.schemas :as schemas]))
+
+(testable-privates lupapalvelu.domain only-authority-sees-drafts)
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -40,3 +42,19 @@
     (fact "'1' is owner" (has-auth-role? app 1 :owner) => true)
     (fact "'2' is not owner" (has-auth-role? app 2 :owner) => false)))
 
+(facts "only-authority-sees-drafts"
+  (only-authority-sees-drafts {:role "authority"} [{:draft true}]) => [{:draft true}]
+  (only-authority-sees-drafts {:role "not-authority"} [{:draft true}]) => []
+  (only-authority-sees-drafts {:role "authority"} [{:draft false}]) => [{:draft false}]
+  (only-authority-sees-drafts {:role "not-authority"} [{:draft false}]) => [{:draft false}]
+
+  (only-authority-sees-drafts nil [{:draft false}]) => [{:draft false}]
+  (only-authority-sees-drafts nil [{:draft true}]) => empty?
+  (only-authority-sees-drafts {:role "authority"} []) => empty?
+  (only-authority-sees-drafts {:role "non-authority"} []) => empty?
+  (only-authority-sees-drafts {:role "authority"} nil) => empty?
+  (only-authority-sees-drafts {:role "non-authority"} nil) => empty?
+  (only-authority-sees-drafts {:role "authority"} [{:draft nil}]) => [{:draft nil}]
+  (only-authority-sees-drafts {:role "non-authority"} [{:draft nil}]) => [{:draft nil}]
+  (only-authority-sees-drafts {:role "authority"} [{}]) => [{}]
+  (only-authority-sees-drafts {:role "nono-authority"} [{}]) => [{}])

@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.strings :refer [lower-case]]
             [sade.env :as env]))
@@ -26,8 +27,16 @@
       :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
       {})))
 
+(defn- only-authority-sees-drafts [user verdicts]
+  (filter (fn [verdict] (not (and (not (user/authority? user)) (:draft verdict)))) verdicts))
+
 (defn get-application-as [application-id user]
-  (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
+  {:pre [user]}
+  (when-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
+    (-> application
+      (update-in [:verdicts] (partial only-authority-sees-drafts user))
+      ; TODO filter attachments that are related to verdict drafts
+      )))
 
 (defn get-application-no-access-checking [application-id]
   (mongo/select-one :applications {:_id application-id}))
