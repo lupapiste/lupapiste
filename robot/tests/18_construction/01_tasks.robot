@@ -75,26 +75,30 @@ Listing contains one less task
   Task count is  task-katselmus  2
 
 Three buildings, all not started
+  [Tags]  fail
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  3
 
-#Start constructing the first building
-#  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (039 muut asuinkerrostalot) - 2000 m²
-#  Click Element  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//a
-#  Wait Until  Element should be visible  modal-datepicker-date
-#  Input text by test id  modal-datepicker-date  1.1.2014
-#  ## Datepickers stays open when using Selenium
-#  Execute JavaScript  $("#ui-datepicker-div").hide();
-#  Click enabled by test id  modal-datepicker-continue
-#  Wait Until  Element should not be visible  modal-datepicker-date
-#  Confirm  dynamic-yes-no-confirm-dialog
+Start constructing the first building
+  [Tags]  fail
+  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (039 muut asuinkerrostalot) - 2000 m²
+  Click Element  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//a
+  Wait Until  Element should be visible  modal-datepicker-date
+  Input text by test id  modal-datepicker-date  1.1.2014
+  ## Datepickers stays open when using Selenium
+  Execute JavaScript  $("#ui-datepicker-div").hide();
+  Click enabled by test id  modal-datepicker-continue
+  Wait Until  Element should not be visible  modal-datepicker-date
+  Confirm  dynamic-yes-no-confirm-dialog
 
-#Construction of the first building should be started
-#  Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//span[@class="ok icon"]  1
-#  Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="dateString: $data.constructionStarted"]  1.1.2014
-#  Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="fullName: $data.startedBy"]  Sonja Sibbo
+Construction of the first building should be started
+  [Tags]  fail
+  Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//span[@class="ok icon"]  1
+  Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="dateString: $data.constructionStarted"]  1.1.2014
+  Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="fullName: $data.startedBy"]  Sonja Sibbo
 
-#Construction of the other buildins is not started
-# Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  2
+Construction of the other buildins is not started
+  [Tags]  fail
+  Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  2
 
 Add katselmus
   Click enabled by test id  application-new-task
