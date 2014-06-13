@@ -1,4 +1,4 @@
-LUPAPISTE.CreateTaskModel = function() {
+LUPAPISTE.createTaskController = new (function() {
   var self = this;
   self.dialogSelector = "#dialog-create-task";
 
@@ -40,4 +40,9 @@ LUPAPISTE.CreateTaskModel = function() {
       })
       .call();
   };
-};
+
+  $(function() {
+    $(self.dialogSelector).applyBindings({createTask: self});
+  });
+
+})();

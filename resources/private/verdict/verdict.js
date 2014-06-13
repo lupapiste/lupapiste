@@ -136,7 +136,7 @@ LUPAPISTE.verdictPageController = (function() {
   var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
-  var createTaskModel = new LUPAPISTE.CreateTaskModel();
+  var createTaskController = LUPAPISTE.createTaskController;
 
   function refresh(application, verdictId) {
     var target = {type: "verdict", id: verdictId};
@@ -147,7 +147,7 @@ LUPAPISTE.verdictPageController = (function() {
     authorizationModel.refresh(application);
     verdictModel.refresh(application, verdictId);
     attachmentsModel.refresh(application, target);
-    createTaskModel.reset(currentApplicationId, target);
+    createTaskController.reset(currentApplicationId, target);
   }
 
   repository.loaded(["verdict"], function(application) {
@@ -173,7 +173,7 @@ LUPAPISTE.verdictPageController = (function() {
       verdictModel: verdictModel,
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
-      createTaskModel: createTaskModel
+      createTask: createTaskController
     });
   });
 
