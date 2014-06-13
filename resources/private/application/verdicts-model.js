@@ -42,7 +42,7 @@ LUPAPISTE.VerdictsModel = function() {
       .pending(self.newPending)
       .success(function(d) {
         repository.load(applicationId, self.newPending, function(application) {
-          verdictPageController.setApplicationModelAndVerdictId(application, d.verdictId);
+          LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, d.verdictId);
           window.location.hash = "!/verdict/" + applicationId + "/" + d.verdictId;
         });})
     .call();

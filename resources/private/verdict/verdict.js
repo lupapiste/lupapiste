@@ -1,4 +1,4 @@
-var verdictPageController = (function() {
+var LUPAPISTE.verdictPageController = (function() {
   "use strict";
 
   var currentApplicationId = null;
