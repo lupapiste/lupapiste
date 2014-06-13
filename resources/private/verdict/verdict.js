@@ -24,21 +24,7 @@ var verdictPageController = (function() {
     self.given = ko.observable();
     self.official = ko.observable();
 
-    self.reset = function(verdict) {
-      var paatos = verdict.paatokset[0];
-      var pk = paatos.poytakirjat[0];
-      var dates = paatos.paivamaarat;
-
-      self.backendId(verdict.kuntalupatunnus);
-      self.draft(verdict.draft);
-      self.status(pk.status);
-      self.name(pk.paatoksentekija);
-      self.given(dates.anto);
-      self.official(dates.lainvoimainen);
-      self.text(pk.paatos);
-      self.agreement(verdict.sopimus);
-      self.section(pk.pykala);
-    };
+    self.taskGroups = ko.observable();
 
     self.refresh = function(application, verdictId) {
 
@@ -46,11 +32,53 @@ var verdictPageController = (function() {
 
       var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
       if (verdict) {
-        self.reset(verdict);
+        var paatos = verdict.paatokset[0];
+        var pk = paatos.poytakirjat[0];
+        var dates = paatos.paivamaarat;
+
+        self.backendId(verdict.kuntalupatunnus);
+        self.draft(verdict.draft);
+        self.status(pk.status);
+        self.name(pk.paatoksentekija);
+        self.given(dates.anto);
+        self.official(dates.lainvoimainen);
+        self.text(pk.paatos);
+        self.agreement(verdict.sopimus);
+        self.section(pk.pykala);
       } else {
         history.back();
         repository.load(application.id);
       }
+
+      var tasks = _.filter(application.tasks || [], function(task) {
+        return _.isEqual(task.source, {"type":"verdict", id: currentVerdictId});
+      });
+
+      var schemaInfos = _.reduce(tasks, function(m, task){
+        var info = task.schema.info;
+        m[info.name] = info;
+        return m;
+      },{});
+
+      var groups = _.groupBy(tasks, function(task) {return task.schema.info.name;});
+
+      self.taskGroups(_(groups)
+        .keys()
+        .map(function(n) {
+          return {
+            name: loc([n, "_group_label"]),
+            order: schemaInfos[n].order,
+            tasks: _.map(groups[n], function(task) {
+              task.displayName = taskUtil.shortDisplayName(task);
+              task.openTask = function() {
+  //              taskPageController.setApplicationModelAndTaskId(self._js, task.id);
+  //              window.location.hash = "!/task/" + self.id() + "/" + task.id;
+              };
+              task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
+              return task;
+            })};})
+        .sortBy("order")
+        .valueOf());
     };
 
     self.returnToApplication = function() {
@@ -108,15 +136,18 @@ var verdictPageController = (function() {
   var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
+  var createTaskModel = new LUPAPISTE.CreateTaskModel();
 
   function refresh(application, verdictId) {
+    var target = {type: "verdict", id: verdictId};
     currentApplication = application;
     currentApplicationId = currentApplication.id;
     currentVerdictId = verdictId;
 
     authorizationModel.refresh(application);
     verdictModel.refresh(application, verdictId);
-    attachmentsModel.refresh(application, {type: "verdict", id: verdictId});
+    attachmentsModel.refresh(application, target);
+    createTaskModel.reset(currentApplicationId, target);
   }
 
   repository.loaded(["verdict"], function(application) {
@@ -141,7 +172,8 @@ var verdictPageController = (function() {
     $("#verdict").applyBindings({
       verdictModel: verdictModel,
       authorization: authorizationModel,
-      attachmentsModel: attachmentsModel
+      attachmentsModel: attachmentsModel,
+      createTaskModel: createTaskModel
     });
   });
 

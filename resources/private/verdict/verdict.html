@@ -53,6 +53,14 @@
             data-test-id="verdict-save" type="submit" class="btn btn-primary">
         </button>
       </form>
+
+      <button class="btn btn-primary"
+        data-test-id="verdict-new-task"
+        data-bind="click: $root.createTaskModel.createTask,
+                   ltext: 'task.create',
+                   visible: $root.authorization.ok('create-task'),
+                   enable: $root.authorization.ok('create-task')"></button>
+
     </div>
 
     <div id="verdictAttachments" style="float: right; width:48%">
