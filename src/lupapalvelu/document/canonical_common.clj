@@ -124,10 +124,12 @@
    :ya-sijoituslupa-maalampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen "pysyvien maanalaisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muuntamoiden-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-jatekatoksien-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
+   :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen "pysyvien maanp\u00e4\u00e4llisten rakenteiden sijoittaminen"
    :ya-sijoituslupa-muu-sijoituslupa "muu sijoituslupa"})
 
 (def ya-operation-type-to-additional-usage-description
@@ -154,11 +156,14 @@
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                "maal\u00e4mp\u00f6putkien sijoittaminen"
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                "kaukol\u00e4mp\u00f6putkien sijoittaminen"
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen "s\u00e4hk\u00f6-, data- ja muiden kaapelien sijoittaminen"
+   :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen       "rakennuksen tai sen osan sijoittaminen"
    ;; pysyvien maanpaallisten rakenteiden sijoittaminen
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   "ilmajohtojen sijoittaminen"
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                   "muuntamoiden sijoittaminen"
    :ya-sijoituslupa-jatekatoksien-sijoittaminen                  "j\u00e4tekatoksien sijoittaminen"
-   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen   "leikkipaikan tai koiratarhan sijoittaminen"})
+   :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen   "leikkipaikan tai koiratarhan sijoittaminen"
+   :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen     "rakennuksen pelastuspaikan sijoittaminen"
+   })
 
 (def ya-operation-type-to-schema-name-key
   {:ya-kayttolupa-tapahtumat                                     :Kayttolupa
@@ -185,10 +190,12 @@
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                :Sijoituslupa
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen              :Sijoituslupa
    :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen :Sijoituslupa
+   :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen       :Sijoituslupa
    :ya-sijoituslupa-ilmajohtojen-sijoittaminen                   :Sijoituslupa
    :ya-sijoituslupa-muuntamoiden-sijoittaminen                   :Sijoituslupa
    :ya-sijoituslupa-jatekatoksien-sijoittaminen                  :Sijoituslupa
    :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen   :Sijoituslupa
+   :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen     :Sijoituslupa
    :ya-sijoituslupa-muu-sijoituslupa                             :Sijoituslupa})
 
 (defn toimituksen-tiedot [{:keys [title municipality]} lang]

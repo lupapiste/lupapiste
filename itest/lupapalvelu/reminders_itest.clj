@@ -299,15 +299,20 @@
     :given nil
     :person {:id "5252ecdfe4b0138a23d8e385"
              :text "Palotarkastus"
-             :email "sito.lupapiste@gmail.com"
-             :name "Sito Lupapiste 1"}
+             :email "pekka.lupapiste@gmail.com"
+             :name "Pekka Lupapiste"}
     :requested timestamp-1-day-ago
     :status nil})
 
 (def ^:private statement-matching
-  (-> statement-non-matching
-    (assoc :id "525533f7e4b0138a23d8e4b5")
-    (assoc :requested timestamp-the-beginning-of-time)))
+  {:id "525533f7e4b0138a23d8e4b5"
+   :given nil
+   :person {:id "5252ecdfe4b0138a23d8e385"
+            :text "Turvatarkastus"
+            :email "esa.lupapiste@gmail.com"
+            :name "Esa Lupapiste"}
+   :requested timestamp-the-beginning-of-time
+   :status nil})
 
 (def ^:private app-id
   "LP-753-2014-12345")
@@ -449,7 +454,7 @@
          )
 
        (check-sent-reminder-email
-         "pena@example.com"
+         (-> statement-matching :person :email)
          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
          "Sinulta on pyydetty lausuntoa lupahakemukseen")
        ))
@@ -466,7 +471,7 @@
        (> (-> app :statements second :reminder-sent) timestamp-the-beginning-of-time) => true?)
 
      (check-sent-reminder-email
-       "pena@example.com"
+       (-> statement-matching :person :email)
        "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
        "Sinulta on pyydetty lausuntoa lupahakemukseen")
      ))

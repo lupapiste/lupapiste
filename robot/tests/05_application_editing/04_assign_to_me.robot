@@ -31,6 +31,10 @@ Application is not assigned
 Sonja sees comment indicator on application
   Element text should be  applicationUnseenComments  1
 
+Sonja resets indicators
+  Click enabled by test id  application-mark-everything-seen-btn
+  Wait until  Element should not be visible  applicationUnseenComments
+
 Sonja assign application to herself
   Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sonja Sibbo
 

@@ -157,53 +157,51 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
-          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
+          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: !processing() && $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
             <span data-bind="ltext: 'application.submitApplication'"></span>
             <span class="icon send left-align"></span>
           </button>
-          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
+          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
+          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
             <span data-bind="ltext: 'application.requestForComplement'"></span>
             <span class="icon complement left-align"></span>
           </button>
-          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
+          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: !processing() && $root.authorization.ok('add-operation')"  data-test-id="add-operation">
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: $root.signingModel.init,   visible: $root.authorization.ok('sign-attachments'),     enable: $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
-            <span data-bind="ltext: 'application.signAttachments'"></span>
-            <span class="icon stamp left-align"></span>
-          </button>
-          <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export'),     enable: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
+          <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export'),             enable: !processing() && $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
           </button>
-          <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,  visible: $root.authorization.ok('add-link-permit'),        enable: $root.authorization.ok('add-link-permit')"        data-test-id="application-add-link-permit-btn">
+          <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')"        data-test-id="application-add-link-permit-btn">
             <span data-bind="ltext: 'application.addLinkPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: createChangePermit,    visible: $root.authorization.ok('create-change-permit'),     enable: $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
+          <button data-bind="click: createChangePermit,   visible: $root.authorization.ok('create-change-permit'),   enable: !processing() && $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
             <span data-bind="ltext: 'application.createChangePermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'),     enable: $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
+          <button data-bind="click: createContinuationPeriodPermit,    visible: $root.authorization.ok('create-continuation-period-permit'), enable: !processing() && $root.authorization.ok('create-continuation-period-permit')"     data-test-id="continuation-period-create-btn"  class="btn">
             <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
+          <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: !processing() && $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-          <button data-bind="click: $root.stampModel.init, visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
-            <span data-bind="ltext: 'application.stampAttachments'"></span>
-            <span class="icon stamp left-align"></span>
-          </button>
-          <button data-bind="click: refreshKTJ,    visible: $root.authorization.ok('refresh-ktj'),     enable: $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
+
+          <button data-bind="click: refreshKTJ,           visible: $root.authorization.ok('refresh-ktj'),            enable: !processing() && $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
+          </button>
+
+          <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
+            <span data-bind="ltext: 'application.reset-indicators'"></span>
+            <span class="icon mark-seen left-align"></span>
           </button>
         </div>
 
@@ -380,19 +378,29 @@
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
           <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
-            <button
-              data-bind="click: $root.application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
-              data-window-id="upload-dialog"
-              class="btn btn-primary modal">
-            </button>
-            <button
-              data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
-              class="btn btn-primary">
-            </button>
-            <button
-              data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
-              class="btn">
-            </button>
+            <div data-bind="with: application">
+              <button
+                data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
+                data-window-id="upload-dialog"
+                class="btn btn-primary modal">
+              </button>
+              <button
+                data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
+                class="btn btn-primary">
+              </button>
+              <button
+                data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
+                class="btn">
+              </button>
+              <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" class="btn">
+                <span data-bind="ltext: 'application.stampAttachments'"></span>
+                <span class="icon stamp left-align"></span>
+              </button>
+              <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')" class="btn">
+                <span data-bind="ltext: 'application.signAttachments'"></span>
+                <span class="icon stamp left-align"></span>
+              </button>
+            </div>
           </div>
 
           <div class="">
@@ -412,30 +420,41 @@
               <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
-              <button
-                  data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+
+              <div data-bind="with: application">
+                <button
+                  data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
                   data-window-id="upload-dialog"
                   class="btn btn-primary modal"
                   data-test-id="add-attachment">
-              </button>
-              <button
-                  data-bind="click: application.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application')"
+                </button>
+                <button
+                  data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
                   class="btn btn-primary"
                   data-test-id="attachments-copy-own">
-              </button>
-              <button
-                  data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
+                </button>
+                <button
+                  data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
                   class="btn">
-              </button>
-              <button
-                  data-bind="click: application.sendUnsentAttachmentsToBackingSystem,
-                             disable: application.sendUnsentAttachmentsButtonDisabled,
-                             visible: $root.authorization.ok('move-attachments-to-backing-system')"
-                  class="btn btn-primary modal"
-                  data-test-id="send-unsent-attachments">
-                  <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
-                  <em data-bind="visible: application.pending" class="button-loader"></em>
-              </button>
+                </button>
+                <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" data-test-id="application-stamp-btn"  class="btn">
+                  <span data-bind="ltext: 'application.stampAttachments'"></span>
+                  <span class="icon stamp left-align"></span>
+                </button>
+                <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
+                  <span data-bind="ltext: 'application.signAttachments'"></span>
+                  <span class="icon stamp left-align"></span>
+                </button>
+                <button
+                    data-bind="click: sendUnsentAttachmentsToBackingSystem,
+                               disable: sendUnsentAttachmentsButtonDisabled,
+                               visible: $root.authorization.ok('move-attachments-to-backing-system')"
+                    class="btn btn-primary modal"
+                    data-test-id="send-unsent-attachments">
+                    <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
+                    <em data-bind="visible: pending" class="button-loader"></em>
+                </button>
+              </div>
             </div>
 
             <!-- ko if: postVerdict() -->
@@ -538,13 +557,29 @@
                 <div class="accordion_content expanded">
                   <div class="accordion-fields">
                     <!--  ko if:  $data.paivamaarat -->
-                    <div data-bind="if: paivamaarat.aloitettava" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.aloitettava'"></label>
-                      <span class="value" data-bind="dateString: paivamaarat.aloitettava"></span>
+                    <div data-bind="if: paivamaarat.anto" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.anto'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.anto"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.paatosdokumentinPvm" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.julkipano" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.julkipano'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.viimeinenValitus" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.viimeinenValitus'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
                     </div>
                     <div data-bind="if: paivamaarat.lainvoimainen" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.lainvoimainen'"></label>
                       <span class="value" data-bind="dateString: paivamaarat.lainvoimainen"></span>
+                    </div>
+                    <div data-bind="if: paivamaarat.aloitettava" class="key-value-pair">
+                      <label data-bind="ltext: 'verdict.aloitettava'"></label>
+                      <span class="value" data-bind="dateString: paivamaarat.aloitettava"></span>
                     </div>
                     <div data-bind="if: paivamaarat.voimassaHetki" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.voimassaHetki'"></label>
@@ -553,22 +588,6 @@
                     <div data-bind="if: paivamaarat.raukeamis" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.raukeamis'"></label>
                       <span class="value" data-bind="dateString: paivamaarat.raukeamis"></span>
-                    </div>
-                    <div data-bind="if: paivamaarat.anto" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.anto'"></label>
-                      <span class="value" data-bind="dateString: paivamaarat.anto"></span>
-                    </div>
-                    <div data-bind="if: paivamaarat.viimeinenValitus" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.viimeinenValitus'"></label>
-                      <span class="value" data-bind="dateString: paivamaarat.viimeinenValitus"></span>
-                    </div>
-                    <div data-bind="if: paivamaarat.julkipano" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.julkipano'"></label>
-                      <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
-                    </div>
-                    <div data-bind="if: paivamaarat.paatosdokumentinPvm" class="key-value-pair">
-                      <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
-                      <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
                     </div>
                     <!-- /ko --> <!-- /paivamaarat -->
 

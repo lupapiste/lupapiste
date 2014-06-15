@@ -1,7 +1,6 @@
 (ns lupapalvelu.document.canonical-common-test
   (:require [lupapalvelu.document.canonical-common :refer :all]
-            [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [midje.sweet :refer :all]))
 
 (facts "timestamps"
   (let [day (* 24 60 60 1000)

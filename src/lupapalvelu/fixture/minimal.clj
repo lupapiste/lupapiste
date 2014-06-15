@@ -30,18 +30,6 @@
 
    ;; Tampere
 
-   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
-   {:id "777777777777777777000016"
-    :email "veikko.viranomainen@tampere.fi"
-    :enabled true
-    :role "authority"
-    :organizations ["837-R"]
-    :firstName "Veikko"
-    :lastName "Viranomainen"
-    :phone "03121991"
-    :username "veikko"
-    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
-              :apikey "5051ba0caa2480f374dcfeff"}}
    ;; Tampere YA paakayttaja:  tampere-ya / tampere
    {:id "837-YA"
     :enabled true
@@ -56,6 +44,20 @@
     :zip "10203"
     :organizations ["837-YA"]
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
+
+   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
+   {:id "777777777777777777000016"
+    :email "veikko.viranomainen@tampere.fi"
+    :enabled true
+    :role "authority"
+    :organizations ["837-R"]
+    :firstName "Veikko"
+    :lastName "Viranomainen"
+    :phone "03121991"
+    :username "veikko"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
+              :apikey "5051ba0caa2480f374dcfeff"}}
+
    ;; Jussi Viranomainen - tamperelainen YA-lupa-arkkitehti:  jussi / jussi
    {:id "777777777777777777000017"
     :email "jussi.viranomainen@tampere.fi"
@@ -376,10 +378,12 @@
                                             :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             [[:muut :muu]]
                                             :ya-sijoituslupa-maalampoputkien-sijoittaminen                     [[:muut :muu]]
                                             :ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen      [[:muut :muu]]
+                                            :ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen            [[:muut :muu]]
                                             :ya-sijoituslupa-ilmajohtojen-sijoittaminen                        [[:muut :muu]]
                                             :ya-sijoituslupa-muuntamoiden-sijoittaminen                        [[:muut :muu]]
                                             :ya-sijoituslupa-jatekatoksien-sijoittaminen                       [[:muut :muu]]
                                             :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen        [[:muut :muu]]
+                                            :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen          [[:muut :muu]]
                                             :ya-sijoituslupa-muu-sijoituslupa                                  [[:muut :muu]]
                                             :ya-jatkoaika                                                      [[:muut :muu]]})
 
