@@ -214,6 +214,7 @@
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
+  {:pre [permit-type]}
   (partition 2
     (case (keyword permit-type)
       :R  attachment-types-R
@@ -223,10 +224,11 @@
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
-      (fail! (str "unsupported permit-type " permit-type)))))
+      (fail! (str "unsupported permit-type: " permit-type)))))
 
 (defn get-attachment-types-for-application
   [application]
+  {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
 (defn make-attachment [now target locked applicationState op attachement-type & [attachment-id]]
@@ -373,8 +375,9 @@
       (some #(= (keyword %) type-id) types))))
 
 (defn allowed-attachment-type-for-application? [application attachment-type]
-  (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
-    (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type)))
+  (when application
+    (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
+     (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type))))
 
 (defn get-attachments-infos
   "gets attachments from application"
