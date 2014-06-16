@@ -40,10 +40,11 @@
         relates-to-draft (fn [m]
                            (let [reference (or (:target m) (:source m))]
                              (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
-    (-> application
-      (update-in [:verdicts] (partial only-authority-sees-drafts user))
-      (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
-      (update-in [:tasks] (partial only-authority-sees user relates-to-draft)))))
+    (when (seq application)
+      (-> application
+       (update-in [:verdicts] (partial only-authority-sees-drafts user))
+       (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+       (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
 
 (defn get-application-no-access-checking [application-id]
   (mongo/select-one :applications {:_id application-id}))
