@@ -6,6 +6,7 @@
             [lupapalvelu.user :as user]))
 
 (defn comment-mongo-update [current-app-state text target type mark-answered user to-user timestamp]
+  {:pre [current-app-state (string? text) (map? target) (not (nil? mark-answered)) type (map? user) (number? timestamp)]}
   (let [answered? (and mark-answered (user/authority? user))]
     (util/deep-merge
       {$set  {:modified timestamp}}
