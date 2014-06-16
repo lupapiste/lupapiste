@@ -54,7 +54,7 @@ LUPAPISTE.verdictPageController = (function() {
         return _.isEqual(task.source, {"type":"verdict", id: currentVerdictId});
       });
 
-      var schemaInfos = _.reduce(tasks, function(m, task){
+      var schemaInfos = _.reduce(tasks, function(m, task) {
         var info = task.schema.info;
         m[info.name] = info;
         return m;
@@ -70,9 +70,17 @@ LUPAPISTE.verdictPageController = (function() {
             order: schemaInfos[n].order,
             tasks: _.map(groups[n], function(task) {
               task.displayName = taskUtil.shortDisplayName(task);
-              task.openTask = function() {
-  //              taskPageController.setApplicationModelAndTaskId(self._js, task.id);
-  //              window.location.hash = "!/task/" + self.id() + "/" + task.id;
+              task.deleteTask = function() {
+                LUPAPISTE.ModalDialog.showDynamicYesNo(
+                    loc("areyousure"),
+                    loc("task.delete.confirm"),
+                    {title: loc("yes"), fn: function() {
+                      ajax
+                        .command("delete-task", {id: currentApplicationId, taskId: task.id})
+                        .success(function(){repository.load(currentApplicationId);})
+                        .call();}},
+                        {title: loc("no")});
+                return false;
               };
               task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
               return task;

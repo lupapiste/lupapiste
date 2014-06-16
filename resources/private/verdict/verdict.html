@@ -66,8 +66,8 @@
           </thead>
           <tbody data-bind="foreach: tasks">
             <tr data-bind="attr: {'data-test-type': schema.info.name}">
-              <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
-              <td><a href="#" data-bind="click: openTask, ltext: 'remove'"></a></td>
+              <td data-bind="text: displayName"></td>
+              <td><a href="#" data-bind="click: deleteTask, ltext: 'remove'"></a></td>
             </tr>
           </tbody>
         </table>
