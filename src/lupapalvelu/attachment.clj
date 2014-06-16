@@ -296,6 +296,7 @@
   ([application attachment-id file-id filename content-type size comment-text now user stamped retry-limit]
     {:pre [(map? application)]}
     ; TODO refactor to use proper optimistic locking
+    ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
             next-version (next-attachment-version latest-version user)

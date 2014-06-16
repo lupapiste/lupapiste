@@ -20,9 +20,6 @@
                            :user    (user/summary user)}}})
 
       (case (keyword current-app-state)
-        ;; LUPA-XYZ (was: open-application)
-        ;;:draft  (when-not (blank? text) {$set {:state :open, :opened timestamp}})
-
         ;; LUPA-371, LUPA-745
         :info (when answered? {$set {:state :answered}})
 

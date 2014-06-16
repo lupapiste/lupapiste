@@ -331,7 +331,7 @@
                 out (io/output-stream temp-file)]
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
-    (let [new-version (if re-stamp?
+    (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
                         (a/update-version-content application attachment-id new-file-id (.length temp-file) created)
                         (a/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil created user true))
           comment-text (i18n/loc (if re-stamp? "stamp.comment.restamp" "stamp.comment"))
