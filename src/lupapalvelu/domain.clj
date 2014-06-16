@@ -42,9 +42,10 @@
                              (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
     (when (seq application)
       (-> application
-       (update-in [:verdicts] (partial only-authority-sees-drafts user))
-       (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
-       (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
+        (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (:role user))) %))
+        (update-in [:verdicts] (partial only-authority-sees-drafts user))
+        (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
 
 (defn get-application-no-access-checking [application-id]
   (mongo/select-one :applications {:_id application-id}))

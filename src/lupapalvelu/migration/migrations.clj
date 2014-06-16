@@ -474,3 +474,7 @@
                   (:tasks application))]
       (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
 
+(defmigration comment-roles
+  (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
+    (mongo/update-by-id :applications (:id application)
+      {$set (mongo/generate-array-updates :comments (:comments application) (constantly true) :roles [:applicant :authority])})))

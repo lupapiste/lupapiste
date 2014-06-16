@@ -679,6 +679,7 @@
                           :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
+                                        :roles [:applicant :authority]
                                         :user (user/summary user)} :text)
 
           application   (merge domain/application-skeleton
