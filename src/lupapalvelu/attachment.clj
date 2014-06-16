@@ -319,7 +319,7 @@
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
                              (util/deep-merge
-                               (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now)
+                               (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now)
                                {$set {:modified now
                                       :attachments.$.modified now
                                       :attachments.$.state  :requires_authority_action
