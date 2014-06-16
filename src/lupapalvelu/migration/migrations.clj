@@ -469,7 +469,7 @@
                       (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
                             verdict-id (id-for-kuntalupatunnus kuntalupatunnus)]
                         (assert verdict-id (str "Unable to resolve source id: " task))
-                        (assoc task :source (assoc source :id id)))
+                        (assoc task :source (assoc source :id verdict-id)))
                       task))
                   (:tasks application))]
       (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
