@@ -33,8 +33,8 @@ var comments = (function() {
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(self.text());
     });
-    
-    
+
+
     var doAddComment = function(markAnswered, openApplication) {
         var id = self.applicationId();
         ajax.command("add-comment", {
@@ -42,8 +42,9 @@ var comments = (function() {
             text: self.text(),
             target: self.target(),
             to: self.to(),
+            roles: [], // TODO
             "mark-answered": markAnswered,
-            openApplication: openApplication 
+            openApplication: openApplication
         })
         .processing(self.processing)
         .pending(self.pending)
@@ -57,7 +58,7 @@ var comments = (function() {
         .call();
         return false;
     };
-    
+
     self.markAnswered = function() {
       return doAddComment(true, false);
     };

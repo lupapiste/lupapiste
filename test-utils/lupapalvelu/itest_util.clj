@@ -212,9 +212,12 @@
     id => truthy
     id))
 
-(defn comment-application [id apikey open]
-  (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target {:type "application"} :openApplication open) => ok?))
+(defn comment-application
+  ([apikey id open?]
+    {:pre [(instance? Boolean open?)]}
+    (comment-application apikey id open? nil))
+  ([apikey id open? to]
+    (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open? :roles [])))
 
 (defn query-application
   "Fetch application from server.

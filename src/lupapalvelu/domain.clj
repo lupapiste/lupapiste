@@ -132,7 +132,7 @@
 (defn ->comment [text target type user to-user timestamp roles]
   {:pre [(or (nil? text) (string? text)) (map? target)
          type (map? user) (or (nil? to-user) (:role to-user))
-         (number? timestamp) (sequential? roles)]}
+         (number? timestamp) (or (sequential? roles) (set? roles))]}
 
   {:text    text
    :target  target
