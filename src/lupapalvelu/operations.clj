@@ -575,10 +575,15 @@
               filtered)))))
     operation-tree))
 
+(defn- sort-operation-tree [target-tree]
+  (keep identity
+    (for [part operation-tree]
+      (some #(when (= (first %) (first part)) % ) target-tree))))
+
 (defn organization-operations [organization]
   (let [permitTypes (->> organization :scope (map :permitType) set)
         filtering-fn (fn [node] (permitTypes (permit-type-of-operation node)))]
-    (sort-by first
+    (sort-operation-tree
       (operations-filtered filtering-fn false))))
 
 (defn selected-operations-for-organizations [organizations]
@@ -600,7 +605,7 @@
                                                    (#(map organization-operations %))
                                                    (#(apply concat %)))
                                                  [])]
-    (sort-by first
+    (sort-operation-tree
       (concat op-trees-for-orgs-with-selected-ops op-trees-for-orgs-without-selected-ops))))
 
 (defn addable-operations [selected-operations permit-type]
@@ -608,5 +613,5 @@
         filtering-fn (fn [node] (and
                                   (or (empty? selected-operations) (selected-operations node))
                                   (= (name permit-type) (permit-type-of-operation node))))]
-    (sort-by first
+    (sort-operation-tree
       (operations-filtered filtering-fn true))))
