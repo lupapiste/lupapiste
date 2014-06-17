@@ -677,11 +677,6 @@
                           info-request?              :info
                           (user/authority? user)     :open
                           :else                      :draft)
-          make-comment  (partial assoc {:target {:type "application"}
-                                        :created created
-                                        :roles [:applicant :authority]
-                                        :user (user/summary user)} :text)
-
           application   (merge domain/application-skeleton
                           {:id                  id
                            :created             created
@@ -700,7 +695,7 @@
                            :propertyId          propertyId
                            :title               address
                            :auth                [owner]
-                           :comments            (map make-comment messages)
+                           :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
                            :schema-version      (schemas/get-latest-schema-version)})]
 
       (merge application (when-not info-request?

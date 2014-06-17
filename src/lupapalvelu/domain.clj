@@ -126,6 +126,23 @@
                                 :paatoskoodi     (when status (verdict/verdict-name status))}]}]}))
 
 ;;
+;; Comment model
+;;
+
+(defn ->comment [text target type user to-user timestamp roles]
+  {:pre [(or (nil? text) (string? text)) (map? target)
+         type (map? user) (or (nil? to-user) (:role to-user))
+         (number? timestamp) (sequential? roles)]}
+
+  {:text    text
+   :target  target
+   :type    type
+   :created timestamp
+   :roles   (if to-user (conj (set roles) (:role to-user)) roles)
+   :to      (user/summary to-user)
+   :user    (user/summary user)})
+
+;;
 ;; Application skeleton with default values
 ;;
 
