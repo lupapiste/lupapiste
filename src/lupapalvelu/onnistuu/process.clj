@@ -29,9 +29,8 @@
 ;
 
 ; Key is process state, value is allowed next states:
-(def process-state {:created  #{:start}
-                    :start    #{:document :fail}
-                    :document #{:done :error :fail}})
+(def process-state {:created  #{:started :cancelled}
+                    :started  #{:done :error :fail}})
 
 ;
 ; Utils:
@@ -58,55 +57,62 @@
     (fail! :bad-request))
   process)
 
-(defn- process-update! [process status ts & user-id]
+(defn- process-update! [process status ts]
   (validate-process-update! process status)
   (mongo/update :sign-processes
                 {:_id (:id process)}
                 {$set  {:status status}
                  $push {:progress {:status   status
-                                   :ts       ts
-                                   :user-id  user-id}}}))
+                                   :ts       ts}}})
+  process)
 
 ;
 ; Init sign process:
 ;
 
-(defn init-sign-process [company-name y user-id ts]
-  (let [id     (random-password 40)
-        stamp  (random-password 40)]
-    (infof "sign:init-sign-process:%s: company-name [%s], y [%s], user-id [%s]" id company-name y user-id)
-    (mongo/insert :sign-processes {:id        id
+(defn- jump-data [{:keys [process success-url document-url crypto-iv crypto-key customer-id post-to]}]
+  (assert (and process success-url document-url crypto-iv crypto-key customer-id post-to))
+  )
+
+(defn init-sign-process [ts crypto-key success-url document-url company-name y first-name last-name email lang]
+  (let [{:keys [crypto-key success-url document-url]} config  
+        crypto-iv  (c/make-iv)
+        process-id (random-password 40)
+        stamp      (random-password 40)]
+    (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name y email)
+    (mongo/insert :sign-processes {:_id       process-id
                                    :stamp     stamp
-                                   :company   {:name  company-name
-                                               :y     y}
+                                   :company   {:name company-name, :y y}
+                                   :signer    {:first-name first-name, :last-name last-name, :email email, :lang lang}
                                    :status    :created
                                    :created   ts
-                                   :progress  [{:ts       ts
-                                                :user-id  user-id
-                                                :status   :created}]})
-    id))
+                                   :progress  [{:status :created, :ts ts}]})
+    {:process-id process-id
+     :data       (->> {:stamp           stamp
+                       :return_success  (str success-url "/" process-id)
+                       :document        (str document-url "/" process-id)
+                       :requirements    [{:type :company, :identifier y}]}
+                      (json/encode)
+                      (str->bytes)
+                      (c/encrypt (-> crypto-key (str->bytes) (c/base64-decode)) crypto-iv)
+                      (c/base64-encode)
+                      (bytes->str))
+     :iv         (-> crypto-iv (c/base64-encode) (bytes->str))}))
+
+;
+; Cancel sign:
+;
+
+(defn cancel-sign-process! [process-id ts]
+  (infof "sign:cancel-sign-process:%s:" process-id)
+  (process-update! (find-sign-process! process-id) :cancelled ts)
+  nil)
 
 ;
 ; Process start:
 ;
 
-(defn- jump-data [{:keys [process success-url document-url crypto-iv crypto-key customer-id post-to]}]
-  (assert (and process success-url document-url crypto-iv crypto-key customer-id post-to))
-  {:data      (->> {:stamp           (-> process :stamp)
-                    :return_success  success-url
-                    :document        document-url
-                    :requirements    [{:type       :company
-                                       :identifier (-> process :company :y)}]}
-                   (json/encode)
-                   (str->bytes)
-                   (c/encrypt (-> crypto-key (str->bytes) (c/base64-decode)) crypto-iv)
-                   (c/base64-encode)
-                   (bytes->str))
-   :iv        (-> crypto-iv
-                  (c/base64-encode)
-                  (bytes->str))
-   :customer  customer-id
-   :post-to   post-to})
+
 
 (def ^:private config (env/value :onnistuu))
 
@@ -127,7 +133,7 @@
 (defn fetch-document [id ts]
   (infof "sign:fetch-document:%s" id)
   (-> (find-sign-process! id)
-      (process-update! :document ts))
+      (process-update! :started ts))
   ; FIXME: where we get the actual document?
   ["text/plain" "da pdf"])
 
@@ -135,46 +141,38 @@
 ; Success:
 ;
 
+(defmacro resp-assert! [message result expected]
+  `(when-not (= ~result ~expected)
+     (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'id ~message ~result ~expected)
+     (process-update! ~'process :error ~'ts)
+     (fail! :bad-request)))
+
 (defn success [id data iv ts]
-  (let [process (find-sign-process! id)
-        data    (->> data
-                     (str->bytes)
-                     (c/base64-decode)
-                     (c/decrypt (-> (:crypto-key config)
-                                    (str->bytes)
-                                    (c/base64-decode))
-                                (-> iv
-                                    (str->bytes)
-                                    (c/base64-decode)))
-                     (json/decode)
-                     (walk/keywordize-keys))]
-    (when-not (= (:stamp process) (:stamp data))
-      (errorf "sing:success:%s: stamp fail: process stamp: [%s], data stamp: [%s]" id (:stamp process) (:stamp data))
-      (process-update! process :error ts)
-      (fail! :bad-request))
-    (let [signatures (:signatures data)
-          {:keys [type identifier name timestamp uuid]} (first signatures)]
-      (when-not (= (count signatures) 1)
-        (errorf "sing:success:%s: wrong number of signatures: %d" id (count signatures))
-        (process-update! process :error ts)
-        (fail! :bad-request))
-      (when-not (= type "company")
-        (errorf "sing:success:%s: wrong type: [%s]" id type)
-        (process-update! process :error ts)
-        (fail! :bad-request))
-      (when-not (= (-> process :company :y) identifier)
-        (errorf "sing:success:%s: wrong Y: expected [%s], response [%s]" id (-> process :company :y) identifier)
-        (process-update! process :error ts)
-        (fail! :bad-request))
-      (process-update! process :done ts)
-      ; FIXME: Create compary account
-      (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" id identifier name timestamp uuid))))
+  (let [process    (find-sign-process! id)
+        crypto-key (-> config :crypto-key (str->bytes) (c/base64-decode))
+        crypto-iv  (-> iv (str->bytes) (c/base64-decode))
+        resp       (->> data
+                        (str->bytes)
+                        (c/base64-decode)
+                        (c/decrypt crypto-key crypto-iv)
+                        (json/decode)
+                        (walk/keywordize-keys))
+        signatures (:signatures resp)
+        {:keys [type identifier name timestamp uuid]} (first signatures)]
+    (resp-assert! "wrong stamp"           (:stamp process) (:stamp resp))
+    (resp-assert! "number of signatures"  (count signatures) 1)
+    (resp-assert! "wrong signature type"  type "company")
+    (resp-assert! "wrong Y"               (-> process :company :y) identifier)
+    (process-update! process :done ts)
+    ; FIXME: Create compary account
+    (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" id identifier name timestamp uuid)
+    process))
 
 ;
 ; Fail:
 ;
 
-(defn fail [id ts]
+(defn fail! [id ts]
   (warnf "sign:fail:%s: signing failed" id)
   (-> (find-sign-process! id)
       (process-update! :fail ts)))
