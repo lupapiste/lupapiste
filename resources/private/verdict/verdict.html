@@ -56,6 +56,7 @@
 
   <!-- TODO  -->
       <div>
+        <h2 data-bind="ltext: 'verdict.terms'"></h2>
         <table data-bind="foreach: taskGroups">
           <thead>
             <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
@@ -82,7 +83,7 @@
 
 
       <div>
-        <h3 data-bind="ltext: 'statement.conversation'">Keskustele p&auml;&auml;t&ouml;ksest&auml;:</h3>
+        <h2 data-bind="ltext: 'verdict.conversation'"></h2>
         <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </div>
     </div>

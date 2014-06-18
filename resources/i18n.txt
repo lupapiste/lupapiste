@@ -2,3 +2,5 @@ verdict.delete: Poista päätös
 verdict.text: Päätösteksti
 verdict.section: Pykälät
 verdict.agreement: Vaatii hakijan allekirjoituksen
+verdict.terms: Lupavaatimukset
+verdict.conversation: Valmistelumerkinnät
