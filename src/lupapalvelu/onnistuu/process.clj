@@ -9,7 +9,7 @@
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
-            [lupapalvelu.onnistuu.crypt :as c]))
+            [lupapalvelu.onnistuu.crypt :refer [str->bytes bytes->str] :as c]))
 
 (set! *warn-on-reflection* true)
 
@@ -38,12 +38,6 @@
 (defn- fail! [error]
   (throw+ {:error error}))
 
-(defn- str->bytes ^bytes [^String s]
-  (.getBytes s "UTF-8"))
-
-(defn- bytes->str ^String [^bytes b]
-  (String. b "UTF-8"))
-
 (defn find-sign-process [id]
   (mongo/by-id :sign-processes id))
 
@@ -70,13 +64,8 @@
 ; Init sign process:
 ;
 
-(defn- jump-data [{:keys [process success-url document-url crypto-iv crypto-key customer-id post-to]}]
-  (assert (and process success-url document-url crypto-iv crypto-key customer-id post-to))
-  )
-
 (defn init-sign-process [ts crypto-key success-url document-url company-name y first-name last-name email lang]
-  (let [{:keys [crypto-key success-url document-url]} config  
-        crypto-iv  (c/make-iv)
+  (let [crypto-iv  (c/make-iv)
         process-id (random-password 40)
         stamp      (random-password 40)]
     (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name y email)
@@ -111,8 +100,6 @@
 ;
 ; Process start:
 ;
-
-
 
 (def ^:private config (env/value :onnistuu))
 
