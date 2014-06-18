@@ -1,10 +1,10 @@
 var comments = (function() {
   "use strict";
 
-  function CommentModel(takeAll) {
+  function CommentModel(takeAll, newCommentRoles) {
     var self = this;
 
-    self.applicationId = ko.observable();
+    self.applicationId = null;
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
@@ -14,10 +14,8 @@ var comments = (function() {
     self.hideAttachmentComments = ko.observable(false);
 
     self.refresh = function(application, target) {
-      self
-        .applicationId(application.id)
-        .target(target || {type: "application"})
-        .text("");
+      self.applicationId = application.id;
+      self.target(target || {type: "application"}).text("");
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
@@ -36,13 +34,12 @@ var comments = (function() {
 
 
     var doAddComment = function(markAnswered, openApplication) {
-        var id = self.applicationId();
         ajax.command("add-comment", {
-            id: id,
+            id: self.applicationId,
             text: self.text(),
             target: self.target(),
             to: self.to(),
-            roles: [], // TODO
+            roles: newCommentRoles || ["applicant","authority"],
             "mark-answered": markAnswered,
             openApplication: openApplication
         })
@@ -53,7 +50,7 @@ var comments = (function() {
             if (markAnswered) {
                 LUPAPISTE.ModalDialog.showDynamicOk(loc('comment-request-mark-answered-label'), loc('comment-request-mark-answered.ok'));
             }
-            repository.load(id);
+            repository.load(self.applicationId);
         })
         .call();
         return false;
@@ -83,7 +80,7 @@ var comments = (function() {
   }
 
   return {
-    create: function(takeAll) { return new CommentModel(takeAll); }
+    create: function(takeAll, newCommentRoles) { return new CommentModel(takeAll, newCommentRoles); }
   };
 
 })();

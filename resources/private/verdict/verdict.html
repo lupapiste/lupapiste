@@ -80,6 +80,11 @@
                    visible: $root.authorization.ok('create-task'),
                    enable: $root.authorization.ok('create-task')"></button>
 
+
+      <div>
+        <h3 data-bind="ltext: 'statement.conversation'">Keskustele p&auml;&auml;t&ouml;ksest&auml;:</h3>
+        <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
+      </div>
     </div>
 
     <div id="verdictAttachments" style="float: right; width:48%">
