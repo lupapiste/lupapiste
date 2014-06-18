@@ -33,6 +33,11 @@
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
 
+(defn- commented-attachment-exists [application]
+  (let [attachments (set (map :id (:attachments application)))]
+    (update-in application [:comments]
+      #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
+
 (defn get-application-as [application-id user]
   {:pre [user]}
   (let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})
@@ -45,6 +50,7 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (:role user))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+        commented-attachment-exists
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
 
 (defn get-application-no-access-checking [application-id]
