@@ -38,20 +38,24 @@
     (update-in application [:comments]
       #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
 
-(defn get-application-as [application-id user]
-  {:pre [user]}
-  (let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})
-        draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
-        relates-to-draft (fn [m]
-                           (let [reference (or (:target m) (:source m))]
-                             (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
-    (when (seq application)
+(defn filter-application-content-for [application user]
+  (when (seq application)
+    (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
+          relates-to-draft (fn [m]
+                             (let [reference (or (:target m) (:source m))]
+                               (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
       (-> application
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (:role user))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
         commented-attachment-exists
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
+
+(defn get-application-as [application-id user]
+  {:pre [user]}
+  (filter-application-content-for
+    (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})
+    user))
 
 (defn get-application-no-access-checking [application-id]
   (mongo/select-one :applications {:_id application-id}))
