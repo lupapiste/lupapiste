@@ -45,9 +45,8 @@
   (or (find-sign-process id) (fail! :not-found)))
 
 (defn- validate-process-update! [process status]
-  (if-not process
-    (fail! :not-found))
-  (if-not (-> process :status keyword process-state status)
+  (when-not (-> process :status keyword process-state status)
+    (errorf "sign:illegal-state-transfer:%s: from [%s] to [%s]" (:stamp process) (:status process) (name status))
     (fail! :bad-request))
   process)
 
@@ -98,22 +97,6 @@
   nil)
 
 ;
-; Process start:
-;
-
-(def ^:private config (env/value :onnistuu))
-
-(defn start-process [id user-id ts success-url document-url]
-  (infof "sign:start-process:%s" id)
-  (let [process (find-sign-process! id)]
-    (process-update! process :start ts user-id)
-    (jump-data (assoc config
-                      :process      process
-                      :success-url  success-url
-                      :document-url document-url
-                      :crypto-iv    (c/make-iv)))))
-
-;
 ; Onnistuu.fi loads the document:
 ;
 
@@ -136,7 +119,7 @@
 
 (defn success [id data iv ts]
   (let [process    (find-sign-process! id)
-        crypto-key (-> config :crypto-key (str->bytes) (c/base64-decode))
+        crypto-key (-> (env/get-config) :onnistuu :crypto-key (str->bytes) (c/base64-decode))
         crypto-iv  (-> iv (str->bytes) (c/base64-decode))
         resp       (->> data
                         (str->bytes)
@@ -159,7 +142,7 @@
 ; Fail:
 ;
 
-(defn fail! [id ts]
+(defn failed! [id ts]
   (warnf "sign:fail:%s: signing failed" id)
   (-> (find-sign-process! id)
       (process-update! :fail ts)))
