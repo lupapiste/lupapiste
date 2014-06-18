@@ -107,8 +107,7 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Run Keyword Unless  '${SERVER}'=='http://localhost:8000'  Wait Until  Page should contain  Etusivu
-  Go to login page
+  Wait Until  Page should contain  Haluan kirjautua palveluun
 
 #
 # Login stuff
@@ -323,7 +322,7 @@ Prepare new request
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
 Prepare first request
@@ -336,7 +335,7 @@ Prepare first request
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
 
@@ -397,7 +396,7 @@ Select operations path YA sijoituslupa
 
 Click tree item by text
   [Arguments]  ${itemName}
-  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()=${itemName}]
+  Wait and click  //section[@id="create-part-2"]//div[@class="tree-content"]//*[text()=${itemName}]
 
 
 # Closes the application that is currently open by clicking cancel button

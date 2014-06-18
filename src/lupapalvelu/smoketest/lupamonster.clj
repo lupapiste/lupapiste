@@ -9,7 +9,7 @@
     (println "Warning: disconnecting current MongoDB connection!")
     (mongo/disconnect!))
 
-  (mongo/connect! "lupaci.solita.fi" 27018)
+  (mongo/connect!)
 
   (let [started-from-cli (find-ns 'lupapalvelu.main)
         results (apply execute-tests args)

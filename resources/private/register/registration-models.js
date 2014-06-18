@@ -26,6 +26,9 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
     pending: ko.observable(false),
+    showRakentajafiInfo: function() {
+      LUPAPISTE.ModalDialog.open("#dialogRakentajafi");
+    },
     submit: function() {
       var error$ = $(errorSelector);
       error$.text("");

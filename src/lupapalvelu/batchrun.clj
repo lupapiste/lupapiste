@@ -66,12 +66,13 @@
                                                                         {:reminder-sent (older-than timestamp-1-week-ago)}]}}})]
     (doseq [app apps
             statement (:statements app)
-            :let [requested (:requested statement)]
+            :let [email (-> statement :person :email)
+                  requested (:requested statement)]
             :when (and
                     (nil? (:given statement))
                     (< requested timestamp-1-week-ago))]
       (notifications/notify! :reminder-request-statement {:application app
-                                                          :data {:email (get-app-owner-email app)
+                                                          :data {:email email
                                                                  :created-date (util/to-local-date requested)}})
       (update-application (application->command app)
         {:statements {$elemMatch {:id (:id statement)}}}

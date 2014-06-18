@@ -16,64 +16,14 @@
 
 #_(def ^:private test-app-1
    {:sent nil,
-    :neighbors [{:id "534bf825299508fb3618489v",
-                 :propertyId "p",
-                 :owner {:name "n",
-                         :businessID nil,
-                         :nameOfDeceased nil,
-                         :email "e",
-                         :type nil,
-                         :address {:city "c", :street "s", :zip "z"}},
-                 :status [{:state "open", :created 1}
-                          {:state "email-sent",
-                           :created 1398174717307,
-                           :email "abba@example.com",
-                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
-                           :user {:enabled true,
-                                  :lastName "Panaani",
-                                  :firstName "Pena",
-                                  :city "Piippola",
-                                  :username "pena",
-                                  :street "Paapankuja 12",
-                                  :phone "0102030405",
-                                  :email "pena@example.com",
-                                  :personId "010203-0405",
-                                  :role "applicant",
-                                  :zip "10203",
-                                  :id "777777777777777777000020"}}]}
-                {:id "534bf825299508fb3618456c",
-                 :owner {:name "n",
-                         :businessID nil,
-                         :nameOfDeceased nil,
-                         :email "e",
-                         :type nil,
-                         :address {:city "c", :street "s", :zip "z"}},
-                 :propertyId "p",
-                 :status [{:state "open", :created 1}
-                          {:state "email-sent",
-                           :created 0,
-                           :email "abba@example.com",
-                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
-                           :user {:enabled true,
-                                  :lastName "Panaani",
-                                  :firstName "Pena",
-                                  :city "Piippola",
-                                  :username "pena",
-                                  :street "Paapankuja 12",
-                                  :phone "0102030405",
-                                  :email "pena@example.com",
-                                  :personId "010203-0405",
-                                  :role "applicant",
-                                  :zip "10203",
-                                  :id "777777777777777777000020"}}]}],
     :schema-version 1,
     :authority {},
     :auth [{:lastName "Panaani",
             :firstName "Pena",
-     :username "pena",
-     :type "owner",
-     :role "owner",
-     :id "777777777777777777000020"}],
+            :username "pena",
+            :type "owner",
+            :role "owner",
+            :id "777777777777777777000020"}],
     :drawings [],
     :submitted nil,
     :state "open",
@@ -122,12 +72,8 @@
     :address "Naapurikuja 3",
     :permitType "R",
     :id "LP-753-2014-12345",
-    :municipality "753"}
-   )
-
-#_(def ^:private test-app-2
-   {:sent nil,
-    :neighbors [{:id "534bf825299508fb3615223m",
+    :municipality "753"
+    :neighbors [{:id "534bf825299508fb3618489v",
                  :propertyId "p",
                  :owner {:name "n",
                          :businessID nil,
@@ -135,6 +81,31 @@
                          :email "e",
                          :type nil,
                          :address {:city "c", :street "s", :zip "z"}},
+                 :status [{:state "open", :created 1}
+                          {:state "email-sent",
+                           :created 1398174717307,
+                           :email "abba@example.com",
+                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
+                           :user {:enabled true,
+                                  :lastName "Panaani",
+                                  :firstName "Pena",
+                                  :city "Piippola",
+                                  :username "pena",
+                                  :street "Paapankuja 12",
+                                  :phone "0102030405",
+                                  :email "pena@example.com",
+                                  :personId "010203-040A",
+                                  :role "applicant",
+                                  :zip "10203",
+                                  :id "777777777777777777000020"}}]}
+                {:id "534bf825299508fb3618456c",
+                 :owner {:name "n",
+                         :businessID nil,
+                         :nameOfDeceased nil,
+                         :email "e",
+                         :type nil,
+                         :address {:city "c", :street "s", :zip "z"}},
+                 :propertyId "p",
                  :status [{:state "open", :created 1}
                           {:state "email-sent",
                            :created 0,
@@ -148,21 +119,13 @@
                                   :street "Paapankuja 12",
                                   :phone "0102030405",
                                   :email "pena@example.com",
-                                  :personId "010203-0405",
+                                  :personId "010203-040A",
                                   :role "applicant",
                                   :zip "10203",
-                                  :id "777777777777777777000020"}}
-                          {:state "response-given-ok",
-                           :message "",
-                           :user nil,
-                           :created 1398174717307,
-                           :vetuma {:lastName "TESTAA",
-                                    :stamp "70505470151426009182",
-                                    :firstName "PORTAALIA",
-                                    :city nil,
-                                    :street nil,
-                                    :zip nil,
-                                    :userid "210281-9988"}}]}],
+                                  :id "777777777777777777000020"}}]}]})
+
+#_(def ^:private test-app-2
+   {:sent nil,
     :schema-version 1,
     :authority {},
     :auth [{:lastName "Panaani",
@@ -211,8 +174,43 @@
     :address "Naapurikuja 3",
     :permitType "R",
     :id "LP-753-2014-123456789",
-    :municipality "753"}
-   )
+    :municipality "753"
+    :neighbors [{:id "534bf825299508fb3615223m",
+                 :propertyId "p",
+                 :owner {:name "n",
+                         :businessID nil,
+                         :nameOfDeceased nil,
+                         :email "e",
+                         :type nil,
+                         :address {:city "c", :street "s", :zip "z"}},
+                 :status [{:state "open", :created 1}
+                          {:state "email-sent",
+                           :created 0,
+                           :email "abba@example.com",
+                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
+                           :user {:enabled true,
+                                  :lastName "Panaani",
+                                  :firstName "Pena",
+                                  :city "Piippola",
+                                  :username "pena",
+                                  :street "Paapankuja 12",
+                                  :phone "0102030405",
+                                  :email "pena@example.com",
+                                  :personId "010203-040A",
+                                  :role "applicant",
+                                  :zip "10203",
+                                  :id "777777777777777777000020"}}
+                          {:state "response-given-ok",
+                           :message "",
+                           :user nil,
+                           :created 1398174717307,
+                           :vetuma {:lastName "TESTAA",
+                                    :stamp "70505470151426009182",
+                                    :firstName "PORTAALIA",
+                                    :city nil,
+                                    :street nil,
+                                    :zip nil,
+                                    :userid "210281-9988"}}]}]})
 
 ;; NOTE: This does not work for some reason
 #_(let [resp (mongo/select :applications
@@ -271,7 +269,7 @@
                     :street "Paapankuja 12"
                     :phone "0102030405"
                     :email "pena@example.com"
-                    :personId "010203-0405"
+                    :personId "010203-040A"
                     :role "applicant"
                     :zip "10203"
                     :id "777777777777777777000020"}}]})
@@ -301,15 +299,20 @@
     :given nil
     :person {:id "5252ecdfe4b0138a23d8e385"
              :text "Palotarkastus"
-             :email "sito.lupapiste@gmail.com"
-             :name "Sito Lupapiste 1"}
+             :email "pekka.lupapiste@gmail.com"
+             :name "Pekka Lupapiste"}
     :requested timestamp-1-day-ago
     :status nil})
 
 (def ^:private statement-matching
-  (-> statement-non-matching
-    (assoc :id "525533f7e4b0138a23d8e4b5")
-    (assoc :requested timestamp-the-beginning-of-time)))
+  {:id "525533f7e4b0138a23d8e4b5"
+   :given nil
+   :person {:id "5252ecdfe4b0138a23d8e385"
+            :text "Turvatarkastus"
+            :email "esa.lupapiste@gmail.com"
+            :name "Esa Lupapiste"}
+   :requested timestamp-the-beginning-of-time
+   :status nil})
 
 (def ^:private app-id
   "LP-753-2014-12345")
@@ -451,7 +454,7 @@
          )
 
        (check-sent-reminder-email
-         "pena@example.com"
+         (-> statement-matching :person :email)
          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
          "Sinulta on pyydetty lausuntoa lupahakemukseen")
        ))
@@ -459,7 +462,7 @@
    (fact "the \"reminder-sent\" timestamp already exists"
      (update-application
        (application->command reminder-application)
-       {:statements {$elemMatch {:id (-> statement-matching :id)}}}
+       {:statements {$elemMatch {:id (:id statement-matching)}}}
        {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
 
      (batchrun/statement-request-reminder)
@@ -468,7 +471,7 @@
        (> (-> app :statements second :reminder-sent) timestamp-the-beginning-of-time) => true?)
 
      (check-sent-reminder-email
-       "pena@example.com"
+       (-> statement-matching :person :email)
        "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
        "Sinulta on pyydetty lausuntoa lupahakemukseen")
      ))

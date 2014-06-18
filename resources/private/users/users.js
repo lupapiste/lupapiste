@@ -38,10 +38,12 @@ var users = (function() {
           td = $(td);
       _.each(opts.ops, function(op) {
         if (op.showFor(user)) {
-          td.append($("<a>")
+          td.append("[")
+           .append($("<a>")
             .attr("href", "#")
             .attr("data-op", op.name)
-            .text("[" + loc(["users.op", op.name]) + "]"));
+            .text(loc(["users.op", op.name])))
+           .append("] ");
         }
       });
     };
@@ -86,7 +88,7 @@ var users = (function() {
       if (!op || !email) return false;
       LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc(["users.op", op.name, "title"]),
-          loc(["users.op", op.name, "message"]),
+          loc(["users.op", op.name, "message"], email),
           {title: loc("yes"), fn: function() { op.operation(email, self.redrawCallback); }},
           {title: loc("cancel")});
       return false;

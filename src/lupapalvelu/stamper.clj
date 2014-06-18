@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [slingshot.slingshot :refer [throw+]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
@@ -29,12 +30,11 @@
 (defn draw-text [g text x y]
   (.draw text g x y))
 
-(defn make-stamp [verdict created username municipality transparency]
+(defn make-stamp [verdict created municipality transparency]
   (let [font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (map (fn [text] (TextLayout. text font frc))
                    [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
-                    username
                     municipality
                     "LUPAPISTE.fi"])
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
@@ -44,7 +44,7 @@
     (doto (.createGraphics i)
       (.setColor (Color. 255 255 255 (- 255 transparency)))
       (.fillRect 0 0 width height)
-      (.drawImage (qrcode "http://lupapiste.fi" 70) (- width 70) (int 5) nil)
+      (.drawImage (qrcode (env/value :host) 70) (- width 70) (int 5) nil)
       (.translate 0 70)
       (.setStroke (BasicStroke. 2.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
@@ -53,9 +53,8 @@
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER))
       (.setFont font)
       (draw-text (nth texts 0) 22 27)
-      (draw-text (nth texts 1) 22 43)
-      (draw-text (nth texts 2) 22 55)
-      (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 70)
+      (draw-text (nth texts 1) 22 48)
+      (draw-text (nth texts 2) (int (/ (- width (nth text-widths 2)) 2)) 70)
       (.dispose))
     i))
 
@@ -75,13 +74,18 @@
 ;; Stamp PDF:
 ;;
 
-; iText uses points as units, 1 mm is 2.835 points 
+; iText uses points as units, 1 mm is 2.835 points
 (defn- mm->u [mm] (* 2.835 mm))
 
 (defn- transparency->opacity [transparency]
   (- 1.0 (/ (double transparency) 255.0)))
 
-(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
+(defn- get-sides [itext-bean]
+  (select-keys (bean itext-bean) [:top :right :bottom :left]))
+
+(defn- stamp-pdf
+  "About calculating stamp location, see http://support.itextpdf.com/node/106"
+  [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
@@ -92,14 +96,23 @@
                    (.setFillOpacity opacity)
                    (.setStrokeOpacity opacity))]
       (doseq [page (range (.getNumberOfPages reader))]
-        (let [page-size (.getPageSizeWithRotation reader (inc page))
-              page-width (.getWidth page-size)
-              page-height (.getHeight page-size)]
+        (let [visible-area (.getCropBox reader (inc page))
+              rotation (.getPageRotation reader (inc page))
+              rotate? (pos? (mod rotation 180))
+              sides   (get-sides visible-area)
+              _ (debug "Rotation:" rotation)
+              _ (debug "page-size with rotation:" (get-sides (.getPageSizeWithRotation reader (inc page))))
+              _ (debug "visible-area without rotation:" sides)
+              max-x (if rotate? (:top sides) (:right sides))
+              min-y (if rotate? (:left sides) (:bottom sides))
+              x (- max-x stamp-width (mm->u x-margin))
+              y (+ min-y (mm->u y-margin))
+              _ (debug "Stamp location" x y)]
           (doto (.getOverContent stamper (inc page))
             (.saveState)
             (.setGState gstate)
-            (.addImage stamp stamp-width 0 0 stamp-height (- page-width stamp-width (mm->u x-margin)) (mm->u y-margin))
-            (.restoreState))))))) 
+            (.addImage stamp stamp-width 0 0 stamp-height x y)
+            (.restoreState)))))))
 
 ;;
 ;; Stamp raster image:
@@ -126,7 +139,7 @@
       (.drawImage stamp x y nil)
       (.dispose))))
 
-; Images are (usually?) printed in 72 DPI. That means 1 mm is 2.835 points. 
+; Images are (usually?) printed in 72 DPI. That means 1 mm is 2.835 points.
 (defn- mm->p [mm] (int (* 2.835 mm)))
 
 ;;
@@ -134,7 +147,7 @@
 ;;
 
 (comment
-  
+
   (defn- paint-component [g w h]
     (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO" 255)
           iw (.getWidth i)
@@ -142,7 +155,7 @@
       (.setColor g Color/GRAY)
       (.fillRect g 0 0 w h)
       (.drawImage g i (int (/ (- w iw) 2)) (int (/ (- h ih) 2)) nil)))
-  
+
   (defn make-frame []
     (let [watch-these [#'make-stamp #'paint-component]
           frame (javax.swing.JFrame. "heelo")]
@@ -158,7 +171,7 @@
                 (add-watch v :repaint (fn [_ _ _ _] (javax.swing.SwingUtilities/invokeLater (fn [] (.repaint frame)))))))
             (windowClosing [_]
               (doseq [v watch-these]
-                (remove-watch v :repaint)))))  
+                (remove-watch v :repaint)))))
         (.setMinimumSize (java.awt.Dimension. 100 100))
         (.setDefaultCloseOperation javax.swing.JFrame/DISPOSE_ON_CLOSE)
         (.setAlwaysOnTop true)

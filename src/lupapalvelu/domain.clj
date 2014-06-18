@@ -79,10 +79,10 @@
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(-> % :email (= (lower-case email))) (invites application))))
+  (first (filter #(= (lower-case email) (:email %)) (invites application))))
 
-(defn invited? [{invites :invites} email]
-  (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
+(defn no-pending-invites [application user-id]
+  (not-any? #(= user-id (-> % :user :id)) (invites application)))
 
 ;;
 ;; Verdict model
@@ -105,42 +105,43 @@
 ;;
 
 (def application-skeleton
-  {:_statements-seen-by      {}
-   :_verdicts-seen-by        {}
+  {:_applicantIndex          []
+   :_attachment_indicator_reset nil ; timestamp
    :_comments-seen-by        {}
-   :_applicantIndex          []
+   :_statements-seen-by      {}
+   :_verdicts-seen-by        {}
    :address                  ""
    :applicant                ""
    :attachments              []
    :auth                     []
    :authority                {}
    :buildings                []
-   :closed                   nil
+   :closed                   nil ; timestamp
    :closedBy                 {}
    :comments                 []
-   :created                  nil
+   :created                  nil ; timestamp
    :documents                []
    :drawings                 []
    :infoRequest              false
    :location                 {}
-   :modified                 nil
+   :modified                 nil ; timestamp
    :municipality             ""
    :neighbors                []
-   :opened                   nil
+   :opened                   nil ; timestamp
    :openInfoRequest          false
    :operations               []
    :organization             ""
    :propertyId               ""
    :permitSubtype            ""
    :permitType               ""
-   :reminder-sent            nil
-   :schema-version           nil
-   :sent                     nil
+   :reminder-sent            nil ; timestamp
+   :schema-version           nil ; Long
+   :sent                     nil ; timestamp
    :started                  nil ; construction started
    :startedBy                {}
    :state                    ""
    :statements               []
-   :submitted                nil
+   :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
    :verdicts                 []})

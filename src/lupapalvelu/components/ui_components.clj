@@ -111,7 +111,11 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :attachment   {:depends [:common :repository]
+   :signing      {:depends [:common]
+                  :html ["signing-dialogs.html"]
+                  :js ["signing-model.js"]}
+
+   :attachment   {:depends [:common :repository :signing]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
@@ -119,7 +123,7 @@
                   :js ["task.js"]
                   :html ["task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :modal-datepicker]
+   :application  {:depends [:common :repository :tree :task :modal-datepicker :signing]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "create-task-model.js" "application-model.js" "application.js"]

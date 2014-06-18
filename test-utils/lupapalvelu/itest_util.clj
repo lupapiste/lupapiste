@@ -19,10 +19,11 @@
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn find-user-from-minimal-by-apikey [apikey] (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
+(defn id-for-key [apikey] (:id (find-user-from-minimal-by-apikey apikey)))
 (defn apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
 
 (defn email-for [username] (:email (find-user-from-minimal username)))
-(defn email-for-key [apikey] (:email (some #(when (= (-> % :private :apikey) apikey) %) minimal/users)))
+(defn email-for-key [apikey] (:email (find-user-from-minimal-by-apikey apikey)))
 
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
@@ -125,7 +126,7 @@
                        :propertyId "75312312341234"
                        :x 444444 :y 6666666
                        :address "foo 42, bar"
-                       :municipality sonja-muni})
+                       :municipality (or (muni-for-key apikey) sonja-muni)})
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
@@ -176,6 +177,9 @@
 
 (defn http200? [{:keys [status]}]
   (= status 200))
+
+(defn http302? [{:keys [status]}]
+  (= status 302))
 
 (defn http401? [{:keys [status]}]
   (= status 401))
@@ -343,7 +347,7 @@
 
 (defn generate-documents [application apikey]
   (doseq [document (:documents application)]
-    (let [data    (tools/create-document-data (model/get-document-schema document) tools/dummy-values)
+    (let [data    (tools/create-document-data (model/get-document-schema document) (partial tools/dummy-values (id-for-key apikey)))
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]

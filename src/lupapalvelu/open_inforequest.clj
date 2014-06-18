@@ -35,11 +35,11 @@
         (notifications/notify! :open-inforequest-commented {:data {:email (:email token) :token-id (:id token)} :application application}))
       (error "Open inforequest token not found! Application ID=" (:id application)))))
 
-(defn new-open-inforequest! [{application-id :id organization-id :organization :as application}]
-  (assert application-id)
-  (assert organization-id)
+(defn new-open-inforequest! [{application-id :id organization-id :organization municipality :municipality permit-type :permitType :as application}]
+  {:pre [application-id organization-id municipality permit-type]}
   (let [organization    (organization/get-organization organization-id)
-        email           (:open-inforequest-email organization)
+        scope           (organization/resolve-organization-scope organization municipality permit-type)
+        email           (:open-inforequest-email scope)
         token-id        (random-password 48)]
     (when-not organization (fail! :error.unknown-organization))
     (when-not email (fail! :error.missing-organization-email))

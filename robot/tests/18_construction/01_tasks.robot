@@ -75,9 +75,11 @@ Listing contains one less task
   Task count is  task-katselmus  2
 
 Three buildings, all not started
+  [Tags]  fail
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  3
 
 Start constructing the first building
+  [Tags]  fail
   Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (039 muut asuinkerrostalot) - 2000 m²
   Click Element  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//a
   Wait Until  Element should be visible  modal-datepicker-date
@@ -89,11 +91,13 @@ Start constructing the first building
   Confirm  dynamic-yes-no-confirm-dialog
 
 Construction of the first building should be started
+  [Tags]  fail
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//span[@class="ok icon"]  1
   Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="dateString: $data.constructionStarted"]  1.1.2014
   Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="fullName: $data.startedBy"]  Sonja Sibbo
 
 Construction of the other buildins is not started
+  [Tags]  fail
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  2
 
 Add katselmus

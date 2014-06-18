@@ -13,10 +13,19 @@ var repository = (function() {
   }
 
   function schemaNotFound(schemas, name, version) {
-    // TODO, now what?
     var message = "unknown schema, name='" + name + "', version='" + version + "'";
     error(message);
-    throw message;
+  }
+
+  function calculateAttachmentStateIndicators(attachment) {
+    attachment.signed = false;
+    var versionsByApplicants = _(attachment.versions || []).filter(function(v) {return v.user.role === "applicant";}).value();
+    if (versionsByApplicants && versionsByApplicants.length) {
+      var lastVersionByApplicant = _.last(versionsByApplicants).version;
+      if (_.find(attachment.signatures || [], function(s) {return _.isEqual(lastVersionByApplicant, s.version);})) {
+        attachment.signed = true;
+      }
+    }
   }
 
   function load(id, pending) {
@@ -54,6 +63,7 @@ var repository = (function() {
             }
           }
         });
+        _.each(application.attachments ||[], calculateAttachmentStateIndicators);
         hub.send("application-loaded", {applicationDetails: loading});
       };
     });

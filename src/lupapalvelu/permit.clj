@@ -102,15 +102,19 @@
 
 (defn validate-permit-type-is-not [validator-permit-type]
   (fn [_ application]
-    (let [application-permit-type (permit-type application)]
-      (when (= (keyword application-permit-type) (keyword validator-permit-type))
-        (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
+    (if application
+      (let [application-permit-type (permit-type application)]
+        (when (= (keyword application-permit-type) (keyword validator-permit-type))
+          (fail :error.invalid-permit-type :permit-type validator-permit-type)))
+      (fail :error.invalid-application-parameter))))
 
 (defn validate-permit-type-is [validator-permit-type]
   (fn [_ application]
-    (let [application-permit-type (permit-type application)]
-      (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
-        (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
+    (if application
+      (let [application-permit-type (permit-type application)]
+        (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
+          (fail :error.invalid-permit-type :permit-type validator-permit-type)))
+      (fail :error.invalid-application-parameter))))
 
 (defn is-valid-subtype [permitSubtype {permitType :permitType}]
   (when-not (some #(= permitSubtype %) (permit-subtypes permitType))

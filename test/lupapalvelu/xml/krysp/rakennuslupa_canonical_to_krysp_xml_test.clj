@@ -12,7 +12,6 @@
                                                                 rakennuslupa_to_krysp_214
                                                                 rakennuslupa_to_krysp_215
                                                                 save-katselmus-as-krysp]]
-            [lupapalvelu.document.validators :refer [dummy-doc]]
             [lupapalvelu.xml.krysp.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :refer :all :as validator]

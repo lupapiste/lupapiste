@@ -10,15 +10,15 @@
     return f;
   }
 
-  function localize() {
+  function localize(prefix) {
     var e = $(this),
         t = e.attr("data-loc");
     if (t) {
-      if (e.is("input")) { e.attr("placeholder", loc(t)); } else { e.text(loc(t)); }
+      if (e.is("input")) { e.attr("placeholder", loc([t, prefix])); } else { e.text(loc([t, prefix])); }
     }
   }
 
-  $.fn.selectm = function(template) {
+  $.fn.selectm = function(template, prefix) {
     var self = {};
 
     self.data = [];
@@ -29,7 +29,7 @@
       .children()
       .first()
       .clone()
-      .find("*").each(localize).end());
+      .find("*").each(_.partial(localize, prefix)).end());
 
     self.$filter = $("input", this);
     self.$source = $(".selectm-source", this);
@@ -69,17 +69,44 @@
       self.check();
     };
 
-    self.getSelected = function()   { return $("option:selected", self.$source).data() || {}; };
+    self.getSelected = function()   {
+      var trimmed = [];
+      $("option:selected", self.$source).each( function( i, selected ) { trimmed.push($(selected).data()); });
+      return trimmed;
+    };
+
     self.inTarget    = function(id) { return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length; };
-    self.canAdd      = function(id) { return id && (self.duplicates || !self.inTarget(id)); };
+
+    self.canAdd      = function(ids) {
+      ids = _.isArray(ids) ? ids : [ids];
+      var someFalsey = _.some(ids, function(id) {
+        var isAddable = id && (self.duplicates || !self.inTarget(id));
+        return !isAddable;
+      });
+      return !someFalsey;
+    };
+
     self.makeTarget  = function(d)  { return $("<option>").data("id", d.id).text(d.text); };
-    self.addTarget   = function(d)  { if (d && self.canAdd(d.id)) { self.$target.append(self.makeTarget(d)); return self; }};
+
+    self.addTarget   = function(d)  {
+      if (d) {
+        d = _.isArray(d) ? d : [d];
+        if (self.canAdd(d)) {
+          _.each(d, function(data) {
+            if (data) {
+              self.$target.append(self.makeTarget(data));
+            }
+          });
+        }
+      }
+      return self;
+    };
 
     self.add = function() { self.addTarget(self.getSelected()); self.check(); };
     self.remove = function() { $("option:selected", self.$target).remove(); self.check(); };
 
     self.check = function() {
-      self.$add.prop("disabled", !self.canAdd(self.getSelected().id));
+      self.$add.prop("disabled", !self.canAdd(self.getSelected()));
       self.$remove.prop("disabled", $("option:selected", self.$target).length === 0);
       if (!self.duplicates) {
         $("option", self.$source).each(function() {

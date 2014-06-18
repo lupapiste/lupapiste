@@ -16,7 +16,7 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y)
+(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? mark-indicators-seen-updates)
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
@@ -33,6 +33,42 @@
   (validate-y {:data {:y "6610000"}}) => nil
   (validate-y {:data {:y "7780000"}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-y {:data {:y "7779999"}}) => nil)
+
+(facts "mark-indicators-seen-updates"
+  (let [timestamp 123
+        expected-seen-bys {"_comments-seen-by.pena" timestamp, "_statements-seen-by.pena" timestamp, "_verdicts-seen-by.pena" timestamp}
+        expected-attachment (assoc expected-seen-bys :_attachment_indicator_reset timestamp)
+        expected-docs (assoc expected-attachment "documents.0.meta._indicator_reset.timestamp" timestamp)]
+    (mark-indicators-seen-updates {} {:id "pena"} timestamp) => expected-seen-bys
+    (mark-indicators-seen-updates {:documents []} {:id "pena", :role "authority"} timestamp) => expected-attachment
+    (mark-indicators-seen-updates {:documents [{}]} {:id "pena", :role "authority"} timestamp) => expected-docs))
+
+
+(facts "generate-remove-invalid-user-from-docs-updates"
+  (generate-remove-invalid-user-from-docs-updates nil) => empty?
+  (generate-remove-invalid-user-from-docs-updates {:auth nil, :documents nil}) => empty?
+
+  (generate-remove-invalid-user-from-docs-updates {:auth nil
+                                                   :documents [{:schema-info {:name "hakija" :version 1}
+                                                                :data {:henkilo {:userId {:value "123"}}}}
+                                                               {:schema-info {:name "hakija" :version 1}
+                                                                :data {:henkilo {:userId {:value "345"}}}}]})
+  => {"documents.0.data.henkilo.userId" ""
+      "documents.1.data.henkilo.userId" ""}
+
+  (generate-remove-invalid-user-from-docs-updates {:auth [{:id "123"}]
+                                                   :documents [{:schema-info {:name "hakija" :version 1}
+                                                                :data {:henkilo {:userId {:value "123"}}}}]})
+  => empty?
+
+  (generate-remove-invalid-user-from-docs-updates {:auth nil
+                                                   :documents [{:schema-info {:name "uusiRakennus" :version 1}
+                                                                :data {:rakennuksenOmistajat {:0 {:henkilo {:userId {:value "123"}}}
+                                                                                              :1 {:henkilo {:userId {:value "345"}}}}}}]})
+  => {"documents.0.data.rakennuksenOmistajat.0.henkilo.userId" ""
+      "documents.0.data.rakennuksenOmistajat.1.henkilo.userId" ""}
+
+  )
 
 (defn find-by-schema? [docs schema-name]
   (domain/get-document-by-name {:documents docs} schema-name))
@@ -54,9 +90,6 @@
   (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
   (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
   (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
-
-
-(testable-privates lupapalvelu.application add-operation-allowed?)
 
 (facts "Add operation allowed"
   (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen}

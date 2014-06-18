@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
-            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
@@ -10,7 +9,8 @@
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [sade.util :as util]
-            [sade.strings :refer :all]
+            [sade.strings :as ss]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -32,12 +32,12 @@
 ;; Field validation
 ;;
 
-(defmulti validate-field (fn [elem _] (keyword (:type elem))))
+(defmulti validate-field (fn [application elem value] (keyword (:type elem))))
 
-(defmethod validate-field :group [_ v]
+(defmethod validate-field :group [_ _ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
-(defmethod validate-field :string [{:keys [max-len min-len] :as elem} v]
+(defmethod validate-field :string [_ {:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
@@ -45,7 +45,7 @@
     (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
 
-(defmethod validate-field :text [elem v]
+(defmethod validate-field :text [_ elem v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
@@ -69,50 +69,53 @@
         old-checksum (subs hetu 10 11)]
     (when (not= checksum old-checksum) [:err "illegal-hetu"])))
 
-(defmethod validate-field :hetu [_ v]
+(defmethod validate-field :hetu [_ _ v]
   (cond
-    (blank? v) nil
+    (ss/blank? v) nil
     (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
     :else [:err "illegal-hetu"]))
 
-(defmethod validate-field :checkbox [_ v]
+(defmethod validate-field :checkbox [_ _ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate-field :date [_ v]
+(defmethod validate-field :date [_ _ v]
   (try
-    (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
+    (or (ss/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
-(defmethod validate-field :time [_ v]
-  (when-not (s/blank? v)
+(defmethod validate-field :time [_ _ v]
+  (when-not (ss/blank? v)
     (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
       (let [h (util/->int (first matches))
             m (util/->int (second matches))]
         (when-not (and (<= 0 h 23) (<= 0 m 59)) [:warn "illegal-value:time"]))
       [:warn "illegal-value:time"])))
 
-(defmethod validate-field :select [{:keys [body other-key]} v]
+(defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
         accepted-values (if other-key (conj accepted-values "other") accepted-values)]
-    (when-not (or (s/blank? v) (contains? accepted-values v))
+    (when-not (or (ss/blank? v) (contains? accepted-values v))
       [:warn "illegal-value:select"])))
 
 ;; FIXME https://support.solita.fi/browse/LUPA-1453
 ;; implement validator, the same as :select?
-(defmethod validate-field :radioGroup [elem v] nil)
+(defmethod validate-field :radioGroup [_ elem v] nil)
 
-(defmethod validate-field :buildingSelector [elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
-(defmethod validate-field :newBuildingSelector [elem v] (subtype/subtype-validation {:subtype :number} v))
+(defmethod validate-field :buildingSelector [_ elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
-;; FIXME https://support.solita.fi/browse/LUPA-1454
-;; implement validator (mongo id, check that user exists)
-(defmethod validate-field :personSelector [elem v] nil)
+(defmethod validate-field :personSelector [application elem v]
+  (when-not (and
+              (not (ss/blank? v))
+              (domain/has-auth? application v)
+              (domain/no-pending-invites application v))
+    [:err "application-does-not-have-given-auth"]))
 
-(defmethod validate-field nil [_ _]
+(defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
 
-(defmethod validate-field :default [elem _]
+(defmethod validate-field :default [_ elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
 
@@ -125,28 +128,33 @@
     (if (nil? ks)
       elem
       (if (:repeating elem)
-        (when (numeric? (name (first ks)))
+        (when (ss/numeric? (name (first ks)))
           (if (seq (rest ks))
             (find-by-name (:body elem) (rest ks))
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- ->validation-result [path element result]
+(defn- ->validation-result [data path element result]
   (when result
-    {:path    (vec (map keyword path))
-     :element element
-     :result  result}))
+    (let [result {:data    data
+                  :path    (vec (map keyword path))
+                  :element element
+                  :result  result}]
+      ; Return results without :data.
+      ; Data is handy when hacking in REPL, though.
+      ; See also mongo_scripts/prod/hetu-cleanup.js.
+      (dissoc result :data))))
 
-(defn- validate-fields [schema-body k data path]
+(defn- validate-fields [application schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
-            result  (validate-field element (:value data))]
-        (->validation-result current-path element result))
+            result  (validate-field application element (:value data))]
+        (->validation-result data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
-               (validate-fields schema-body k2 v2 current-path)) data)))))
+               (validate-fields application schema-body k2 v2 current-path)) data)))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -162,8 +170,8 @@
   (let [check (fn [{:keys [name required body repeating] :as element}]
                 (let [kw (keyword name)
                       current-path (conj path kw)
-                      validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
-                                         (->validation-result current-path element [:tip "illegal-value:required"]))
+                      validation-error (when (and required (ss/blank? (get-in data (conj current-path :value))))
+                                         (->validation-result nil current-path element [:tip "illegal-value:required"]))
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
                     (if body
@@ -180,21 +188,23 @@
       (map #(check (sub-schema-by-name schema-body %)) sub-schemas-to-validate)))
 
 (defn get-document-schema [{schema-info :schema-info}]
+  {:pre [schema-info]
+   :post [%]}
   (schemas/get-schema schema-info))
 
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
    If schema is not given, uses schema defined in document."
-  ([document]
-    (validate document nil))
-  ([document schema]
+  ([application document]
+    (validate application document nil))
+  ([application document schema]
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           schema-body (:body schema)]
       (when data
         (flatten
           (concat
-            (validate-fields schema-body nil data [])
+            (validate-fields application schema-body nil data [])
             (validate-required-fields schema-body [] data [])
             (validator/validate document)))))))
 
@@ -286,8 +296,9 @@
 
 (defn modifications-since-approvals
   ([{:keys [schema-info data meta]}]
-    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))]
-      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0))))
+    (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))
+          timestamp (max (get-in meta [:_approved :timestamp] 0) (get-in meta [:_indicator_reset :timestamp] 0))]
+      (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) timestamp)))
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
@@ -300,6 +311,11 @@
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
                   (if (and current-approvable (> (get-in data (conj current-path :modified) 0) (max-timestamp current-path))) 1 0))))]
       (reduce + 0 (map count-mods schema-body)))))
+
+(defn mark-approval-indicators-seen-update
+  "Generates update map for marking document approval indicators seen. Merge into $set statement."
+  [{documents :documents} timestamp]
+  (mongo/generate-array-updates :documents documents (constantly true) "meta._indicator_reset.timestamp" timestamp))
 
 ;;
 ;; Create
