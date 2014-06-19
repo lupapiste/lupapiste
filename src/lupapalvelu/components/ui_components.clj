@@ -79,7 +79,7 @@
                   :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers-2.13_20140428.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common]
                   :js ["mypage.js"]
