@@ -9,7 +9,7 @@
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
-            [lupapalvelu.onnistuu.crypt :refer [str->bytes bytes->str] :as c]))
+            [lupapalvelu.onnistuu.crypt :as c]))
 
 (set! *warn-on-reflection* true)
 
@@ -50,11 +50,11 @@
     (fail! :bad-request))
   process)
 
-(defn- process-update! [process status ts]
+(defn- process-update! [process status ts & updates]
   (validate-process-update! process status)
   (mongo/update :sign-processes
                 {:_id (:id process)}
-                {$set  {:status status}
+                {$set  (assoc (apply hash-map updates) :status status)
                  $push {:progress {:status   status
                                    :ts       ts}}})
   process)
@@ -81,11 +81,11 @@
                        :document        (str document-url "/" process-id)
                        :requirements    [{:type :company, :identifier y}]}
                       (json/encode)
-                      (str->bytes)
-                      (c/encrypt (-> crypto-key (str->bytes) (c/base64-decode)) crypto-iv)
+                      (c/str->bytes)
+                      (c/encrypt (-> crypto-key (c/str->bytes) (c/base64-decode)) crypto-iv)
                       (c/base64-encode)
-                      (bytes->str))
-     :iv         (-> crypto-iv (c/base64-encode) (bytes->str))}))
+                      (c/bytes->str))
+     :iv         (-> crypto-iv (c/base64-encode) (c/bytes->str))}))
 
 ;
 ; Cancel sign:
@@ -93,16 +93,18 @@
 
 (defn cancel-sign-process! [process-id ts]
   (infof "sign:cancel-sign-process:%s:" process-id)
-  (process-update! (find-sign-process! process-id) :cancelled ts)
+  (-> process-id
+      (find-sign-process!)
+      (process-update! :cancelled ts))
   nil)
 
 ;
 ; Onnistuu.fi loads the document:
 ;
 
-(defn fetch-document [id ts]
-  (infof "sign:fetch-document:%s" id)
-  (-> (find-sign-process! id)
+(defn fetch-document [process-id ts]
+  (infof "sign:fetch-document:%s" process-id)
+  (-> (find-sign-process! process-id)
       (process-update! :started ts))
   ; FIXME: where we get the actual document?
   ["text/plain" "da pdf"])
@@ -113,18 +115,19 @@
 
 (defmacro resp-assert! [message result expected]
   `(when-not (= ~result ~expected)
-     (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'id ~message ~result ~expected)
+     (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'process-id ~message ~result ~expected)
      (process-update! ~'process :error ~'ts)
      (fail! :bad-request)))
 
-(defn success [id data iv ts]
-  (let [process    (find-sign-process! id)
-        crypto-key (-> (env/get-config) :onnistuu :crypto-key (str->bytes) (c/base64-decode))
-        crypto-iv  (-> iv (str->bytes) (c/base64-decode))
+(defn success [process-id data iv ts]
+  (let [process    (find-sign-process! process-id)
+        crypto-key (-> (env/get-config) :onnistuu :crypto-key (c/str->bytes) (c/base64-decode))
+        crypto-iv  (-> iv (c/str->bytes) (c/base64-decode))
         resp       (->> data
-                        (str->bytes)
+                        (c/str->bytes)
                         (c/base64-decode)
                         (c/decrypt crypto-key crypto-iv)
+                        (c/bytes->str)
                         (json/decode)
                         (walk/keywordize-keys))
         signatures (:signatures resp)
@@ -135,14 +138,15 @@
     (resp-assert! "wrong Y"               (-> process :company :y) identifier)
     (process-update! process :done ts)
     ; FIXME: Create compary account
-    (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" id identifier name timestamp uuid)
+    (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" process-id identifier name timestamp uuid)
     process))
 
 ;
 ; Fail:
 ;
 
-(defn failed! [id ts]
-  (warnf "sign:fail:%s: signing failed" id)
-  (-> (find-sign-process! id)
-      (process-update! :fail ts)))
+(defn failed! [process-id error message ts]
+  (warnf "sign:fail:%s: signing failed: error [%s], message [%s]" process-id error message)
+  (-> process-id
+      (find-sign-process!)
+      (process-update! :fail ts :error {:code error :message message})))
