@@ -4,27 +4,38 @@
             [sade.http :as http]
             [lupapalvelu.onnistuu.process :as p]))
 
-(facts "start signing process"
-  (let [cname   "Foo Oy"
-        y       "FI2341528-4"
-        resp    (u/command u/pena :init-sign :company-name cname :y y)
-        id      (:id resp)
-        process (p/find-sign-process id)]
-    id => #"[a-zA-Z0-9]{40}"
-    process => (contains {:id      id
-                          :stamp   #"[a-zA-Z0-9]{40}"
-                          :company {:name cname
-                                   :y    y}
-                          :status  "created"})
-    
-    (fact "start-process"
-      (let [resp    (http/get (str (u/server-address) "/api/sign/start/" id))
-            process (p/find-sign-process id)]
-        (-> resp :status) => 200
-        (-> process :status) => "start"))
-    
-    (fact "onnisttu.fi fetches the document"
-      (let [resp    (http/get (str (u/server-address) "/api/sign/document/" id))
-            process (p/find-sign-process id)]
-        (-> resp :status) => 200
-        (-> process :status) => "document"))))
+(defn init-sign []
+  (-> (u/command u/pena :init-sign
+                 :companyName "company-name"
+                 :companyY    "1234567-8"
+                 :firstName   "First"
+                 :lastName    "Last"
+                 :email       "email"
+                 :lang        "fi")
+      :processId
+      p/find-sign-process))
+
+(fact "init-sign"
+  (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
+                            :company {:name "company-name"
+                                      :y    "1234567-8"}
+                            :signer {:first-name   "First"
+                                     :last-name    "Last"
+                                     :email        "email"
+                                     :lang         "fi"}
+                            :status  "created"}))
+
+(fact "cancel"
+  (let [process-id (:id (init-sign))]
+    (u/command u/pena :cancel-sign :processId process-id)
+    (p/find-sign-process process-id) => (contains {:status "cancelled"})))
+
+(fact "Fetch document"
+    (let [process-id (:id (init-sign))]
+      (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+      (p/find-sign-process process-id) => (contains {:status "started"})))
+
+(fact "Can't fetch document on cancelled process"
+  (let [process-id (:id (init-sign))]
+    (u/command u/pena :cancel-sign :processId process-id)
+    (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 400})))
