@@ -30,10 +30,16 @@
     (u/command u/pena :cancel-sign :processId process-id)
     (p/find-sign-process process-id) => (contains {:status "cancelled"})))
 
+(fact "cancel unknown"
+  (u/command u/pena :cancel-sign :processId "fooo") => {:ok false, :text "error.unknown"})
+
 (fact "Fetch document"
     (let [process-id (:id (init-sign))]
       (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
       (p/find-sign-process process-id) => (contains {:status "started"})))
+
+(fact "Fetch document for unknown process"
+  (http/get (str (u/server-address) "/api/sign/document/" "foozaa") :throw-exceptions false) => (contains {:status 404}))
 
 (fact "Can't fetch document on cancelled process"
   (let [process-id (:id (init-sign))]

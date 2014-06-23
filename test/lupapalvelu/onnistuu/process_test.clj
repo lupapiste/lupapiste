@@ -1,6 +1,7 @@
 (ns lupapalvelu.onnistuu.process-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [clojure.walk :as walk]
             [cheshire.core :as json]
             [lupapalvelu.onnistuu.crypt :as c]
             [lupapalvelu.onnistuu.process :refer :all]))
@@ -17,10 +18,8 @@
 ; Utils:
 ;
 
-(testable-privates lupapalvelu.onnistuu.process str->bytes bytes->str)
-
 (fact "str->bytes and bytes->str"
-  (-> "Hullo" str->bytes bytes->str) => "Hullo")
+  (-> "Hullo" c/str->bytes c/bytes->str) => "Hullo")
 
 (testable-privates lupapalvelu.onnistuu.process validate-process-update!)
 
@@ -32,31 +31,33 @@
 (def bad-request? (partial exception-with-type? :bad-request))
 
 (facts process-update!
-  (validate-process-update! nil ..irrelevant..) => (throws not-found?)
-  (validate-process-update! {:status "created"} :start) => truthy
+  (validate-process-update! {:status "created"} :started) => truthy
   (validate-process-update! {:status "created"} :document) => (throws bad-request?))
 
 ;
-; Jump data:
+; Init:
 ;
 
-(testable-privates lupapalvelu.onnistuu.process jump-data)
+(defn ubyte [v] (byte (if (>= v 0x80) (- v 0x100) v)))
 
-(facts jump-data
-  (let [crypto-iv  (byte-array (map byte (range 32)))
-        crypto-key (-> (byte-array (map byte (range 32)))
-                       c/base64-encode
-                       bytes->str)]
-    (jump-data {:process       {:stamp "process-stamp"
-                                :company {:y "company-y"}}
-               :success-url   "success-url"
-               :document-url  "document-url"
-               :crypto-iv     crypto-iv
-               :crypto-key    crypto-key
-               :customer-id   "customer-id"
-               :post-to       "target-url"})
-    => (contains {:data       string?
-                  :iv         string?
-                  :customer   "customer-id"
-                  :post-to    "target-url"})))
+(facts init-sign-process
+  (let [ts         #inst "2014-06-20T08:52:45.785-00:00"
+        crypto-key (->> (range 32) (map ubyte) (byte-array) (c/base64-encode) (c/bytes->str))]
+    (let [resp (init-sign-process ts crypto-key "success-url" "document-url" ..irrelevant.. "company-y" ..irrelevant.. ..irrelevant.. ..irrelevant.. ..irrelevant..)
+          {:keys [process-id data iv]} resp]
+      process-id => #"\S+"
+      data       => #"\S+"
+      iv         => #"\S+"
+      (let [crypto-iv (-> iv (c/str->bytes) (c/base64-decode))
+            form-data (->> data
+                           (c/str->bytes)
+                           (c/base64-decode)
+                           (c/decrypt (-> crypto-key (c/str->bytes) (c/base64-decode)) crypto-iv)
+                           (c/bytes->str)
+                           (json/decode))
+            {:strs [stamp return_success document requirements]} form-data]
+        stamp          => #"\S+"
+        return_success => #"success-url/\S+"
+        document       => #"document-url/\S+"
+        requirements   => [{"type" "company" "identifier" "company-y"}]))))
 
