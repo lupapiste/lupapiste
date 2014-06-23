@@ -4,3 +4,4 @@ verdict.section: Pykälät
 verdict.agreement: Vaatii hakijan allekirjoituksen
 verdict.terms: Lupavaatimukset
 verdict.conversation: Valmistelumerkinnät
+conversation.preparation.toggle: Näytä valmistelumerkinnät

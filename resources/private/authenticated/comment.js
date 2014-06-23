@@ -12,6 +12,7 @@ var comments = (function() {
     self.pending = ko.observable();
     self.to = ko.observable();
     self.hideAttachmentComments = ko.observable(false);
+    self.showPreparationComments = ko.observable(false);
 
     self.refresh = function(application, target) {
       self.applicationId = application.id;
@@ -77,6 +78,16 @@ var comments = (function() {
     self.isForAttachment = function(model) {
       return model && model.target && model.target.type() === "attachment";
     };
+
+    function isPreparationComment(model) {
+      return model && model.roles().length === 1 && model.roles()[0] === "authority";
+    }
+
+    self.isVisible = function(model) {
+      return !(self.isForNewAttachment(model) && self.hideAttachmentComments()) &&
+             (!isPreparationComment(model) || self.showPreparationComments());
+    };
+
   }
 
   return {
