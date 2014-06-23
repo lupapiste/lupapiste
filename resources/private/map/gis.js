@@ -326,6 +326,7 @@ var gis = (function() {
 
     self.setMarkerMapCloseCallback = function(handler) {
       self.markerMapCloseCallback = handler;
+      return self;
     };
 
     // Map handling functions
