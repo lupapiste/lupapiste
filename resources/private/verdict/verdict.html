@@ -54,12 +54,11 @@
         </button>
       </form>
 
-  <!-- TODO  -->
-      <div>
+      <section>
         <h2 data-bind="ltext: 'verdict.terms'"></h2>
         <table data-bind="foreach: taskGroups">
           <thead>
-            <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+            <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
             <tr>
               <th data-bind="ltext: 'application.taskDisplayName'"></th>
               <th data-bind="ltext: 'remove'"></th>
@@ -72,7 +71,7 @@
             </tr>
           </tbody>
         </table>
-      </div>
+      </section>
 
       <button class="btn btn-primary"
         data-test-id="verdict-new-task"
@@ -82,10 +81,10 @@
                    enable: $root.authorization.ok('create-task')"></button>
 
 
-      <div>
+      <section>
         <h2 data-bind="ltext: 'verdict.conversation'"></h2>
         <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
-      </div>
+      </section>
     </div>
 
     <div id="verdictAttachments" style="float: right; width:48%">
