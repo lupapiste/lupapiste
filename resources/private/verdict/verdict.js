@@ -7,6 +7,7 @@ LUPAPISTE.verdictPageController = (function() {
 
   function VerdictEditModel() {
     var self = this;
+    self.refreshing = false;
 
     self.applicationTitle = ko.observable();
 
@@ -27,6 +28,7 @@ LUPAPISTE.verdictPageController = (function() {
     self.taskGroups = ko.observable();
 
     self.refresh = function(application, verdictId) {
+      self.refreshing = true;
 
       self.applicationTitle(application.title);
 
@@ -43,7 +45,7 @@ LUPAPISTE.verdictPageController = (function() {
         self.given(dates.anto);
         self.official(dates.lainvoimainen);
         self.text(pk.paatos);
-        self.agreement(verdict.sopimus ? true : false); // Boolean required for the checkbox to work correctly
+        self.agreement(verdict.sopimus);
         self.section(pk.pykala);
       } else {
         history.back();
@@ -87,6 +89,8 @@ LUPAPISTE.verdictPageController = (function() {
             })};})
         .sortBy("order")
         .valueOf());
+
+      self.refreshing = false;
     };
 
     self.returnToApplication = function() {
@@ -94,28 +98,48 @@ LUPAPISTE.verdictPageController = (function() {
     };
 
     self.save = function(onSuccess) {
-      var givenMillis = new Date(self.given()).getTime();
-      var officialMillis = new Date(self.official()).getTime();
-      ajax
+      if (!self.refreshing) {
+        var givenMillis = new Date(self.given()).getTime();
+        var officialMillis = new Date(self.official()).getTime();
+        ajax
         .command("save-verdict-draft",
-          {id: currentApplicationId, verdictId: currentVerdictId,
-           backendId: self.backendId(), status: self.status(),
-           name: self.name(), text: self.text(),
-           section: self.section(),
-           agreement: self.agreement() || false,
-           given: givenMillis, official: officialMillis})
-        .success(onSuccess)
-        .processing(self.processing)
-        .call();
+            {id: currentApplicationId, verdictId: currentVerdictId,
+          backendId: self.backendId(), status: self.status(),
+          name: self.name(), text: self.text(),
+          section: self.section(),
+          agreement: self.agreement() || false,
+          given: givenMillis, official: officialMillis})
+          .success(onSuccess)
+          .processing(self.processing)
+          .call();
+      }
       return false;
     };
 
+
+    self.indicatorTimeout = null;
     self.submit = function() {
+      var i$ = $("#verdictSubmitIndicator");
+      if (self.indicatorTimeout) {
+        clearTimeout(self.indicatorTimeout);
+      }
+      i$.hide();
+
       self.save(function() {
-        repository.load(currentApplicationId);
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("form.saved"), loc("saved"));
+        i$.show();
+        self.indicatorTimeout = setTimeout(function () {
+          i$.fadeOut(200);
+        }, 3000);
       });
+      return true;
     };
+
+    _.each([self.backendId, self.draft, self.status, self.name, self.text, self.agreement,
+            self.section, self.given, self.official],
+           function(o) {
+             o.subscribe(self.submit);
+           }
+    );
 
     self.commandAndBack = function(cmd) {
       ajax

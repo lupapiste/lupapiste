@@ -49,9 +49,10 @@
           </label>
         </div>
 
-        <button data-bind="click: submit, disable: processing, ltext: 'save', visible: $root.authorization.ok('save-verdict-draft')"
-            data-test-id="verdict-save" type="submit" class="btn btn-primary">
-        </button>
+        <div>
+          <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" data-bind="visible: processing">
+          <span id="verdictSubmitIndicator" class="form-indicator form-input-saved" style="position: relative;" data-bind="ltext: 'saved'"></span>
+        </div>
       </form>
 
       <section data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}" class="attachments"></section>
