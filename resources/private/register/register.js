@@ -15,7 +15,6 @@
                                 .attr("id", "vetuma-init");
     });
     statusModel.subPage(pageutil.subPage());
-
   });
 
   hub.onPageChange("register2", function() {
