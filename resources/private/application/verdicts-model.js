@@ -58,6 +58,15 @@ LUPAPISTE.VerdictsModel = function() {
     return false;
   };
 
+  self.publishVerdict = function(bindings, verdict) {
+    var applicationId = getApplicationId(bindings);
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmpublish"), {title: loc("yes"), fn: function() {
+      ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id})
+        .success(function(d) {repository.load(applicationId, self.newPending);})
+        .call();
+      }});
+  };
+
   self.checkVerdict = function(bindings){
     var applicationId = getApplicationId(bindings);
     ajax.command("check-for-verdict", {id: applicationId})
