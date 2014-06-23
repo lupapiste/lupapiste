@@ -108,7 +108,7 @@ LUPAPISTE.verdictPageController = (function() {
           backendId: self.backendId(), status: self.status(),
           name: self.name(), text: self.text(),
           section: self.section(),
-          agreement: self.agreement(),
+          agreement: self.agreement() || false,
           given: givenMillis, official: officialMillis})
           .success(onSuccess)
           .processing(self.processing)
@@ -154,7 +154,7 @@ LUPAPISTE.verdictPageController = (function() {
     };
 
     self.publish = function() {
-      self.save(_.partial(self.commandAndBack, "publish-verdict"));
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmpublish"), {title: loc("yes"), fn: _.partial(self.save, _.partial(self.commandAndBack, "publish-verdict"))});
     };
 
     self.deleteVerdict = function() {
