@@ -19,7 +19,7 @@
       <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'" class="btn" style="float:right"></button>
     </div>
 
-    <div style="float: left; width:48%">
+    <div>
       <form>
         <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
         <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: backendId, disable: !$root.authorization.ok('save-verdict-draft')" id="backend-id"></input>
@@ -28,7 +28,7 @@
         <select id="verdict-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.status.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('save-verdict-draft')"></select>
 
         <label class="form-label" data-bind="ltext: 'verdict.name'"></label><br/>
-        <input type="text" class="form-input long" data-bind="value: name, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-name"></input>
+        <input type="text" class="form-input long" data-bind="value: name, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-name"></input>
 
         <label class="form-label" data-bind="ltext: 'verdict.given'"></label><br/>
         <input type="text" class="form-input long" data-bind="datepicker: given, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-given"></input>
@@ -40,11 +40,11 @@
         <textarea data-bind="value: text" rows=10 class="form-input textarea really-long high"></textarea>
 
         <label class="form-label" data-bind="ltext: 'verdict.section'"></label><br/>
-        <input type="text" class="form-input" data-bind="value: section, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-section"></input>
+        <input type="text" class="form-input" data-bind="value: section, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-section"></input>
 
         <div>
           <label class="form-entry form-label">
-            <input type="checkbox" data-bind="value: section, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"></input>
+            <input type="checkbox" data-bind="value: section, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"></input>
             <span data-bind="ltext: 'verdict.agreement'"></span>
           </label>
         </div>
@@ -54,11 +54,13 @@
         </button>
       </form>
 
+      <section data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}" class="attachments"></section>
+
       <section>
         <h2 data-bind="ltext: 'verdict.terms'"></h2>
-        <table data-bind="foreach: taskGroups">
+        <table data-bind="foreach: taskGroups" class="tasks">
           <thead>
-            <tr><td colspan="5"><h2 data-bind="text: name"></h2></td></tr>
+            <tr><td colspan="5"><h3 data-bind="text: name"></h3></td></tr>
             <tr>
               <th data-bind="ltext: 'application.taskDisplayName'"></th>
               <th data-bind="ltext: 'remove'"></th>
@@ -85,10 +87,7 @@
         <h2 data-bind="ltext: 'verdict.conversation'"></h2>
         <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </section>
-    </div>
 
-    <div id="verdictAttachments" style="float: right; width:48%">
-      <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}"></div>
     </div>
 
   </section>
