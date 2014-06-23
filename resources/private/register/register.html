@@ -3,6 +3,7 @@
 <body>
   <section class="page container" id="register">
     <div class="container">
+
       <h1 data-bind="ltext: 'register.header1'"></h1>
       <p data-bind="ltext: 'register.info'" class="register-info"></p>
       <div id="vetuma-register"></div>
@@ -11,6 +12,18 @@
       </div>
       <div data-bind="if: isError">
         <div id="register-error" data-bind="ltext: 'register.error'" class="context-error"></div>
+      </div>
+
+      <div data-bind="if: features.enabled('company')">
+        <div class="feature">
+          <h1 data-bind="ltext: 'register.company.header'"></h1>
+          <p data-bind="ltext: 'register.company.info'" class="register-info"></p>
+          <a data-bind="attr: {href: '#!/register-company'}, ltext: 'register.company.register'"
+             href="#"
+             class="btn btn-primary"
+             data-test-id="register-company-start">
+          </a>
+        </div>      
       </div>
     </div>
   </section>
