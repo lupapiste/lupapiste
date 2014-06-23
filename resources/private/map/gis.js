@@ -25,13 +25,6 @@ var gis = (function() {
         resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
         controls: [ new OpenLayers.Control.Zoom(),
                     new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
-//        , fallThrough: false
-//        , eventListeners: {
-//          featureclick: function(e) {
-//            var event = getEvent(e);
-//            console.log("Map says: " + event.feature.id + " clicked on " + event.feature.layer.name);
-//          }
-//        }
       });
       OpenLayers.ImgPath = '/theme/default/img/';
 
@@ -295,33 +288,7 @@ var gis = (function() {
       }
     });
 
-    // TEST ->
-//    function selected (e) {
-//      var event = getEvent(e);
-//      console.log("selected, event: ", event);
-//      OpenLayers.Event.stop(event);
-//    }
-//    self.selectControl.events.register("featureselected", self.selectControl, selected);
-    // <- TEST
-
     self.map.addControl(self.selectControl);
-
-
-
-    // TEST ->
-//    var updateMarkerClickHandler = function() {
-//      var geoms = $("#create-map image[id^='OpenLayers_Geometry_Point_']")
-//      .click(function(e) {
-//
-//        console.log("MARKER CLICK, event: ", e);
-//        e.preventDefault();
-//        e.stopPropagation();
-//        return false;
-//
-//      });
-//      console.log("geoms by jquery: ", geoms);
-//    }
-    // <- TEST
 
 
     // Adding markers
@@ -338,22 +305,12 @@ var gis = (function() {
             {isCluster: markerInfo.isCluster || false,
              contents: markerInfo.contents || "" },
             {externalGraphic: iconPath});
-
-        // TEST
-//        markerFeature.events.on('click', function() {
-//          console.log('markerFeature clicked');
-//          return false;
-//        });
-
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);
 
       });  //each
 
       self.markerLayer.addFeatures(newMarkers);
-
-//      updateMarkerClickHandler();
-
       return self;
     };
 
