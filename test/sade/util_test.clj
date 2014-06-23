@@ -204,3 +204,10 @@
   (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
   => {:a :a, :b :b, :c :c})
 
+(facts y?
+  (fact (y? nil)           => falsey)
+  (fact (y? "")            => falsey)
+  (fact (y? "foo")         => falsey)
+  (fact (y? "FI2341529-4") => falsey)
+  (fact (y? "FI2341528-4") => truthy)
+  (fact (y? "SW123456789") => falsey))

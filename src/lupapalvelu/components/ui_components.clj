@@ -147,9 +147,11 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common]
-                  :js ["registration-models.js" "register.js"]
-                  :html ["register.html" "register2.html" "register3.html"]}
-
+                  :js ["registration-models.js" "register.js"
+                       "company-registration.js"]
+                  :html ["register.html" "register2.html" "register3.html"
+                         "register-company.html" "register-company-success.html" "register-company-fail.html"]}
+   
    :link-account {:depends [:register]
                   :js ["link-account.js"]
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
