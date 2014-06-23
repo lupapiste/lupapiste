@@ -15,3 +15,9 @@
 
 (def go server/-main)
 (println "Ready! To start Lupapiste server eval (go)")
+
+(defn ktag
+  "KRYSP mapping tag"
+  [s & [children]] {:tag (keyword (clojure.string/replace s #"^[a-z]+:" "")) :child (or children [])})
+
+(defn ktags [c & [children]] (mapv #(ktag % children) (clojure.string/split c #"\s")))
