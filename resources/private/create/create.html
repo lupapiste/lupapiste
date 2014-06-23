@@ -13,59 +13,63 @@
       </button>
     </div>
     <div class="selected-location">
-      <div class="map-select-info">
-        <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
-        <p data-bind="ltext: 'create.search-check-prompt'"></p>
 
-        <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
-        <div data-bind="visible: !municipalitySupported(), ltext: 'municipalityNotSupported'"></div>
+      <div data-bind="visible: false">
+        <div class="map-select-info">
+          <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
+          <p data-bind="ltext: 'create.search-check-prompt'"></p>
 
-        <div class="form-entry">
-          <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-          <input
-            data-bind="value: addressString, valueUpdate: 'afterkeydown'"
-            data-test-id="create-address"
-            type="text"
-            class="form-input text long"></input>
+          <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
+          <div data-bind="visible: !municipalitySupported(), ltext: 'municipalityNotSupported'"></div>
+
+          <div class="form-entry">
+            <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+            <input
+              data-bind="value: addressString, valueUpdate: 'afterkeydown'"
+              data-test-id="create-address"
+              type="text"
+              class="form-input text long"></input>
+          </div>
+
+          <div class="form-entry">
+            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
+            <select
+              data-bind="visible: useManualEntry,
+                         options: municipalities.municipalities,
+                         optionsText: function(m) { return loc(['municipality', m.id]); },
+                         optionsValue: 'id',
+                         value: municipalityCode,
+                         optionsCaption: loc('choose')"
+              data-test-id="create-municipality-select"
+              class="form-select form-input combobox long">
+            </select>
+            <input
+              data-bind="visible: !useManualEntry(), value: municipalityName"
+              disabled="disabled"
+              type="text"
+              class="form-input text long">
+
+            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
+            <input
+              data-bind="value: propertyId,
+                         valueUpdate: 'afterkeydown',
+                         enable: useManualEntry,
+                         readonly: !currentUser.isAuthority()"
+              data-test-id="create-property-id"
+              type="text"
+              class="form-input text long">
+          </div>
+
+          <button
+              data-bind="enable: addressOk, click: goPhase2"
+              class="btn btn-primary btn-nav-forward"
+              data-test-id="create-continue"
+              id="create-location-continue">
+            <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
+          </button>
         </div>
-
-        <div class="form-entry">
-          <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
-          <select
-            data-bind="visible: useManualEntry,
-                       options: municipalities.municipalities,
-                       optionsText: function(m) { return loc(['municipality', m.id]); },
-                       optionsValue: 'id',
-                       value: municipalityCode,
-                       optionsCaption: loc('choose')"
-            data-test-id="create-municipality-select"
-            class="form-select form-input combobox long">
-          </select>
-          <input
-            data-bind="visible: !useManualEntry(), value: municipalityName"
-            disabled="disabled"
-            type="text"
-            class="form-input text long">
-
-          <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
-          <input
-            data-bind="value: propertyId,
-                       valueUpdate: 'afterkeydown',
-                       enable: useManualEntry,
-                       readonly: !currentUser.isAuthority()"
-            data-test-id="create-property-id"
-            type="text"
-            class="form-input text long">
-        </div>
-
-        <button
-            data-bind="enable: addressOk, click: goPhase2"
-            class="btn btn-primary btn-nav-forward"
-            data-test-id="create-continue"
-            id="create-location-continue">
-          <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
-        </button>
       </div>
+
       <div id="create-map" class="map create-application-map" style="width: 75%; height: 580px;"></div>
     </div>
   </section>

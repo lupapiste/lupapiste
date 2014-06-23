@@ -35,8 +35,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
             if (matchingMarkerContents) {
               $("#inforequest-marker-map-contents").html(matchingMarkerContents).show();
             }
-          },
-          false
+          }
         );
 
         inforequestMarkerMap.setMarkerMapCloseCallback(

@@ -110,7 +110,22 @@
 
     self.clear = function() {
       var zoomLevel = features.enabled("use-wmts-map") ? 2 : 0;
-      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, zoomLevel).addClickHandler(self.click);
+      if (!self.map) self.map = gis
+        .makeMap("create-map", false)
+        .center(404168, 7205000, zoomLevel)
+        .addClickHandler(self.click)
+        .setPopupContentProvider(
+          function(/*feature*/) {
+            var html = $("div.map-select-info")[0].innerHTML;
+            return {
+              html: html,
+              applyBindingsFn: function(popupId) {
+                $("#" + popupId + "_contentDiv").applyBindings(self);
+              }
+            };
+          }
+        );
+
       return self
         .search("")
         .x(0)

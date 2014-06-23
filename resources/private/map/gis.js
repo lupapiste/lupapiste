@@ -25,7 +25,15 @@ var gis = (function() {
         resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
         controls: [ new OpenLayers.Control.Zoom(),
                     new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
+//        , fallThrough: false
+//        , eventListeners: {
+//          featureclick: function(e) {
+//            var event = getEvent(e);
+//            console.log("Map says: " + event.feature.id + " clicked on " + event.feature.layer.name);
+//          }
+//        }
       });
+      OpenLayers.ImgPath = '/theme/default/img/';
 
     } else {
 
@@ -184,10 +192,10 @@ var gis = (function() {
     var stylemap = new OpenLayers.StyleMap({
       'default': new OpenLayers.Style({
         externalGraphic: '${extGraphic}',
-        graphicWidth: '${graphicWidth}',
-        graphicHeight: '${graphicHeight}',   //alt to pointRadius
-        graphicYOffset: '${graphicYOffset}',
-        cursor: 'default'
+        graphicWidth:    '${graphicWidth}',
+        graphicHeight:   '${graphicHeight}',   //alt to pointRadius
+        graphicYOffset:  '${graphicYOffset}',
+        cursor:          'default'
       }, {
         context: context
       }),
@@ -224,12 +232,42 @@ var gis = (function() {
 
     // Select control
 
+    self.selectedFeature = null;
+    self.closePopup = function(e) {
+      self.selectControl.unselect(self.selectedFeature);
+    };
     self.selectControl = new OpenLayers.Control.SelectFeature(self.markerLayer, {
       autoActivate: true,
       clickOut: true,
       toggle: true,
 
       onSelect: function(feature) {
+        self.selectedFeature = feature;
+
+        if (self.popupContentProvider) {
+          var popupContentProviderResp = self.popupContentProvider(feature);
+          var popupId = "popup-id";
+
+          var popup = new OpenLayers.Popup.FramedCloud(
+              popupId,                                              // id (not used)
+              feature.geometry.getBounds().getCenterLonLat(),       // lonlat
+              null,                                                 // contentSize
+              popupContentProviderResp.html,                        // (html content)
+              null,                                                 // anchor
+              true,                                                 // closeBox
+              self.closePopup);                                     // closeBoxCallback
+
+          popup.panMapIfOutOfView = true;
+          popup.autoSize = true;
+          popup.minSize = new OpenLayers.Size(470, 220);
+          popup.maxSize = new OpenLayers.Size(550, 550);
+          popup.fixedRelativePosition = true;
+          feature.popup = popup;
+          self.map.addPopup(popup, true);
+
+          popupContentProviderResp.applyBindingsFn(popupId);
+        }
+
         if (self.markerClickCallback) {
           var contents = feature.cluster ?
                           _.reduce(
@@ -244,13 +282,46 @@ var gis = (function() {
       },
 
       onUnselect: function(feature) {
+        if (feature && feature.popup) {
+          self.map.removePopup(feature.popup);
+          feature.popup.destroy();
+          feature.popup = null;
+        }
+        self.selectedFeature = null;
+
         if (self.markerMapCloseCallback) {
           self.markerMapCloseCallback();
         }
       }
     });
 
+    // TEST ->
+//    function selected (e) {
+//      var event = getEvent(e);
+//      console.log("selected, event: ", event);
+//      OpenLayers.Event.stop(event);
+//    }
+//    self.selectControl.events.register("featureselected", self.selectControl, selected);
+    // <- TEST
+
     self.map.addControl(self.selectControl);
+
+
+
+    // TEST ->
+//    var updateMarkerClickHandler = function() {
+//      var geoms = $("#create-map image[id^='OpenLayers_Geometry_Point_']")
+//      .click(function(e) {
+//
+//        console.log("MARKER CLICK, event: ", e);
+//        e.preventDefault();
+//        e.stopPropagation();
+//        return false;
+//
+//      });
+//      console.log("geoms by jquery: ", geoms);
+//    }
+    // <- TEST
 
 
     // Adding markers
@@ -268,6 +339,12 @@ var gis = (function() {
              contents: markerInfo.contents || "" },
             {externalGraphic: iconPath});
 
+        // TEST
+//        markerFeature.events.on('click', function() {
+//          console.log('markerFeature clicked');
+//          return false;
+//        });
+
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);
 
@@ -275,11 +352,19 @@ var gis = (function() {
 
       self.markerLayer.addFeatures(newMarkers);
 
+//      updateMarkerClickHandler();
+
+      return self;
+    };
+
+    self.setPopupContentProvider = function(handler) {
+      self.popupContentProvider = handler;
       return self;
     };
 
     self.setMarkerClickCallback = function(handler) {
       self.markerClickCallback = handler;
+      return self;
     };
 
     self.setMarkerMapCloseCallback = function(handler) {
@@ -345,8 +430,16 @@ var gis = (function() {
         },
 
         trigger: function(e) {
-          var pos = self.map.getLonLatFromPixel(e.xy);
-          handler(pos.lon, pos.lat);
+          var event = getEvent(e);
+          //
+          // When marker (event.target.nodeName === "image") is clicked, let's prevent further reacting to the click here.
+          // This is somewhat a hack. It would be better to find a way to somehow stop propagation of click event earlier
+          // in the selectControl's onSelect callback, or by the marker item (OpenLayers.Feature.Vector) itself.
+          //
+          if (!event.target || event.target.nodeName !== "image") {
+            var pos = self.map.getLonLatFromPixel(event.xy);
+            handler(pos.lon, pos.lat);
+          }
         }
       });
 
