@@ -43,7 +43,7 @@ LUPAPISTE.verdictPageController = (function() {
         self.given(dates.anto);
         self.official(dates.lainvoimainen);
         self.text(pk.paatos);
-        self.agreement(verdict.sopimus);
+        self.agreement(verdict.sopimus ? true : false); // Boolean required for the checkbox to work correctly
         self.section(pk.pykala);
       } else {
         history.back();
