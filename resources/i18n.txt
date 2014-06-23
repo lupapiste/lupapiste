@@ -5,6 +5,7 @@ verdict.agreement: Vaatii hakijan allekirjoituksen
 verdict.terms: Lupavaatimukset
 verdict.conversation: Valmistelumerkinnät
 conversation.preparation.toggle: Näytä valmistelumerkinnät
+conversation.attachment.toggle: Näytä liitteiden lisäykset
 register.company.header:    Rekisteröi yritys Lupapisteen käyttäjäksi
 register.company.info:      Rekisteröi yritys tiedot... TODO
 register.company.register:  Rekisteröi yritys

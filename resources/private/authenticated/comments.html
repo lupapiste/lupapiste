@@ -56,7 +56,7 @@
           </div>
         </form>
         <div class="comment-toggle" data-bind="if: $parent.mainConversation">
-          <input type="checkbox" id="show-attachment-comments" data-bind="checked: hideAttachmentComments">
+          <input type="checkbox" id="show-attachment-comments" data-bind="checked: showAttachmentComments">
           <label for="show-attachment-comments" data-bind="ltext: 'conversation.attachment.toggle'"></label>
           <div data-bind="if: $root.authorization.ok('save-verdict-draft')">
             <input type="checkbox" id="show-preparation-comments" data-bind="checked: showPreparationComments">
