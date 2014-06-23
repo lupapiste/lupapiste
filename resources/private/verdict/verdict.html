@@ -7,6 +7,9 @@
       <h1>
         <span data-bind="text: applicationTitle"></span>:
         <span data-bind="ltext: 'application.verdict.title'"></span>
+        <span data-bind="visible: draft">
+          (<span data-bind="ltext: 'draft'"></span>)
+        </span>
       </h1>
 
       <button data-bind="click: returnToApplication, enable: true, ltext: 'attachment.return'" class="btn attachment-back inline-block btn-nav-back"></button>

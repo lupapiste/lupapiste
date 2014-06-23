@@ -544,6 +544,7 @@
             <h2 class="application_section_header">
               <span data-bind="ltext: 'verdict.id'"></span>:
               <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
+              <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
             </h2>
 
             <!--  ko if:  $data.paatokset -->
