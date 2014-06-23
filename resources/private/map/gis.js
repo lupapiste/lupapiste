@@ -276,6 +276,10 @@ var gis = (function() {
 
       onUnselect: function(feature) {
         if (feature && feature.popup) {
+          // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+          ko.cleanNode(feature.popup.contentDiv);
+          $(feature.popup.contentDiv).empty();
+
           self.map.removePopup(feature.popup);
           feature.popup.destroy();
           feature.popup = null;
