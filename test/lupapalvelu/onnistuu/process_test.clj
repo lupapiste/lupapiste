@@ -34,30 +34,4 @@
   (validate-process-update! {:status "created"} :started) => truthy
   (validate-process-update! {:status "created"} :document) => (throws bad-request?))
 
-;
-; Init:
-;
-
-(defn ubyte [v] (byte (if (>= v 0x80) (- v 0x100) v)))
-
-(facts init-sign-process
-  (let [ts         #inst "2014-06-20T08:52:45.785-00:00"
-        crypto-key (->> (range 32) (map ubyte) (byte-array) (c/base64-encode) (c/bytes->str))]
-    (let [resp (init-sign-process ts crypto-key "success-url" "document-url" ..irrelevant.. "company-y" ..irrelevant.. ..irrelevant.. ..irrelevant.. ..irrelevant..)
-          {:keys [process-id data iv]} resp]
-      process-id => #"\S+"
-      data       => #"\S+"
-      iv         => #"\S+"
-      (let [crypto-iv (-> iv (c/str->bytes) (c/base64-decode))
-            form-data (->> data
-                           (c/str->bytes)
-                           (c/base64-decode)
-                           (c/decrypt (-> crypto-key (c/str->bytes) (c/base64-decode)) crypto-iv)
-                           (c/bytes->str)
-                           (json/decode))
-            {:strs [stamp return_success document requirements]} form-data]
-        stamp          => #"\S+"
-        return_success => #"success-url/\S+"
-        document       => #"document-url/\S+"
-        requirements   => [{"type" "company" "identifier" "company-y"}]))))
 
