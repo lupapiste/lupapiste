@@ -1,0 +1,16 @@
+register.company.header:    Rekisteröi yritys Lupapisteen käyttäjäksi
+register.company.info:      Rekisteröi yritys tiedot... TODO
+register.company.register:  Rekisteröi yritys
+
+register.company.form.header:      Rekisteröinti tiedot:
+register.company.form.info:        Rekisteröinti tiedot... TODO
+register.company.form.company:     Yrityksen tiedot:
+register.company.form.companyName: Yrityksen nimi:
+register.company.form.companyY:    Yrityksen Y-tunnus:
+register.company.form.applicant:   Hakijan tiedot:
+register.company.form.firstName:   Etunimi:
+register.company.form.lastName:    Sukunimi:
+register.company.form.email:       Sähköpostiosoite:
+
+register.company.sign.info:   Sinut ohjataan sopimuksen allekirjoitukseen... TODO
+register.company.sign.begin:  Aloita
