@@ -9,7 +9,7 @@
         <span data-bind="ltext: 'application.verdict.title'"></span>
       </h1>
 
-      <button data-bind="click: returnToApplication, enable: true, ltext: 'attachment.return'" class="btn"></button>
+      <button data-bind="click: returnToApplication, enable: true, ltext: 'attachment.return'" class="btn attachment-back inline-block btn-nav-back"></button>
 
       <button data-bind="disable: disabled, click: publish, ltext: 'verdict.submit', visible: $data.draft() && $root.authorization.ok('publish-verdict')"
           data-test-id="verdict-publish"
