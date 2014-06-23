@@ -84,8 +84,9 @@ var comments = (function() {
     }
 
     self.isVisible = function(model) {
-      return !(self.isForNewAttachment(model) && self.hideAttachmentComments()) &&
-             (!isPreparationComment(model) || self.showPreparationComments());
+      return !takeAll ||
+             (!(self.isForNewAttachment(model) && self.hideAttachmentComments()) &&
+               (!isPreparationComment(model) || self.showPreparationComments()));
     };
 
   }
