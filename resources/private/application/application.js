@@ -160,7 +160,7 @@
       commentModel.refresh(app);
 
       // Verdict details
-      verdictModel.refresh(app);
+      verdictModel.refresh(app, applicationDetails.authorities);
 
       // Map
       mapModel.refresh(app);

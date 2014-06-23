@@ -94,6 +94,7 @@ LUPAPISTE.verdictPageController = (function() {
     };
 
     self.returnToApplication = function() {
+      repository.load(currentApplicationId);
       window.location.hash = "!/application/" + currentApplicationId + "/verdict";
     };
 
@@ -107,7 +108,7 @@ LUPAPISTE.verdictPageController = (function() {
           backendId: self.backendId(), status: self.status(),
           name: self.name(), text: self.text(),
           section: self.section(),
-          agreement: self.agreement() || false,
+          agreement: self.agreement(),
           given: givenMillis, official: officialMillis})
           .success(onSuccess)
           .processing(self.processing)
@@ -170,8 +171,9 @@ LUPAPISTE.verdictPageController = (function() {
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
   var createTaskController = LUPAPISTE.createTaskController;
   var commentsModel = new comments.create(false, ["authority"]);
+  var authorities = ko.observableArray([]);
 
-  function refresh(application, verdictId) {
+  function refresh(application, authorityUsers, verdictId) {
     var target = {type: "verdict", id: verdictId};
     currentApplication = application;
     currentApplicationId = currentApplication.id;
@@ -182,11 +184,12 @@ LUPAPISTE.verdictPageController = (function() {
     attachmentsModel.refresh(application, target);
     createTaskController.reset(currentApplicationId, target);
     commentsModel.refresh(application, target);
+    authorities(authorityUsers);
   }
 
-  repository.loaded(["verdict"], function(application) {
+  repository.loaded(["verdict"], function(application, applicationDetails) {
     if (currentApplicationId === application.id) {
-      refresh(application, currentVerdictId);
+      refresh(application, applicationDetails.authorities, currentVerdictId);
     }
   });
 
@@ -197,7 +200,7 @@ LUPAPISTE.verdictPageController = (function() {
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
     } else if (currentVerdictId !== verdictId){
-      refresh(currentApplication, currentVerdictId);
+      refresh(currentApplication, authorities(), currentVerdictId);
     }
     currentApplicationId = applicationId;
     currentVerdictId = verdictId;
@@ -209,7 +212,9 @@ LUPAPISTE.verdictPageController = (function() {
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
       createTask: createTaskController,
-      commentsModel: commentsModel
+      commentsModel: commentsModel,
+      authorities: authorities, // Authorities for comment template
+      application: {} // Dummy application for comment template
     });
   });
 

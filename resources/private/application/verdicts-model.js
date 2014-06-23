@@ -6,6 +6,7 @@ LUPAPISTE.VerdictsModel = function() {
     return bindings.application.id();
   }
 
+  self.authorities = [];
   self.verdicts = ko.observable();
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
@@ -13,7 +14,7 @@ LUPAPISTE.VerdictsModel = function() {
   self.newProcessing = ko.observable(false);
   self.newPending = ko.observable(false);
 
-  self.refresh = function(application) {
+  self.refresh = function(application, authorities) {
     var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
 
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
@@ -33,6 +34,7 @@ LUPAPISTE.VerdictsModel = function() {
     });
 
     self.verdicts(verdicts);
+    self.authorities = authorities;
   };
 
   self.newVerdict = function(bindings) {
@@ -42,7 +44,7 @@ LUPAPISTE.VerdictsModel = function() {
       .pending(self.newPending)
       .success(function(d) {
         repository.load(applicationId, self.newPending, function(application) {
-          LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, d.verdictId);
+          LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, self.authorities, d.verdictId);
           window.location.hash = "!/verdict/" + applicationId + "/" + d.verdictId;
         });})
     .call();
@@ -51,7 +53,7 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.openVerdict = function(bindings, verdict) {
     var applicationId = getApplicationId(bindings);
-    LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(bindings.application._js, verdict.id);
+    LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(bindings.application._js, self.authorities, verdict.id);
     window.location.hash = "!/verdict/" + applicationId + "/" + verdict.id;
     return false;
   };
