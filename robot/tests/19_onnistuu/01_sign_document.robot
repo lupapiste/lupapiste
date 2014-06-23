@@ -56,5 +56,4 @@ Bod decides to register his company after all, and this time he means it
   Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  success
   Click element  xpath=//a[@data-test-id='onnistuu-dummy-success']
   Wait until  Element should be visible  xpath=//section[@id='register-company-success']
-
   
