@@ -168,14 +168,15 @@ LUPAPISTE.verdictPageController = (function() {
 
   hub.onPageChange("verdict", function(e) {
     var applicationId = e.pagePath[0];
-    currentVerdictId = e.pagePath[1];
+    var verdictId = e.pagePath[1];
     // Reload application only if needed
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
-    } else {
+    } else if (currentVerdictId !== verdictId){
       refresh(currentApplication, currentVerdictId);
     }
     currentApplicationId = applicationId;
+    currentVerdictId = verdictId;
   });
 
   $(function() {
