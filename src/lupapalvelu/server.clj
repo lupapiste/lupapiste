@@ -20,6 +20,7 @@
             [lupapalvelu.statement-api]
             [lupapalvelu.tasks-api]
             [lupapalvelu.verdict-api]
+            [lupapalvelu.onnistuu]
             [lupapalvelu.admin]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
