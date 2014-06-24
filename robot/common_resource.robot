@@ -570,31 +570,6 @@ Go to give new verdict
   Wait Until  Element Should Be Visible  backend-id
   Wait Until  Element Should Be Enabled  backend-id
 
-Input verdict
-  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text  backend-id  ${backend-id}
-  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
-  Input text  verdict-given  ${verdict-given-date}
-  Input text  verdict-official  ${verdict-official-date}
-  Input text  verdict-name  ${verdict-giver-name}
-  ## Trigger change manually
-  Execute JavaScript  $("#backend-id").change();
-  Execute JavaScript  $("#verdict-type-select").change();
-  Execute JavaScript  $("#verdict-given").change();
-  Execute JavaScript  $("#verdict-official").change();
-  Execute JavaScript  $("#verdict-name").change();
-
-Throw in a verdict
-  Go to give new verdict
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  verdictGiven
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
-
 Submit empty verdict
   Go to give new verdict
   Go back
