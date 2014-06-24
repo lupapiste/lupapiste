@@ -562,7 +562,7 @@
                       <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
                               class="btn btn-primary" style="float: right;margin-left: 3px" data-test-id="publish-verdict"></button>
                       <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
-                              class="btn btn-primary" style="float: right;"></button>
+                              class="btn btn-primary" style="float: right;" data-test-id="edit-verdict"></button>
                     </div>
                   </div>
 
@@ -1170,7 +1170,8 @@
                   ltext: 'stamp.start',
                   enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
                   visible: status() <= statusReady"
-                class="btn btn-primary btn-dialog">
+                class="btn btn-primary btn-dialog"
+                data-test-id="start-stamping">
               </button>
               <button data-bind="
                   ltext: 'stamp.cancel',
