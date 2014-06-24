@@ -2,7 +2,7 @@
 
 Documentation   User signs company agreement
 Suite setup     Apply minimal fixture now
-#Suite teardown  Logout
+Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -50,10 +50,9 @@ Bod decides to register his company after all, and this time he means it
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
   Click Element  xpath=//*[@data-test-id='register-company-start-sign']
   # In DEV only!
-  Wait until  Element should be visible  xpath=//span[@data-test-id='onnistuu-dummy-status']
-  Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  ready
-  Click element  xpath=//a[@data-test-id='onnistuu-dummy-fetch-doc']
-  Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  success
-  Click element  xpath=//a[@data-test-id='onnistuu-dummy-success']
-  Wait until  Element should be visible  xpath=//section[@id='register-company-success']
-  
+  # Wait until  Element should be visible  xpath=//span[@data-test-id='onnistuu-dummy-status']
+  # Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  ready
+  # Click element  xpath=//a[@data-test-id='onnistuu-dummy-fetch-doc']
+  # Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  success
+  # Click element  xpath=//a[@data-test-id='onnistuu-dummy-success']
+  # Wait until  Element should be visible  xpath=//section[@id='register-company-success']
