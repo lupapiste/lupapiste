@@ -16,7 +16,7 @@ Bob decides to register his company, but then cancels his mind
   Click Element  xpath=//*[@data-test-id='register-company-cancel']
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
   
-Bod decides to register his company after all, but still chikens out
+Bob decides to register his company after all, but still chikens out
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
@@ -24,16 +24,15 @@ Bod decides to register his company after all, but still chikens out
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha  
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-submit']
-  Click Element  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
+  Click enabled by test id  register-company-submit
+  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
   Click Element  xpath=//*[@data-test-id='register-company-cancel-sign']
   Wait until  Element should be visible  register-button
 
-Bod decides to register his company after all, and this time he means it
+Bob decides to register his company after all, and this time he means it
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
@@ -42,9 +41,8 @@ Bod decides to register his company after all, and this time he means it
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha  
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-submit']
-  Click Element  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
+  Click enabled by test id  register-company-submit
+  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
