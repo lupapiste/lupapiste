@@ -13,11 +13,11 @@
 
 (fact "create application link"
   (fact "..for application"
-    (get-application-link {:id 1} "" "fi" "http://localhost:8080")
-      => "http://localhost:8080/app/fi/applicant?hashbang=!/application/1#!/application/1")
+    (get-application-link {:id 1} "" "fi")
+      => (str (sade.env/value :host) "/app/fi/applicant#!/application/1"))
   (fact "..for inforequest"
-    (get-application-link {:id 1 :infoRequest true} "/comment" "fi" "http://localhost:8080" )
-      => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
+    (get-application-link {:id 1 :infoRequest true} "/comment" "fi" )
+      => (str (sade.env/value :host) "/app/fi/applicant#!/inforequest/1/comment")))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
