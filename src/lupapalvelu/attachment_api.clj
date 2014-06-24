@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify]]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as a]
@@ -269,7 +269,7 @@
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]
    :notified   true
-   :on-success [(fn [command _] (notifications/notify! :new-comment command))
+   :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]

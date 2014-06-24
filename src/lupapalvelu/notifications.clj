@@ -13,10 +13,10 @@
 ;; Helpers
 ;;
 
-(defn- get-application-link [{:keys [infoRequest id]} suffix lang & [host]]
+(defn- get-application-link [{:keys [infoRequest id]} suffix lang]
   (let [permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
-    (str (or host (env/value :host)) "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
+    (str (env/value :host) "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
 
 (defn- send-mail-to-recipients! [recipients subject msg]
   (future*

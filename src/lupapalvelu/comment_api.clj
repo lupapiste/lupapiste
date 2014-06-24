@@ -1,5 +1,6 @@
 (ns lupapalvelu.comment-api
   (:require [monger.operators :refer :all]
+            [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
@@ -8,15 +9,28 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.user :as user]))
 
+(defn- application-link [lang role full-path]
+  (str (env/value :host) "/app/" lang "/" role "#!" full-path))
+
+(defn- create-model [{{id :id} :application, {target :target} :data} _]
+  (let [[role full-path] (case (:type target)
+                        "verdict" ["authority" (str "/verdict/" id "/" (:id target))]
+                        "attachment" ["applicant" (str "/attachment/" id "/" (:id target))]
+                        ["applicant" (str "/application/" id "/conversation")])]
+    {:link-fi (application-link "fi" role full-path)
+     :link-sv (application-link "sv" role full-path)}))
+
 (notifications/defemail :new-comment
-  {:tab "/conversation"
-   :pred-fn (fn [{user :user {roles :roles} :data}]
-              (and (not= roles ["authority"]) (user/authority? user)))})
+  {:pred-fn (fn [{user :user {roles :roles target :target} :data}]
+              (and
+                (not= (:type target) "verdict") ; target might be comment target or attachment target
+                (user/authority? user)))
+   :model-fn create-model})
 
 (notifications/defemail :application-targeted-comment
   {:recipients-fn  notifications/from-user
    :subject-key    "new-comment"
-   :tab            "/conversation"})
+   :model-fn create-model})
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
   (when (and to (not (user/authority? user)))

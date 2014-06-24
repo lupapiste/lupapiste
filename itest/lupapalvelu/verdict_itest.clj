@@ -40,8 +40,7 @@
 
       (fact "Upload attachment to draft"
         (upload-attachment-to-target sonja application-id nil true verdict-id "verdict")
-        ;(fact "Nobody got mail" (last-email) => nil)
-        )
+        (fact "Nobody got mail" (last-email) => nil))
 
       (fact "Pena does not see comment or attachment"
         (let [{:keys [comments attachments]} (query-application pena application-id)]
@@ -52,6 +51,16 @@
         (let [{:keys [comments attachments]} (query-application sonja application-id)]
           (count comments) => 2 ; comment and new attachment auto-comment
           (count (keep :latestVersion attachments)) => 1))
+
+      (fact "Comment verdict, target is Ronja"
+        (command sonja :add-comment :id application-id :text "hello" :to ronja-id :target {:type "verdict" :id verdict-id} :openApplication false :roles [:authority]) => ok?
+        (let [email (last-email)]
+          (fact "Ronja got mail"
+            email => map?
+            (:to email) => (email-for "ronja")
+            ;(println (:body email))
+            ))
+          )
 
       (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id) => ok?)
 
