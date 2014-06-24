@@ -107,7 +107,7 @@
           <div data-bind="with: linkPermitData">
             <p data-bind="ltext: 'application.linkPermits'"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <span data-bind="visible: $data.type() === 'lupapistetunnus'">
+              <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
                 <a data-bind="text: $data.id,
                               click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
                               attr: {'data-test-app-link-permit': $data.id}"
@@ -119,7 +119,7 @@
                    data-test-id="test-remove-link-permit"
                    href="#" class="remove-link-permit"></a>
               </span>
-              <span data-bind="visible: $data.type() === 'kuntalupatunnus'">
+              <span data-bind="visible: $data.type() === 'kuntalupatunnus'" class="link-permit">
                 <span data-bind="text: $data.id,
                                attr: {'data-test-app-link-permit': $data.id}"
                     data-test-id="test-application-link-permit-kuntalupatunnus"
