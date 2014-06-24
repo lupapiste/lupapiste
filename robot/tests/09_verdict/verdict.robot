@@ -60,6 +60,14 @@ Sonja publishes verdict
   Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-2-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
   Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-2-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
 
+Add and delete verdict
+  Verdict count is  3
+  Go to give new verdict
+  Verdict count is  4
+  Click enabled by test id  delete-verdict
+  Confirm  dynamic-yes-no-confirm-dialog
+  Verdict count is  3
+
 Stamping dialog opens
   Open tab  attachments
   Element should be visible  xpath=//section[@id='application']//button[@data-test-id='application-stamp-btn']
@@ -89,6 +97,10 @@ Verdict is given
 
 Verdict is not given
   Wait until  Element should not be visible  application-verdict-details
+
+Verdict count is
+  [Arguments]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id="application-verdict-tab"]//h2[@class="application_section_header"]  ${amount}
 
 Input verdict
   [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}

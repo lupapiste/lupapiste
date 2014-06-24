@@ -19,7 +19,7 @@
           type="submit" class="btn btn-primary">
       </button>
 
-      <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'" class="btn" style="float:right"></button>
+      <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'" class="btn" style="float:right" data-test-id="delete-verdict"></button>
     </div>
 
     <div>
