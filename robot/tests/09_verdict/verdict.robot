@@ -25,7 +25,6 @@ Sonja logs in and throws in a verdict
   Open application  ${appname}  753-416-25-30
   Throw in a verdict
   Verdict is given  123567890
-  Can't regive verdict
 
 Stamping dialog opens and closes
   Open tab  attachments
@@ -37,10 +36,7 @@ Stamping dialog opens and closes
 
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict
-  Click enabled by test id  fetch-verdict
-  Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
-  Confirm  dynamic-ok-confirm-dialog
+  Fetch verdict
   Verdict is given  2013-01
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
@@ -63,5 +59,3 @@ Verdict is given
 Verdict is not given
   Wait until  Element should not be visible  application-verdict-details
 
-Can't regive verdict
-  Wait until  Element should not be visible  xpath=//*[@data-test-id='give-verdict']

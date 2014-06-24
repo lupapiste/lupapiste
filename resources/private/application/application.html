@@ -558,10 +558,12 @@
                 <div class="accordion_content expanded">
 
                   <div data-bind="with: $parent">
-                    <button data-bind="visible: $data.draft && $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
-                            class="btn btn-primary" style="float: right;margin-left: 3px"></button>
-                    <button data-bind="visible: $data.draft && $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
-                            class="btn btn-primary" style="float: right;"></button>
+                    <div data-bind="if: $data.draft">
+                      <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
+                              class="btn btn-primary" style="float: right;margin-left: 3px" data-test-id="publish-verdict"></button>
+                      <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
+                              class="btn btn-primary" style="float: right;"></button>
+                    </div>
                   </div>
 
                   <div class="accordion-fields">
