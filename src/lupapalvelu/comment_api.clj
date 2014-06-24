@@ -12,11 +12,12 @@
 (defn- application-link [lang role full-path]
   (str (env/value :host) "/app/" lang "/" role "#!" full-path))
 
-(defn- create-model [{{id :id} :application, {target :target} :data} _]
-  (let [[role full-path] (case (:type target)
-                        "verdict" ["authority" (str "/verdict/" id "/" (:id target))]
-                        "attachment" ["applicant" (str "/attachment/" id "/" (:id target))]
-                        ["applicant" (str "/application/" id "/conversation")])]
+(defn- create-model [{{id :id info-request? :infoRequest} :application, {target :target} :data} _]
+  (let [permit-type-path (if info-request? "/inforequest" "/application")
+        [role full-path] (case (:type target)
+                           "verdict" ["authority" (str "/verdict/" id "/" (:id target))]
+                           "attachment" ["applicant" (str "/attachment/" id "/" (:id target))]
+                           ["applicant" (str permit-type-path "/" id "/conversation")])]
     {:link-fi (application-link "fi" role full-path)
      :link-sv (application-link "sv" role full-path)}))
 

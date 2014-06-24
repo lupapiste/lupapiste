@@ -58,9 +58,9 @@
           (fact "Ronja got mail"
             email => map?
             (:to email) => (email-for "ronja")
-            ;(println (:body email))
-            ))
-          )
+            (let [[href a-id v-id] (re-find #"(?sm)http.+/app/fi/authority#!/verdict/([A-Za-z0-9-]+)/([0-9a-z]+)" (get-in email [:body :plain]))]
+              a-id => application-id
+              v-id => verdict-id))))
 
       (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id) => ok?)
 
