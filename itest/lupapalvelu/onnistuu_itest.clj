@@ -4,6 +4,12 @@
             [sade.http :as http]
             [lupapalvelu.onnistuu.process :as p]))
 
+(defn get-process [process-id]
+  (:process (u/query u/pena :find-sign-process :processId process-id)))
+
+(defn get-process-status [process-id]
+  (:status (get-process process-id)))
+
 (defn init-sign []
   (-> (u/command u/pena :init-sign
                  :companyName "company-name"
@@ -13,7 +19,7 @@
                  :email       "email"
                  :lang        "fi")
       :processId
-      p/find-sign-process))
+      get-process))
 
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
@@ -28,7 +34,7 @@
 (fact "cancel"
   (let [process-id (:id (init-sign))]
     (u/command u/pena :cancel-sign :processId process-id)
-    (p/find-sign-process process-id) => (contains {:status "cancelled"})))
+    (get-process-status process-id) => "cancelled"))
 
 (fact "cancel unknown"
   (u/command u/pena :cancel-sign :processId "fooo") => {:ok false, :text "error.unknown"})
@@ -36,7 +42,7 @@
 (fact "Fetch document"
     (let [process-id (:id (init-sign))]
       (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
-      (p/find-sign-process process-id) => (contains {:status "started"})))
+      (get-process-status process-id) => "started"))
 
 (fact "Fetch document for unknown process"
   (http/get (str (u/server-address) "/api/sign/document/" "foozaa") :throw-exceptions false) => (contains {:status 404}))
