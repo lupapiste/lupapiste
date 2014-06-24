@@ -494,6 +494,14 @@ Comment count is
   Wait until  Xpath Should Match X Times  //section[@id='${section}']//div[contains(@class,'comment-text')]  ${amount}
 
 #
+# Tasks
+#
+
+Task count is
+  [Arguments]  ${type}  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
+
+#
 # Quick, jettison the db...
 #
 

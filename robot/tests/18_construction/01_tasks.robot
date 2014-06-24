@@ -115,10 +115,6 @@ Verify post-verdict attachmens - Aloituskokous
 
 *** Keywords ***
 
-Task count is
-  [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
-
 Open task
   [Arguments]  ${name}
   Click Element  //div[@id='application-tasks-tab']//table//td/a[text()='${name}']
