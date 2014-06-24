@@ -84,17 +84,12 @@
 ;;
 
 (defonce ^:private mail-config
-  (atom {:application-targeted-comment {:recipients-fn  from-user
-                                        :subject-key    "new-comment"
-                                        :tab            "/conversation"}
-         :application-state-change     {:subject-key    "state-change"
+  (atom {:application-state-change     {:subject-key    "state-change"
                                         :application-fn (fn [{id :id}] (mongo/by-id :applications id))}
          :reminder-application-state   {:subject-key    "active-application-reminder"
                                         :recipients-fn  from-data}
          :application-verdict          {:subject-key    "verdict"
                                         :tab            "/verdict"}
-         :new-comment                  {:tab            "/conversation"
-                                        :pred-fn        (fn [{user :user}] (user/authority? user))}
          :invite                       {:recipients-fn  from-data}
          :add-statement-giver          {:recipients-fn  from-user
                                         :subject-key    "application.statements"

@@ -36,8 +36,7 @@
 
       (fact "Comment verdict"
         (command sonja :add-comment :id application-id :text "hello" :to nil :target {:type "verdict" :id verdict-id} :openApplication false :roles [:authority]) => ok?
-        ;(fact "Nobody got mail" (last-email) => nil)
-        )
+        (fact "Nobody got mail" (last-email) => nil))
 
       (fact "Upload attachment to draft"
         (upload-attachment-to-target sonja application-id nil true verdict-id "verdict")

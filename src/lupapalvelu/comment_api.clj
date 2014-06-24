@@ -8,6 +8,16 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.user :as user]))
 
+(notifications/defemail :new-comment
+  {:tab "/conversation"
+   :pred-fn (fn [{user :user {roles :roles} :data}]
+              (and (not= roles ["authority"]) (user/authority? user)))})
+
+(notifications/defemail :application-targeted-comment
+  {:recipients-fn  notifications/from-user
+   :subject-key    "new-comment"
+   :tab            "/conversation"})
+
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
