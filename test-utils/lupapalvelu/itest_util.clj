@@ -288,12 +288,12 @@
     messages))
 
 (defn contains-application-link? [application-id {body :body}]
-  (let [[href a-id a-id-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" (:plain body))]
-    (= application-id a-id a-id-again)))
+  (let [[href a-id] (re-find #"(?sm)http.+/app/fi/applicant#!/application/([A-Za-z0-9-]+)" (:plain body))]
+    (= application-id a-id)))
 
 (defn contains-application-link-with-tab? [application-id tab {body :body}]
-  (let [[href a-id a-tab a-id-again a-tab-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/([a-z]+)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
-    (and (= application-id a-id a-id-again) (= tab a-tab a-tab-again))))
+  (let [[href a-id a-tab] (re-find #"(?sm)http.+/app/fi/applicant#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
+    (and (= application-id a-id) (= tab a-tab))))
 
 ;;
 ;; Stuffin' data in
