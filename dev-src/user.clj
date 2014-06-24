@@ -14,4 +14,3 @@
   (env/enable-feature! :disable-anti-csrf))
 
 (def go server/-main)
-(println "Ready! To start Lupapiste server eval (go)")
