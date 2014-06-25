@@ -54,3 +54,6 @@ Bob decides to register his company after all, and this time he means it
   # Click element  xpath=//a[@data-test-id='onnistuu-dummy-success']
   # Wait until  Element should be visible  xpath=//section[@id='register-company-success']
   # [Teardown]  logout
+  #
+  # Fake logout
+  [Teardown]  Go to login page
