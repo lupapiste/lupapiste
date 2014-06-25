@@ -4,7 +4,7 @@
   function login() {
     var username = $("#login-username").val();
     var password = $("#login-password").val();
-    $("#login-message").text("").hide();
+    $("#login-message").text("").css('display', 'none');
 
     ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
@@ -22,7 +22,7 @@
   }
 
   hub.subscribe("login-failure", function(e) {
-    $("#login-message").text(loc(e.text)).show();
+    $("#login-message").text(loc(e.text)).css('display', 'block');
   });
 
   function Reset() {
