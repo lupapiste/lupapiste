@@ -10,7 +10,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Base_app_for_change_permit_${secs}
-  Set Suite Variable  ${propertyid}  753-416-17-15
+  Set Suite Variable  ${propertyid}  753-423-2-41
   Create application the fast way  ${appname}  753  ${propertyid}  asuinrakennus
 
   Wait until  Application state should be  open

@@ -10,7 +10,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Start_ready_app_${secs}
-  Create application the fast way   ${appname}  753  753-416-25-23  ya-katulupa-vesi-ja-viemarityot
+  Create application the fast way   ${appname}  753  753-423-2-162  ya-katulupa-vesi-ja-viemarityot
 
 Sonja fills in the application fields required by krysp
   Fill tyoaika fields

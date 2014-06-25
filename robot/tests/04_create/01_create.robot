@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
-  Create first application  create-app  753  753-416-17-15  R
+  Create first application  create-app  753  753-423-2-41  R
   It is possible to add operation
 
 Mikko sees application in list
@@ -74,7 +74,7 @@ Mikko closes application at Latokuja 3 and logs out
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application the fast way  create-veikko-auth-app  837  837-416-17-15  asuinrakennus
+  Create application the fast way  create-veikko-auth-app  837  837-111-172-1  asuinrakennus
   Wait until  Application state should be  open
   It is possible to add operation
 
