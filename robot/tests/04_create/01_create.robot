@@ -5,6 +5,9 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
+Setting maps enabled for these tests
+  Set integration proxy on
+
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
@@ -86,3 +89,7 @@ Veikko sees application in list
   Go to page  applications
   Request should be visible  create-veikko-auth-app
   [Teardown]  logout
+
+Setting maps disabled again after the tests
+  Set integration proxy off
+

@@ -5,6 +5,8 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
+Setting maps enabled for these tests
+  Set integration proxy on
 
 Mikko creates a kaivulupa
   Mikko logs in
@@ -33,3 +35,6 @@ Mikko creates a sijoituslupa
   Set Suite Variable  ${appname}  FOO_${secs}
   Create application  ${appname}  753  753-423-2-160  YA-sijoituslupa
   [Teardown]  logout
+
+Setting maps disabled again after the tests
+  Set integration proxy off
