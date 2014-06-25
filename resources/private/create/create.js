@@ -262,7 +262,13 @@
         .appendTo(ul);
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) {
+      if (!_.isEmpty(value)) {
+        return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value);
+      } else {
+        return self;
+      }
+    };
 
     self.searchPointByAddress = function(address) {
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
