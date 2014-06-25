@@ -209,27 +209,22 @@ var gis = (function() {
 
 
     var unselect = function(feature) {
-      console.log("entered unselect, feature: ", feature);
       if (feature && feature.popup) {
-        console.log("onUnselect, feature.popup: ", feature.popup);
         // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
         ko.cleanNode(feature.popup.contentDiv);
         $(feature.popup.contentDiv).empty();
 
         self.map.removePopup(feature.popup);
         feature.popup.destroy();
-        console.log("onUnselect, popup: ", feature.popup);
         feature.popup = null;
       }
       if (feature && feature.cluster && feature.cluster[0].popup) {
-        console.log("onUnselect, feature.cluster[0].popup: ", feature.cluster[0].popup);
         // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
         ko.cleanNode(feature.cluster[0].popup.contentDiv);
         $(feature.cluster[0].popup.contentDiv).empty();
 
         self.map.removePopup(feature.cluster[0].popup);
         feature.cluster[0].popup.destroy();
-        console.log("onUnselect, popup: ", feature.cluster[0].popup);
         feature.cluster[0].popup = null;
       }
       self.selectedFeature = null;
@@ -241,14 +236,11 @@ var gis = (function() {
 
 
     self.clear = function() {
-      console.log("entered self.clear");
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
       }
 
       if (self.selectedFeature) {
-//        self.selectControl.unselect(self.selectedFeature);
-        console.log("self.clear, calling unselectAll");
         self.selectControl.unselectAll();
         unselect(self.selectedFeature);
       }
@@ -268,63 +260,46 @@ var gis = (function() {
     var popupContentProviderResp = null;
     var popupId = "popup-id";
     self.programmaticallySelected = false;
-    self.userAddedMarker = false;
+    self.markerAddedDueToClickOnMap = false;
     self.selectedFeature = null;
 
     self.closePopup = function(e) {
-      console.log("closePopup, self.selectedFeature: ", self.selectedFeature);
-//      self.selectControl.unselect(self.selectedFeature);
       self.selectControl.unselectAll();
       unselect(self.selectedFeature);
     };
 
     function createPopup(feature, html) {
-      console.log("entered createPopup, feature: ", feature);
-      console.log("createPopup, feature.popup: ", feature.popup);
+      var popup = new OpenLayers.Popup.FramedCloud(
+          popupId,                                              // id (not used)
+          feature.geometry.getBounds().getCenterLonLat(),       // lonlat
+          null,                                                 // contentSize
+          html,                                                 // (html content)
+          null,                                                 // anchor
+          true,                                                 // closeBox
+          self.closePopup);                                     // closeBoxCallback
 
-//      if (self.popupContentProvider) {
-//        var popupContentProviderResp = self.popupContentProvider();
-
-        var popup = new OpenLayers.Popup.FramedCloud(
-            popupId,                                              // id (not used)
-            feature.geometry.getBounds().getCenterLonLat(),       // lonlat
-            null,                                                 // contentSize
-            html,                                                 // (html content)
-//            popupContentProviderResp.html,                        // (html content)
-            null,                                                 // anchor
-            true,                                                 // closeBox
-            self.closePopup);                                     // closeBoxCallback
-
-//        popup.keepInMap = true;
-        popup.panMapIfOutOfView = true;  //false
-        popup.closeOnMove = false;
-        popup.autoSize = true;
-        popup.minSize = new OpenLayers.Size(300, 410);
-        popup.maxSize = new OpenLayers.Size(450, 550)
-        popup.fixedRelativePosition = true;
-//        feature.popup = popup;
-//        feature.cluster[0].popup = popup;
-//        self.map.addPopup(popup, true);
-
-//        popupContentProviderResp.applyBindingsFn(popupId);
-        return popup;
-//      }
+      popup.panMapIfOutOfView = true;
+      popup.closeOnMove = false;
+      popup.autoSize = true;
+      popup.minSize = new OpenLayers.Size(300, 410);
+      popup.maxSize = new OpenLayers.Size(450, 550)
+      popup.fixedRelativePosition = true;
+      return popup;
     }
 
     function fitPopupOntoMap(feature) {
       if (feature.cluster[0].popup) {
-        // When marker feature was selected programmatically, the popup did not automatically center
-        // so that the whole popup would be visible on map.
-        // Using this hack to fix this.
-        // When marker is selected by hand centering happens (as it should due of the 'panMapIfOutOfView' option of OpenLayers.Popup.FramedCloud).
+        // When marker feature was selected programmatically, the popup did not automatically move so that
+        // the whole popup would be visible on map.
+        // Normally, when marker is manually selected the moving happens -
+        // as it should, due of the 'panMapIfOutOfView' option of OpenLayers.Popup.FramedCloud.
+        // Using this hack to move popup programmatically.
         var centerPoint = feature.cluster[0].geometry.bounds.centerLonLat;
-//        console.log("centerPoint: ", centerPoint);
         centerPoint.lat = centerPoint.lat + 40;
         centerPoint.lon = centerPoint.lon + 20;
         feature.cluster[0].popup.lonlat.lat = feature.cluster[0].popup.lonlat.lat + 40;
         feature.cluster[0].popup.lonlat.lon = feature.cluster[0].popup.lonlat.lon + 20;
         self.map.panTo(centerPoint);
-//        firstPopup.updateSize();
       }
     }
 
@@ -335,109 +310,38 @@ var gis = (function() {
 
       onSelect: function(feature) {
         self.selectedFeature = feature;
-        console.log("onSelect, feature: ", feature);
-        console.log("onSelect, feature.popup: ", feature.popup);
-        console.log("onSelect, feature.cluster[0].popup: ", feature.cluster[0].popup);
 
         if (self.popupContentProvider) {
-          if (/*!self.programmaticallySelected*/ !feature.popup && (!feature.cluster || !feature.cluster[0].popup)) {
-            console.log("onSelect, creating popup");
+          // HACK:
+          // When popup is opened programmatically, and user clicks a marker,
+          // we received another onSelect event (instead of Unselect event) for some reason.
+          // Needed to add some ugly logic to handle this.
+          //
+          if (feature.popup || (feature.cluster && feature.cluster[0].popup)) {
+
+            if (self.programmaticallySelected) {
+              self.programmaticallySelected = false;
+              self.map.addPopup(feature.cluster[0].popup, true);
+              if (popupContentProviderResp) {
+                popupContentProviderResp.applyBindingsFn(popupId);
+              }
+              // Do the moving of marker and its popup only when the marker is programmatically selected (from the Add function).
+              if (!self.markerAddedDueToClickOnMap) {
+                fitPopupOntoMap(feature);
+              }
+            } else {
+              self.selectControl.unselectAll();
+              unselect(feature);
+            }
+
+          } else {
+
             popupContentProviderResp = self.popupContentProvider();
             feature.popup = createPopup(feature, popupContentProviderResp.html);
             self.map.addPopup(feature.popup, true);
             popupContentProviderResp.applyBindingsFn(popupId);
 
-          } else {
-//            console.log("onSelect, NOT creating popup");
-            console.log("onSelect, NOT creating popup, adding feature: ", feature);
-//            console.log("onSelect, NOT creating popup, adding feature.cluster[0].popup: ", feature.cluster[0].popup);
-
-//            self.selectControl.unselect(feature.cluster[0]);
-//            self.selectControl.unselect(feature);
-//            feature.cluster[0].popup.toggle();
-
-
-//            feature.popup.show();
-
-//            self.map.addPopup(feature.cluster[0].popup, true);
-
-
-
-            if (self.programmaticallySelected) {
-              console.log("onSelect, self.programmaticallySelected -> adding popup");
-              self.programmaticallySelected = false;
-
-//            self.selectedFeature.popup.show();
-
-//            if (self.map.popups.length > 0) {
-//              self.map.popups[0].show();
-//            }
-
-//            feature.popup.events.listeners.click[0].func.call(feature, event);
-
-//            var firstPopup = self.map.popups[0];
-//            console.log("map's first popup: ", firstPopup);
-//            firstPopup.updateSize();
-//            console.log("popup safe content size: ", firstPopup.getSafeContentSize());
-
-
-//            console.log("createPopup, self.map: ", self.map);
-//            console.log("createPopup, feature.cluster[0].geometry: ", feature.cluster[0].geometry);
-              console.log("onSelect, feature.cluster[0].popup: ", feature.cluster[0].popup);
-//            console.log("createPopup, feature.geometry: ", feature.geometry);
-
-
-              self.map.addPopup(feature.cluster[0].popup, true);
-//              self.map.addPopup(self.markerLayer.features[0].cluster[0].popup, true);
-              if (popupContentProviderResp) popupContentProviderResp.applyBindingsFn(popupId);
-
-//              self.markerLayer.features[0].cluster[0].popup.updateSize();
-
-              console.log("onSelect, self.userAddedMarker: ", self.userAddedMarker);
-              if (!self.userAddedMarker) {
-//              fitPopupOntoMap(self.markerLayer.features[0]);
-                fitPopupOntoMap(feature);
-//              self.map.zoomToExtent(feature.geometry.bounds)
-              }
-
-//              self.markerLayer.drawFeature(feature);
-
-            } else {
-
-              console.log("onSelect, !self.programmaticallySelected -> unselecting popup");
-//              self.selectControl.unhighlight(feature);
-
-//              feature.cluster[0].popup.toggle();
-//              self.selectControl.unselect(feature.cluster[0]);
-//              self.selectControl.unselect(feature);
-              self.selectControl.unselectAll();
-              unselect(feature);
-            }
-
-
-            /*
-            - OpenLayers.Layer.Vector
-
-            drawFeature Draw (or redraw) a feature on the layer.
-
-
-            - click eri tavalla
-
-            feature.marker.events.listeners.click[0].func.call(feature, event)
-
-
-            - OpenLayers.Popup
-
-            updateSize  Auto size the popup so that it precisely fits its contents (as determined by this.contentDiv.innerHTML).
-            getSafeContentSize
-
-
-            - OpenLayers.Control.SelectFeature
-
-            clickFeature  Called on click in a feature Only responds if this.hover is false.
-             */
           }
-
         }
 
         if (self.markerClickCallback) {
@@ -453,35 +357,7 @@ var gis = (function() {
         }
       },
 
-      onUnselect: unselect /*function(feature) {
-        if (feature && feature.popup) {
-          console.log("onUnselect, feature.popup: ", feature.popup);
-          // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
-          ko.cleanNode(feature.popup.contentDiv);
-          $(feature.popup.contentDiv).empty();
-
-          self.map.removePopup(feature.popup);
-          feature.popup.destroy();
-          console.log("onUnselect, popup: ", feature.popup);
-          feature.popup = null;
-        }
-        if (feature && feature.cluster && feature.cluster[0].popup) {
-          console.log("onUnselect, feature.cluster[0].popup: ", feature.cluster[0].popup);
-          // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
-          ko.cleanNode(feature.cluster[0].popup.contentDiv);
-          $(feature.cluster[0].popup.contentDiv).empty();
-
-          self.map.removePopup(feature.cluster[0].popup);
-          feature.cluster[0].popup.destroy();
-          console.log("onUnselect, popup: ", feature.cluster[0].popup);
-          feature.cluster[0].popup = null;
-        }
-        self.selectedFeature = null;
-
-        if (self.markerMapCloseCallback) {
-          self.markerMapCloseCallback();
-        }
-      }*/
+      onUnselect: unselect
     });
 
     self.map.addControl(self.selectControl);
@@ -489,10 +365,7 @@ var gis = (function() {
 
     // Adding markers
 
-    self.add = function(markerInfos, autoSelect, userAdded) {
-
-      console.log("add, autoSelect: ", autoSelect);
-
+    self.add = function(markerInfos, autoSelect, isDueToClickOnMap) {
       var newMarkers = [];
       markerInfos = _.isArray(markerInfos) ? markerInfos : [markerInfos];
 
@@ -507,53 +380,24 @@ var gis = (function() {
 
         if (autoSelect && self.popupContentProvider) {
           popupContentProviderResp = self.popupContentProvider();
-          console.log("markerFeature.popup BEFORE: ", markerFeature.popup);
           markerFeature.popup = createPopup(markerFeature, popupContentProviderResp.html);
-          console.log("markerFeature.popup AFTER: ", markerFeature.popup);
         }
 
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);
-
-//        console.log("adding markerFeature: ", markerFeature);
-
       });  //each
 
       self.markerLayer.addFeatures(newMarkers);
 
-
       if (autoSelect && self.popupContentProvider) {
-
-        // Nama taytyy tehda self.selectControl.selectin kautta, tai unselect ei toimi?
-//        self.selectedFeature = self.markerLayer.features[0];
-//        self.map.addPopup(self.markerLayer.features[0].cluster[0].popup, true);
-//        if (popupContentProviderResp) popupContentProviderResp.applyBindingsFn(popupId);
-//        fitPopupOntoMap(self.markerLayer.features[0]);
-
-//        console.log("add, selecting the first markerFeature, self.markerLayer: ", self.markerLayer);
-
+        // HACK:
+        // We want to open a popup for the newly created marker (when autoSelect == true).
+        // It needs to be explicitly selected like this, to be able to close the popup later.
+        // Closing popup causes an Unselect event, and an error would occur inside Openlayers if this selection is not done.
+        //
         self.programmaticallySelected = true;
-        self.userAddedMarker = userAdded || false;
-
-        var fe = self.markerLayer.features[0];
-//        var fe = newMarkers[0];
-//        console.log("add, selecting feature, newMarkers[0].popup: ", newMarkers[0].popup);
-        console.log("add, selecting feature, self.markerLayer.features[0].cluster[0].popup: ", self.markerLayer.features[0].cluster[0].popup);
-//        console.log("add, selecting feature geometry: ", fe.geometry, ", zoom: ", self.getZoom());
-        self.selectControl.select(fe);
-//        self.center(fe.geometry.x, fe.geometry.y, self.getZoom());
-
-//        _.each(self.markerLayer.features, function(fe) {
-//          console.log("add, selecting feature geometry: ", fe.geometry, ", zoom: ", self.getZoom());
-//          self.selectControl.select(fe);
-//          self.center(fe.geometry.x, fe.geometry.y, self.getZoom());
-//        });
-
-//        var markerImage = $("image").attr("id", "OpenLayers_Geometry_Point_")[0];
-//        console.log("markerImage: ", markerImage);
-//        console.log("jquery markerImage: ", $(markerImage));
-//        $(markerImage).click();
-
+        self.markerAddedDueToClickOnMap = isDueToClickOnMap || false;
+        self.selectControl.select(self.markerLayer.features[0]);
       }
 
       return self;
@@ -577,7 +421,6 @@ var gis = (function() {
     // Map handling functions
 
     self.center = function(x, y, zoom) {
-//      console.log("self.center, x: ", x, ", y: ", y, ", zoom: ", zoom);
       self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
@@ -640,7 +483,8 @@ var gis = (function() {
           // This is somewhat a hack. It would be better to find a way to somehow stop propagation of click event earlier
           // in the selectControl's onSelect callback, or by the marker item (OpenLayers.Feature.Vector) itself.
           //
-          console.log("click handler trigger, event.target: ", event.target, ", event.target.nodeName: ", event.target.nodeName);
+          // HACK: Added check for the event.target.nodeName "DIV" to prevent creating new marker when marker popup's close cross is pressed.
+          //
           if (!event.target || (event.target.nodeName !== "image" && event.target.nodeName !== "DIV")) {
             var pos = self.map.getLonLatFromPixel(event.xy);
             handler(pos.lon, pos.lat);
