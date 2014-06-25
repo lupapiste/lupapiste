@@ -18,7 +18,7 @@ var gis = (function() {
     if (features.enabled("use-wmts-map")) {
 
       self.map = new OpenLayers.Map(element, {
-        theme: "/theme/default/style.css",
+        theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
         projection: new OpenLayers.Projection("EPSG:3067"),
         units: "m",
         maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
@@ -31,7 +31,7 @@ var gis = (function() {
     } else {
 
       self.map = new OpenLayers.Map(element, {
-        theme: "/theme/default/style.css",
+        theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
         projection: new OpenLayers.Projection("EPSG:3067"),
         units: "m",
         maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
