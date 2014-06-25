@@ -60,9 +60,12 @@ Go to operation tree
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Go to page  applications
   Click by test id  applications-create-new-application
-  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
-  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
-  Input text by test id  create-address  ${address}
+  Input Text  create-search  ${propertyId}
+  Click enabled by test id  create-search-button
+  Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
+  Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
+  Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
+  Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
   Click enabled by test id  create-continue
 
