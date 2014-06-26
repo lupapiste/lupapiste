@@ -7,6 +7,9 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
+Setting maps enabled for these tests
+  Set integration proxy on
+
 Operation tree does have 'Asuinrakennuksen rakentaminen' in it
   Apply minimal fixture now
   Mikko logs in
@@ -52,6 +55,9 @@ Operation tree does not have 'Asuinrakennuksen rakentaminen' in it
 #  Focus  ${element}
 #  Wait until  Element should not be visible  ${element}
   Logout
+
+Setting maps disabled again after the tests
+  Set integration proxy off
 
 
 *** Keywords ***
