@@ -208,7 +208,7 @@ var gis = (function() {
     self.markers = [];
 
 
-    var unselect = function(feature) {
+    var markerUnselect = function(feature) {
       if (feature && feature.popup) {
         // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
         ko.cleanNode(feature.popup.contentDiv);
@@ -242,7 +242,7 @@ var gis = (function() {
 
       if (self.selectedFeature) {
         self.selectControl.unselectAll();
-        unselect(self.selectedFeature);
+        markerUnselect(self.selectedFeature);
       }
 
       self.vectorLayer.removeAllFeatures();
@@ -265,7 +265,7 @@ var gis = (function() {
 
     self.closePopup = function(e) {
       self.selectControl.unselectAll();
-      unselect(self.selectedFeature);
+      markerUnselect(self.selectedFeature);
     };
 
     function createPopup(feature, html) {
@@ -331,7 +331,7 @@ var gis = (function() {
               }
             } else {
               self.selectControl.unselectAll();
-              unselect(feature);
+              markerUnselect(feature);
             }
 
           } else {
@@ -357,7 +357,7 @@ var gis = (function() {
         }
       },
 
-      onUnselect: unselect
+      onUnselect: markerUnselect
     });
 
     self.map.addControl(self.selectControl);
