@@ -485,7 +485,7 @@ var gis = (function() {
           //
           // HACK: Added check for the event.target.nodeName "DIV" to prevent creating new marker when marker popup's close cross is pressed.
           //
-          if (!event.target || (event.target.nodeName !== "image" && event.target.nodeName !== "DIV")) {
+          if (!event.target || (event.target.nodeName !== "image" && event.target.className !== "olPopupCloseBox")) {
             var pos = self.map.getLonLatFromPixel(event.xy);
             handler(pos.lon, pos.lat);
           }
