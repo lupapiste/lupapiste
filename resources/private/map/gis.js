@@ -294,11 +294,13 @@ var gis = (function() {
         // Normally, when marker is manually selected the moving happens -
         // as it should, due of the 'panMapIfOutOfView' option of OpenLayers.Popup.FramedCloud.
         // Using this hack to move popup programmatically.
+        var diffLat = 40;
+        var diffLon = 20;
         var centerPoint = feature.cluster[0].geometry.bounds.centerLonLat;
-        centerPoint.lat = centerPoint.lat + 40;
-        centerPoint.lon = centerPoint.lon + 20;
-        feature.cluster[0].popup.lonlat.lat = feature.cluster[0].popup.lonlat.lat + 40;
-        feature.cluster[0].popup.lonlat.lon = feature.cluster[0].popup.lonlat.lon + 20;
+        centerPoint.lat += diffLat;
+        centerPoint.lon += diffLon;
+        feature.cluster[0].popup.lonlat.lat += diffLat;
+        feature.cluster[0].popup.lonlat.lon += diffLon;
         self.map.panTo(centerPoint);
       }
     }
