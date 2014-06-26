@@ -55,7 +55,7 @@ Sonja adds owners - luonnollinen henkilo
 #  Set selenium speed  ${SLOW_SPEED}
   Mock proxy  property-id-by-point  "75341600380013"
   Mock query  owners  {"ok":true,"owners":[{"postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}
-  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Lönnroth, Tage
   Wait until  Page Should Contain  Präståkersvägen 1
   Wait until  Page Should Contain  04130 SIBBO
@@ -66,7 +66,7 @@ Sonja adds owners - luonnollinen henkilo
 Sonja adds owners - kuolinpesä
   Mock proxy  property-id-by-point  "75341600380013"
   Mock query  owners  {"ok":true,"owners":[{"kuolinpvm":799372800000,"sukunimi":"Palm","ulkomaalainen":false,"henkilolaji":"kuolinpesa","etunimet":"Paul Olavi","syntymapvm":-1642982400000,"yhteyshenkilo":{"postinumero":"70620","sukunimi":"Ruhtinas","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Birgitta","syntymapvm":-599097600000,"paikkakunta":"KUOPIO","jakeluosoite":"Saastamoisenkatu 17"}}]}
-  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Palm, Paul Olavi -Kuolinpesä
   Wait until  Page Should Contain  Ruhtinas, Birgitta
   Wait until  Page Should Contain  Saastamoisenkatu 17
@@ -77,7 +77,7 @@ Sonja adds owners - kuolinpesä
 
 Property-id-by-point error
   Mock proxy error  property-id-by-point
-  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Kiinteistötunnuksen haku ei onnistunut.
   Click element  xpath=//button[@data-test-id='neighbors.edit.cancel']
   Clear mocks
@@ -85,7 +85,7 @@ Property-id-by-point error
 Find owners error
   Mock proxy  property-id-by-point  "75341600380013"
   Mock query error  owners
-  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  20  20
+  Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Omistajien haku ei onnistunut.
   Page Should Contain  753-416-38-13
   Click element  xpath=//button[@data-test-id='neighbors.edit.cancel']
