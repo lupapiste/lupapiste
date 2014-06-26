@@ -14,7 +14,9 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
 
   var createMap = function(divName) {
-    return gis.makeMap(divName, false).center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
+    return gis
+      .makeMap(divName, false)
+      .center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
   };
 
   var getOrCreateMap = function(kind) {

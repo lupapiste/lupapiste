@@ -11,7 +11,7 @@ Mikko opens an application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
-  Set Suite Variable  ${propertyId}  753-416-17-15
+  Set Suite Variable  ${propertyId}  753-423-2-41
   Create application the fast way  ${appname}  753  ${propertyId}  asuinrakennus
 
 Mikko removes apartment
