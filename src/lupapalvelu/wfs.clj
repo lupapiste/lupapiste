@@ -331,23 +331,22 @@
 (defn plan-info-by-point [x y]
   (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]]
     (:body (http/get "http://194.111.49.141/WMSMikkeli.mapdef?"
-      {:query-params {"REQUEST" "GetFeatureInfo"
-                      "EXCEPTIONS" "application/vnd.ogc.se_xml"
-                      "SERVICE" "WMS"
-                      "INFO_FORMAT" "text/xml"
-                      "QUERY_LAYERS" "Asemakaavaindeksi"
-                      "FEATURE_COUNT" "50"
-                      "Layers" "Asemakaavaindeksi"
-                      "WIDTH" "256"
-                      "HEIGHT" "256"
-                      "format" "image/png"
-                      "styles" ""
-                      "srs" "EPSG:3067"
-                      "version" "1.1.1"
-                      "x" "128"
-                      "y" "128"
-                      "BBOX" (s/join "," bbox)}
-              }))))
+             {:query-params {"REQUEST" "GetFeatureInfo"
+                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
+                             "SERVICE" "WMS"
+                             "INFO_FORMAT" "text/xml"
+                             "QUERY_LAYERS" "Asemakaavaindeksi"
+                             "FEATURE_COUNT" "50"
+                             "Layers" "Asemakaavaindeksi"
+                             "WIDTH" "256"
+                             "HEIGHT" "256"
+                             "format" "image/png"
+                             "styles" ""
+                             "srs" "EPSG:3067"
+                             "version" "1.1.1"
+                             "x" "128"
+                             "y" "128"
+                             "BBOX" (s/join "," bbox)}}))))
 
 (defn gfi-to-features [gfi]
   (when gfi
@@ -358,7 +357,7 @@
       (xml-> info :FeatureKeysInLevel :FeatureInfo :FeatureKey))))
 
 (defn feature-to-feature-info  [feature]
-    (when feature
+  (when feature
     {:id (first (xml-> feature :property (attr= :name "ID") text))
      :kaavanro (first (xml-> feature :property (attr= :name "Kaavanro") text))
      :kaavalaji (first (xml-> feature :property (attr= :name "Kaavalaji") text))
