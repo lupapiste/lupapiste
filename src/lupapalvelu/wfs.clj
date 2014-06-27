@@ -5,7 +5,7 @@
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.data.zip.xml :refer [xml-> text]]
+            [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
             [sade.xml]
             [sade.strings :refer [starts-with-i]]
@@ -328,6 +328,41 @@
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
 
+(defn plan-info-by-point [x y]
+  (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]]
+    (:body (http/get "http://194.111.49.141/WMSMikkeli.mapdef?"
+             {:query-params {"REQUEST" "GetFeatureInfo"
+                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
+                             "SERVICE" "WMS"
+                             "INFO_FORMAT" "text/xml"
+                             "QUERY_LAYERS" "Asemakaavaindeksi"
+                             "FEATURE_COUNT" "50"
+                             "Layers" "Asemakaavaindeksi"
+                             "WIDTH" "256"
+                             "HEIGHT" "256"
+                             "format" "image/png"
+                             "styles" ""
+                             "srs" "EPSG:3067"
+                             "version" "1.1.1"
+                             "x" "128"
+                             "y" "128"
+                             "BBOX" (s/join "," bbox)}}))))
+
+(defn gfi-to-features [gfi]
+  (when gfi
+    (let [info (zip/xml-zip
+                 (xml/parse
+                   (java.io.ByteArrayInputStream. (.getBytes gfi))
+                   startparse-sax-non-validating))]
+      (xml-> info :FeatureKeysInLevel :FeatureInfo :FeatureKey))))
+
+(defn feature-to-feature-info  [feature]
+  (when feature
+    {:id (first (xml-> feature :property (attr= :name "ID") text))
+     :kaavanro (first (xml-> feature :property (attr= :name "Kaavanro") text))
+     :kaavalaji (first (xml-> feature :property (attr= :name "Kaavalaji") text))
+     :kasitt_pvm (first (xml-> feature :property (attr= :name "Kasitt_pvm") text))
+     :linkki (first (xml-> feature :property (attr= :name "Linkki") text))}))
 ;;
 ;; Raster images:
 ;;
