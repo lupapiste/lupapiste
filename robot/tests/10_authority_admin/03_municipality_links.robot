@@ -6,6 +6,9 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
+Setting maps enabled for these tests
+  Set integration proxy on
+
 Admin adds new municipality link
   Sipoo logs in
   Add link  fancy-link  http://reddit.com
@@ -60,10 +63,13 @@ Remove link
 
 User sees link
   [Arguments]  ${name}  ${url}
-  Prepare first request  Latokuja 103  753  75300000000001  R
+  Prepare first request  Latokuja 103  753  753-423-2-160  R
   Element Text Should Be  xpath=//a[@href='${url}']  ${name} fi
 
 User does not see link
   [Arguments]  ${name}
-  Prepare first request  Latokuja 103  753  75300000000001  R
+  Prepare first request  Latokuja 103  753  753-423-2-160  R
   Element should not be visible  //a[text()='${name} fi']
+
+Setting maps disabled again after the tests
+  Set integration proxy off

@@ -13,11 +13,11 @@
   var model = new function() {
     var self = this;
 
-    self.goPhase1 = function() { 
+    self.goPhase1 = function() {
       window.location = "#!/create-part-1";
       self.map.updateSize();
      };
-      
+
 
     self.goPhase2 = function() {
       window.location = "#!/create-part-2";
@@ -110,7 +110,22 @@
 
     self.clear = function() {
       var zoomLevel = features.enabled("use-wmts-map") ? 2 : 0;
-      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, zoomLevel).addClickHandler(self.click);
+      if (!self.map) self.map = gis
+        .makeMap("create-map", false)
+        .center(404168, 7205000, zoomLevel)
+        .addClickHandler(self.click)
+        .setPopupContentProvider(
+          function() {
+            var html = $("div.map-select-info")[0].innerHTML;
+            return {
+              html: html,
+              applyBindingsFn: function(popupId) {
+                $("#" + popupId + "_contentDiv").applyBindings(self);
+              }
+            };
+          }
+        );
+
       return self
         .search("")
         .x(0)
@@ -124,7 +139,7 @@
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
-    self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}); } return self.x(x).y(y); };
+    self.setXY = function(x, y, isUserClick) { if (self.map) { self.map.clear().add({x: x, y: y}, true, isUserClick); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
@@ -144,7 +159,7 @@
 
     self.click = function(x, y) {
       self
-        .setXY(x, y)
+        .setXY(x, y, true)
         .addressData(null)
         .propertyId(null)
         .beginUpdateRequest()
@@ -247,7 +262,13 @@
         .appendTo(ul);
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) {
+      if (!_.isEmpty(value)) {
+        return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value);
+      } else {
+        return self;
+      }
+    };
 
     self.searchPointByAddress = function(address) {
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
@@ -257,7 +278,7 @@
                 y = data.location.y;
             self
               .useManualEntry(false)
-              .setXY(x, y)
+              .setXY(x, y, false)
               .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .addressData(data)
               .beginUpdateRequest()
@@ -275,7 +296,7 @@
                 y = data.y;
             self
               .useManualEntry(false)
-              .setXY(x, y)
+              .setXY(x, y, false)
               .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .propertyId(id)
               .beginUpdateRequest()
