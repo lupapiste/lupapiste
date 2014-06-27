@@ -11,7 +11,7 @@ Sonja prepares the application that will later act as link permit
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Link_permit_app_${secs}
-  Set Suite Variable  ${propertyid}  753-416-17-15
+  Set Suite Variable  ${propertyid}  753-423-2-41
   Create application the fast way  ${appname}  753  ${propertyid}  asuinrakennus
   Submit application
   Click enabled by test id  approve-application
@@ -22,7 +22,7 @@ Sonja prepares the application that will later act as link permit
 Sonja prepares the application to whom the link permit will be added
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  App_to_have_link_permit_${secs}
-  Set Suite Variable  ${propertyid}  753-416-17-15
+  Set Suite Variable  ${propertyid}  753-423-2-41
   Create application the fast way  ${appname}  753  ${propertyid}  asuinrakennus
 
 Sonja adds a link permit (lupapistetunnus type) via the link permit dialog
