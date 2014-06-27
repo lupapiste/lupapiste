@@ -209,17 +209,21 @@ var gis = (function() {
 
 
     var markerUnselect = function(feature) {
-      if (feature) {
-        var popup = feature.popup || feature.cluster ? feature.cluster[0].popup : null;
-        if (popup) {
-          // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
-          ko.cleanNode(popup.contentDiv);
-          $(popup.contentDiv).empty();
-          self.map.removePopup(popup);
-          popup.destroy();
-          popup = null;
-        }
-
+      if (feature && feature.popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.popup.contentDiv);
+        $(feature.popup.contentDiv).empty();
+        self.map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+      }
+      if (feature && feature.cluster && feature.cluster[0].popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.cluster[0].popup.contentDiv);
+        $(feature.cluster[0].popup.contentDiv).empty();
+        self.map.removePopup(feature.cluster[0].popup);
+        feature.cluster[0].popup.destroy();
+        feature.cluster[0].popup = null;
       }
       self.selectedFeature = null;
 
