@@ -279,8 +279,8 @@ var gis = (function() {
       popup.panMapIfOutOfView = true;
       popup.closeOnMove = false;
       popup.autoSize = true;
-      popup.minSize = new OpenLayers.Size(300, 410);
-      popup.maxSize = new OpenLayers.Size(450, 550)
+      popup.minSize = new OpenLayers.Size(300, 500);
+      popup.maxSize = new OpenLayers.Size(300, 500)
       popup.fixedRelativePosition = true;
       return popup;
     }
@@ -297,7 +297,7 @@ var gis = (function() {
         var centerPoint = feature.cluster[0].geometry.bounds.centerLonLat;
         centerPoint.lat += diffLat;
         centerPoint.lon += diffLon;
-        feature.cluster[0].popup.lonlat.lat += diffLat;
+        feature.cluster[0].popup.lonlat.lat += (diffLat + 40);
         feature.cluster[0].popup.lonlat.lon += diffLon;
         self.map.panTo(centerPoint);
       }
