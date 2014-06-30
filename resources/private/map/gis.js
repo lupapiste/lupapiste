@@ -297,7 +297,7 @@ var gis = (function() {
         var centerPoint = feature.cluster[0].geometry.bounds.centerLonLat;
         centerPoint.lat += diffLat;
         centerPoint.lon += diffLon;
-        feature.cluster[0].popup.lonlat.lat += (diffLat + 40);
+        feature.cluster[0].popup.lonlat.lat += diffLat;
         feature.cluster[0].popup.lonlat.lon += diffLon;
         self.map.panTo(centerPoint);
       }
