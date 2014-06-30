@@ -258,7 +258,6 @@ var gis = (function() {
     var popupContentProviderResp = null;
     var popupId = "popup-id";
     self.programmaticallySelected = false;
-    self.markerAddedDueToClickOnMap = false;
     self.selectedFeature = null;
 
     self.closePopup = function(e) {
@@ -279,28 +278,10 @@ var gis = (function() {
       popup.panMapIfOutOfView = true;
       popup.closeOnMove = false;
       popup.autoSize = true;
-      popup.minSize = new OpenLayers.Size(300, 500);
-      popup.maxSize = new OpenLayers.Size(300, 500)
+      popup.minSize = new OpenLayers.Size(300, 505);
+      popup.maxSize = new OpenLayers.Size(300, 505)
       popup.fixedRelativePosition = true;
       return popup;
-    }
-
-    function fitPopupOntoMap(feature) {
-      if (feature.cluster[0].popup) {
-        // When marker feature was selected programmatically, the popup did not automatically move so that
-        // the whole popup would be visible on map.
-        // Normally, when marker is manually selected the moving happens -
-        // as it should, due of the 'panMapIfOutOfView' option of OpenLayers.Popup.FramedCloud.
-        // Using this hack to move popup programmatically.
-        var diffLat = 40;
-        var diffLon = 20;
-        var centerPoint = feature.cluster[0].geometry.bounds.centerLonLat;
-        centerPoint.lat += diffLat;
-        centerPoint.lon += diffLon;
-        feature.cluster[0].popup.lonlat.lat += diffLat;
-        feature.cluster[0].popup.lonlat.lon += diffLon;
-        self.map.panTo(centerPoint);
-      }
     }
 
     self.selectControl = new OpenLayers.Control.SelectFeature(self.markerLayer, {
@@ -324,10 +305,6 @@ var gis = (function() {
               self.map.addPopup(feature.cluster[0].popup, true);
               if (popupContentProviderResp) {
                 popupContentProviderResp.applyBindingsFn(popupId);
-              }
-              // Do the moving of marker and its popup only when the marker is programmatically selected (from the Add function).
-              if (!self.markerAddedDueToClickOnMap) {
-                fitPopupOntoMap(feature);
               }
             } else {
               self.selectControl.unselectAll();
@@ -365,7 +342,7 @@ var gis = (function() {
 
     // Adding markers
 
-    self.add = function(markerInfos, autoSelect, isDueToClickOnMap) {
+    self.add = function(markerInfos, autoSelect) {
       var newMarkers = [];
       markerInfos = _.isArray(markerInfos) ? markerInfos : [markerInfos];
 
@@ -396,7 +373,6 @@ var gis = (function() {
         // Closing popup causes an Unselect event, and an error would occur inside Openlayers if this selection is not done.
         //
         self.programmaticallySelected = true;
-        self.markerAddedDueToClickOnMap = isDueToClickOnMap || false;
         self.selectControl.select(self.markerLayer.features[0]);
       }
 
