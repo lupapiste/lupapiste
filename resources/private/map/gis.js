@@ -2,11 +2,11 @@ var gis = (function() {
   "use strict";
 
 
-  var iconDefaultPath  = "/img/map-marker.png";
+  var iconDefaultPath  = "/img/map-marker-big.png";
   var iconLocMapping = {
     "sameLocation"  : iconDefaultPath,
-    "sameOperation" : "/img/map-marker-red.png",
-    "others"        : "/img/map-marker-green.png",
+    "sameOperation" : "/img/map-marker-green.png",
+    "others"        : "/img/map-marker.png",
     "cluster"       : "/img/map-marker-group.png"
   };
 
@@ -267,21 +267,30 @@ var gis = (function() {
     };
 
     function createPopup(feature, html) {
-      var popup = new OpenLayers.Popup.FramedCloud(
+      console.log(feature);
+      console.log('x: ' + feature.geometry.x + ' y: ' + feature.geometry.y);
+      var anchor = {'size':new OpenLayers.Size(0,0),'offset':new OpenLayers.Pixel(100,200)};
+      var center = new OpenLayers.LonLat();
+      center.lon = feature.geometry.x;
+      center.lat = feature.geometry.y;
+      var popup = new OpenLayers.Popup.Anchored(
           popupId,                                              // id (not used)
-          feature.geometry.getBounds().getCenterLonLat(),       // lonlat
+          feature.geometry.getBounds().getCenterLonLat(),      // lonlat
           null,                                                 // contentSize
           html,                                                 // (html content)
-          null,                                                 // anchor
+          anchor,                                               // anchor
           true,                                                 // closeBox
           self.closePopup);                                     // closeBoxCallback
 
       popup.panMapIfOutOfView = true;
+      popup.relativePosition = "br";
+      popup.calculateRelativePosition = function () {
+           return 'tr';
+      }
       popup.closeOnMove = false;
       popup.autoSize = true;
-      popup.minSize = new OpenLayers.Size(300, 500);
-      popup.maxSize = new OpenLayers.Size(300, 500)
-      popup.fixedRelativePosition = true;
+      popup.minSize = new OpenLayers.Size(270, 500);
+      popup.maxSize = new OpenLayers.Size(270, 500);
       return popup;
     }
 
@@ -292,14 +301,17 @@ var gis = (function() {
         // Normally, when marker is manually selected the moving happens -
         // as it should, due of the 'panMapIfOutOfView' option of OpenLayers.Popup.FramedCloud.
         // Using this hack to move popup programmatically.
-        var diffLat = 40;
-        var diffLon = 20;
+        var diffLat = 0;
+        var diffLon = 0;
+        var temp = new OpenLayers.LonLat();
+        temp = feature.cluster[0].geometry.bounds.centerLonLat;
         var centerPoint = feature.cluster[0].geometry.bounds.centerLonLat;
         centerPoint.lat += diffLat;
         centerPoint.lon += diffLon;
         feature.cluster[0].popup.lonlat.lat += diffLat;
         feature.cluster[0].popup.lonlat.lon += diffLon;
         self.map.panTo(centerPoint);
+        feature.cluster[0].geometry.bounds.centerLonLat = temp;
       }
     }
 
