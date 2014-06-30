@@ -28,7 +28,7 @@
               data-bind="value: addressString, valueUpdate: 'afterkeydown'"
               data-test-id="create-address"
               type="text"
-              class="form-input text long"></input>
+              class="form-input text"></input>
           </div>
 
           <div class="form-entry">
@@ -41,13 +41,13 @@
                          value: municipalityCode,
                          optionsCaption: loc('choose')"
               data-test-id="create-municipality-select"
-              class="form-select form-input combobox long">
+              class="form-select form-input combobox">
             </select>
             <input
               data-bind="visible: !useManualEntry(), value: municipalityName"
               disabled="disabled"
               type="text"
-              class="form-input text long">
+              class="form-input text">
 
             <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
             <input
@@ -57,7 +57,7 @@
                          readonly: !currentUser.isAuthority()"
               data-test-id="create-property-id"
               type="text"
-              class="form-input text long bottom-marginM">
+              class="form-input text bottom-marginM">
           </div>
 
           <button
@@ -70,7 +70,7 @@
         </div>
       </div>
 
-      <div id="create-map" class="map create-application-map" style="width: 100%; height: 580px;"></div>
+      <div id="create-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
     </div>
   </section>
   <!-- Phase 2: -->
