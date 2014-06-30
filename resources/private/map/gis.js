@@ -267,15 +267,10 @@ var gis = (function() {
     };
 
     function createPopup(feature, html) {
-      console.log(feature);
-      console.log('x: ' + feature.geometry.x + ' y: ' + feature.geometry.y);
       var anchor = {'size':new OpenLayers.Size(0,0),'offset':new OpenLayers.Pixel(100,200)};
-      var center = new OpenLayers.LonLat();
-      center.lon = feature.geometry.x;
-      center.lat = feature.geometry.y;
       var popup = new OpenLayers.Popup.Anchored(
           popupId,                                              // id (not used)
-          feature.geometry.getBounds().getCenterLonLat(),      // lonlat
+          feature.geometry.getBounds().getCenterLonLat(),       // lonlat
           null,                                                 // contentSize
           html,                                                 // (html content)
           anchor,                                               // anchor
@@ -289,8 +284,8 @@ var gis = (function() {
       }
       popup.closeOnMove = false;
       popup.autoSize = true;
-      popup.minSize = new OpenLayers.Size(270, 500);
-      popup.maxSize = new OpenLayers.Size(270, 500);
+      popup.minSize = new OpenLayers.Size(270, 505);
+      popup.maxSize = new OpenLayers.Size(270, 505);
       return popup;
     }
 
