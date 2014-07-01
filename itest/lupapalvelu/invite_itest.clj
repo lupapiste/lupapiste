@@ -134,7 +134,7 @@
       (fact "Pena can still approve invite"
         (command pena :approve-invite :id application-id) => ok?))))
 
-(facts* "Auhtority invites designer"
+(facts* "Authority invites designer"
   (doseq [user-key [sonja mikko teppo]]
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
