@@ -278,7 +278,7 @@
                 y = data.location.y;
             self
               .useManualEntry(false)
-              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
+              .center(x, y, features.enabled("use-wmts-map") ? 13 : 11)
               .setXY(x, y)
               .addressData(data)
               .beginUpdateRequest()
