@@ -164,12 +164,10 @@
       (doall
         (pmap
           (fn [app]
-            (let [eraajo-user {:id (mongo/create-id) ;"777777777777777777111123"
+            (let [eraajo-user {:id (mongo/create-id)
                                :enabled true
                                :lastName "Er\u00e4ajo"
                                :firstName "Lupapiste"
-;                               :username "lupapiste-er\u00e4ajo"
-;                               :email "lupapiste-eraajo@lupapiste.fi"
                                :role "authority"
                                :organizations ids-of-all-orgs}
                   command (application->command app)
