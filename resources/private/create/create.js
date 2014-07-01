@@ -139,7 +139,7 @@
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
-    self.setXY = function(x, y, isUserClick) { if (self.map) { self.map.clear().add({x: x, y: y}, true, isUserClick); } return self.x(x).y(y); };
+    self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
@@ -159,7 +159,7 @@
 
     self.click = function(x, y) {
       self
-        .setXY(x, y, true)
+        .setXY(x, y)
         .addressData(null)
         .propertyId(null)
         .beginUpdateRequest()
@@ -278,8 +278,8 @@
                 y = data.location.y;
             self
               .useManualEntry(false)
-              .setXY(x, y, false)
               .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
+              .setXY(x, y)
               .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
@@ -296,8 +296,8 @@
                 y = data.y;
             self
               .useManualEntry(false)
-              .setXY(x, y, false)
               .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
+              .setXY(x, y)
               .propertyId(id)
               .beginUpdateRequest()
               .searchAddress(x, y);
