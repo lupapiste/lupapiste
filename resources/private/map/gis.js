@@ -154,7 +154,7 @@ var gis = (function() {
 
 
     var getIconHeight = function(feature) {
-      return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 25;
+      return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 40 : 32;
     };
 
     var context = {
@@ -172,7 +172,7 @@ var gis = (function() {
         return iconPath || iconDefaultPath;
       },
       graphicWidth: function(feature) {
-        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 21;
+        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 40 : 32;
       },
       graphicHeight: function(feature) {
         return getIconHeight(feature);
