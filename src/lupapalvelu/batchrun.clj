@@ -9,7 +9,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.user :as user]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.application :as application]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]))
@@ -157,3 +157,23 @@
 
     (mongo/disconnect!)))
 
+(defn check-for-verdicts [& args]
+  (when (env/feature? :automatic-verdicts-checking)
+    (let [apps (mongo/select :applications {:state {$in ["sent"]}})
+          ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
+      (doall
+        (pmap
+          (fn [app]
+            (let [eraajo-user {:id (mongo/create-id) ;"777777777777777777111123"
+                               :enabled true
+                               :lastName "Er\u00e4ajo"
+                               :firstName "Lupapiste"
+;                               :username "lupapiste-er\u00e4ajo"
+;                               :email "lupapiste-eraajo@lupapiste.fi"
+                               :role "authority"
+                               :organizations ids-of-all-orgs}
+                  command (application->command app)
+                  verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
+              (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
+                (notifications/notify! :application-verdict command))))
+          apps)))))
