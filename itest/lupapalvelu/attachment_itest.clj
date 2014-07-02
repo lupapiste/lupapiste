@@ -162,9 +162,11 @@
 (facts "Stamping"
   (let [application (create-and-submit-application sonja :municipality sonja-muni)
         application-id (:id application)
+
         attachment (first (:attachments application))
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
-        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)
+        comments (:comments(query-application sonja application-id))]
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
@@ -172,6 +174,9 @@
     ; Poll for 5 seconds
     (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
 
-    (fact "Attachment has stamp"
-      (let [attachment (get-attachment-by-id sonja application-id (:id attachment))]
-        (get-in attachment [:latestVersion :stamped]) => true))))
+    (fact "Attachment has stamp and no new comments"
+      (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
+            comments-after (:comments(query-application sonja application-id))]
+
+        (get-in attachment [:latestVersion :stamped]) => true
+        comments-after => comments))))
