@@ -26,11 +26,14 @@
         (info "email was sent successfully." recipient subject))))
   nil)
 
-(defn- get-email-subject [{title :title} & [title-key]]
+(defn- get-email-subject [{title :title
+                           municipality :municipality} & [title-key show-municipality-in-subject]]
   (let [title-postfix (when title-key (if (i18n/has-term? "fi" "email.title" title-key)
                                         (i18n/localize "fi" "email.title" title-key)
-                                        (i18n/localize "fi" title-key)))]
-    (str "Lupapiste.fi: " title (when (and title title-key)" - ") (when title-key title-postfix))))
+                                        (i18n/localize "fi" title-key)))
+        title-begin (str (when show-municipality-in-subject
+                         (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
+    (str "Lupapiste.fi: " title-begin (when (and title title-key)" - ") (when title-key title-postfix))))
 
 ; emails are sent to everyone in auth array except statement persons
 (defn- get-email-recipients-for-application [{:keys [auth statements]} included-roles excluded-roles]
@@ -95,7 +98,8 @@
                                         :subject-key    "application.statements"
                                         :model-fn       statement-giver-model}
          :request-statement            {:recipients-fn  from-data
-                                        :subject-key    "statement-request"}
+                                        :subject-key    "statement-request"
+                                        :show-municipality-in-subject true}
          :reminder-request-statement   {:recipients-fn  from-data
                                         :subject-key    "statement-request-reminder"
                                         :model-fn       request-statement-reminder-email-model}}))
@@ -116,7 +120,7 @@
             command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (remove ss/blank? (recipients-fn command))
-            subject        (get-email-subject application (get conf :subject-key (name template-name)))
+            subject        (get-email-subject application (get conf :subject-key (name template-name)) (get conf :show-municipality-in-subject false))
             model-fn       (get conf :model-fn create-app-model)
             model          (model-fn command conf)
             template-file  (get conf :template (str (name template-name) ".md"))
