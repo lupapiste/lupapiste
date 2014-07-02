@@ -146,7 +146,6 @@
 
 
 (defn send-reminder-emails [& args]
-
   (when (env/feature? :reminders)
     (mongo/connect!)
 
@@ -159,6 +158,8 @@
 
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
+    (mongo/connect!)
+
     (let [apps (mongo/select :applications {:state {$in ["sent"]}})
           ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
       (doall
@@ -174,4 +175,6 @@
                   verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
               (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
                 (notifications/notify! :application-verdict command))))
-          apps)))))
+          apps)))
+
+    (mongo/disconnect!)))
