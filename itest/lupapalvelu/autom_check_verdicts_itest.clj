@@ -1,14 +1,8 @@
 (ns lupapalvelu.autom_check_verdicts_itest
-  (:require [clojure.java.io :as io]
-;            [monger.operators :refer :all]
-            [midje.sweet :refer :all]
-            [lupapalvelu.core :refer [now]]
+  (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
-            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
 (apply-remote-minimal)
