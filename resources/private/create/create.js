@@ -184,7 +184,7 @@
       return false;
     };
 
-    var zoomLevel = {
+    var zoomLevelEnum = {
       "540": 6,
       "550": 7,
       "560": 9
@@ -202,7 +202,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevelEnum[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
