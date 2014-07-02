@@ -6,7 +6,7 @@ var gis = (function() {
   var iconLocMapping = {
     "sameLocation"  : iconDefaultPath,
     "sameOperation" : "/img/map-marker-green.png",
-    "others"        : "/img/map-marker.png",
+    "others"        : "/img/map-marker-orange.png",
     "cluster"       : "/img/map-marker-group.png"
   };
 
