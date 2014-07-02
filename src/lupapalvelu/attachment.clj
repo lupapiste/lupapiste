@@ -289,8 +289,10 @@
 
 (defn set-attachment-version
   ([application-id attachment-id file-id filename content-type size comment-text now user stamped]
-    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text now user stamped 5))
-  ([application-id attachment-id file-id filename content-type size comment-text now user stamped retry-limit]
+    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text now user stamped 5 true))
+  ([application-id attachment-id file-id filename content-type size comment-text now user stamped make-comment]
+    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text now user stamped 5 make-comment))
+  ([application-id attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment]
     (if (pos? retry-limit)
       (when-let [application (mongo/by-id :applications application-id)]
         (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
@@ -319,13 +321,12 @@
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
                              (util/deep-merge
-                               (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now)
+                               (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now))
                                {$set {:modified now
                                       :attachments.$.modified now
                                       :attachments.$.state  :requires_authority_action
                                       :attachments.$.latestVersion version-model}
-                                $push {:attachments.$.versions version-model}})
-                             true)]
+                                $push {:attachments.$.versions version-model}}) true)]
           ; Check return value and try again with new version number
           (if (pos? result-count)
             (assoc version-model :id attachment-id)
