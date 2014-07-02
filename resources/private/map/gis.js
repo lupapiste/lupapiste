@@ -159,7 +159,7 @@ var gis = (function() {
 
     var context = {
       extGraphic: function(feature) {
-        var iconPath = "img/map-marker.png";
+        var iconPath = null;
         if (feature.cluster) {
           if (feature.cluster.length > 1) {
             iconPath = iconLocMapping["cluster"];
