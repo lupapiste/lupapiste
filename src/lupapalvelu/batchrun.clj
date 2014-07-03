@@ -12,7 +12,8 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.dummy-email-server]))
 
 
 (defn get-timestamp-from-now [time-key amount]
