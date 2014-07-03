@@ -472,7 +472,7 @@
   [options]
   {:pre [(map? (:application options))]}
   (let [file-id (mongo/create-id)
-        {:keys [filename content user]} options
+        {:keys [filename content]} options
         application-id (-> options :application :id)
         sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)

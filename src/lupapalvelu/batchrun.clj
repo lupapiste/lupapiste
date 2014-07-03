@@ -9,10 +9,11 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.user :as user]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.application :as application]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.dummy-email-server]))
 
 
 (defn get-timestamp-from-now [time-key amount]
@@ -146,7 +147,6 @@
 
 
 (defn send-reminder-emails [& args]
-
   (when (env/feature? :reminders)
     (mongo/connect!)
 
@@ -157,3 +157,25 @@
 
     (mongo/disconnect!)))
 
+(defn check-for-verdicts [& args]
+  (when (env/feature? :automatic-verdicts-checking)
+    (mongo/connect!)
+
+    (let [apps (mongo/select :applications {:state {$in ["sent"]}})
+          ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
+      (doall
+        (pmap
+          (fn [app]
+            (let [eraajo-user {:id (mongo/create-id)
+                               :enabled true
+                               :lastName "Er\u00e4ajo"
+                               :firstName "Lupapiste"
+                               :role "authority"
+                               :organizations ids-of-all-orgs}
+                  command (application->command app)
+                  verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
+              (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
+                (notifications/notify! :application-verdict command))))
+          apps)))
+
+    (mongo/disconnect!)))
