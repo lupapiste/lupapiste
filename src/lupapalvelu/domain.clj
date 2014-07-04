@@ -24,7 +24,7 @@
     (basic-application-query-for user)
     (case (keyword (:role user))
       :applicant {:state {$ne "canceled"}}
-      :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
+      :authority {:state {$nin ["draft" "canceled"]}}
       {})))
 
 (defn- only-authority-sees [user checker items]
