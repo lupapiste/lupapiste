@@ -105,7 +105,7 @@ Marker count by type is
   [Arguments]  ${current-location-amount}  ${same-operation-amount}  ${others-amount}  ${cluster-amount}
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-big.png']  ${current-location-amount}
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-green.png']  ${same-operation-amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker.png']  ${others-amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-orange.png']  ${others-amount}
   Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-group.png']  ${cluster-amount}
 
 Total Inforequest info card count on map is
