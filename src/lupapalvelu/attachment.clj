@@ -292,8 +292,8 @@
 (defn set-attachment-version
   ([application attachment-id file-id filename content-type size comment-text now user stamped]
     {:pre [(map? application)]}
-    (set-attachment-version application attachment-id file-id filename content-type size comment-text now user stamped 5))
-  ([application attachment-id file-id filename content-type size comment-text now user stamped retry-limit]
+    (set-attachment-version application attachment-id file-id filename content-type size comment-text now user stamped 5 true))
+  ([application attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment]
     {:pre [(map? application)]}
     ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
@@ -324,7 +324,7 @@
                                                       :latestVersion.version.major (:major latest-version)
                                                       :latestVersion.version.minor (:minor latest-version)}}}
                            (util/deep-merge
-                             (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now)
+                             (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
                              {$set {:modified now
                                     :attachments.$.modified now
                                     :attachments.$.state  :requires_authority_action
@@ -338,7 +338,7 @@
             (error
               "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
               attachment-id retry-limit)
-            (set-attachment-version (mongo/by-id :applications (:id application)) attachment-id file-id filename content-type size now user stamped (dec retry-limit)))))
+            (set-attachment-version (mongo/by-id :applications (:id application)) attachment-id file-id filename content-type size now user stamped (dec retry-limit) make-comment))))
       (do
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
