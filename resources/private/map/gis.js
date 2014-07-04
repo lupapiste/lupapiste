@@ -155,7 +155,7 @@ var gis = (function() {
 
     var getIconHeight = function(feature) {
       if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
-        return 56;
+        return 53;
       } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
         return 47;
       } else {
