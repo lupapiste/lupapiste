@@ -68,16 +68,7 @@
         verdicts (krysp/->verdicts xml reader)]
     (map (partial verdict-attachments application user timestamp) verdicts)))
 
-(defcommand check-for-verdict
-  {:description "Fetches verdicts from municipality backend system.
-                 If the command is run more than once, existing verdicts are
-                 replaced by the new ones."
-   :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
-   :roles      [:authority]
-   :notified   true
-   :on-success  (notify :application-verdict)}
-  [{:keys [user created application] :as command}]
+(defn do-check-for-verdict [command user created application]
   (let [xml (application/get-application-xml application)
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
@@ -91,6 +82,18 @@
        (update-application command updates)
        (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
      (fail :info.no-verdicts-found-from-backend))))
+
+(defcommand check-for-verdict
+  {:description "Fetches verdicts from municipality backend system.
+                 If the command is run more than once, existing verdicts are
+                 replaced by the new ones."
+   :parameters [:id]
+   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :roles      [:authority]
+   :notified   true
+   :on-success  (notify :application-verdict)}
+  [{:keys [user created application] :as command}]
+  (do-check-for-verdict command user created application))
 
 ;;
 ;; Manual verdicts

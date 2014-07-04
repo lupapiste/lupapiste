@@ -110,21 +110,25 @@
 
     self.clear = function() {
       var zoomLevel = features.enabled("use-wmts-map") ? 2 : 0;
-      if (!self.map) self.map = gis
-        .makeMap("create-map", false)
-        .center(404168, 7205000, zoomLevel)
-        .addClickHandler(self.click)
-        .setPopupContentProvider(
-          function() {
-            var html = $("div.map-select-info")[0].innerHTML;
-            return {
-              html: html,
-              applyBindingsFn: function(popupId) {
-                $("#" + popupId + "_contentDiv").applyBindings(self);
+      if (self.map) {
+        self.map.clear();
+      } else {
+        self.map = gis
+          .makeMap("create-map", false)
+          .center(404168, 7205000, zoomLevel)
+          .addClickHandler(self.click)
+          .setPopupContentProvider(
+              function() {
+                var html = $("div.map-select-info")[0].innerHTML;
+                return {
+                  html: html,
+                  applyBindingsFn: function(popupId) {
+                    $("#" + popupId + "_contentDiv").applyBindings(self);
+                  }
+                };
               }
-            };
-          }
-        );
+          );
+      }
 
       return self
         .search("")
@@ -138,7 +142,7 @@
         .requestType(null)
     };
 
-    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
+    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0); };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
@@ -180,7 +184,7 @@
       return false;
     };
 
-    var zoomLevel = {
+    var zoomLevelEnum = {
       "540": 6,
       "550": 7,
       "560": 9
@@ -198,7 +202,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevelEnum[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));

@@ -17,11 +17,10 @@
       <div data-bind="visible: false">
         <div class="map-select-info">
           <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
-          <p data-bind="visible: municipalitySupported(), ltext: 'create.search-check-prompt'"></p>
+          <p data-bind="ltext: 'create.search-check-prompt'"></p>
 
           <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
-          <div data-bind="visible: !municipalitySupported(), ltext: 'municipalityNotSupported'"></div>
-          <div data-bind="visible: municipalitySupported()">
+          <div>
             <div class="form-entry">
               <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
               <input
