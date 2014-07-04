@@ -544,6 +544,7 @@
             <h2 class="application_section_header">
               <span data-bind="ltext: 'verdict.id'"></span>:
               <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
+              <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
             </h2>
 
             <!--  ko if:  $data.paatokset -->
@@ -555,6 +556,16 @@
                   <span data-bind="text: $index() + 1"></span>
                 </h2>
                 <div class="accordion_content expanded">
+
+                  <div data-bind="with: $parent">
+                    <div data-bind="if: $data.draft">
+                      <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
+                              class="btn btn-primary" style="float: right;margin-left: 3px" data-test-id="publish-verdict"></button>
+                      <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
+                              class="btn btn-primary" style="float: right;" data-test-id="edit-verdict"></button>
+                    </div>
+                  </div>
+
                   <div class="accordion-fields">
                     <!--  ko if:  $data.paivamaarat -->
                     <div data-bind="if: paivamaarat.anto" class="key-value-pair">
@@ -699,9 +710,11 @@
           </div>
 
           <button
-            data-bind="click: $root.verdictModel.openVerdict, ltext: 'application.verdict.add', visible: $root.authorization.ok('give-verdict')"
+            data-bind="click: $root.verdictModel.newVerdict, visible: $root.authorization.ok('new-verdict-draft'), disable: $root.verdictModel.newProcessing"
             class="btn btn-primary modal"
             data-test-id="give-verdict">
+            <em data-bind="visible: $root.verdictModel.newPending" class="button-loader"></em>
+            <span data-bind="ltext: 'application.verdict.add'"></span>
           </button>
 
           <button
@@ -781,7 +794,7 @@
                 </thead>
                 <tbody data-bind="foreach: neighbors">
                   <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + owner.email()}">
-                    <td data-bind="text: propertyId"></td>
+                    <td data-bind="propertyId: propertyId"></td>
                     <td data-bind="with: owner">
                       <span data-bind="text: name" class="owner-name"></span>
                       <span data-bind="text: address.street" class="owner-street"></span>
@@ -923,7 +936,7 @@
           </div>
 
           <div>
-            <table data-bind="foreach: taskGroups">
+            <table data-bind="foreach: taskGroups" class="tasks">
               <thead>
                 <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
                 <tr>
@@ -944,7 +957,7 @@
 
           <button class="btn btn-primary"
                   data-test-id="application-new-task"
-                  data-bind="click: $root.createTaskModel.createTask,
+                  data-bind="click: $root.createTask.createTask,
                              ltext: 'task.create',
                              visible: $root.authorization.ok('create-task'),
                              enable: $root.authorization.ok('create-task')"></button>
@@ -1157,7 +1170,8 @@
                   ltext: 'stamp.start',
                   enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
                   visible: status() <= statusReady"
-                class="btn btn-primary btn-dialog">
+                class="btn btn-primary btn-dialog"
+                data-test-id="start-stamping">
               </button>
               <button data-bind="
                   ltext: 'stamp.cancel',

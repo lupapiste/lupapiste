@@ -1,23 +1,22 @@
 var comments = (function() {
   "use strict";
 
-  function CommentModel(takeAll) {
+  function CommentModel(takeAll, newCommentRoles) {
     var self = this;
 
-    self.applicationId = ko.observable();
+    self.applicationId = null;
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-    self.hideAttachmentComments = ko.observable(false);
+    self.showAttachmentComments = ko.observable(false);
+    self.showPreparationComments = ko.observable(false);
 
     self.refresh = function(application, target) {
-      self
-        .applicationId(application.id)
-        .target(target || {type: "application"})
-        .text("");
+      self.applicationId = application.id;
+      self.target(target || {type: "application"}).text("");
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
@@ -33,17 +32,17 @@ var comments = (function() {
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(self.text());
     });
-    
-    
+
+
     var doAddComment = function(markAnswered, openApplication) {
-        var id = self.applicationId();
         ajax.command("add-comment", {
-            id: id,
+            id: self.applicationId,
             text: self.text(),
             target: self.target(),
             to: self.to(),
+            roles: newCommentRoles || ["applicant","authority"],
             "mark-answered": markAnswered,
-            openApplication: openApplication 
+            openApplication: openApplication
         })
         .processing(self.processing)
         .pending(self.pending)
@@ -52,12 +51,12 @@ var comments = (function() {
             if (markAnswered) {
                 LUPAPISTE.ModalDialog.showDynamicOk(loc('comment-request-mark-answered-label'), loc('comment-request-mark-answered.ok'));
             }
-            repository.load(id);
+            repository.load(self.applicationId);
         })
         .call();
         return false;
     };
-    
+
     self.markAnswered = function() {
       return doAddComment(true, false);
     };
@@ -79,10 +78,21 @@ var comments = (function() {
     self.isForAttachment = function(model) {
       return model && model.target && model.target.type() === "attachment";
     };
+
+    function isPreparationComment(model) {
+      return model && model.roles().length === 1 && model.roles()[0] === "authority";
+    }
+
+    self.isVisible = function(model) {
+      return !takeAll ||
+               ((!self.isForNewAttachment(model) || self.showAttachmentComments() ) &&
+                (!isPreparationComment(model)    || self.showPreparationComments()));
+    };
+
   }
 
   return {
-    create: function(takeAll) { return new CommentModel(takeAll); }
+    create: function(takeAll, newCommentRoles) { return new CommentModel(takeAll, newCommentRoles); }
   };
 
 })();

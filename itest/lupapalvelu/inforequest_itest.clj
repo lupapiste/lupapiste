@@ -25,7 +25,7 @@
 
     (fact "When Commenting on inforequest marks it answered"
       (query-application pena id)    => (in-state? :info)
-      (comment-application id sonja false)
+      (comment-application sonja id false) => ok?
       (query-application pena id)    => (in-state? :answered))
 
     (fact "Pena can convert-to-application"
@@ -57,7 +57,7 @@
        (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
        (count token) => pos?))
 
-    (comment-application application-id pena false)
+    (comment-application pena application-id false) => ok?
 
     (fact "Auhtority receives email about the comment"
       (let [email          (last-email)

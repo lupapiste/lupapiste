@@ -42,7 +42,7 @@
               email (first emails)]
           (fact "Veikko receives email"
             (:to email) => veikko-email
-            (:subject email) => "Lupapiste.fi: Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6")
+            (:subject email) => "Lupapiste.fi: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6")
           (fact "...but no-one else"
             (count emails) => 1)
           (fact "auth array has one entry more (veikko)"

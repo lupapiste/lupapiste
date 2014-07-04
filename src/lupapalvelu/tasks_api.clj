@@ -31,15 +31,20 @@
       updates)))
 
 ;; API
+(def valid-source-types #{"verdict"})
+
+(defn- valid-source [{:keys [id type]}]
+  (when (and (string? id) (valid-source-types type))
+    {:id id, :type type}))
 
 (defcommand create-task
   {:parameters [id taskName schemaName]
    :roles      [:authority]
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application user data] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
     (fail! :illegal-schema))
-  (let [task (tasks/new-task schemaName taskName {} {:created created :assignee user} {:type :authority :id (:id user)})]
+  (let [task (tasks/new-task schemaName taskName {} {:created created :assignee user} (or (valid-source (:source data)) {:type :authority :id (:id user)}))]
     (update-application command
       {$push {:tasks task}
        $set {:modified created}})
