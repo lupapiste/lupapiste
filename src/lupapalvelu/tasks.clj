@@ -82,9 +82,9 @@
     (new-task "task-katselmus" task-name data meta source)))
 
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
- (map-indexed
-   (fn [idx {lupamaaraykset :lupamaaraykset}]
-     (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
+ (map
+   (fn [{lupamaaraykset :lupamaaraykset}]
+     (let [source {:type "verdict" :id (:id verdict)}]
        (concat
          (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
          (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)

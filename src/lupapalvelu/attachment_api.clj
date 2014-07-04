@@ -6,7 +6,8 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify]]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as a]
             [lupapalvelu.user :as user]
@@ -268,7 +269,7 @@
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]
    :notified   true
-   :on-success [(fn [command _] (notifications/notify! :new-comment command))
+   :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
@@ -321,21 +322,6 @@
            :re-stamp? re-stamp?
            :attachment-id (:id attachment))))
 
-(defn- add-stamp-comment [new-version new-file-id file-info {:keys [application] :as context}]
-  ; mea culpa, but what the fuck was I supposed to do
-  ; FIXME use comment/comment-mongo-update!
-  (update-application
-    (application->command application)
-    {$set {:modified (:created context)}
-     $push {:comments {:text    (i18n/loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
-                       :created (:created context)
-                       :user    (:user context)
-                       :target  {:type "attachment"
-                                 :id (:attachment-id file-info)
-                                 :version (:version new-version)
-                                 :filename (:filename file-info)
-                                 :fileId new-file-id}}}}))
-
 (defn- stamp-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
@@ -345,11 +331,9 @@
                 out (io/output-stream temp-file)]
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
-    (let [new-version (if re-stamp?
+    (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
                         (a/update-version-content application attachment-id new-file-id (.length temp-file) created)
-                        (a/set-attachment-version (:id application) attachment-id new-file-id filename contentType (.length temp-file) nil created user true 5 false))]
-      ;(add-stamp-comment new-version new-file-id file-info context)
-      )
+                        (a/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil created user true 5 false))])
     (try (.delete temp-file) (catch Exception _))))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]

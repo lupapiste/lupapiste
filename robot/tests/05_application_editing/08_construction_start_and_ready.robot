@@ -20,8 +20,8 @@ Sonja fills in the application fields required by krysp
 Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
-  Throw in a verdict
-  Wait until  Element should not be visible  verdict-submit
+  Open tab  verdict
+  Submit empty verdict
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
   Open tab  tasks
@@ -51,7 +51,6 @@ Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
   Element should be visible  //*[@data-test-id='construction-state-change-info-closed']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Tab should be visible  tasks
-
 
 *** Keywords ***
 

@@ -9,7 +9,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.user :as user]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.verdict-api :as application]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]

@@ -20,7 +20,7 @@
 
     (command sonja :approve-application :id application-id-sent :lang "fi") => ok?
     (command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
-    (command sonja :give-verdict :id application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+    (give-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
 
     (let [application-submitted (query-application sonja application-id-submitted) => truthy
           application-sent (query-application sonja application-id-sent) => truthy

@@ -212,9 +212,12 @@
     id => truthy
     id))
 
-(defn comment-application [id apikey open]
-  (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target {:type "application"} :openApplication open) => ok?))
+(defn comment-application
+  ([apikey id open?]
+    {:pre [(instance? Boolean open?)]}
+    (comment-application apikey id open? nil))
+  ([apikey id open? to]
+    (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open? :roles [])))
 
 (defn query-application
   "Fetch application from server.
@@ -255,6 +258,12 @@
     resp => ok?
     (query-application apikey id)))
 
+(defn give-verdict [apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
+  (let [new-verdict-resp (command apikey :new-verdict-draft :id application-id)
+        verdict-id (:verdictId new-verdict-resp)]
+    (command apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+    (command apikey :publish-verdict :id application-id :verdictId verdict-id)))
+
 (defn allowed? [action & args]
   (fn [apikey]
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
@@ -279,12 +288,12 @@
     messages))
 
 (defn contains-application-link? [application-id {body :body}]
-  (let [[href a-id a-id-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" (:plain body))]
-    (= application-id a-id a-id-again)))
+  (let [[href a-id] (re-find #"(?sm)http.+/app/fi/applicant#!/application/([A-Za-z0-9-]+)" (:plain body))]
+    (= application-id a-id)))
 
 (defn contains-application-link-with-tab? [application-id tab {body :body}]
-  (let [[href a-id a-tab a-id-again a-tab-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/([a-z]+)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
-    (and (= application-id a-id a-id-again) (= tab a-tab a-tab-again))))
+  (let [[href a-id a-tab] (re-find #"(?sm)http.+/app/fi/applicant#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
+    (and (= application-id a-id) (= tab a-tab))))
 
 ;;
 ;; Stuffin' data in

@@ -1,0 +1,10 @@
+verdict.delete: Poista päätös
+verdict.text: Päätösteksti
+verdict.section: Pykälät
+verdict.agreement: Vaatii hakijan allekirjoituksen
+verdict.terms: Lupavaatimukset
+verdict.conversation: Valmistelumerkinnät
+verdict.confirmpublish: Haluatko varmasti julkaista päätöksen? Toimintoa ei voi perua. Hakemuksen osapuolet saavat päätöksestä sähköposti-ilmoituksen.
+conversation.preparation.toggle: Näytä valmistelumerkinnät
+conversation.attachment.toggle: Näytä liitteiden lisäykset
+

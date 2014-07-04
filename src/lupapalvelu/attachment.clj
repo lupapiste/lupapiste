@@ -214,6 +214,7 @@
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
+  {:pre [permit-type]}
   (partition 2
     (case (keyword permit-type)
       :R  attachment-types-R
@@ -223,10 +224,11 @@
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
-      (fail! (str "unsupported permit-type " permit-type)))))
+      (fail! (str "unsupported permit-type: " permit-type)))))
 
 (defn get-attachment-types-for-application
   [application]
+  {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
 (defn make-attachment [now target locked applicationState op attachement-type & [attachment-id]]
@@ -288,53 +290,55 @@
     latest))
 
 (defn set-attachment-version
-  ([application-id attachment-id file-id filename content-type size comment-text now user stamped]
-    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text now user stamped 5 true))
-  ([application-id attachment-id file-id filename content-type size comment-text now user stamped make-comment]
-    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text now user stamped 5 make-comment))
-  ([application-id attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment]
+  ([application attachment-id file-id filename content-type size comment-text now user stamped]
+    {:pre [(map? application)]}
+    (set-attachment-version application attachment-id file-id filename content-type size comment-text now user stamped 5 true))
+  ([application attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment]
+    {:pre [(map? application)]}
+    ; TODO refactor to use proper optimistic locking
+    ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
-      (when-let [application (mongo/by-id :applications application-id)]
-        (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
-              next-version (next-attachment-version latest-version user)
-              version-model {:version  next-version
-                             :fileId   file-id
-                             :created  now
-                             :accepted nil
-                             :user    (user/summary user)
-                             ; File name will be presented in ASCII when the file is downloaded.
-                             ; Conversion could be done here as well, but we don't want to lose information.
-                             :filename filename
-                             :contentType content-type
-                             :size size
-                             :stamped stamped}
+      (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
+            next-version (next-attachment-version latest-version user)
+            version-model {:version  next-version
+                           :fileId   file-id
+                           :created  now
+                           :accepted nil
+                           :user    (user/summary user)
+                           ; File name will be presented in ASCII when the file is downloaded.
+                           ; Conversion could be done here as well, but we don't want to lose information.
+                           :filename filename
+                           :contentType content-type
+                           :size size
+                           :stamped stamped}
 
-              comment-target {:type :attachment
-                              :id attachment-id
-                              :version next-version
-                              :filename filename
-                              :fileId file-id}
+            comment-target {:type :attachment
+                            :id attachment-id
+                            :version next-version
+                            :filename filename
+                            :fileId file-id}
 
-              result-count (update-application
-                             (application->command application)
-                             {:attachments {$elemMatch {:id attachment-id
-                                                        :latestVersion.version.major (:major latest-version)
-                                                        :latestVersion.version.minor (:minor latest-version)}}}
-                             (util/deep-merge
-                               (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil now))
-                               {$set {:modified now
-                                      :attachments.$.modified now
-                                      :attachments.$.state  :requires_authority_action
-                                      :attachments.$.latestVersion version-model}
-                                $push {:attachments.$.versions version-model}}) true)]
-          ; Check return value and try again with new version number
-          (if (pos? result-count)
-            (assoc version-model :id attachment-id)
-            (do
-              (warn
-                "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
-                attachment-id retry-limit)
-              (set-attachment-version application-id attachment-id file-id filename content-type size now user stamped (dec retry-limit))))))
+            result-count (update-application
+                           (application->command application)
+                           {:attachments {$elemMatch {:id attachment-id
+                                                      :latestVersion.version.major (:major latest-version)
+                                                      :latestVersion.version.minor (:minor latest-version)}}}
+                           (util/deep-merge
+                             (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
+                             {$set {:modified now
+                                    :attachments.$.modified now
+                                    :attachments.$.state  :requires_authority_action
+                                    :attachments.$.latestVersion version-model}
+                              $push {:attachments.$.versions version-model}})
+                           true)]
+        ; Check return value and try again with new version number
+        (if (pos? result-count)
+          (assoc version-model :id attachment-id)
+          (do
+            (error
+              "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
+              attachment-id retry-limit)
+            (set-attachment-version (mongo/by-id :applications (:id application)) attachment-id file-id filename content-type size now user stamped (dec retry-limit) make-comment))))
       (do
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
@@ -355,12 +359,11 @@
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked]}]
   {:pre [(map? application)]}
-  (let [application-id (:id application)
-        attachment-id (cond
+  (let [attachment-id (cond
                         (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
-                        (pos? (mongo/count :applications {:_id application-id :attachments.id attachment-id})) attachment-id
+                        (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
                         :else (create-attachment application attachment-type created target locked attachment-id))]
-    (set-attachment-version application-id attachment-id file-id filename content-type size comment-text created user false)))
+    (set-attachment-version application attachment-id file-id filename content-type size comment-text created user false)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
@@ -374,8 +377,9 @@
       (some #(= (keyword %) type-id) types))))
 
 (defn allowed-attachment-type-for-application? [application attachment-type]
-  (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
-    (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type)))
+  (when application
+    (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
+     (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type))))
 
 (defn get-attachments-infos
   "gets attachments from application"
@@ -397,42 +401,42 @@
 
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
-  [application attachmentId]
-  (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
+  [application attachment-id]
+  (->> (get-attachment-info application attachment-id) :versions (map :fileId)))
 
 (defn attachment-latest-file-id
   "Gets latest file-id from attachment."
-  [application attachmentId]
-  (last (attachment-file-ids application attachmentId)))
+  [application attachment-id]
+  (last (attachment-file-ids application attachment-id)))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
-  [application attachmentId file-id]
-  (let [file-ids (attachment-file-ids application attachmentId)]
+  [application attachment-id file-id]
+  (let [file-ids (attachment-file-ids application attachment-id)]
     (boolean (some #{file-id} file-ids))))
 
 (defn delete-attachment
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [{:keys [attachments] :as application} attachmentId]
-  (info "1/3 deleting files of attachment" attachmentId)
-  (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachmentId)))
-  (info "2/3 deleted files of attachment" attachmentId)
-  (update-application (application->command application) {$pull {:attachments {:id attachmentId}}})
-  (info "3/3 deleted meta-data of attachment" attachmentId))
+  [{:keys [attachments] :as application} attachment-id]
+  (info "1/3 deleting files of attachment" attachment-id)
+  (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachment-id)))
+  (info "2/3 deleted files of attachment" attachment-id)
+  (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
+  (info "3/3 deleted meta-data of attachment" attachment-id))
 
 (defn delete-attachment-version
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-  [{:keys [id attachments] :as application} attachmentId fileId]
-  (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
-    (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
+  [{:keys [id attachments] :as application} attachment-id fileId]
+  (let [latest-version (latest-version-after-removing-file attachments attachment-id fileId)]
+    (infof "1/3 deleting file %s of attachment %s" fileId attachment-id)
     (mongo/delete-file-by-id fileId)
-    (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
+    (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
     (update-application
       (application->command application)
-      {:attachments {$elemMatch {:id attachmentId}}}
+      {:attachments {$elemMatch {:id attachment-id}}}
       {$pull {:attachments.$.versions {:fileId fileId}}
        $set  {:attachments.$.latestVersion latest-version}})
-    (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
+    (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
 (defn get-attachment-as
   "Returns the attachment if user has access to application, otherwise nil."

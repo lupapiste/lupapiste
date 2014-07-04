@@ -56,25 +56,21 @@
       (fail :error.application-not-found :id id))
     (fail :error.application-not-found :id nil)))
 
-(defn- filter-params-of-command [params command filter-fn]
-  (seq (filter
-         #(let [s (get-in command [:data %])] (filter-fn s))
-         params)))
+(defn- filter-params-of-command [params command filter-fn error-message]
+  (when-let [non-matching (seq (filter #(filter-fn (get-in command [:data %])) params))]
+    (fail error-message :parameters (vec non-matching))))
 
 (defn non-blank-parameters [params command]
-  (when-let [non-matching (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))))]
-    (info "blank parameters:" (s/join ", " non-matching))
-    (fail :error.missing-parameters :parameters (vec non-matching))))
+  (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
 
 (defn vector-parameters [params command]
-  (when-let [non-matching (filter-params-of-command params command #(not (vector? %)))]
-    (info "non-vector parameters:" (s/join ", " non-matching))
-    (fail :error.non-vector-parameters :parameters (vec non-matching))))
+  (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
 
 (defn boolean-parameters [params command]
-  (when-let [non-matching (filter-params-of-command params command #(not (instance? Boolean %)))]
-    (info "non-boolean parameters:" (s/join ", " non-matching))
-    (fail :error.non-boolean-parameters :parameters (vec non-matching))))
+  (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
+
+(defn map-parameters [params command]
+  (filter-params-of-command params command (complement map?) :error.unknown-type))
 
 (defn update-application
   "Get current application from command (or fail) and run changes into it.

@@ -113,7 +113,7 @@
                          (i18n/loc "statement.updated")
                          (i18n/loc "statement.given"))
         comment-target {:type :statement :id statementId}
-        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil created)]
+        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)]
     (update-application command
       {:statements {$elemMatch {:id statementId}}}
       (util/deep-merge

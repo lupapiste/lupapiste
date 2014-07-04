@@ -1,79 +1,225 @@
-(function() {
+LUPAPISTE.verdictPageController = (function() {
   "use strict";
 
-  var applicationId = null;
+  var currentApplicationId = null;
+  var currentApplication = null;
+  var currentVerdictId = null;
 
   function VerdictEditModel() {
     var self = this;
+    self.refreshing = false;
 
-    self.application = ko.observable();
+    self.applicationTitle = ko.observable();
+
+    self.processing = ko.observable();
 
     self.statuses = _.range(1,43); // 42 different values in verdict in krysp (verdict.clj)
 
-    self.verdictId = ko.observable();
+    self.backendId = ko.observable();
+    self.draft = ko.observable();
     self.status = ko.observable();
     self.name = ko.observable();
+    self.text = ko.observable();
+    self.agreement = ko.observable(false);
+    self.section = ko.observable();
     self.given = ko.observable();
     self.official = ko.observable();
 
-    self.refresh = function(application) {
-      self.application(ko.mapping.fromJS(application));
-      if (application.verdict) {
-        self.reset(application.verdict);
+    self.taskGroups = ko.observable();
+
+    self.refresh = function(application, verdictId) {
+      self.refreshing = true;
+
+      self.applicationTitle(application.title);
+
+      var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
+      if (verdict) {
+        var paatos = verdict.paatokset[0];
+        var pk = paatos.poytakirjat[0];
+        var dates = paatos.paivamaarat;
+
+        self.backendId(verdict.kuntalupatunnus);
+        self.draft(verdict.draft);
+        self.status(pk.status);
+        self.name(pk.paatoksentekija);
+        self.given(dates.anto);
+        self.official(dates.lainvoimainen);
+        self.text(pk.paatos);
+        self.agreement(verdict.sopimus);
+        self.section(pk.pykala);
+      } else {
+        history.back();
+        repository.load(application.id);
       }
+
+      var tasks = _.filter(application.tasks || [], function(task) {
+        return _.isEqual(task.source, {"type":"verdict", id: currentVerdictId});
+      });
+
+      var schemaInfos = _.reduce(tasks, function(m, task) {
+        var info = task.schema.info;
+        m[info.name] = info;
+        return m;
+      },{});
+
+      var groups = _.groupBy(tasks, function(task) {return task.schema.info.name;});
+
+      self.taskGroups(_(groups)
+        .keys()
+        .map(function(n) {
+          return {
+            name: loc([n, "_group_label"]),
+            order: schemaInfos[n].order,
+            tasks: _.map(groups[n], function(task) {
+              task.displayName = taskUtil.shortDisplayName(task);
+              task.deleteTask = function() {
+                LUPAPISTE.ModalDialog.showDynamicYesNo(
+                    loc("areyousure"),
+                    loc("task.delete.confirm"),
+                    {title: loc("yes"), fn: function() {
+                      ajax
+                        .command("delete-task", {id: currentApplicationId, taskId: task.id})
+                        .success(function(){repository.load(currentApplicationId);})
+                        .call();}},
+                        {title: loc("no")});
+                return false;
+              };
+              task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
+              return task;
+            })};})
+        .sortBy("order")
+        .valueOf());
+
+      self.refreshing = false;
     };
 
-    self.reset = function(verdict) {
-      self.verdictId(verdict.id);
-      self.status(verdict.status);
-      self.name(verdict.name);
-      self.given(verdict.given);
-      self.official(verdict.official);
+    self.returnToApplication = function() {
+      repository.load(currentApplicationId);
+      window.location.hash = "!/application/" + currentApplicationId + "/verdict";
     };
 
-    self.submit = function() {
-      var givenMillis = new Date(self.given()).getTime();
-      var officialMillis = new Date(self.official()).getTime();
-      ajax
-        .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), status: self.status(), name: self.name(), given: givenMillis, official: officialMillis})
-        .success(function() {
-          repository.load(applicationId);
-          self.reset({});
-          window.location.hash = "!/application/"+applicationId+"/verdict";
-          return false;
-        })
-        .call();
+    self.save = function(onSuccess) {
+      if (!self.refreshing) {
+        var givenMillis = new Date(self.given()).getTime();
+        var officialMillis = new Date(self.official()).getTime();
+        ajax
+        .command("save-verdict-draft",
+            {id: currentApplicationId, verdictId: currentVerdictId,
+          backendId: self.backendId(), status: self.status(),
+          name: self.name(), text: self.text(),
+          section: self.section(),
+          agreement: self.agreement() || false,
+          given: givenMillis, official: officialMillis})
+          .success(onSuccess)
+          .processing(self.processing)
+          .call();
+      }
       return false;
     };
 
+
+    self.indicatorTimeout = null;
+    self.submit = function() {
+      var i$ = $("#verdictSubmitIndicator");
+      if (self.indicatorTimeout) {
+        clearTimeout(self.indicatorTimeout);
+      }
+      i$.hide();
+
+      self.save(function() {
+        i$.show();
+        self.indicatorTimeout = setTimeout(function () {
+          i$.fadeOut(200);
+        }, 3000);
+      });
+      return true;
+    };
+
+    _.each([self.backendId, self.draft, self.status, self.name, self.text, self.agreement,
+            self.section, self.given, self.official],
+           function(o) {
+             o.subscribe(self.submit);
+           }
+    );
+
+    self.commandAndBack = function(cmd) {
+      ajax
+      .command(cmd, {id: currentApplicationId, verdictId: currentVerdictId})
+      .success(function() {
+        repository.load(currentApplicationId);
+        window.location.hash = "!/application/" + currentApplicationId + "/verdict";
+      })
+      .processing(self.processing)
+      .call();
+    };
+
+    self.publish = function() {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmpublish"), {title: loc("yes"), fn: _.partial(self.save, _.partial(self.commandAndBack, "publish-verdict"))});
+    };
+
+    self.deleteVerdict = function() {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("areyousure.message"), {title: loc("yes"), fn: _.partial(self.commandAndBack, "delete-verdict")});
+    };
+
     self.disabled = ko.computed(function() {
-      return !(self.verdictId() && self.status() && self.name() && self.given() && self.official());
+      return self.processing() || !(self.backendId() && self.status() && self.name() && self.given() && self.official());
     });
   }
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "verdict"}, "muut.muu");
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
+  var createTaskController = LUPAPISTE.createTaskController;
+  var commentsModel = new comments.create(false, ["authority"]);
+  var authorities = ko.observableArray([]);
 
-  repository.loaded(["verdict"], function(application) {
-    if (applicationId === application.id) {
-      authorizationModel.refresh(application);
-      verdictModel.refresh(application);
-      attachmentsModel.refresh(application);
+  function refresh(application, authorityUsers, verdictId) {
+    var target = {type: "verdict", id: verdictId};
+    currentApplication = application;
+    currentApplicationId = currentApplication.id;
+    currentVerdictId = verdictId;
+
+    authorizationModel.refresh(application);
+    verdictModel.refresh(application, verdictId);
+    attachmentsModel.refresh(application, target);
+    createTaskController.reset(currentApplicationId, target);
+    commentsModel.refresh(application, target);
+    authorities(authorityUsers);
+  }
+
+  repository.loaded(["verdict"], function(application, applicationDetails) {
+    if (currentApplicationId === application.id) {
+      refresh(application, applicationDetails.authorities, currentVerdictId);
     }
   });
 
   hub.onPageChange("verdict", function(e) {
-    applicationId = e.pagePath[0];
-    repository.load(applicationId);
+    var applicationId = e.pagePath[0];
+    var verdictId = e.pagePath[1];
+    // Reload application only if needed
+    if (currentApplicationId !== applicationId) {
+      repository.load(applicationId);
+    } else if (currentVerdictId !== verdictId){
+      refresh(currentApplication, authorities(), currentVerdictId);
+    }
+    currentApplicationId = applicationId;
+    currentVerdictId = verdictId;
   });
 
   $(function() {
     $("#verdict").applyBindings({
       verdictModel: verdictModel,
       authorization: authorizationModel,
-      attachmentsModel: attachmentsModel
+      attachmentsModel: attachmentsModel,
+      createTask: createTaskController,
+      commentsModel: commentsModel,
+      authorities: authorities, // Authorities for comment template
+      application: {} // Dummy application for comment template
     });
   });
+
+  return {
+    setApplicationModelAndVerdictId: refresh
+  };
 
 })();
