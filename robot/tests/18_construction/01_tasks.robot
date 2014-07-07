@@ -14,10 +14,7 @@ Sonja prepares the application
   Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
   Submit application
   Open tab  verdict
-  Click enabled by test id  fetch-verdict
-  Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
-  Confirm  dynamic-ok-confirm-dialog
+  Fetch verdict
   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-0']  2013-01
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
@@ -117,10 +114,6 @@ Verify post-verdict attachmens - Aloituskokous
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 *** Keywords ***
-
-Task count is
-  [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
 
 Open task
   [Arguments]  ${name}

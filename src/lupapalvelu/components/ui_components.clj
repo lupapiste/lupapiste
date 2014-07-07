@@ -79,7 +79,7 @@
                   :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers-2.13_20140428.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common]
                   :js ["mypage.js"]
@@ -123,12 +123,15 @@
                   :js ["task.js"]
                   :html ["task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :modal-datepicker :signing]
+   :create-task  {:js ["create-task.js"]
+                  :html ["create-task.html"]}
+
+   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
-                       "create-task-model.js" "application-model.js" "application.js"]
+                       "application-model.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "create-task.html"]}
+                         "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]
@@ -147,9 +150,11 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common]
-                  :js ["registration-models.js" "register.js"]
-                  :html ["register.html" "register2.html" "register3.html"]}
-
+                  :js ["registration-models.js" "register.js"
+                       "company-registration.js"]
+                  :html ["register.html" "register2.html" "register3.html"
+                         "register-company.html" "register-company-success.html" "register-company-fail.html"]}
+   
    :link-account {:depends [:register]
                   :js ["link-account.js"]
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}

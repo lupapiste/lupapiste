@@ -23,16 +23,6 @@
     (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
                                                                          :documents (map drop-schema-data (:documents application))}})))
 
-(defn verdict-to-verdics [{verdict :verdict}]
-  {$set {:verdicts (map domain/->paatos verdict)}
-   $unset {:verdict 1}})
-
-(defmigration verdicts-migraation
-  {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
-  (let [applications (mongo/select :applications {:verdict {$exists true}})]
-    (doall (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications))))
-
-
 (defn fix-invalid-schema-infos [{documents :documents operations :operations :as application}]
   (let [updated-documents (doall (for [o operations]
                                    (let [operation-name (keyword (:name o))
@@ -446,7 +436,45 @@
       (when (seq updates)
         (mongo/update-by-id collection (:id application) {$unset updates})))))
 
-(defmigration cleanup-activation-collection
-  (let [active-accounts (map :email (mongo/select :users {:enabled true} {:email 1}))]
-    (mongo/remove-many :activation {:email {$in active-accounts}})))
+(defmigration cleanup-activation-collection-v2
+  (let [users (map :email (mongo/select :users {} {:email 1}))]
+    (mongo/remove-many :activation {:email {$nin users}})))
 
+(defmigration generate-verdict-ids
+  (doseq [application (mongo/select :applications {"verdicts.0" {$exists true}} {:verdicts 1, :attachments 1})]
+    (let [verdicts (map #(assoc % :id (mongo/create-id)) (:verdicts application))
+          id-for-urlhash (reduce
+                            #(let [hashes (->> %2 :paatokset (map :poytakirjat) flatten (map :urlHash) (remove nil?))]
+                               (merge %1 (zipmap hashes (repeat (:id %2)))))
+                            {} verdicts)
+          attachments (map
+                        (fn [{:keys [target] :as a}]
+                          (if (= "verdict" (:type target ))
+                            (if-let [hash (:id target)]
+                              ; Attachment for verdict from krysp
+                              (assoc a :target (assoc target :id (id-for-urlhash hash) :urlHash hash))
+                              ; Attachment for manual verdict
+                              (assoc a :target (assoc target :id (:id (first verdicts)))))
+                            a))
+                        (:attachments application))]
+
+      (mongo/update-by-id :applications (:id application) {$set {:verdicts verdicts, :attachments attachments}}))))
+
+(defmigration convert-task-source-ids
+  (doseq [application (mongo/select :applications {"verdicts.0" {$exists true} "tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
+    (let [id-for-kuntalupatunnus (reduce #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1) {} (:verdicts application))
+          tasks (map
+                  (fn [{:keys [source] :as task} ]
+                    (if (= "verdict" (:type source))
+                      (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
+                            verdict-id (id-for-kuntalupatunnus kuntalupatunnus)]
+                        (assert verdict-id (str "Unable to resolve source id: " task))
+                        (assoc task :source (assoc source :id verdict-id)))
+                      task))
+                  (:tasks application))]
+      (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
+
+(defmigration comment-roles
+  (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
+    (mongo/update-by-id :applications (:id application)
+      {$set (mongo/generate-array-updates :comments (:comments application) (constantly true) :roles [:applicant :authority])})))

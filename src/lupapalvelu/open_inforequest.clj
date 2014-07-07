@@ -4,13 +4,16 @@
             [noir.session :as session]
             [noir.response :as resp]
             [sade.env :as env]
-            [lupapalvelu.core :refer [now fail!]]
+            [lupapalvelu.core :refer [now fail fail!]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
 
+(defn not-open-inforequest-user-validator [{user :user} _]
+  (when (:oir user)
+    (fail :error.not-allowed-for-oir)))
 
 (defn- base-email-model [{{token :token-id} :data} _]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))

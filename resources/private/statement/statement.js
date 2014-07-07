@@ -152,7 +152,7 @@
 
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
-  var commentsModel = new comments.create();
+  var commentsModel = new comments.create(false);
   var attachmentsModel = new AttachmentsModel();
 
   repository.loaded(["statement"], function(application) {
