@@ -454,7 +454,7 @@
                               ; Attachment for verdict from krysp
                               (assoc a :target (assoc target :id (id-for-urlhash hash) :urlHash hash))
                               ; Attachment for manual verdict
-                              (assoc a :target (assoc target :id (:id (first verdicts)))))
+                              (assoc-in a [:target :id] (:id (first verdicts))))
                             a))
                         (:attachments application))]
 
