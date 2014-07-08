@@ -463,7 +463,7 @@
 (defmigration convert-task-source-ids
   (doseq [application (mongo/select :applications {"verdicts.0" {$exists true} "tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
     (let [id-for-kuntalupatunnus (reduce
-                                   (if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1)
+                                   #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1)
                                    {}
                                    (:verdicts application))
           tasks (map
@@ -471,7 +471,6 @@
                     (if (= "verdict" (:type source))
                       (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
                             ;; The task's source id might already be the id of some verdict of the application in question -> no needs for converting.
-                            already-converted-value
                             verdict-id (or
                                          (id-for-kuntalupatunnus kuntalupatunnus)
                                          (some (fn [[k v]] (when (= v kuntalupatunnus) kuntalupatunnus)) id-for-kuntalupatunnus))]
