@@ -9,7 +9,7 @@
 
 (facts* "Automatic checking for verdicts"
 
-  (last-email) ; Inbox zero
+  (dummy-email-server/messages :reset true) ; Inbox zero
 
   (let [application-submitted         (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 17") => truthy
         application-id-submitted      (:id application-submitted)
