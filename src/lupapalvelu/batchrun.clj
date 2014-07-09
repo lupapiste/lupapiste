@@ -150,6 +150,9 @@
   (when (env/feature? :reminders)
     (mongo/connect!)
 
+    ;; TEMP -> remove
+    (println "\n Entered send-reminder-emails \n")
+
     (statement-request-reminder)
     (open-inforequest-reminder)
     (neighbor-reminder)
@@ -160,6 +163,9 @@
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
+
+    ;; TEMP -> remove
+    (println "\n Entered check-for-verdicts \n")
 
     (let [apps (mongo/select :applications {:state {$in ["sent"]}})
           ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
