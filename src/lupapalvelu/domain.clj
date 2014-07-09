@@ -45,7 +45,7 @@
                              (let [reference (or (:target m) (:source m))]
                                (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
       (-> application
-        (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (:role user))) %))
+        (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
         commented-attachment-exists
