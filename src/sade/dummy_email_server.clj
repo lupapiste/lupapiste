@@ -15,7 +15,7 @@
 
 (when (get-in (env/get-config) [:email :dummy-server])
 
-  (warn "Initializing dummy email server")
+  (info "Initializing dummy email server")
 
   (def sent-messages (atom []))
 

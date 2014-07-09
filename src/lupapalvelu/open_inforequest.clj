@@ -58,13 +58,13 @@
                                                      :application application})
     true))
 
-(defn make-user [token]
+(defn- make-user [token]
   (let [organization-id (:organization-id token)
         email (:email token)]
     {:id (str "oir-" organization-id "-" email)
      :email email
      :enabled true
-     :role :authority
+     :role "authority"
      :oir true
      :organizations [organization-id]
      :firstName ""

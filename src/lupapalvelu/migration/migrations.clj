@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils]]
             [lupapalvelu.migration.core :refer [defmigration]]
@@ -454,7 +455,7 @@
                               ; Attachment for verdict from krysp
                               (assoc a :target (assoc target :id (id-for-urlhash hash) :urlHash hash))
                               ; Attachment for manual verdict
-                              (assoc a :target (assoc target :id (:id (first verdicts)))))
+                              (assoc-in a [:target :id] (:id (first verdicts))))
                             a))
                         (:attachments application))]
 
@@ -462,14 +463,29 @@
 
 (defmigration convert-task-source-ids
   (doseq [application (mongo/select :applications {"verdicts.0" {$exists true} "tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
-    (let [id-for-kuntalupatunnus (reduce #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1) {} (:verdicts application))
+    (let [id-for-kuntalupatunnus (reduce
+                                   #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1)
+                                   {}
+                                   (:verdicts application))
           tasks (map
                   (fn [{:keys [source] :as task} ]
                     (if (= "verdict" (:type source))
                       (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
-                            verdict-id (id-for-kuntalupatunnus kuntalupatunnus)]
-                        (assert verdict-id (str "Unable to resolve source id: " task))
-                        (assoc task :source (assoc source :id verdict-id)))
+                            ;; The task's source id might already be the id of some verdict of the application in question -> no needs for converting.
+                            already-converted-id (some (fn [[k v]] (when (= v kuntalupatunnus) kuntalupatunnus)) id-for-kuntalupatunnus)
+                            verdict-id (or
+                                         (id-for-kuntalupatunnus kuntalupatunnus)
+                                         already-converted-id)]
+                        ;;
+                        ;; TODO:
+                        ;; Make a Lupamonster test for kuntalupatunnus in tasks of applications.
+                        ;; The "verdict-id" should always be found. And when the situation is that the assert below could be uncommented.
+                        ;; Possibly there is a need for another migration.
+                        ;;
+;                        (assert verdict-id (str "Unable to resolve source id,\n  application id: " (:id application) ",\n  task: " task, ",\n  id-for-kuntalupatunnus: " id-for-kuntalupatunnus "\n"))
+                        (if verdict-id
+                          (assoc-in task [:source :id] verdict-id)
+                          (warnf "Unable to resolve source id,\n  application id: %s,\n  task: %s,\n  id-for-kuntalupatunnus: %s \n" (:id application) task id-for-kuntalupatunnus)))
                       task))
                   (:tasks application))]
       (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
