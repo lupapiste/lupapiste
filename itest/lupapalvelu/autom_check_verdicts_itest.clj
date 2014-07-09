@@ -37,6 +37,11 @@
       ;; dummy-email-server/messages sometimes returned nil for the email
       ;; (because the email sending is asynchronous). Thus applying sleep here.
       (Thread/sleep 100)
+
+      (println "\n sent email messages:")
+      (dummy-email-server/dump-sent-messages)
+      (println "\n")
+
       (let [emails (dummy-email-server/messages :reset true)]
         (fact "email count" (count emails) => 1)
         (let [email (last emails)]
