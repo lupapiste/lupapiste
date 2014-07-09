@@ -3,9 +3,12 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [sade.dummy-email-server :as dummy-email-server]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
-(apply-remote-minimal)
+(mongo/clear!)
+(fixture/apply-fixture "minimal")
 
 (facts* "Automatic checking for verdicts"
 
@@ -36,11 +39,7 @@
     (fact "Verifying the sent emails"
       ;; dummy-email-server/messages sometimes returned nil for the email
       ;; (because the email sending is asynchronous). Thus applying sleep here.
-      (Thread/sleep 1000)
-
-      (println "\n sent email messages:")
-      (dummy-email-server/dump-sent-messages)
-      (println "\n")
+      (Thread/sleep 100)
 
       (let [emails (dummy-email-server/messages :reset true)]
         (fact "email count" (count emails) => 1)
