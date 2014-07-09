@@ -485,7 +485,9 @@
 ;                        (assert verdict-id (str "Unable to resolve source id,\n  application id: " (:id application) ",\n  task: " task, ",\n  id-for-kuntalupatunnus: " id-for-kuntalupatunnus "\n"))
                         (if verdict-id
                           (assoc-in task [:source :id] verdict-id)
-                          (warnf "Unable to resolve source id,\n  application id: %s,\n  task: %s,\n  id-for-kuntalupatunnus: %s \n" (:id application) task id-for-kuntalupatunnus)))
+                          (do
+                            (warnf "Unable to resolve source id,\n  application id: %s,\n  task: %s,\n  id-for-kuntalupatunnus: %s \n" (:id application) task id-for-kuntalupatunnus)
+                            task)))
                       task))
                   (:tasks application))]
       (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
