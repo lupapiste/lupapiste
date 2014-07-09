@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]  ;; TODO: Remove this
             [sade.dummy-email-server]))
 
 
@@ -151,7 +152,7 @@
     (mongo/connect!)
 
     ;; TEMP -> remove
-    (println "\n Entered send-reminder-emails \n")
+    (warn "\n Entered send-reminder-emails \n")
 
     (statement-request-reminder)
     (open-inforequest-reminder)
@@ -165,7 +166,7 @@
     (mongo/connect!)
 
     ;; TEMP -> remove
-    (println "\n Entered check-for-verdicts \n")
+    (warn "\n Entered check-for-verdicts \n")
 
     (let [apps (mongo/select :applications {:state {$in ["sent"]}})
           ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
