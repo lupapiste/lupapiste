@@ -149,7 +149,6 @@
 (defn send-reminder-emails [& args]
   (when (env/feature? :reminders)
     (mongo/connect!)
-
     (statement-request-reminder)
     (open-inforequest-reminder)
     (neighbor-reminder)
@@ -160,7 +159,6 @@
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
-
     (let [apps (mongo/select :applications {:state {$in ["sent"]}})
           ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
       (doall
