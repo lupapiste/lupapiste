@@ -496,3 +496,24 @@
   (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
     (mongo/update-by-id :applications (:id application)
       {$set (mongo/generate-array-updates :comments (:comments application) (constantly true) :roles [:applicant :authority])})))
+
+(defmigration unify-attachment-latest-version
+  (doseq [application (mongo/select :applications {"state" {$in ["sent", "verdictGiven" "complement-needed", "constructionStarted"]}} {:attachments 1})
+          {:keys [latestVersion] :as attachment} (:attachments application)]
+    (let [last-version (last (:versions attachment))
+          last-version-index (dec (count (:versions attachment)))]
+      (when (and last-version (not= latestVersion last-version))
+        (println (:id application) (:id attachment) "last version is out of sync")
+
+        (assert (= (:version last-version) (:version latestVersion)))
+
+        (when-not (= (:fileId last-version) (:fileId latestVersion)) (mongo/delete-file-by-id (:fileId last-version)))
+
+        (println "Replacing " last-version " with " (:latestVersion attachment))
+
+        (assert
+          (pos?
+            (mongo/update-by-query
+              :applications
+              {:_id (:id application), :attachments {$elemMatch {:id (:id attachment)}}}
+              {$set {(str "attachments.$.versions." last-version-index) (:latestVersion attachment)}})))))))
