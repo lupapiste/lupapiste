@@ -1,5 +1,5 @@
 (ns lupapalvelu.stamper
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debugf info warn error fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [slingshot.slingshot :refer [throw+]]
@@ -98,16 +98,13 @@
       (doseq [page (range (.getNumberOfPages reader))]
         (let [visible-area (.getCropBox reader (inc page))
               rotation (.getPageRotation reader (inc page))
-              _ (debug "Rotation:" rotation)
               rotate? (pos? (mod rotation 180))
               sides   (get-sides visible-area)
-              _ (debug "visible-area without rotation:" sides)
               max-x (if rotate? (- (:top sides) (:bottom sides)) (- (:right sides) (:left sides)))
               min-y (if rotate? (:left sides) (:bottom sides))
-              _ (debug "max-x/min-y" max-x min-y)
               x (- max-x stamp-width (mm->u x-margin))
-              y (+ min-y (mm->u y-margin))
-              _ (debug "Stamp location" x y)]
+              y (+ min-y (mm->u y-margin))]
+          (debugf "Rotation: %s, visible-area without rotation: %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s" rotation sides max-x min-y x y)
           (doto (.getOverContent stamper (inc page))
             (.saveState)
             (.setGState gstate)

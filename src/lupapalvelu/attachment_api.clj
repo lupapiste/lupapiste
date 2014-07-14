@@ -341,11 +341,12 @@
   (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
     (doseq [file-info (vals file-infos)]
       (try
+        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
         (job/update job-id assoc (:attachment-id file-info) :working)
         (stamp-attachment! stamp file-info context)
         (job/update job-id assoc (:attachment-id file-info) :done)
-        (catch Exception e
-          (errorf e "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
+        (catch Throwable t
+          (errorf t "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
           (job/update job-id assoc (:attachment-id file-info) :error))))))
 
 (defn- stamp-job-status [data]
