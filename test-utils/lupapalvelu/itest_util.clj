@@ -245,7 +245,8 @@
           (:comments %)
           (:schema-version %)
           (:documents %)
-          (:attachments %)]}
+          (:attachments %)
+          (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
   (let [{:keys [application ok]} (query apikey :application :id id)]
     (assert ok)
     application))
