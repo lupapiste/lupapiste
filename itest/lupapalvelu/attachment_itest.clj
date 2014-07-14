@@ -165,8 +165,8 @@
 
         attachment (first (:attachments application))
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
-        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)
-        comments (:comments(query-application sonja application-id))]
+        comments (:comments (query-application sonja application-id))
+        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
@@ -174,9 +174,30 @@
     ; Poll for 5 seconds
     (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
 
-    (fact "Attachment has stamp and no new comments"
-      (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
-            comments-after (:comments(query-application sonja application-id))]
+    (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
+          comments-after (:comments (query-application sonja application-id))]
 
+      (fact "Attachment has stamp and no new comments"
         (get-in attachment [:latestVersion :stamped]) => true
-        comments-after => comments))))
+        comments-after => comments)
+
+      (facts "re-stamp"
+        (let [{job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+          resp => ok?
+          ; Poll for 5 seconds
+          (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+
+          (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
+
+            (:latestVersion attachment) =not=> (:latestVersion attachment-after-restamp)
+
+            )
+
+          )
+
+        )
+      )
+
+
+    )
+  )
