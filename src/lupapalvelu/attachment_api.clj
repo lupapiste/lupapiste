@@ -332,7 +332,7 @@
       (stamper/stamp stamp contentType in out x-margin y-margin transparency))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-                        (a/update-version-content application attachment-id new-file-id (.length temp-file) now)
+                        (a/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
                         (a/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil now user true 5 false))])
     (try (.delete temp-file) (catch Exception _))))
 
