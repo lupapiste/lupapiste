@@ -39,6 +39,17 @@
 (defmonster submitted-applications-documents-are-valid
   (documents-are-valid @submitted-applications "illegal-hetu"))
 
+;; Latest attachment version and latestVersion match
+
+(defn latest-version-mismatch [application]
+  (when-not (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments application))
+    (:id application)))
+
+(defmonster attachment-latest-version-in-sycn
+  (if-let [results (seq (remove nil? (map latest-version-mismatch @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
 ;; Documents have operation information
 
 (defn- application-schemas-have-ops [{documents :documents operations :operations :as application}]
