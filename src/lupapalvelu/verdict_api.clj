@@ -24,8 +24,9 @@
     (do
       (debug "Download" url)
       (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
-
-            resp            (http/get url :as :stream :throw-exceptions false)
+            resp            (try
+                              (http/get url :as :stream :throw-exceptions false)
+                              (catch Exception e {:status -1 :body (str e)}))
             header-filename  (when (get (:headers resp) "content-disposition")
                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
