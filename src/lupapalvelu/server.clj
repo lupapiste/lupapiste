@@ -6,6 +6,7 @@
             [lupapalvelu.vetuma]
             [sade.env :as env]
             [sade.security-headers :as headers]
+            [sade.email :as email]
             [sade.dummy-email-server]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.minimal]
@@ -40,7 +41,12 @@
     (System/getProperty "javax.net.ssl.trustStore"))
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
+
   (migration/update!)
+  (when-let [failures (seq (migration/failing-migrations))]
+    (let [msg (str "Failing migration(s): " (clojure.string/join failures))]
+      (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
+
   (mongo/ensure-indexes)
   (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
