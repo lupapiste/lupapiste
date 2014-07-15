@@ -135,14 +135,14 @@
      :userId        (get-in action [:user :id])}
     (action/execute action)))
 
-(defn- execute-command
+(defn execute-command
   ([name] (execute-command name (from-json (request/ring-request))))
   ([name params] (execute (enriched (action/make-command name params)))))
 
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
 
-(defn- execute-query [name params]
+(defn execute-query [name params]
   (execute (enriched (action/make-query name params))))
 
 (defjson "/api/query/:name" {name :name}

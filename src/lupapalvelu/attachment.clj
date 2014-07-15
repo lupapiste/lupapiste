@@ -356,9 +356,11 @@
 (defn update-latest-version-content [application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
-        latest-version-path (str "attachments.$.versions." latest-version-index ".")]
+        latest-version-path (str "attachments.$.versions." latest-version-index ".")
+        old-file-id (get-in attachment [:latestVersion :fileId])]
 
-    (mongo/delete-file-by-id (get-in attachment [:latestVersion :fileId]))
+    (when-not (= old-file-id file-id)
+      (mongo/delete-file-by-id old-file-id))
 
     (update-application
       (application->command application)
