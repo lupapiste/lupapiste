@@ -87,3 +87,17 @@
 
 (defmonster municipality-is-set
   (nil-property :municipality))
+
+;; task source is set
+
+(defn every-task-refers-verdict [{:keys [verdicts tasks id]}]
+  (let [verdict-ids (set (map :id verdicts))]
+     (when-not (every? (fn [{:keys [source]}] (or (not= "verdict" (:type source)) (verdict-ids (:id source)))) tasks)
+       id)))
+
+(defmonster task-source-refers-verdict
+  (if-let [results (seq (remove nil? (map every-task-refers-verdict @applications)))]
+    {:ok false :results results}
+    {:ok true})
+
+  )
