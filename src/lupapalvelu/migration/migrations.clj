@@ -8,6 +8,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]))
@@ -517,3 +518,11 @@
               :applications
               {:_id (:id application), :attachments {$elemMatch {:id (:id attachment)}}}
               {$set {(str "attachments.$.versions." last-version-index) (:latestVersion attachment)}})))))))
+
+(defmigration fix-missing-organizations
+  {:apply-when (pos? (mongo/count :applications {:organization nil}))}
+  (doseq [{:keys [id municipality permitType]} (mongo/select :applications {:organization nil} {:municipality 1, :permitType 1})]
+    (let [organization-id (:id (organization/resolve-organization municipality permitType))]
+      (assert organization-id)
+      (mongo/update-by-id :applications id {$set {:organization organization-id}}))))
+
