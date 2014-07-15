@@ -156,24 +156,26 @@
 
     (mongo/disconnect!)))
 
+(defn fetch-verdics []
+  (let [apps (mongo/select :applications {:state {$in ["sent"]}})
+        ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))
+        eraajo-user {:id "-"
+                     :enabled true
+                     :lastName "Er\u00e4ajo"
+                     :firstName "Lupapiste"
+                     :role "authority"
+                     :organizations ids-of-all-orgs}]
+    (doall
+      (pmap
+        (fn [app]
+          (let [command (application->command app)
+                verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
+            (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
+              (notifications/notify! :application-verdict command))))
+        apps))))
+
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
-    (let [apps (mongo/select :applications {:state {$in ["sent"]}})
-          ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))]
-      (doall
-        (pmap
-          (fn [app]
-            (let [eraajo-user {:id (mongo/create-id)
-                               :enabled true
-                               :lastName "Er\u00e4ajo"
-                               :firstName "Lupapiste"
-                               :role "authority"
-                               :organizations ids-of-all-orgs}
-                  command (application->command app)
-                  verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
-              (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
-                (notifications/notify! :application-verdict command))))
-          apps)))
-
+    (fetch-verdics)
     (mongo/disconnect!)))
