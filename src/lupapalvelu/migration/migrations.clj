@@ -462,36 +462,28 @@
 
       (mongo/update-by-id :applications (:id application) {$set {:verdicts verdicts, :attachments attachments}}))))
 
-(defmigration convert-task-source-ids
-  (doseq [application (mongo/select :applications {"verdicts.0" {$exists true} "tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
-    (let [id-for-kuntalupatunnus (reduce
-                                   #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1)
-                                   {}
-                                   (:verdicts application))
+(defmigration convert-task-source-ids-v2
+  (doseq [{verdicts :verdicts :as application} (mongo/select :applications {"tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
+    (let [id-for-kuntalupatunnus (reduce #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1) {} verdicts)
+          verdict-ids (set (map :id verdicts))
           tasks (map
                   (fn [{:keys [source] :as task} ]
-                    (if (= "verdict" (:type source))
-                      (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
-                            ;; The task's source id might already be the id of some verdict of the application in question -> no needs for converting.
-                            already-converted-id (some (fn [[k v]] (when (= v kuntalupatunnus) kuntalupatunnus)) id-for-kuntalupatunnus)
-                            verdict-id (or
-                                         (id-for-kuntalupatunnus kuntalupatunnus)
-                                         already-converted-id)]
-                        ;;
-                        ;; TODO:
-                        ;; Make a Lupamonster test for kuntalupatunnus in tasks of applications.
-                        ;; The "verdict-id" should always be found. And when the situation is that the assert below could be uncommented.
-                        ;; Possibly there is a need for another migration.
-                        ;;
-;                        (assert verdict-id (str "Unable to resolve source id,\n  application id: " (:id application) ",\n  task: " task, ",\n  id-for-kuntalupatunnus: " id-for-kuntalupatunnus "\n"))
-                        (if verdict-id
-                          (assoc-in task [:source :id] verdict-id)
-                          (do
-                            (warnf "Unable to resolve source id,\n  application id: %s,\n  task: %s,\n  id-for-kuntalupatunnus: %s \n" (:id application) task id-for-kuntalupatunnus)
-                            task)))
+                    (if (and (= "verdict" (:type source)) (not (verdict-ids (:id source))) )
+                      (if (empty? verdicts)
+                        (assoc task :source {}) ; no verdicts, clear invalid source
+                        (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
+                              verdict-id (or
+                                           (id-for-kuntalupatunnus kuntalupatunnus)
+                                           (:id (last verdicts)))]
+                          (if verdict-id
+                            (assoc-in task [:source :id] verdict-id)
+                            (do
+                              (warnf "Unable to resolve source id,\n  application id: %s,\n  task: %s,\n  id-for-kuntalupatunnus: %s \n" (:id application) task id-for-kuntalupatunnus)
+                              task))))
                       task))
                   (:tasks application))]
-      (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}}))))
+      (when-not (= tasks (:tasks application))
+        (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}})))))
 
 (defmigration comment-roles
   (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
