@@ -69,3 +69,21 @@
 
 (defmonster submitted-applications-schemas-have-ops
   (schemas-have-ops @submitted-applications))
+
+;; not null
+(defn nil-property [property]
+  (if-let [results (seq (remove nil? (map #(when (nil? (property %)) (:id %)) @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
+(defmonster organization-is-set
+  (nil-property :organization))
+
+(defmonster property-id-is-set
+  (nil-property :propertyId))
+
+(defmonster location-is-set
+  (nil-property :location))
+
+(defmonster municipality-is-set
+  (nil-property :municipality))
