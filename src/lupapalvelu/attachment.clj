@@ -208,6 +208,16 @@
         attachment-file-ids (map :fileId (:versions attachment))]
     (some #(file-id-set %) attachment-file-ids)))
 
+(defn get-attachments-infos
+  "gets attachments from application"
+  [application attachment-ids]
+  (let [ids (set attachment-ids)] (filter (comp ids :id) (:attachments application))))
+
+(defn get-attachment-info
+  "gets an attachment from application or nil"
+  [application attachment-id]
+  (first (get-attachments-infos application [attachment-id])))
+
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
@@ -343,15 +353,26 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-version-content [application attachment-id file-id size now]
-  (update-application
-    (application->command application)
-    {:attachments {$elemMatch {:id attachment-id}}}
-    {$set {:modified now
-           :attachments.$.modified now
-           :attachments.$.latestVersion.fileId file-id
-           :attachments.$.latestVersion.size size
-           :attachments.$.latestVersion.created now}}))
+(defn update-latest-version-content [application attachment-id file-id size now]
+  (let [attachment (get-attachment-info application attachment-id)
+        latest-version-index (-> attachment :versions count dec)
+        latest-version-path (str "attachments.$.versions." latest-version-index ".")
+        old-file-id (get-in attachment [:latestVersion :fileId])]
+
+    (when-not (= old-file-id file-id)
+      (mongo/delete-file-by-id old-file-id))
+
+    (update-application
+      (application->command application)
+      {:attachments {$elemMatch {:id attachment-id}}}
+      {$set {:modified now
+             :attachments.$.modified now
+             (str latest-version-path "fileId") file-id
+             (str latest-version-path "size") size
+             (str latest-version-path "created") now
+             :attachments.$.latestVersion.fileId file-id
+             :attachments.$.latestVersion.size size
+             :attachments.$.latestVersion.created now}})))
 
 
 (defn update-or-create-attachment
@@ -380,16 +401,6 @@
   (when application
     (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
      (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type))))
-
-(defn get-attachments-infos
-  "gets attachments from application"
-  [application attachment-ids]
-  (let [ids (set attachment-ids)] (filter (comp ids :id) (:attachments application))))
-
-(defn get-attachment-info
-  "gets an attachment from application or nil"
-  [application attachment-id]
-  (first (get-attachments-infos application [attachment-id])))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"

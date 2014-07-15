@@ -39,6 +39,17 @@
 (defmonster submitted-applications-documents-are-valid
   (documents-are-valid @submitted-applications "illegal-hetu"))
 
+;; Latest attachment version and latestVersion match
+
+(defn latest-version-mismatch [application]
+  (when-not (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments application))
+    (:id application)))
+
+(defmonster attachment-latest-version-in-sycn
+  (if-let [results (seq (remove nil? (map latest-version-mismatch @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
 ;; Documents have operation information
 
 (defn- application-schemas-have-ops [{documents :documents operations :operations :as application}]
@@ -58,3 +69,35 @@
 
 (defmonster submitted-applications-schemas-have-ops
   (schemas-have-ops @submitted-applications))
+
+;; not null
+(defn nil-property [property]
+  (if-let [results (seq (remove nil? (map #(when (nil? (property %)) (:id %)) @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
+(defmonster organization-is-set
+  (nil-property :organization))
+
+(defmonster property-id-is-set
+  (nil-property :propertyId))
+
+(defmonster location-is-set
+  (nil-property :location))
+
+(defmonster municipality-is-set
+  (nil-property :municipality))
+
+;; task source is set
+
+(defn every-task-refers-verdict [{:keys [verdicts tasks id]}]
+  (let [verdict-ids (set (map :id verdicts))]
+     (when-not (every? (fn [{:keys [source]}] (or (not= "verdict" (:type source)) (verdict-ids (:id source)))) tasks)
+       id)))
+
+(defmonster task-source-refers-verdict
+  (if-let [results (seq (remove nil? (map every-task-refers-verdict @applications)))]
+    {:ok false :results results}
+    {:ok true})
+
+  )

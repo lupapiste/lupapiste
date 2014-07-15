@@ -285,16 +285,16 @@
       (fail! (:text validation-error))))
 
   (when-not (a/attach-file! {:application application
-                           :filename filename
-                           :size size
-                           :content tempfile
-                           :attachment-id attachmentId
-                           :attachment-type attachmentType
-                           :comment-text text
-                           :target target
-                           :locked locked
-                           :user user
-                           :created created})
+                             :filename filename
+                             :size size
+                             :content tempfile
+                             :attachment-id attachmentId
+                             :attachment-type attachmentType
+                             :comment-text text
+                             :target target
+                             :locked locked
+                             :user user
+                             :created created})
     (fail :error.unknown)))
 
 
@@ -322,18 +322,18 @@
            :re-stamp? re-stamp?
            :attachment-id (:id attachment))))
 
-(defn- stamp-attachment! [stamp file-info {:keys [application user created] :as context}]
+(defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
     (with-open [in ((:content (mongo/download fileId)))
                 out (io/output-stream temp-file)]
-      (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
+      (stamper/stamp stamp contentType in out x-margin y-margin transparency))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-                        (a/update-version-content application attachment-id new-file-id (.length temp-file) created)
-                        (a/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil created user true 5 false))])
+                        (a/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
+                        (a/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil now user true 5 false))])
     (try (.delete temp-file) (catch Exception _))))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
@@ -341,11 +341,12 @@
   (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
     (doseq [file-info (vals file-infos)]
       (try
+        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
         (job/update job-id assoc (:attachment-id file-info) :working)
         (stamp-attachment! stamp file-info context)
         (job/update job-id assoc (:attachment-id file-info) :done)
-        (catch Exception e
-          (errorf e "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
+        (catch Throwable t
+          (errorf t "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
           (job/update job-id assoc (:attachment-id file-info) :error))))))
 
 (defn- stamp-job-status [data]
@@ -372,6 +373,7 @@
                          (number? timestamp) (long timestamp)
                          (ss/blank? timestamp) (:created command)
                          :else (->long timestamp))
+              :now      (:created command)
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))})))
