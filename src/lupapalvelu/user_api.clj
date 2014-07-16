@@ -503,7 +503,7 @@
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-    (user/refresh-user!)
+    (user/refresh-user! (:id user))
 
     (->> (assoc file-info :ok true)
       (resp/json)
@@ -529,7 +529,7 @@
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
-  (user/refresh-user!)
+  (user/refresh-user! (:id user))
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 

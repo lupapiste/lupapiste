@@ -194,15 +194,11 @@
   ([] (current-user (request/ring-request)))
   ([request] (request :user)))
 
-(defn load-current-user
-  "fetch the current user from db"
-  []
-  (get-user-by-id (:id (current-user))))
-
 (defn refresh-user!
   "Loads user information from db and saves it to session. Call this after you make changes to user information."
-  []
-  (when-let [user (load-current-user)]
+  [user-id]
+  {:pre [user-id]}
+  (when-let [user (get-user-by-id user-id)]
     (debug "user session refresh successful, username:" (:username user))
     (session/put! :user user)))
 
