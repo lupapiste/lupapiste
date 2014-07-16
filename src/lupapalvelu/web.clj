@@ -89,19 +89,17 @@
    :sessionId  (sessionId request)
    :host       (host request)})
 
-(defn- logged-in?
-  ([] (logged-in? (request/ring-request)))
-  ([request]
-    (not (nil? (:id (user/current-user request))))))
+(defn- logged-in? [request]
+  (not (nil? (:id (user/current-user request)))))
 
-(defn- in-role? [role]
-  (= role (keyword (:role (user/current-user (request/ring-request))))))
+(defn- in-role? [role request]
+  (= role (keyword (:role (user/current-user request)))))
 
-(defn- authority? [] (in-role? :authority))
-(defn- authority-admin? [] (in-role? :authorityAdmin))
-(defn- admin? [] (in-role? :admin))
-(defn- anyone [] true)
-(defn- nobody [] false)
+(def authority? (partial in-role? :authority))
+(def authority-admin? (partial in-role? :authorityAdmin))
+(def admin? (partial in-role? :admin))
+(defn- anyone [_] true)
+(defn- nobody [_] false)
 
 ;;
 ;; Status
@@ -206,15 +204,16 @@
     (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
 (defn- single-resource [resource-type app failure]
-  (if ((auth-methods app nobody))
-    ; Check If-None-Match header, see cache-headers above
-    (if (or (never-cache app) (s/blank? build-number) (not= (get-in (request/ring-request) [:headers "if-none-match"]) etag))
-      (->>
-        (java.io.ByteArrayInputStream. (compose resource-type app))
-        (resp/content-type (resource-type content-type))
-        (resp/set-headers (cache-headers resource-type)))
-      {:status 304})
-    failure))
+  (let [request (request/ring-request)]
+    (if ((auth-methods app nobody) request)
+     ; Check If-None-Match header, see cache-headers above
+     (if (or (never-cache app) (s/blank? build-number) (not= (get-in request [:headers "if-none-match"]) etag))
+       (->>
+         (java.io.ByteArrayInputStream. (compose resource-type app))
+         (resp/content-type (resource-type content-type))
+         (resp/set-headers (cache-headers resource-type)))
+       {:status 304})
+     failure)))
 
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
@@ -239,9 +238,10 @@
   ([]
     (landing-page default-lang))
   ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (user/current-user (request/ring-request)))))]
-      (redirect lang application-page)
-      (redirect-to-frontpage lang))))
+    (let [request (request/ring-request)]
+      (if-let [application-page (and (logged-in? request) (user/applicationpage-for (:role (user/current-user request))))]
+       (redirect lang application-page)
+       (redirect-to-frontpage lang)))))
 
 (defn- ->hashbang [v]
   (when (and v (= -1 (.indexOf v ":")))
@@ -376,7 +376,8 @@
 (defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
   (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
-  (let [target (when-not (every? s/blank? [targetId targetType])
+  (let [request (request/ring-request)
+        target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
                    {:type targetType :id targetId}))
@@ -391,11 +392,11 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (execute (enriched (action/make-command "upload-attachment" upload-data) (request/ring-request)))]
+        result (execute (enriched (action/make-command "upload-attachment" upload-data) request))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
-                                        (-> (:params (request/ring-request))
+                                        (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
                                           (assoc  :errorMessage (:text result)))))))))
@@ -534,7 +535,7 @@
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [request (request/ring-request)
           response (execute-query "apply-fixture" {:name name} request)]
-      (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
+      (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in request [:headers "user-agent"])))
         (resp/status 200 (str response))
         (resp/json response))))
 
@@ -544,7 +545,7 @@
           params (assoc (from-query) :propertyId property :messages (if message [message] []))
           response (execute-command "create-application" params request)]
       (if (core/ok? response)
-        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user (request/ring-request))))
+        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
         (resp/status 400 (str response)))))
 
