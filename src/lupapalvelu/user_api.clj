@@ -73,7 +73,7 @@
 (notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
 
 (defn- notify-new-authority [new-user created-by]
-  (let [token (token/make-token :authority-invitation (merge new-user {:caller-email (:email created-by)}))]
+  (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
     (notifications/notify! :invite-authority {:data {:email (:email new-user) :token token}})))
 
 (defn- validate-create-new-user! [caller user-data]
@@ -205,7 +205,7 @@
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
       (let [token-ttl (* 7 24 60 60 1000)
-            token (token/make-token :password-reset {:email (:email user)} :ttl token-ttl)]
+            token (token/make-token :password-reset caller {:email (:email user)} :ttl token-ttl)]
         (ok :id (:id user)
           :user user
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
@@ -334,7 +334,7 @@
     (let [user (mongo/select-one :users {:email email})]
       (if (and user (not= "dummy" (:role user)))
        (let [token-ttl (* 24 60 60 1000)
-             token (token/make-token :password-reset {:email email} :ttl token-ttl)]
+             token (token/make-token :password-reset nil {:email email} :ttl token-ttl)]
          (infof "password reset request: email=%s, token=%s" email token)
          (notifications/notify! :reset-password {:data {:email email :token token}})
          (ok))

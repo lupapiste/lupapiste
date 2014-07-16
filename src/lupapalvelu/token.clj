@@ -16,7 +16,7 @@
 
 (def make-token-id (partial security/random-password 48))
 
-(defn make-token [token-type data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
+(defn make-token [token-type user data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
   (let [token-id (make-token-id)
         now (core/now)
         request (request/ring-request)]
@@ -27,8 +27,8 @@
                           :auto-consume auto-consume
                           :created now
                           :expires (+ now ttl)
-                          :ip (:remote-addr request)
-                          :user-id (:id (user/current-user))})
+                          :ip (get-in request [:headers "x-real-ip"] (:remote-addr request))
+                          :user-id (:id (or user (user/current-user request)))})
     token-id))
 
 (defn get-token [id & {:keys [consume] :or {consume false}}]
