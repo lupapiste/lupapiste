@@ -149,8 +149,24 @@
   (let [request (request/ring-request)]
     (execute-query name (:params request) request)))
 
-(defjson [:get "/data-api/:name"] {name :name}
-  (execute-query name (from-query) (request/ring-request)))
+(defn basic-authentication
+  "Returns a user map or nil if authentication fails"
+  [request]
+  (let [auth (get-in request [:headers "authorization"])
+        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))
+        [u p] (and cred (s/split (str cred) #":" 2))]
+    (when (and u p)
+      (:user (execute-command "login" {:username u :password p} request)))))
+
+(defpage [:get "/data-api/:name"] {name :name}
+  (let [request (request/ring-request)
+        user (basic-authentication request)]
+    (if user
+      (resp/json (execute-query name (from-query) (assoc request :user user)))
+      (->
+        (resp/status 401 "Unauthorized")
+        (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))
+
 
 (defpage "/api/raw/:name" {name :name}
   (let [response (execute (enriched (action/make-raw name (from-query)) (request/ring-request)))]
