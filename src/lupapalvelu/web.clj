@@ -499,6 +499,9 @@
 ;; dev utils:
 ;;
 
+;; Static error responses for testing
+(defpage [:get ["/dev/:status"  :status #"[45]0\d"]] {status :status} (resp/status (util/->int status) status))
+
 (when (env/feature? :dummy-krysp)
   (defpage "/dev/krysp" {typeName :typeName r :request}
     (if-not (s/blank? typeName)
