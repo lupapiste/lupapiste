@@ -1,6 +1,7 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.set :as set]
+            [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.core :refer [defpage]]
@@ -211,11 +212,11 @@
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
           :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
-(defn get-or-create-user-by-email [email]
+(defn get-or-create-user-by-email [email current-user]
   (let [email (ss/lower-case email)]
     (or
       (user/get-user-by-email email)
-      (create-new-user (user/current-user) {:email email :role "dummy"}))))
+      (create-new-user current-user {:email email :role "dummy"}))))
 
 ;;
 ;; ==============================================================================
@@ -251,7 +252,7 @@
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
       (do
         (when (= email (:email caller))
-          (session/put! :user (user/get-user-by-email email)))
+          (user/refresh-user! (:id caller)))
         (ok))
       (fail :not-found :email email))))
 
@@ -486,7 +487,7 @@
   (ok :attachments (:attachments user)))
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
-  (let [user              (user/current-user)
+  (let [user              (user/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
         attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)

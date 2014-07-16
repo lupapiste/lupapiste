@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.request :as request]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
@@ -191,8 +190,7 @@
 
 (defn current-user
   "fetches the current user from session"
-  ([] (current-user (request/ring-request)))
-  ([request] (request :user)))
+  [request] (:user request ))
 
 (defn refresh-user!
   "Loads user information from db and saves it to session. Call this after you make changes to user information."

@@ -89,19 +89,19 @@
    :sessionId  (sessionId request)
    :host       (host request)})
 
-(defn logged-in?
+(defn- logged-in?
   ([] (logged-in? (request/ring-request)))
   ([request]
     (not (nil? (:id (user/current-user request))))))
 
-(defn in-role? [role]
-  (= role (keyword (:role (user/current-user)))))
+(defn- in-role? [role]
+  (= role (keyword (:role (user/current-user (request/ring-request))))))
 
-(defn authority? [] (in-role? :authority))
-(defn authority-admin? [] (in-role? :authorityAdmin))
-(defn admin? [] (in-role? :admin))
-(defn anyone [] true)
-(defn nobody [] false)
+(defn- authority? [] (in-role? :authority))
+(defn- authority-admin? [] (in-role? :authorityAdmin))
+(defn- admin? [] (in-role? :admin))
+(defn- anyone [] true)
+(defn- nobody [] false)
 
 ;;
 ;; Status
@@ -239,7 +239,7 @@
   ([]
     (landing-page default-lang))
   ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (user/current-user))))]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (user/current-user (request/ring-request)))))]
       (redirect lang application-page)
       (redirect-to-frontpage lang))))
 
@@ -415,7 +415,7 @@
 ;; Server is alive
 ;;
 
-(defjson "/api/alive" [] {:ok (if (user/current-user) true false)})
+(defjson "/api/alive" [] {:ok (if (user/current-user (request/ring-request)) true false)})
 
 ;;
 ;; Proxy
@@ -544,7 +544,7 @@
           params (assoc (from-query) :propertyId property :messages (if message [message] []))
           response (execute-command "create-application" params request)]
       (if (core/ok? response)
-        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
+        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user (request/ring-request))))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
         (resp/status 400 (str response)))))
 
