@@ -2,6 +2,7 @@
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [ring "1.2.1"]
+                 [ring-basic-authentication "1.0.5"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [bultitude "0.2.2"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
                  [compojure "1.1.6" :exclusions [org.clojure/tools.macro]]
