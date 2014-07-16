@@ -83,12 +83,11 @@
 (defn client-ip [request]
   (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
-(defn web-stuff []
-  (let [request (request/ring-request)]
-    {:user-agent (user-agent request)
-     :client-ip  (client-ip request)
-     :sessionId  (sessionId request)
-     :host       (host request)}))
+(defn- web-stuff [request]
+  {:user-agent (user-agent request)
+   :client-ip  (client-ip request)
+   :sessionId  (sessionId request)
+   :host       (host request)})
 
 (defn logged-in?
   ([] (logged-in? (request/ring-request)))
@@ -124,10 +123,10 @@
 ;; Commands
 ;;
 
-(defn enriched [m]
-  (merge m {:user (user/current-user)
+(defn enriched [m request]
+  (merge m {:user (user/current-user request)
             :lang *lang*
-            :web  (web-stuff)}))
+            :web  (web-stuff request)}))
 
 (defn execute [action]
   (with-logging-context
@@ -135,24 +134,28 @@
      :userId        (get-in action [:user :id])}
     (action/execute action)))
 
-(defn execute-command
-  ([name] (execute-command name (from-json (request/ring-request))))
-  ([name params] (execute (enriched (action/make-command name params)))))
+(defn execute-command [name params request]
+  (execute (enriched (action/make-command name params) request)))
 
 (defjson [:post "/api/command/:name"] {name :name}
-  (execute-command name))
+  (let [request (request/ring-request)]
+    (execute-command name (from-json request) request)))
 
-(defn execute-query [name params]
-  (execute (enriched (action/make-query name params))))
+(defn execute-query [name params request]
+  (execute (enriched (action/make-query name params) request)))
 
 (defjson "/api/query/:name" {name :name}
-  (execute-query name (from-query)))
+  (execute-query name (from-query) (request/ring-request)))
 
 (defjson [:post "/api/datatables/:name"] {name :name}
-  (execute-query name (:params (request/ring-request))))
+  (let [request (request/ring-request)]
+    (execute-query name (:params request) request)))
+
+(defjson [:get "/data-api/:name"] {name :name}
+  (execute-query name (from-query) (request/ring-request)))
 
 (defpage "/api/raw/:name" {name :name}
-  (let [response (execute (enriched (action/make-raw name (from-query))))]
+  (let [response (execute (enriched (action/make-raw name (from-query)) (request/ring-request)))]
     (if-not (= (:ok response) false)
       response
       (resp/status 404 (resp/json response)))))
@@ -301,13 +304,15 @@
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
-  (if username
-    (execute-command "login" params) ; Handles form POST (Nessus)
-    (execute-command "login")))
+  (let [request (request/ring-request)]
+    (if username
+     (execute-command "login" params request) ; Handles form POST (Nessus)
+     (execute-command "login" (from-json request) request))))
 
 ;; Reset password via saparate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
-  (execute-command "reset-password"))
+  (let [request (request/ring-request)]
+    (execute-command "reset-password" (from-json request) request)))
 
 ;;
 ;; Redirects
@@ -386,7 +391,7 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (execute (enriched (action/make-command "upload-attachment" upload-data)))]
+        result (execute (enriched (action/make-command "upload-attachment" upload-data) (request/ring-request)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
@@ -527,14 +532,17 @@
     (dissoc (request/ring-request) :body))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
-    (let [response (execute-query "apply-fixture" {:name name})]
+    (let [request (request/ring-request)
+          response (execute-query "apply-fixture" {:name name} request)]
       (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
         (resp/status 200 (str response))
         (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId message]}
-    (let [property (util/to-property-id propertyId)
-          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages (if message [message] [])))]
+    (let [request (request/ring-request)
+          property (util/to-property-id propertyId)
+          params (assoc (from-query) :propertyId property :messages (if message [message] []))
+          response (execute-command "create-application" params request)]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
