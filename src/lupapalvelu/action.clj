@@ -23,12 +23,14 @@
    :created (now)
    :data data})
 
-(defn make-query [name data] (action name :type :query :data data))
-(defn make-raw   [name data] (action name :type :raw :data data))
 
 (defn make-command
   ([name data]      (make-command name nil data))
   ([name user data] (action name :user user :data data :type :command)))
+
+(defn make-query  [name data] (action name :type :query :data data))
+(defn make-raw    [name data] (action name :type :raw :data data))
+(defn make-export [name data] (action name :type :export :data data))
 
 ;;
 ;; some utils
@@ -348,4 +350,5 @@
 (defmacro defcommand [& args] `(defaction :command ~@args))
 (defmacro defquery   [& args] `(defaction :query ~@args))
 (defmacro defraw     [& args] `(defaction :raw ~@args))
+(defmacro defexport  [& args] `(defaction :export ~@args))
 

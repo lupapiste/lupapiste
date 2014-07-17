@@ -1,6 +1,7 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.set :as set]
+            [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.core :refer [defpage]]
@@ -73,7 +74,7 @@
 (notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
 
 (defn- notify-new-authority [new-user created-by]
-  (let [token (token/make-token :authority-invitation (merge new-user {:caller-email (:email created-by)}))]
+  (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
     (notifications/notify! :invite-authority {:data {:email (:email new-user) :token token}})))
 
 (defn- validate-create-new-user! [caller user-data]
@@ -205,17 +206,17 @@
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
       (let [token-ttl (* 7 24 60 60 1000)
-            token (token/make-token :password-reset {:email (:email user)} :ttl token-ttl)]
+            token (token/make-token :password-reset caller {:email (:email user)} :ttl token-ttl)]
         (ok :id (:id user)
           :user user
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
           :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
-(defn get-or-create-user-by-email [email]
+(defn get-or-create-user-by-email [email current-user]
   (let [email (ss/lower-case email)]
     (or
       (user/get-user-by-email email)
-      (create-new-user (user/current-user) {:email email :role "dummy"}))))
+      (create-new-user current-user {:email email :role "dummy"}))))
 
 ;;
 ;; ==============================================================================
@@ -251,7 +252,7 @@
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
       (do
         (when (= email (:email caller))
-          (session/put! :user (user/get-user-by-email email)))
+          (user/refresh-user! (:id caller)))
         (ok))
       (fail :not-found :email email))))
 
@@ -334,7 +335,7 @@
     (let [user (mongo/select-one :users {:email email})]
       (if (and user (not= "dummy" (:role user)))
        (let [token-ttl (* 24 60 60 1000)
-             token (token/make-token :password-reset {:email email} :ttl token-ttl)]
+             token (token/make-token :password-reset nil {:email email} :ttl token-ttl)]
          (infof "password reset request: email=%s, token=%s" email token)
          (notifications/notify! :reset-password {:data {:email email :token token}})
          (ok))
@@ -486,7 +487,7 @@
   (ok :attachments (:attachments user)))
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
-  (let [user              (user/current-user)
+  (let [user              (user/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
         attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
@@ -503,7 +504,7 @@
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-    (user/refresh-user!)
+    (user/refresh-user! (:id user))
 
     (->> (assoc file-info :ok true)
       (resp/json)
@@ -529,7 +530,7 @@
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
-  (user/refresh-user!)
+  (user/refresh-user! (:id user))
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 

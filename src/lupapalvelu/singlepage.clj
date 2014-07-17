@@ -14,8 +14,6 @@
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
            [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
-(def utf8 (java.nio.charset.Charset/forName "UTF-8"))
-
 (defn write-header [kind out n]
   (when (env/dev-mode?)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
@@ -112,8 +110,8 @@
                       (enlive/html-resource (c/path "template.html"))
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component)]
-      (.write out (.getBytes element utf8)))
-    (-> out (.toString (.name utf8)) (compress-html) (.getBytes utf8))))
+      (.write out (ss/utf8-bytes element)))
+    (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
