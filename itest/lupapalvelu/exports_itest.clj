@@ -30,3 +30,13 @@
     (count (:applications resp)) => 1
     (-> resp :applications first :id) => application-id))
 
+
+(fact "Applicant can not use the api"
+  (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+                    {:basic-auth ["pena" "pena"]
+                     :follow-redirects false
+                     :throw-exceptions false})
+        resp (:body (decode-response http-resp))]
+    (:status http-resp) => 200
+    resp => unauthorized?
+    (:applications resp) => nil?))
