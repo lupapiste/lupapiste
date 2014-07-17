@@ -1,7 +1,14 @@
 (ns sade.strings
   (:require [clojure.string :as s])
   (:import [java.text Normalizer Normalizer$Form]
-           [org.apache.commons.lang3 StringUtils]))
+           [org.apache.commons.lang3 StringUtils]
+           [org.apache.commons.codec.binary Base64]))
+
+(def utf8 (java.nio.charset.Charset/forName "UTF-8"))
+
+(defn utf8-bytes ^bytes  [^String s] (when s (.getBytes s utf8)))
+
+(defn utf8-str ^String [^bytes b] (when b (String. b "UTF-8")))
 
 (defn last-n [n ^String s]
   (when s
@@ -63,6 +70,11 @@
     (replace "&lt;"   "<")
     (replace "&gt;"   ">")
     (replace "&quot;" "\"")))
+
+(defn base64-decode
+  "Decode a base64 encoded string using UTF-8."
+  ^String [^String s]
+  (utf8-str (Base64/decodeBase64 (utf8-bytes s))))
 
 ;; Commons-lang3 wrappers
 (defn numeric?

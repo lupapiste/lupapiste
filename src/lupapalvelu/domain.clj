@@ -15,6 +15,7 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :trusted-etl {}
     (do
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
       {:_id nil}))) ; should not yield any results

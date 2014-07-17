@@ -415,11 +415,11 @@
 
 (defn local-command [apikey command-name & args]
   (binding [*request* (make-local-request apikey)]
-    (web/execute-command (name command-name) (apply hash-map args))))
+    (web/execute-command (name command-name) (apply hash-map args) *request*)))
 
 (defn local-query [apikey query-name & args]
   (binding [*request* (make-local-request apikey)]
-    (web/execute-query (name query-name) (apply hash-map args))))
+    (web/execute-query (name query-name) (apply hash-map args) *request*)))
 
 (defn create-local-app
   "Runs the create-application command locally, returns reply map. Use ok? to check it."

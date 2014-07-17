@@ -212,7 +212,7 @@
   (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email)
+      (let [invited (user-api/get-or-create-user-by-email email user)
             invite  {:title        title
                      :application  id
                      :text         text

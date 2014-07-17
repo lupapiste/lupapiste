@@ -68,8 +68,8 @@
 (defn from-json [request]
   (:json request))
 
-(defn from-query []
-  (keywordize-keys (:query-params (request/ring-request))))
+(defn from-query [request]
+  (keywordize-keys (:query-params request)))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -83,26 +83,23 @@
 (defn client-ip [request]
   (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
-(defn web-stuff []
-  (let [request (request/ring-request)]
-    {:user-agent (user-agent request)
-     :client-ip  (client-ip request)
-     :sessionId  (sessionId request)
-     :host       (host request)}))
+(defn- web-stuff [request]
+  {:user-agent (user-agent request)
+   :client-ip  (client-ip request)
+   :sessionId  (sessionId request)
+   :host       (host request)})
 
-(defn logged-in?
-  ([] (logged-in? (request/ring-request)))
-  ([request]
-    (not (nil? (:id (user/current-user request))))))
+(defn- logged-in? [request]
+  (not (nil? (:id (user/current-user request)))))
 
-(defn in-role? [role]
-  (= role (keyword (:role (user/current-user)))))
+(defn- in-role? [role request]
+  (= role (keyword (:role (user/current-user request)))))
 
-(defn authority? [] (in-role? :authority))
-(defn authority-admin? [] (in-role? :authorityAdmin))
-(defn admin? [] (in-role? :admin))
-(defn anyone [] true)
-(defn nobody [] false)
+(def authority? (partial in-role? :authority))
+(def authority-admin? (partial in-role? :authorityAdmin))
+(def admin? (partial in-role? :admin))
+(defn- anyone [_] true)
+(defn- nobody [_] false)
 
 ;;
 ;; Status
@@ -124,10 +121,10 @@
 ;; Commands
 ;;
 
-(defn enriched [m]
-  (merge m {:user (user/current-user)
+(defn enriched [m request]
+  (merge m {:user (user/current-user request)
             :lang *lang*
-            :web  (web-stuff)}))
+            :web  (web-stuff request)}))
 
 (defn execute [action]
   (with-logging-context
@@ -135,24 +132,49 @@
      :userId        (get-in action [:user :id])}
     (action/execute action)))
 
-(defn execute-command
-  ([name] (execute-command name (from-json (request/ring-request))))
-  ([name params] (execute (enriched (action/make-command name params)))))
+(defn execute-command [name params request]
+  (execute (enriched (action/make-command name params) request)))
 
 (defjson [:post "/api/command/:name"] {name :name}
-  (execute-command name))
+  (let [request (request/ring-request)]
+    (execute-command name (from-json request) request)))
 
-(defn execute-query [name params]
-  (execute (enriched (action/make-query name params))))
+(defn execute-query [name params request]
+  (execute (enriched (action/make-query name params) request)))
 
 (defjson "/api/query/:name" {name :name}
-  (execute-query name (from-query)))
+  (let [request (request/ring-request)]
+    (execute-query name (from-query request) request)))
 
 (defjson [:post "/api/datatables/:name"] {name :name}
-  (execute-query name (:params (request/ring-request))))
+  (let [request (request/ring-request)]
+    (execute-query name (:params request) request)))
+
+(defn basic-authentication
+  "Returns a user map or nil if authentication fails"
+  [request]
+  (let [auth (get-in request [:headers "authorization"])
+        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))
+        [u p] (and cred (s/split (str cred) #":" 2))]
+    (when (and u p)
+      (:user (execute-command "login" {:username u :password p} request)))))
+
+(defn execute-export [name params request]
+  (execute (enriched (action/make-export name params) request)))
+
+(defpage [:get "/data-api/json/:name"] {name :name}
+  (let [request (request/ring-request)
+        user (basic-authentication request)]
+    (if user
+      (resp/json (execute-export name (from-query request) (assoc request :user user)))
+      (->
+        (resp/status 401 "Unauthorized")
+        (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))
+
 
 (defpage "/api/raw/:name" {name :name}
-  (let [response (execute (enriched (action/make-raw name (from-query))))]
+  (let [request (request/ring-request)
+        response (execute (enriched (action/make-raw name (from-query request)) request))]
     (if-not (= (:ok response) false)
       response
       (resp/status 404 (resp/json response)))))
@@ -203,15 +225,16 @@
     (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
 (defn- single-resource [resource-type app failure]
-  (if ((auth-methods app nobody))
-    ; Check If-None-Match header, see cache-headers above
-    (if (or (never-cache app) (s/blank? build-number) (not= (get-in (request/ring-request) [:headers "if-none-match"]) etag))
-      (->>
-        (java.io.ByteArrayInputStream. (compose resource-type app))
-        (resp/content-type (resource-type content-type))
-        (resp/set-headers (cache-headers resource-type)))
-      {:status 304})
-    failure))
+  (let [request (request/ring-request)]
+    (if ((auth-methods app nobody) request)
+     ; Check If-None-Match header, see cache-headers above
+     (if (or (never-cache app) (s/blank? build-number) (not= (get-in request [:headers "if-none-match"]) etag))
+       (->>
+         (java.io.ByteArrayInputStream. (compose resource-type app))
+         (resp/content-type (resource-type content-type))
+         (resp/set-headers (cache-headers resource-type)))
+       {:status 304})
+     failure)))
 
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
@@ -236,9 +259,10 @@
   ([]
     (landing-page default-lang))
   ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (user/current-user))))]
-      (redirect lang application-page)
-      (redirect-to-frontpage lang))))
+    (let [request (request/ring-request)]
+      (if-let [application-page (and (logged-in? request) (user/applicationpage-for (:role (user/current-user request))))]
+       (redirect lang application-page)
+       (redirect-to-frontpage lang)))))
 
 (defn- ->hashbang [v]
   (when (and v (= -1 (.indexOf v ":")))
@@ -301,13 +325,15 @@
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
-  (if username
-    (execute-command "login" params) ; Handles form POST (Nessus)
-    (execute-command "login")))
+  (let [request (request/ring-request)]
+    (if username
+     (execute-command "login" params request) ; Handles form POST (Nessus)
+     (execute-command "login" (from-json request) request))))
 
 ;; Reset password via saparate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
-  (execute-command "reset-password"))
+  (let [request (request/ring-request)]
+    (execute-command "reset-password" (from-json request) request)))
 
 ;;
 ;; Redirects
@@ -371,7 +397,8 @@
 (defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
   (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
-  (let [target (when-not (every? s/blank? [targetId targetType])
+  (let [request (request/ring-request)
+        target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
                    {:type targetType :id targetId}))
@@ -386,11 +413,11 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (execute (enriched (action/make-command "upload-attachment" upload-data)))]
+        result (execute (enriched (action/make-command "upload-attachment" upload-data) request))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
-                                        (-> (:params (request/ring-request))
+                                        (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
                                           (assoc  :errorMessage (:text result)))))))))
@@ -410,7 +437,7 @@
 ;; Server is alive
 ;;
 
-(defjson "/api/alive" [] {:ok (if (user/current-user) true false)})
+(defjson "/api/alive" [] {:ok (if (user/current-user (request/ring-request)) true false)})
 
 ;;
 ;; Proxy
@@ -527,16 +554,19 @@
     (dissoc (request/ring-request) :body))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
-    (let [response (execute-query "apply-fixture" {:name name})]
-      (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in (request/ring-request) [:headers "user-agent"])))
+    (let [request (request/ring-request)
+          response (execute-query "apply-fixture" {:name name} request)]
+      (if (seq (re-matches #"(.*)MSIE [\.\d]+; Windows(.*)" (get-in request [:headers "user-agent"])))
         (resp/status 200 (str response))
         (resp/json response))))
 
   (defpage "/dev/create" {:keys [infoRequest propertyId message]}
-    (let [property (util/to-property-id propertyId)
-          response (execute-command "create-application" (assoc (from-query) :propertyId property :messages (if message [message] [])))]
+    (let [request (request/ring-request)
+          property (util/to-property-id propertyId)
+          params (assoc (from-query request) :propertyId property :messages (if message [message] []))
+          response (execute-command "create-application" params request)]
       (if (core/ok? response)
-        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user)))
+        (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
                             "#!/" (if infoRequest "inforequest" "application") "/" (:id response)))
         (resp/status 400 (str response)))))
 
