@@ -116,6 +116,7 @@
 (status/defstatus :system-env (remove-sensitive-keys (System/getenv)))
 (status/defstatus :system-properties (remove-sensitive-keys (System/getProperties)))
 (status/defstatus :sade-env (remove-sensitive-keys (env/get-config)))
+(status/defstatus :proxy-headers (-> (request/ring-request) :headers (select-keys ["host" "x-real-ip" "x-forwarded-for" "x-forwarded-proto"])))
 
 ;;
 ;; Commands
