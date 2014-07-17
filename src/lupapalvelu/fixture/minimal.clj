@@ -516,7 +516,7 @@
                                         :text "Paloviranomainen"
                                         :email "jussi.viranomainen@tampere.fi"
                                         :name "Jussi Viranomainen"}]
-                     :krysp {:YA {:ftpUser "dev_ya_tampere" :version "2.1.2"}}
+                     :krysp {:YA {:url local-krysp :ftpUser "dev_ya_tampere" :version "2.1.2"}}
                      :operations-attachments ya-default-attachments-for-operations}
 
                     ;; Porvoo R
