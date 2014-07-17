@@ -166,7 +166,7 @@
   (let [request (request/ring-request)
         user (basic-authentication request)]
     (if user
-      (resp/json (execute-query name (from-query request) (assoc request :user user)))
+      (resp/json (execute-export name (from-query request) (assoc request :user user)))
       (->
         (resp/status 401 "Unauthorized")
         (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))

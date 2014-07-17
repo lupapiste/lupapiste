@@ -24,6 +24,7 @@
             [lupapalvelu.onnistuu]
             [lupapalvelu.admin]
             [lupapalvelu.proxy-services]
+            [lupapalvelu.exports]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.document.schema-repository]
