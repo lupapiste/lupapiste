@@ -68,8 +68,8 @@
 (defn from-json [request]
   (:json request))
 
-(defn from-query []
-  (keywordize-keys (:query-params (request/ring-request))))
+(defn from-query [request]
+  (keywordize-keys (:query-params request)))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -143,7 +143,8 @@
   (execute (enriched (action/make-query name params) request)))
 
 (defjson "/api/query/:name" {name :name}
-  (execute-query name (from-query) (request/ring-request)))
+  (let [request (request/ring-request)]
+    (execute-query name (from-query request) request)))
 
 (defjson [:post "/api/datatables/:name"] {name :name}
   (let [request (request/ring-request)]
@@ -158,18 +159,22 @@
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
-(defpage [:get "/data-api/:name"] {name :name}
+(defn execute-export [name params request]
+  (execute (enriched (action/make-export name params) request)))
+
+(defpage [:get "/data-api/json/:name"] {name :name}
   (let [request (request/ring-request)
         user (basic-authentication request)]
     (if user
-      (resp/json (execute-query name (from-query) (assoc request :user user)))
+      (resp/json (execute-query name (from-query request) (assoc request :user user)))
       (->
         (resp/status 401 "Unauthorized")
         (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))
 
 
 (defpage "/api/raw/:name" {name :name}
-  (let [response (execute (enriched (action/make-raw name (from-query)) (request/ring-request)))]
+  (let [request (request/ring-request)
+        response (execute (enriched (action/make-raw name (from-query request)) request))]
     (if-not (= (:ok response) false)
       response
       (resp/status 404 (resp/json response)))))
@@ -558,7 +563,7 @@
   (defpage "/dev/create" {:keys [infoRequest propertyId message]}
     (let [request (request/ring-request)
           property (util/to-property-id propertyId)
-          params (assoc (from-query) :propertyId property :messages (if message [message] []))
+          params (assoc (from-query request) :propertyId property :messages (if message [message] []))
           response (execute-command "create-application" params request)]
       (if (core/ok? response)
         (redirect "fi" (str (user/applicationpage-for (:role (user/current-user request)))
