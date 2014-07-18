@@ -33,7 +33,7 @@
   (fact "but not if modified timestamp is too old"
     (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["solita-etl" "solita-etl"]
-                     :query-params {:modifiedAfterTimestampMillis (lupapalvelu.core/now)}
+                     :query-params {:modifiedAfterTimestampMillis (+ (lupapalvelu.core/now) (* 1000 60))}
                      :follow-redirects false
                      :throw-exceptions false})
           resp (:body (decode-response http-resp))]
