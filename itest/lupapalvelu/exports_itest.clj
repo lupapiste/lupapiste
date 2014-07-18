@@ -28,8 +28,18 @@
     (:status http-resp) => 200
     resp => ok?
     (count (:applications resp)) => 1
-    (-> resp :applications first :id) => application-id))
+    (-> resp :applications first :id) => application-id)
 
+  (fact "but not if modified timestamp is too old"
+    (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+                    {:basic-auth ["solita-etl" "solita-etl"]
+                     :query-params {:modifiedAfterTimestampMillis (+ (lupapalvelu.core/now) (* 1000 60))}
+                     :follow-redirects false
+                     :throw-exceptions false})
+          resp (:body (decode-response http-resp))]
+      resp => ok?
+      (:applications resp) => sequential?
+      (count (:applications resp)) => 0)))
 
 (fact "Applicant can not use the api"
   (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
