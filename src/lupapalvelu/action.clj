@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
+            [sade.dns :as dns]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -42,7 +43,10 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (or (ss/blank? email) (util/valid-email? email))
+      (when-not (or (ss/blank? email)
+                  (and
+                    (util/valid-email? email)
+                    (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
         (fail :error.email)))))
 
 ;; Notificator

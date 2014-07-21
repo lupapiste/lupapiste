@@ -8,7 +8,7 @@
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.mime :as mime]))
 
@@ -274,7 +274,7 @@
     (update-application
       (application->command application)
       {$set {:modified now}
-       $pushAll {:attachments attachments}})
+       $push {:attachments {$each attachments}}})
     (map :id attachments)))
 
 (defn- next-attachment-version [{major :major minor :minor} user]
