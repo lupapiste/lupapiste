@@ -13,7 +13,7 @@
 ;; Dummy email server:
 ;;
 
-(when (get-in (env/get-config) [:email :dummy-server])
+(when (env/value :email :dummy-server)
 
   (info "Initializing dummy email server")
 
