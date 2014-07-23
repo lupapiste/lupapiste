@@ -182,13 +182,14 @@
 
 (defquery organizations
   {:roles       [:admin]}
-  [{user :user}]
+  [_]
   (ok :organizations (get-organizations)))
 
-(defquery organization-names
-  {:authenticated true}
-  [{user :user}]
-  (ok :organizations (get-organizations {} {:name 1})))
+(defquery organization-by-id
+  {:parameters [organizationId]
+   :roles [:admin]}
+  [_]
+  (get-organization organizationId))
 
 (defquery "municipalities-with-organization"
   {:verified true}
@@ -214,18 +215,12 @@
 
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
-   :parameters [:id]}
+   :parameters [:id]
+   :roles [:applicant :authority]}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (get-organization organization)]
     (let [selected-operations (map keyword (:selected-operations org))]
       (ok :operations (operations/addable-operations selected-operations permitType)))))
-
-(defquery organization-by-id
-  {:parameters [organizationId]
-   :roles [:admin]
-   :verified true}
-  [_]
-  (get-organization organizationId))
 
 (defquery organization-details
   {:parameters [municipality operation lang]
