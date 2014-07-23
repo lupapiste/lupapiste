@@ -245,13 +245,13 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
+  (re-pattern (str "(" (s/join "|" (map name (keys auth-methods))) ")")))
 
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
-(defn redirect-to-server-root []
-  (resp/redirect (str (env/value :host) "/")))
+(defn redirect-after-logout []
+  (resp/redirect (str (env/value :host) (env/value :redirect-after-logout) )))
 
 (defn redirect-to-frontpage [lang]
   (redirect lang "welcome"))
@@ -318,11 +318,11 @@
 
 (defpage "/logout" []
   (logout!)
-  (redirect-to-server-root))
+  (redirect-after-logout))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
-  (redirect-to-server-root))
+  (redirect-after-logout))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
