@@ -206,8 +206,7 @@
   {:description "Returns selected operations of all the organizations who have a scope with the given municipality.
                  If a \"permitType\" parameter is given, returns selected operations for only that organization (the municipality + permitType combination)."
    :parameters [:municipality]
-   :authenticated true
-   :verified true
+   :roles [:applicant :authority :authorityAdmin]
    :input-validators [(partial non-blank-parameters [:municipality])]}
   [{{:keys [municipality permitType]} :data}]
   (when-let [organizations (resolve-organizations municipality permitType)]
