@@ -308,8 +308,7 @@
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
-   :roles [:applicant :authority :authorityAdmin :admin]
-   :verified true}
+   :roles [:applicant :authority :authorityAdmin :admin]}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
@@ -374,8 +373,7 @@
 
 
 (defcommand login
-  {:parameters [username password]
-   :verified false}
+  {:parameters [username password]}
   [_]
   (if (user/throttle-login? username)
     (do
@@ -417,8 +415,7 @@
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
    :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
-                      action/email-validator]
-   :verified   true}
+                      action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (-> email ss/lower-case ss/trim)]
