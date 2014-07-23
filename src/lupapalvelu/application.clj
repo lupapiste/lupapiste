@@ -1054,6 +1054,6 @@
 
 (defquery applications-for-datatables
   {:parameters [params]
-   :verified true}
+   :roles      [:applicant :authority]}
   [{user :user}]
   (ok :data (search/applications-for-user user params)))
