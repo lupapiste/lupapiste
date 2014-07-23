@@ -31,7 +31,7 @@
 ;;
 
 (defquery user
-  {:authenticated true :verified true}
+  {:roles [:applicant :authority :authorityAdmin :admin]}
   [{user :user}]
   (ok :user user))
 
@@ -244,7 +244,7 @@
     true))
 
 (defcommand update-user
-  {:authenticated true}
+  {:roles [:applicant :authority :authorityAdmin :admin]}
   [{caller :user user-data :data}]
   (let [email     (ss/lower-case (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
@@ -308,7 +308,7 @@
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
-   :authenticated true
+   :roles [:applicant :authority :authorityAdmin :admin]
    :verified true}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
@@ -482,7 +482,7 @@
 ;;
 
 (defquery user-attachments
-  {:authenticated true}
+  {:roles [:applicant]}
   [{user :user}]
   (ok :attachments (:attachments user)))
 
@@ -498,6 +498,8 @@
                            :size             size
                            :created          (now)}]
 
+    (when-not (user/applicant? user) (throw+ {:status 401 :body "forbidden"}))
+
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
     (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
@@ -512,7 +514,8 @@
       (resp/status 200))))
 
 (defraw download-user-attachment
-  {:parameters [attachment-id]}
+  {:parameters [attachment-id]
+   :roles [:applicant]}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
   (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
@@ -526,7 +529,7 @@
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]
-   :authenticated true}
+   :roles [:applicant]}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
@@ -536,7 +539,6 @@
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
-   :authenticated true
    :roles [:applicant]
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
