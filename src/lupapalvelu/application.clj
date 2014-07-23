@@ -127,7 +127,7 @@
     {:firstName 1 :lastName 1}))
 
 (defquery application
-  {:authenticated true
+  {:roles [:applicant :authority]
    :extra-auth-roles [:any]
    :parameters [:id]}
   [{app :application user :user}]
@@ -142,7 +142,7 @@
 ;; application id and the authorities in that organization.
 (defquery authorities-in-applications-organization
   {:parameters [:id]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{app :application}]
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
@@ -178,7 +178,7 @@
 
 (defquery party-document-names
   {:parameters [:id]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{application :application}]
   (let [documents (:documents application)
         initialOp (:name (first (:operations application)))
@@ -191,8 +191,7 @@
 ;;
 
 (defquery invites
-  {:authenticated true
-   :verified true}
+  {:roles [:applicant :authority]}
   [{{:keys [id]} :user}]
   (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
@@ -273,7 +272,7 @@
 
 (defcommand decline-invitation
   {:parameters [:id]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [command]
   (do-remove-auth command (get-in command [:user :email])))
 
@@ -287,7 +286,7 @@
 (defcommand mark-seen
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
@@ -299,7 +298,7 @@
 
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
     (set-user-to-document application document userId path user created)
