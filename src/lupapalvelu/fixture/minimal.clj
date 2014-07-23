@@ -28,6 +28,13 @@
     :role "admin"
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
 
+   ;; ETL export user: solita-etl / solita-etl
+   {:id "solita-etl"
+    :username "solita-etl"
+    :enabled true
+    :role "trusted-etl"
+    :private {:password "$2a$10$uog/cI4n4vxFBNgku4xTpu6lcrF56cttBDW5zkTfDaSClgEw54/Nm"}}
+
    ;; Tampere
 
    ;; Tampere YA paakayttaja:  tampere-ya / tampere

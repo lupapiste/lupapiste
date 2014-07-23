@@ -13,7 +13,7 @@
             [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify] :as action]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -212,7 +212,7 @@
   (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email)
+      (let [invited (user-api/get-or-create-user-by-email email user)
             invite  {:title        title
                      :application  id
                      :text         text
@@ -705,9 +705,9 @@
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
         new-docs   (make-documents nil created op application)]
-    (update-application command {$push {:operations op}
-                                 $pushAll {:documents new-docs
-                                           :attachments (make-attachments created op (:organization application) (:state application))}
+    (update-application command {$push {:operations op
+                                        :documents {$each new-docs}
+                                        :attachments {$each (make-attachments created op (:organization application) (:state application))}}
                                  $set {:modified created}})))
 
 (defcommand change-permit-sub-type
@@ -1010,7 +1010,7 @@
              :state :open
              :documents (make-documents user created op application)
              :modified created}
-       $pushAll {:attachments (make-attachments created op (:organization application) (:state application))}})
+       $push {:attachments {$each (make-attachments created op (:organization application) (:state application))}}})
     (try (autofill-rakennuspaikka application (now))
       (catch Exception e (error e "KTJ data was not updated")))))
 

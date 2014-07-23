@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
+            [sade.dns :as dns]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -23,12 +24,14 @@
    :created (now)
    :data data})
 
-(defn make-query [name data] (action name :type :query :data data))
-(defn make-raw   [name data] (action name :type :raw :data data))
 
 (defn make-command
   ([name data]      (make-command name nil data))
   ([name user data] (action name :user user :data data :type :command)))
+
+(defn make-query  [name data] (action name :type :query :data data))
+(defn make-raw    [name data] (action name :type :raw :data data))
+(defn make-export [name data] (action name :type :export :data data))
 
 ;;
 ;; some utils
@@ -40,7 +43,10 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (or (ss/blank? email) (util/valid-email? email))
+      (when-not (or (ss/blank? email)
+                  (and
+                    (util/valid-email? email)
+                    (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
         (fail :error.email)))))
 
 ;; Notificator
@@ -348,4 +354,5 @@
 (defmacro defcommand [& args] `(defaction :command ~@args))
 (defmacro defquery   [& args] `(defaction :query ~@args))
 (defmacro defraw     [& args] `(defaction :raw ~@args))
+(defmacro defexport  [& args] `(defaction :export ~@args))
 

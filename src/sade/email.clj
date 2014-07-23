@@ -120,7 +120,7 @@
 
 (defn- html->plain [html]
   (-> html
-    (.getBytes "UTF-8")
+    (ss/utf8-bytes)
     (io/reader :encoding "UTF-8")
     enlive/html-resource
     (enlive/select [:body])
