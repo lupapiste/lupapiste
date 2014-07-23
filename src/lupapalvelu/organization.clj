@@ -181,15 +181,12 @@
   (ok))
 
 (defquery organizations
-  {:roles       [:admin]
-   :authenticated true
-   :verified true}
+  {:roles       [:admin]}
   [{user :user}]
   (ok :organizations (get-organizations)))
 
 (defquery organization-names
-  {:authenticated true
-   :verified true}
+  {:authenticated true}
   [{user :user}]
   (ok :organizations (get-organizations {} {:name 1})))
 
