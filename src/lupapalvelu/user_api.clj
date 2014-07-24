@@ -31,7 +31,7 @@
 ;;
 
 (defquery user
-  {:authenticated true :verified true}
+  {:roles [:applicant :authority :authorityAdmin :admin]}
   [{user :user}]
   (ok :user user))
 
@@ -48,7 +48,8 @@
 
 (env/in-dev
   (defquery user-by-email
-    {:parameters [email] :roles [:admin]}
+    {:parameters [email]
+     :roles [:admin]}
     [_]
     (ok :user (user/get-user-by-email email))))
 
@@ -244,7 +245,7 @@
     true))
 
 (defcommand update-user
-  {:authenticated true}
+  {:roles [:applicant :authority :authorityAdmin :admin]}
   [{caller :user user-data :data}]
   (let [email     (ss/lower-case (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
@@ -308,8 +309,7 @@
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
-   :authenticated true
-   :verified true}
+   :roles [:applicant :authority :authorityAdmin :admin]}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
@@ -325,10 +325,10 @@
 
 (defcommand reset-password
   {:parameters    [email]
+   :roles [:anonymous]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :notified      true
-   :authenticated false}
+   :notified      true}
   [_]
   (let [email (ss/lower-case (ss/trim email))]
     (infof "Password reset request: email=%s" email)
@@ -375,7 +375,7 @@
 
 (defcommand login
   {:parameters [username password]
-   :verified false}
+   :roles [:anonymous]}
   [_]
   (if (user/throttle-login? username)
     (do
@@ -416,9 +416,9 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
+   :roles [:anonymous]
    :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
-                      action/email-validator]
-   :verified   true}
+                      action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (-> email ss/lower-case ss/trim)]
@@ -440,6 +440,7 @@
 
 (defcommand confirm-account-link
   {:parameters [stamp tokenId email password street zip city phone]
+   :roles [:anonymous]
    :input-validators [(partial action/non-blank-parameters [:tokenId :password])
                       action/email-validator]}
   [{data :data}]
@@ -482,7 +483,7 @@
 ;;
 
 (defquery user-attachments
-  {:authenticated true}
+  {:roles [:applicant :authority :authorityAdmin :admin]}
   [{user :user}]
   (ok :attachments (:attachments user)))
 
@@ -498,6 +499,8 @@
                            :size             size
                            :created          (now)}]
 
+    (when-not (user/applicant? user) (throw+ {:status 401 :body "forbidden"}))
+
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
     (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type))
@@ -512,7 +515,8 @@
       (resp/status 200))))
 
 (defraw download-user-attachment
-  {:parameters [attachment-id]}
+  {:parameters [attachment-id]
+   :roles [:applicant]}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
   (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
@@ -526,7 +530,7 @@
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]
-   :authenticated true}
+   :roles [:applicant]}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
@@ -536,8 +540,7 @@
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
-   :authenticated true
-   :roles [:applicant]
+   :roles      [:applicant]
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
   [{application :application user :user}]

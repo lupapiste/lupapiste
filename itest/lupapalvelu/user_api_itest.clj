@@ -194,7 +194,7 @@
 
     ; Sonja can not get attachment
 
-    (raw sonja "download-user-attachment" :attachment-id attachment-id) => http404?
+    (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?
 
     ; Sonja can not delete attachment
 

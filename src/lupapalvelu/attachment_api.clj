@@ -156,6 +156,7 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
+   :roles       [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application user]}]
@@ -169,6 +170,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
+   :roles       [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [application user]}]
@@ -184,24 +186,19 @@
 ;; Download
 ;;
 
-(defn- output-attachment-if-logged-in [attachment-id download? user]
-  (if user
-    (a/output-attachment attachment-id download? (partial a/get-attachment-as user))
-    {:status 401
-     :headers {"Content-Type" "text/plain"}
-     :body "401 Unauthorized"}))
-
 (defraw "view-attachment"
   {:parameters [:attachment-id]
+   :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
-  (output-attachment-if-logged-in attachment-id false user))
+  (a/output-attachment attachment-id false (partial a/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
+   :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
-  (output-attachment-if-logged-in attachment-id true user))
+  (a/output-attachment attachment-id true (partial a/get-attachment-as user)))
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
@@ -243,6 +240,7 @@
 
 (defraw "download-all-attachments"
   {:parameters [:id]
+   :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]}
   [{:keys [application lang]}]
   (if application

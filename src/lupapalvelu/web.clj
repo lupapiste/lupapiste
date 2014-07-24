@@ -176,9 +176,10 @@
 (defpage "/api/raw/:name" {name :name}
   (let [request (request/ring-request)
         response (execute (enriched (action/make-raw name (from-query request)) request))]
-    (if-not (= (:ok response) false)
-      response
-      (resp/status 404 (resp/json response)))))
+    (cond
+      (= response core/unauthorized) (resp/status 401 "unauthorized")
+      (false? (:ok response)) (resp/status 404 (resp/json response))
+      :else response)))
 
 ;;
 ;; Web UI:
@@ -293,7 +294,8 @@
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
 
-(defcommand "frontend-error" {}
+(defcommand "frontend-error"
+  {:roles [:anonymous]}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
         sanitize (partial lupapalvelu.logging/sanitize limit)

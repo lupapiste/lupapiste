@@ -52,19 +52,20 @@
       (clojure.pprint/pprint message)))
 
   (defcommand "send-email"
-    {:parameters [:to :subject :template]}
+    {:parameters [:to :subject :template]
+     :roles      [:anonymous]}
     [{{:keys [to subject template] :as data} :data}]
-    (if-let [error (sade.email/send-email-message to subject (email/apply-template template (dissoc data :from :to :subject :template)))]
+    (if-let [error (email/send-email-message to subject (email/apply-template template (dissoc data :from :to :subject :template)))]
       (fail "send-email-message failed" error)
       (ok)))
 
   (defquery "sent-emails"
-    {}
+    {:roles [:anonymous]}
     [{{reset :reset :or {reset false}} :data}]
     (ok :messages (messages :reset reset)))
 
   (defquery "last-email"
-    {}
+    {:roles [:anonymous]}
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 
