@@ -23,8 +23,8 @@
 ;;
 
 (def deliver-email (fn [to subject body]
-                     (assert to "must provide 'to'")
-                     (assert subject "must provide 'subject'")
+                     (assert (string? to) "must provide 'to'")
+                     (assert (string? subject) "must provide 'subject'")
                      (assert body "must provide 'body'")
                      (let [config     (:email (env/get-config))
                            error      (postal/send-message
