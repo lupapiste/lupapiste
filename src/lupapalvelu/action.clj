@@ -326,12 +326,15 @@
 
 (def ^:private supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
-(defn register-action [action-type action-name params line ns-str handler]
+(defn register-action [action-type action-name meta-data line ns-str handler]
+  (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
+  (assert (seq (:roles meta-data)) (str "You must defive :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
+
   (let [action-keyword (keyword action-name)]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
-      (merge params {:type action-type
+      (merge meta-data {:type action-type
                      :ns ns-str
                      :line line
                      :handler handler}))))
@@ -357,10 +360,6 @@
                       `(fn [request#]
                          (let [{{:keys ~letkeys} :data} request#]
                            ((fn ~bindings (do ~@body)) request#))))]
-
-    (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
-    (assert (seq (:roles meta-data)) (str "You must defive :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone.") )
-
     `(do
        (register-action ~atype ~action-name ~meta-data ~line-number ~ns-str ~handler)
        (defn ~defname
