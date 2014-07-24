@@ -254,3 +254,9 @@
 
 (fact "None of the actions contain the outdated :validators definition"
   (map :validators (vals (get-actions))) => (has every? nil?))
+
+#_(fact "Every action has roles defined"
+   (filter (fn [[n m]] (empty? (:roles m))) (get-actions)) => empty?)
+
+#_(fact "None of the actions contain the deprecated :authenticated definition. Define :roles instead!"
+   (map :validators (vals (get-actions))) => (has every? nil?))
