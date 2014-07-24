@@ -205,8 +205,7 @@
                       action/email-validator]
    :roles      [:applicant :authority]
    :notified   true
-   :on-success (notify :invite)
-   :verified   true}
+   :on-success (notify :invite)}
   [{:keys [created user application] :as command}]
   (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invite application email)
@@ -233,8 +232,7 @@
 
 (defcommand approve-invite
   {:parameters [id]
-   :roles      [:applicant]
-   :verified   true}
+   :roles      [:applicant]}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
@@ -756,7 +754,6 @@
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
-   :verified   true
    :roles      [:applicant :authority]}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications

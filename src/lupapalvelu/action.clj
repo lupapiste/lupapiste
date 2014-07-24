@@ -321,7 +321,6 @@
       (merge params {:type action-type
                      :ns ns-str
                      :line line
-                     :verified (or (:verified params) (contains? (set (:parameters params)) :id))
                      :handler handler}))))
 
 (defmacro defaction [atype fun & args]
@@ -345,6 +344,7 @@
                       `(fn [request#]
                          (let [{{:keys ~letkeys} :data} request#]
                            ((fn ~bindings (do ~@body)) request#))))]
+
     `(do
        (register-action ~atype ~action-name ~meta-data ~line-number ~ns-str ~handler)
        (defn ~defname
