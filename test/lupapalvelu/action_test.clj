@@ -11,10 +11,10 @@
 
 (defn returns [])
 
-(defcommand "test-command" {:abba "jabba"} [command] (returns))
+(defcommand "test-command" {:description "jabba"} [command] (returns))
 
 (facts "get-meta"
-  (get-meta "test-command") => (contains {:abba "jabba"}))
+  (get-meta "test-command") => (contains {:description "jabba"}))
 
 (fact "masked"
   (fact "returns normal data as-is"

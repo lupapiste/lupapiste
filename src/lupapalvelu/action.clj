@@ -313,6 +313,24 @@
 ;; Register actions
 ;;
 
+(def supported-action-meta-data
+  {:parameters "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
+   :roles "Vector of role keywords."
+   :authenticated "TO BE REMOVED"
+   :extra-auth-roles "Vector of role keywords."
+   :description "Documentation string."
+   :notified "Boolean. Documents that the action will be sending (email) notifications."
+   :pre-checks "Vector of functions."
+   :input-validators "Vector of functions."
+   :states  "Vector of application state keywords"
+   :on-complete "Function or vector of functions."
+   :on-success "Function or vector of functions."
+   :on-fail "Function or vector of functions."
+   :feature "Keyword: feature flag name. Action is run only if the feature flag is true.
+             If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
+
+(def ^:private supported-action-meta-data-keys (set (keys supported-action-meta-data)))
+
 (defn register-action [action-type action-name params line ns-str handler]
   (let [action-keyword (keyword action-name)]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
@@ -344,6 +362,8 @@
                       `(fn [request#]
                          (let [{{:keys ~letkeys} :data} request#]
                            ((fn ~bindings (do ~@body)) request#))))]
+
+    (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
 
     `(do
        (register-action ~atype ~action-name ~meta-data ~line-number ~ns-str ~handler)
