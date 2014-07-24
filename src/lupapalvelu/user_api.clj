@@ -483,7 +483,7 @@
 ;;
 
 (defquery user-attachments
-  {:roles [:applicant]}
+  {:roles [:applicant :authority :authorityAdmin :admin]}
   [{user :user}]
   (ok :attachments (:attachments user)))
 
