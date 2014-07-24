@@ -48,7 +48,8 @@
 
 (env/in-dev
   (defquery user-by-email
-    {:parameters [email] :roles [:admin]}
+    {:parameters [email]
+     :roles [:admin]}
     [_]
     (ok :user (user/get-user-by-email email))))
 
@@ -324,10 +325,10 @@
 
 (defcommand reset-password
   {:parameters    [email]
+   :roles [:anonymous]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :notified      true
-   :authenticated false}
+   :notified      true}
   [_]
   (let [email (ss/lower-case (ss/trim email))]
     (infof "Password reset request: email=%s" email)
@@ -373,7 +374,8 @@
 
 
 (defcommand login
-  {:parameters [username password]}
+  {:parameters [username password]
+   :roles [:anonymous]}
   [_]
   (if (user/throttle-login? username)
     (do
@@ -414,6 +416,7 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
+   :roles [:anonymous]
    :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
                       action/email-validator]}
   [{data :data}]
@@ -437,6 +440,7 @@
 
 (defcommand confirm-account-link
   {:parameters [stamp tokenId email password street zip city phone]
+   :roles [:anonymous]
    :input-validators [(partial action/non-blank-parameters [:tokenId :password])
                       action/email-validator]}
   [{data :data}]
@@ -536,7 +540,7 @@
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
-   :roles [:applicant]
+   :roles      [:applicant]
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
   [{application :application user :user}]

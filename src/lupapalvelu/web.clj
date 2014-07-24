@@ -294,7 +294,8 @@
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
 
-(defcommand "frontend-error" {}
+(defcommand "frontend-error"
+  {:roles [:anonymous]}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
         sanitize (partial lupapalvelu.logging/sanitize limit)

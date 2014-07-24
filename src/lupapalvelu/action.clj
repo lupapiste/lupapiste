@@ -121,10 +121,11 @@
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-role [command meta-data]
+(defn- has-required-role [command {roles :roles :as meta-data}]
+  {:pre [roles]}
   (let [user-role      (-> command :user :role keyword)
-        roles-required (:roles meta-data)]
-    (or (empty? roles-required) (some #{user-role} roles-required))))
+        roles-required (if (set? roles) roles (set roles))]
+    (or (roles-required :anonymous) (roles-required user-role))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -133,10 +134,6 @@
   (when-not (meta-data command)
     (warnf "command '%s' not found" (:action command))
     (fail :error.invalid-command)))
-
-(defn not-authenticated [{user :user :as command}]
-  (when (and (nil? user) (:authenticated (meta-data command)))
-    unauthorized))
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
@@ -207,7 +204,6 @@
 
 (def authorize-validators [missing-command
                            missing-feature
-                           not-authenticated
                            missing-roles
                            impersonation])
 
@@ -316,7 +312,6 @@
 (def supported-action-meta-data
   {:parameters "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
    :roles "Vector of role keywords."
-   :authenticated "TO BE REMOVED"
    :extra-auth-roles "Vector of role keywords."
    :description "Documentation string."
    :notified "Boolean. Documents that the action will be sending (email) notifications."
@@ -346,7 +341,7 @@
         args        (if doc-string (rest args) args)
         meta-data   (when (map? (first args)) (first args))
         args        (if meta-data (rest args) args)
-        meta-data   (or meta-data {})
+        meta-data   (update-in (or meta-data {}) [:roles] set)
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
         bindings    (or bindings ['_])
@@ -364,6 +359,7 @@
                            ((fn ~bindings (do ~@body)) request#))))]
 
     (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
+    (assert (seq (:roles meta-data)) (str "You must defive :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone.") )
 
     `(do
        (register-action ~atype ~action-name ~meta-data ~line-number ~ns-str ~handler)

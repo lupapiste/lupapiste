@@ -8,10 +8,10 @@
         <table>
           <thead>
             <tr>
-              <th>status</th>
               <th>toiminto</th>
               <th>tyyppi</th>
               <th>roolit</th>
+              <th>extra-roolit</th>
               <th>tilat</th>
               <th>parametrit</th>
               <th>email</th>
@@ -22,12 +22,18 @@
           </thead>
           <tbody data-bind="foreach: actions">
             <tr>
-              <td data-bind="attr: {'class': $data.verified === true ? 'btn-primary' : 'btn-decline'}"></td>
               <td data-bind="text: name"></td>
               <td data-bind="text: type"></td>
               <td>
                 <!-- ko if: $data.roles -->
                 <ul data-bind="foreach: roles">
+                  <li data-bind="text: $data"></li>
+                </ul>
+                <!-- /ko -->
+              </td>
+              <td>
+                <!-- ko if: $data['extra-auth-roles'] -->
+                <ul data-bind="foreach: $data['extra-auth-roles']">
                   <li data-bind="text: $data"></li>
                 </ul>
                 <!-- /ko -->
