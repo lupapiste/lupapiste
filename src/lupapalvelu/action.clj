@@ -136,7 +136,7 @@
 
 (defn not-authenticated [{user :user :as command}]
   (when (and (nil? user) (:authenticated (meta-data command)))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
@@ -151,14 +151,14 @@
 (defn missing-roles [command]
   (when-not (has-required-role command (meta-data command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn- impersonation [command]
   (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn disallow-impersonation [command _]
-  (when (get-in command [:user :impersonating]) (fail :error.unauthorized)))
+  (when (get-in command [:user :impersonating]) unauthorized))
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
@@ -234,12 +234,12 @@
                   (domain/owner-or-writer? application (:id user))
                   (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
-      (fail :error.unauthorized))))
+      unauthorized)))
 
 (defn- not-authorized-to-application [command application]
   (when-let [id (-> command :data :id)]
     (if-not application
-      (fail :error.unauthorized)
+      unauthorized
       (or
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))

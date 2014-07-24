@@ -18,8 +18,7 @@
 (facts "defquery users"
 
   (fact "pena can't list users"
-    (query pena :users)
-      => {:ok false, :text "error.unauthorized"})
+    (query pena :users) => unauthorized?)
 
   (fact "admin can list users"
     (query admin :users)

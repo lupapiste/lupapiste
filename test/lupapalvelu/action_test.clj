@@ -53,8 +53,7 @@
   (fact (execute {:action "foobar"})
         => (contains {:ok false}))
 
-  (fact (execute {:action "test-command" :user {:role :applicant}})
-        => (contains {:ok false :text "error.unauthorized"}))
+  (fact (execute {:action "test-command" :user {:role :applicant}}) => unauthorized)
 
   (fact (execute {:action "test-command" :user {:role :authority}})
         => (contains {:ok false :text "error.missing-parameters"})))
@@ -86,16 +85,13 @@
     (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :role :authority}) =>  nil)
 
   (fact "regular user is not authority"
-        (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}})
-        => { :ok false :text "error.unauthorized"})
+        (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
 
   (fact "with correct authority command is executed"
-        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}})
-        => { :ok true})
+        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "with incorred authority error is returned"
-        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}})
-        => { :ok false :text "error.unauthorized"}))
+        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => unauthorized))
 
 (facts "Access based on extra-auth-roles"
   (against-background
@@ -125,25 +121,25 @@
     )
 
   (fact "Authority from same org has access"
-    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Non-authority from same org has no access"
-    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :applicant} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :applicant} :data {:id "123"}}) => unauthorized)
 
   (fact "Authority with no org but correct role has access"
-    (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Authority with no org and incorrect role has no access"
-    (execute {:action "test-command-auth" :user {:id "user234" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+    (execute {:action "test-command-auth" :user {:id "user234" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
 
   (fact "Authority with no org and writer role in auth array has access"
-    (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Authority with no org and non-writer role in auth array has no access"
-    (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+    (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
 
   (fact "Any extra-auth-role allowed"
-    (execute {:action "with-any-extra-role" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "with-any-extra-role" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
   )
 
 (facts "Parameter validation"
@@ -160,7 +156,7 @@
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
 
  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+ (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Custom input-validator is run"
@@ -171,35 +167,35 @@
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
 
  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+ (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Input-validator is not run during auth check"
   (against-background
    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]}}
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
-  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
 (facts "Defined querys work only in query pipelines"
   (against-background (get-actions) => {:test-command {:type :query}})
-  (fact  (execute {:action "test-command"})                 => {:ok true})
-  (fact  (execute {:action "test-command" :type :query})    => {:ok true})
+  (fact  (execute {:action "test-command"})                 => ok?)
+  (fact  (execute {:action "test-command" :type :query})    => ok?)
   (fact  (execute {:action "test-command" :type :command})  => {:ok false, :text "error.invalid-type"})
   (fact  (execute {:action "test-command" :type :raw})      => {:ok false, :text "error.invalid-type"}))
 
 (facts "Defined commands work only in command pipelines"
   (against-background (get-actions) => {:test-command {:type :command}})
-  (fact  (execute {:action "test-command"})                 => {:ok true})
+  (fact  (execute {:action "test-command"})                 => ok?)
   (fact  (execute {:action "test-command" :type :query})    => {:ok false, :text "error.invalid-type"})
-  (fact  (execute {:action "test-command" :type :command})  => {:ok true})
+  (fact  (execute {:action "test-command" :type :command})  => ok?)
   (fact  (execute {:action "test-command" :type :raw})      => {:ok false, :text "error.invalid-type"}))
 
 (facts "Defined raws work only in raw pipelines"
   (against-background (get-actions) => {:test-command {:type :raw}})
-  (fact  (execute {:action "test-command"})                 => {:ok true})
+  (fact  (execute {:action "test-command"})                 => ok?)
   (fact  (execute {:action "test-command" :type :query})    => {:ok false, :text "error.invalid-type"})
   (fact  (execute {:action "test-command" :type :command})  => {:ok false, :text "error.invalid-type"})
-  (fact  (execute {:action "test-command" :type :raw})      => {:ok true}))
+  (fact  (execute {:action "test-command" :type :raw})      => ok?))
 
 (fact "fail! stops the press"
   (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh"))}})
@@ -228,7 +224,7 @@
    (provided (env/feature? :abba) => false))
 
  (fact "with correct feature command is executed"
-   (execute {:action "test-command1"}) => {:ok true}
+   (execute {:action "test-command1"}) => ok?
    (provided (env/feature? :abba) => true)))
 
 (def ok-status   {:ok true})

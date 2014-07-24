@@ -30,4 +30,4 @@
                   result (doc-result (user-is-not-allowed-to-access? command application) action)]]
       (if (allowed-actions action)
         result => (doc-check nil?)
-        result => (doc-check = {:ok false :text "error.unauthorized"})))))
+        result => (doc-check = unauthorized)))))

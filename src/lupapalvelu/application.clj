@@ -11,7 +11,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
-            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
@@ -51,7 +51,7 @@
    To be used in commands' :pre-checks vector."
   [command application]
   (when-not (domain/owner-or-writer? application (-> command :user :id))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn- validate-x [{{:keys [x]} :data}]
   (when (and x (not (< 10000 (util/->double x) 800000)))
@@ -619,7 +619,7 @@
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
-      (fail! :error.unauthorized))
+      (unauthorized!))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
