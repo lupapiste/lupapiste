@@ -93,7 +93,7 @@
                       :js   ["modal-datepicker.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :moment :i18n :selectm :screenmessages]
-                   :js ["comment.js" "municipalities.js"]
+                   :js ["comment.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]
@@ -163,7 +163,7 @@
                   :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common]
-                  :js ["create.js"]
+                  :js ["municipalities.js" "create.js"]
                   :html ["create.html"]
                   :css ["create.css"]}
 
