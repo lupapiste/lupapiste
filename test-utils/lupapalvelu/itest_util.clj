@@ -1,7 +1,7 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [lupapalvelu.core :refer [fail!]]
+            [lupapalvelu.core :refer [fail! unauthorized]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.vetuma :as vetuma]
@@ -157,10 +157,10 @@
 (defn expected-failure? [expected-text {:keys [ok text]}]
   (and (= ok false) (= text expected-text)))
 
-(def unauthorized? (partial expected-failure? "error.unauthorized"))
+(def unauthorized? (partial expected-failure? (:text unauthorized)))
 
 (fact "unauthorized?"
-  (unauthorized? {:ok false :text "error.unauthorized"}) => true
+  (unauthorized? unauthorized) => true
   (unauthorized? {:ok false :text "error.SOME_OTHER_REASON"}) => false
   (unauthorized? {:ok true}) => false)
 

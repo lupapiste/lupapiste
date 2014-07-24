@@ -73,6 +73,7 @@
      :username email}))
 
 (defraw openinforequest
+  {:roles [:anonymous]}
   [{{token-id :token-id} :data lang :lang}]
   (info "open-inforequest: open:" token-id lang)
   (let [token (mongo/by-id :open-inforequest-token token-id)

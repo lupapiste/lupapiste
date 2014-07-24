@@ -11,7 +11,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
-            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
@@ -51,7 +51,7 @@
    To be used in commands' :pre-checks vector."
   [command application]
   (when-not (domain/owner-or-writer? application (-> command :user :id))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn- validate-x [{{:keys [x]} :data}]
   (when (and x (not (< 10000 (util/->double x) 800000)))
@@ -127,7 +127,7 @@
     {:firstName 1 :lastName 1}))
 
 (defquery application
-  {:authenticated true
+  {:roles [:applicant :authority]
    :extra-auth-roles [:any]
    :parameters [:id]}
   [{app :application user :user}]
@@ -142,7 +142,7 @@
 ;; application id and the authorities in that organization.
 (defquery authorities-in-applications-organization
   {:parameters [:id]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{app :application}]
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
@@ -178,7 +178,7 @@
 
 (defquery party-document-names
   {:parameters [:id]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{application :application}]
   (let [documents (:documents application)
         initialOp (:name (first (:operations application)))
@@ -191,8 +191,7 @@
 ;;
 
 (defquery invites
-  {:authenticated true
-   :verified true}
+  {:roles [:applicant :authority]}
   [{{:keys [id]} :user}]
   (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
@@ -206,8 +205,7 @@
                       action/email-validator]
    :roles      [:applicant :authority]
    :notified   true
-   :on-success (notify :invite)
-   :verified   true}
+   :on-success (notify :invite)}
   [{:keys [created user application] :as command}]
   (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invite application email)
@@ -234,8 +232,7 @@
 
 (defcommand approve-invite
   {:parameters [id]
-   :roles      [:applicant]
-   :verified   true}
+   :roles      [:applicant]}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
@@ -273,7 +270,7 @@
 
 (defcommand decline-invitation
   {:parameters [:id]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [command]
   (do-remove-auth command (get-in command [:user :email])))
 
@@ -287,7 +284,7 @@
 (defcommand mark-seen
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
@@ -299,7 +296,7 @@
 
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
-   :authenticated true}
+   :roles [:applicant :authority]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
     (set-user-to-document application document userId path user created)
@@ -620,7 +617,7 @@
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
-      (fail! :error.unauthorized))
+      (unauthorized!))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
@@ -757,7 +754,6 @@
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
-   :verified   true
    :roles      [:applicant :authority]}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
@@ -1055,6 +1051,6 @@
 
 (defquery applications-for-datatables
   {:parameters [params]
-   :verified true}
+   :roles      [:applicant :authority]}
   [{user :user}]
   (ok :data (search/applications-for-user user params)))

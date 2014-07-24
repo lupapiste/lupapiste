@@ -31,6 +31,9 @@
    ;; ETL export user: solita-etl / solita-etl
    {:id "solita-etl"
     :username "solita-etl"
+    :email "lupapiste@solita.fi"
+    :firstName "Solita"
+    :lastName "DW ETL-lataus"
     :enabled true
     :role "trusted-etl"
     :private {:password "$2a$10$uog/cI4n4vxFBNgku4xTpu6lcrF56cttBDW5zkTfDaSClgEw54/Nm"}}

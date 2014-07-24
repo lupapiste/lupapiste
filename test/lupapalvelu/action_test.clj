@@ -11,10 +11,10 @@
 
 (defn returns [])
 
-(defcommand "test-command" {:abba "jabba"} [command] (returns))
+(defcommand "test-command" {:description "jabba" :roles [:anonymous]} [command] (returns))
 
 (facts "get-meta"
-  (get-meta "test-command") => (contains {:abba "jabba"}))
+  (get-meta "test-command") => (contains {:description "jabba"}))
 
 (fact "masked"
   (fact "returns normal data as-is"
@@ -53,8 +53,7 @@
   (fact (execute {:action "foobar"})
         => (contains {:ok false}))
 
-  (fact (execute {:action "test-command" :user {:role :applicant}})
-        => (contains {:ok false :text "error.unauthorized"}))
+  (fact (execute {:action "test-command" :user {:role :applicant}}) => unauthorized)
 
   (fact (execute {:action "test-command" :user {:role :authority}})
         => (contains {:ok false :text "error.missing-parameters"})))
@@ -86,16 +85,13 @@
     (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :role :authority}) =>  nil)
 
   (fact "regular user is not authority"
-        (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}})
-        => { :ok false :text "error.unauthorized"})
+        (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
 
   (fact "with correct authority command is executed"
-        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}})
-        => { :ok true})
+        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "with incorred authority error is returned"
-        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}})
-        => { :ok false :text "error.unauthorized"}))
+        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => unauthorized))
 
 (facts "Access based on extra-auth-roles"
   (against-background
@@ -105,6 +101,7 @@
                       :without-extra-roles {:parameters [:id]
                                             :roles [:authority]}
                       :with-any-extra-role {:parameters [:id]
+                                            :roles [:anonymous]
                                             :extra-auth-roles [:any]}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
                                                                                                   :auth [{:id "user123" :role "someRole"}]}
@@ -125,25 +122,25 @@
     )
 
   (fact "Authority from same org has access"
-    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Non-authority from same org has no access"
-    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :applicant} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :applicant} :data {:id "123"}}) => unauthorized)
 
   (fact "Authority with no org but correct role has access"
-    (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Authority with no org and incorrect role has no access"
-    (execute {:action "test-command-auth" :user {:id "user234" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+    (execute {:action "test-command-auth" :user {:id "user234" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
 
   (fact "Authority with no org and writer role in auth array has access"
-    (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Authority with no org and non-writer role in auth array has no access"
-    (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok false :text "error.unauthorized"})
+    (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
 
   (fact "Any extra-auth-role allowed"
-    (execute {:action "with-any-extra-role" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => {:ok true})
+    (execute {:action "with-any-extra-role" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
   )
 
 (facts "Parameter validation"
@@ -154,59 +151,59 @@
 
 (facts "Custom pre-check is run"
  (against-background
-   (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))]}
-                     :test-command2 {:pre-checks [(constantly nil)]}
-                     :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
+   (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))] :roles [:authority]}
+                     :test-command2 {:pre-checks [(constantly nil)] :roles [:authority]}
+                     :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
 
  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+ (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Custom input-validator is run"
  (against-background
-   (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]}
-                     :test-command2 {:input-validators [(constantly nil)]}
-                     :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))]}}
+   (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))] :roles [:authority]}
+                     :test-command2 {:input-validators [(constantly nil)] :roles [:authority]}
+                     :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
 
  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+ (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Input-validator is not run during auth check"
   (against-background
-   (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]}}
+   (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]:roles [:authority]}}
    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
-  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok true})
+  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
 (facts "Defined querys work only in query pipelines"
-  (against-background (get-actions) => {:test-command {:type :query}})
-  (fact  (execute {:action "test-command"})                 => {:ok true})
-  (fact  (execute {:action "test-command" :type :query})    => {:ok true})
+  (against-background (get-actions) => {:test-command {:type :query :roles [:anonymous]}})
+  (fact  (execute {:action "test-command"})                 => ok?)
+  (fact  (execute {:action "test-command" :type :query})    => ok?)
   (fact  (execute {:action "test-command" :type :command})  => {:ok false, :text "error.invalid-type"})
   (fact  (execute {:action "test-command" :type :raw})      => {:ok false, :text "error.invalid-type"}))
 
 (facts "Defined commands work only in command pipelines"
-  (against-background (get-actions) => {:test-command {:type :command}})
-  (fact  (execute {:action "test-command"})                 => {:ok true})
+  (against-background (get-actions) => {:test-command {:type :command :roles [:anonymous]}})
+  (fact  (execute {:action "test-command"})                 => ok?)
   (fact  (execute {:action "test-command" :type :query})    => {:ok false, :text "error.invalid-type"})
-  (fact  (execute {:action "test-command" :type :command})  => {:ok true})
+  (fact  (execute {:action "test-command" :type :command})  => ok?)
   (fact  (execute {:action "test-command" :type :raw})      => {:ok false, :text "error.invalid-type"}))
 
 (facts "Defined raws work only in raw pipelines"
-  (against-background (get-actions) => {:test-command {:type :raw}})
-  (fact  (execute {:action "test-command"})                 => {:ok true})
+  (against-background (get-actions) => {:test-command {:type :raw :roles [:anonymous]}})
+  (fact  (execute {:action "test-command"})                 => ok?)
   (fact  (execute {:action "test-command" :type :query})    => {:ok false, :text "error.invalid-type"})
   (fact  (execute {:action "test-command" :type :command})  => {:ok false, :text "error.invalid-type"})
-  (fact  (execute {:action "test-command" :type :raw})      => {:ok true}))
+  (fact  (execute {:action "test-command" :type :raw})      => ok?))
 
 (fact "fail! stops the press"
-  (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh"))}})
+  (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh")) :roles [:anonymous]}})
   (execute {:action "failing"}) => {:ok false :text "kosh"})
 
 (fact "exception details are not returned"
-  (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh")))}})
+  (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh"))) :roles [:anonymous]}})
   (execute {:action "failing"}) => {:ok false :text "error.unknown"})
 
 (facts "non-blank-parameters"
@@ -221,14 +218,14 @@
 
 (facts "feature requirements"
  (against-background
-   (get-actions) => {:test-command1 {:feature :abba}})
+   (get-actions) => {:test-command1 {:feature :abba :roles [:anonymous]}})
 
  (fact "without correct feature error is given"
    (execute {:action "test-command1"}) => {:ok false, :text "error.missing-feature"}
    (provided (env/feature? :abba) => false))
 
  (fact "with correct feature command is executed"
-   (execute {:action "test-command1"}) => {:ok true}
+   (execute {:action "test-command1"}) => ok?
    (provided (env/feature? :abba) => true)))
 
 (def ok-status   {:ok true})
@@ -251,6 +248,3 @@
     => [...c1... ...c2... ...f...]
   (get-post-fns fail-status {:on-complete [...c1... ...c2...] :on-success [...s1... ...s2...] :on-fail [...f1... ...f2...]})
     => [...c1... ...c2... ...f1... ...f2...])
-
-(fact "None of the actions contain the outdated :validators definition"
-  (map :validators (vals (get-actions))) => (has every? nil?))
