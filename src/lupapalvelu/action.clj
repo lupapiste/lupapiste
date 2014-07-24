@@ -339,7 +339,7 @@
                      :line line
                      :handler handler}))))
 
-(defmacro defaction [atype fun & args]
+(defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
         args        (if doc-string (rest args) args)
         meta-data   (when (map? (first args)) (first args))
@@ -352,22 +352,21 @@
         letkeys     (filter symbol? parameters)
         parameters  (map (comp keyword name) parameters)
         meta-data   (assoc meta-data :parameters (vec parameters))
-        line-number (:line (meta &form))
+        line-number (:line form-meta)
         ns-str      (str *ns*)
-        defname     (symbol (str (name atype) "-" fun))
-        action-name (str fun)
+        defname     (symbol (str (name action-type) "-" action-name))
         handler     (eval
                       `(fn [request#]
                          (let [{{:keys ~letkeys} :data} request#]
                            ((fn ~bindings (do ~@body)) request#))))]
     `(do
-       (register-action ~atype ~action-name ~meta-data ~line-number ~ns-str ~handler)
+       (register-action ~action-type ~(str action-name) ~meta-data ~line-number ~ns-str ~handler)
        (defn ~defname
          ([] (~defname {}))
          ([request#] (~handler request#))))))
 
-(defmacro defcommand [& args] `(defaction :command ~@args))
-(defmacro defquery   [& args] `(defaction :query ~@args))
-(defmacro defraw     [& args] `(defaction :raw ~@args))
-(defmacro defexport  [& args] `(defaction :export ~@args))
+(defmacro defcommand [& args] `(defaction ~(meta &form) :command ~@args))
+(defmacro defquery   [& args] `(defaction ~(meta &form) :query ~@args))
+(defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
+(defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
