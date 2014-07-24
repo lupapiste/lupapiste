@@ -6,9 +6,6 @@
             [lupapalvelu.action :refer :all]
             [lupapalvelu.common-actions :as ca]))
 
-(fact (executed "ping" {:action "ping"}) => {:ok true :text "pong"})
-(fact (executed {:action "ping"}) => {:ok true :text "pong"})
-
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
 (facts "Allowed actions for statementGiver"

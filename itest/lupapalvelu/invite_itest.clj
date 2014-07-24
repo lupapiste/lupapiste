@@ -18,7 +18,7 @@
 
 (facts* "Applicant invites designer"
 
-  (doseq [user-key [mikko teppo veikko sonja sipoo]]
+  (doseq [user-key [mikko teppo veikko sonja]]
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
