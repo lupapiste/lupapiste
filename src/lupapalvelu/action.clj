@@ -121,10 +121,11 @@
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-role [command meta-data]
+(defn- has-required-role [command {roles :roles :as meta-data}]
+  {:pre [roles]}
   (let [user-role      (-> command :user :role keyword)
-        roles-required (:roles meta-data)]
-    (or (empty? roles-required) (some #{user-role} roles-required))))
+        roles-required (if (set? roles) roles (set roles))]
+    (or (roles-required :anonymous) (roles-required user-role))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -133,10 +134,6 @@
   (when-not (meta-data command)
     (warnf "command '%s' not found" (:action command))
     (fail :error.invalid-command)))
-
-(defn not-authenticated [{user :user :as command}]
-  (when (and (nil? user) (:authenticated (meta-data command)))
-    (fail :error.unauthorized)))
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
@@ -151,14 +148,14 @@
 (defn missing-roles [command]
   (when-not (has-required-role command (meta-data command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn- impersonation [command]
   (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
-    (fail :error.unauthorized)))
+    unauthorized))
 
 (defn disallow-impersonation [command _]
-  (when (get-in command [:user :impersonating]) (fail :error.unauthorized)))
+  (when (get-in command [:user :impersonating]) unauthorized))
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
@@ -207,7 +204,6 @@
 
 (def authorize-validators [missing-command
                            missing-feature
-                           not-authenticated
                            missing-roles
                            impersonation])
 
@@ -234,12 +230,12 @@
                   (domain/owner-or-writer? application (:id user))
                   (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
-      (fail :error.unauthorized))))
+      unauthorized)))
 
 (defn- not-authorized-to-application [command application]
   (when-let [id (-> command :data :id)]
     (if-not application
-      (fail :error.unauthorized)
+      unauthorized
       (or
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
@@ -313,23 +309,42 @@
 ;; Register actions
 ;;
 
-(defn register-action [action-type action-name params line ns-str handler]
+(def supported-action-meta-data
+  {:parameters "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
+   :roles "Vector of role keywords."
+   :extra-auth-roles "Vector of role keywords."
+   :description "Documentation string."
+   :notified "Boolean. Documents that the action will be sending (email) notifications."
+   :pre-checks "Vector of functions."
+   :input-validators "Vector of functions."
+   :states  "Vector of application state keywords"
+   :on-complete "Function or vector of functions."
+   :on-success "Function or vector of functions."
+   :on-fail "Function or vector of functions."
+   :feature "Keyword: feature flag name. Action is run only if the feature flag is true.
+             If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
+
+(def ^:private supported-action-meta-data-keys (set (keys supported-action-meta-data)))
+
+(defn register-action [action-type action-name meta-data line ns-str handler]
+  (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
+  (assert (seq (:roles meta-data)) (str "You must defive :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
+
   (let [action-keyword (keyword action-name)]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
-      (merge params {:type action-type
+      (merge meta-data {:type action-type
                      :ns ns-str
                      :line line
-                     :verified (or (:verified params) (contains? (set (:parameters params)) :id))
                      :handler handler}))))
 
-(defmacro defaction [atype fun & args]
+(defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
         args        (if doc-string (rest args) args)
         meta-data   (when (map? (first args)) (first args))
         args        (if meta-data (rest args) args)
-        meta-data   (or meta-data {})
+        meta-data   (update-in (or meta-data {}) [:roles] set)
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
         bindings    (or bindings ['_])
@@ -337,22 +352,21 @@
         letkeys     (filter symbol? parameters)
         parameters  (map (comp keyword name) parameters)
         meta-data   (assoc meta-data :parameters (vec parameters))
-        line-number (:line (meta &form))
+        line-number (:line form-meta)
         ns-str      (str *ns*)
-        defname     (symbol (str (name atype) "-" fun))
-        action-name (str fun)
+        defname     (symbol (str (name action-type) "-" action-name))
         handler     (eval
                       `(fn [request#]
                          (let [{{:keys ~letkeys} :data} request#]
                            ((fn ~bindings (do ~@body)) request#))))]
     `(do
-       (register-action ~atype ~action-name ~meta-data ~line-number ~ns-str ~handler)
+       (register-action ~action-type ~(str action-name) ~meta-data ~line-number ~ns-str ~handler)
        (defn ~defname
          ([] (~defname {}))
          ([request#] (~handler request#))))))
 
-(defmacro defcommand [& args] `(defaction :command ~@args))
-(defmacro defquery   [& args] `(defaction :query ~@args))
-(defmacro defraw     [& args] `(defaction :raw ~@args))
-(defmacro defexport  [& args] `(defaction :export ~@args))
+(defmacro defcommand [& args] `(defaction ~(meta &form) :command ~@args))
+(defmacro defquery   [& args] `(defaction ~(meta &form) :query ~@args))
+(defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
+(defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 

@@ -126,8 +126,7 @@
 
 (defquery organization-by-user
   {:description "Lists all organization users by organization."
-   :roles [:authorityAdmin]
-   :verified true}
+   :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [orgs (get-organizations {:_id {$in organizations}})
         organization (first orgs)
@@ -142,8 +141,7 @@
 (defcommand update-organization
   {:description "Update organization details."
    :parameters [permitType municipality inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
-   :roles [:admin]
-   :verified true}
+   :roles [:admin]}
   [_]
   (mongo/update-by-query :organizations
       {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
@@ -156,8 +154,7 @@
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
-   :roles [:authorityAdmin]
-   :verified true}
+   :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -165,8 +162,7 @@
 (defcommand update-organization-link
   {:description "Updates organization link."
    :parameters [url nameFi nameSv index]
-   :roles [:authorityAdmin]
-   :verified true}
+   :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -174,33 +170,32 @@
 (defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [nameFi nameSv url]
-   :roles [:authorityAdmin]
-   :verified true}
+   :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defquery organizations
-  {:roles       [:admin]
-   :authenticated true
-   :verified true}
-  [{user :user}]
+  {:roles [:admin]}
+  [_]
   (ok :organizations (get-organizations)))
 
-(defquery organization-names
-  {:authenticated true
-   :verified true}
-  [{user :user}]
-  (ok :organizations (get-organizations {} {:name 1})))
+(defquery organization-by-id
+  {:parameters [organizationId]
+   :roles [:admin]}
+  [_]
+  (get-organization organizationId))
 
 (defquery "municipalities-with-organization"
-  {:verified true}
+  {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
+   :roles [:applicant :authority]}
   [_]
   (ok :municipalities (municipalities-with-organization)))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
+   :roles [:authorityAdmin]
    :input-validators [(partial non-blank-parameters [:organizationId])]}
   (when-let [org (get-organization organizationId)]
     (ok :operations (operations/organization-operations org))))
@@ -209,8 +204,7 @@
   {:description "Returns selected operations of all the organizations who have a scope with the given municipality.
                  If a \"permitType\" parameter is given, returns selected operations for only that organization (the municipality + permitType combination)."
    :parameters [:municipality]
-   :authenticated true
-   :verified true
+   :roles [:applicant :authority :authorityAdmin]
    :input-validators [(partial non-blank-parameters [:municipality])]}
   [{{:keys [municipality permitType]} :data}]
   (when-let [organizations (resolve-organizations municipality permitType)]
@@ -218,22 +212,17 @@
 
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
-   :parameters [:id]}
+   :parameters [:id]
+   :roles [:applicant :authority]}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (get-organization organization)]
     (let [selected-operations (map keyword (:selected-operations org))]
       (ok :operations (operations/addable-operations selected-operations permitType)))))
 
-(defquery organization-by-id
-  {:parameters [organizationId]
-   :roles [:admin]
-   :verified true}
-  [_]
-  (get-organization organizationId))
-
 (defquery organization-details
-  {:parameters [municipality operation lang]
-   :verified true}
+  {:description "Resolves organization based on municipality and selected operation."
+   :parameters [municipality operation]
+   :roles [:applicant :authority]}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (if-let [organization (resolve-organization municipality permit-type)]
@@ -264,8 +253,7 @@
   (ok))
 
 (defquery krysp-config
-  {:roles [:authorityAdmin]
-   :verified true}
+  {:roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
     (if-let [organization (get-organization organization-id)]
@@ -276,7 +264,6 @@
 (defcommand set-krysp-endpoint
   {:parameters [url permitType version]
    :roles      [:authorityAdmin]
-   :verified   true
    :input-validators [(fn [{{:keys [permitType]} :data}]
                         (when-not (contains? (permit/permit-types) permitType)
                           (warn "invalid permit type" permitType)
