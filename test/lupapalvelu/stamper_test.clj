@@ -4,13 +4,6 @@
 
 (testable-privates lupapalvelu.stamper calculate-x-y get-origin)
 
-(facts "get-origin"
-  (get-origin {:left 0.0, :bottom -1795.2, :right 841.92, :top 0.0}) => :top-left
-  (get-origin {:left 0.0, :bottom 0, :right 841.92, :top -1795.2}) => :bottom-left
-  (get-origin {:left 0.0, :bottom -1795.2, :right 841.92, :top 0.0}) => :top-left
-  (get-origin {:left 0.0, :bottom -1795.2, :right 841.92, :top 0.0}) => :top-left
-  )
-
 (fact "problematic-pdfs/pohjapiirros.pdf"
   (let [page-box {:left 0.0, :bottom -1795.2, :right 841.92, :top 0.0}
         crop-box {:left 0.0, :bottom -1795.2, :right 841.92, :top 0.0}
