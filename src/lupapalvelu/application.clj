@@ -193,8 +193,9 @@
 (defquery invites
   {:roles [:applicant :authority]}
   [{{:keys [id]} :user}]
-  (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
-        projection (assoc filter :_id 0)
+  (let [common     {:auth {$elemMatch {:invite.user.id id}}}
+        projection (assoc common :_id 0)
+        filter     {$and [common {:state {$ne :canceled}}]}
         data       (mongo/select :applications filter projection)
         invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
