@@ -13,7 +13,7 @@
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
         documents-after-approve (:documents (query-application sonja application-id)) => seq
         _              (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.command-illegal-state")
-        _              (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+        _              (give-verdict sonja application-id) => ok?
         application    (query-application sonja application-id) => truthy]
 
     (facts "Documents got an indicator reset timestamp"
@@ -55,7 +55,7 @@
   (let [application    (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 11") => truthy
         application-id (:id application)
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
-        _              (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+        _              (give-verdict sonja application-id) => ok?
         application    (query-application sonja application-id) => truthy
         _              (:state application) => "verdictGiven"]
     (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.invalid-permit-type")))

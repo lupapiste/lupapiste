@@ -2,11 +2,11 @@ var gis = (function() {
   "use strict";
 
 
-  var iconDefaultPath  = "/img/map-marker.png";
+  var iconDefaultPath  = "/img/map-marker-big.png";
   var iconLocMapping = {
     "sameLocation"  : iconDefaultPath,
-    "sameOperation" : "/img/map-marker-red.png",
-    "others"        : "/img/map-marker-green.png",
+    "sameOperation" : "/img/map-marker-green.png",
+    "others"        : "/img/map-marker-orange.png",
     "cluster"       : "/img/map-marker-group.png"
   };
 
@@ -18,7 +18,7 @@ var gis = (function() {
     if (features.enabled("use-wmts-map")) {
 
       self.map = new OpenLayers.Map(element, {
-        theme: "/theme/default/style.css",
+        theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
         projection: new OpenLayers.Projection("EPSG:3067"),
         units: "m",
         maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
@@ -26,11 +26,12 @@ var gis = (function() {
         controls: [ new OpenLayers.Control.Zoom(),
                     new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
       });
+      OpenLayers.ImgPath = '/theme/default/img/';
 
     } else {
 
       self.map = new OpenLayers.Map(element, {
-        theme: "/theme/default/style.css",
+        theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
         projection: new OpenLayers.Projection("EPSG:3067"),
         units: "m",
         maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
@@ -153,12 +154,18 @@ var gis = (function() {
 
 
     var getIconHeight = function(feature) {
-      return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 25;
+      if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
+        return 53;
+      } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
+        return 47;
+      } else {
+        return 30;
+      }
     };
 
     var context = {
       extGraphic: function(feature) {
-        var iconPath = "img/map-marker.png";
+        var iconPath = null;
         if (feature.cluster) {
           if (feature.cluster.length > 1) {
             iconPath = iconLocMapping["cluster"];
@@ -171,7 +178,13 @@ var gis = (function() {
         return iconPath || iconDefaultPath;
       },
       graphicWidth: function(feature) {
-        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 21;
+        if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
+          return 56;
+        } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
+          return 44;
+        } else {
+          return 25;
+        }
       },
       graphicHeight: function(feature) {
         return getIconHeight(feature);
@@ -184,10 +197,10 @@ var gis = (function() {
     var stylemap = new OpenLayers.StyleMap({
       'default': new OpenLayers.Style({
         externalGraphic: '${extGraphic}',
-        graphicWidth: '${graphicWidth}',
-        graphicHeight: '${graphicHeight}',   //alt to pointRadius
-        graphicYOffset: '${graphicYOffset}',
-        cursor: 'default'
+        graphicWidth:    '${graphicWidth}',
+        graphicHeight:   '${graphicHeight}',   //alt to pointRadius
+        graphicYOffset:  '${graphicYOffset}',
+        cursor:          'default'
       }, {
         context: context
       }),
@@ -206,10 +219,13 @@ var gis = (function() {
 
     self.markers = [];
 
-
     self.clear = function() {
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
+      }
+
+      if (self.selectedFeature) {
+        self.selectControl.unselect(self.selectedFeature);
       }
 
       self.vectorLayer.removeAllFeatures();
@@ -224,12 +240,74 @@ var gis = (function() {
 
     // Select control
 
+    var popupContentProviderResp = null;
+    var popupId = "popup-id";
+    self.selectedFeature = null;
+
+    function closePopup(e) {
+      if (self.selectedFeature) {
+        self.selectControl.unselect(self.selectedFeature);
+      }
+    };
+
+    function createPopup(feature, html) {
+      var anchor = {
+          size: new OpenLayers.Size(0,0),
+          offset: new OpenLayers.Pixel(100,200)
+      };
+      var popup = new OpenLayers.Popup.Anchored(
+          popupId,                                              // id (not used)
+          feature.geometry.getBounds().getCenterLonLat(),       // lonlat
+          null,                                                 // contentSize
+          html,                                                 // (html content)
+          anchor,                                               // anchor
+          true,                                                 // closeBox
+          closePopup);                                          // closeBoxCallback
+
+      popup.panMapIfOutOfView = true;
+      popup.relativePosition = "br";
+      popup.calculateRelativePosition = function() {return "tr";}
+      popup.closeOnMove = false;
+      popup.autoSize = true;
+      popup.minSize = new OpenLayers.Size(270, 505);
+      popup.maxSize = new OpenLayers.Size(270, 505);
+      return popup;
+    }
+
+    function clearMarkerKnockoutBindings(feature) {
+      if (feature && feature.popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.popup.contentDiv);
+        $(feature.popup.contentDiv).empty();
+        self.map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+      }
+      if (feature && feature.cluster && feature.cluster[0].popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.cluster[0].popup.contentDiv);
+        $(feature.cluster[0].popup.contentDiv).empty();
+        self.map.removePopup(feature.cluster[0].popup);
+        feature.cluster[0].popup.destroy();
+        feature.cluster[0].popup = null;
+      }
+    }
+
     self.selectControl = new OpenLayers.Control.SelectFeature(self.markerLayer, {
       autoActivate: true,
       clickOut: true,
       toggle: true,
 
       onSelect: function(feature) {
+        self.selectedFeature = feature;
+
+        if (self.popupContentProvider) {
+          popupContentProviderResp = self.popupContentProvider();
+          feature.popup = createPopup(feature, popupContentProviderResp.html);
+          self.map.addPopup(feature.popup, true);
+          popupContentProviderResp.applyBindingsFn(popupId);
+        }
+
         if (self.markerClickCallback) {
           var contents = feature.cluster ?
                           _.reduce(
@@ -244,6 +322,8 @@ var gis = (function() {
       },
 
       onUnselect: function(feature) {
+        clearMarkerKnockoutBindings(feature);
+        self.selectedFeature = null;
         if (self.markerMapCloseCallback) {
           self.markerMapCloseCallback();
         }
@@ -255,7 +335,7 @@ var gis = (function() {
 
     // Adding markers
 
-    self.add = function(markerInfos) {
+    self.add = function(markerInfos, autoSelect) {
       var newMarkers = [];
       markerInfos = _.isArray(markerInfos) ? markerInfos : [markerInfos];
 
@@ -270,20 +350,30 @@ var gis = (function() {
 
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);
-
       });  //each
 
       self.markerLayer.addFeatures(newMarkers);
 
+      if (autoSelect && self.popupContentProvider) {
+        self.selectControl.select(self.markerLayer.features[0]);
+      }
+
+      return self;
+    };
+
+    self.setPopupContentProvider = function(handler) {
+      self.popupContentProvider = handler;
       return self;
     };
 
     self.setMarkerClickCallback = function(handler) {
       self.markerClickCallback = handler;
+      return self;
     };
 
     self.setMarkerMapCloseCallback = function(handler) {
       self.markerMapCloseCallback = handler;
+      return self;
     };
 
     // Map handling functions
@@ -345,8 +435,18 @@ var gis = (function() {
         },
 
         trigger: function(e) {
-          var pos = self.map.getLonLatFromPixel(e.xy);
-          handler(pos.lon, pos.lat);
+          var event = getEvent(e);
+          //
+          // When marker (event.target.nodeName === "image") is clicked, let's prevent further reacting to the click here.
+          // This is somewhat a hack. It would be better to find a way to somehow stop propagation of click event earlier
+          // in the selectControl's onSelect callback, or by the marker item (OpenLayers.Feature.Vector) itself.
+          //
+          // HACK: Added check for the event.target.nodeName "DIV" to prevent creating new marker when marker popup's close cross is pressed.
+          //
+          if (!event.target || (event.target.nodeName !== "image" && event.target.className !== "olPopupCloseBox")) {
+            var pos = self.map.getLonLatFromPixel(event.xy);
+            handler(pos.lon, pos.lat);
+          }
         }
       });
 

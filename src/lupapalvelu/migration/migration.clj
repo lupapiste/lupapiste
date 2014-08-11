@@ -66,6 +66,15 @@
 (defn update! []
   (run-migrations! (map :name (unexecuted-migrations))))
 
+(defn migration-results-summary-by-name []
+  (map
+    (fn [results] {:name (:name (first results)), :ok (some :ok results)})
+    (->> (mongo/select :migrations {} {:name 1, :ok 1}) (sort-by :name) (partition-by :name))))
+
+(defn all-ok? [] (every? :ok (migration-results-summary-by-name)))
+
+(defn failing-migrations [] (map :name (remove :ok (migration-results-summary-by-name))))
+
 (defn -main [& [action & args]]
   (mongo/connect!)
   (cond

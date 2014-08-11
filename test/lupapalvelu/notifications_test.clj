@@ -8,16 +8,17 @@
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
 
 (facts "email titles"
-  (get-email-subject {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
-  (get-email-subject {:title "Haavikontie 9, Tampere"}) => "Lupapiste.fi: Haavikontie 9, Tampere")
+  (get-email-subject {:title "Haavikontie 9" :municipality "837" } "new-comment") => "Lupapiste.fi: Haavikontie 9 - uusi kommentti"
+  (get-email-subject {:title "Haavikontie 9" :municipality "837" }) => "Lupapiste.fi: Haavikontie 9"
+  (get-email-subject {:title "Haavikontie 9" :municipality "837" } "statement-request" true) => "Lupapiste.fi: Tampere, Haavikontie 9 - Lausuntopyynt\u00f6")
 
 (fact "create application link"
   (fact "..for application"
-    (get-application-link {:id 1} "" "fi" "http://localhost:8080")
-      => "http://localhost:8080/app/fi/applicant?hashbang=!/application/1#!/application/1")
+    (get-application-link {:id 1} "" "fi")
+      => (str (sade.env/value :host) "/app/fi/applicant#!/application/1"))
   (fact "..for inforequest"
-    (get-application-link {:id 1 :infoRequest true} "/comment" "fi" "http://localhost:8080" )
-      => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
+    (get-application-link {:id 1 :infoRequest true} "/comment" "fi" )
+      => (str (sade.env/value :host) "/app/fi/applicant#!/inforequest/1/comment")))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}

@@ -12,11 +12,11 @@
     (fact "applicant can't comment with to"
       pena =not=> (allowed? :can-target-comment-to-authority :id id)
       pena =not=> (allowed? :add-comment :id id :to irrelevant)
-      (command pena :add-comment :id id :text "comment1" :target {:type "application"}) => ok?
-      (command pena :add-comment :id id :text "comment1" :target {:type "application"} :to sonja-id) =not=> ok?)
+      (comment-application pena id false) => ok?
+      (comment-application pena id false sonja-id) =not=> ok?)
 
     (fact "authority can comment and applicant gets email"
-      (command sonja :add-comment :id id :text "comment1" :target {:type "application"}) => ok?
+      (comment-application sonja id false) => ok?
       (let [email (last-email)]
         (:to email) => (email-for "pena")
         email => has-correct-link?))
@@ -26,7 +26,7 @@
       sonja => (allowed? :add-comment :id id :to sonja-id))
 
     (fact "when sonja adds comment, both pena and ronja will receive email"
-      (command sonja :add-comment :id id :text "comment1" :target {:type "application"} :to ronja-id) => ok?
+      (comment-application sonja id false ronja-id) => ok?
       (let [emails (sent-emails)
             ronja-email (email-for "ronja")
             pena-email  (email-for "pena")
@@ -40,7 +40,10 @@
           (and (= to2 ronja-email) (= to1 pena-email))) => true))
 
     (fact "can't refer to non-existent user id"
-      (command sonja :add-comment :id id :text "comment1" :target {:type "application"} :to 0) => (partial expected-failure? "to-is-not-id-of-any-user-in-system"))
+      (comment-application sonja id false 0) => (partial expected-failure? "to-is-not-id-of-any-user-in-system"))
 
-    (fact "the type parameter cannot be a string"
-      (command sonja :add-comment :id id :text "comment1" :target "application") => (partial expected-failure? "error.unknown-type"))))
+    (fact "the target parameter cannot be a string"
+      (command sonja :add-comment :id id :text "comment1" :target "application" :roles []) => (partial expected-failure? "error.unknown-type"))
+
+    (fact "the roles parameter cannot be a string"
+      (command sonja :add-comment :id id :text "comment1" :target {:type "application"} :roles "applicant") => (partial expected-failure? "error.non-vector-parameters"))))

@@ -6,7 +6,7 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.map = function() {
     if (!_map) _map = gis
-        .makeMap("change-location-map")
+        .makeMap("change-location-map", false)
         .center(404168, 6693765, features.enabled("use-wmts-map") ? 13 : 10)
         .addClickHandler(function(x, y) {
           self

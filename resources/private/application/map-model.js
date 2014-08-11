@@ -14,7 +14,9 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
 
   var createMap = function(divName) {
-    return gis.makeMap(divName, false).center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
+    return gis
+      .makeMap(divName, false)
+      .center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
   };
 
   var getOrCreateMap = function(kind) {
@@ -190,7 +192,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     var x = (location && location.x) ? location.x : 0;
     var y = (location && location.y) ? location.y : 0;
     hub.send("oskari-center-map", {
-      data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker.png"}],
+      data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker-orange.png"}],
       clear: true
     });
   });

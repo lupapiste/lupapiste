@@ -18,7 +18,7 @@
 
 (facts* "Applicant invites designer"
 
-  (doseq [user-key [mikko teppo veikko sonja sipoo]]
+  (doseq [user-key [mikko teppo veikko sonja]]
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
@@ -79,7 +79,7 @@
     (last-email) ; Inbox zero
 
     (fact "Sonja adds comment, only Mikko gets email"
-      (comment-application application-id sonja false)
+      (comment-application sonja application-id false) => ok?
       (let [emails (sent-emails)]
         (count emails) => 1
         (:to (first emails)) => (email-for-key mikko)))
@@ -89,7 +89,7 @@
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id application-id :text (email-for-key teppo) :target {:type "application"} :openApplication true) => ok?)
+      (comment-application teppo application-id true) => ok?)
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
@@ -134,7 +134,7 @@
       (fact "Pena can still approve invite"
         (command pena :approve-invite :id application-id) => ok?))))
 
-(facts* "Auhtority invites designer"
+(facts* "Authority invites designer"
   (doseq [user-key [sonja mikko teppo]]
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
@@ -158,7 +158,7 @@
       (command teppo :approve-invite :id id) => ok?)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text (email-for-key teppo) :target {:type "application"}) => ok?)
+      (comment-application teppo id false) => ok?)
 
     (fact "Teppo must be able to invite another designer, Mikko!"
       (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
