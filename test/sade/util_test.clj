@@ -1,6 +1,7 @@
 (ns sade.util-test
   (:require [sade.util :refer :all]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [schema.core :as sc]))
 
 
 (facts "strip-nils"
@@ -211,3 +212,13 @@
   (fact (y? "FI2341529-4") => falsey)
   (fact (y? "FI2341528-4") => truthy)
   (fact (y? "SW123456789") => falsey))
+
+(facts max-length
+  (fact (sc/check (max-length 1) []) => nil)
+  (fact (sc/check (max-length 1) [1]) => nil)
+  (fact (sc/check (max-length 1) [1 2]) =not=> nil))
+
+(facts max-length-string
+  (fact (sc/check (max-length-string 1) "a") => nil)
+  (fact (sc/check (max-length-string 1) "ab") =not=> nil)
+  (fact (sc/check (max-length-string 1) [1]) =not=> nil))

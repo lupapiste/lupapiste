@@ -2,8 +2,8 @@
   (:require [clojure.walk :refer [postwalk prewalk]]
             [sade.strings :refer [numeric? decimal-number?] :as ss]
             [clj-time.format :as timeformat]
-            [clj-time.coerce :as tc]))
-
+            [clj-time.coerce :as tc]
+            [schema.core :as sc]))
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
@@ -254,3 +254,17 @@
       (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
             cn (if (zero? cn) 0 (- 11 cn))]
         (= (Long/parseLong check) cn)))))
+
+;;
+;; Schema utils:
+;;
+
+(def max-length (memoize
+                  (fn [max-len]
+                    (sc/pred
+                      (fn [v]
+                        (<= (count v) max-len))
+                      (str "Longer than " max-len)))))
+
+(defn max-length-string [max-len]
+  (sc/both sc/Str (max-length max-len)))
