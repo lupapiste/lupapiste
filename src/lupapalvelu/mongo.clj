@@ -3,7 +3,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
-            ;[monger.joda-time]
             [sade.env :as env]
             [sade.util :as util]
             [monger.core :as m]
@@ -300,7 +299,8 @@
   (mc/ensure-index :open-inforequest-token {:application-id 1})
   (mc/ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
-  )
+  (mc/ensure-index :companies {:name 1} {:unique true})
+  (mc/ensure-index :companies {:y 1} {:unique true}))
 
 (defn clear! []
   (if-let [mode (db-mode)]
