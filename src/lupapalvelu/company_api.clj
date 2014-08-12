@@ -1,6 +1,8 @@
 (ns lupapalvelu.company-api
   (:require [lupapalvelu.core :refer [ok fail]]
-            [lupapalvelu.action :refer [defquery defcommand]]))
+            [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.company :as c]
+            [lupapalvelu.user :as u]))
 
 ;;
 ;; Company API:
@@ -21,5 +23,22 @@
   {:roles [:anonymous]
    :input-validators [validate-user-is-admin-or-member]
    :parameters [company]}
-  (ok :company {:foo "bar" :id company}))
+  (ok :company (c/find-company! {:id company})))
 
+(defcommand company
+  {:roles [:anonymous]
+   :input-validators [validate-user-is-admin-or-member]
+   :parameters [company updates]}
+  (ok :company (c/update-company! company updates)))
+
+(defquery company-users
+  {:roles [:anonymous]
+   :input-validators [validate-user-is-admin-or-member]
+   :parameters [company]}
+  (ok :company-users (u/get-users-by-company company)))
+
+(defcommand company-user
+  {:roles [:anonymous]
+   :input-validators [validate-user-is-admin-or-member]
+   :parameters [company user-id]}
+  (ok :company-users (u/get-users-by-company company)))

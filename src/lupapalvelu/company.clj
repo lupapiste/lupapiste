@@ -40,7 +40,7 @@
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
   [q]
-  (or (find-company q) (fail! "not found")))
+  (or (find-company q) (fail! :company.not-found)))
 
 (defn update-company!
   "Update company. Throws if comoany is not found, or if updates would make company data invalid.
@@ -52,3 +52,4 @@
     (sc/validate Company updated)
     (mongo/update :companies q updated)
     updated))
+

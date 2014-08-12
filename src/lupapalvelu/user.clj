@@ -170,6 +170,9 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
+(defn get-users-by-company [company-id]
+  (map non-private (find-user {:company company-id})))
+
 ;;
 ;; ==============================================================================
 ;; User role:
