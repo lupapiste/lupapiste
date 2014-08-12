@@ -137,8 +137,8 @@
     (resp-assert! "wrong signature type"  type "company")
     (resp-assert! "wrong Y"               (-> process :company :y) identifier)
     (process-update! process :done ts)
-    ; FIXME: Create compary account
     (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" process-id identifier name timestamp uuid)
+    
     process))
 
 ;
