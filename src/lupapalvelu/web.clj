@@ -456,13 +456,13 @@
 ;;
 
 (defpage [:get "/api/token/:token-id"] {token-id :token-id}
-  (let [params (:params (request/ring-request))
-        response (token/consume-token token-id params)]
-    (or response {:status 404})))
+  (if-let [token (token/get-token token-id :consume false)]
+    (resp/status 200 (resp/json {:ok true :token token}))
+    (resp/status 404 (resp/json {:ok false}))))
 
 (defpage [:post "/api/token/:token-id"] {token-id :token-id}
   (let [params (from-json (request/ring-request))
-        response (token/consume-token token-id params)]
+        response (token/consume-token token-id params :consume true)]
     (or response (resp/status 404 (resp/json {:ok false})))))
 
 ;;
