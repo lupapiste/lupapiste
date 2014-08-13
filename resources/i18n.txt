@@ -1,0 +1,14 @@
+new-company-user.subject:   Kutsu Lupapiste.fi palveluun
+new-company-user.loading:   Odota, sivua ladataan...
+new-company-user.title:     Tervetuloa Lupapiste.fi palvelun käyttäjäksi
+new-company-user.info:      Sinut on kutsuttu yritys-tilin käyttäjäksi <b>Lupapiste.fi</b> palveluun. Alla näet tiedot jotka kutsuja on syöttänyt.
+new-company-user.setpw:     Aseta itsellesi salasana
+
+new-company-user.company-name:  Yrityksen nimi:
+new-company-user.company-y:     Yrityksen Y-tunnus:
+new-company-user.first-name:    Etunimesi:
+new-company-user.last-name:     Sukunimesi:
+new-company-user.email:         Sähköpostiosoitteesi (toimii käyttäjätunnuksenasi):
+
+new-company-user.not-found.title:    Tapahtui virhe
+new-company-user.not-found.message:  Linkki on vanhentunut tai se on jo käytetty.

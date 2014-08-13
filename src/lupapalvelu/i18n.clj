@@ -31,6 +31,8 @@
 
 (defn get-localizations [] @excel-data)
 
+(def languages (-> (get-localizations) keys set))
+
 (defn get-terms
   "Return localization terms for given language. If language is not supported returns terms for default language (\"fi\")"
   [lang]

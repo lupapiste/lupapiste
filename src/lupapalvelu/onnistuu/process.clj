@@ -6,10 +6,16 @@
             [cheshire.core :as json]
             [cheshire.generate :as cheshire]
             [slingshot.slingshot :refer [throw+]]
+            [noir.response :as resp]
             [sade.env :as env]
+            [sade.util :refer [fn->]]
+            [lupapalvelu.core :refer [ok]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
-            [lupapalvelu.onnistuu.crypt :as crypt]))
+            [lupapalvelu.onnistuu.crypt :as crypt]
+            [lupapalvelu.company :as c]
+            [lupapalvelu.token :as token]
+            [lupapalvelu.notifications :as notif]))
 
 (set! *warn-on-reflection* true)
 
@@ -121,6 +127,7 @@
 
 (defn success [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
+        signer     (:signer process)
         crypto-key (-> (env/get-config) :onnistuu :crypto-key (crypt/str->bytes) (crypt/base64-decode))
         crypto-iv  (-> iv (crypt/str->bytes) (crypt/base64-decode))
         resp       (->> data
@@ -128,18 +135,42 @@
                         (crypt/base64-decode)
                         (crypt/decrypt crypto-key crypto-iv)
                         (crypt/bytes->str)
-                        (json/decode)
-                        (walk/keywordize-keys))
-        signatures (:signatures resp)
-        {:keys [type identifier name timestamp uuid]} (first signatures)]
-    (resp-assert! "wrong stamp"           (:stamp process) (:stamp resp))
+                        (json/decode))
+        {:strs [signatures stamp]} resp
+        {:strs [type identifier name timestamp uuid]} (first signatures)]
+    (resp-assert! "wrong stamp"           (:stamp process) stamp)
     (resp-assert! "number of signatures"  (count signatures) 1)
     (resp-assert! "wrong signature type"  type "company")
     (resp-assert! "wrong Y"               (-> process :company :y) identifier)
     (process-update! process :done ts)
-    (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" process-id identifier name timestamp uuid)
-
+    (infof "sign:success:%s: OK: y [%s], company: [%s]"
+             process-id
+             identifier
+             name)
+    (let [company  (c/create-company {:name name, :y identifier, :process-id process-id})
+          token-id (token/make-token :new-company-user nil {:user signer, :company company} :auto-consume false)]
+      (notif/notify! :new-company-user {:user       signer
+                                        :company    company
+                                        :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
+                                        :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+      (infof "sign:success:%s: company-created: y [%s], company: [%s], company-id: [%s], token: [%s]"
+             process-id
+             (:y company)
+             (:name company)
+             (:id company)
+             token-id))
     process))
+
+(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
+                                   :recipients-fn (fn-> :user :email vector)
+                                   :model-fn      (fn [model _] model)})
+
+(defmethod token/handle-token :new-company-user [{{:keys [user company]} :data} {password :password}]
+  (c/find-company! {:id (:id company)}) ; make sure company still exists
+  (println "token: :new-company-user")
+  (println "  token-data:  " (pr-str user) (pr-str company))
+  (println "  token-params:" password)
+  (ok))
 
 ;
 ; Fail:

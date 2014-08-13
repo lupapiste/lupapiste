@@ -1,4 +1,4 @@
-;(function() {
+(function() {
   "use strict";
 
   function login() {
@@ -82,6 +82,88 @@
 
   }
 
+  function NewCompanyUser() {
+    var self = this;
+
+    self.token = ko.observable();
+
+    self.loading = ko.observable();
+    self.loaded = ko.observable();
+    self.notFound = ko.observable();
+
+    self.companyName = ko.observable();
+    self.companyY = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.email = ko.observable();
+
+    self.pending = ko.observable(false);
+    self.password1 = ko.observable();
+    self.password2 = ko.observable();
+    self.passwordQuality = ko.computed(function() { return quality(self.password1()); });
+    self.ok = ko.computed(function() {
+      var t = self.token(),
+          p1 = self.password1(),
+          p2 = self.password2();
+      return t && t.length && p1 && p1.length > 5 && p1 === p2;
+    });
+    self.success = ko.observable(false);
+    self.fail = ko.observable(false);
+
+    self.reset = function() {
+      return self
+        .token("")
+        .loading(true)
+        .loaded(false)
+        .notFound(false)
+        .companyName("")
+        .companyY("")
+        .firstName("")
+        .lastName("")
+        .email("")
+        .pending(true)
+        .password1("")
+        .password2("")
+        .success(false)
+        .fail(false);
+    };
+
+    self.send = function() {
+      ajax
+        .post("/api/token/" + self.token())
+        .json({password: self.password1()})
+        .success(function() { self.success(true).fail(false).password1("").password2(""); })
+        .fail(function() { self.success(false).fail(true); })
+        .call();
+    };
+
+    hub.onPageChange("new-company-user", function(e) {
+      self.reset().token(e.pagePath[0]);
+      ajax
+        .get("/api/token/" + self.token())
+        .success(function(data) {
+          var token = data.token.data,
+              company = token.company,
+              user = token.user;
+          self
+            .companyName(company.name)
+            .companyY(company.y)
+            .firstName(user['first-name'])
+            .lastName(user['last-name'])
+            .email(user.email)
+            .loading(false)
+            .loaded(true);
+        })
+        .fail(function() {
+          self
+            .loading(false)
+            .notFound(true);
+        })
+        .call();
+    });
+
+  }
+
   hub.onPageChange("login", function() { $("#login-username:first").focus(); });
 
   //
@@ -92,6 +174,7 @@
     $("section#login").applyBindings({});
     $("section#reset").applyBindings(new Reset());
     $("section#setpw").applyBindings(new SetPW());
+    $("section#new-company-user").applyBindings(new NewCompanyUser());
 
     $("#login-button").click(login);
     $("#register-button").click(function() {
