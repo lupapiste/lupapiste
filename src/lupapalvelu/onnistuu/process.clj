@@ -9,7 +9,7 @@
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
-            [lupapalvelu.onnistuu.crypt :as c]))
+            [lupapalvelu.onnistuu.crypt :as crypt]))
 
 (set! *warn-on-reflection* true)
 
@@ -64,7 +64,7 @@
 ;
 
 (defn init-sign-process [ts crypto-key success-url document-url company-name y first-name last-name email lang]
-  (let [crypto-iv  (c/make-iv)
+  (let [crypto-iv  (crypt/make-iv)
         process-id (random-password 40)
         stamp      (random-password 40)]
     (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name y email)
@@ -81,11 +81,11 @@
                        :document        (str document-url "/" process-id)
                        :requirements    [{:type :company, :identifier y}]}
                       (json/encode)
-                      (c/str->bytes)
-                      (c/encrypt (-> crypto-key (c/str->bytes) (c/base64-decode)) crypto-iv)
-                      (c/base64-encode)
-                      (c/bytes->str))
-     :iv         (-> crypto-iv (c/base64-encode) (c/bytes->str))}))
+                      (crypt/str->bytes)
+                      (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
+                      (crypt/base64-encode)
+                      (crypt/bytes->str))
+     :iv         (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))}))
 
 ;
 ; Cancel sign:
@@ -121,13 +121,13 @@
 
 (defn success [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
-        crypto-key (-> (env/get-config) :onnistuu :crypto-key (c/str->bytes) (c/base64-decode))
-        crypto-iv  (-> iv (c/str->bytes) (c/base64-decode))
+        crypto-key (-> (env/get-config) :onnistuu :crypto-key (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv  (-> iv (crypt/str->bytes) (crypt/base64-decode))
         resp       (->> data
-                        (c/str->bytes)
-                        (c/base64-decode)
-                        (c/decrypt crypto-key crypto-iv)
-                        (c/bytes->str)
+                        (crypt/str->bytes)
+                        (crypt/base64-decode)
+                        (crypt/decrypt crypto-key crypto-iv)
+                        (crypt/bytes->str)
                         (json/decode)
                         (walk/keywordize-keys))
         signatures (:signatures resp)
@@ -138,7 +138,7 @@
     (resp-assert! "wrong Y"               (-> process :company :y) identifier)
     (process-update! process :done ts)
     (infof "sign:success:%s: OK: y [%s], company: [%s], timestamp: [%s], uuid: [%s]" process-id identifier name timestamp uuid)
-    
+
     process))
 
 ;
