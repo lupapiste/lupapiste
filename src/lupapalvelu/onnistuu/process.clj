@@ -167,7 +167,7 @@
                                    :model-fn      (fn [model _] model)})
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
-  (c/find-company! {:_id (:id company)}) ; make sure company still exists
+  (c/find-company! {:id (:id company)}) ; make sure company still exists
   (u/create-new-user nil
                      {:email       (:email user)
                       :username    (:email user)

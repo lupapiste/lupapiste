@@ -12,7 +12,7 @@
 
 (defn validate-user-is-admin-or-member [{{:keys [role company]} :user {requested-company :company} :data}]
   (if-not (or (= role :admin)
-              (= company requested-company))
+              (= (:id company) requested-company))
     (fail "forbidden")))
 
 ;;
@@ -25,7 +25,7 @@
    :parameters [company]}
   (ok :company (c/find-company! {:id company})))
 
-(defcommand company
+(defcommand company-update
   {:roles [:anonymous]
    :input-validators [validate-user-is-admin-or-member]
    :parameters [company updates]}

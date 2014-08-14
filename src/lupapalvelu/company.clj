@@ -35,7 +35,7 @@
 (defn find-company
   "Returns company mathing the provided query, or nil"
   [q]
-  (mongo/select-one :companies q))
+  (mongo/select-one :companies (mongo/with-_id q)))
 
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
