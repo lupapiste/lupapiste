@@ -15,7 +15,8 @@
             [lupapalvelu.onnistuu.crypt :as crypt]
             [lupapalvelu.company :as c]
             [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notif]))
+            [lupapalvelu.notifications :as notif]
+            [lupapalvelu.user-api :as u]))
 
 (set! *warn-on-reflection* true)
 
@@ -166,10 +167,19 @@
                                    :model-fn      (fn [model _] model)})
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company]} :data} {password :password}]
-  (c/find-company! {:id (:id company)}) ; make sure company still exists
-  (println "token: :new-company-user")
-  (println "  token-data:  " (pr-str user) (pr-str company))
-  (println "  token-params:" password)
+  (println "handle:" company (:id company))
+  (c/find-company! {:_id (:id company)}) ; make sure company still exists
+  (u/create-new-user nil
+                     {:email       (:email user)
+                      :username    (:email user)
+                      :firstName   (:first-name user)
+                      :lastName    (:last-name user)
+                      :company     (:id company)
+                      :password    password
+                      :role        :applicant
+                      :architect   true
+                      :enabled     true}
+                     :send-email false)
   (ok))
 
 ;
