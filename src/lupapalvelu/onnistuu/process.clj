@@ -149,7 +149,7 @@
              identifier
              name)
     (let [company  (c/create-company {:name name, :y identifier, :process-id process-id})
-          token-id (token/make-token :new-company-user nil {:user signer, :company company} :auto-consume false)]
+          token-id (token/make-token :new-company-user nil {:user signer, :company company, :role :admin} :auto-consume false)]
       (notif/notify! :new-company-user {:user       signer
                                         :company    company
                                         :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
@@ -166,15 +166,15 @@
                                    :recipients-fn (fn-> :user :email vector)
                                    :model-fn      (fn [model _] model)})
 
-(defmethod token/handle-token :new-company-user [{{:keys [user company]} :data} {password :password}]
-  (println "handle:" company (:id company))
+(defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (c/find-company! {:_id (:id company)}) ; make sure company still exists
   (u/create-new-user nil
                      {:email       (:email user)
                       :username    (:email user)
                       :firstName   (:first-name user)
                       :lastName    (:last-name user)
-                      :company     (:id company)
+                      :company     {:id     (:id company)
+                                    :role   role}
                       :password    password
                       :role        :applicant
                       :architect   true
