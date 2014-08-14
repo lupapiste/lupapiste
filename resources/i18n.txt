@@ -12,3 +12,8 @@ new-company-user.email:         Sähköpostiosoitteesi (toimii käyttäjätunnuk
 
 new-company-user.not-found.title:    Tapahtui virhe
 new-company-user.not-found.message:  Linkki on vanhentunut tai se on jo käytetty.
+
+userInfo.company.title:    Yrityksen tiedot
+userInfo.company.loading:  Odota, yrityksen tietoja ladataan...
+userInfo.company.name:     Yrityksen nimi:
+userInfo.company.y:        Y-tunnus:

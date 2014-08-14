@@ -31,6 +31,7 @@
     self.phone = ko.observable();
     self.role = ko.observable();
     self.architect = ko.observable();
+    self.companyId = ko.observable();
     self.degree = ko.observable();
     self.graduatingYear = ko.observable();
     self.fise = ko.observable();
@@ -44,7 +45,32 @@
     });
     self.loadingAttachments = ko.observable();
 
+    self.company = {
+      name: ko.observable(null),
+      y: ko.observable(null)
+    };
+    self.companyShow = ko.observable();
+    self.companyLoading = ko.observable();
+    self.companyLoaded = ko.computed(function() { return !self.companyLoading(); });
+
     self.init = function(u) {
+      self.company
+        .name(null)
+        .y(null);
+      if (u.company) {
+        self
+          .companyShow(true)
+          .companyLoading(true);
+        ajax
+          .query("company", {company: u.company.id})
+          .pending(self.companyLoading)
+          .success(function(data) { self.company.name(data.company.name); self.company.y(data.company.y); })
+          .call();
+      } else {
+        self
+          .companyShow(false)
+          .companyLoading(false);
+      }
       return self
         .error(null)
         .saved(false)
@@ -86,7 +112,7 @@
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
-         "degree", "graduatingYear", "fise", 
+         "degree", "graduatingYear", "fise",
          "companyName", "companyId",
          "allowDirectMarketing"]);
 
@@ -245,8 +271,8 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) { 
-              uploadModel.done(); 
+            done: function(e, data) {
+              uploadModel.done();
               LUPAPISTE.ModalDialog.close();
             },
             fail: uploadModel.error
