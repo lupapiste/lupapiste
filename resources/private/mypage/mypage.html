@@ -69,7 +69,7 @@
 
             <div class="form-entry allowDirectMarketing-toggle">
               <input data-bind="checked: allowDirectMarketing" id="allowDirectMarketing"
-                type="checkbox" class="form-input"></input> 
+                type="checkbox" class="form-input"></input>
               <label data-bind="ltext: 'userinfo.allowDirectMarketing'" for="allowDirectMarketing"
                 class="form-label"></label>
             </div>
@@ -83,68 +83,68 @@
           </div>
 
         <div data-bind="visible: architect">
-            <div class="architect-info form-group">
-              <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+          <div class="architect-info form-group">
+            <h2 data-bind="ltext: 'architect.experience.title'"></h2>
 
-              <div class="form-entry">
-                <label data-bind="ltext: 'userinfo.architect.degree'"
-                  for="architect.degree" class="form-label"></label> <input
-                  data-bind="value: degree" id="architect.degree"
-                  type="text" class="form-input"></input>
-              </div>
-
-              <div class="form-entry">
-                <label data-bind="ltext: 'userinfo.architect.graduatingYear'"
-                  for="architect.graduatingYear" class="form-label"></label> <input
-                  data-bind="value: graduatingYear" id="architect.graduatingYear"
-                  type="text" class="form-input"></input>
-              </div>
-
-              <div class="form-entry">
-                <label data-bind="ltext: 'userinfo.architect.fise'"
-                  for="architect.fise" class="form-label"></label> <input
-                  data-bind="value: fise" id="architect.fise"
-                  type="text" class="form-input"></input>
-              </div>
-
-              <div class="form-entry clear">
-                <div
-                  data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
-                <table data-bind="visible: hasAttachments"
-                  class="architect-attachments">
-                  <thead>
-                    <tr>
-                      <th
-                        data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
-                      <th
-                        data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
-                    </tr>
-                  </thead>
-                  <tbody data-bind="foreach: attachments">
-                    <tr>
-                      <td
-                        data-bind="attr: {'data-test-id': $data['attachment-id']}">
-                        <div
-                          data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
-                          data-test-id="attachment-type"></div>
-                        <div data-bind="text:  $data['file-name']"
-                          data-test-id="filename"></div>
-                      </td>
-                      <td><a
-                        data-bind="ltext: 'userinfo.architect.attachments.load',
-                                    attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
-                        data-test-id="load" href="#" target="_blank">
-                      </a> <a
-                        data-bind="ltext: 'userinfo.architect.attachments.remove',
-                                    click: $parent.remove"
-                        data-test-id="remove" href="#"> </a></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <button
-                  data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="add-attachment"></button>
-              </div>
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.degree'"
+                for="architect.degree" class="form-label"></label> <input
+                data-bind="value: degree" id="architect.degree"
+                type="text" class="form-input"></input>
             </div>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.graduatingYear'"
+                for="architect.graduatingYear" class="form-label"></label> <input
+                data-bind="value: graduatingYear" id="architect.graduatingYear"
+                type="text" class="form-input"></input>
+            </div>
+
+            <div class="form-entry">
+              <label data-bind="ltext: 'userinfo.architect.fise'"
+                for="architect.fise" class="form-label"></label> <input
+                data-bind="value: fise" id="architect.fise"
+                type="text" class="form-input"></input>
+            </div>
+
+            <div class="form-entry clear">
+              <div
+                data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
+              <table data-bind="visible: hasAttachments"
+                class="architect-attachments">
+                <thead>
+                  <tr>
+                    <th
+                      data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                    <th
+                      data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: attachments">
+                  <tr>
+                    <td
+                      data-bind="attr: {'data-test-id': $data['attachment-id']}">
+                      <div
+                        data-bind="text: loc(['attachmentType.osapuolet', $data['attachment-type']['type-id']])"
+                        data-test-id="attachment-type"></div>
+                      <div data-bind="text:  $data['file-name']"
+                        data-test-id="filename"></div>
+                    </td>
+                    <td><a
+                      data-bind="ltext: 'userinfo.architect.attachments.load',
+                                  attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
+                      data-test-id="load" href="#" target="_blank">
+                    </a> <a
+                      data-bind="ltext: 'userinfo.architect.attachments.remove',
+                                  click: $parent.remove"
+                      data-test-id="remove" href="#"> </a></td>
+                  </tr>
+                </tbody>
+              </table>
+              <button
+                data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="add-attachment"></button>
+            </div>
+          </div>
         </div>
 
         <button data-bind="ltext: 'save', enable: ok, click: save"
