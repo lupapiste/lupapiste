@@ -176,6 +176,10 @@
    :users        {:js ["users.js"]
                   :html ["users.html"]}
 
+   :company      {:js ["company.js"]
+                  :html ["company.html"]
+                  :css ["company.css"]}
+
    :admins       {:depends [:users]}
 
    ;; Single Page Apps and standalone components:
@@ -189,12 +193,14 @@
                   :css ["upload.css"]}
 
    :applicant    {:depends [:common :authenticated :map :applications :application
-                            :statement :docgen :create :mypage :user-menu :debug]
+                            :statement :docgen :create :mypage :user-menu :debug
+                            :company]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application
-                            :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
+                            :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
+                            :company]
                   :js ["authority.js" "integration-error.js"]
                   :html ["index.html" "integration-error.html"]}
 

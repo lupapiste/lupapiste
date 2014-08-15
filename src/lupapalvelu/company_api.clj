@@ -23,22 +23,12 @@
   {:roles [:anonymous]
    :input-validators [validate-user-is-admin-or-member]
    :parameters [company]}
-  (ok :company (c/find-company! {:id company})))
+  [{{:keys [users]} :data}]
+  (ok :company (c/find-company! {:id company})
+      :users   (and users (u/get-users {:company.id company}))))
 
 (defcommand company-update
   {:roles [:anonymous]
    :input-validators [validate-user-is-admin-or-member]
    :parameters [company updates]}
   (ok :company (c/update-company! company updates)))
-
-(defquery company-users
-  {:roles [:anonymous]
-   :input-validators [validate-user-is-admin-or-member]
-   :parameters [company]}
-  (ok :company-users (u/get-users-by-company company)))
-
-(defcommand company-user
-  {:roles [:anonymous]
-   :input-validators [validate-user-is-admin-or-member]
-   :parameters [company user-id]}
-  (ok :company-users (u/get-users-by-company company)))

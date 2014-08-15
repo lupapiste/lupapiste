@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <section class="page container" id="company">
+
+    <div data-bind="visible: pending">
+      <em class="button-loader"></em>
+      <span data-bind="ltext: 'company.loading'"></span>
+    </div>
+
+    <div data-bind="visible: !pending()">
+      <h1>
+        <span data-bind="text: name"></span>
+        (<span data-bind="text: y"></span>)
+      </h1>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th data-bind="ltext: 'company.user.firstName'"></th>
+            <th data-bind="ltext: 'company.user.lastName'"></th>
+            <th data-bind="ltext: 'company.user.email'"></th>
+            <th data-bind="ltext: 'company.user.enabled'"></th>
+            <th data-bind="ltext: 'company.user.actions'"></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: users">
+          <tr>
+            <td data-bind="text: firstName"></td>
+            <td data-bind="text: lastName"></td>
+            <td data-bind="text: email"></td>
+            <td data-bind="text: enabled"></td>
+            <td>Actions</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+</body>
+</html>
