@@ -56,13 +56,6 @@
     self.companyLoading = ko.observable();
     self.companyLoaded = ko.computed(function() { return !self.companyLoading(); });
 
-    self.company.name.subscribe(function(name) {
-      $("#company-name")
-        .attr("href", "#!/company/" + self.company.id())
-        .css("display", name ? "block" : "none")
-        .find("span").text(name || "");
-    });
-
     self.init = function(u) {
       self.company
         .id(null)
