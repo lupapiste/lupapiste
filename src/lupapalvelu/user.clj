@@ -143,13 +143,19 @@
 ;; ==============================================================================
 ;;
 
+(defn get-user [q]
+  (non-private (find-user q)))
+
+(defn get-users [q]
+  (map non-private (find-users q)))
+
 (defn get-user-by-id [id]
   {:pre [id]}
-  (non-private (find-user {:id id})))
+  (get-user {:id id}))
 
 (defn get-user-by-email [email]
   {:pre [email]}
-  (non-private (find-user {:email email})))
+  (get-user {:email email}))
 
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
@@ -169,9 +175,6 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
-
-(defn get-users-by-company [company-id]
-  (map non-private (find-user {:company company-id})))
 
 ;;
 ;; ==============================================================================
