@@ -46,16 +46,26 @@
     self.loadingAttachments = ko.observable();
 
     self.company = {
-      name: ko.observable(null),
-      y: ko.observable(null)
+      id:    ko.observable(),
+      name:  ko.observable(),
+      y:     ko.observable()
     };
+
     self.companyShow = ko.observable();
     self.showSimpleCompanyInfo = ko.computed(function () { return !self.companyShow(); });
     self.companyLoading = ko.observable();
     self.companyLoaded = ko.computed(function() { return !self.companyLoading(); });
 
+    self.company.name.subscribe(function(name) {
+      $("#company-name")
+        .attr("href", "#!/company/" + self.company.id())
+        .css("display", name ? "block" : "none")
+        .find("span").text(name || "");
+    });
+
     self.init = function(u) {
       self.company
+        .id(null)
         .name(null)
         .y(null);
       if (u.company) {
@@ -65,7 +75,7 @@
         ajax
           .query("company", {company: u.company.id})
           .pending(self.companyLoading)
-          .success(function(data) { self.company.name(data.company.name); self.company.y(data.company.y); })
+          .success(function(data) { self.company.id(data.company.id).name(data.company.name).y(data.company.y); })
           .call();
       } else {
         self
