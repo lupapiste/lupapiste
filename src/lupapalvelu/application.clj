@@ -626,7 +626,6 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-
     (let [id            (make-application-id municipality)
           owner         (user/user-in-role user :owner :type :owner)
           op            (make-op operation created)
@@ -654,7 +653,8 @@
                            :title               address
                            :auth                [owner]
                            :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
-                           :schema-version      (schemas/get-latest-schema-version)})]
+                           :schema-version      (schemas/get-latest-schema-version)
+                           :company             (get-in user [:company :id])})]
 
       (merge application (when-not info-request?
                             {:attachments            (make-attachments created op organization-id state)
