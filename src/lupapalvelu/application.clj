@@ -34,7 +34,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-search :as search]
-            [lupapalvelu.application-meta-fields :as meta-fields]))
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.company :as c]))
 
 ;; Validators
 
@@ -654,7 +655,7 @@
                            :auth                [owner]
                            :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
                            :schema-version      (schemas/get-latest-schema-version)
-                           :company             (get-in user [:company :id])})]
+                           :company             (some-> user :company :id c/find-company-by-id (select-keys [:id :name :y]))})]
 
       (merge application (when-not info-request?
                             {:attachments            (make-attachments created op organization-id state)

@@ -42,6 +42,11 @@
   [q]
   (or (find-company q) (fail! :company.not-found)))
 
+(defn find-company-by-id
+  "Returns company by given ID, or nil"
+  [id]
+  (find-company {:id id}))
+
 (defn update-company!
   "Update company. Throws if comoany is not found, or if updates would make company data invalid.
    Retuens the updated company data."
