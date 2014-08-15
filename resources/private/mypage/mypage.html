@@ -30,23 +30,23 @@
               id="phone" type="text" class="form-input"></input>
           </div>
 
-            <div class="form-entry">
-              <label
-                data-bind="ltext: 'userinfo.architect.company.name'"
-                for="architect.company.name" class="form-label"></label>
-              <input data-bind="value: companyName"
-                id="architect.company.name" type="text"
-                class="form-input"></input>
-            </div>
-            <div class="form-entry">
-              <label
-                data-bind="ltext: 'userinfo.architect.company.id'"
-                for="architect.company.id" class="form-label"></label>
-              <input data-bind="value: companyId"
-                id="architect.company.id" type="text"
-                class="form-input"></input>
-            </div>
+          <div data-bind="visible: showSimpleCompanyInfo" class="form-entry">
+            <label
+              data-bind="ltext: 'userinfo.architect.company.name'"
+              for="architect.company.name" class="form-label"></label>
+            <input data-bind="value: companyName"
+              id="architect.company.name" type="text"
+              class="form-input"></input>
+          </div>
 
+          <div data-bind="visible: showSimpleCompanyInfo" class="form-entry">
+            <label
+              data-bind="ltext: 'userinfo.architect.company.id'"
+              for="architect.company.id" class="form-label"></label>
+            <input data-bind="value: companyId"
+              id="architect.company.id" type="text"
+              class="form-input"></input>
+          </div>
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.street'" for="street"

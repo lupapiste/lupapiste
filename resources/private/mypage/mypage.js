@@ -50,6 +50,7 @@
       y: ko.observable(null)
     };
     self.companyShow = ko.observable();
+    self.showSimpleCompanyInfo = ko.computed(function () { return !self.companyShow(); });
     self.companyLoading = ko.observable();
     self.companyLoaded = ko.computed(function() { return !self.companyLoading(); });
 
