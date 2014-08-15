@@ -46,20 +46,20 @@
     var fn = e$[fnName];
     var value = ko.utils.unwrapObservable(valueAccessor());
     if (value) {
-        var v = loc(value);
-        fn.call(e$, (v ? v : "$$EMPTY_LTEXT$$"));
-        if (v) {
-          e$.removeClass("ltext-error");
-        } else {
-          e$.addClass("ltext-error");
-        }
-      } else {
-        // value is null or undefined, show it as empty string. Note that this
-        // does not mean that the localization would be missing. It's just that
-        // the actual value to use for localization is not available at this time.
-        fn.call(e$, "");
+      var v = loc(value);
+      fn.call(e$, (v ? v : "$$EMPTY_LTEXT$$"));
+      if (v) {
         e$.removeClass("ltext-error");
-      }   
+      } else {
+        e$.addClass("ltext-error");
+      }
+    } else {
+      // value is null or undefined, show it as empty string. Note that this
+      // does not mean that the localization would be missing. It's just that
+      // the actual value to use for localization is not available at this time.
+      fn.call(e$, "");
+      e$.removeClass("ltext-error");
+    }
   }
 
   ko.bindingHandlers.ltext = {
