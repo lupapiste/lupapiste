@@ -93,7 +93,9 @@
 
             <div data-bind="visible: companyLoaded">
               <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
-              <span data-bind="text: company.name" class="form-input"></span>
+              <a data-bind="attr: {href: '#!/company/' + company.id()}" href="#">
+                <span data-bind="text: company.name" class="form-input"></span>
+              </a>
               <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
               <span data-bind="text: company.y" class="form-input"></span>
             </div>
