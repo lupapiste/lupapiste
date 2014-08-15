@@ -671,20 +671,19 @@
   [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
-  (let [permit-type       (operations/permit-type-of-operation operation)
-        organization      (organization/resolve-organization municipality permit-type)
-        scope             (organization/resolve-organization-scope organization municipality permit-type)
-        info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
-        created-application (do-create-application command)]
-
-      (insert-application created-application)
-      (when open-inforequest?
-        (open-inforequest/new-open-inforequest! created-application))
-      (try
-        (autofill-rakennuspaikka created-application created)
-        (catch Exception e (error e "KTJ data was not updated")))
-      (ok :id (:id created-application))))
+  (let [permit-type          (operations/permit-type-of-operation operation)
+        organization         (organization/resolve-organization municipality permit-type)
+        scope                (organization/resolve-organization-scope organization municipality permit-type)
+        info-request?        (boolean infoRequest)
+        open-inforequest?    (and info-request? (:open-inforequest scope))
+        created-application  (do-create-application command)]
+    (insert-application created-application)
+    (when open-inforequest?
+      (open-inforequest/new-open-inforequest! created-application))
+    (try
+      (autofill-rakennuspaikka created-application created)
+      (catch Exception e (error e "KTJ data was not updated")))
+    (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
