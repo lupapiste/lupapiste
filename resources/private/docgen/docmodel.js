@@ -38,7 +38,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     }
   };
 
-  self.sizeClasses = { "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
+  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
 
   // Context help
   self.addFocus = function (e) {
@@ -198,6 +198,10 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function makeEntrySpan(subSchema, pathStr) {
+    if (!subSchema.label) {
+      return makeEntryTableCell(subSchema, pathStr);
+    }
+
     var help = null;
     var helpLocKey = locKeyFromPath(pathStr + ".help");
     var span = document.createElement("span");
@@ -230,6 +234,11 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     }
 
     return span;
+  }
+
+  function makeEntryTableCell(subSchema, pathStr) {
+    var td = document.createElement("td");
+    return td;
   }
 
   self.makeApprovalButtons = function (path, model) {
@@ -332,13 +341,17 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
     var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
-    var label = makeLabel(subSchema, "checkbox", myPath);
     input.onmouseover = self.showHelp;
     input.onmouseout = self.hideHelp;
-    label.onmouseover = self.showHelp;
-    label.onmouseout = self.hideHelp;
     span.appendChild(input);
-    span.appendChild(label);
+
+    if (subSchema.label) {
+      var label = makeLabel(subSchema, "checkbox", myPath);
+      label.onmouseover = self.showHelp;
+      label.onmouseout = self.hideHelp;
+      span.appendChild(label);
+    }
+
     return span;
   }
 
@@ -358,7 +371,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
     setMaxLen(input, subSchema);
 
-    span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
+    }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
       var kiitunAndInput = document.createElement("span");
@@ -438,7 +453,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     input.className = "form-input textarea";
     input.value = getModelValue(model, subSchema.name);
 
-    span.appendChild(makeLabel(subSchema, "text", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "text", myPath));
+    }
     span.appendChild(input);
     return span;
   }
@@ -450,7 +467,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     var span = makeEntrySpan(subSchema, myPath);
 
-    span.appendChild(makeLabel(subSchema, "date", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "date", myPath));
+    }
 
     // date
     var input = $("<input>", {
@@ -540,7 +559,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       select.appendChild(option);
     }
 
-    span.appendChild(makeLabel(subSchema, "select", myPath, true));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "select", myPath, true));
+    }
     span.appendChild(select);
     return span;
   }
@@ -551,18 +572,21 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var myModel = model[name] || {};
     var partsDiv = document.createElement("div");
     var div = document.createElement("div");
-    var label = makeLabel(subSchema, "group", myPath, true);
 
     appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
-    div.appendChild(label);
+    if (subSchema.label) {
+      var label = makeLabel(subSchema, "group", myPath, true);
+      div.appendChild(label);
 
-    if (subSchema.approvable) {
-      label.appendChild(self.makeApprovalButtons(path, myModel));
+      if (subSchema.approvable) {
+        label.appendChild(self.makeApprovalButtons(path, myModel));
+      }
     }
+
 
     div.appendChild(partsDiv);
     return div;
@@ -590,7 +614,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       input.checked = o.name === myModel;
 
       span.appendChild(input);
-      span.appendChild(makeLabel(subSchema, "radio", pathForId));
+      if (subSchema.label) {
+        span.appendChild(makeLabel(subSchema, "radio", pathForId));
+      }
     });
 
     partsDiv.appendChild(span);
@@ -663,7 +689,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       })
       .call();
 
-    span.appendChild(makeLabel(subSchema, "select", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "select", myPath));
+    }
     span.appendChild(select);
     return span;
   }
@@ -808,6 +836,25 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return span;
   }
 
+  function buildTable(subSchema, model, path, partOfChoice) {
+    console.log("buildTable", subSchema);
+    var myPath = path.join(".");
+    var name = subSchema.name;
+    var myModel = model[name] || {};
+    // var header = document.createElement("thead");
+    // var rows = document.createElement("tbody");
+    var row = document.createElement("tr");
+    var label = makeLabel(subSchema, "row", myPath, true);
+
+    console.log(model, myModel);
+
+    appendElements(row, subSchema, myModel, path, save, partOfChoice);
+
+    row.id = pathStrToGroupID(myPath);
+
+    return row;
+  }
+
   function buildUnknown(subSchema, model, path) {
     var div = document.createElement("div");
 
@@ -830,6 +877,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     personSelector: buildPersonSelector,
+    table: buildTable,
     unknown: buildUnknown
   };
 
@@ -845,6 +893,10 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function build(subSchema, model, path, partOfChoice) {
     if (subSchema.hidden) {
       return;
+    }
+
+    if (subSchema.label === undefined) {
+      subSchema.label = true;
     }
 
     var myName = subSchema.name;
@@ -873,20 +925,60 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       return elem;
     }
 
+    function buildElements(models) {
+      return _.map(models, function (val, key) {
+        var myModel = {};
+        myModel[myName] = val;
+        return makeElem(myModel, key);
+      });
+    }
+
+    function createTableHeader(models, pathStr) {
+      console.log("createTblHdr", models, pathStr, locKeyFromPath(pathStr), subSchema);
+      var thead = document.createElement("thead");
+      var tr = document.createElement("tr");
+      // remove button column
+      tr.appendChild(document.createElement("th"));
+      _.each(subSchema.body, function(item) {
+        var locKey = locKeyFromPath(pathStr + "." + item.name);
+        if (schema.i18nkey) {
+          locKey = schema.i18nkey;
+        }
+        var th = document.createElement("th");
+        th.textContent = loc(locKey);
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr);
+      return thead;
+    }
+
     if (subSchema.repeating) {
       var models = model[myName];
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
-      var elements = _.map(models, function (val, key) {
-        var myModel = {};
-        myModel[myName] = val;
-        return makeElem(myModel, key);
-      });
+
+      var elements = undefined;
+
+      if (subSchema.type === "table") {
+        elements = buildElements(models);
+        var table = document.createElement("table");
+        table.className = "form-table";
+        var tbody = document.createElement("tbody");
+        table.appendChild(createTableHeader(models, myPath.join(".")));
+        _.each(elements, function(element) {
+          tbody.appendChild(element);
+        });
+        table.appendChild(tbody);
+        elements = [table];
+      } else {
+        elements = buildElements(models);
+      }
 
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
+        // TODO find table node for table rows
         var parent$ = $(this.parentNode);
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {

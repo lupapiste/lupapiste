@@ -1,0 +1,15 @@
+uusiRakennus.huoneistot.porras:Porras-kirjain
+uusiRakennus.huoneistot.huoneistonumero:Numero
+uusiRakennus.huoneistot.jakokirjain:Jako-kirjain
+uusiRakennus.huoneistot.huoneistoTyyppi:Huoneistotyyppi
+uusiRakennus.huoneistot.huoneistoala:Huoneisto-ala m2
+uusiRakennus.huoneistot.huoneluku:Huoneluku
+uusiRakennus.huoneistot.keittionTyyppi:Keittiötyyppi
+uusiRakennus.huoneistot.WCKytkin:WC
+uusiRakennus.huoneistot.ammeTaiSuihkuKytkin:Amme/ suihku
+uusiRakennus.huoneistot.saunaKytkin:Sauna
+uusiRakennus.huoneistot.parvekeTaiTerassiKytkin:Parveke/ terassi
+uusiRakennus.huoneistot.lamminvesiKytkin:Lämmin vesi
+uusiRakennus.huoneistot.muutostapa:Huoneiston muutos
+uusiRakennus.huoneistot.huoneistoTyyppi.asuinhuoneisto:Asuinhuoneisto
+uusiRakennus.huoneistot.huoneistoTyyppi.toimitila:Toimitila
