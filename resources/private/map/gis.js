@@ -246,7 +246,13 @@ var gis = (function() {
 
     function closePopup(e) {
       if (self.selectedFeature) {
-        self.selectControl.unselect(self.selectedFeature);
+        // If using here "self.selectControl.unselect(self.selectedFeature);" and doing this stuff in onUnselect,
+        // was getting the error message "Uncaught TypeError: Cannot read property 'drawFeature' of null".
+        clearMarkerKnockoutBindings(self.selectedFeature);
+        self.selectedFeature = null;
+        if (self.markerMapCloseCallback) {
+          self.markerMapCloseCallback();
+        }
       }
     };
 
