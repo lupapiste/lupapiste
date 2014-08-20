@@ -225,7 +225,7 @@ var gis = (function() {
       }
 
       if (self.selectedFeature) {
-        self.selectControl.unselect(self.selectedFeature);
+        onPopupClosed(self.selectedFeature);
       }
 
       self.vectorLayer.removeAllFeatures();
@@ -244,9 +244,38 @@ var gis = (function() {
     var popupId = "popup-id";
     self.selectedFeature = null;
 
+    function clearMarkerKnockoutBindings(feature) {
+      if (feature && feature.popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.popup.contentDiv);
+        $(feature.popup.contentDiv).empty();
+        self.map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+      }
+      if (feature && feature.cluster && feature.cluster[0].popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.cluster[0].popup.contentDiv);
+        $(feature.cluster[0].popup.contentDiv).empty();
+        self.map.removePopup(feature.cluster[0].popup);
+        feature.cluster[0].popup.destroy();
+        feature.cluster[0].popup = null;
+      }
+    }
+
+    function onPopupClosed(feature) {
+      clearMarkerKnockoutBindings(feature);
+      self.selectedFeature = null;
+      if (self.markerMapCloseCallback) {
+        self.markerMapCloseCallback();
+      }
+    }
+
     function closePopup(e) {
       if (self.selectedFeature) {
-        self.selectControl.unselect(self.selectedFeature);
+        // If using here "self.selectControl.unselect(self.selectedFeature);" and doing this stuff in onUnselect,
+        // was getting the error message "Uncaught TypeError: Cannot read property 'drawFeature' of null".
+        onPopupClosed(self.selectedFeature);
       }
     };
 
@@ -272,25 +301,6 @@ var gis = (function() {
       popup.minSize = new OpenLayers.Size(270, 505);
       popup.maxSize = new OpenLayers.Size(270, 505);
       return popup;
-    }
-
-    function clearMarkerKnockoutBindings(feature) {
-      if (feature && feature.popup) {
-        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
-        ko.cleanNode(feature.popup.contentDiv);
-        $(feature.popup.contentDiv).empty();
-        self.map.removePopup(feature.popup);
-        feature.popup.destroy();
-        feature.popup = null;
-      }
-      if (feature && feature.cluster && feature.cluster[0].popup) {
-        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
-        ko.cleanNode(feature.cluster[0].popup.contentDiv);
-        $(feature.cluster[0].popup.contentDiv).empty();
-        self.map.removePopup(feature.cluster[0].popup);
-        feature.cluster[0].popup.destroy();
-        feature.cluster[0].popup = null;
-      }
     }
 
     self.selectControl = new OpenLayers.Control.SelectFeature(self.markerLayer, {
@@ -321,13 +331,7 @@ var gis = (function() {
         }
       },
 
-      onUnselect: function(feature) {
-        clearMarkerKnockoutBindings(feature);
-        self.selectedFeature = null;
-        if (self.markerMapCloseCallback) {
-          self.markerMapCloseCallback();
-        }
-      }
+      onUnselect: onPopupClosed
     });
 
     self.map.addControl(self.selectControl);

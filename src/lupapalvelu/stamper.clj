@@ -97,7 +97,9 @@
      (rotate-rectangle (.rotate rectangle) (- rotation 90))
      rectangle)))
 
-(defn- calculate-x-y [page-box crop-box page-rotation stamp-width x-margin y-margin]
+(defn- calculate-x-y
+  "About calculating stamp location, see http://support.itextpdf.com/node/106"
+  [page-box crop-box page-rotation stamp-width x-margin y-margin]
   (let [visible-area (rotate-rectangle crop-box page-rotation)
         sides (get-sides visible-area)
         page-size (get-sides (rotate-rectangle page-box page-rotation))
@@ -113,9 +115,7 @@
       page-rotation sides page-size max-x min-y x y)
     [x y]))
 
-(defn- stamp-pdf
-  "About calculating stamp location, see http://support.itextpdf.com/node/106"
-  [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
+(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
@@ -207,6 +207,7 @@
   (let [d "problematic-pdfs"
         my-stamp (make-stamp "OK" 0 "Solita Oy" 0)]
     (doseq [f (remove #(.endsWith % "-leima.pdf") (me.raynes.fs/list-dir d))]
+      (println f)
       (let [my-in  (clojure.java.io/input-stream (str d "/" f))
             my-out (clojure.java.io/output-stream (str d "/" f "-leima.pdf"))]
         (stamp-pdf my-stamp my-in my-out 10 100 0))))

@@ -95,9 +95,9 @@
      (when-not (every? (fn [{:keys [source]}] (or (not= "verdict" (:type source)) (verdict-ids (:id source)))) tasks)
        id)))
 
-(defmonster task-source-refers-verdict
-  (if-let [results (seq (remove nil? (map every-task-refers-verdict @applications)))]
-    {:ok false :results results}
-    {:ok true})
-
-  )
+; Not a valid test anymore. Fails if a verdict is replaced.
+(comment
+  (defmonster task-source-refers-verdict
+       (if-let [results (seq (remove nil? (map every-task-refers-verdict @applications)))]
+         {:ok false :results results}
+         {:ok true})))
