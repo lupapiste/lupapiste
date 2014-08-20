@@ -967,7 +967,6 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
-        // TODO find table node for table rows
         var parent$ = $(this.parentNode);
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
@@ -978,7 +977,23 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         $(this).before(makeElem(myModel, count));
       };
 
-      $(appendButton).click(appender);
+      var tableAppender = function () {
+        var parent$ = $(this.parentNode).find("tbody");
+        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+          count++;
+        }
+        var myModel = {};
+        myModel[myName] = {};
+        parent$.append(makeElem(myModel, count));
+      };
+
+      if (subSchema.type === "table") {
+        $(appendButton).click(tableAppender);
+      } else {
+        $(appendButton).click(appender);
+      }
+
       elements.push(appendButton);
 
       return elements;
