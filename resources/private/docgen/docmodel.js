@@ -978,7 +978,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       };
 
       var tableAppender = function () {
-        var parent$ = $(this.parentNode).find("tbody");
+        var parent$ = $(this).closest(".accordion-fields").find("tbody");
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -988,14 +988,51 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         parent$.append(makeElem(myModel, count));
       };
 
+      var copyElement = function() {
+        var parent$ = $(this).closest(".accordion-fields").find("tbody");
+        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+          count++;
+        }
+        var lastItem$ = parent$.find("tr").last();
+
+        var myModel = {};
+        myModel[myName] = {};
+        var newItem = makeElem(myModel, count);
+
+        // copy last element items to new
+        lastItem$.find("td").each(function(index) {
+          var newInput$ = $($(newItem).find("input, select")[index]);
+          var oldInput$ = $(this).find("input, select");
+          var prop = "value";
+          if(oldInput$.is(":checkbox")) {
+            prop = "checked";
+          }
+          var oldValue = oldInput$.prop(prop);
+          if(oldValue) {
+            newInput$.prop(prop, oldInput$.prop(prop));
+            newInput$.change();
+          }
+        });
+
+        parent$.append(newItem);
+      }
+
+      var buttonGroup = document.createElement("div");
+      buttonGroup.className = "button-group";
+      buttonGroup.appendChild(appendButton);
+
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
+
+        var copyButton = makeButton(myPath.join("_") + "_copy", loc([self.schemaI18name, myPath.join("."), "_copy_label"]));
+        $(copyButton).click(copyElement);
+        buttonGroup.appendChild(copyButton);
       } else {
         $(appendButton).click(appender);
       }
 
-      elements.push(appendButton);
-
+      elements.push(buttonGroup);
       return elements;
     }
 
