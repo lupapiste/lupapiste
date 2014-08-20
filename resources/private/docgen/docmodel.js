@@ -198,10 +198,6 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function makeEntrySpan(subSchema, pathStr) {
-    if (!subSchema.label) {
-      return makeEntryTableCell(subSchema, pathStr);
-    }
-
     var help = null;
     var helpLocKey = locKeyFromPath(pathStr + ".help");
     var span = document.createElement("span");
@@ -234,11 +230,6 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     }
 
     return span;
-  }
-
-  function makeEntryTableCell(subSchema, pathStr) {
-    var td = document.createElement("td");
-    return td;
   }
 
   self.makeApprovalButtons = function (path, model) {
@@ -837,16 +828,11 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function buildTable(subSchema, model, path, partOfChoice) {
-    console.log("buildTable", subSchema);
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
-    // var header = document.createElement("thead");
-    // var rows = document.createElement("tbody");
     var row = document.createElement("tr");
     var label = makeLabel(subSchema, "row", myPath, true);
-
-    console.log(model, myModel);
 
     appendElements(row, subSchema, myModel, path, save, partOfChoice);
 
@@ -919,7 +905,11 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
                 { title: loc("no") });
           };
-          elem.insertBefore(removeButton, elem.childNodes[0]);
+          if (subSchema.type === "table") {
+            elem.appendChild(removeButton, elem.childNodes[0]);
+          } else {
+            elem.insertBefore(removeButton, elem.childNodes[0]);
+          }
         }
       }
       return elem;
@@ -934,11 +924,8 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     }
 
     function createTableHeader(models, pathStr) {
-      console.log("createTblHdr", models, pathStr, locKeyFromPath(pathStr), subSchema);
       var thead = document.createElement("thead");
       var tr = document.createElement("tr");
-      // remove button column
-      tr.appendChild(document.createElement("th"));
       _.each(subSchema.body, function(item) {
         var locKey = locKeyFromPath(pathStr + "." + item.name);
         if (schema.i18nkey) {
@@ -948,6 +935,8 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         th.textContent = loc(locKey);
         tr.appendChild(th);
       });
+      // remove button column
+      tr.appendChild(document.createElement("th"));
       thead.appendChild(tr);
       return thead;
     }
@@ -1033,6 +1022,11 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
           $(elem).hide();
         }
         if (elem) {
+          if (!subSchema.label) {
+            var td = document.createElement("td");
+            td.appendChild(elem);
+            elem = td;
+          }
           body.appendChild(elem);
         }
       });
@@ -1135,8 +1129,15 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function showIndicator(indicator, className, locKey) {
+    var parent$ = $(indicator).closest("table");
     var i$ = $(indicator);
-    i$.addClass(className).text(loc(locKey)).fadeIn(200);
+
+    if(parent$.length > 0) {
+      // disable indicator text for table element
+      i$.addClass(className).fadeIn(200);
+    } else {
+      i$.addClass(className).text(loc(locKey)).fadeIn(200);
+    }
 
     setTimeout(function () {
       i$.removeClass(className).fadeOut(200, function () { i$.remove; });
