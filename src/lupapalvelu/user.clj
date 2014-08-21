@@ -153,6 +153,9 @@
   {:pre [id]}
   (get-user {:id id}))
 
+(defn get-user-by-id! [id]
+  (or (get-user-by-id id) (fail! :not-found)))
+
 (defn get-user-by-email [email]
   {:pre [email]}
   (get-user {:email email}))
