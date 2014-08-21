@@ -832,12 +832,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var name = subSchema.name;
     var myModel = model[name] || {};
     var row = document.createElement("tr");
-    var label = makeLabel(subSchema, "row", myPath, true);
-
     appendElements(row, subSchema, myModel, path, save, partOfChoice);
 
     row.id = pathStrToGroupID(myPath);
-
     return row;
   }
 
@@ -951,15 +948,21 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
       if (subSchema.type === "table") {
         elements = buildElements(models);
+        var div = document.createElement("div");
+        div.className = "form-table";
         var table = document.createElement("table");
-        table.className = "form-table";
         var tbody = document.createElement("tbody");
         table.appendChild(createTableHeader(models, myPath.join(".")));
         _.each(elements, function(element) {
           tbody.appendChild(element);
         });
         table.appendChild(tbody);
-        elements = [table];
+
+        var label = makeLabel(subSchema, "table", myPath.join("."), true);
+        div.appendChild(label);
+        div.appendChild(table);
+
+        elements = [div];
       } else {
         elements = buildElements(models);
       }
