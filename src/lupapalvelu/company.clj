@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.util :refer [max-length max-length-string y?]]
+            [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [now fail!]])
   (:import [java.util Date]))
@@ -58,3 +59,11 @@
     (mongo/update :companies q updated)
     updated))
 
+(defn update-user!
+  "Update company user."
+  [user-id op value]
+  (condp = op
+    :admin  (mongo/update-by-id :users user-id {$set {:company.role (if value "admin" "user")}})
+    :enabled (mongo/update-by-id :users user-id {$set {:enabled (if value true false)}})
+    :delete (mongo/update-by-id :users user-id {$set {:enabled false :company nil}})
+    (fail! :bad-request)))
