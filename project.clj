@@ -62,11 +62,9 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
-                                            :checksum :ignore}]]
+                                           :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
-  :main ^:skip-aot lupapalvelu.server
-  :repl-options {:init-ns lupapalvelu.server}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
                 [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.0.0")
