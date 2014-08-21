@@ -30,4 +30,25 @@ company.user.role:           Rooli
 company.user.role.admin:     Ylläpitäjä
 company.user.role.user:      Käyttäjä
 
-company.user.op.delete:      [Poista]
+company.user.op.enabled.true:          [Sulje]
+company.user.op.enabled.false:         [Avaa]
+company.user.op.enabled.true.title:    Käyttäjän tilin sulkeminen
+company.user.op.enabled.true.message:  Oletko varma että haluat sulkea käyttäjän <b>{0}</b> tilin tilapäisesti?
+company.user.op.enabled.false.title:   Käyttäjän tilin avaaminen
+company.user.op.enabled.false.message: Oletko varma että avata käyttäjän <b>{0}</b> tilin?
+
+company.user.op.admin.true:           [Käyttäjäksi]
+company.user.op.admin.false:          [Ylläpitäjäksi]
+company.user.op.admin.true.title:     Ylläpitooikeuksien poistaminen
+company.user.op.admin.true.message:   Olekto varma että haluat poistaa käyttäjältä <b>{0}</b> ylläpito oikeudet?
+company.user.op.admin.false.title:    Ylläpitooikeuksien antaminen
+company.user.op.admin.false.message:  Olekto varma että haluat antaa käyttäjälle <b>{0}</b> ylläpito oikeudet?
+
+company.user.op.delete:               [Poista]
+company.user.op.delete.true.title:    Yrityskäyttäjän poistaminen
+company.user.op.delete.true.message:  Oletko varma että haluat poistaa käyttäjän <b>{0}</b> kokonaan Lupapiste.fi palvelusta?
+
+company.user.op.pending:              Toimintoa suoritetaan...
+company.user.op.failure:              Toiminnon suoritus epäonnistui.
+
+forbidden: Toiminto ei ole sallittu
