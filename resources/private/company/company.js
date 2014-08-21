@@ -31,14 +31,22 @@
       return self;
     };
 
-    self.init = function(id) {
+    self.show = function(id) {
       return (self.id() === id) ? self : self.clear().id(id).load();
+    };
+
+    self.op = function(m, e) {
+      var target = $(e.target),
+          userId = target.attr("data-userId"),
+          op = target.attr("data-op");
+      // TODO:
+      console.log("userId:", userId, "op:", op);
     };
   }
 
   var company = new Company();
 
-  hub.onPageChange("company", function(e) { company.init(e.pagePath[0]); });
+  hub.onPageChange("company", function(e) { company.show(e.pagePath[0]); });
 
   $(function() {
     $("#company").applyBindings(company);

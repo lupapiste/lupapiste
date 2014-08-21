@@ -18,10 +18,16 @@ userInfo.company.loading:  Odota, yrityksen tietoja ladataan...
 userInfo.company.name:     Yrityksen nimi:
 userInfo.company.y:        Y-tunnus:
 
-company.title:             Yritys
-company.loading:           Odota, yrityksen tietoja ladataan...
-company.user.firstName:    Etunimi
-company.user.lastName:     Sukunimi
-company.user.email:        Sähköposti
-company.user.enabled:      Käytössä
-company.user.actions:
+company.title:               Yritys
+company.loading:             Odota, yrityksen tietoja ladataan...
+company.user.firstName:      Etunimi
+company.user.lastName:       Sukunimi
+company.user.email:          Sähköposti
+company.user.enabled:        Tila
+company.user.enabled.true:   Käytössä
+company.user.enabled.false:  Suljettu
+company.user.role:           Rooli
+company.user.role.admin:     Ylläpitäjä
+company.user.role.user:      Käyttäjä
+
+company.user.op.delete:      [Poista]
