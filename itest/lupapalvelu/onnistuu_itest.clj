@@ -13,10 +13,10 @@
 (defn init-sign []
   (-> (u/command u/pena :init-sign
                  :companyName "company-name"
-                 :companyY    "1234567-8"
+                 :companyY    "FI2341528-4"
                  :firstName   "First"
                  :lastName    "Last"
-                 :email       "email"
+                 :email       "a@b.c"
                  :lang        "fi")
       :processId
       get-process))
@@ -24,10 +24,10 @@
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
-                                      :y    "1234567-8"}
+                                      :y    "FI2341528-4"}
                             :signer {:first-name   "First"
                                      :last-name    "Last"
-                                     :email        "email"
+                                     :email        "a@b.c"
                                      :lang         "fi"}
                             :status  "created"}))
 
