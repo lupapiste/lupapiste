@@ -38,7 +38,14 @@
           .email(null)
           .admin(false);
     };
+
+    this.open = function() {
+      this.clear();
+      LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
+    };
   }
+
+  var newCompanyUser = new NewCompanyUser();
 
   function CompanyUserOp() {
     var self = this;
@@ -143,7 +150,9 @@
       return (self.id() === id) ? self : self.clear().id(id).load();
     };
 
-    self.newUser = new NewCompanyUser();
+    self.openNewUser = function() {
+      newCompanyUser.open();
+    };
   }
 
   var company = new Company();
@@ -153,6 +162,7 @@
   $(function() {
     $("#company-content").applyBindings(company);
     $("#dialog-company-user-op").applyBindings(companyUserOp);
+    $("#dialog-company-new-user").applyBindings(newCompanyUser);
   });
 
 })();
