@@ -51,8 +51,10 @@
   {:roles [:anonymous]
    :parameters [firstName lastName email admin]}
   [{user :user}]
-  (if (or (= (:role user) :admin)
-          (= (get-in user [:company :role]) :admin))
-    )
-  (println "company-add-user:" user firstName lastName email admin)
+  (if-not (or (= (:role user) "admin")
+              (= (get-in user [:company :role]) "admin"))
+    (fail! :forbidden))
+  (c/add-user! {:firstName firstName :lastName lastName :email email}
+               (c/find-company-by-id (-> user :company :id))
+               (if admin :admin :user))
   (ok))
