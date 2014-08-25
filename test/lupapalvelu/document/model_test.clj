@@ -368,7 +368,7 @@
    :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
                                                  :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
                                                  :timestamp 1370856511356}}}}
-   :data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
+   :data {:huoneistot {:0 {:huoneistonumero {:value "001"}}}
           :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
           :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                                      :henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
