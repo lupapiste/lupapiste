@@ -55,7 +55,7 @@
 (defn find-company-by-id!
   "Returns company by given ID, throws if not found"
   [id]
-  (or (find-company-by-id! id) (fail! :company.not-found)))
+  (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn update-company!
   "Update company. Throws if comoany is not found, or if updates would make company data invalid.
