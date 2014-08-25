@@ -8,14 +8,11 @@
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
-            [sade.util :refer [fn->]]
             [lupapalvelu.core :refer [ok]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.onnistuu.crypt :as crypt]
             [lupapalvelu.company :as c]
-            [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notif]
             [lupapalvelu.user-api :as u]))
 
 (set! *warn-on-reflection* true)
@@ -149,11 +146,7 @@
              identifier
              name)
     (let [company  (c/create-company {:name name, :y identifier, :process-id process-id})
-          token-id (token/make-token :new-company-user nil {:user signer, :company company, :role :admin} :auto-consume false)]
-      (notif/notify! :new-company-user {:user       signer
-                                        :company    company
-                                        :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
-                                        :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+          token-id (c/add-user! signer company :admin)]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], company-id: [%s], token: [%s]"
              process-id
              (:y company)
@@ -161,26 +154,6 @@
              (:id company)
              token-id))
     process))
-
-(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
-                                   :recipients-fn (fn-> :user :email vector)
-                                   :model-fn      (fn [model _] model)})
-
-(defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
-  (c/find-company! {:id (:id company)}) ; make sure company still exists
-  (u/create-new-user nil
-                     {:email       (:email user)
-                      :username    (:email user)
-                      :firstName   (:firstName user)
-                      :lastName    (:lastName user)
-                      :company     {:id     (:id company)
-                                    :role   role}
-                      :password    password
-                      :role        :applicant
-                      :architect   true
-                      :enabled     true}
-                     :send-email false)
-  (ok))
 
 ;
 ; Fail:
