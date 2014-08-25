@@ -32,7 +32,7 @@
               <td data-bind="text: email"></td>
               <td data-bind="ltext: 'company.user.enabled.' + enabled()"></td>
               <td data-bind="ltext: 'company.user.role.' + role()"></td>
-              <td>
+              <td data-bind="visible: $parent.isAdmin">
                 <div data-bind="visible: opsEnabled">
                   <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#"></a>
                   <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#"></a>
