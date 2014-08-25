@@ -13,7 +13,9 @@
 
 (defn basic-application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:auth.id (:id user)}
+    :applicant (if-let [company-id (get-in user [:company :id])]
+                 {:company.id company-id}
+                 {:auth.id (:id user)})
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
     :trusted-etl {}
     (do
