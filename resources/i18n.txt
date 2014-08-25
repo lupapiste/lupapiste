@@ -6,8 +6,8 @@ new-company-user.setpw:     Aseta itsellesi salasana
 
 new-company-user.company-name:  Yrityksen nimi:
 new-company-user.company-y:     Yrityksen Y-tunnus:
-new-company-user.first-name:    Etunimesi:
-new-company-user.last-name:     Sukunimesi:
+new-company-user.firstName:     Etunimesi:
+new-company-user.lastName:      Sukunimesi:
 new-company-user.email:         Sähköpostiosoitteesi (toimii käyttäjätunnuksenasi):
 
 new-company-user.not-found.title:    Tapahtui virhe
