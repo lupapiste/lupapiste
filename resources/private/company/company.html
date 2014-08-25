@@ -86,32 +86,35 @@
       <div class="dialog-content">
         <form>
           <h1 data-bind="ltext: 'register.company.add-user.message'"></h1>
-          <div class="form-entry">
-            <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
-            <input data-bind="value: model().firstName, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="Etunimi"/>
+
+          <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
+          <input data-bind="value: model().firstName, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="Etunimi"/>
+
+          <label data-bind="ltext: 'company.user.lastName'" class="form-label tip"></label>
+          <input data-bind="value: model().lastName, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="Sukunimi"/>
+
+          <label data-bind="ltext: 'company.user.email'" class="form-label tip"></label>
+          <input data-bind="value: model().email, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="etunimi.sukunimi@osoite.fi"/>
+
+          <input data-bind="checked: model().admin" class="form-input" type="checkbox" id="register.company.add-user.admin"></input>
+          <label data-bind="ltext: 'register.company.add-user.admin'" class="form-label" for="register.company.add-user.admin"></label>
+
+          <div data-bind="visible: pending">
+            <h3>
+              <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
+              <span data-bind="ltext: 'register.company.add-user.pending'"></span>
+            </h3>
           </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'company.user.lastName'" class="form-label tip"></label>
-            <input data-bind="value: model().lastName, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="Sukunimi"/>
-          </div>
-          <div class="form-entry">
-            <label data-bind="ltext: 'company.user.email'" class="form-label tip"></label>
-            <input data-bind="value: model().email, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="etunimi.sukunimi@osoite.fi"/>
-          </div>
-          <div class="form-entry">
-            <input data-bind="checked: model().admin" class="form-input" type="checkbox" id="register.company.add-user.admin"></input>
-            <label data-bind="ltext: 'register.company.add-user.admin'" class="form-label" for="register.company.add-user.admin"></label>
-          </div>
+
           <div data-bind="visible: done">
             <h3 data-bind="ltext: 'register.company.add-user.done.header'"></h3>
-            <div data-bind="ltext: 'register.company.add-user.done.message'"></div>
+            <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
+            <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
           </div>
+
           <div>
-            <button data-bind="enable: canSubmit, click:  submit" type="submit" class="btn btn-primary">
-              <span data-bind="ltext: 'register.company.add-user.submit'"></span>
-              <em data-bind="visible: pending" class="button-loader"></em>
-            </button>
-            <button data-bind="enable: !pending(), ltext: 'cancel'" class="btn btn-dialog close"></button>
+            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="btn btn-dialog btn-primary"></button>
+            <button data-bind="enable: canClose, ltext: 'close'" class="btn btn-dialog close"></button>
           </div>
         </form>
       </div>

@@ -13,8 +13,20 @@
 
     this.pending   = ko.observable();
     this.done      = ko.observable(false);
-    this.canSubmit = ko.computed(function() { return !this.pending() && this.model.isValid(); }, this);
-    this.canClear  = ko.computed(function() { return !this.pending(); }, this);
+    this.canSubmit = ko.computed(function() { return !this.pending() && this.model.isValid() && !this.done(); }, this);
+    this.canClose  = ko.computed(function() { return !this.pending(); }, this);
+
+    this.open = function() {
+      this
+        .pending(false)
+        .done(false)
+        .model()
+          .firstName(null)
+          .lastName(null)
+          .email(null)
+          .admin(false);
+      LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
+    };
 
     this.submit = function() {
       var m = this.model(),
@@ -27,21 +39,6 @@
         .pending(this.pending)
         .success(this.done.bind(this, true))
         .call();
-    };
-
-    this.clear = function() {
-      this
-        .done(false)
-        .model()
-          .firstName(null)
-          .lastName(null)
-          .email(null)
-          .admin(false);
-    };
-
-    this.open = function() {
-      this.clear();
-      LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
     };
   }
 
