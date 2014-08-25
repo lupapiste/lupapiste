@@ -60,7 +60,7 @@
             </div>
 
             <button
-                data-bind="enable: addressOk, click: goPhase2"
+                data-bind="enable: addressOk() && propertyIdOk(), click: goPhase2"
                 class="btn btn-primary btn-nav-forward"
                 data-test-id="create-continue"
                 id="create-location-continue">
