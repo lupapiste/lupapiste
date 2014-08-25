@@ -46,3 +46,13 @@
       (fail! :forbidden))
     (c/update-user! user-id (keyword op) value)
     (ok)))
+
+(defcommand company-add-user
+  {:roles [:anonymous]
+   :parameters [firstName lastName email admin]}
+  [{user :user}]
+  (if (or (= (:role user) :admin)
+          (= (get-in user [:company :role]) :admin))
+    )
+  (println "company-add-user:" user firstName lastName email admin)
+  (ok))

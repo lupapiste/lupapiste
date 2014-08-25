@@ -1,6 +1,45 @@
 (function() {
   "use strict";
 
+  function NewCompanyUser() {
+    var required = {required: true, minLength: 1};
+
+    this.model = ko.validatedObservable({
+      firstName: ko.observable().extend(required),
+      lastName:  ko.observable().extend(required),
+      email:     ko.observable().extend(required).extend({pattern: {message: "S\u00E4hk\u00F6postiosoite", params: "^\\S+@\\S+$"}}),
+      admin:     ko.observable().extend({required: false})
+    });
+
+    this.pending   = ko.observable();
+    this.done      = ko.observable(false);
+    this.canSubmit = ko.computed(function() { return !this.pending() && this.model.isValid(); }, this);
+    this.canClear  = ko.computed(function() { return !this.pending(); }, this);
+
+    this.submit = function() {
+      var m = this.model(),
+          data = _.reduce(
+              ["firstName", "lastName", "email", "admin"],
+              function(acc, k) { acc[k] = m[k](); return acc; },
+              {});
+      ajax
+        .command("company-add-user", data)
+        .pending(this.pending)
+        .success(this.done.bind(this, true))
+        .call();
+    };
+
+    this.clear = function() {
+      this
+        .done(false)
+        .model()
+          .firstName(null)
+          .lastName(null)
+          .email(null)
+          .admin(false);
+    };
+  }
+
   function CompanyUserOp() {
     var self = this;
 
@@ -103,6 +142,8 @@
     self.show = function(id) {
       return (self.id() === id) ? self : self.clear().id(id).load();
     };
+
+    self.newUser = new NewCompanyUser();
   }
 
   var company = new Company();

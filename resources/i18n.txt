@@ -52,3 +52,9 @@ company.user.op.pending:              Toimintoa suoritetaan...
 company.user.op.failure:              Toiminnon suoritus epäonnistui.
 
 forbidden: Toiminto ei ole sallittu
+
+register.company.add-user.header: Uusi yrityskäyttäjä
+register.company.add-user.submit: Lisää käyttäjä
+register.company.add-user.admin:  Ylläpitäjä?
+register.company.add-user.done.header:  Käyttäjä kutsuttu.
+register.company.add-user.done.message: Käyttäjälle on lähetetty sähköposti jonka avulla hän voi aktivoida tilinsä.

@@ -41,6 +41,40 @@
           </tbody>
         </table>
       </div>
+
+      <form data-bind="visible: isAdmin, with: newUser">
+        <h1 data-bind="ltext: 'register.company.add-user.header'"></h1>
+        <div class="form-group">
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'company.user.firstName'"></label>
+            <input class="form-input text" data-bind="value: model().firstName, valueUpdate: 'afterkeydown'" type="text" placeholder="Etunimi"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'company.user.lastName'"></label>
+            <input class="form-input text" data-bind="value: model().lastName, valueUpdate: 'afterkeydown'" type="text" placeholder="Sukunimi"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'company.user.email'"></label>
+            <input class="form-input text" data-bind="value: model().email, valueUpdate: 'afterkeydown'" type="text" placeholder="etunimi.sukunimi@osoite.fi"/>
+          </div>
+          <div class="form-entry">
+            <input type="checkbox" data-bind="checked: model().admin" class="form-input" id="register.company.add-user.admin"></input>
+            <label data-bind="ltext: 'register.company.add-user.admin'" for="register.company.add-user.admin" class="form-label"></label>
+          </div>
+        </div>
+        <div>
+          <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary">
+            <span data-bind="ltext: 'register.company.add-user.submit'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+          </button>
+          <button data-bind="enable: canClear, click: clear, ltext: 'cancel'" type="button" class="btn"></button>
+        </div>
+        <div data-bind="visible: done">
+          <h3 data-bind="ltext: 'register.company.add-user.done.header'"></h3>
+          <div data-bind="ltext: 'register.company.add-user.done.message'"></div>
+        </div>
+      </form>
+
     </div>
 
     <div id="dialog-company-user-op" class="window autosized">
