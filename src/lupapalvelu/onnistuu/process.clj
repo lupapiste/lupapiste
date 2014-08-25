@@ -70,7 +70,7 @@
 ; Init sign process:
 ;
 
-(defn init-sign-process [ts crypto-key success-url document-url company-name y first-name last-name email lang]
+(defn init-sign-process [ts crypto-key success-url document-url company-name y firstName lastName email lang]
   (let [crypto-iv  (crypt/make-iv)
         process-id (random-password 40)
         stamp      (random-password 40)]
@@ -78,7 +78,7 @@
     (mongo/insert :sign-processes {:_id       process-id
                                    :stamp     stamp
                                    :company   {:name company-name, :y y}
-                                   :signer    {:first-name first-name, :last-name last-name, :email email, :lang lang}
+                                   :signer    {:firstName firstName, :lastName lastName, :email email, :lang lang}
                                    :status    :created
                                    :created   ts
                                    :progress  [{:status :created, :ts ts}]})
@@ -171,8 +171,8 @@
   (u/create-new-user nil
                      {:email       (:email user)
                       :username    (:email user)
-                      :firstName   (:first-name user)
-                      :lastName    (:last-name user)
+                      :firstName   (:firstName user)
+                      :lastName    (:lastName user)
                       :company     {:id     (:id company)
                                     :role   role}
                       :password    password

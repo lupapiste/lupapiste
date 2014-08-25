@@ -1,10 +1,13 @@
 (ns lupapalvelu.company
   (:require [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [max-length max-length-string y?]]
+            [sade.util :refer [max-length max-length-string y? fn->]]
             [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.core :refer [now fail!]])
+            [lupapalvelu.core :refer [now ok fail!]]
+            [lupapalvelu.token :as token]
+            [lupapalvelu.notifications :as notif]
+            [lupapalvelu.user-api :as u])
   (:import [java.util Date]))
 
 ;;
@@ -67,3 +70,54 @@
     :enabled (mongo/update-by-id :users user-id {$set {:enabled (if value true false)}})
     :delete (mongo/update-by-id :users user-id {$set {:enabled false :company nil}})
     (fail! :bad-request)))
+
+;;
+;; Add new company user:
+;;
+
+(defn add-user! [user firstName lastName email admin]
+  (let [company  (c/create-company {:name name, :y identifier, :process-id process-id})
+          token-id (token/make-token :new-company-user nil {:user signer, :company company, :role :admin} :auto-consume false)]
+      (notif/notify! :new-company-user {:user       signer
+                                        :company    company
+                                        :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
+                                        :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+      (infof "sign:success:%s: company-created: y [%s], company: [%s], company-id: [%s], token: [%s]"
+             process-id
+             (:y company)
+             (:name company)
+             (:id company)
+             token-id)))
+
+(defn add-user! [caller firstName lastName email admin]
+  (let [token-id (token/make-token :new-company-user nil {:user signer, :company company, :role :admin} :auto-consume false)]
+      (notif/notify! :new-company-user {:user       signer
+                                        :company    company
+                                        :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
+                                        :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+      (infof "sign:success:%s: company-created: y [%s], company: [%s], company-id: [%s], token: [%s]"
+             process-id
+             (:y company)
+             (:name company)
+             (:id company)
+             token-id)))
+
+(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
+                                   :recipients-fn (fn-> :user :email vector)
+                                   :model-fn      (fn [model _] model)})
+
+(defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
+  (find-company! {:id (:id company)}) ; make sure company still exists
+  (u/create-new-user nil
+                     {:email       (:email user)
+                      :username    (:email user)
+                      :firstName   (:firstName user)
+                      :lastName    (:lastName user)
+                      :company     {:id     (:id company)
+                                    :role   role}
+                      :password    password
+                      :role        :applicant
+                      :architect   true
+                      :enabled     true}
+                     :send-email false)
+  (ok))

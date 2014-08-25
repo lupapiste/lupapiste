@@ -1,4 +1,4 @@
-# Hei {{user.first-name}} {{user.last-name}},
+# Hei {{user.firstName}} {{user.lastName}},
 
 Sinut on kutsuttu [Lupapiste.fi](https://lupapiste.fi) palveluun yrityksen **{{company.name}}** tilin käyttäjäksi.
 
@@ -10,6 +10,6 @@ Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 ---
 
-# Hej {{user.first-name}} {{user.last-name}},
+# Hej {{user.firstName}} {{user.lastName}},
 
 [{{link-sv}}]({{link-sv}})

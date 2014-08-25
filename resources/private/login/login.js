@@ -148,8 +148,8 @@
           self
             .companyName(company.name)
             .companyY(company.y)
-            .firstName(user['first-name'])
-            .lastName(user['last-name'])
+            .firstName(user.firstName)
+            .lastName(user.lastName)
             .email(user.email)
             .loading(false)
             .loaded(true);

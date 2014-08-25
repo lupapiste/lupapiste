@@ -25,8 +25,8 @@
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
                                       :y    "FI2341528-4"}
-                            :signer {:first-name   "First"
-                                     :last-name    "Last"
+                            :signer {:firstName   "First"
+                                     :lastName    "Last"
                                      :email        "a@b.c"
                                      :lang         "fi"}
                             :status  "created"}))
