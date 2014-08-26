@@ -255,6 +255,11 @@
             cn (if (zero? cn) 0 (- 11 cn))]
         (= (Long/parseLong check) cn)))))
 
+(defn ovt? [ovt]
+  (if ovt
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
+      (y? (str "FI" y \- c)))))
+
 ;;
 ;; Schema utils:
 ;;

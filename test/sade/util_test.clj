@@ -213,6 +213,23 @@
   (fact (y? "FI2341528-4") => truthy)
   (fact (y? "SW123456789") => falsey))
 
+(facts ovt?
+  (fact (ovt? nil)             => falsey)
+  (fact (ovt? "")              => falsey)
+  (fact (ovt? "foo")           => falsey)
+  (fact (ovt? "1234")          => falsey)
+  (fact (ovt? "12345")         => truthy) ; foreign OVT
+  (fact (ovt? "003712345")     => falsey)
+  (fact (ovt? "003723415284")  => truthy)
+  (fact (ovt? "0037234152841") => truthy)
+  (fact (ovt? "00372341528412") => truthy)
+  (fact (ovt? "003723415284123") => truthy)
+  (fact (ovt? "0037234152841234") => truthy)
+  (fact (ovt? "00372341528412345") => truthy)
+  (fact (ovt? "003723415284123456") => falsey)
+  (fact (ovt? "003701902735") => truthy)
+  (fact (ovt? "003710601555") => truthy))
+
 (facts max-length
   (fact (sc/check (max-length 1) []) => nil)
   (fact (sc/check (max-length 1) [1]) => nil)
