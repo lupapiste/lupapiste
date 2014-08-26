@@ -20,11 +20,26 @@
   ko.validation.localize(loc.getErrorMessages());
 
   ko.validation.rules.validPassword = {
-      validator: function (val) {
-        return val && util.isValidPassword(val);
-      },
-      message: loc("error.password.minlength")
-    };
+    validator: function (val) {
+      return val && util.isValidPassword(val);
+    },
+    message: loc("error.password.minlength")
+  };
+
+  ko.validation.rules.y = {
+    validator: function(y) {
+      return _.isBlank(y) || util.isValidY(y);
+    },
+    message: loc("error.invalidY")
+  };
+
+  ko.validation.rules.ovt = {
+    validator: function(ovt) {
+      return _.isBlank(ovt) || util.isValidOVT(ovt);
+    },
+    message: loc("error.invalidOVT")
+  };
+
   ko.validation.registerExtenders();
 
   ko.bindingHandlers.dateString = {
