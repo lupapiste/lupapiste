@@ -42,8 +42,8 @@
                                                                  :huoneluku {:value "66"}
                                                                  :ammeTaiSuihkuKytkin {:value true}
                                                                  :saunaKytkin {:value true}}}}}]})
-(def flatten-data (flatten-huoneisto-data application-old))
 
 (fact "flatten aplications huoneistot documents"
-      (= (:documents application-expected) application-old) => false
-      flatten-data => (:documents application-expected))
+  (let [flatten-data (flatten-huoneisto-data application-old)] 
+    (:documents application-expected) =not> (:documents application-old)
+    flatten-data => (:documents application-expected)))

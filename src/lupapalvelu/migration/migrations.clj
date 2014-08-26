@@ -521,7 +521,7 @@
 (defn flatten-huoneisto-data [{documents :documents}]
   (map 
     (fn [doc]
-      (let [to-update (tools/deep-find doc :huoneistot )]       
+      (if-let [to-update (seq (tools/deep-find doc :huoneistot ))]       
         (reduce 
           #(let [[p v] %2
                  path (conj p :huoneistot)]
@@ -539,11 +539,12 @@
                                 ))))
                %1
                v)) doc to-update)
+        doc
         )) documents))
 
 (defmigration flatten-huoneisto
   (doseq [collection [:applications :submitted-applications]
           application (mongo/select collection {:infoRequest false})]
-    (if (seq (tools/deep-find (:documents application) :huoneistot )) 
+    (if (some seq (map #(tools/deep-find % :huoneistot) (:documents application))) 
       (let [updated-documents (flatten-huoneisto-data application)]
         (mongo/update-by-id collection (:id application) {$set {:documents updated-documents}})))))
