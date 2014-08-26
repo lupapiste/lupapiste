@@ -111,23 +111,33 @@ var util = (function() {
     return undefined;
   }
 
+  function isValidY(y) {
+    return true;
+  }
+
+  function isValidOVT(ovt) {
+    return true;
+  }
+
   return {
-    zeropad: zeropad,
-    fluentify: fluentify,
-    getPwQuality: getPwQuality,
+    zeropad:             zeropad,
+    fluentify:           fluentify,
+    getPwQuality:        getPwQuality,
     isValidEmailAddress: isValidEmailAddress,
-    isValidPassword: isValidPassword,
+    isValidPassword:     isValidPassword,
     prop: {
-      isPropertyId: isPropertyId,
+      isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
-      toHumanFormat: propertyIdToHumanFormat,
-      toDbFormat: propertyIdToDbFormat
+      toHumanFormat:          propertyIdToHumanFormat,
+      toDbFormat:             propertyIdToDbFormat
     },
     buildingName: buildingName,
-    nop: nop,
-    constantly: function(value) { return function() { return value; }; },
-    isNum: isNum,
-    getIn: getIn
+    nop:          nop,
+    constantly:   function(value) { return function() { return value; }; },
+    isNum:        isNum,
+    getIn:        getIn,
+    isValidY:     isValidY,
+    isValidOVT:   isValidOVT
   };
 
 })();
