@@ -289,6 +289,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :type :table
                       :repeating true
+                      :approvable true
                       :body huoneistoRow})
 
 (def yhden-asunnon-talot "011 yhden asunnon talot")

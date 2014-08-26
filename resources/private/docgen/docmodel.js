@@ -569,15 +569,12 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
-    if (subSchema.label) {
-      var label = makeLabel(subSchema, "group", myPath, true);
-      div.appendChild(label);
+    var label = makeLabel(subSchema, "group", myPath, true);
+    div.appendChild(label);
 
-      if (subSchema.approvable) {
-        label.appendChild(self.makeApprovalButtons(path, myModel));
-      }
+    if (subSchema.approvable) {
+      label.appendChild(self.makeApprovalButtons(path, myModel));
     }
-
 
     div.appendChild(partsDiv);
     return div;
@@ -827,7 +824,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return span;
   }
 
-  function buildTable(subSchema, model, path, partOfChoice) {
+  function buildTableRow(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -860,7 +857,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     personSelector: buildPersonSelector,
-    table: buildTable,
+    table: buildTableRow,
     unknown: buildUnknown
   };
 
@@ -959,6 +956,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         table.appendChild(tbody);
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
+        if (subSchema.approvable) {
+          label.appendChild(self.makeApprovalButtons(path, models));
+        }
         div.appendChild(label);
         div.appendChild(table);
 
