@@ -14,7 +14,8 @@ var util = (function() {
                           f = pair[1];
                       if (!_.isFunction(f)) { throw "The value of key '" + k + "' is not a function: " + f; }
                       m[k] = function() { f.apply(context || m, arguments); return m; };
-                      return m; },
+                      return m;
+                    },
                     {});
   }
 
@@ -112,11 +113,29 @@ var util = (function() {
   }
 
   function isValidY(y) {
-    return true;
+    var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
+        number = m && m[1],
+        check  = m && m[2];
+
+    if (!m) { return false; }
+
+    var cn = _(number)
+      .chars()
+      .map(function(c) { return parseInt(c, 10); })
+      .zip([7, 9, 10, 5, 8, 4, 2])
+      .map(function(p) { return p[0] * p[1]; })
+      .reduce(function(acc, v) { return acc + v; });
+    cn = cn % 11;
+    cn = (cn === 0) ? cn : 11 - cn;
+    return cn === parseInt(check, 10);
   }
 
   function isValidOVT(ovt) {
-    return true;
+    var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
+        y = m && m[1],
+        c = m && m[2];
+    if (!y || !c) { return false; }
+    return isValidY("FI" + y + "-" + c);
   }
 
   return {
