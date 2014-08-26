@@ -112,7 +112,7 @@ var util = (function() {
     return undefined;
   }
 
-  function isValidY(y) {
+  function isValidFinnishY(y) {
     var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
         number = m && m[1],
         check  = m && m[2];
@@ -130,12 +130,32 @@ var util = (function() {
     return cn === parseInt(check, 10);
   }
 
-  function isValidOVT(ovt) {
+  function isValidNonFinnishY(y) {
+    var m = /^([A-Z]{2})\w+/.exec(y),
+        c = m && m[1];
+    return c && c !== "FI";
+  }
+
+  function isValidY(y) {
+    return isValidFinnishY(y) || isValidFinnishY("FI" + y) || isValidNonFinnishY(y);
+  }
+
+  function isValidFinnishOVT(ovt) {
     var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
         y = m && m[1],
         c = m && m[2];
     if (!y || !c) { return false; }
     return isValidY("FI" + y + "-" + c);
+  }
+
+  function isValidNonFinnishOVT(ovt) {
+    var m = /^(\d{4}).+/.exec(ovt),
+        c = m && m[1];
+    return c && c !== "0037";
+  }
+
+  function isValidOVT(ovt) {
+    return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
   }
 
   return {
