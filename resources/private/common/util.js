@@ -164,6 +164,8 @@ var util = (function() {
     getPwQuality:        getPwQuality,
     isValidEmailAddress: isValidEmailAddress,
     isValidPassword:     isValidPassword,
+    isValidY:            isValidY,
+    isValidOVT:          isValidOVT,
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
@@ -174,9 +176,7 @@ var util = (function() {
     nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
     isNum:        isNum,
-    getIn:        getIn,
-    isValidY:     isValidY,
-    isValidOVT:   isValidOVT
+    getIn:        getIn
   };
 
 })();
