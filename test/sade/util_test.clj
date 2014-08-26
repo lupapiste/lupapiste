@@ -218,7 +218,6 @@
   (fact (ovt? "")              => falsey)
   (fact (ovt? "foo")           => falsey)
   (fact (ovt? "1234")          => falsey)
-  (fact (ovt? "12345")         => truthy) ; foreign OVT
   (fact (ovt? "003712345")     => falsey)
   (fact (ovt? "003723415284")  => truthy)
   (fact (ovt? "0037234152841") => truthy)
