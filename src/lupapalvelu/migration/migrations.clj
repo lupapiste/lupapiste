@@ -518,3 +518,32 @@
       (assert organization-id)
       (mongo/update-by-id :applications id {$set {:organization organization-id}}))))
 
+(defn flatten-huoneisto-data [{documents :documents}]
+  (map 
+    (fn [doc]
+      (let [to-update (tools/deep-find doc :huoneistot )]       
+        (reduce 
+          #(let [[p v] %2
+                 path (conj p :huoneistot)]
+             (reduce 
+               (fn [old-doc [n _]] 
+                 (update-in old-doc (conj path n)  
+                            (fn [old-data]
+                              (-> old-data
+                                (merge (:huoneistoTunnus old-data))
+                                (dissoc :huoneistoTunnus)
+                                (merge (:huoneistonTyyppi old-data))
+                                (dissoc :huoneistonTyyppi)
+                                (merge (:varusteet old-data))
+                                (dissoc :varusteet)
+                                ))))
+               %1
+               v)) doc to-update)
+        )) documents))
+
+(defmigration flatten-huoneisto
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {:infoRequest false})]
+    (if (seq (tools/deep-find (:documents application) :huoneistot )) 
+      (let [updated-documents (flatten-huoneisto-data application)]
+        (mongo/update-by-id collection (:id application) {$set {:documents updated-documents}})))))
