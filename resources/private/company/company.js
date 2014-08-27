@@ -162,7 +162,9 @@
   // ========================================================================================
 
   function assoc(m, k, v) { m[k] = v; return m; }
+  function dissoc(m, k) { delete m[k]; return m; }
   function unObservableize(fieldNames, m) { return _.reduce(fieldNames, function(acc, field) { return assoc(acc, field, m[field]()); }, {}); }
+  function updateObservables(fieldNames, target, source) { _.each(fieldNames, function(field) { target[field](source[field]); }); return target; }
 
   function CompanyInfo(parent) {
     this.parent = parent;
@@ -186,39 +188,37 @@
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
   }
 
-  CompanyInfo.prototype.clear = function() {
-    var m = this.model();
-    _.each(this.fieldNames, function(fieldName) { m[fieldName](null); });
+  CompanyInfo.prototype.update = function(company) {
+    updateObservables(this.fieldNames, this.model(), company);
     return this
       .edit(false)
       .saved(null)
       .parent;
   };
 
-  CompanyInfo.prototype.update = function(company) {
-    var m = this.model();
-    _.each(this.fieldNames, function(fieldName) { m[fieldName](company[fieldName]); });
-    return this.parent;
+  CompanyInfo.prototype.clear = function() {
+    return this.update({});
   };
 
   CompanyInfo.prototype.startEdit = function() {
-    var m = this.model();
     return this
-      .saved(_.reduce(this.fieldNames, function(acc, fieldName) { return assoc(acc, fieldName, m[fieldName]()); }, {}))
+      .saved(unObservableize(this.fieldNames, this.model()))
       .edit(true);
   };
 
   CompanyInfo.prototype.cancelEdit = function() {
-    var m = this.model(),
-        s = this.saved();
-    _.each(this.fieldNames, function(fieldName) { m[fieldName](s[fieldName]); });
+    updateObservables(this.fieldNames, this.model(), this.saved());
     return this
       .edit(false)
       .saved(null);
   };
 
   CompanyInfo.prototype.submit = function() {
-    console.log("submit!");
+    ajax
+      .command("company-update", {company: this.parent.id(), updates: dissoc(unObservableize(this.fieldNames, this.model()), "y")})
+      .pending(this.parent.pending)
+      .success(function(data) { this.update(data.company); }, this)
+      .call();
     return false;
   };
 
@@ -234,7 +234,6 @@
     self.isAdmin  = ko.observable();
     self.users    = ko.observableArray();
     self.info     = new CompanyInfo(self);
-
     self.tabs     = new TabsModel(self.id);
 
     self.clear = function() {
