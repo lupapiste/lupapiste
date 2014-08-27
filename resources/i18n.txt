@@ -1,16 +1,29 @@
-uusiRakennus.huoneistot.porras:Porras­kirjain
-uusiRakennus.huoneistot.huoneistonumero:Numero
-uusiRakennus.huoneistot.jakokirjain:Jako­kirjain
-uusiRakennus.huoneistot.huoneistoTyyppi:Huoneisto­tyyppi
-uusiRakennus.huoneistot.huoneistoala:Huoneisto­ala m2
-uusiRakennus.huoneistot.huoneluku:Huoneluku
-uusiRakennus.huoneistot.keittionTyyppi:Keittiötyyppi
-uusiRakennus.huoneistot.WCKytkin:WC
-uusiRakennus.huoneistot.ammeTaiSuihkuKytkin:Amme/ suihku
-uusiRakennus.huoneistot.saunaKytkin:Sauna
-uusiRakennus.huoneistot.parvekeTaiTerassiKytkin:Parveke/ terassi
-uusiRakennus.huoneistot.lamminvesiKytkin:Lämmin vesi
-uusiRakennus.huoneistot.muutostapa:Huoneiston muutos
-uusiRakennus.huoneistot.huoneistoTyyppi.asuinhuoneisto:Asuinhuoneisto
-uusiRakennus.huoneistot.huoneistoTyyppi.toimitila:Toimitila
-uusiRakennus.huoneistot._copy_label:+ Kopioi viimeinen rivi
+huoneistot: Huoneistot
+huoneistot.huoneistoTyyppi.asuinhuoneisto: Asuinhuoneisto
+huoneistot.copyLabel:+ Kopioi viimeinen rivi
+
+huoneistot.huoneistoala: Huoneistoala
+huoneistot.huoneistoTyyppi: Huoneistotyyppi
+huoneistot.huoneistoTyyppi.asuinhuoneisto: Asuinhuoneisto
+huoneistot.huoneistoTyyppi.eiTiedossa: Ei tiedossa
+huoneistot.huoneistoTyyppi.toimitila: Toimitila
+huoneistot.huoneluku: Huoneluku
+huoneistot.huoneistonumero: Huoneistonumero
+huoneistot.huoneistonumero.help: Jos kyseessä on yhden asunnon talo, merkitään huoneistonumeroksi  000.
+huoneistot.jakokirjain: Jakokirjain
+huoneistot.porras: Porras
+huoneistot.keittionTyyppi: Keittiön tyyppi
+huoneistot.keittionTyyppi.eiTiedossa: Ei tiedossa
+huoneistot.keittionTyyppi.keittio: Keittiö
+huoneistot.keittionTyyppi.keittokomero: Keittokomero
+huoneistot.keittionTyyppi.keittotila: Keittotila
+huoneistot.keittionTyyppi.tupakeittio: Tupakeittiö
+huoneistot.ammeTaiSuihkuKytkin: Amme tai suihku
+huoneistot.lamminvesiKytkin: Lämmin vesi
+huoneistot.parvekeTaiTerassiKytkin: Parveke tai terassi
+huoneistot.saunaKytkin: Sauna
+huoneistot.WCKytkin: WC
+huoneistot.muutostapa: Muutostapa
+
+huoneistot.huoneistoala.help: Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
+huoneistot.muutostapa.help: Ilmoitetaan, jos huoneiston tiedot muuttuvat esimerkiksi huoneistoja yhdistettäessä tai jaettaessa.

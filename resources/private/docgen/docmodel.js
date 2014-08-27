@@ -200,6 +200,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function makeEntrySpan(subSchema, pathStr) {
     var help = null;
     var helpLocKey = locKeyFromPath(pathStr + ".help");
+    if (subSchema.i18nkey) {
+      helpLocKey = subSchema.i18nkey + ".help";
+    }
     var span = document.createElement("span");
     var sizeClass = self.sizeClasses[subSchema.size] || "";
     span.className = "form-entry " + sizeClass;
@@ -528,8 +531,13 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     select.appendChild(option);
 
     _(subSchema.body)
-      .map(function(e) { return [e.name,
-                                 loc(self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name)]; })
+      .map(function(e) {
+        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name
+        if (e.i18nkey) {
+          locKey = e.i18nkey;
+        }
+        return [e.name, loc(locKey)];
+        })
       .sortBy(function(e) { return e[1]; })
       .forEach(function(e) {
         var name = e[0];
@@ -922,8 +930,8 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var tr = document.createElement("tr");
       _.each(subSchema.body, function(item) {
         var locKey = locKeyFromPath(pathStr + "." + item.name);
-        if (schema.i18nkey) {
-          locKey = schema.i18nkey;
+        if (item.i18nkey) {
+          locKey = item.i18nkey;
         }
         var th = document.createElement("th");
         th.textContent = loc(locKey);
@@ -1027,8 +1035,11 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
-
-        var copyButton = makeButton(myPath.join("_") + "_copy", loc([self.schemaI18name, myPath.join("."), "_copy_label"]));
+        var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"]
+        if (subSchema.i18nkey) {
+          locKey = [subSchema.i18nkey, "copyLabel"];
+        }
+        var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
         $(copyButton).click(copyElement);
         buttonGroup.appendChild(copyButton);
       } else {
