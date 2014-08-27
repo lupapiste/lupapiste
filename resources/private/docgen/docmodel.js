@@ -964,10 +964,10 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         table.appendChild(tbody);
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
-        if (subSchema.approvable) {
-          label.appendChild(self.makeApprovalButtons(path, models));
-        }
         div.appendChild(label);
+        if (subSchema.approvable) {
+          div.appendChild(self.makeApprovalButtons(path, models));
+        }
         div.appendChild(table);
 
         elements = [div];
