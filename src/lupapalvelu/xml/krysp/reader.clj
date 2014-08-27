@@ -264,14 +264,18 @@
          :huoneistot (->>
                        (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
-                              {:huoneistoTunnus {:huoneistonumero  (get-text huoneisto :huoneistonumero)
-                                                 :jakokirjain      (get-text huoneisto :jakokirjain)
-                                                 :porras           (get-text huoneisto :porras)}
-                               :huoneistonTyyppi {:huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
-                                                  :huoneistoala    (get-text huoneisto :huoneistoala)
-                                                  :huoneluku       (get-text huoneisto :huoneluku)}
-                               :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
-                               :varusteet                          (cr/all-of huoneisto :varusteet)})))}))))
+                              {:huoneistonumero (get-text huoneisto :huoneistonumero)
+                               :jakokirjain     (get-text huoneisto :jakokirjain)
+                               :porras          (get-text huoneisto :porras)
+                               :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
+                               :huoneistoala    (get-text huoneisto :huoneistoala)
+                               :huoneluku       (get-text huoneisto :huoneluku)
+                               :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
+                               :WCKytkin                (get-text huoneisto :WCKytkin)
+                               :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
+                               :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
+                               :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
+                               :saunaKytkin             (get-text huoneisto :saunaKytkin)})))}))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
