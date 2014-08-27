@@ -1,14 +1,19 @@
 (function() {
   "use strict";
 
-  function NewCompanyUser() {
-    var required = {required: true, minLength: 1};
+  var required      = {required: true},
+      notRequired   = {required: false};
 
+  // ========================================================================================
+  // NewCompanyUser:
+  // ========================================================================================
+
+  function NewCompanyUser() {
     this.model = ko.validatedObservable({
       firstName: ko.observable().extend(required),
       lastName:  ko.observable().extend(required),
-      email:     ko.observable().extend(required).extend({pattern: {message: "S\u00E4hk\u00F6postiosoite", params: "^\\S+@\\S+$"}}),
-      admin:     ko.observable().extend({required: false})
+      email:     ko.observable().extend(required).extend({email: true}),
+      admin:     ko.observable().extend(notRequired)
     });
 
     this.pending   = ko.observable();
@@ -43,6 +48,10 @@
   }
 
   var newCompanyUser = new NewCompanyUser();
+
+  // ========================================================================================
+  // CompanyUserOp:
+  // ========================================================================================
 
   function CompanyUserOp() {
     var self = this;
@@ -90,6 +99,10 @@
 
   var companyUserOp = new CompanyUserOp();
 
+  // ========================================================================================
+  // CompanyUser:
+  // ========================================================================================
+
   function CompanyUser(user, users) {
     var self = this;
     self.id           = user.id;
@@ -109,6 +122,10 @@
       users.remove(function(u) { return u.id === self.id; });
     });
   }
+
+  // ========================================================================================
+  // Tab and Tabs:
+  // ========================================================================================
 
   function Tab(parent, name) {
     this.parent  = parent;
@@ -140,28 +157,99 @@
     return _.find(this.tabs, {name: _.isBlank(name) ? "info" : name}).active;
   };
 
+  // ========================================================================================
+  // CompanyModel:
+  // ========================================================================================
+
+  function assoc(m, k, v) { m[k] = v; return m; }
+  function unObservableize(fieldNames, m) { return _.reduce(fieldNames, function(acc, field) { return assoc(acc, field, m[field]()); }, {}); }
+
+  function CompanyInfo(parent) {
+    this.parent = parent;
+    this.model = ko.validatedObservable({
+      name:         ko.observable().extend(required),
+      y:            ko.observable(),
+      reference:    ko.observable().extend(notRequired),
+      address1:     ko.observable().extend(notRequired),
+      address2:     ko.observable().extend(notRequired),
+      po:           ko.observable().extend(notRequired),
+      zip:          ko.observable().extend(notRequired),
+      country:      ko.observable().extend(notRequired),
+      ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
+      pop:          ko.observable().extend(notRequired).extend({ovt: true}),
+    });
+    this.fieldNames    = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop"];
+    this.edit          = ko.observable(false);
+    this.saved         = ko.observable(null);
+    this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
+    this.changed       = ko.computed(function() { return !_.isEqual(unObservableize(this.fieldNames, this.model()), this.saved()); }, this);
+    this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
+  }
+
+  CompanyInfo.prototype.clear = function() {
+    var m = this.model();
+    _.each(this.fieldNames, function(fieldName) { m[fieldName](null); });
+    return this
+      .edit(false)
+      .saved(null)
+      .parent;
+  };
+
+  CompanyInfo.prototype.update = function(company) {
+    var m = this.model();
+    _.each(this.fieldNames, function(fieldName) { m[fieldName](company[fieldName]); });
+    return this.parent;
+  };
+
+  CompanyInfo.prototype.startEdit = function() {
+    var m = this.model();
+    return this
+      .saved(_.reduce(this.fieldNames, function(acc, fieldName) { return assoc(acc, fieldName, m[fieldName]()); }, {}))
+      .edit(true);
+  };
+
+  CompanyInfo.prototype.cancelEdit = function() {
+    var m = this.model(),
+        s = this.saved();
+    _.each(this.fieldNames, function(fieldName) { m[fieldName](s[fieldName]); });
+    return this
+      .edit(false)
+      .saved(null);
+  };
+
+  CompanyInfo.prototype.submit = function() {
+    console.log("submit!");
+    return false;
+  };
+
+  // ========================================================================================
+  // Company:
+  // ========================================================================================
+
   function Company() {
     var self = this;
 
     self.pending  = ko.observable();
     self.id       = ko.observable();
-    self.name     = ko.observable();
-    self.y        = ko.observable();
-    self.users    = ko.observableArray();
     self.isAdmin  = ko.observable();
+    self.users    = ko.observableArray();
+    self.info     = new CompanyInfo(self);
 
-    self.tabs = new TabsModel(self.id);
+    self.tabs     = new TabsModel(self.id);
 
     self.clear = function() {
-      _(self).values().filter(ko.isObservable).each(function(o) { o(null); });
-      return self;
+      return self
+        .pending(false)
+        .id(null)
+        .info.clear()
+        .users(null)
+        .isAdmin(null);
     };
 
     self.update = function(data) {
       return self
         .id(data.company.id)
-        .name(data.company.name)
-        .y(data.company.y)
+        .info.update(data.company)
         .isAdmin(currentUser.get().role() === "admin" || (currentUser.get().company.role() === "admin" && currentUser.get().company.id() === self.id()))
         .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }));
     };

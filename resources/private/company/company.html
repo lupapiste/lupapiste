@@ -10,6 +10,10 @@
         <span data-bind="ltext: 'company.loading'"></span>
       </div>
 
+      <div class="header">
+        <h1 data-bind="text: info.model.name"></h1>
+      </div>
+
       <div class="tabs-container" data-bind="with: tabs">
         <ul class="tabs" data-bind="foreach: tabs">
           <li data-bind="css: {active: active}">
@@ -27,7 +31,69 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('info')">
-          <h1>INFO</h1>
+          <div data-bind="with: info">
+
+            <div class="form-entry">
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
+              <input class="form-input text" data-bind="value: model().name, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+            <div class="form-entry">
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
+              <input class="form-input text" data-bind="value: model().y, enable: false" type="text"/>
+            </div>
+
+            <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.reference'"></label>
+              <input class="form-input text" data-bind="value: model().reference, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.address'"></label>
+              <input class="form-input text" data-bind="value: model().address1, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="value: model().address2, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <br/>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
+              <input class="form-input text" data-bind="value: model().po, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
+              <input class="form-input text" data-bind="value: model().zip, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.country'"></label>
+              <input class="form-input text" data-bind="value: model().country, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <br/>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
+              <input class="form-input text" data-bind="value: model().ovt, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.pop'"></label>
+              <input class="form-input text" data-bind="value: model().pop, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+            </div>
+
+            <div>
+              <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary"></button>
+              <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary">
+                <span data-bind="ltext: 'save'"></span>
+                <em data-bind="visible: $parent.pending" class="button-loader"></em>
+              </button>
+              <button data-bind="enable: edit, click: cancelEdit, ltext: 'cancel'" type="button" class="btn"></button>
+            </div>
+
+          </div>
         </div>
 
         <!-- =================== -->
@@ -35,41 +101,34 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('users')">
-          <div data-bind="visible: !pending()">
-            <h1>
-              <span data-bind="text: name"></span>
-              (<span data-bind="text: y"></span>)
-            </h1>
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th data-bind="ltext: 'company.user.firstName'"></th>
-                  <th data-bind="ltext: 'company.user.lastName'"></th>
-                  <th data-bind="ltext: 'company.user.email'"></th>
-                  <th data-bind="ltext: 'company.user.enabled'"></th>
-                  <th data-bind="ltext: 'company.user.role'"></th>
-                  <th data-bind="visible: isAdmin"></th>
-                </tr>
-              </thead>
-              <tbody data-bind="foreach: users">
-                <tr>
-                  <td data-bind="text: firstName"></td>
-                  <td data-bind="text: lastName"></td>
-                  <td data-bind="text: email"></td>
-                  <td data-bind="ltext: 'company.user.enabled.' + enabled()"></td>
-                  <td data-bind="ltext: 'company.user.role.' + role()"></td>
-                  <td data-bind="visible: $parent.isAdmin">
-                    <div data-bind="visible: opsEnabled">
-                      <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#"></a>
-                      <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#"></a>
-                      <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#"></a>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
+          <table data-bind="visible: !pending()" class="table table-striped">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'company.user.firstName'"></th>
+                <th data-bind="ltext: 'company.user.lastName'"></th>
+                <th data-bind="ltext: 'company.user.email'"></th>
+                <th data-bind="ltext: 'company.user.enabled'"></th>
+                <th data-bind="ltext: 'company.user.role'"></th>
+                <th data-bind="visible: isAdmin"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: users">
+              <tr>
+                <td data-bind="text: firstName"></td>
+                <td data-bind="text: lastName"></td>
+                <td data-bind="text: email"></td>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled()"></td>
+                <td data-bind="ltext: 'company.user.role.' + role()"></td>
+                <td data-bind="visible: $parent.isAdmin">
+                  <div data-bind="visible: opsEnabled">
+                    <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#"></a>
+                    <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#"></a>
+                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#"></a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
           <div data-bind="visible: isAdmin">
             <button data-bind="click: openNewUser, ltext: 'register.company.add-user.open'" class="btn btn-primary"></button>
           </div>
