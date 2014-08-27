@@ -260,18 +260,17 @@
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
 (def muutostapa {:name "muutostapa" :type :select :required true :label false :i18nkey "huoneistot.muutostapa"
-                 :body [{:name "poisto"}
-                        {:name "lis\u00e4ys"}
-                        {:name "muutos"}]})
+                 :body [{:name "poisto" :i18nkey "huoneistot.muutostapa.poisto"}
+                        {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
+                        {:name "muutos" :i18nkey "huoneistot.muutostapa.muutos"}]})
   
-(def huoneistoRow [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras"}
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :label false :i18nkey "huoneistot.huoneistoTyyppi"
+                   :body [{:name "asuinhuoneisto" :i18nkey "huoneistot.huoneistoTyyppi.asuinhuoneisto"}
+                          {:name "toimitila" :i18nkey "huoneistot.huoneistoTyyppi.toimitila"}
+                          {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
+                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras"}
                    {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero"}
                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain"}
-                   {:name "huoneistoTyyppi" :type :select :label false :i18nkey "huoneistot.huoneistoTyyppi"
-                    :body [{:name "asuinhuoneisto" :i18nkey "huoneistot.huoneistoTyyppi.asuinhuoneisto"}
-                           {:name "toimitila" :i18nkey "huoneistot.huoneistoTyyppi.toimitila"}
-                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
-                   {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku"}
                    {:name "keittionTyyppi" :type :select :required true :label false :i18nkey "huoneistot.keittionTyyppi"
                     :body [{:name "keittio" :i18nkey "huoneistot.keittionTyyppi.keittio"}
@@ -279,6 +278,7 @@
                            {:name "keittotila" :i18nkey "huoneistot.keittionTyyppi.keittotila"}
                            {:name "tupakeittio" :i18nkey "huoneistot.keittionTyyppi.tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
+                   {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
                    {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin"}
                    {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin"}
                    {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin"}
