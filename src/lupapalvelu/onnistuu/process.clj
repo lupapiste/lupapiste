@@ -3,11 +3,13 @@
             [clojure.walk :as walk]
             [monger.collection :as mc]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [cheshire.core :as json]
             [cheshire.generate :as cheshire]
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
+            [sade.util :refer [max-length-string valid-email?]]
             [lupapalvelu.core :refer [ok]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
@@ -35,6 +37,10 @@
 ; Key is process state, value is allowed next states:
 (def process-state {:created  #{:started :cancelled}
                     :started  #{:done :error :fail}})
+
+(def Signer {:firstName (max-length-string 64)
+             :lastName  (max-length-string 64)
+             :email     (sc/pred valid-email? "valid email")})
 
 ;
 ; Utils:
@@ -67,15 +73,18 @@
 ; Init sign process:
 ;
 
-(defn init-sign-process [ts crypto-key success-url document-url company-name y firstName lastName email lang]
-  (let [crypto-iv  (crypt/make-iv)
-        process-id (random-password 40)
-        stamp      (random-password 40)]
-    (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name y email)
+(defn init-sign-process [ts crypto-key success-url document-url company signer lang]
+  (let [crypto-iv    (crypt/make-iv)
+        process-id   (random-password 40)
+        stamp        (random-password 40)
+        company-name (:name company)
+        company-y    (:y company)]
+    (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name company-y (:email signer))
     (mongo/insert :sign-processes {:_id       process-id
                                    :stamp     stamp
-                                   :company   {:name company-name, :y y}
-                                   :signer    {:firstName firstName, :lastName lastName, :email email, :lang lang}
+                                   :company   company
+                                   :signer    signer
+                                   :lang      lang
                                    :status    :created
                                    :created   ts
                                    :progress  [{:status :created, :ts ts}]})
@@ -83,7 +92,7 @@
      :data       (->> {:stamp           stamp
                        :return_success  (str success-url "/" process-id)
                        :document        (str document-url "/" process-id)
-                       :requirements    [{:type :company, :identifier y}]}
+                       :requirements    [{:type :company, :identifier company-y}]}
                       (json/encode)
                       (crypt/str->bytes)
                       (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
@@ -117,7 +126,7 @@
 ; Success:
 ;
 
-(defmacro resp-assert! [message result expected]
+(defmacro resp-assert! [result expected message]
   `(when-not (= ~result ~expected)
      (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'process-id ~message ~result ~expected)
      (process-update! ~'process :error ~'ts)
@@ -136,18 +145,18 @@
                         (json/decode))
         {:strs [signatures stamp]} resp
         {:strs [type identifier name timestamp uuid]} (first signatures)]
-    (resp-assert! "wrong stamp"           (:stamp process) stamp)
-    (resp-assert! "number of signatures"  (count signatures) 1)
-    (resp-assert! "wrong signature type"  type "company")
-    (resp-assert! "wrong Y"               (-> process :company :y) identifier)
+    (resp-assert! (:stamp process)          stamp       "wrong stamp")
+    (resp-assert! (count signatures)        1           "number of signatures")
+    (resp-assert! type                      "company"   "wrong signature type")
+    (resp-assert! (-> process :company :y)  identifier  "wrong Y")
     (process-update! process :done ts)
     (infof "sign:success:%s: OK: y [%s], company: [%s]"
              process-id
              identifier
              name)
-    (let [company  (c/create-company {:name name, :y identifier, :process-id process-id})
+    (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
           token-id (c/add-user! signer company :admin)]
-      (infof "sign:success:%s: company-created: y [%s], company: [%s], company-id: [%s], token: [%s]"
+      (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
              process-id
              (:y company)
              (:name company)

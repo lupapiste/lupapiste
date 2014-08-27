@@ -64,4 +64,14 @@ register.company.add-user.done.header:   Käyttäjä kutsuttu.
 register.company.add-user.done.message:  Käyttäjälle on lähetetty sähköposti jonka avulla hän voi aktivoida tilinsä.
 register.company.add-user.done.canClose: Voit sulkea tämän ikkunan.
 
+register.company.form.billing:            Laskutus tiedot:
+register.company.form.billing.reference:  Viite:
+register.company.form.billing.address:    Osoite:
+register.company.form.billing.po:         Postitoimipaikka:
+register.company.form.billing.zip:        Postinumero:
+register.company.form.billing.country:    Maa:
+register.company.form.billing.ovt:        Verkkolaskuosoite:
+register.company.form.billing.pop:        Maksuoperaattori:
 
+error.invalidY:   Virheellinen Y-tunnus
+error.invalidOVT: Virheellinen OVT-tunnus

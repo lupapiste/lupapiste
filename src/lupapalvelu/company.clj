@@ -1,9 +1,9 @@
 (ns lupapalvelu.company
   (:require [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [max-length max-length-string y? fn->]]
-            [lupapalvelu.core :refer [fail!]]
+            [sade.util :refer [min-length-string max-length-string y? ovt? fn->]]
             [sade.env :as env]
+            [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [now ok fail!]]
             [lupapalvelu.token :as token]
@@ -15,13 +15,23 @@
 ;; Company schema:
 ;;
 
-(def Company {:id       #"^\w{24}$"
-              :name     (max-length-string 64)
-              :y        (sc/pred y? "Not valid Y number")
-              :created  sc/Int
-              (sc/optional-key :process-id) sc/Str})
+(def ^:private max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
-(def company-updateable-keys [:name])
+(def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
+              :y                             (sc/pred y? "Not valid Y code")
+              (sc/optional-key :reference)   max-64-or-nil
+              (sc/optional-key :address1)    max-64-or-nil
+              (sc/optional-key :address2)    max-64-or-nil
+              (sc/optional-key :po)          max-64-or-nil
+              (sc/optional-key :zip)         max-64-or-nil
+              (sc/optional-key :country)     max-64-or-nil
+              (sc/optional-key :ovt)         (sc/pred ovt? "Not valid OVT code")
+              (sc/optional-key :pop)         (sc/pred ovt? "Not valid OVT code")
+              (sc/optional-key :process-id)  sc/Str})
+
+(def company-updateable-keys (->> (keys Company)
+                                  (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
+                                  (remove #{:y})))
 
 ;;
 ;; API:
@@ -30,10 +40,10 @@
 (defn create-company
   "Create a new company. Returns the created company data. Throws if given company data is not valid."
   [company]
+  (sc/validate Company company)
   (let [company (assoc company
                        :id      (mongo/create-id)
                        :created (now))]
-    (sc/validate Company company)
     (mongo/insert :companies company)
     company))
 

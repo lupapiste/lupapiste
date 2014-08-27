@@ -140,6 +140,10 @@ var util = (function() {
     return isValidFinnishY(y) || isValidFinnishY("FI" + y) || isValidNonFinnishY(y);
   }
 
+  function coerceNationalY(y) {
+    return isValidFinnishY("FI" + y) ? "FI" + y : y;
+  }
+
   function isValidFinnishOVT(ovt) {
     var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
         y = m && m[1],
@@ -165,6 +169,7 @@ var util = (function() {
     isValidEmailAddress: isValidEmailAddress,
     isValidPassword:     isValidPassword,
     isValidY:            isValidY,
+    coerceNationalY:     coerceNationalY,
     isValidOVT:          isValidOVT,
     prop: {
       isPropertyId:           isPropertyId,
