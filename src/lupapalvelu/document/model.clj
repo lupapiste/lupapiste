@@ -37,6 +37,9 @@
 (defmethod validate-field :group [_ _ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
+(defmethod validate-field :table [_ _ v]
+  (if (not (map? v)) [:err "illegal-value:not-a-map"]))
+
 (defmethod validate-field :string [_ {:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
@@ -305,7 +308,7 @@
               [{:keys [name approvable repeating body type] :as element}]
               (let [current-path (conj path (keyword name))
                     current-approvable (or approvable-parent approvable)]
-                (if (= :group type)
+                (if (or (= :group type) (= :table type))
                   (if repeating
                     (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))

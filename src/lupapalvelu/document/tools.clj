@@ -56,7 +56,7 @@
 (defn- ^{:testable true} group [x]
   (if (:repeating x)
     {:name :0
-     :type :group
+     :type (or :group :table)
      :body (:body x)}
     (:body x)))
 
@@ -64,7 +64,7 @@
   (walk/prewalk
     #(if (map? %)
        (let [k (-> % :name keyword)
-             v (if (= :group (-> % :type keyword)) (group %) (f %))]
+             v (if (or (= :table (-> % :type keyword)) (= :group (-> % :type keyword))) (group %) (f %))]
          {k v})
        %)
     body))
