@@ -45,5 +45,5 @@
 
 (fact "flatten aplications huoneistot documents"
   (let [flatten-data (flatten-huoneisto-data application-old)] 
-    (:documents application-expected) =not> (:documents application-old)
+    (:documents application-expected) =not=> (:documents application-old)
     flatten-data => (:documents application-expected)))
