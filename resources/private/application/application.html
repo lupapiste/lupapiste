@@ -403,15 +403,19 @@
             </div>
           </div>
 
-          <div class="">
+          <div>
             <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.post-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
+              <h2>
+                <span data-bind="ltext: 'application.attachments.post-verdict'"></span>
+              </h2>
+              <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"></div>
             </div>
             <!-- ko if: !postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+              <h2>
+                <span data-bind="ltext: 'application.attachments.pre-verdict'"></span>
+              </h2>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
             </div>
             <!-- /ko -->
 
@@ -459,8 +463,10 @@
 
             <!-- ko if: postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+              <h2>
+                <span data-bind="ltext: 'application.attachments.pre-verdict'"></span>
+              </h2>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
             </div>
             <!-- /ko -->
 
