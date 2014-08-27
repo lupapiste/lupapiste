@@ -115,7 +115,7 @@ $(function() {
       $("footer input[data-id='proxy']").prop("checked", data.data);
       // Refresh maps checkbox too, features might not have been loaded when the box was initialized
       $("footer input[data-id='maps']").prop("checked", features.enabled("maps-disabled"));
-     })
+    })
     .call();
 
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
@@ -133,21 +133,24 @@ $(function() {
     .append($("<button>")
       .addClass("btn btn-decline")
       .html("AUTO FILL")
-      .click(function(e) {
+      .click(function() {
         var form = $("#register-company .form-group"),
-            fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); };
-        fill("name", "Oy FooBar Ab");
-        fill("y", "FI1234567-1")
-        fill("reference", "Kansantanhu osasto");
-        fill("address1", "Latokuja 1")
-        fill("po", "Sipoo");
-        fill("zip", "12345");
-        fill("country", "SUAMI");
-        fill("ovt", "0037123456710007")
-        fill("pop", "003776543212")
-        fill("firstName", "fo");
-        fill("lastName", "ba");
-        fill("email", "fo@ba.com");
+            fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); },
+            fillAll = function(f) { _.each(f, function(value, id) { fill(id, value); }); };
+        fillAll({
+          name:      "Oy FooBar Ab",
+          y:         "FI1234567-1",
+          reference: "Kansantanhu osasto",
+          address1:  "Latokuja 1",
+          po:        "Sipoo",
+          zip:       "12345",
+          country:   "SUAMI",
+          ovt:       "0037123456710007",
+          pop:       "003776543212",
+          firstName: "fo",
+          lastName:  "ba",
+          email:     "fo@ba.com"
+        });
       }))
     .appendTo("#register-company .content");
 
