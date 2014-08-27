@@ -60,13 +60,21 @@
 (declare apply-template)
 
 (defn send-email-message
-  "Sends email message using a template."
+  "Sends email message using a template. Returns true if there is an error, false otherwise."
   [to subject msg]
   {:pre [subject msg]}
   (if-not (ss/blank? to)
     (let [[plain html] msg]
-      (send-mail to subject :plain plain :html html))
-    (error "Email could not be sent because of missing To field. Subject being: " subject)))
+      (try
+        (send-mail to subject :plain plain :html html)
+        false
+        (catch Exception e
+          (error "Email failure:" e)
+          (.printStackTrace e)
+          true)))
+    (do
+      (error "Email could not be sent because of missing To field. Subject being: " subject)
+      true)))
 
 ;;
 ;; templating:
