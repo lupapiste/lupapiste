@@ -121,4 +121,34 @@ $(function() {
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
 
+  // Help registering company:
+
+  $("<div>")
+    .css("background", "#f88")
+    .css("padding", "12px")
+    .css("margin-top", "20px")
+    .append($("<span>")
+      .css("color", "white")
+      .html("DEBUG:"))
+    .append($("<button>")
+      .addClass("btn btn-decline")
+      .html("AUTO FILL")
+      .click(function(e) {
+        var form = $("#register-company .form-group"),
+            fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); };
+        fill("name", "Oy FooBar Ab");
+        fill("y", "FI1234567-1")
+        fill("reference", "Kansantanhu osasto");
+        fill("address1", "Latokuja 1")
+        fill("po", "Sipoo");
+        fill("zip", "12345");
+        fill("country", "SUAMI");
+        fill("ovt", "0037123456710007")
+        fill("pop", "003776543212")
+        fill("firstName", "fo");
+        fill("lastName", "ba");
+        fill("email", "fo@ba.com");
+      }))
+    .appendTo("#register-company .content");
+
 });
