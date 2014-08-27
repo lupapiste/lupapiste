@@ -110,6 +110,36 @@
     });
   }
 
+  function Tab(parent, name) {
+    this.parent  = parent;
+    this.name    = name;
+    this.active  = ko.observable(false);
+  }
+
+  Tab.prototype.click = function(m) {
+    m.parent.click(m.name);
+  };
+
+  function TabsModel(companyId) {
+    this.tabs = _.map(["info", "users"], function(name) { return new Tab(this, name); }, this);
+    this.companyId = companyId;
+  }
+
+  TabsModel.prototype.click = function(tab) {
+    window.location.hash = "!/company/" + this.companyId() + "/" + tab;
+    return false;
+  };
+
+  TabsModel.prototype.show = function(name) {
+    name = _.isBlank(name) ? "info" : name;
+    _.each(this.tabs, function(tab) { tab.active(tab.name === name); });
+    return this;
+  };
+
+  TabsModel.prototype.visible = function(name) {
+    return _.find(this.tabs, {name: _.isBlank(name) ? "info" : name}).active;
+  };
+
   function Company() {
     var self = this;
 
@@ -119,6 +149,8 @@
     self.y        = ko.observable();
     self.users    = ko.observableArray();
     self.isAdmin  = ko.observable();
+
+    self.tabs = new TabsModel(self.id);
 
     self.clear = function() {
       _(self).values().filter(ko.isObservable).each(function(o) { o(null); });
@@ -143,18 +175,21 @@
       return self;
     };
 
-    self.show = function(id) {
-      return (self.id() === id) ? self : self.clear().id(id).load();
+    self.show = function(id, tab) {
+      if (self.id() !== id) { self.clear().id(id).load(); }
+      self.tabs.show(tab);
+      return self;
     };
 
     self.openNewUser = function() {
       newCompanyUser.open();
     };
+
   }
 
   var company = new Company();
 
-  hub.onPageChange("company", function(e) { company.show(e.pagePath[0]); });
+  hub.onPageChange("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
 
   $(function() {
     $("#company-content").applyBindings(company);

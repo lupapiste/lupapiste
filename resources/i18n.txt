@@ -30,6 +30,9 @@ company.user.role:           Rooli
 company.user.role.admin:     Ylläpitäjä
 company.user.role.user:      Käyttäjä
 
+company.tab.info:   Yrityksen tiedot:
+company.tab.users:  Käyttäjät
+
 company.user.op.enabled.true:          [Sulje]
 company.user.op.enabled.false:         [Avaa]
 company.user.op.enabled.true.title:    Käyttäjän tilin sulkeminen
