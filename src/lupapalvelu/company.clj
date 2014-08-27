@@ -27,7 +27,8 @@
               (sc/optional-key :country)     max-64-or-nil
               (sc/optional-key :ovt)         (sc/pred ovt? "Not valid OVT code")
               (sc/optional-key :pop)         (sc/pred ovt? "Not valid OVT code")
-              (sc/optional-key :process-id)  sc/Str})
+              (sc/optional-key :process-id)  sc/Str
+              (sc/optional-key :created)     sc/Int})
 
 (def company-updateable-keys (->> (keys Company)
                                   (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
@@ -68,14 +69,13 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn update-company!
-  "Update company. Throws if comoany is not found, or if updates would make company data invalid.
-   Retuens the updated company data."
+  "Update company. Throws if company is not found, or if provided updates would make company invalid.
+   Retuens the updated company."
   [id updates]
-  (let [q       {:id id}
-        company (find-company! q)
-        updated (merge company (select-keys updates company-updateable-keys))]
+  (if (some #{:id :y} (keys updates)) (fail! :bad-request))
+  (let [updated (merge (dissoc (find-company-by-id! id) :id) updates)]
     (sc/validate Company updated)
-    (mongo/update :companies q updated)
+    (mongo/update :companies {:_id id} updated)
     updated))
 
 (defn update-user!
