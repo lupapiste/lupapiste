@@ -12,22 +12,20 @@
 
 (defn- get-huoneisto-data [huoneistot]
   (for [huoneisto (vals (into (sorted-map) huoneistot))
-        :let [tyyppi (:huoneistonTyyppi huoneisto)
-              varusteet (:varusteet huoneisto)
-              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero)
-              huoneistoPorras (-> huoneisto :huoneistoTunnus :porras)
-              jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain)]
+        :let [huoneistonumero (-> huoneisto :huoneistonumero)
+              huoneistoPorras (-> huoneisto :porras)
+              jakokirjain (-> huoneisto :jakokirjain)]
         :when (seq huoneisto)]
     (merge {:muutostapa (-> huoneisto :muutostapa)
-            :huoneluku (-> tyyppi :huoneluku)
+            :huoneluku (-> huoneisto :huoneluku)
             :keittionTyyppi (-> huoneisto :keittionTyyppi)
-            :huoneistoala (-> tyyppi :huoneistoala)
-            :varusteet {:WCKytkin (true? (-> varusteet :WCKytkin))
-                        :ammeTaiSuihkuKytkin (true? (-> varusteet :ammeTaiSuihkuKytkin))
-                        :saunaKytkin (true? (-> varusteet :saunaKytkin))
-                        :parvekeTaiTerassiKytkin (true? (-> varusteet  :parvekeTaiTerassiKytkin))
-                        :lamminvesiKytkin (true? (-> varusteet :lamminvesiKytkin))}
-            :huoneistonTyyppi (-> tyyppi :huoneistoTyyppi)}
+            :huoneistoala (-> huoneisto :huoneistoala)
+            :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
+                        :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
+                        :saunaKytkin (true? (-> huoneisto :saunaKytkin))
+                        :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
+                        :lamminvesiKytkin (true? (-> huoneisto :lamminvesiKytkin))}
+            :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
               (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
