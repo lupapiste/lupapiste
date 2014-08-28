@@ -108,7 +108,7 @@
   (some->> x (re-matches #"(\d+) .*") last keyword ))
 
 (defn ->huoneistoala [huoneistot]
-  (apply + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
+  (apply + (map (fn-> second :huoneistoala ->int) huoneistot)))
 
 (defn ->count [m]
   (-> m keys count))
@@ -236,10 +236,10 @@
    :schema "uusiRakennus"
    :fields [kokonaisala  [:mitat :kokonaisala ->int]
             huoneistoala [:huoneistot ->huoneistoala]]
-   :facts  {:ok   [[100 {:0 {:huoneistonTyyppi {:huoneistoala 60}}
-                         :1 {:huoneistonTyyppi {:huoneistoala 40}}}]]
-            :fail [[100 {:0 {:huoneistonTyyppi {:huoneistoala 60}}
-                         :1 {:huoneistonTyyppi {:huoneistoala 50}}}]]}}
+   :facts  {:ok   [[100 {:0 {:huoneistoala 60}
+                         :1 {:huoneistoala 40}}]]
+            :fail [[100 {:0 {:huoneistoala 60}
+                         :1 {:huoneistoala 50}}]]}}
   (and kokonaisala huoneistoala (< kokonaisala huoneistoala)))
 
 (defvalidator :vrk:BR113
