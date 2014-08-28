@@ -300,8 +300,8 @@
   (mc/ensure-index :open-inforequest-token {:application-id 1})
   (mc/ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
-  (mc/ensure-index :companies {:name 1} {:unique true})
-  (mc/ensure-index :companies {:y 1} {:unique true}))
+  (mc/ensure-index :companies {:name 1})
+  (mc/ensure-index :companies {:y 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]
