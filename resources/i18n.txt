@@ -1,0 +1,3 @@
+application.tabRequiredFieldSummary: Yhteenveto ja hakemuksen jättäminen
+application.allRequiredDataFilled: Kaikki pakolliset tiedot on täytetty
+application.requiredDataMissing: Puuttuvat pakolliset tiedot

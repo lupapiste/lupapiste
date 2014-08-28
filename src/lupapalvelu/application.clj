@@ -114,12 +114,18 @@
 ;; Query application:
 ;;
 
-(defn- app-post-processor [user]
-  (comp
-    (fn [application] (update-in application [:documents] #(map model/mask-person-ids %)))
-    without-system-keys
-    (partial meta-fields/with-meta-fields user)
-    meta-fields/enrich-with-link-permit-data))
+(defn- post-process-app [app user]
+  ((comp
+     (fn [application] (update-in application [:documents] (fn [documents]
+                                                             (map
+                                                               (comp
+                                                                 model/mask-person-ids
+                                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
+                                                               documents))))
+     without-system-keys
+     (partial meta-fields/with-meta-fields user)
+     meta-fields/enrich-with-link-permit-data)
+    app))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
@@ -133,7 +139,7 @@
   [{app :application user :user}]
   (if app
     (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
-      (ok :application ((app-post-processor user) app)
+      (ok :application (post-process-app app user)
           :authorities (find-authorities-in-applications-organization app)
           :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
@@ -148,7 +154,7 @@
 
 (defn filter-repeating-party-docs [schema-version schema-names]
   (let [schemas (schemas/get-schemas schema-version)]
-  (filter
+    (filter
       (fn [schema-name]
         (let [schema-info (get-in schemas [schema-name :info])]
           (and (:repeating schema-info) (= (:type schema-info) :party))))

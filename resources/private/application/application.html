@@ -157,10 +157,6 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
-          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: !processing() && $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
-            <span data-bind="ltext: 'application.submitApplication'"></span>
-            <span class="icon send left-align"></span>
-          </button>
           <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
@@ -229,6 +225,10 @@
                   <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
+            <li data-bind="if: $root.authorization.ok('submit-application')">
+              <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
+                <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
+
             <li><a data-bind="click: changeTab"
                    href="#" data-target="statement" data-test-id="application-open-statement-tab">
                   <span data-bind="ltext: 'application.tabStatement'"></span>
@@ -236,11 +236,13 @@
                     <span data-bind="text: unseenStatements"
                           id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
-                   <span data-bind="ltext: 'application.tabVerdict'"></span>
-                <span data-bind="if: unseenVerdicts">
-                  <span data-bind="text: unseenVerdicts"
+            <!-- TODO: Pitaako alla oleva paatos-tabi olla piilotettuna hakemuksen alkupaan tiloissa, kuten :draft :open :submitted :complement-needed ? -->
+
+            <li data-bind="if: $root.authorization.ok('new-verdict-draft')">
+              <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
+                  <span data-bind="ltext: 'application.tabVerdict'"></span>
+                  <span data-bind="if: unseenVerdicts">
+                    <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
@@ -467,8 +469,8 @@
             <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
           </div>
-          <div class="process-nav btn-nav-forward">
-            <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="conversation">
+          <div class="process-nav">
+            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
               <span data-bind="ltext: 'application.next-tab'"></span>
               <span class="icon drill-right-orange right-align"></span>
             </a>
@@ -534,6 +536,50 @@
             </tbody>
           </table>
         </script>
+
+
+        <div id="application-requiredFieldSummary-tab"
+             data-bind="with: $root.application"
+             class="tab-content">
+
+          <div>
+            <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
+
+            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0 -->
+              <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
+            <!-- /ko -->
+            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length > 0 -->
+              <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
+              <table>
+                <tbody data-bind="foreach: incorrectlyFilledRequiredFields">
+                  <tr data-bind="foreach: $data">
+                    <td><span class="missing icon"></span></td>
+                    <td data-bind="text: loc([docName, '_group_label'])+ ': ' + fieldName"></td>
+                    <td>
+                      [<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            <!-- /ko -->
+
+             <button class="btn btn-primary"
+                     data-test-id="application-submit-btn"
+                     data-bind="click: submitApplication,
+                                visible: $root.authorization.ok('submit-application'),
+                                enable: !processing() && $root.authorization.ok('submit-application') && incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0">
+               <span data-bind="ltext: 'application.submitApplication'"></span>
+               <span class="icon send left-align"></span>
+             </button>
+          </div>
+
+          <div class="process-nav">
+            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+              <span data-bind="ltext: 'application.previous-tab'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
+          </div>
+        </div>
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>

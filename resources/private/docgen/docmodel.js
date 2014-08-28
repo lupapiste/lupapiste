@@ -1,4 +1,4 @@
-var DocModel = function(schema, model, meta, docId, application, authorizationModel, options) {
+var DocModel = function(schema, doc, application, authorizationModel, options) {
   "use strict";
 
   var self = this;
@@ -13,13 +13,13 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   if (!self.schemaI18name) {
       self.schemaI18name = self.schemaName;
   }
-  self.model = model;
-  self.meta = meta;
-  self.docId = docId;
+  self.model = doc.data;
+  self.meta = doc.meta;
+  self.docId = doc.id;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
-  self.eventData = { doc: docId, app: self.appId };
+  self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
 
@@ -170,7 +170,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function makeInput(type, pathStr, value, extraClass, readonly) {
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
-    input.name = docId + "." + pathStr;
+    input.name = self.docId + "." + pathStr;
     input.setAttribute("data-docgen-path", pathStr);
 
     try {
@@ -455,7 +455,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
-      name: docId + "." + myPath,
+      name: self.docId + "." + myPath,
       type: "text",
       "class": "form-input text form-date",
       value: value
@@ -619,7 +619,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: self.getCollection() })
+          .command("merge-details-from-krysp", { id: self.appId, documentId: self.docId, buildingId: buildingId, collection: self.getCollection() })
           .success(function () {
             save(event);
             repository.load(self.appId);
@@ -752,7 +752,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var userId = target.value;
       if (!_.isEmpty(userId)) {
         ajax
-        .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: self.getCollection() })
+        .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
           save(event, function () { repository.load(self.appId); });
         })
@@ -1161,7 +1161,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     sectionContainer.className = "accordion_content expanded";
     sectionContainer.setAttribute("data-accordion-state", "open");
-    sectionContainer.id = "document-" + docId;
+    sectionContainer.id = "document-" + self.docId;
 
     appendElements(elements, self.schema, self.model, []);
 
@@ -1171,7 +1171,14 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return section;
   }
 
+
   self.element = buildElement();
-  validate();
+  if (doc.validationErrors) {
+    console.log("docModel.js, calling showValidationResults() with errors: ", doc.validationErrors);
+    showValidationResults(doc.validationErrors);
+  } else {
+    validate();
+  }
   disableBasedOnOptions();
+
 };

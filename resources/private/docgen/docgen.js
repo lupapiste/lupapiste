@@ -21,7 +21,7 @@ var docgen = (function () {
 
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
-      var docModel = new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options);
+      var docModel = new DocModel(schema, doc, application, authorizationModel, options);
 
       docgenDiv.append(docModel.element);
 
@@ -34,8 +34,13 @@ var docgen = (function () {
             ajax
               .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: docModel.getCollection() })
               .success(function (data) {
-                var newDocId = data.doc;
-                var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;
+                var newDoc = {
+                  id: data.doc,
+                  data: {},
+                  meta: {},
+                  validationErrors: doc.validationErrors
+                };
+                var newElem = new DocModel(schema, newDoc, application, authorizationModel).element;
                 $(self).before(newElem);
               })
               .call();

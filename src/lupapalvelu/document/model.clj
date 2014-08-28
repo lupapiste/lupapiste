@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
+            [clojure.string :refer [join]]
             [clojure.set :refer [union difference]]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
@@ -12,7 +13,9 @@
             [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]))
+            [lupapalvelu.document.subtype :as subtype]
+            [lupapalvelu.i18n :refer [*lang* localize]]
+            ))
 
 ;;
 ;; Validation:
@@ -134,23 +137,42 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- ->validation-result [data path element result]
+(defn- form-field-name [info path]
+  ;;
+  ;; TODO: Tama ei ole oikea tapa tehda lokalisaation etsinta.
+  ;; Allaolevan kakkoslokalisointi ei toimi -> haluaa joskus "._group_label":n peraansa.
+  ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
+  ;;
+  (let [locStr (str (:name info) "." (join "." (map name path)))
+        standard-loc (localize *lang* locStr)
+        group-loc (localize *lang* (str locStr "._group_label"))]
+
+    ;; TODO: paranna tama logiikka
+    (if (= 0 (.indexOf standard-loc "???"))
+      group-loc
+      standard-loc)))
+
+(defn- ->validation-result [info data path element result]
   (when result
-    (let [result {:data    data
-                  :path    (vec (map keyword path))
-                  :element element
-                  :result  result}]
+    (let [result {:data      data
+                  :path      (vec (map keyword path))
+                  :element   element
+                  :docId     (:doc-id info)
+                  :docName   (:name info)
+                  :fieldName (form-field-name info path)
+                  :result    result}]
       ; Return results without :data.
       ; Data is handy when hacking in REPL, though.
       ; See also mongo_scripts/prod/hetu-cleanup.js.
       (dissoc result :data))))
 
-(defn- validate-fields [application schema-body k data path]
-  (let [current-path (if k (conj path (name k)) path)]
+(defn- validate-fields [application info k data path]
+  (let [current-path (if k (conj path (name k)) path)
+        schema-body (:schema-body info)]
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
             result  (validate-field application element (:value data))]
-        (->validation-result data current-path element result))
+        (->validation-result info data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
@@ -166,12 +188,12 @@
   (when-let [one-of (seq (one-of-many-options sub-schemas))]
     (or (get-in data (conj path :_selected :value)) (first one-of))))
 
-(defn- validate-required-fields [schema-body path data validation-errors]
+(defn- validate-required-fields [info path data validation-errors]
   (let [check (fn [{:keys [name required body repeating] :as element}]
                 (let [kw (keyword name)
                       current-path (conj path kw)
                       validation-error (when (and required (ss/blank? (get-in data (conj current-path :value))))
-                                         (->validation-result nil current-path element [:tip "illegal-value:required"]))
+                                         (->validation-result info nil current-path element [:tip "illegal-value:required"]))
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
                     (if body
@@ -180,6 +202,7 @@
                         (validate-required-fields body current-path data []))
                       []))))
 
+        schema-body (:schema-body info)
         selected (one-of-many-selection schema-body path data)
         sub-schemas-to-validate (-> (set (map :name schema-body))
                                   (difference (set (one-of-many-options schema-body)) #{schemas/select-one-of-key})
@@ -200,17 +223,15 @@
   ([application document schema]
     (let [data (:data document)
           schema (or schema (get-document-schema document))
-          schema-body (:body schema)]
+          info {:doc-id (:id document)
+                :name (or (-> schema :info :i18name) (-> schema :info :name))
+                :schema-body (:body schema)}]
       (when data
         (flatten
           (concat
-            (validate-fields application schema-body nil data [])
-            (validate-required-fields schema-body [] data [])
+            (validate-fields application info nil data [])
+            (validate-required-fields info [] data [])
             (validator/validate document)))))))
-
-(defn valid-document?
-  "Checks weather document is valid."
-  [document] (empty? (validate document)))
 
 (defn has-errors?
   [results]
