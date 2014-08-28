@@ -908,7 +908,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
                 { title: loc("no") });
           };
           if (subSchema.type === "table") {
-            elem.appendChild(removeButton, elem.childNodes[0]);
+            var td = document.createElement("td");
+            td.appendChild(removeButton);
+            elem.appendChild(td, elem.childNodes[0]);
           } else {
             elem.insertBefore(removeButton, elem.childNodes[0]);
           }
