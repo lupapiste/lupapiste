@@ -140,20 +140,22 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- form-field-name [info path]
+(defn- form-field-name [info path element]
   ;;
   ;; TODO: Tama ei ole oikea tapa tehda lokalisaation etsinta.
   ;; Allaolevan kakkoslokalisointi ei toimi -> haluaa joskus "._group_label":n peraansa.
   ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
   ;;
-  (let [locStr (str (:name info) "." (join "." (map name path)))
-        standard-loc (localize *lang* locStr)
-        group-loc (localize *lang* (str locStr "._group_label"))]
+  (if (:i18nkey element)
+    (localize *lang* (:i18nkey element))
+    (let [locStr       (str (:name info) "." (join "." (map name path)))
+          standard-loc (localize *lang* locStr)
+          group-loc    (localize *lang* (str locStr "._group_label"))]
 
-    ;; TODO: paranna tama logiikka
-    (if (= 0 (.indexOf standard-loc "???"))
-      group-loc
-      standard-loc)))
+          ;; TODO: paranna tama logiikka
+          (if (= 0 (.indexOf standard-loc "???"))
+            group-loc
+            standard-loc))))
 
 (defn- ->validation-result [info data path element result]
   (when result
@@ -162,7 +164,7 @@
                   :element   element
                   :docId     (:doc-id info)
                   :docName   (:name info)
-                  :fieldName (form-field-name info path)
+                  :fieldName (form-field-name info path element)
                   :result    result}]
       ; Return results without :data.
       ; Data is handy when hacking in REPL, though.
@@ -170,16 +172,15 @@
       (dissoc result :data))))
 
 (defn- validate-fields [application info k data path]
-  (let [current-path (if k (conj path (name k)) path)
-        schema-body (:schema-body info)]
+  (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
-      (let [element (keywordize-keys (find-by-name schema-body current-path))
+      (let [element (keywordize-keys (find-by-name (:schema-body info) current-path))
             result  (validate-field application element (:value data))]
         (->validation-result info data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
-               (validate-fields application schema-body k2 v2 current-path)) data)))))
+               (validate-fields application info k2 v2 current-path)) data)))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -200,9 +201,12 @@
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
                     (if body
-                      (if repeating
-                        (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
-                        (validate-required-fields body current-path data []))
+                      (let [newInfo {:doc-id (:doc-id info)
+                                     :name (:name info)
+                                     :schema-body body}]
+                        (if repeating
+                          (map (fn [k] (validate-required-fields newInfo (conj current-path k) data [])) (keys (get-in data current-path)))
+                          (validate-required-fields newInfo current-path data [])))
                       []))))
 
         schema-body (:schema-body info)

@@ -548,18 +548,27 @@
             <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0 -->
               <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
             <!-- /ko -->
+
             <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length > 0 -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
+
               <table>
-                <tbody data-bind="foreach: incorrectlyFilledRequiredFields">
-                  <tr data-bind="foreach: $data">
-                    <td><span class="missing icon"></span></td>
-                    <td data-bind="text: loc([docName, '_group_label'])+ ': ' + fieldName"></td>
-                    <td>
-                      [<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]
-                    </td>
-                  </tr>
-                </tbody>
+                <!-- ko foreach: incorrectlyFilledRequiredFields -->
+                  <thead>
+                    <tr data-bind="with: $data[0]">
+                      <td colspan="3"><h3 class="required-field-error-doc" data-bind="text: loc([docName, '_group_label'])"></h3></td>
+                    </tr>
+                  </thead>
+                  <!-- ko foreach: $data -->
+                  <tbody>
+                      <tr>
+                        <td><span class="missing icon"></span></td>
+                        <td><span class="required-field-error-element" data-bind="text: fieldName"></span></td>
+                        <td>[<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]</td>
+                      </tr>
+                  </tbody>
+                  <!-- /ko -->
+                <!-- /ko -->
               </table>
             <!-- /ko -->
 

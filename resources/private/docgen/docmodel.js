@@ -123,10 +123,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return "group-" + pathStrToID(pathStr);
   }
 
-  function locKeyFromPath(pathStr) {
-    return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
-  }
-
   // Option utils
 
   self.getCollection = function() {
@@ -150,7 +146,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var label = document.createElement("label");
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
 
-    var locKey = locKeyFromPath(path);
+    var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + path);
     if (schema.i18nkey) {
       locKey = schema.i18nkey;
     }
@@ -199,7 +195,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function makeEntrySpan(subSchema, pathStr) {
     var help = null;
-    var helpLocKey = locKeyFromPath(pathStr + ".help");
+    var helpLocKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + ".help");
     if (subSchema.i18nkey) {
       helpLocKey = subSchema.i18nkey + ".help";
     }
@@ -931,7 +927,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var thead = document.createElement("thead");
       var tr = document.createElement("tr");
       _.each(subSchema.body, function(item) {
-        var locKey = locKeyFromPath(pathStr + "." + item.name);
+        var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + "." + item.name);
         if (item.i18nkey) {
           locKey = item.i18nkey;
         }
@@ -1335,7 +1331,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   self.element = buildElement();
   if (doc.validationErrors) {
-    console.log("docModel.js, calling showValidationResults() with errors: ", doc.validationErrors);
     showValidationResults(doc.validationErrors);
   } else {
     validate();
