@@ -142,17 +142,15 @@
 
 (defn- form-field-name [info path element]
   ;;
-  ;; TODO: Tama ei ole oikea tapa tehda lokalisaation etsinta.
-  ;; Allaolevan kakkoslokalisointi ei toimi -> haluaa joskus "._group_label":n peraansa.
+  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?  Esimerkiksi: (= "select" (:type element)) => group loc, muuten standard?
+  ;; Ainakin select-tyyppisten elementtien lokalisaatioavaimet ovat "._group_label"-loppuisia.
   ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
   ;;
   (if (:i18nkey element)
     (localize *lang* (:i18nkey element))
-    (let [locStr       (str (:name info) "." (join "." (map name path)))
-          standard-loc (localize *lang* locStr)
-          group-loc    (localize *lang* (str locStr "._group_label"))]
-
-          ;; TODO: paranna tama logiikka
+    (let [loc-key      (str (-> info :document :loc-key) "." (join "." (map name path)))
+          standard-loc (localize *lang* loc-key)
+          group-loc    (localize *lang* (str loc-key "._group_label"))]
           (if (= 0 (.indexOf standard-loc "???"))
             group-loc
             standard-loc))))
@@ -161,11 +159,9 @@
   (when result
     (let [result {:data        data
                   :path        (vec (map keyword path))
-                  :element     element
-                  :docId       (:doc-id info)
-                  :docName     (:name info)
-                  :elementName (form-field-name info path element)
-                  :result    result}]
+                  :element     (merge element {:localisation (form-field-name info path element)})
+                  :document    (dissoc (:document info) :loc-key)
+                  :result      result}]
       ; Return results without :data.
       ; Data is handy when hacking in REPL, though.
       ; See also mongo_scripts/prod/hetu-cleanup.js.
@@ -201,9 +197,7 @@
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
                     (if body
-                      (let [newInfo {:doc-id (:doc-id info)
-                                     :name (:name info)
-                                     :schema-body body}]
+                      (let [newInfo (assoc info :schema-body body)]
                         (if repeating
                           (map (fn [k] (validate-required-fields newInfo (conj current-path k) data [])) (keys (get-in data current-path)))
                           (validate-required-fields newInfo current-path data [])))
@@ -230,8 +224,11 @@
   ([application document schema]
     (let [data (:data document)
           schema (or schema (get-document-schema document))
-          info {:doc-id (:id document)
-                :name (or (-> schema :info :i18name) (-> schema :info :name))
+          document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
+          info {:document {:id (:id document)
+                           :loc-key document-loc-key
+                           :localisation (localize *lang* (str document-loc-key "._group_label"))
+                           :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
       (when data
         (flatten

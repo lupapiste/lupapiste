@@ -556,14 +556,14 @@
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
                   <thead>
                     <tr data-bind="with: $data[0]">
-                      <td colspan="3"><h3 class="required-field-error-doc" data-bind="text: loc([docName, '_group_label'])"></h3></td>
+                      <td colspan="3"><h3 class="required-field-error-doc" data-bind="text: document.localisation"></h3></td>
                     </tr>
                   </thead>
                   <!-- ko foreach: $data -->
                   <tbody>
                       <tr>
                         <td><span class="missing icon"></span></td>
-                        <td><span class="required-field-error-element" data-bind="text: elementName"></span></td>
+                        <td><span class="required-field-error-element" data-bind="text: element.localisation"></span></td>
                         <td>[<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]</td>
                       </tr>
                   </tbody>
