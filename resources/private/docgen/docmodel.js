@@ -934,7 +934,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
           locKey = item.i18nkey;
         }
         var th = document.createElement("th");
-        th.textContent = loc(locKey);
+        th.innerHTML = loc(locKey);
         tr.appendChild(th);
       });
       // remove button column
