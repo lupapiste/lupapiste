@@ -159,12 +159,12 @@
 
 (defn- ->validation-result [info data path element result]
   (when result
-    (let [result {:data      data
-                  :path      (vec (map keyword path))
-                  :element   element
-                  :docId     (:doc-id info)
-                  :docName   (:name info)
-                  :fieldName (form-field-name info path element)
+    (let [result {:data        data
+                  :path        (vec (map keyword path))
+                  :element     element
+                  :docId       (:doc-id info)
+                  :docName     (:name info)
+                  :elementName (form-field-name info path element)
                   :result    result}]
       ; Return results without :data.
       ; Data is handy when hacking in REPL, though.
