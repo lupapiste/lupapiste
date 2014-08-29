@@ -3,6 +3,7 @@
             [clojure.walk :refer [keywordize-keys]]
             [clojure.string :refer [join]]
             [clojure.set :refer [union difference]]
+            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
@@ -14,7 +15,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]
-            [lupapalvelu.i18n :refer [*lang* localize]]
             ))
 
 ;;
@@ -140,27 +140,29 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- form-field-name [info path element]
+(defn- resolve-element-loc-key [info element path]
   ;;
-  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?  Esimerkiksi: (= "select" (:type element)) => group loc, muuten standard?
+  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?
+  ;; Esimerkiksi: (= 0 (.indexOf (lupapalvelu.i18n.localize lupapalvelu.i18n.*lang* loc-key) "???")) => group loc, muuten standard?
   ;; Ainakin select-tyyppisten elementtien lokalisaatioavaimet ovat "._group_label"-loppuisia.
   ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
   ;;
-  (if (:i18nkey element)
-    (localize *lang* (:i18nkey element))
-    (let [loc-key      (str (-> info :document :loc-key) "." (join "." (map name path)))
-          standard-loc (localize *lang* loc-key)
-          group-loc    (localize *lang* (str loc-key "._group_label"))]
-          (if (= 0 (.indexOf standard-loc "???"))
-            group-loc
-            standard-loc))))
+  (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
+    (if (:i18nkey element)
+      (:i18nkey element)
+      (-> (if (= :select (:type element))
+            (str loc-key "._group_label")
+            loc-key)
+        (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+        (s/replace #"\.+" ".")))     ;; removes multiple dots: "a..b" => "a.b"
+    ))
 
 (defn- ->validation-result [info data path element result]
   (when result
     (let [result {:data        data
                   :path        (vec (map keyword path))
-                  :element     (merge element {:localisation (form-field-name info path element)})
-                  :document    (dissoc (:document info) :loc-key)
+                  :element     (merge element {:locKey (resolve-element-loc-key info element path)})
+                  :document    (:document info)
                   :result      result}]
       ; Return results without :data.
       ; Data is handy when hacking in REPL, though.
@@ -226,8 +228,7 @@
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
           info {:document {:id (:id document)
-                           :loc-key document-loc-key
-                           :localisation (localize *lang* (str document-loc-key "._group_label"))
+                           :locKey document-loc-key
                            :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
       (when data
