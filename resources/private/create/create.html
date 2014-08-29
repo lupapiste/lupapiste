@@ -22,6 +22,18 @@
           <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
           <div>
             <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
+              <input
+                data-bind="value: propertyId,
+                           valueUpdate: 'afterkeydown',
+                           enable: useManualEntry,
+                           readonly: !currentUser.isAuthority()"
+                data-test-id="create-property-id"
+                type="text"
+                class="form-input text bottom-marginM">
+            </div>
+
+            <div class="form-entry">
               <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
               <input
                 data-bind="value: addressString, valueUpdate: 'afterkeydown'"
@@ -47,16 +59,6 @@
                 disabled="disabled"
                 type="text"
                 class="form-input text">
-
-              <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
-              <input
-                data-bind="value: propertyId,
-                           valueUpdate: 'afterkeydown',
-                           enable: useManualEntry,
-                           readonly: !currentUser.isAuthority()"
-                data-test-id="create-property-id"
-                type="text"
-                class="form-input text bottom-marginM">
             </div>
 
             <button
