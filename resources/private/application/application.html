@@ -189,12 +189,10 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-
           <button data-bind="click: refreshKTJ,           visible: $root.authorization.ok('refresh-ktj'),            enable: !processing() && $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
           </button>
-
           <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
             <span data-bind="ltext: 'application.reset-indicators'"></span>
             <span class="icon mark-seen left-align"></span>
@@ -209,7 +207,7 @@
                   <span data-bind="ltext: 'application.tabInfo'"></span>
                   <span data-bind="if: nonpartyDocumentIndicator">
                     <span data-bind="text: nonpartyDocumentIndicator"
-                        id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
+                          id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
 
             <li><a data-bind="click: changeTab"
                    href="#" data-target="parties" data-test-id="application-open-parties-tab">
