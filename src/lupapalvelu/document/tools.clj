@@ -53,19 +53,19 @@
        %)
     col))
 
-(defn- ^{:testable true} group [x]
+(defn- ^{:testable true} group [x t]
   (if (:repeating x)
     {:name :0
-     :type (or :group :table)
+     :type t
      :body (:body x)}
     (:body x)))
 
 (defn- ^{:testable true} create [{body :body} f]
   (walk/prewalk
     #(if (map? %)
-       (let [k (-> % :name keyword)
-             v (if (or (= :table (-> % :type keyword)) (= :group (-> % :type keyword))) (group %) (f %))]
-         {k v})
+       (let [t (keyword (:type %))
+             v (if (#{:group :table} t) (group % t) (f %))]
+         {(keyword (:name %)) v})
        %)
     body))
 
