@@ -3,7 +3,7 @@
             [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
@@ -250,6 +250,15 @@
   [{{:keys [organizations]} :user}]
   ; FIXME: validate operation and attachments
   (update-organization (first organizations) {$set {(str "operations-attachments." operation) attachments}})
+  (ok))
+
+(defcommand set-organization-app-required-fields-filling-obligatory
+  {:parameters [isObligatory]
+   :roles [:authorityAdmin]
+   :input-validators  [(partial non-blank-parameters [:isObligatory])
+                       (partial boolean-parameters [:isObligatory])]}
+  [{{:keys [organizations]} :user}]
+  (update-organization (first organizations) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
 (defquery krysp-config
