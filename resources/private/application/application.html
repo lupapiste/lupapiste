@@ -459,8 +459,8 @@
 
             <!-- ko if: postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
             </div>
             <!-- /ko -->
 
