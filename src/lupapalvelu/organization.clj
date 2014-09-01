@@ -95,8 +95,8 @@
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
     (get-in organization [:name i18n/*lang*] default)))
 
-(defn get-organization-name [{organization-id :organization :as application}]
-  (loc-organization-name (get-organization organization-id)))
+(defn get-organization-name [organization]
+  (loc-organization-name organization))
 
 (defn resolve-organizations
   ([municipality]

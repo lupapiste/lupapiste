@@ -559,9 +559,9 @@
                   </thead>
                   <!-- ko foreach: $data -->
                   <tbody>
-                      <tr>
+                      <tr class="required-field-error-element-row">
                         <td><span class="missing icon"></span></td>
-                        <td><span class="required-field-error-element" data-bind="ltext: element.locKey"></span></td>
+                        <td><span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span></td>
                         <td>[<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]</td>
                       </tr>
                   </tbody>
@@ -574,7 +574,8 @@
                      data-test-id="application-submit-btn"
                      data-bind="click: submitApplication,
                                 visible: $root.authorization.ok('submit-application'),
-                                enable: !processing() && $root.authorization.ok('submit-application') && incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0">
+                                enable: !processing() && $root.authorization.ok('submit-application') &&
+                                        (requiredFieldsFillingObligatory() || (incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0))">
                <span data-bind="ltext: 'application.submitApplication'"></span>
                <span class="icon send left-align"></span>
              </button>
