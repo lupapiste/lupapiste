@@ -1143,7 +1143,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
   }
 
-  function showValidationResults(results) {
+  self.showValidationResults = function(results) {
     // remove warning and error highlights
     $("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
     // clear validation errors
@@ -1170,7 +1170,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (!options || options.validate) {
       ajax
         .query("validate-doc", { id: self.appId, doc: self.docId, collection: self.getCollection() })
-        .success(function (e) { showValidationResults(e.results); })
+        .success(function (e) { self.showValidationResults(e.results); })
         .call();
     }
   }
@@ -1209,7 +1209,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function afterSave(label, loader, indicator, callback, status, results) {
-    showValidationResults(results);
+    self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
     }
@@ -1330,9 +1330,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
 
   self.element = buildElement();
-  if (doc.validationErrors) {
-    showValidationResults(doc.validationErrors);
-  } else {
+  // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
+  // self.showValidationResults is called with in docgen.js after this docmodel has been appended to DOM.
+  // So self.showValidationResults cannot be called here because of its jQuery lookups.
+  if (!doc.validationErrors) {
     validate();
   }
   disableBasedOnOptions();

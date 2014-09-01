@@ -25,6 +25,10 @@ var docgen = (function () {
 
       docgenDiv.append(docModel.element);
 
+      if (doc.validationErrors) {
+        docModel.showValidationResults(doc.validationErrors);
+      }
+
       if (schema.info.repeating && !isDisabled && authorizationModel.ok('create-doc')) {
 
         var btn = $("<button>", {"id": schema.info.name + "_append_btn", "class": "btn block"})
