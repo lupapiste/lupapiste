@@ -106,8 +106,8 @@
         rotate? (pos? (mod page-rotation 180))
         ; If the visible area does not fit into page, we must crop
         max-x (if (< (:width page-size) (+ (:right sides) (:left sides)))
-                (- (:right sides) (:left sides))
-                (:right sides))
+               (- (:right sides) (:left sides))
+               (:right sides))
         min-y (:bottom sides)
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
@@ -208,8 +208,8 @@
         my-stamp (make-stamp "OK" 0 "Solita Oy" 0)]
     (doseq [f (remove #(.endsWith % "-leima.pdf") (me.raynes.fs/list-dir d))]
       (println f)
-      (let [my-in  (clojure.java.io/input-stream (str d "/" f))
-            my-out (clojure.java.io/output-stream (str d "/" f "-leima.pdf"))]
+      (with-open [my-in  (clojure.java.io/input-stream (str d "/" f))
+                  my-out (clojure.java.io/output-stream (str d "/" f "-leima.pdf"))]
         (stamp-pdf my-stamp my-in my-out 10 100 0))))
 
   )
