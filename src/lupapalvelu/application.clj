@@ -200,6 +200,12 @@
         invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
+(defn- create-invite-model [command conf]
+  (assoc (notifications/create-app-model command conf) :message (get-in command [:data :text]) ))
+
+(notifications/defemail :invite  {:recipients-fn  notifications/from-data
+                                  :model-fn create-invite-model})
+
 (defcommand invite
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial action/non-blank-parameters [:email])
