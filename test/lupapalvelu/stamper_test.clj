@@ -53,8 +53,7 @@
     x => (roughly (:top crop-box))
     y => (roughly (:left crop-box))))
 
-; FIXME fails.
-#_(fact "problematic-pdfs/scan.pdf"
+(fact "problematic-pdfs/scan.pdf"
    (let [page-box {:left 0.0, :bottom -2990.52, :right 841.68, :top 0.0}
         crop-box {:left 0.0, :bottom -2990.52, :right 841.68, :top 0.0}
         [x y] (calculate-x-y page-box crop-box 270 0.0 0 0)]
