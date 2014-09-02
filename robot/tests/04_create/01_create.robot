@@ -83,6 +83,7 @@ Authority (Veikko) can create an application
 
 # LUPA-23
 Veikko can submit the application he created
+  Open tab  requiredFieldSummary
   Wait Until  Element should be visible  //*[@data-test-id='application-submit-btn']
 
 Veikko sees application in list

@@ -94,8 +94,10 @@
     (reduce + 0 (vals (:documentModificationsPerDoc app)))
     0))
 
-(defn- organization-name [_ app]
-  (organization/get-organization-name app))
+(defn- organization-meta [_ app]
+  (let [org (organization/get-organization (:organization app))]
+    {:name (organization/get-organization-name org)
+     :requiredFieldsFillingObligatory (or (:app-required-fields-filling-obligatory org) false)}))
 
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
@@ -110,7 +112,7 @@
 
 (def meta-fields (conj indicator-meta-fields
                    {:field :applicantPhone :fn get-applicant-phone}
-                   {:field :organizationName :fn organization-name}
+                   {:field :organizationMeta :fn organization-meta}
                    {:field :neighbors :fn neighbors/normalize-neighbors}))
 
 (defn- enrich-with-meta-fields [fields user app]
