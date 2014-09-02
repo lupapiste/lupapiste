@@ -1,5 +1,0 @@
-application.tabRequiredFieldSummary: Yhteenveto ja hakemuksen jättäminen
-application.allRequiredDataFilled: Kaikki pakolliset tiedot on täytetty
-application.requiredDataMissing: Puuttuvat pakolliset tiedot
-auth-admin.required-fields-obligatory.title: Hakemusten lähettämisen sallimisen esiehdot
-auth-admin.required-fields-obligatory.enabled: Pakolliseksi merkittyjen kenttien tiedot vaaditaan täytetyiksi, jotta hakemusten lähettäminen sallitaan
