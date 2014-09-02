@@ -1,11 +1,15 @@
 (ns lupapalvelu.stamper
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
-            [clojure.java.io :as io]
             [clojure.string :as s]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [slingshot.slingshot :refer [throw+]]
+            [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.core :refer [now]]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
            [java.awt Graphics2D Color Image BasicStroke Font AlphaComposite RenderingHints]
@@ -14,6 +18,7 @@
            [java.awt.image BufferedImage RenderedImage]
            [javax.imageio ImageIO]
            [com.lowagie.text Rectangle]
+           [com.lowagie.text.exceptions InvalidPdfException]
            [com.lowagie.text.pdf PdfGState PdfStamper PdfReader]
            [com.google.zxing BarcodeFormat]
            [com.google.zxing.qrcode QRCodeWriter]
@@ -66,11 +71,38 @@
 
 (declare stamp-pdf stamp-image)
 
-(defn stamp [stamp content-type in out x-margin y-margin transparency]
+(defn- stamp-stream [stamp content-type in out x-margin y-margin transparency]
   (cond
     (= content-type "application/pdf")      (do (stamp-pdf stamp in out x-margin y-margin transparency) nil)
     (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin transparency) nil)
     :else                                   nil))
+
+(defn- create-pdftk-file [in file-name]
+  (let [result (shell/sh "pdftk" "-" "output" file-name :in in)]
+    ; POSIX return code 0 signals success, others are failure codes
+    (when-not (zero? (:exit result))
+      (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
+
+(defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
+  (let [tmp-file-name (str (System/getProperty "java.io.tmpdir") file-id "-" (now) ".pdf")]
+    (debugf "Redownloading file %s from DB and running `pdftk - output %s`" file-id tmp-file-name)
+    (try
+      (with-open [in ((:content (mongo/download file-id)))]
+        (create-pdftk-file in tmp-file-name))
+      (with-open [in (io/input-stream tmp-file-name)]
+        (stamp-stream stamp-graphic "application/pdf" in out x-margin y-margin transparency))
+      (finally
+        (fs/delete tmp-file-name)
+        nil))))
+
+(defn stamp [stamp file-id out x-margin y-margin transparency]
+  (try
+    (let [{content-type :content-type :as attachment} (mongo/download file-id)]
+      (with-open [in ((:content attachment))]
+        (stamp-stream stamp content-type in out x-margin y-margin transparency)))
+    (catch InvalidPdfException e
+      (info (str "Retry stamping because: " (.getMessage e)))
+      (retry-stamping stamp file-id out x-margin y-margin transparency))))
 
 ;;
 ;; Stamp PDF:
@@ -105,7 +137,9 @@
         page-size (get-sides (rotate-rectangle page-box page-rotation))
         rotate? (pos? (mod page-rotation 180))
         ; If the visible area does not fit into page, we must crop
-        max-x (if (< (:width page-size) (+ (:right sides) (:left sides)))
+        max-x (if (or (< (:width page-size) (+ (:right sides) (:left sides)))
+                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270))
+                    )
                (- (:right sides) (:left sides))
                (:right sides))
         min-y (:bottom sides)
@@ -206,10 +240,12 @@
   ; Run this in REPL and check that every new file has been stamped
   (let [d "problematic-pdfs"
         my-stamp (make-stamp "OK" 0 "Solita Oy" 0)]
-    (doseq [f (remove #(.endsWith % "-leima.pdf") (me.raynes.fs/list-dir d))]
+    (doseq [f (remove #(.endsWith % "-leima.pdf") (fs/list-dir d))]
       (println f)
-      (with-open [my-in  (clojure.java.io/input-stream (str d "/" f))
-                  my-out (clojure.java.io/output-stream (str d "/" f "-leima.pdf"))]
-        (stamp-pdf my-stamp my-in my-out 10 100 0))))
+      (with-open [my-in  (io/input-stream (str d "/" f))
+                  my-out (io/output-stream (str d "/" f "-leima.pdf"))]
+        (try
+          (stamp-pdf my-stamp my-in my-out 10 100 0)
+          (catch Throwable t (error t))))))
 
   )
