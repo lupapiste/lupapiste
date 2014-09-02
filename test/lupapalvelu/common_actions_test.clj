@@ -13,6 +13,7 @@
                           :application
                           :allowed-actions
                           :validate-doc
+                          :fetch-validation-errors
                           :add-comment
                           :attachment-types
                           :should-see-unsubmitted-statements
