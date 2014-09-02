@@ -335,7 +335,7 @@
                         <span data-bind="if: !$data.invite">
                           <span data-bind="ltext: 'accepted'"></span>
                           <!-- ko if: $data.inviteAccepted -->
-                          <span data-bind="dateTimeString: $data.inviteAccepted"></span>
+                          <span data-test-id="invite-accepted-span" data-bind="dateTimeString: $data.inviteAccepted"></span>
                           <!-- /ko -->
                         </span>
                       </span>
