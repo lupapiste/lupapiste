@@ -157,7 +157,7 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
-          <!-- ko if: invites().length === 0 -->
+          <!-- ko if: !showInviteButtons() -->
           <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: !processing() && $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
             <span data-bind="ltext: 'application.submitApplication'"></span>
             <span class="icon send left-align"></span>
@@ -205,7 +205,7 @@
             <span class="icon mark-seen left-align"></span>
           </button>
           <!-- /ko  -->
-          <!-- ko if: invites().length -->
+          <!-- ko if: showInviteButtons -->
           <button data-bind="click: approveInvite" class="btn btn-primary btn-mini" data-test-id="accept-invite-button">
             <span data-bind="ltext: 'applications.approveInvite'"></span>
           </button>
