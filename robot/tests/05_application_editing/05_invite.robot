@@ -68,8 +68,12 @@ Mikko comes back and can see Teppos modification
   Open application  invite-app  753-423-2-159
   Wait Until  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
 
-Mikko can see invite paasuunnittelija button again
+Mikko can see that Teppo has accepted invitation
   Open tab  parties
+  # Check that invite accepted timestamp span is present
+  Element should be visible  xpath=//*[@data-test-id='invite-accepted-span']
+
+Mikko can see invite paasuunnittelija button again
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko can't invite himself
