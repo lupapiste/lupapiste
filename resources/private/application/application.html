@@ -158,10 +158,6 @@
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
           <!-- ko if: !showInviteButtons() -->
-          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: !processing() && $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
-            <span data-bind="ltext: 'application.submitApplication'"></span>
-            <span class="icon send left-align"></span>
-          </button>
           <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
@@ -194,12 +190,10 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-
           <button data-bind="click: refreshKTJ,           visible: $root.authorization.ok('refresh-ktj'),            enable: !processing() && $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
           </button>
-
           <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
             <span data-bind="ltext: 'application.reset-indicators'"></span>
             <span class="icon mark-seen left-align"></span>
@@ -223,7 +217,7 @@
                   <span data-bind="ltext: 'application.tabInfo'"></span>
                   <span data-bind="if: nonpartyDocumentIndicator">
                     <span data-bind="text: nonpartyDocumentIndicator"
-                        id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
+                          id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
 
             <li><a data-bind="click: changeTab"
                    href="#" data-target="parties" data-test-id="application-open-parties-tab">
@@ -239,6 +233,10 @@
                   <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
+            <li data-bind="if: $root.authorization.ok('submit-application')">
+              <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
+                <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
+
             <li><a data-bind="click: changeTab"
                    href="#" data-target="statement" data-test-id="application-open-statement-tab">
                   <span data-bind="ltext: 'application.tabStatement'"></span>
@@ -246,11 +244,11 @@
                     <span data-bind="text: unseenStatements"
                           id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
-                   <span data-bind="ltext: 'application.tabVerdict'"></span>
-                <span data-bind="if: unseenVerdicts">
-                  <span data-bind="text: unseenVerdicts"
+            <li data-bind="ifnot: _.contains(['draft', 'open'], state())">
+              <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
+                  <span data-bind="ltext: 'application.tabVerdict'"></span>
+                  <span data-bind="if: unseenVerdicts">
+                    <span data-bind="text: unseenVerdicts"
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
@@ -335,7 +333,7 @@
                         <span data-bind="if: !$data.invite">
                           <span data-bind="ltext: 'accepted'"></span>
                           <!-- ko if: $data.inviteAccepted -->
-                          <span data-bind="dateTimeString: $data.inviteAccepted"></span>
+                          <span data-test-id="invite-accepted-span" data-bind="dateTimeString: $data.inviteAccepted"></span>
                           <!-- /ko -->
                         </span>
                       </span>
@@ -474,16 +472,16 @@
 
             <!-- ko if: postVerdict() -->
             <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
+              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
             </div>
             <!-- /ko -->
 
             <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
           </div>
-          <div class="process-nav btn-nav-forward">
-            <a class="btn process-next" data-bind="click: $root.application.nextTab" href="#" data-target="conversation">
+          <div class="process-nav">
+            <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
               <span data-bind="ltext: 'application.next-tab'"></span>
               <span class="icon drill-right-orange right-align"></span>
             </a>
@@ -549,6 +547,60 @@
             </tbody>
           </table>
         </script>
+
+
+        <div id="application-requiredFieldSummary-tab"
+             data-bind="with: $root.application"
+             class="tab-content">
+
+          <div>
+            <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
+
+            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0 -->
+              <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
+            <!-- /ko -->
+
+            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length > 0 -->
+              <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
+
+              <table>
+                <!-- ko foreach: incorrectlyFilledRequiredFields -->
+                  <thead>
+                    <tr data-bind="with: $data[0]">
+                      <td colspan="3"><h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3></td>
+                    </tr>
+                  </thead>
+                  <!-- ko foreach: $data -->
+                  <tbody>
+                      <tr class="required-field-error-element-row">
+                        <td><span class="missing icon"></span></td>
+                        <td><span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span></td>
+                        <td>[<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]</td>
+                      </tr>
+                  </tbody>
+                  <!-- /ko -->
+                <!-- /ko -->
+              </table>
+            <!-- /ko -->
+
+             <button class="btn btn-primary"
+                     data-test-id="application-submit-btn"
+                     data-bind="click: submitApplication,
+                                visible: $root.authorization.ok('submit-application'),
+                                enable: !processing() && !showInviteButtons() && $root.authorization.ok('submit-application') &&
+                                        (!requiredFieldsFillingObligatory() || (incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0))">
+               <span data-bind="ltext: 'application.submitApplication'"></span>
+               <span class="icon send left-align"></span>
+             </button>
+          </div>
+
+          <div class="process-nav">
+            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+              <span data-bind="ltext: 'application.previous-tab'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
+          </div>
+        </div>
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
