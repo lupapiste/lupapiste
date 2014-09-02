@@ -239,7 +239,7 @@
     (update-application command
       {:auth {$elemMatch {:invite.user.id (:id user)}}}
       {$set  {:modified created
-              :auth.$ (user/user-in-role user :writer)}})
+              :auth.$ (assoc (user/user-in-role user :writer) :inviteAccepted created)}})
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; Document can be undefined in invite or removed by the time invite is approved.
       ; It's not possible to combine Mongo writes here,
