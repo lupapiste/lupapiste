@@ -426,6 +426,7 @@ It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 
 Submit application
+  Open tab  requiredFieldSummary
   Click enabled by test id  application-submit-btn
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted

@@ -365,7 +365,10 @@
              {:application application
               :user (:user command)
               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :organization (if-not (ss/blank? organization) organization (organization/get-organization-name application))
+              :organization (if-not (ss/blank? organization)
+                              organization
+                              (let [org (organization/get-organization (:organization application))]
+                                (organization/get-organization-name org)))
               :created (cond
                          (number? timestamp) (long timestamp)
                          (ss/blank? timestamp) (:created command)
