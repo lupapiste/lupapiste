@@ -575,7 +575,7 @@
                      data-bind="click: submitApplication,
                                 visible: $root.authorization.ok('submit-application'),
                                 enable: !processing() && $root.authorization.ok('submit-application') &&
-                                        (requiredFieldsFillingObligatory() || (incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0))">
+                                        (!requiredFieldsFillingObligatory() || (incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0))">
                <span data-bind="ltext: 'application.submitApplication'"></span>
                <span class="icon send left-align"></span>
              </button>
