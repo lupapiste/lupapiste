@@ -47,7 +47,7 @@
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
 
-(fact "newly created application includes documents that have some ready-calculated validation errors about required document fields with them"
+(fact "the ready-calculated validation errors about required document fields, included by a newly created application, are updated when those application fields are filled"
   (let [application-id  (create-app-id pena :municipality sonja-muni)
         application     (query-application pena application-id)
         hakija          (domain/get-document-by-name application "hakija")
