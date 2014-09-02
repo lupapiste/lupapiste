@@ -157,6 +157,7 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
+          <!-- ko if: !showInviteButtons() -->
           <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
@@ -197,6 +198,15 @@
             <span data-bind="ltext: 'application.reset-indicators'"></span>
             <span class="icon mark-seen left-align"></span>
           </button>
+          <!-- /ko  -->
+          <!-- ko if: showInviteButtons -->
+          <button data-bind="click: approveInvite" class="btn btn-primary btn-mini" data-test-id="accept-invite-button">
+            <span data-bind="ltext: 'applications.approveInvite'"></span>
+          </button>
+          <button data-bind="click: declineInvite" class="btn btn-mini" data-test-id="decline-invite-button">
+            <span data-bind="ltext: 'applications.declineInvite'"></span>
+          </button>
+          <!-- /ko -->
         </div>
 
         <!-- Tabs: -->
