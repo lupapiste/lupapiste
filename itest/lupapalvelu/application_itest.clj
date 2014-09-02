@@ -59,8 +59,7 @@
 
     (let [application     (query-application pena application-id)
           hakija          (domain/get-document-by-name application "hakija")]
-      (not-any? #(= "illegal-value:required" (-> % :result second)) errs)
-      )))
+      (not-any? #(= "illegal-value:required" (-> % :result second)) errs))))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "837")
@@ -200,11 +199,6 @@
             company-path (into [] (concat [:data] (map keyword path) [:yritys]))
             experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
             suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
-
-        (println "\n fact, updated doc: ")
-        (clojure.pprint/pprint update-doc)
-        (println "\n")
-
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
         (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
         (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
