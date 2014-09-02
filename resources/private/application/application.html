@@ -244,9 +244,7 @@
                     <span data-bind="text: unseenStatements"
                           id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-            <!-- TODO: Pitaako alla oleva paatos-tabi olla piilotettuna hakemuksen alkupaan tiloissa, kuten :draft :open :submitted :complement-needed ? -->
-
-            <li data-bind="if: $root.authorization.ok('new-verdict-draft')">
+            <li data-bind="ifnot: _.contains(['draft', 'open'], state())">
               <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
                   <span data-bind="ltext: 'application.tabVerdict'"></span>
                   <span data-bind="if: unseenVerdicts">
