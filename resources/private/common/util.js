@@ -111,6 +111,11 @@ var util = (function() {
     return undefined;
   }
 
+  function locKeyFromDocPath(pathStr) {
+    var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+    return res;
+  }
+
   return {
     zeropad: zeropad,
     fluentify: fluentify,
@@ -127,7 +132,8 @@ var util = (function() {
     nop: nop,
     constantly: function(value) { return function() { return value; }; },
     isNum: isNum,
-    getIn: getIn
+    getIn: getIn,
+    locKeyFromDocPath: locKeyFromDocPath
   };
 
 })();

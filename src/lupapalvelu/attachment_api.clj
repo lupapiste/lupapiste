@@ -325,9 +325,8 @@
         temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
-    (with-open [in ((:content (mongo/download fileId)))
-                out (io/output-stream temp-file)]
-      (stamper/stamp stamp contentType in out x-margin y-margin transparency))
+    (with-open [out (io/output-stream temp-file)]
+      (stamper/stamp stamp fileId out x-margin y-margin transparency))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
                         (a/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
@@ -366,7 +365,10 @@
              {:application application
               :user (:user command)
               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :organization (if-not (ss/blank? organization) organization (organization/get-organization-name application))
+              :organization (if-not (ss/blank? organization)
+                              organization
+                              (let [org (organization/get-organization (:organization application))]
+                                (organization/get-organization-name org)))
               :created (cond
                          (number? timestamp) (long timestamp)
                          (ss/blank? timestamp) (:created command)

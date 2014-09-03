@@ -47,6 +47,20 @@
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
 
+(fact "the ready-calculated validation errors about required document fields, included by a newly created application, are updated when those application fields are filled"
+  (let [application-id  (create-app-id pena :municipality sonja-muni)
+        application     (query-application pena application-id)
+        hakija          (domain/get-document-by-name application "hakija")
+        errs            (:validationErrors hakija)]
+    (count errs) => pos?
+    (some #(= "illegal-value:required" (-> % :result second)) errs)
+
+    (generate-documents application pena)
+
+    (let [application     (query-application pena application-id)
+          hakija          (domain/get-document-by-name application "hakija")]
+      (not-any? #(= "illegal-value:required" (-> % :result second)) errs))))
+
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
   (let [application-id  (create-app-id pena :municipality "837")
         application     (query-application pena application-id)
@@ -185,7 +199,6 @@
             company-path (into [] (concat [:data] (map keyword path) [:yritys]))
             experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
             suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
-
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
         (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
         (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)

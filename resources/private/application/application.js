@@ -153,6 +153,12 @@
       // Update observables
       ko.mapping.fromJS(app, {}, applicationModel);
 
+      // Update validation errors
+      var errors = _.map(app.documents, function(doc) {
+        return doc.validationErrors;
+      });
+      applicationModel.initValidationErrors(errors);
+
       // Invite
       inviteModel.setApplicationId(app.id);
 

@@ -147,6 +147,7 @@
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
+    self.propertyIdOk = ko.computed(function(value) { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
 
     //
     // Concurrency control:

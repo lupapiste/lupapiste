@@ -55,7 +55,7 @@
 ;;
 
 ;; Application (the default)
-(defn- create-app-model [{application :application} {tab :tab}]
+(defn create-app-model [{application :application} {tab :tab}]
   {:link-fi (get-application-link application tab "fi")
    :link-sv (get-application-link application tab "sv")
    :state-fi (i18n/localize :fi (str (:state application)))
@@ -93,7 +93,6 @@
                                         :recipients-fn  from-data}
          :application-verdict          {:subject-key    "verdict"
                                         :tab            "/verdict"}
-         :invite                       {:recipients-fn  from-data}
          :add-statement-giver          {:recipients-fn  from-user
                                         :subject-key    "application.statements"
                                         :model-fn       statement-giver-model}
