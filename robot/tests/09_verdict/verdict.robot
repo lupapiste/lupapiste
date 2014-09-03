@@ -12,9 +12,8 @@ Mikko want to build Olutteltta
   Set Suite Variable  ${appname}  Olutteltta${secs}
   Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
 
-Application does not have verdict
-  Open tab  verdict
-  Verdict is not given
+The verdict tab is not visible
+  Element should not be visible  application-verdict-tab
 
 Mikko submits application & goes for lunch
   Submit application
@@ -94,9 +93,6 @@ Verdict is given
   [Arguments]  ${kuntalupatunnus}  ${i}
   Wait until  Element should be visible  application-verdict-details
   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
-
-Verdict is not given
-  Wait until  Element should not be visible  application-verdict-details
 
 Verdict count is
   [Arguments]  ${amount}

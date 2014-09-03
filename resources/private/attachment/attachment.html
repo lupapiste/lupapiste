@@ -88,8 +88,6 @@
       </div>
 
       <div class="attachment-file-versions">
-      <div data-bind="if: features.enabled('attachmentsignature')">
-      <div class="feature">
         <h3 data-bind="ltext: 'attachment.signatures'"></h3>
         <table class="table table-striped" data-bind="if: signatures && signatures().length > 0">
           <thead>
@@ -107,13 +105,9 @@
             </tr>
           </tbody>
         </table>
-
         <button data-test-id="signLatestAttachmentVersion" class="btn"
             data-bind="click: sign, ltext: 'attachment.signLatest', visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
         </button>
-
-      </div><!-- /feature class-->
-      </div><!-- /feature flag-->
       </div>
 
       <div class="attachment-file-conversation">

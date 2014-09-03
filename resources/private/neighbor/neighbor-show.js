@@ -40,23 +40,22 @@
         .call();
     };
 
-    function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
-    function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
-
     self.success = function(data) {
       var a = data.application,
           l = a.location,
           x = l.x,
           y = l.y;
 
-      self.application(a).map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 12).add({x: x, y: y});
+      self.application(a).map.updateSize().clear().center(x, y, 14).add({x: x, y: y});
 
-      var partyDocs = _.filter(a.documents, isPartyDoc);
-      var nonpartyDocs = _.filter(a.documents, isNotPartyDoc);
+      var nonpartyDocs = _.filter(a.documents, util.isNotPartyDoc);
+      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
+      var partyDocs = _.filter(a.documents, util.isPartyDoc);
+      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
       var options = {disabled: true, validate: false};
 
-      docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel, options);
-      docgen.displayDocuments("#neighborPartiesDocgen", a, partyDocs, authorizationModel, options);
+      docgen.displayDocuments("#neighborDocgen", a, sortedNonpartyDocs, authorizationModel, options);
+      docgen.displayDocuments("#neighborPartiesDocgen", a, sortedPartyDocs, authorizationModel, options);
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {
@@ -140,7 +139,7 @@
     model.map = gis
       .makeMap("neighbor-map", false)
       .updateSize()
-      .center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
+      .center(404168, 6693765, 14);
     $("#neighbor-show").applyBindings(model);
   });
 

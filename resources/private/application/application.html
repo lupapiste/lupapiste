@@ -563,24 +563,18 @@
             <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length > 0 -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
 
-              <table>
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
-                  <thead>
-                    <tr data-bind="with: $data[0]">
-                      <td colspan="3"><h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3></td>
-                    </tr>
-                  </thead>
+                  <div data-bind="with: $data[0]">
+                    <h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3>
+                  </div>
                   <!-- ko foreach: $data -->
-                  <tbody>
-                      <tr class="required-field-error-element-row">
-                        <td><span class="missing icon"></span></td>
-                        <td><span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span></td>
-                        <td>[<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]</td>
-                      </tr>
-                  </tbody>
+                  <div class="requiredField-line">
+                    <span class="missing icon"></span>
+                    <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                    <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+                  </div>
                   <!-- /ko -->
                 <!-- /ko -->
-              </table>
             <!-- /ko -->
 
              <button class="btn btn-primary"
