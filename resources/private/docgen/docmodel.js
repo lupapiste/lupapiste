@@ -976,7 +976,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
-        var parent$ = $(this.parentNode);
+        var parent$ = $(this).closest(".accordion-fields")
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
