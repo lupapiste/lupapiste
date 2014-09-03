@@ -116,6 +116,14 @@ var util = (function() {
     return res;
   }
 
+  function getDocumentOrder(doc) {
+    var num = doc.schema.info.order || 7;
+    return num * 10000000000 + doc.created / 1000;
+  }
+
+  function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
+  function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
+
   return {
     zeropad: zeropad,
     fluentify: fluentify,
@@ -133,7 +141,10 @@ var util = (function() {
     constantly: function(value) { return function() { return value; }; },
     isNum: isNum,
     getIn: getIn,
-    locKeyFromDocPath: locKeyFromDocPath
+    locKeyFromDocPath: locKeyFromDocPath,
+    getDocumentOrder: getDocumentOrder,
+    isPartyDoc: isPartyDoc,
+    isNotPartyDoc: isNotPartyDoc
   };
 
 })();
