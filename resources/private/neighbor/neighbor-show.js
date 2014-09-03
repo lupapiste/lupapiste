@@ -49,7 +49,7 @@
           x = l.x,
           y = l.y;
 
-      self.application(a).map.updateSize().clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 12).add({x: x, y: y});
+      self.application(a).map.updateSize().clear().center(x, y, 14).add({x: x, y: y});
 
       var partyDocs = _.filter(a.documents, isPartyDoc);
       var nonpartyDocs = _.filter(a.documents, isNotPartyDoc);
@@ -140,7 +140,7 @@
     model.map = gis
       .makeMap("neighbor-map", false)
       .updateSize()
-      .center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
+      .center(404168, 6693765, 14);
     $("#neighbor-show").applyBindings(model);
   });
 
