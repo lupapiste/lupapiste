@@ -316,9 +316,14 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
+
+  Input Text  create-search  ${propertyId}
+  Click enabled by test id  create-search-button
+  Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
+  Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
-  Input text by test id  create-address  ${address}
+  Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
+
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
@@ -329,9 +334,14 @@ Prepare first request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new-inforequest
-  Execute Javascript  $("input[data-test-id='create-property-id']").val("${propertyId}").change();
-  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
-  Input text by test id  create-address  ${address}
+
+  Input Text  create-search  ${propertyId}
+  Click enabled by test id  create-search-button
+  Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
+  Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
+  Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
+  Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
+
   Set animations off
   Click enabled by test id  create-continue
   Select operation path by permit type  ${permitType}
@@ -416,6 +426,7 @@ It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 
 Submit application
+  Open tab  requiredFieldSummary
   Click enabled by test id  application-submit-btn
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
@@ -494,6 +505,14 @@ Comment count is
   Wait until  Xpath Should Match X Times  //section[@id='${section}']//div[contains(@class,'comment-text')]  ${amount}
 
 #
+# Tasks
+#
+
+Task count is
+  [Arguments]  ${type}  ${amount}
+  Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="${type}"]  ${amount}
+
+#
 # Quick, jettison the db...
 #
 
@@ -567,37 +586,21 @@ Add neighbor
 Go to give new verdict
   Open tab  verdict
   Click enabled by test id  give-verdict
-  Wait Until  Element Should Be Visible  verdict-id
-  Wait Until  Element Should Be Enabled  verdict-id
+  Wait Until  Element Should Be Visible  backend-id
+  Wait Until  Element Should Be Enabled  backend-id
 
-Input verdict
-  [Arguments]  ${verdict-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text  verdict-id  ${verdict-id}
-  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
-  Input text  verdict-given  ${verdict-given-date}
-  Input text  verdict-official  ${verdict-official-date}
-  Input text  verdict-name  ${verdict-giver-name}
-  ## Trigger change manually
-  Execute JavaScript  $("#verdict-id").change();
-  Execute JavaScript  $("#verdict-type-select").change();
-  Execute JavaScript  $("#verdict-given").change();
-  Execute JavaScript  $("#verdict-official").change();
-  Execute JavaScript  $("#verdict-name").change();
-
-Submit verdict
-  Focus  verdict-submit
-  Wait Until  Element Should Be Enabled  verdict-submit
-  Click button  verdict-submit
-
-Throw in a verdict
+Submit empty verdict
   Go to give new verdict
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
-  Submit verdict
+  Go back
+  Click enabled by test id  publish-verdict
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-0-content']//span[@data-bind='dateString: paivamaarat.lainvoimainen']  1.6.2018
+
+Fetch verdict
+  Click enabled by test id  fetch-verdict
+  Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
+  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Confirm  dynamic-ok-confirm-dialog
 
 # User management
 

@@ -6,7 +6,7 @@
             [sade.util :as util]
             [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.domain :as domain]
@@ -88,7 +88,8 @@
             statements (map :statement details)
             auth       (map :auth details)
             mail-list  (map :email details)]
-          (update-application command {$pushAll {:statements statements :auth auth}})
+          (update-application command {$push {:statements {$each statements}
+                                              :auth {$each auth}}})
           (notifications/notify! :request-statement (assoc command :data {:email mail-list}))))))
 
 (defcommand delete-statement
@@ -113,7 +114,7 @@
                          (i18n/loc "statement.updated")
                          (i18n/loc "statement.given"))
         comment-target {:type :statement :id statementId}
-        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system nil user nil created)]
+        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)]
     (update-application command
       {:statements {$elemMatch {:id statementId}}}
       (util/deep-merge

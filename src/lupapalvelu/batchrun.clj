@@ -9,10 +9,12 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.user :as user]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.verdict-api :as application]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.dummy-email-server]))
 
 
 (defn get-timestamp-from-now [time-key amount]
@@ -25,11 +27,9 @@
 
 (defn- older-than [timestamp] {$lt timestamp})
 
-(defn- get-app-owner-email [application]
-  (let [owner (domain/get-auths-by-role application :owner)
-        owner-id (-> owner first :id)
-        user (user/get-user-by-id owner-id)]
-    (:email user)))
+(defn- get-app-owner [application]
+  (let [owner (domain/get-auths-by-role application :owner)]
+    (user/get-user-by-id (-> owner first :id))))
 
 
 ;; Email definition for the "open info request reminder"
@@ -140,16 +140,14 @@
                                                {:reminder-sent (older-than timestamp-1-month-ago)}]})]
     (doseq [app apps]
       (notifications/notify! :reminder-application-state {:application app
-                                                          :data {:email (get-app-owner-email app)}})
+                                                          :data {:email (:email (get-app-owner app))}})
       (update-application (application->command app)
         {$set {:reminder-sent (now)}}))))
 
 
 (defn send-reminder-emails [& args]
-
   (when (env/feature? :reminders)
     (mongo/connect!)
-
     (statement-request-reminder)
     (open-inforequest-reminder)
     (neighbor-reminder)
@@ -157,3 +155,32 @@
 
     (mongo/disconnect!)))
 
+(defn fetch-verdics []
+  (let [apps (mongo/select :applications {:state {$in ["sent"]}})
+        ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))
+        eraajo-user {:id "-"
+                     :enabled true
+                     :lastName "Er\u00e4ajo"
+                     :firstName "Lupapiste"
+                     :role "authority"
+                     :organizations ids-of-all-orgs}]
+    (doall
+      (pmap
+        (fn [app]
+          (let [command (application->command app)
+                verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
+            (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
+              ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+              (let [app-owner (get-app-owner app)]
+                (logging/with-logging-context
+                  {:applicationId (:id app)
+                   :userId        (:id app-owner)}
+                  (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict" :app-owner app-owner})))
+              (notifications/notify! :application-verdict command))))
+        apps))))
+
+(defn check-for-verdicts [& args]
+  (when (env/feature? :automatic-verdicts-checking)
+    (mongo/connect!)
+    (fetch-verdics)
+    (mongo/disconnect!)))

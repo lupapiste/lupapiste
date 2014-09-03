@@ -25,15 +25,11 @@
     (command apikey :approve-application :id verdict-given-application-ya-id :lang "fi") => ok?
     ;; Jatkoaika permit can be applied only for applications in state "verdictGiven or "constructionStarted
     (command apikey :create-continuation-period-permit :id verdict-given-application-ya-id) => (partial expected-failure? "error.command-illegal-state")
-    (command apikey :give-verdict :id verdict-given-application-ya-id
-                                  :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                  :given 123 :official 124) => ok?
+    (give-verdict apikey verdict-given-application-ya-id) => ok?
     ;; R app
     (generate-documents verdict-given-application-r apikey)
     (command apikey :approve-application :id verdict-given-application-r-id :lang "fi") => ok?
-    (command apikey :give-verdict :id verdict-given-application-r-id
-                                  :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                  :given 123 :official 124) => ok?
+    (give-verdict apikey verdict-given-application-r-id) => ok?
     ;; Jatkoaika permit can be applied only for YA type of applications
     (command apikey :create-continuation-period-permit :id verdict-given-application-r-id) => (partial expected-failure? "error.invalid-permit-type")
 
@@ -52,7 +48,5 @@
       ;; When a jatkoaika application is approved it goes straight into the state "closed".
       ;; It is forbidden to add jatkolupa for a jatkolupa, but already the wrong state blocks the try.
       (:state jatkoaika-application) => "closed"
-      (command apikey :give-verdict :id jatkoaika-application-id
-                                    :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                    :given 123 :official 124) => (partial expected-failure? "error.command-illegal-state")
+      (give-verdict apikey jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state")
       (command apikey :create-continuation-period-permit :id jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state"))))

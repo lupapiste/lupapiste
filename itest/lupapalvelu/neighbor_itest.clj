@@ -14,7 +14,7 @@
 
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :municipality sonja-muni)]
-    (command pena :add-comment :id application-id :text "foo" :target {:type "application"} :openApplication true) => ok?
+    (comment-application pena application-id true) => ok?
     (fact "no name"   (command sonja "neighbor-add" :id application-id :propertyId "p"           :street "s" :city "c" :zip "z" :email "e") => ok?)
     (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"             :city "c" :zip "z" :email "e") => ok?)
     (fact "no city"   (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s"           :zip "z" :email "e") => ok?)
@@ -24,7 +24,7 @@
 
 (defn- create-app-with-neighbor [& args]
   (let [application-id (apply create-app-id pena args)
-        resp (command pena :add-comment :id application-id :text "foo" :target {:type "application"} :openApplication true)
+        resp (comment-application pena application-id true)
         resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
         application (query-application pena application-id)

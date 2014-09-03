@@ -9,8 +9,8 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753  753-416-25-25  asuinrakennus
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-416-25-25
+  Create application the fast way  invite-app  753  753-423-2-159  asuinrakennus
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-423-2-159
 
 Mikko can see invite paasuunnittelija button
   Open tab  parties
@@ -43,7 +43,7 @@ Teppo declines invitation
 
 Mikko reinvites Teppo
   Mikko logs in
-  Open application  invite-app  753-416-25-25
+  Open application  invite-app  753-423-2-159
   Open tab  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Invite Teppo
@@ -56,7 +56,7 @@ Teppo accepts invitation
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
 Teppo can edit Mikko's application
-  Open application  invite-app  753-416-25-25
+  Open application  invite-app  753-423-2-159
   # OnChange event does not seem to get triggered. Do it manually.
   Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
   Wait Until  Page Should Contain  Tiedot tallennettu
@@ -65,11 +65,15 @@ Teppo can edit Mikko's application
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
-  Open application  invite-app  753-416-25-25
+  Open application  invite-app  753-423-2-159
   Wait Until  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
 
-Mikko can see invite paasuunnittelija button again
+Mikko can see that Teppo has accepted invitation
   Open tab  parties
+  # Check that invite accepted timestamp span is present
+  Element should be visible  xpath=//*[@data-test-id='invite-accepted-span']
+
+Mikko can see invite paasuunnittelija button again
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko can't invite himself
@@ -88,13 +92,13 @@ Mikko decides to go to the desert, put on his ipod, and listen some some British
 
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
-  Open application  invite-app  753-416-25-25
+  Open application  invite-app  753-423-2-159
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   [Teardown]  logout
 
 Mikko invites previously unknown user Oskari as paasuunnittelija
   Mikko logs in
-  Open application  invite-app  753-416-25-25
+  Open application  invite-app  753-423-2-159
   Open tab  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Click by test id  application-invite-paasuunnittelija

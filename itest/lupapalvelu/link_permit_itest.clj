@@ -26,10 +26,7 @@
         verdict-given-application-id (:id verdict-given-application)
         _                         (generate-documents verdict-given-application apikey)
         _                         (command apikey :approve-application :id verdict-given-application-id :lang "fi") => ok?
-        _                         (command apikey :give-verdict
-                                    :id verdict-given-application-id
-                                    :verdictId "aaa" :status 42 :name "Paatoksen antaja"
-                                    :given 123 :official 124) => ok?
+        _                         (give-verdict apikey verdict-given-application-id) => ok?
 
         ;; App 3 - with same permit type, verdict given, of operation "ya-jatkoaika"
         create-jatkoaika-resp     (command apikey :create-continuation-period-permit :id verdict-given-application-id) => ok?

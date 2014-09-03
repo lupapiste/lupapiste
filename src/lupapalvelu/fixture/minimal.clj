@@ -28,6 +28,16 @@
     :role "admin"
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
 
+   ;; ETL export user: solita-etl / solita-etl
+   {:id "solita-etl"
+    :username "solita-etl"
+    :email "lupapiste@solita.fi"
+    :firstName "Solita"
+    :lastName "DW ETL-lataus"
+    :enabled true
+    :role "trusted-etl"
+    :private {:password "$2a$10$uog/cI4n4vxFBNgku4xTpu6lcrF56cttBDW5zkTfDaSClgEw54/Nm"}}
+
    ;; Tampere
 
    ;; Tampere YA paakayttaja:  tampere-ya / tampere
@@ -509,7 +519,7 @@
                                         :text "Paloviranomainen"
                                         :email "jussi.viranomainen@tampere.fi"
                                         :name "Jussi Viranomainen"}]
-                     :krysp {:YA {:ftpUser "dev_ya_tampere" :version "2.1.2"}}
+                     :krysp {:YA {:url local-krysp :ftpUser "dev_ya_tampere" :version "2.1.2"}}
                      :operations-attachments ya-default-attachments-for-operations}
 
                     ;; Porvoo R

@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.strings :refer [lower-case]]
             [sade.env :as env]))
@@ -14,6 +15,7 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :trusted-etl {}
     (do
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
       {:_id nil}))) ; should not yield any results
@@ -23,11 +25,38 @@
     (basic-application-query-for user)
     (case (keyword (:role user))
       :applicant {:state {$ne "canceled"}}
-      :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
+      :authority {:state {$nin ["draft" "canceled"]}}
       {})))
 
+(defn- only-authority-sees [user checker items]
+  (filter (fn [m] (not (and (not (user/authority? user)) (checker m)))) items))
+
+(defn- only-authority-sees-drafts [user verdicts]
+  (only-authority-sees user :draft verdicts))
+
+(defn- commented-attachment-exists [application]
+  (let [attachments (set (map :id (:attachments application)))]
+    (update-in application [:comments]
+      #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
+
+(defn filter-application-content-for [application user]
+  (when (seq application)
+    (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
+          relates-to-draft (fn [m]
+                             (let [reference (or (:target m) (:source m))]
+                               (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
+      (-> application
+        (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
+        (update-in [:verdicts] (partial only-authority-sees-drafts user))
+        (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+        commented-attachment-exists
+        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
+
 (defn get-application-as [application-id user]
-  (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
+  {:pre [user]}
+  (filter-application-content-for
+    (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})
+    user))
 
 (defn get-application-no-access-checking [application-id]
   (mongo/select-one :applications {:_id application-id}))
@@ -90,15 +119,39 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [id timestamp name given status official]}]
-  {:kuntalupatunnus id
-   :timestamp timestamp
-   :paatokset [{:paivamaarat {:anto             given
-                              :lainvoimainen    official}
-                :poytakirjat [{:paatoksentekija name
-                               :status          status
-                               :paatospvm       given
-                               :paatoskoodi     (verdict/verdict-name status)}]}]})
+  [{:keys [verdictId backendId timestamp name given status official text section draft agreement]}]
+  (let [verdict-id (or verdictId (mongo/create-id))]
+    {:id verdict-id
+    :kuntalupatunnus backendId
+    :draft (if (nil? draft) false draft)
+    :timestamp timestamp
+    :sopimus agreement ; not in KRYSP
+    :paatokset [{:paivamaarat {:anto             given
+                               :lainvoimainen    official}
+                 :poytakirjat [{:paatoksentekija name
+                                :urlHash         verdict-id
+                                :status          status
+                                :paatos          text ; Only in rakennusvalvonta KRYSP
+                                :paatospvm       given
+                                :pykala          section
+                                :paatoskoodi     (when status (verdict/verdict-name status))}]}]}))
+
+;;
+;; Comment model
+;;
+
+(defn ->comment [text target type user to-user timestamp roles]
+  {:pre [(or (nil? text) (string? text)) (map? target)
+         type (map? user) (or (nil? to-user) (:role to-user))
+         (number? timestamp) (or (sequential? roles) (set? roles))]}
+
+  {:text    text
+   :target  target
+   :type    type
+   :created timestamp
+   :roles   (if to-user (conj (set roles) (:role to-user)) roles)
+   :to      (user/summary to-user)
+   :user    (user/summary user)})
 
 ;;
 ;; Application skeleton with default values

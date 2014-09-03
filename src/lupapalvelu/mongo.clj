@@ -16,6 +16,10 @@
            [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
+;; $each is missing from monger.operations.
+;; https://github.com/michaelklishin/monger/pull/84
+(def $each "$each")
+
 ;;
 ;; Utils
 ;;

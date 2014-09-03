@@ -16,11 +16,11 @@
             </div>
 
             <div>
-              <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-              <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
-
               <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
               <input data-bind="value: propertyId, valueUpdate: 'afterkeydown', readonly: !currentUser.isAuthority()" data-test-id="application-new-propertyid" type="text" maxlength="20" class="form-input text long"></input>
+
+              <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+              <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
 
               <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
 

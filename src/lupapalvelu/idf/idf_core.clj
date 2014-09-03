@@ -1,10 +1,8 @@
 (ns lupapalvelu.idf.idf-core
   (:require [digest]
             [sade.env :as env]
+            [sade.strings :as ss]
             [lupapalvelu.user :as user]))
-
-
-(def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
 (def send-or-receive-set #{:send :receive} )
 
@@ -40,7 +38,7 @@
                       [(send-app-for-partner partner-name) (send-key-for-partner partner-name)])
           text (str etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen app id ts key)]
       (assert key (str "key, parter/app=" partner-name " " app))
-      (digest/sha-256 (java.io.ByteArrayInputStream. (.getBytes text utf8))))))
+      (digest/sha-256 (java.io.ByteArrayInputStream. (ss/utf8-bytes text))))))
 
 (defn link-account! [email app id timestamp origin?]
   (let [path (str "partnerApplications." (id-for-partner app))]

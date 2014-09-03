@@ -1,9 +1,11 @@
 (ns lupapalvelu.itest-util
-  (:require [lupapalvelu.fixture.minimal :as minimal]
-            [lupapalvelu.core :refer [fail!]]
+  (:require [noir.request :refer [*request*]]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.core :refer [fail! unauthorized]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.web :as web]
             [sade.util :refer [fn-> fn->>]]
             [sade.http :as http]
             [midje.sweet :refer :all]
@@ -117,9 +119,7 @@
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
-(defn create-app
-  "Runs the create-application command, returns reply map. Use ok? to check it."
-  [apikey & args]
+(defn create-app-with-fn [f apikey & args]
   (let [args (->> args
                (apply hash-map)
                (merge {:operation "asuinrakennus"
@@ -128,7 +128,12 @@
                        :address "foo 42, bar"
                        :municipality (or (muni-for-key apikey) sonja-muni)})
                (mapcat seq))]
-    (apply command apikey :create-application args)))
+    (apply f apikey :create-application args)))
+
+(defn create-app
+  "Runs the create-application command, returns reply map. Use ok? to check it."
+  [apikey & args]
+  (apply create-app-with-fn command apikey args))
 
 (defn success [resp]
   (fact (:text resp) => nil)
@@ -152,10 +157,10 @@
 (defn expected-failure? [expected-text {:keys [ok text]}]
   (and (= ok false) (= text expected-text)))
 
-(def unauthorized? (partial expected-failure? "error.unauthorized"))
+(def unauthorized? (partial expected-failure? (:text unauthorized)))
 
 (fact "unauthorized?"
-  (unauthorized? {:ok false :text "error.unauthorized"}) => true
+  (unauthorized? unauthorized) => true
   (unauthorized? {:ok false :text "error.SOME_OTHER_REASON"}) => false
   (unauthorized? {:ok true}) => false)
 
@@ -212,40 +217,46 @@
     id => truthy
     id))
 
-(defn comment-application [id apikey open]
-  (fact "comment is added succesfully"
-    (command apikey :add-comment :id id :text "hello" :target {:type "application"} :openApplication open) => ok?))
+(defn comment-application
+  ([apikey id open?]
+    {:pre [(instance? Boolean open?)]}
+    (comment-application apikey id open? nil))
+  ([apikey id open? to]
+    (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open? :roles [])))
 
 (defn query-application
   "Fetch application from server.
-   Asserts that application is found and that the application data looks sane."
-  [apikey id]
-  {:pre  [apikey id]
-   :post [(:id %)
-          (not (s/blank? (:applicant %)))
-          (:created %) (pos? (:created %))
-          (:modified %) (pos? (:modified %))
-          (contains? % :opened)
-          (:permitType %)
-          (contains? % :permitSubtype)
-          (contains? % :infoRequest)
-          (contains? % :openInfoRequest)
-          (:operations %)
-          (:state %)
-          (:municipality %)
-          (:location %)
-          (:organization %)
-          (:address %)
-          (:propertyId %)
-          (:title %)
-          (:auth %) (pos? (count (:auth %)))
-          (:comments %)
-          (:schema-version %)
-          (:documents %)
-          (:attachments %)]}
-  (let [{:keys [application ok]} (query apikey :application :id id)]
-    (assert ok)
-    application))
+   Asserts that application is found and that the application data looks sane.
+   Takes an optional query function (query or local-query)"
+  ([apikey id] (query-application query apikey id))
+  ([f apikey id]
+    {:pre  [apikey id]
+     :post [(:id %)
+            (not (s/blank? (:applicant %)))
+            (:created %) (pos? (:created %))
+            (:modified %) (pos? (:modified %))
+            (contains? % :opened)
+            (:permitType %)
+            (contains? % :permitSubtype)
+            (contains? % :infoRequest)
+            (contains? % :openInfoRequest)
+            (:operations %)
+            (:state %)
+            (:municipality %)
+            (:location %)
+            (:organization %)
+            (:address %)
+            (:propertyId %)
+            (:title %)
+            (:auth %) (pos? (count (:auth %)))
+            (:comments %)
+            (:schema-version %)
+            (:documents %)
+            (:attachments %)
+            (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
+    (let [{:keys [application ok]} (f apikey :application :id id)]
+      (assert ok)
+      application)))
 
 (defn create-and-submit-application
   "Returns the application map"
@@ -254,6 +265,15 @@
         resp  (command apikey :submit-application :id id)]
     resp => ok?
     (query-application apikey id)))
+
+(defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
+  (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
+        verdict-id (:verdictId new-verdict-resp)]
+    (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+    (f apikey :publish-verdict :id application-id :verdictId verdict-id)))
+
+(defn give-verdict [apikey application-id & args]
+  (apply give-verdict-with-fn command apikey application-id args))
 
 (defn allowed? [action & args]
   (fn [apikey]
@@ -279,12 +299,12 @@
     messages))
 
 (defn contains-application-link? [application-id {body :body}]
-  (let [[href a-id a-id-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)#!/application/([A-Za-z0-9-]+)" (:plain body))]
-    (= application-id a-id a-id-again)))
+  (let [[href a-id] (re-find #"(?sm)http.+/app/fi/applicant#!/application/([A-Za-z0-9-]+)" (:plain body))]
+    (= application-id a-id)))
 
 (defn contains-application-link-with-tab? [application-id tab {body :body}]
-  (let [[href a-id a-tab a-id-again a-tab-again] (re-find #"(?sm)http.+/app/fi/applicant\?hashbang=!/application/([A-Za-z0-9-]+)/([a-z]+)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
-    (and (= application-id a-id a-id-again) (= tab a-tab a-tab-again))))
+  (let [[href a-id a-tab] (re-find #"(?sm)http.+/app/fi/applicant#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
+    (and (= application-id a-id) (= tab a-tab))))
 
 ;;
 ;; Stuffin' data in
@@ -385,3 +405,34 @@
     (addCookie [cookie]  (swap! store assoc (.getName cookie) cookie))
     (clear []            (reset! store {}))
     (clearExpired [])))
+
+;; API for local operations
+
+(defn make-local-request [apikey]
+  {:scheme "http"
+   :user (find-user-from-minimal-by-apikey apikey)}
+  )
+
+(defn local-command [apikey command-name & args]
+  (binding [*request* (make-local-request apikey)]
+    (web/execute-command (name command-name) (apply hash-map args) *request*)))
+
+(defn local-query [apikey query-name & args]
+  (binding [*request* (make-local-request apikey)]
+    (web/execute-query (name query-name) (apply hash-map args) *request*)))
+
+(defn create-local-app
+  "Runs the create-application command locally, returns reply map. Use ok? to check it."
+  [apikey & args]
+  (apply create-app-with-fn local-command apikey args))
+
+(defn create-and-submit-local-application
+  "Returns the application map"
+  [apikey & args]
+  (let [id    (:id (apply create-local-app apikey args))
+        resp  (local-command apikey :submit-application :id id)]
+    resp => ok?
+    (query-application local-query apikey id)))
+
+(defn give-local-verdict [apikey application-id & args]
+  (apply give-verdict-with-fn local-command apikey application-id args))

@@ -13,7 +13,7 @@
     (command apikey :submit-application :id application-id) => ok?
     (command apikey :approve-application :id application-id :lang "fi") => ok?
     (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.command-illegal-state")
-    (command apikey :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+    (give-verdict apikey application-id) => ok?
     (let [application (query-application apikey application-id)]
       (:state application) => "verdictGiven"
       )
@@ -29,7 +29,7 @@
         application-id         (:id application)]
     (generate-documents application apikey)
     (command apikey :approve-application :id application-id :lang "fi") => ok?
-    (command apikey :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+    (give-verdict apikey application-id) => ok?
     (let [application (query-application apikey application-id) => truthy]
       (:state application) => "verdictGiven")
     (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.invalid-permit-type")))

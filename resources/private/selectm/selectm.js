@@ -14,7 +14,12 @@
     var e = $(this),
         t = e.attr("data-loc");
     if (t) {
-      if (e.is("input")) { e.attr("placeholder", loc([t, prefix])); } else { e.text(loc([t, prefix])); }
+      var locci = prefix ? loc([t, prefix]) : loc(t);
+      if (e.is("input")) {
+        e.attr("placeholder", locci);
+      } else {
+        e.text(locci);
+      }
     }
   }
 

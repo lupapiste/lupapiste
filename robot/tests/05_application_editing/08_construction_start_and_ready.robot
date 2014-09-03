@@ -10,7 +10,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Start_ready_app_${secs}
-  Create application the fast way   ${appname}  753  753-416-25-23  ya-katulupa-vesi-ja-viemarityot
+  Create application the fast way   ${appname}  753  753-423-2-162  ya-katulupa-vesi-ja-viemarityot
 
 Sonja fills in the application fields required by krysp
   Fill tyoaika fields
@@ -20,8 +20,8 @@ Sonja fills in the application fields required by krysp
 Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
-  Throw in a verdict
-  Wait until  Element should not be visible  verdict-submit
+  Open tab  verdict
+  Submit empty verdict
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
   Open tab  tasks
@@ -52,14 +52,13 @@ Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Tab should be visible  tasks
 
-
 *** Keywords ***
 
 Sets construction started/ready via modal datepicker dialog
   [Arguments]  ${openDialogButtonId}  ${date}
   Click enabled by test id  ${openDialogButtonId}
-  Wait until  element should be visible  dialog-modal-datepicker
-  Wait Until  Element Should Be Enabled  modal-datepicker-date
+  Wait until  element should be visible  modal-datepicker-date
+  Element Should Be Enabled  modal-datepicker-date
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text by test id  modal-datepicker-date  ${date}
   Click enabled by test id  modal-datepicker-continue

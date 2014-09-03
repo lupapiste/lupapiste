@@ -4,12 +4,12 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]))
 
-(defn- invite [apikey application-id document-id doc-name email]
+(defn- invite [apikey application-id document-id doc-name email & [text]]
   (command apikey :invite
     :id application-id
     :email email
     :title email
-    :text email
+    :text  (or text email)
     :documentName doc-name
     :documentId document-id
     :path ""))
@@ -18,7 +18,7 @@
 
 (facts* "Applicant invites designer"
 
-  (doseq [user-key [mikko teppo veikko sonja sipoo]]
+  (doseq [user-key [mikko teppo veikko sonja]]
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
@@ -43,14 +43,15 @@
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
 
-      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?
+      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kustuttu") => ok?
 
       (count (:invites (query teppo :invites))) => 1
 
       (let [email (last-email)]
         email => (partial contains-application-link? application-id)
         (:to email) => (email-for-key teppo)
-        (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"))
+        (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
+        (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
       (command sonja :remove-auth :id application-id :email (email-for-key teppo)) => unauthorized?
@@ -79,7 +80,7 @@
     (last-email) ; Inbox zero
 
     (fact "Sonja adds comment, only Mikko gets email"
-      (comment-application application-id sonja false)
+      (comment-application sonja application-id false) => ok?
       (let [emails (sent-emails)]
         (count emails) => 1
         (:to (first emails)) => (email-for-key mikko)))
@@ -89,7 +90,7 @@
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id application-id :text (email-for-key teppo) :target {:type "application"} :openApplication true) => ok?)
+      (comment-application teppo application-id true) => ok?)
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
@@ -134,7 +135,7 @@
       (fact "Pena can still approve invite"
         (command pena :approve-invite :id application-id) => ok?))))
 
-(facts* "Auhtority invites designer"
+(facts* "Authority invites designer"
   (doseq [user-key [sonja mikko teppo]]
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
@@ -158,7 +159,7 @@
       (command teppo :approve-invite :id id) => ok?)
 
     (fact "Teppo must be able to comment!"
-      (command teppo :add-comment :id id :text (email-for-key teppo) :target {:type "application"}) => ok?)
+      (comment-application teppo id false) => ok?)
 
     (fact "Teppo must be able to invite another designer, Mikko!"
       (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
