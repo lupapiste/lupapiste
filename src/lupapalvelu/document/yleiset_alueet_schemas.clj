@@ -42,13 +42,13 @@
 
 (def tyo-aika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date}                 ;; alkuPvm / loppuPvm
-    {:name "tyoaika-paattyy-pvm" :type :date}))
+    {:name "tyoaika-alkaa-pvm" :type :date :required true} ;; alkuPvm / loppuPvm
+    {:name "tyoaika-paattyy-pvm" :type :date :required true}))
 
 (def tyo-aika-for-jatkoaika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date :readonly true}  ;; alkuPvm / loppuPvm
-    {:name "tyoaika-paattyy-pvm" :type :date}))
+    {:name "tyoaika-alkaa-pvm" :type :date :readonly true :required true}  ;; alkuPvm / loppuPvm
+    {:name "tyoaika-paattyy-pvm" :type :date :required true}))
 
 (def hankkeen-kuvaus-jatkoaika
   (body

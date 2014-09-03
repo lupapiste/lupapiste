@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils]]
             [lupapalvelu.migration.core :refer [defmigration]]
@@ -7,6 +8,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]))
@@ -22,16 +24,6 @@
   (doseq [application (mongo/select :submitted-applications {:schema-version {$exists false}} {:documents true})]
     (mongo/update-by-id :submitted-applications (:id application) {$set {:schema-version 1
                                                                          :documents (map drop-schema-data (:documents application))}})))
-
-(defn verdict-to-verdics [{verdict :verdict}]
-  {$set {:verdicts (map domain/->paatos verdict)}
-   $unset {:verdict 1}})
-
-(defmigration verdicts-migraation
-  {:apply-when (pos? (mongo/count  :applications {:verdict {$exists true}}))}
-  (let [applications (mongo/select :applications {:verdict {$exists true}})]
-    (doall (map #(mongo/update-by-id :applications (:id %) (verdict-to-verdics %)) applications))))
-
 
 (defn fix-invalid-schema-infos [{documents :documents operations :operations :as application}]
   (let [updated-documents (doall (for [o operations]
@@ -446,7 +438,113 @@
       (when (seq updates)
         (mongo/update-by-id collection (:id application) {$unset updates})))))
 
-(defmigration cleanup-activation-collection
-  (let [active-accounts (map :email (mongo/select :users {:enabled true} {:email 1}))]
-    (mongo/remove-many :activation {:email {$in active-accounts}})))
+(defmigration cleanup-activation-collection-v2
+  (let [users (map :email (mongo/select :users {} {:email 1}))]
+    (mongo/remove-many :activation {:email {$nin users}})))
 
+(defmigration generate-verdict-ids
+  (doseq [application (mongo/select :applications {"verdicts.0" {$exists true}} {:verdicts 1, :attachments 1})]
+    (let [verdicts (map #(assoc % :id (mongo/create-id)) (:verdicts application))
+          id-for-urlhash (reduce
+                            #(let [hashes (->> %2 :paatokset (map :poytakirjat) flatten (map :urlHash) (remove nil?))]
+                               (merge %1 (zipmap hashes (repeat (:id %2)))))
+                            {} verdicts)
+          attachments (map
+                        (fn [{:keys [target] :as a}]
+                          (if (= "verdict" (:type target ))
+                            (if-let [hash (:id target)]
+                              ; Attachment for verdict from krysp
+                              (assoc a :target (assoc target :id (id-for-urlhash hash) :urlHash hash))
+                              ; Attachment for manual verdict
+                              (assoc-in a [:target :id] (:id (first verdicts))))
+                            a))
+                        (:attachments application))]
+
+      (mongo/update-by-id :applications (:id application) {$set {:verdicts verdicts, :attachments attachments}}))))
+
+(defmigration convert-task-source-ids-v2
+  (doseq [{verdicts :verdicts :as application} (mongo/select :applications {"tasks.0" {$exists true}} {:verdicts 1, :tasks 1})]
+    (let [id-for-kuntalupatunnus (reduce #(if (:kuntalupatunnus %2) (assoc %1 (:kuntalupatunnus %2) (:id %2)) %1) {} verdicts)
+          verdict-ids (set (map :id verdicts))
+          tasks (map
+                  (fn [{:keys [source] :as task} ]
+                    (if (and (= "verdict" (:type source)) (not (verdict-ids (:id source))) )
+                      (if (empty? verdicts)
+                        (assoc task :source {}) ; no verdicts, clear invalid source
+                        (let [kuntalupatunnus (first (clojure.string/split (:id source) #"/"))
+                              verdict-id (or
+                                           (id-for-kuntalupatunnus kuntalupatunnus)
+                                           (:id (last verdicts)))]
+                          (if verdict-id
+                            (assoc-in task [:source :id] verdict-id)
+                            (do
+                              (warnf "Unable to resolve source id,\n  application id: %s,\n  task: %s,\n  id-for-kuntalupatunnus: %s \n" (:id application) task id-for-kuntalupatunnus)
+                              task))))
+                      task))
+                  (:tasks application))]
+      (when-not (= tasks (:tasks application))
+        (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}})))))
+
+(defmigration comment-roles
+  (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
+    (mongo/update-by-id :applications (:id application)
+      {$set (mongo/generate-array-updates :comments (:comments application) (constantly true) :roles [:applicant :authority])})))
+
+(defmigration unify-attachment-latest-version
+  (doseq [application (mongo/select :applications {"state" {$in ["sent", "verdictGiven" "complement-needed", "constructionStarted"]}} {:attachments 1})
+          {:keys [latestVersion] :as attachment} (:attachments application)]
+    (let [last-version (last (:versions attachment))
+          last-version-index (dec (count (:versions attachment)))]
+      (when (and last-version (not= latestVersion last-version))
+        (println (:id application) (:id attachment) "last version is out of sync")
+
+        (assert (= (:version last-version) (:version latestVersion)))
+
+        (when-not (= (:fileId last-version) (:fileId latestVersion)) (mongo/delete-file-by-id (:fileId last-version)))
+
+        (println "Replacing " last-version " with " (:latestVersion attachment))
+
+        (assert
+          (pos?
+            (mongo/update-by-query
+              :applications
+              {:_id (:id application), :attachments {$elemMatch {:id (:id attachment)}}}
+              {$set {(str "attachments.$.versions." last-version-index) (:latestVersion attachment)}})))))))
+
+(defmigration fix-missing-organizations
+  {:apply-when (pos? (mongo/count :applications {:organization nil}))}
+  (doseq [{:keys [id municipality permitType]} (mongo/select :applications {:organization nil} {:municipality 1, :permitType 1})]
+    (let [organization-id (:id (organization/resolve-organization municipality permitType))]
+      (assert organization-id)
+      (mongo/update-by-id :applications id {$set {:organization organization-id}}))))
+
+(defn flatten-huoneisto-data [{documents :documents}]
+  (map 
+    (fn [doc]
+      (if-let [to-update (seq (tools/deep-find doc :huoneistot ))]       
+        (reduce 
+          #(let [[p v] %2
+                 path (conj p :huoneistot)]
+             (reduce 
+               (fn [old-doc [n _]] 
+                 (update-in old-doc (conj path n)  
+                            (fn [old-data]
+                              (-> old-data
+                                (merge (:huoneistoTunnus old-data))
+                                (dissoc :huoneistoTunnus)
+                                (merge (:huoneistonTyyppi old-data))
+                                (dissoc :huoneistonTyyppi)
+                                (merge (:varusteet old-data))
+                                (dissoc :varusteet)
+                                ))))
+               %1
+               v)) doc to-update)
+        doc
+        )) documents))
+
+(defmigration flatten-huoneisto
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {:infoRequest false})]
+    (if (some seq (map #(tools/deep-find % :huoneistot) (:documents application))) 
+      (let [updated-documents (flatten-huoneisto-data application)]
+        (mongo/update-by-id collection (:id application) {$set {:documents updated-documents}})))))

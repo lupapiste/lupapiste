@@ -10,20 +10,18 @@ var docgen = (function () {
     function initSelectWithOther(i, e) { updateOther($(e)); }
     function selectWithOtherChanged() { updateOther($(this)); }
 
-    function getDocumentOrder(doc) {
-      var num = doc.schema.info.order || 7;
-      return num * 10000000000 + doc.created / 1000;
-    }
-
     var isDisabled = options && options.disabled;
-    var sortedDocs = _.sortBy(documents, getDocumentOrder);
     var docgenDiv = $(containerSelector).empty();
 
-    _.each(sortedDocs, function (doc) {
+    _.each(documents, function (doc) {
       var schema = doc.schema;
-      var docModel = new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options);
+      var docModel = new DocModel(schema, doc, application, authorizationModel, options);
 
       docgenDiv.append(docModel.element);
+
+      if (doc.validationErrors) {
+        docModel.showValidationResults(doc.validationErrors);
+      }
 
       if (schema.info.repeating && !isDisabled && authorizationModel.ok('create-doc')) {
 
@@ -34,8 +32,13 @@ var docgen = (function () {
             ajax
               .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: docModel.getCollection() })
               .success(function (data) {
-                var newDocId = data.doc;
-                var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;
+                var newDoc = {
+                  id: data.doc,
+                  data: {},
+                  meta: {},
+                  validationErrors: doc.validationErrors
+                };
+                var newElem = new DocModel(schema, newDoc, application, authorizationModel).element;
                 $(self).before(newElem);
               })
               .call();

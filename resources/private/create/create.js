@@ -13,11 +13,11 @@
   var model = new function() {
     var self = this;
 
-    self.goPhase1 = function() { 
+    self.goPhase1 = function() {
       window.location = "#!/create-part-1";
       self.map.updateSize();
      };
-      
+
 
     self.goPhase2 = function() {
       window.location = "#!/create-part-2";
@@ -109,8 +109,27 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      var zoomLevel = features.enabled("use-wmts-map") ? 2 : 0;
-      if (!self.map) self.map = gis.makeMap("create-map").center(404168, 7205000, zoomLevel).addClickHandler(self.click);
+      var zoomLevel = 2;
+      if (self.map) {
+        self.map.clear();
+      } else {
+        self.map = gis
+          .makeMap("create-map", false)
+          .center(404168, 7205000, zoomLevel)
+          .addClickHandler(self.click)
+          .setPopupContentProvider(
+              function() {
+                var html = $("div.map-select-info")[0].innerHTML;
+                return {
+                  html: html,
+                  applyBindingsFn: function(popupId) {
+                    $("#" + popupId + "_contentDiv").applyBindings(self);
+                  }
+                };
+              }
+          );
+      }
+
       return self
         .search("")
         .x(0)
@@ -123,11 +142,12 @@
         .requestType(null)
     };
 
-    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
-    self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}); } return self.x(x).y(y); };
+    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0); };
+    self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
+    self.propertyIdOk = ko.computed(function(value) { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
 
     //
     // Concurrency control:
@@ -165,7 +185,7 @@
       return false;
     };
 
-    var zoomLevel = {
+    var zoomLevelEnum = {
       "540": 6,
       "550": 7,
       "560": 9
@@ -183,7 +203,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevelEnum[item.type] || 11); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
@@ -201,11 +221,11 @@
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
       [{kind: "address"}, comp(fillAddress, self.searchNow)],
-      [{kind: "address", type: "street"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
-      [{kind: "address", type: "street-city"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
-      [{kind: "address", type: "street-number"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
-      [{kind: "address", type: "street-number-city"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
-      [{kind: "property-id"}, comp(zoomer(features.enabled("use-wmts-map") ? 14 : 12), self.searchNow)]
+      [{kind: "address", type: "street"}, zoomer(13)],
+      [{kind: "address", type: "street-city"}, zoomer(13)],
+      [{kind: "address", type: "street-number"}, zoomer(14)],
+      [{kind: "address", type: "street-number-city"}, zoomer(14)],
+      [{kind: "property-id"}, comp(zoomer(14), self.searchNow)]
     ];
 
     var renderers = [
@@ -247,7 +267,13 @@
         .appendTo(ul);
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) {
+      if (!_.isEmpty(value)) {
+        return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value);
+      } else {
+        return self;
+      }
+    };
 
     self.searchPointByAddress = function(address) {
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
@@ -257,8 +283,8 @@
                 y = data.location.y;
             self
               .useManualEntry(false)
+              .center(x, y, 13)
               .setXY(x, y)
-              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
@@ -275,8 +301,8 @@
                 y = data.y;
             self
               .useManualEntry(false)
+              .center(x, y, 14)
               .setXY(x, y)
-              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
               .propertyId(id)
               .beginUpdateRequest()
               .searchAddress(x, y);

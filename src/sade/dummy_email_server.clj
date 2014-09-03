@@ -13,9 +13,9 @@
 ;; Dummy email server:
 ;;
 
-(when (get-in (env/get-config) [:email :dummy-server])
+(when (env/value :email :dummy-server)
 
-  (warn "Initializing dummy email server")
+  (info "Initializing dummy email server")
 
   (def sent-messages (atom []))
 
@@ -28,8 +28,8 @@
       body))
 
   (defn deliver-email [to subject body]
-    (assert to "must provide 'to'")
-    (assert subject "must provide 'subject'")
+    (assert (string? to) "must provide 'to'")
+    (assert (string? subject) "must provide 'subject'")
     (assert body "must provide 'body'")
     (swap! sent-messages conj {:to to
                                :subject subject
@@ -52,19 +52,20 @@
       (clojure.pprint/pprint message)))
 
   (defcommand "send-email"
-    {:parameters [:to :subject :template]}
+    {:parameters [:to :subject :template]
+     :roles      [:anonymous]}
     [{{:keys [to subject template] :as data} :data}]
-    (if-let [error (sade.email/send-email-message to subject (email/apply-template template (dissoc data :from :to :subject :template)))]
+    (if-let [error (email/send-email-message to subject (email/apply-template template (dissoc data :from :to :subject :template)))]
       (fail "send-email-message failed" error)
       (ok)))
 
   (defquery "sent-emails"
-    {}
+    {:roles [:anonymous]}
     [{{reset :reset :or {reset false}} :data}]
     (ok :messages (messages :reset reset)))
 
   (defquery "last-email"
-    {}
+    {:roles [:anonymous]}
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 

@@ -8,7 +8,5 @@
   (fact ".. list allowed actions"
     (let [result (query mikko :allowed-actions)]
       result => truthy
-      result => (has some :ping))))
+      result => (has some :allowed-actions))))
 
-(fact "ping"
-  (query mikko :ping) => {:ok true :text "pong"})

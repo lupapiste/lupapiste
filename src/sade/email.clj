@@ -11,11 +11,16 @@
             [net.cgrand.enlive-html :as html]))
 
 ;;
-;; Default headers:
+;; Configuration:
 ;; ----------------
 
-(def defaults {:from     "\"Lupapiste\" <lupapiste@lupapiste.fi>"
-               :reply-to "\"Lupapiste\" <lupapiste@lupapiste.fi>"})
+(def defaults
+  (merge
+    {:from     "\"Lupapiste\" <no-reply@lupapiste.fi>"
+     :reply-to "\"Lupapiste\" <no-reply@lupapiste.fi>"}
+    (select-keys (env/value :email) [:from :reply-to :bcc :user-agent])))
+
+(def config (select-keys (env/value :email) [:host :port :user :pass :sender :ssl :tls]))
 
 ;;
 ;; Delivery:
@@ -23,13 +28,11 @@
 ;;
 
 (def deliver-email (fn [to subject body]
-                     (assert to "must provide 'to'")
-                     (assert subject "must provide 'subject'")
+                     (assert (string? to) "must provide 'to'")
+                     (assert (string? subject) "must provide 'subject'")
                      (assert body "must provide 'body'")
-                     (let [config     (:email (env/get-config))
-                           error      (postal/send-message
-                                        config
-                                        (merge defaults (dissoc config :dummy-server :host :port) {:to to :subject subject :body body}))]
+                     (let [message (merge defaults {:to to :subject subject :body body})
+                           error (postal/send-message config message)]
                        (when-not (= (:error error) :SUCCESS)
                          error))))
 
@@ -120,7 +123,7 @@
 
 (defn- html->plain [html]
   (-> html
-    (.getBytes "UTF-8")
+    (ss/utf8-bytes)
     (io/reader :encoding "UTF-8")
     enlive/html-resource
     (enlive/select [:body])

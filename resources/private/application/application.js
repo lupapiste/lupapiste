@@ -51,7 +51,7 @@
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
-  var createTaskModel = new LUPAPISTE.CreateTaskModel();
+  var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
 
   var authorities = ko.observableArray([]);
@@ -160,7 +160,7 @@
       commentModel.refresh(app);
 
       // Verdict details
-      verdictModel.refresh(app);
+      verdictModel.refresh(app, applicationDetails.authorities);
 
       // Map
       mapModel.refresh(app);
@@ -202,10 +202,18 @@
       }
 
       // Documents
-      var nonpartyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; });
-      var partyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; });
-      docgen.displayDocuments("#applicationDocgen", app, nonpartyDocs, authorizationModel);
-      docgen.displayDocuments("#partiesDocgen",     app, partyDocs, authorizationModel);
+      var nonpartyDocs = _.filter(app.documents, util.isNotPartyDoc);
+      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
+      var partyDocs = _.filter(app.documents, util.isPartyDoc);
+      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
+
+      var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
+      var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
+
+      applicationModel.initValidationErrors(nonpartyDocErrors.concat(partyDocErrors));
+
+      docgen.displayDocuments("#applicationDocgen", app, sortedNonpartyDocs, authorizationModel);
+      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel);
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -317,7 +325,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors","task"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -428,7 +436,7 @@
       changeLocationModel: changeLocationModel,
       comment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
-      createTaskModel: createTaskModel,
+      createTask: createTaskController,
       invite: inviteModel,
       map: mapModel,
       neighbor: neighborActions,
@@ -445,7 +453,6 @@
     $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
     $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
-    $(createTaskModel.dialogSelector).applyBindings({createTaskModel: createTaskModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
     attachmentTemplatesModel.init();
   });

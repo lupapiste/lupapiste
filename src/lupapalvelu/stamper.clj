@@ -1,10 +1,15 @@
 (ns lupapalvelu.stamper
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
             [clojure.string :as s]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [slingshot.slingshot :refer [throw+]]
+            [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.util :as util]
+            [lupapalvelu.core :refer [now]]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
            [java.awt Graphics2D Color Image BasicStroke Font AlphaComposite RenderingHints]
@@ -12,6 +17,8 @@
            [java.awt.font FontRenderContext TextLayout]
            [java.awt.image BufferedImage RenderedImage]
            [javax.imageio ImageIO]
+           [com.lowagie.text Rectangle]
+           [com.lowagie.text.exceptions InvalidPdfException]
            [com.lowagie.text.pdf PdfGState PdfStamper PdfReader]
            [com.google.zxing BarcodeFormat]
            [com.google.zxing.qrcode QRCodeWriter]
@@ -30,10 +37,10 @@
 (defn draw-text [g text x y]
   (.draw text g x y))
 
-(defn make-stamp [verdict created municipality transparency]
+(defn make-stamp [^String verdict ^long created ^String municipality ^Integer transparency]
   (let [font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
-        texts (map (fn [text] (TextLayout. text font frc))
+        texts (map (fn [text] (TextLayout. ^String text font frc))
                    [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
                     municipality
                     "LUPAPISTE.fi"])
@@ -64,11 +71,40 @@
 
 (declare stamp-pdf stamp-image)
 
-(defn stamp [stamp content-type in out x-margin y-margin transparency]
+(defn- stamp-stream [stamp content-type in out x-margin y-margin transparency]
   (cond
     (= content-type "application/pdf")      (do (stamp-pdf stamp in out x-margin y-margin transparency) nil)
     (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin transparency) nil)
     :else                                   nil))
+
+(defn- create-pdftk-file [in file-name]
+  (let [result (shell/sh "pdftk" "-" "output" file-name :in in)]
+    ; POSIX return code 0 signals success, others are failure codes
+    (when-not (zero? (:exit result))
+      (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
+
+(def ^:private tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
+
+(defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
+  (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
+    (debugf "Redownloading file %s from DB and running `pdftk - output %s`" file-id tmp-file-name)
+    (try
+      (with-open [in ((:content (mongo/download file-id)))]
+        (create-pdftk-file in tmp-file-name))
+      (with-open [in (io/input-stream tmp-file-name)]
+        (stamp-stream stamp-graphic "application/pdf" in out x-margin y-margin transparency))
+      (finally
+        (fs/delete tmp-file-name)
+        nil))))
+
+(defn stamp [stamp file-id out x-margin y-margin transparency]
+  (try
+    (let [{content-type :content-type :as attachment} (mongo/download file-id)]
+      (with-open [in ((:content attachment))]
+        (stamp-stream stamp content-type in out x-margin y-margin transparency)))
+    (catch InvalidPdfException e
+      (info (str "Retry stamping because: " (.getMessage e)))
+      (retry-stamping stamp file-id out x-margin y-margin transparency))))
 
 ;;
 ;; Stamp PDF:
@@ -81,11 +117,41 @@
   (- 1.0 (/ (double transparency) 255.0)))
 
 (defn- get-sides [itext-bean]
-  (select-keys (bean itext-bean) [:top :right :bottom :left]))
+  (if (map? itext-bean)
+    itext-bean
+    (select-keys (bean itext-bean) [:top :right :bottom :left :width :height])))
 
-(defn- stamp-pdf
+(defn- make-rectangle [{:keys [left bottom right top]}]
+  ; (Rectangle. llx lly urx ury)
+  (Rectangle. ^Float left ^Float bottom ^Float right ^Float top))
+
+(defn- rotate-rectangle [r rotation]
+  (let [^Rectangle rectangle (if (map? r) (make-rectangle r) r)]
+    (if (pos? rotation)
+     (rotate-rectangle (.rotate rectangle) (- rotation 90))
+     rectangle)))
+
+(defn- calculate-x-y
   "About calculating stamp location, see http://support.itextpdf.com/node/106"
-  [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
+  [page-box crop-box page-rotation stamp-width x-margin y-margin]
+  (let [visible-area (rotate-rectangle crop-box page-rotation)
+        sides (get-sides visible-area)
+        page-size (get-sides (rotate-rectangle page-box page-rotation))
+        rotate? (pos? (mod page-rotation 180))
+        ; If the visible area does not fit into page, we must crop
+        max-x (if (or (< (:width page-size) (+ (:right sides) (:left sides)))
+                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270))
+                    )
+               (- (:right sides) (:left sides))
+               (:right sides))
+        min-y (:bottom sides)
+        x (- max-x stamp-width (mm->u x-margin))
+        y (+ min-y (mm->u y-margin))]
+    (debugf "Rotation %s, visible-area with rotation: %s, page with rotation %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
+      page-rotation sides page-size max-x min-y x y)
+    [x y]))
+
+(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
@@ -95,20 +161,13 @@
           gstate (doto (PdfGState.)
                    (.setFillOpacity opacity)
                    (.setStrokeOpacity opacity))]
-      (doseq [page (range (.getNumberOfPages reader))]
-        (let [visible-area (.getCropBox reader (inc page))
-              rotation (.getPageRotation reader (inc page))
-              _ (debug "Rotation:" rotation)
-              rotate? (pos? (mod rotation 180))
-              sides   (get-sides visible-area)
-              _ (debug "visible-area without rotation:" sides)
-              max-x (if rotate? (- (:top sides) (:bottom sides)) (- (:right sides) (:left sides)))
-              min-y (if rotate? (:left sides) (:bottom sides))
-              _ (debug "max-x/min-y" max-x min-y)
-              x (- max-x stamp-width (mm->u x-margin))
-              y (+ min-y (mm->u y-margin))
-              _ (debug "Stamp location" x y)]
-          (doto (.getOverContent stamper (inc page))
+      (doseq [i (range (.getNumberOfPages reader))]
+        (let [page (inc i)
+              page-box (.getPageSize reader page)
+              crop-box (.getCropBox reader page)
+              rotation (.getPageRotation reader page)
+              [x y] (calculate-x-y page-box crop-box rotation stamp-width x-margin y-margin)]
+          (doto (.getOverContent stamper page)
             (.saveState)
             (.setGState gstate)
             (.addImage stamp stamp-width 0 0 stamp-height x y)
@@ -178,4 +237,17 @@
         (.pack)
         (.setLocationRelativeTo nil)
         (.setVisible true))
-      frame)))
+      frame))
+
+  ; Run this in REPL and check that every new file has been stamped
+  (let [d "problematic-pdfs"
+        my-stamp (make-stamp "OK" 0 "Solita Oy" 0)]
+    (doseq [f (remove #(.endsWith % "-leima.pdf") (fs/list-dir d))]
+      (println f)
+      (with-open [my-in  (io/input-stream (str d "/" f))
+                  my-out (io/output-stream (str d "/" f "-leima.pdf"))]
+        (try
+          (stamp-pdf my-stamp my-in my-out 10 100 0)
+          (catch Throwable t (error t))))))
+
+  )

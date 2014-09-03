@@ -50,7 +50,7 @@
 
     (facts "by verdict ID"
       (fact "no verdict, matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => no-results?)
-      (command sonja :give-verdict :id application-id :verdictId "Hakup\u00e4\u00e4t\u00f6s-2014-1" :status 1 :name "" :given 123 :official 124) => ok?
+      (give-verdict sonja application-id :verdictId "Hakup\u00e4\u00e4t\u00f6s-2014-1") => ok?
       (fact "no matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014-2") => no-results?)
       (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?))
 

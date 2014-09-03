@@ -6,7 +6,7 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
 
-  var commentsModel = new comments.create();
+  var commentsModel = new comments.create(false);
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);

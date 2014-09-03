@@ -82,24 +82,24 @@
     (new-task "task-katselmus" task-name data meta source)))
 
 (defn- verdict->tasks [verdict {:keys [created] :as meta}]
- (map-indexed
-   (fn [idx {lupamaaraykset :lupamaaraykset}]
-     (let [source {:type "verdict" :id (str (:kuntalupatunnus verdict) \/ (inc idx))}]
-       (concat
-         (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
-         (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
-           (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
-         (if (seq (:vaadittuTyonjohtajatieto lupamaaraykset))
-           ; KRYSP yhteiset 2.1.1+
-           (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source) (:vaadittuTyonjohtajatieto lupamaaraykset))
-           ; KRYSP yhteiset 2.1.0 and below
-           (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
-             (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
-               (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))
-         ;; from YA verdict
-         (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
-           (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))
-   (:paatokset verdict)))
+  (map
+    (fn [{lupamaaraykset :lupamaaraykset}]
+      (let [source {:type "verdict" :id (:id verdict)}]
+        (concat
+          (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
+          (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
+            (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
+          (if (seq (:vaadittuTyonjohtajatieto lupamaaraykset))
+            ; KRYSP yhteiset 2.1.1+
+            (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source) (:vaadittuTyonjohtajatieto lupamaaraykset))
+            ; KRYSP yhteiset 2.1.0 and below
+            (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
+              (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
+                (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))
+          ;; from YA verdict
+          (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
+            (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))
+    (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
   (let [owner (first (domain/get-auths-by-role application :owner))

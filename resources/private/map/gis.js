@@ -2,11 +2,11 @@ var gis = (function() {
   "use strict";
 
 
-  var iconDefaultPath  = "/img/map-marker.png";
+  var iconDefaultPath  = "/img/map-marker-big.png";
   var iconLocMapping = {
     "sameLocation"  : iconDefaultPath,
-    "sameOperation" : "/img/map-marker-red.png",
-    "others"        : "/img/map-marker-green.png",
+    "sameOperation" : "/img/map-marker-green.png",
+    "others"        : "/img/map-marker-orange.png",
     "cluster"       : "/img/map-marker-group.png"
   };
 
@@ -15,107 +15,71 @@ var gis = (function() {
   function Map(element, zoomWheelEnabled) {
     var self = this;
 
-    if (features.enabled("use-wmts-map")) {
-
-      self.map = new OpenLayers.Map(element, {
-        theme: "/theme/default/style.css",
-        projection: new OpenLayers.Projection("EPSG:3067"),
-        units: "m",
-        maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
-        resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-        controls: [ new OpenLayers.Control.Zoom(),
-                    new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
-      });
-
-    } else {
-
-      self.map = new OpenLayers.Map(element, {
-        theme: "/theme/default/style.css",
-        projection: new OpenLayers.Projection("EPSG:3067"),
-        units: "m",
-        maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
-        resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
-        controls: [ new OpenLayers.Control.Zoom(),
-                    new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
-      });
-
-    }
+    self.map = new OpenLayers.Map(element, {
+      theme: "/theme/default/style.css?build=" + LUPAPISTE.config.build,
+      projection: new OpenLayers.Projection("EPSG:3067"),
+      units: "m",
+      maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
+      resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+      controls: [ new OpenLayers.Control.Zoom(),
+                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
+    });
+    OpenLayers.ImgPath = '/theme/default/img/';
 
 
     // Layers
 
     // use the old proxy server to wms/wmts
-    var mapServer = features.enabled("use-wmts-map") ? LUPAPISTE.config.maps["proxyserver-wmts"] : LUPAPISTE.config.maps["proxyserver-wms"];
+    var mapServer = LUPAPISTE.config.maps["proxyserver-wmts"];
     if (mapServer.indexOf(",") > -1) {
       mapServer = mapServer.split(",");
     }
     var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
 
-    if (features.enabled("use-wmts-map")) {   // Uusi: WMTS-layerit
+    var taustakartta = new OpenLayers.Layer.WMTS({
+      name: "Taustakartta",
+      url: mapServer,
+      isBaseLayer: false,
+      requestEncoding: "KVP",
+      layer: "taustakartta",
+      matrixSet: "ETRS-TM35FIN",
+      format: "image/png",
+      style: "default",
+      opacity: 1.0,
+      resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+      // maxExtent not defined here -> inherits from the config of the map
+      projection: new OpenLayers.Projection("EPSG:3067")
+    });
 
-      var taustakartta = new OpenLayers.Layer.WMTS({
-        name: "Taustakartta",
-        url: mapServer,
-        isBaseLayer: false,
-        requestEncoding: "KVP",
-        layer: "taustakartta",
-        matrixSet: "ETRS-TM35FIN",
-        format: "image/png",
-        style: "default",
-        opacity: 1.0,
-        resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-        // maxExtent not defined here -> inherits from the config of the map
-        projection: new OpenLayers.Projection("EPSG:3067")
-      });
-      var kiinteistorajat = new OpenLayers.Layer.WMTS({
-        name: "Kiinteistojaotus",
-        url: mapServer,
-        isBaseLayer: false,
-        requestEncoding: "KVP",
-        layer: "kiinteistojaotus",
-        matrixSet: "ETRS-TM35FIN",
-        format: "image/png",
-        style: "default",
-        opacity: 1.0,
-        resolutions: [4, 2, 1, 0.5],
-        // maxExtent not defined here -> inherits from the config of the map
-        projection: new OpenLayers.Projection("EPSG:3067")
-      });
-      var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
-        name: "Kiinteistotunnukset",
-        url: mapServer,
-        isBaseLayer: false,
-        requestEncoding: "KVP",
-        layer: "kiinteistotunnukset",
-        matrixSet: "ETRS-TM35FIN",
-        format: "image/png",
-        style: "default",
-        opacity: 1.0,
-        resolutions: [4, 2, 1, 0.5],
-        // maxExtent not defined here -> inherits from the config of the map
-        projection: new OpenLayers.Projection("EPSG:3067")
-      });
+    var kiinteistorajat = new OpenLayers.Layer.WMTS({
+      name: "Kiinteistojaotus",
+      url: mapServer,
+      isBaseLayer: false,
+      requestEncoding: "KVP",
+      layer: "kiinteistojaotus",
+      matrixSet: "ETRS-TM35FIN",
+      format: "image/png",
+      style: "default",
+      opacity: 1.0,
+      resolutions: [4, 2, 1, 0.5],
+      // maxExtent not defined here -> inherits from the config of the map
+      projection: new OpenLayers.Projection("EPSG:3067")
+    });
 
-    } else {  // Vanha: WMS-layerit
-
-      var taustakartta = new OpenLayers.Layer.WMS(
-          "taustakartta",
-          mapServer,
-          {layers: "taustakartta", format: "image/png"},
-          {isBaseLayer: false});
-      var kiinteistorajat = new OpenLayers.Layer.WMS(
-          "kiinteistorajat",
-          mapServer,
-          {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true},
-          {isBaseLayer: false, maxScale: 1, minScale: 20000}
-          );
-      var kiinteistotunnukset = new OpenLayers.Layer.WMS(
-          "kiinteistotunnukset",
-          mapServer,
-          {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true},
-          {isBaseLayer: false, maxScale: 1, minScale: 10000});
-
-    }
+    var kiinteistotunnukset = new OpenLayers.Layer.WMTS({
+      name: "Kiinteistotunnukset",
+      url: mapServer,
+      isBaseLayer: false,
+      requestEncoding: "KVP",
+      layer: "kiinteistotunnukset",
+      matrixSet: "ETRS-TM35FIN",
+      format: "image/png",
+      style: "default",
+      opacity: 1.0,
+      resolutions: [4, 2, 1, 0.5],
+      // maxExtent not defined here -> inherits from the config of the map
+      projection: new OpenLayers.Projection("EPSG:3067")
+    });
 
 
     self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
@@ -127,38 +91,41 @@ var gis = (function() {
     }
 
 
-    if (features.enabled("use-wmts-map")) {
+    //
+    // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
+    //       so that the old resolutions array [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+    //       would work.
+    //
+    self.map.events.register('zoomend', self.map, function (event) {
+      // hide marker contents div on the inforequest markers map, because marker clustering may have been divided or merged markers
+      if (self.markerMapCloseCallback) {
+        self.markerMapCloseCallback();
+      }
 
-      //
-      // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
-      //       so that the old resolutions array [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
-      //       would work.
-      //
-      self.map.events.register('zoomend', self.map, function (event) {
-        // hide marker contents div on the inforequest markers map, because marker clustering may have been divided or merged markers
-        if (self.markerMapCloseCallback) {
-          self.markerMapCloseCallback();
-        }
-
-        if( self.map.getZoom() < 2) {
-          // For some reason, calling only "self.map.zoomTo(2);" did not work here.
-          // http://gis.stackexchange.com/questions/25080/why-doesnt-openlayers-zoom
-          self.map.setCenter(self.map.getCenter(), 2);
-        }
-      });
-    }
+      if( self.map.getZoom() < 2) {
+        // For some reason, calling only "self.map.zoomTo(2);" did not work here.
+        // http://gis.stackexchange.com/questions/25080/why-doesnt-openlayers-zoom
+        self.map.setCenter(self.map.getCenter(), 2);
+      }
+    });
 
 
     // Markers
 
 
     var getIconHeight = function(feature) {
-      return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 25;
+      if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
+        return 53;
+      } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
+        return 47;
+      } else {
+        return 30;
+      }
     };
 
     var context = {
       extGraphic: function(feature) {
-        var iconPath = "img/map-marker.png";
+        var iconPath = null;
         if (feature.cluster) {
           if (feature.cluster.length > 1) {
             iconPath = iconLocMapping["cluster"];
@@ -171,7 +138,13 @@ var gis = (function() {
         return iconPath || iconDefaultPath;
       },
       graphicWidth: function(feature) {
-        return (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) ? 32 : 21;
+        if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
+          return 56;
+        } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
+          return 44;
+        } else {
+          return 25;
+        }
       },
       graphicHeight: function(feature) {
         return getIconHeight(feature);
@@ -184,10 +157,10 @@ var gis = (function() {
     var stylemap = new OpenLayers.StyleMap({
       'default': new OpenLayers.Style({
         externalGraphic: '${extGraphic}',
-        graphicWidth: '${graphicWidth}',
-        graphicHeight: '${graphicHeight}',   //alt to pointRadius
-        graphicYOffset: '${graphicYOffset}',
-        cursor: 'default'
+        graphicWidth:    '${graphicWidth}',
+        graphicHeight:   '${graphicHeight}',   //alt to pointRadius
+        graphicYOffset:  '${graphicYOffset}',
+        cursor:          'default'
       }, {
         context: context
       }),
@@ -206,10 +179,13 @@ var gis = (function() {
 
     self.markers = [];
 
-
     self.clear = function() {
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
+      }
+
+      if (self.selectedFeature) {
+        onPopupClosed(self.selectedFeature);
       }
 
       self.vectorLayer.removeAllFeatures();
@@ -224,12 +200,84 @@ var gis = (function() {
 
     // Select control
 
+    var popupContentProviderResp = null;
+    var popupId = "popup-id";
+    self.selectedFeature = null;
+
+    function clearMarkerKnockoutBindings(feature) {
+      if (feature && feature.popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.popup.contentDiv);
+        $(feature.popup.contentDiv).empty();
+        self.map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+      }
+      if (feature && feature.cluster && feature.cluster[0].popup) {
+        // Making sure Knockout's bindings are cleaned, memory is freed and handlers removed
+        ko.cleanNode(feature.cluster[0].popup.contentDiv);
+        $(feature.cluster[0].popup.contentDiv).empty();
+        self.map.removePopup(feature.cluster[0].popup);
+        feature.cluster[0].popup.destroy();
+        feature.cluster[0].popup = null;
+      }
+    }
+
+    function onPopupClosed(feature) {
+      clearMarkerKnockoutBindings(feature);
+      self.selectedFeature = null;
+      if (self.markerMapCloseCallback) {
+        self.markerMapCloseCallback();
+      }
+    }
+
+    function closePopup(e) {
+      if (self.selectedFeature) {
+        // If using here "self.selectControl.unselect(self.selectedFeature);" and doing this stuff in onUnselect,
+        // was getting the error message "Uncaught TypeError: Cannot read property 'drawFeature' of null".
+        onPopupClosed(self.selectedFeature);
+      }
+    };
+
+    function createPopup(feature, html) {
+      var anchor = {
+          size: new OpenLayers.Size(0,0),
+          offset: new OpenLayers.Pixel(100,200)
+      };
+      var popup = new OpenLayers.Popup.Anchored(
+          popupId,                                              // id (not used)
+          feature.geometry.getBounds().getCenterLonLat(),       // lonlat
+          null,                                                 // contentSize
+          html,                                                 // (html content)
+          anchor,                                               // anchor
+          true,                                                 // closeBox
+          closePopup);                                          // closeBoxCallback
+
+      popup.panMapIfOutOfView = true;
+      popup.relativePosition = "br";
+      popup.calculateRelativePosition = function() {return "tr";}
+      popup.closeOnMove = false;
+      popup.autoSize = true;
+      popup.minSize = new OpenLayers.Size(270, 505);
+      popup.maxSize = new OpenLayers.Size(270, 505);
+      return popup;
+    }
+
     self.selectControl = new OpenLayers.Control.SelectFeature(self.markerLayer, {
       autoActivate: true,
       clickOut: true,
       toggle: true,
 
       onSelect: function(feature) {
+        self.selectedFeature = feature;
+
+        if (self.popupContentProvider) {
+          popupContentProviderResp = self.popupContentProvider();
+          feature.popup = createPopup(feature, popupContentProviderResp.html);
+          self.map.addPopup(feature.popup, true);
+          popupContentProviderResp.applyBindingsFn(popupId);
+        }
+
         if (self.markerClickCallback) {
           var contents = feature.cluster ?
                           _.reduce(
@@ -243,11 +291,7 @@ var gis = (function() {
         }
       },
 
-      onUnselect: function(feature) {
-        if (self.markerMapCloseCallback) {
-          self.markerMapCloseCallback();
-        }
-      }
+      onUnselect: onPopupClosed
     });
 
     self.map.addControl(self.selectControl);
@@ -255,7 +299,7 @@ var gis = (function() {
 
     // Adding markers
 
-    self.add = function(markerInfos) {
+    self.add = function(markerInfos, autoSelect) {
       var newMarkers = [];
       markerInfos = _.isArray(markerInfos) ? markerInfos : [markerInfos];
 
@@ -270,20 +314,30 @@ var gis = (function() {
 
         self.markers.push(markerFeature);
         newMarkers.push(markerFeature);
-
       });  //each
 
       self.markerLayer.addFeatures(newMarkers);
 
+      if (autoSelect && self.popupContentProvider) {
+        self.selectControl.select(self.markerLayer.features[0]);
+      }
+
+      return self;
+    };
+
+    self.setPopupContentProvider = function(handler) {
+      self.popupContentProvider = handler;
       return self;
     };
 
     self.setMarkerClickCallback = function(handler) {
       self.markerClickCallback = handler;
+      return self;
     };
 
     self.setMarkerMapCloseCallback = function(handler) {
       self.markerMapCloseCallback = handler;
+      return self;
     };
 
     // Map handling functions
@@ -345,8 +399,18 @@ var gis = (function() {
         },
 
         trigger: function(e) {
-          var pos = self.map.getLonLatFromPixel(e.xy);
-          handler(pos.lon, pos.lat);
+          var event = getEvent(e);
+          //
+          // When marker (event.target.nodeName === "image") is clicked, let's prevent further reacting to the click here.
+          // This is somewhat a hack. It would be better to find a way to somehow stop propagation of click event earlier
+          // in the selectControl's onSelect callback, or by the marker item (OpenLayers.Feature.Vector) itself.
+          //
+          // HACK: Added check for the event.target.nodeName "DIV" to prevent creating new marker when marker popup's close cross is pressed.
+          //
+          if (!event.target || (event.target.nodeName !== "image" && event.target.className !== "olPopupCloseBox")) {
+            var pos = self.map.getLonLatFromPixel(event.xy);
+            handler(pos.lon, pos.lat);
+          }
         }
       });
 

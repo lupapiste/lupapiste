@@ -98,17 +98,17 @@
         (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
 
         (fact "first huoneisto is mapped correctly"
-          (:0 huoneistot) => {:huoneistoTunnus {:huoneistonumero "016"
-                                                :jakokirjain     "a"
-                                                :porras "A"}
-                              :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
-                                                 :huoneistoala "86", :huoneluku "3"}
+          (:0 huoneistot) => {:huoneistonumero "016"
+                              :jakokirjain     "a"
+                              :porras "A"
+                              :huoneistoTyyppi "asuinhuoneisto"
+                              :huoneistoala "86", :huoneluku "3"
                               :keittionTyyppi "keittio"
-                              :varusteet {:ammeTaiSuihkuKytkin true
-                                          :lamminvesiKytkin true
-                                          :parvekeTaiTerassiKytkin true
-                                          :saunaKytkin true
-                                          :WCKytkin true}})
+                              :ammeTaiSuihkuKytkin true
+                              :lamminvesiKytkin true
+                              :parvekeTaiTerassiKytkin true
+                              :saunaKytkin true
+                              :WCKytkin true})
 
         (fact "there are 2 omistaja" (count (keys omistajat)) => 2)
 

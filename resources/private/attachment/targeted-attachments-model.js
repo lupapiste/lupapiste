@@ -23,7 +23,8 @@ LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType, 
     }
 
     self.attachments(_.filter(attachments, function(attachment) {
-      return _.isEqual(attachment.target, self.target);
+      return _.isEqual(_.pick(attachment.target, ["id", "type"]),
+                       _.pick(self.target, ["id", "type"]));
     }));
   };
 

@@ -1,4 +1,4 @@
-var DocModel = function(schema, model, meta, docId, application, authorizationModel, options) {
+var DocModel = function(schema, doc, application, authorizationModel, options) {
   "use strict";
 
   var self = this;
@@ -13,13 +13,13 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   if (!self.schemaI18name) {
       self.schemaI18name = self.schemaName;
   }
-  self.model = model;
-  self.meta = meta;
-  self.docId = docId;
+  self.model = doc.data;
+  self.meta = doc.meta;
+  self.docId = doc.id;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
-  self.eventData = { doc: docId, app: self.appId };
+  self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
 
@@ -38,7 +38,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     }
   };
 
-  self.sizeClasses = { "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
+  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
 
   // Context help
   self.addFocus = function (e) {
@@ -123,10 +123,6 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return "group-" + pathStrToID(pathStr);
   }
 
-  function locKeyFromPath(pathStr) {
-    return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
-  }
-
   // Option utils
 
   self.getCollection = function() {
@@ -150,7 +146,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var label = document.createElement("label");
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
 
-    var locKey = locKeyFromPath(path);
+    var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + path);
     if (schema.i18nkey) {
       locKey = schema.i18nkey;
     }
@@ -170,7 +166,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function makeInput(type, pathStr, value, extraClass, readonly) {
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
-    input.name = docId + "." + pathStr;
+    input.name = self.docId + "." + pathStr;
     input.setAttribute("data-docgen-path", pathStr);
 
     try {
@@ -199,7 +195,10 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
   function makeEntrySpan(subSchema, pathStr) {
     var help = null;
-    var helpLocKey = locKeyFromPath(pathStr + ".help");
+    var helpLocKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + ".help");
+    if (subSchema.i18nkey) {
+      helpLocKey = subSchema.i18nkey + ".help";
+    }
     var span = document.createElement("span");
     var sizeClass = self.sizeClasses[subSchema.size] || "";
     span.className = "form-entry " + sizeClass;
@@ -332,13 +331,17 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
     var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
-    var label = makeLabel(subSchema, "checkbox", myPath);
     input.onmouseover = self.showHelp;
     input.onmouseout = self.hideHelp;
-    label.onmouseover = self.showHelp;
-    label.onmouseout = self.hideHelp;
     span.appendChild(input);
-    span.appendChild(label);
+
+    if (subSchema.label) {
+      var label = makeLabel(subSchema, "checkbox", myPath);
+      label.onmouseover = self.showHelp;
+      label.onmouseout = self.hideHelp;
+      span.appendChild(label);
+    }
+
     return span;
   }
 
@@ -358,7 +361,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
     setMaxLen(input, subSchema);
 
-    span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
+    }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
       var kiitunAndInput = document.createElement("span");
@@ -438,7 +443,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     input.className = "form-input textarea";
     input.value = getModelValue(model, subSchema.name);
 
-    span.appendChild(makeLabel(subSchema, "text", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "text", myPath));
+    }
     span.appendChild(input);
     return span;
   }
@@ -450,12 +457,14 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     var span = makeEntrySpan(subSchema, myPath);
 
-    span.appendChild(makeLabel(subSchema, "date", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "date", myPath));
+    }
 
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
-      name: docId + "." + myPath,
+      name: self.docId + "." + myPath,
       type: "text",
       "class": "form-input text form-date",
       value: value
@@ -518,8 +527,13 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     select.appendChild(option);
 
     _(subSchema.body)
-      .map(function(e) { return [e.name,
-                                 loc(self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name)]; })
+      .map(function(e) {
+        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name
+        if (e.i18nkey) {
+          locKey = e.i18nkey;
+        }
+        return [e.name, loc(locKey)];
+        })
       .sortBy(function(e) { return e[1]; })
       .forEach(function(e) {
         var name = e[0];
@@ -540,7 +554,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       select.appendChild(option);
     }
 
-    span.appendChild(makeLabel(subSchema, "select", myPath, true));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "select", myPath, true));
+    }
     span.appendChild(select);
     return span;
   }
@@ -551,13 +567,13 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var myModel = model[name] || {};
     var partsDiv = document.createElement("div");
     var div = document.createElement("div");
-    var label = makeLabel(subSchema, "group", myPath, true);
 
     appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
+    var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
 
     if (subSchema.approvable) {
@@ -590,7 +606,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       input.checked = o.name === myModel;
 
       span.appendChild(input);
-      span.appendChild(makeLabel(subSchema, "radio", pathForId));
+      if (subSchema.label) {
+        span.appendChild(makeLabel(subSchema, "radio", pathForId));
+      }
     });
 
     partsDiv.appendChild(span);
@@ -619,7 +637,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: self.getCollection() })
+          .command("merge-details-from-krysp", { id: self.appId, documentId: self.docId, buildingId: buildingId, collection: self.getCollection() })
           .success(function () {
             save(event);
             repository.load(self.appId);
@@ -663,7 +681,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       })
       .call();
 
-    span.appendChild(makeLabel(subSchema, "select", myPath));
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "select", myPath));
+    }
     span.appendChild(select);
     return span;
   }
@@ -752,7 +772,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var userId = target.value;
       if (!_.isEmpty(userId)) {
         ajax
-        .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: self.getCollection() })
+        .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
           save(event, function () { repository.load(self.appId); });
         })
@@ -808,6 +828,17 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return span;
   }
 
+  function buildTableRow(subSchema, model, path, partOfChoice) {
+    var myPath = path.join(".");
+    var name = subSchema.name;
+    var myModel = model[name] || {};
+    var row = document.createElement("tr");
+    appendElements(row, subSchema, myModel, path, save, partOfChoice);
+
+    row.id = pathStrToGroupID(myPath);
+    return row;
+  }
+
   function buildUnknown(subSchema, model, path) {
     var div = document.createElement("div");
 
@@ -830,6 +861,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     personSelector: buildPersonSelector,
+    table: buildTableRow,
     unknown: buildUnknown
   };
 
@@ -845,6 +877,10 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function build(subSchema, model, path, partOfChoice) {
     if (subSchema.hidden) {
       return;
+    }
+
+    if (subSchema.label === undefined) {
+      subSchema.label = true;
     }
 
     var myName = subSchema.name;
@@ -867,10 +903,42 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
                 { title: loc("no") });
           };
-          elem.insertBefore(removeButton, elem.childNodes[0]);
+          if (subSchema.type === "table") {
+            var td = document.createElement("td");
+            td.appendChild(removeButton);
+            elem.appendChild(td, elem.childNodes[0]);
+          } else {
+            elem.insertBefore(removeButton, elem.childNodes[0]);
+          }
         }
       }
       return elem;
+    }
+
+    function buildElements(models) {
+      return _.map(models, function (val, key) {
+        var myModel = {};
+        myModel[myName] = val;
+        return makeElem(myModel, key);
+      });
+    }
+
+    function createTableHeader(models, pathStr) {
+      var thead = document.createElement("thead");
+      var tr = document.createElement("tr");
+      _.each(subSchema.body, function(item) {
+        var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + "." + item.name);
+        if (item.i18nkey) {
+          locKey = item.i18nkey;
+        }
+        var th = document.createElement("th");
+        th.innerHTML = loc(locKey);
+        tr.appendChild(th);
+      });
+      // remove button column
+      tr.appendChild(document.createElement("th"));
+      thead.appendChild(tr);
+      return thead;
     }
 
     if (subSchema.repeating) {
@@ -878,16 +946,37 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
-      var elements = _.map(models, function (val, key) {
-        var myModel = {};
-        myModel[myName] = val;
-        return makeElem(myModel, key);
-      });
+
+      var elements = undefined;
+
+      if (subSchema.type === "table") {
+        elements = buildElements(models);
+        var div = document.createElement("div");
+        div.className = "form-table";
+        var table = document.createElement("table");
+        var tbody = document.createElement("tbody");
+        table.appendChild(createTableHeader(models, myPath.join(".")));
+        _.each(elements, function(element) {
+          tbody.appendChild(element);
+        });
+        table.appendChild(tbody);
+
+        var label = makeLabel(subSchema, "table", myPath.join("."), true);
+        div.appendChild(label);
+        if (subSchema.approvable) {
+          div.appendChild(self.makeApprovalButtons(path, models));
+        }
+        div.appendChild(table);
+
+        elements = [div];
+      } else {
+        elements = buildElements(models);
+      }
 
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
-        var parent$ = $(this.parentNode);
+        var parent$ = $(this).closest(".accordion-fields")
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -897,9 +986,65 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
         $(this).before(makeElem(myModel, count));
       };
 
-      $(appendButton).click(appender);
-      elements.push(appendButton);
+      var tableAppender = function () {
+        var parent$ = $(this).closest(".accordion-fields").find("tbody");
+        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+          count++;
+        }
+        var myModel = {};
+        myModel[myName] = {};
+        parent$.append(makeElem(myModel, count));
+      };
 
+      var copyElement = function() {
+        var parent$ = $(this).closest(".accordion-fields").find("tbody");
+        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+          count++;
+        }
+        var lastItem$ = parent$.find("tr").last();
+
+        var myModel = {};
+        myModel[myName] = {};
+        var newItem = makeElem(myModel, count);
+
+        // copy last element items to new
+        lastItem$.find("td").each(function(index) {
+          var newInput$ = $($(newItem).find("input, select")[index]);
+          var oldInput$ = $(this).find("input, select");
+          var prop = "value";
+          if(oldInput$.is(":checkbox")) {
+            prop = "checked";
+          }
+          var oldValue = oldInput$.prop(prop);
+          if(oldValue) {
+            newInput$.prop(prop, oldInput$.prop(prop));
+            newInput$.change();
+          }
+        });
+
+        parent$.append(newItem);
+      }
+
+      var buttonGroup = document.createElement("div");
+      buttonGroup.className = "button-group";
+      buttonGroup.appendChild(appendButton);
+
+      if (subSchema.type === "table") {
+        $(appendButton).click(tableAppender);
+        var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"]
+        if (subSchema.i18nkey) {
+          locKey = [subSchema.i18nkey, "copyLabel"];
+        }
+        var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
+        $(copyButton).click(copyElement);
+        buttonGroup.appendChild(copyButton);
+      } else {
+        $(appendButton).click(appender);
+      }
+
+      elements.push(buttonGroup);
       return elements;
     }
 
@@ -941,6 +1086,11 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
           $(elem).hide();
         }
         if (elem) {
+          if (!subSchema.label) {
+            var td = document.createElement("td");
+            td.appendChild(elem);
+            elem = td;
+          }
           body.appendChild(elem);
         }
       });
@@ -993,7 +1143,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       .call();
   }
 
-  function showValidationResults(results) {
+  self.showValidationResults = function(results) {
     // remove warning and error highlights
     $("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
     // clear validation errors
@@ -1020,7 +1170,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     if (!options || options.validate) {
       ajax
         .query("validate-doc", { id: self.appId, doc: self.docId, collection: self.getCollection() })
-        .success(function (e) { showValidationResults(e.results); })
+        .success(function (e) { self.showValidationResults(e.results); })
         .call();
     }
   }
@@ -1043,8 +1193,15 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function showIndicator(indicator, className, locKey) {
+    var parent$ = $(indicator).closest("table");
     var i$ = $(indicator);
-    i$.addClass(className).text(loc(locKey)).fadeIn(200);
+
+    if(parent$.length > 0) {
+      // disable indicator text for table element
+      i$.addClass(className).fadeIn(200);
+    } else {
+      i$.addClass(className).text(loc(locKey)).fadeIn(200);
+    }
 
     setTimeout(function () {
       i$.removeClass(className).fadeOut(200, function () { i$.remove; });
@@ -1052,7 +1209,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function afterSave(label, loader, indicator, callback, status, results) {
-    showValidationResults(results);
+    self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
     }
@@ -1161,7 +1318,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     sectionContainer.className = "accordion_content expanded";
     sectionContainer.setAttribute("data-accordion-state", "open");
-    sectionContainer.id = "document-" + docId;
+    sectionContainer.id = "document-" + self.docId;
 
     appendElements(elements, self.schema, self.model, []);
 
@@ -1171,7 +1328,14 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return section;
   }
 
+
   self.element = buildElement();
-  validate();
+  // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
+  // self.showValidationResults is called with in docgen.js after this docmodel has been appended to DOM.
+  // So self.showValidationResults cannot be called here because of its jQuery lookups.
+  if (!doc.validationErrors) {
+    validate();
+  }
   disableBasedOnOptions();
+
 };

@@ -211,26 +211,26 @@
               :energiatehokkuusluku {:value "124"}
               :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
    :huoneistot {:0 {:muutostapa {:value "lis\u00e4ys"}
-                    :huoneistoTunnus {:porras {:value "A"}
-                                      :huoneistonumero {:value "1"}
-                                      :jakokirjain {:value "a"}}
-                    :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
-                                       :huoneistoala {:value "56"}
-                                       :huoneluku {:value "66"}}
+                    :porras {:value "A"}
+                    :huoneistonumero {:value "1"}
+                    :jakokirjain {:value "a"}
+                    :huoneistoTyyppi {:value "asuinhuoneisto"}
+                    :huoneistoala {:value "56"}
+                    :huoneluku {:value "66"}
                     :keittionTyyppi {:value "keittio"}
-                    :varusteet {:parvekeTaiTerassiKytkin {:value true}
-                                :WCKytkin {:value true}}}
+                    :parvekeTaiTerassiKytkin {:value true}
+                    :WCKytkin {:value true}}
                 :1 {:muutostapa {:value "lis\u00e4ys"}
-                    :huoneistoTunnus {:porras {:value "A"}
-                                      :huoneistonumero {:value "2"}
-                                      :jakokirjain {:value "a"}}
-                    :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
-                                       :huoneistoala {:value "02"}
-                                       :huoneluku {:value "12"}}
+                    :porras {:value "A"}
+                    :huoneistonumero {:value "2"}
+                    :jakokirjain {:value "a"}
+                    :huoneistoTyyppi {:value "toimitila"}
+                    :huoneistoala {:value "02"}
+                    :huoneluku {:value "12"}
                     :keittionTyyppi {:value "keittokomero"}
-                    :varusteet {:ammeTaiSuihkuKytkin {:value true}
-                                :saunaKytkin {:value true}
-                                :lamminvesiKytkin {:value true}}}}})
+                    :ammeTaiSuihkuKytkin {:value true}
+                    :saunaKytkin {:value true}
+                    :lamminvesiKytkin {:value true}}}})
 
 (def ^:private uusi-rakennus
   {:id "uusi-rakennus"

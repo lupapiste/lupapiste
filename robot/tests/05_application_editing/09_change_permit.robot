@@ -10,7 +10,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Base_app_for_change_permit_${secs}
-  Set Suite Variable  ${propertyid}  753-416-17-15
+  Set Suite Variable  ${propertyid}  753-423-2-41
   Create application the fast way  ${appname}  753  ${propertyid}  asuinrakennus
 
   Wait until  Application state should be  open
@@ -23,8 +23,8 @@ Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
   Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
-  Throw in a verdict
-  Wait until  Element should not be visible  verdict-submit
+  Open tab  verdict
+  Fetch verdict
 
 Sonja creates a change permit
   Wait Until  Element should be visible  xpath=//*[@data-test-id='change-permit-create-btn']
