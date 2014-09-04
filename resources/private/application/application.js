@@ -3,8 +3,8 @@
 
   var isInitializing = true;
   var currentId = null;
-  var applicationModel = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
+  var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
   var commentModel = comments.create(true);
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();

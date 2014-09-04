@@ -5,6 +5,9 @@
     <div id="side-panel" class="hide-side-panel">
       <div class="buttons">
         <button class="btn-conversation" data-bind="click: application.toggleConversationPanel">
+          <span data-bind="if: application.unseenComments">
+            <span data-bind="text: application.unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
+          </span>
           <span>K e s k u s t e l u</span>
         </button>
         <button class="btn-notice" data-bind="click: application.toggleNoticePanel">
