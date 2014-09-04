@@ -16,7 +16,7 @@
   (difference (keyset ops/operations) (keyset price-classes-for-operation) ) => empty?)
 
 (fact "Every kayttotarkoitus has price class"
-  (let [every-kayttotarkoitus (remove (partial = "ei tiedossa") (map :name schemas/rakennuksen-kayttotarkoitus))]
+  (let [every-kayttotarkoitus (map :name schemas/rakennuksen-kayttotarkoitus)]
     (difference (set every-kayttotarkoitus) (keyset @kayttotarkoitus-hinnasto))) => empty?)
 
 (fact "Uusi asuinrakennus"
