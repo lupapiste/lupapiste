@@ -16,7 +16,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
   var createMap = function(divName) {
     return gis
       .makeMap(divName, false)
-      .center(404168, 6693765, features.enabled("use-wmts-map") ? 14 : 12);
+      .center(404168, 6693765, 14);
   };
 
   var getOrCreateMap = function(kind) {
@@ -149,13 +149,13 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10).add({x: x, y: y});
+    map.clear().center(x, y, 14).add({x: x, y: y});
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
       map = getOrCreateMap("inforequest-markers");
-      map.clear().center(x, y, features.enabled("use-wmts-map") ? 14 : 10);
+      map.clear().center(x, y, 14);
       setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
     }
   };
