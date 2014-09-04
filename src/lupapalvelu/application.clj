@@ -565,8 +565,7 @@
     (fn [body [data-path data-value]]
       (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
             val (if (fn? data-value) (data-value application) data-value)]
-        ; FIXME: why not assoc-in?
-        (update-in body path (constantly val))))
+        (assoc-in body path val)))
     {} schema-data))
 
 ;; TODO: permit-type splitting.
@@ -620,6 +619,38 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
+(defn make-application [operation x y address property-id municipality organization-id info-request? open-inforequest? messages user created]
+  (let [permit-type (operations/permit-type-of-operation operation)
+        id          (make-application-id municipality)
+        owner       (user/user-in-role user :owner :type :owner)
+        op          (make-op operation created)
+        state       (cond
+                      info-request?          :info
+                      (user/authority? user) :open
+                      :else                  :draft)
+        application (merge domain/application-skeleton
+                      {:id                  id
+                       :created             created
+                       :opened              (when (#{:open :info} state) created)
+                       :modified            created
+                       :permitType          permit-type
+                       :permitSubtype       (first (permit/permit-subtypes permit-type))
+                       :infoRequest         info-request?
+                       :openInfoRequest     open-inforequest?
+                       :operations          [op]
+                       :state               state
+                       :municipality        municipality
+                       :location            (->location x y)
+                       :organization        organization-id
+                       :address             address
+                       :propertyId          property-id
+                       :title               address
+                       :auth                [owner]
+                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
+                       :schema-version      (schemas/get-latest-schema-version)})]
+    (merge application (when-not info-request?
+                         {:attachments (make-attachments created op organization-id state)
+                          :documents   (make-documents user created op application)}))))
 
 (defn- do-create-application
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
@@ -638,39 +669,7 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-
-    (let [id            (make-application-id municipality)
-          owner         (user/user-in-role user :owner :type :owner)
-          op            (make-op operation created)
-          info-request? (boolean infoRequest)
-          state         (cond
-                          info-request?              :info
-                          (user/authority? user)     :open
-                          :else                      :draft)
-          application   (merge domain/application-skeleton
-                          {:id                  id
-                           :created             created
-                           :opened              (when (#{:open :info} state) created)
-                           :modified            created
-                           :permitType          permit-type
-                           :permitSubtype       (first (permit/permit-subtypes permit-type))
-                           :infoRequest         info-request?
-                           :openInfoRequest     open-inforequest?
-                           :operations          [op]
-                           :state               state
-                           :municipality        municipality
-                           :location            (->location x y)
-                           :organization        organization-id
-                           :address             address
-                           :propertyId          propertyId
-                           :title               address
-                           :auth                [owner]
-                           :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
-                           :schema-version      (schemas/get-latest-schema-version)})]
-
-      (merge application (when-not info-request?
-                            {:attachments            (make-attachments created op organization-id state)
-                             :documents              (make-documents user created op application)})))))
+    (make-application operation x y address propertyId municipality organization-id info-request? open-inforequest? messages user created)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
