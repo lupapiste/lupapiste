@@ -20,7 +20,7 @@
     (difference (set every-kayttotarkoitus) (keyset @kayttotarkoitus-hinnasto))) => empty?)
 
 (fact "Uusi kerrostalo"
-  (let [application (app/make-application "LP-123" "asuinrakennus" 0 0 "address" "01234567891234" "753" "753-R" false false [] {} 123)
+  (let [application (app/make-application "LP-123" "asuinrakennus" 0 0 "address" "01234567891234" "753" {:id "753-R"} false false [] {} 123)
         op (resolve-price-class application (first (:operations application)))]
     (fact "Default value '011 yhden asunnon talot' = C"
       (:priceClass op) => "C")))

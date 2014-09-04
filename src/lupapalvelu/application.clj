@@ -1,6 +1,7 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
+            [clojure.walk :refer [keywordize-keys]]
             [swiss-arrows.core :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
@@ -555,18 +556,18 @@
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))
 
-(defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
-  (let [organization (organization/get-organization organization-id)]
-    (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-      (attachment/make-attachment created target false applicationState operation {:type-group type-group :type-id type-id}))))
+(defn- make-attachments [created operation organization applicationState & {:keys [target]}]
+  (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
+    (attachment/make-attachment created target false applicationState operation {:type-group type-group :type-id type-id})))
 
 (defn- schema-data-to-body [schema-data application]
-  (reduce
-    (fn [body [data-path data-value]]
-      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
-            val (if (fn? data-value) (data-value application) data-value)]
-        (assoc-in body path val)))
-    {} schema-data))
+  (keywordize-keys
+    (reduce
+      (fn [body [data-path data-value]]
+        (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
+              val (if (fn? data-value) (data-value application) data-value)]
+          (assoc-in body path val)))
+      {} schema-data)))
 
 ;; TODO: permit-type splitting.
 (defn- make-documents [user created op application]
@@ -619,7 +620,7 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
-(defn make-application [id operation x y address property-id municipality organization-id info-request? open-inforequest? messages user created]
+(defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created]
   (let [permit-type (operations/permit-type-of-operation operation)
         owner       (user/user-in-role user :owner :type :owner)
         op          (make-op operation created)
@@ -640,7 +641,7 @@
                        :state               state
                        :municipality        municipality
                        :location            (->location x y)
-                       :organization        organization-id
+                       :organization        (:id organization)
                        :address             address
                        :propertyId          property-id
                        :title               address
@@ -648,7 +649,7 @@
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
                        :schema-version      (schemas/get-latest-schema-version)})]
     (merge application (when-not info-request?
-                         {:attachments (make-attachments created op organization-id state)
+                         {:attachments (make-attachments created op organization state)
                           :documents   (make-documents user created op application)}))))
 
 (defn- do-create-application
@@ -669,7 +670,7 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-    (make-application id operation x y address propertyId municipality organization-id info-request? open-inforequest? messages user created)))
+    (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
@@ -713,10 +714,11 @@
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
-        new-docs   (make-documents nil created op application)]
+        new-docs   (make-documents nil created op application)
+        organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations op
                                         :documents {$each new-docs}
-                                        :attachments {$each (make-attachments created op (:organization application) (:state application))}}
+                                        :attachments {$each (make-attachments created op organization (:state application))}}
                                  $set {:modified created}})))
 
 (defcommand change-permit-sub-type
@@ -1012,13 +1014,14 @@
    :states     [:info :answered]
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
-  (let [op          (first (:operations application))]
+  (let [op (first (:operations application))
+        organization (organization/get-organization (:organization application))]
     (update-application command
       {$set {:infoRequest false
              :state :open
              :documents (make-documents user created op application)
              :modified created}
-       $push {:attachments {$each (make-attachments created op (:organization application) (:state application))}}})
+       $push {:attachments {$each (make-attachments created op organization (:state application))}}})
     (try (autofill-rakennuspaikka application (now))
       (catch Exception e (error e "KTJ data was not updated")))))
 
