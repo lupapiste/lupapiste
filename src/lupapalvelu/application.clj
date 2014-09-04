@@ -619,9 +619,8 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
-(defn make-application [operation x y address property-id municipality organization-id info-request? open-inforequest? messages user created]
+(defn make-application [id operation x y address property-id municipality organization-id info-request? open-inforequest? messages user created]
   (let [permit-type (operations/permit-type-of-operation operation)
-        id          (make-application-id municipality)
         owner       (user/user-in-role user :owner :type :owner)
         op          (make-op operation created)
         state       (cond
@@ -659,7 +658,8 @@
         scope             (organization/resolve-organization-scope organization municipality permit-type)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))]
+        open-inforequest? (and info-request? (:open-inforequest scope))
+        id                (make-application-id municipality)]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (unauthorized!))
     (when-not organization-id
@@ -669,7 +669,7 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-    (make-application operation x y address propertyId municipality organization-id info-request? open-inforequest? messages user created)))
+    (make-application id operation x y address propertyId municipality organization-id info-request? open-inforequest? messages user created)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application

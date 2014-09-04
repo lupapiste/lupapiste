@@ -5,6 +5,7 @@
             [lupapalvelu.exports :refer [kayttotarkoitus-hinnasto price-classes-for-operation]]
             [lupapalvelu.application :as app]
             [lupapalvelu.operations :as ops]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
 (testable-privates lupapalvelu.exports resolve-price-class)
@@ -19,6 +20,7 @@
     (difference (set every-kayttotarkoitus) (keyset @kayttotarkoitus-hinnasto))) => empty?)
 
 (fact "Uusi kerrostalo"
-  (let [application (app/make-application "asuinrakennus" 0 0 "address" "01234567891234" "753" "753-R" false false [] {} 123)
+  (let [application (app/make-application "LP-123" "asuinrakennus" 0 0 "address" "01234567891234" "753" "753-R" false false [] {} 123)
         op (resolve-price-class application (first (:operations application)))]
-    (:priceClass op) => "E"))
+    (fact "Default value '011 yhden asunnon talot' = C"
+      (:priceClass op) => "C")))
