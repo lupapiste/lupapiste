@@ -1,6 +1,7 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
+            [clojure.walk :refer [keywordize-keys]]
             [swiss-arrows.core :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
@@ -555,19 +556,18 @@
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))
 
-(defn make-attachments [created operation organization-id applicationState & {:keys [target]}]
-  (let [organization (organization/get-organization organization-id)]
-    (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-      (attachment/make-attachment created target false applicationState operation {:type-group type-group :type-id type-id}))))
+(defn- make-attachments [created operation organization applicationState & {:keys [target]}]
+  (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
+    (attachment/make-attachment created target false applicationState operation {:type-group type-group :type-id type-id})))
 
 (defn- schema-data-to-body [schema-data application]
-  (reduce
-    (fn [body [data-path data-value]]
-      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
-            val (if (fn? data-value) (data-value application) data-value)]
-        ; FIXME: why not assoc-in?
-        (update-in body path (constantly val))))
-    {} schema-data))
+  (keywordize-keys
+    (reduce
+      (fn [body [data-path data-value]]
+        (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
+              val (if (fn? data-value) (data-value application) data-value)]
+          (assoc-in body path val)))
+      {} schema-data)))
 
 ;; TODO: permit-type splitting.
 (defn- make-documents [user created op application]
@@ -620,6 +620,37 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
+(defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created]
+  (let [permit-type (operations/permit-type-of-operation operation)
+        owner       (user/user-in-role user :owner :type :owner)
+        op          (make-op operation created)
+        state       (cond
+                      info-request?          :info
+                      (user/authority? user) :open
+                      :else                  :draft)
+        application (merge domain/application-skeleton
+                      {:id                  id
+                       :created             created
+                       :opened              (when (#{:open :info} state) created)
+                       :modified            created
+                       :permitType          permit-type
+                       :permitSubtype       (first (permit/permit-subtypes permit-type))
+                       :infoRequest         info-request?
+                       :openInfoRequest     open-inforequest?
+                       :operations          [op]
+                       :state               state
+                       :municipality        municipality
+                       :location            (->location x y)
+                       :organization        (:id organization)
+                       :address             address
+                       :propertyId          property-id
+                       :title               address
+                       :auth                [owner]
+                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
+                       :schema-version      (schemas/get-latest-schema-version)})]
+    (merge application (when-not info-request?
+                         {:attachments (make-attachments created op organization state)
+                          :documents   (make-documents user created op application)}))))
 
 (defn- do-create-application
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
@@ -628,7 +659,8 @@
         scope             (organization/resolve-organization-scope organization municipality permit-type)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))]
+        open-inforequest? (and info-request? (:open-inforequest scope))
+        id                (make-application-id municipality)]
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (unauthorized!))
     (when-not organization-id
@@ -638,39 +670,7 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-
-    (let [id            (make-application-id municipality)
-          owner         (user/user-in-role user :owner :type :owner)
-          op            (make-op operation created)
-          info-request? (boolean infoRequest)
-          state         (cond
-                          info-request?              :info
-                          (user/authority? user)     :open
-                          :else                      :draft)
-          application   (merge domain/application-skeleton
-                          {:id                  id
-                           :created             created
-                           :opened              (when (#{:open :info} state) created)
-                           :modified            created
-                           :permitType          permit-type
-                           :permitSubtype       (first (permit/permit-subtypes permit-type))
-                           :infoRequest         info-request?
-                           :openInfoRequest     open-inforequest?
-                           :operations          [op]
-                           :state               state
-                           :municipality        municipality
-                           :location            (->location x y)
-                           :organization        organization-id
-                           :address             address
-                           :propertyId          propertyId
-                           :title               address
-                           :auth                [owner]
-                           :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
-                           :schema-version      (schemas/get-latest-schema-version)})]
-
-      (merge application (when-not info-request?
-                            {:attachments            (make-attachments created op organization-id state)
-                             :documents              (make-documents user created op application)})))))
+    (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
@@ -714,10 +714,11 @@
   [{:keys [application created] :as command}]
   (let [op-id      (mongo/create-id)
         op         (make-op operation created)
-        new-docs   (make-documents nil created op application)]
+        new-docs   (make-documents nil created op application)
+        organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations op
                                         :documents {$each new-docs}
-                                        :attachments {$each (make-attachments created op (:organization application) (:state application))}}
+                                        :attachments {$each (make-attachments created op organization (:state application))}}
                                  $set {:modified created}})))
 
 (defcommand change-permit-sub-type
@@ -1013,13 +1014,14 @@
    :states     [:info :answered]
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
-  (let [op          (first (:operations application))]
+  (let [op (first (:operations application))
+        organization (organization/get-organization (:organization application))]
     (update-application command
       {$set {:infoRequest false
              :state :open
              :documents (make-documents user created op application)
              :modified created}
-       $push {:attachments {$each (make-attachments created op (:organization application) (:state application))}}})
+       $push {:attachments {$each (make-attachments created op organization (:state application))}}})
     (try (autofill-rakennuspaikka application (now))
       (catch Exception e (error e "KTJ data was not updated")))))
 
