@@ -2,7 +2,7 @@
 <html lang="en">
 <body>
   <section class="page" id="application">
-    <div id="side-panel" class="hide-side-panel">
+    <div id="side-panel" class="hide-side-panel" data-bind="click: function(data, event) {event.stopPropagation();}">
       <div class="buttons">
         <button class="btn-conversation" data-bind="click: application.toggleConversationPanel">
           <span data-bind="if: application.unseenComments">
