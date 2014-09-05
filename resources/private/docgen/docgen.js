@@ -10,16 +10,10 @@ var docgen = (function () {
     function initSelectWithOther(i, e) { updateOther($(e)); }
     function selectWithOtherChanged() { updateOther($(this)); }
 
-    function getDocumentOrder(doc) {
-      var num = doc.schema.info.order || 7;
-      return num * 10000000000 + doc.created / 1000;
-    }
-
     var isDisabled = options && options.disabled;
-    var sortedDocs = _.sortBy(documents, getDocumentOrder);
     var docgenDiv = $(containerSelector).empty();
 
-    _.each(sortedDocs, function (doc) {
+    _.each(documents, function (doc) {
       var schema = doc.schema;
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
 

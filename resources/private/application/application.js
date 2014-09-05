@@ -153,12 +153,6 @@
       // Update observables
       ko.mapping.fromJS(app, {}, applicationModel);
 
-      // Update validation errors
-      var errors = _.map(app.documents, function(doc) {
-        return doc.validationErrors;
-      });
-      applicationModel.initValidationErrors(errors);
-
       // Invite
       inviteModel.setApplicationId(app.id);
 
@@ -208,10 +202,18 @@
       }
 
       // Documents
-      var nonpartyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; });
-      var partyDocs = _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; });
-      docgen.displayDocuments("#applicationDocgen", app, nonpartyDocs, authorizationModel);
-      docgen.displayDocuments("#partiesDocgen",     app, partyDocs, authorizationModel);
+      var nonpartyDocs = _.filter(app.documents, util.isNotPartyDoc);
+      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
+      var partyDocs = _.filter(app.documents, util.isPartyDoc);
+      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
+
+      var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
+      var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
+
+      applicationModel.initValidationErrors(nonpartyDocErrors.concat(partyDocErrors));
+
+      docgen.displayDocuments("#applicationDocgen", app, sortedNonpartyDocs, authorizationModel);
+      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel);
 
       // Indicators
       function sumDocIndicators(sum, doc) {

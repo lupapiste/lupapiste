@@ -556,11 +556,11 @@
           <div>
             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
 
-            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0 -->
+            <!--  ko if:  !hasIncorrectlyFilledRequiredFields() -->
               <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
             <!-- /ko -->
 
-            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length > 0 -->
+            <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
 
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
@@ -581,8 +581,7 @@
                      data-test-id="application-submit-btn"
                      data-bind="click: submitApplication,
                                 visible: $root.authorization.ok('submit-application'),
-                                enable: !processing() && !showInviteButtons() && $root.authorization.ok('submit-application') &&
-                                        (!requiredFieldsFillingObligatory() || (incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0))">
+                                enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
                <span data-bind="ltext: 'application.submitApplication'"></span>
                <span class="icon send left-align"></span>
              </button>
