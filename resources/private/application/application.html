@@ -11,22 +11,25 @@
           </span>
           <span>K e s k u s t e l u</span>
         </button>
-        <button class="btn-notice" data-bind="click: application.toggleNoticePanel">
-          <span>H u o m i o</span>
+        <button class="btn-notice" data-bind="click: application.toggleNoticePanel, visible: $root.authorization.ok('toggle-urgency')">
+          <span>H u o m i o t</span>
         </button>
       </div>
       <div class="content">
-        <div class="panel-content">
-          <div id="application-conversation-panel" data-bind="with: $root.comment, visible: application.showConversationPanel">
+        <div class="panel-content" data-bind="visible: application.showConversationPanel">
+          <div id="application-conversation-panel" data-bind="with: $root.comment">
             <h1 data-bind="ltext: 'application.tabConversation'"></h1>
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.conversationDesc'" class="panel-info"></p>
             <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
             <div class="process-nav"></div>
           </div>
         </div>
-        <!-- TODO huomio-paneeli näytetään vain viranomaisille -->
-        <div id="application-notice-panel" data-bind="visible: application.showNoticePanel">
-          HUOMIO
+        <div class="panel-content" data-bind="visible: application.showNoticePanel">
+          <!-- ko if: $root.authorization.ok('toggle-urgency') -->
+          <div id="application-notice-panel" data-bind="with: $root.notice">
+            <div data-bind="template: {name: 'notice-template', data: {notice: $root.notice}}"></div>
+          </div>
+          <!-- /ko -->
         </div>
       </div>
     </div>

@@ -6,6 +6,10 @@
   var authorizationModel = authorization.create();
   var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
   var commentModel = comments.create(true);
+  var noticeModel = {};
+  if (LUPAPISTE.NoticeModel) {
+    noticeModel = new LUPAPISTE.NoticeModel();
+  }
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
@@ -158,6 +162,11 @@
 
       // Comments
       commentModel.refresh(app);
+
+      // Notice
+      if (noticeModel.refresh) {
+        noticeModel.refresh(app);
+      }
 
       // Verdict details
       verdictModel.refresh(app, applicationDetails.authorities);
@@ -435,6 +444,7 @@
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
       comment: commentModel,
+      notice: noticeModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,

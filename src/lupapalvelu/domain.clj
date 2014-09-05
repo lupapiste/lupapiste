@@ -197,6 +197,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
+   :urgent                   false
    :verdicts                 []})
 
 

@@ -178,6 +178,9 @@
 
    :admins       {:depends [:users]}
 
+   :notice      {:js ["notice.js"]
+                 :html ["notice.html"]}
+   
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -193,7 +196,7 @@
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :authenticated :map :applications :application
+   :authority    {:depends [:common :authenticated :map :applications :notice :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
                   :js ["authority.js" "integration-error.js"]
                   :html ["index.html" "integration-error.html"]}
