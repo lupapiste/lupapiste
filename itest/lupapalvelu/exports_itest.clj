@@ -19,7 +19,7 @@
     (:status resp) => 401))
 
 (fact "With valid credentials, api returns one application"
-  (let [application-id (create-app-id pena)
+  (let [application-id (create-app-id pena :operation "markatilan-laajentaminen")
         http-resp (http/get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["solita-etl" "solita-etl"]
                      :follow-redirects false
@@ -28,7 +28,9 @@
     (:status http-resp) => 200
     resp => ok?
     (count (:applications resp)) => 1
-    (-> resp :applications first :id) => application-id)
+    (-> resp :applications first :id) => application-id
+    (fact "with price class"
+      (-> resp :applications first :operations first :priceClass) => "D"))
 
   (fact "but not if modified timestamp is too old"
     (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
