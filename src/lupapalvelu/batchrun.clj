@@ -1,5 +1,6 @@
 (ns lupapalvelu.batchrun
-  (:require [lupapalvelu.notifications :as notifications]
+  (:require [taoensso.timbre :refer [error]]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
             [clj-time.core :refer [days weeks months ago]]
@@ -158,76 +159,45 @@
 
     (mongo/disconnect!)))
 
-(defn- apps-for-orgs-with-wfs-url-defined [apps]
-  (let [match-fn (fn [target app] (some #(and
-                                           (= (:org-id %) (:organization app))
-                                           (= (:org-permit-type %) (:permitType app))) target))
-        orgs-of-apps (reduce
-                       (fn [ret app]
-                         (if (match-fn ret app)
-                           ret
-                           (conj ret {:org-id (:organization app)
-                                      :org-permit-type (:permitType app)
-                                      :wfs-url (let [url (:url (organization/get-krysp-wfs app))
-                                                     org-for-logging {:id (:organization app) :permit-type (:permitType app)}]
-                                                 (if (-> url s/blank? not)
-                                                   (if (krysp/wfs-is-alive? url)
-                                                     true
-                                                     (do
-                                                       (logging/log-event :info {:run-by "Automatic verdicts checking"
-                                                                                 :event "The Krysp WFS was not alive for organization"
-                                                                                 :organization org-for-logging})
-                                                       false))
-                                                   (do
-                                                     (logging/log-event :info {:run-by "Automatic verdicts checking"
-                                                                               :event "No Krysp WFS url defined for organization"
-                                                                               :organization org-for-logging})
-                                                     false)))})))
-                       [] apps)
-        _ (do
-            (println "\n orgs-of-apps: ")
-            (clojure.pprint/pprint orgs-of-apps)
-            (println "\n")
-            )
-
-        orgs-with-wfs-url-defined (filter :wfs-url orgs-of-apps)
-        _ (do
-            (println "\n orgs-with-wfs-url-defined: ")
-            (clojure.pprint/pprint orgs-with-wfs-url-defined)
-            (println "\n")
-            )
-        ]
-    (filter (partial match-fn orgs-with-wfs-url-defined) apps)
-    ))
-
 (defn fetch-verdics []
-  (let [apps (mongo/select :applications {:state {$in ["sent"]}})
-        apps (apps-for-orgs-with-wfs-url-defined apps)
-
-        ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))
+  (let [orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
+                                                   {$or [{:krysp.R.url {$exists true}}
+                                                         {:krysp.YA.url {$exists true}}
+                                                         {:krysp.P.url {$exists true}}
+                                                         {:krysp.MAL.url {$exists true}}
+                                                         {:krysp.VVVL.url {$exists true}}
+                                                         {:krysp.YI.url {$exists true}}
+                                                         {:krysp.YL.url {$exists true}}]}
+                                                   {:krysp 1})
+        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
+        org-ids (keys orgs-by-id)
+        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
         eraajo-user {:id "-"
                      :enabled true
                      :lastName "Er\u00e4ajo"
                      :firstName "Lupapiste"
                      :role "authority"
-                     :organizations ids-of-all-orgs}]
+                     :organizations org-ids}]
     (doall
       (pmap
-        (fn [app]
+        (fn [{:keys [id permitType organization] :as app}]
+
           (try
+            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+              (logging/with-logging-context {:applicationId id}
+                (if-not (s/blank? url)
 
-            (let [command (application->command app)
-                  verdicts-info (verdict-api/do-check-for-verdict command eraajo-user (now) (:application command))]
-              (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
-                ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
-                (let [app-owner (get-app-owner app)]
-                  (logging/with-logging-context {:applicationId (:id app) :userId (:id app-owner)}
-                    (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict" :app-owner app-owner})))
-                ;; Send email
-                (notifications/notify! :application-verdict command)))
+                  (let [command (application->command app)
+                        verdicts-info (verdict-api/do-check-for-verdict command eraajo-user (now) (:application command))]
+                    (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
+                      ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+                      (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
+                      (notifications/notify! :application-verdict command)))
 
-            (catch Exception e
-               (logging/log-event :warn {:run-by "Automatic verdicts checking" :event "Exception occured" :exception-info e}))))
+                  (logging/log-event :info {:run-by "Automatic verdicts checking"
+                                            :event "No Krysp WFS url defined for organization"
+                                            :organization {:id organization :permit-type permitType}}))))
+            (catch Exception e (error e))))
         apps))))
 
 (defn check-for-verdicts [& args]
