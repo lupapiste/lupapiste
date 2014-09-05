@@ -15,11 +15,13 @@
         </button>
       </div>
       <div class="content">
-        <div id="application-conversation-panel" data-bind="with: $root.comment, visible: application.showConversationPanel" class="panel-content">
-          <h1 data-bind="ltext: 'application.tabConversation'"></h1>
-          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.conversationDesc'" class="panel-info"></p>
-          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
-          <div class="process-nav"></div>
+        <div class="panel-content">
+          <div id="application-conversation-panel" data-bind="with: $root.comment, visible: application.showConversationPanel">
+            <h1 data-bind="ltext: 'application.tabConversation'"></h1>
+            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.conversationDesc'" class="panel-info"></p>
+            <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
+            <div class="process-nav"></div>
+          </div>
         </div>
         <!-- TODO huomio-paneeli näytetään vain viranomaisille -->
         <div id="application-notice-panel" data-bind="visible: application.showNoticePanel">
