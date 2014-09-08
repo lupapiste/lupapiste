@@ -211,12 +211,10 @@
            polttoaine   [:lammitys :lammonlahde]]
   :facts {:ok   [["ei l\u00e4mmityst\u00e4" nil]
                  ["ei l\u00e4mmityst\u00e4" ""]
-                 ["ei l\u00e4mmityst\u00e4" "ei tiedossa"]
                  ["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
-          :fail [["ei l\u00e4mmityst\u00e4" "s\u00e4hk\u00f6"]]}}
- (and
-   (= lammitystapa ei-lammitysta)
-   (not (or (s/blank? polttoaine) (= polttoaine "ei tiedossa")))))
+          :fail [["ei l\u00e4mmityst\u00e4" "s\u00e4hk\u00f6"]
+                 ["ei l\u00e4mmityst\u00e4" "ei tiedossa"]]}}
+ (and (= lammitystapa ei-lammitysta) (exists? polttoaine)))
 
 (defvalidator :vrk:CR326
   {:doc    "Kokonaisalan oltava vahintaan kerrosala"
