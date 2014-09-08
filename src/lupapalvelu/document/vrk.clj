@@ -481,13 +481,13 @@
    :level   :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             lammitystapa    [:lammitys :lammitystapa]]
-   :facts  {:ok    [["032 luhtitalot"       "uuni"]
-                    ["032 luhtitalot"       ei-lammitysta]
-                    ["032 luhtitalot"       "ei tiedossa"]
+   :facts  {:ok    [["141 ravintolat yms."  "uuni"]
+                    ["141 ravintolat yms."  ei-lammitysta]
+                    ["141 ravintolat yms."  "ei tiedossa"]
                     ["931 saunarakennukset" ei-lammitysta]
                     ["931 saunarakennukset" nil]
                     ["931 saunarakennukset" " "]]
-            :fail  [["032 luhtitalot"       nil]]}}
+            :fail  [["141 ravintolat yms."  nil]]}}
   (and (<= kayttotarkoitus 729) (not lammitystapa)))
 
 #_(defvalidator :vrk:BR203
