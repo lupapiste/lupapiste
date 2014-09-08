@@ -3,10 +3,21 @@
 <body>
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
-    	<div data-bind="with: $data.notice">
-    		<input type="checkbox" id="urgent-application" data-bind="checked: urgent"></input>
-    		<label for="urgent-application">Kiireellinen hakemus</label>
-    	</div>
+      <div data-bind="with: $data.notice">
+        <div class="urgent-toggle">
+          <input type="checkbox" id="urgent-application" data-bind="checked: urgent"></input>
+          <label for="urgent-application">Kiireellinen hakemus</label>
+          <span class="icon urgent"></span>
+        </div>
+        <h3>Viranomaisen huomiot (eivät näy hakijalle): </h3>
+        <textarea
+          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: authorityNotice, valueUpdate: 'afterkeydown'"
+          data-test-id="application-authority-notice"
+          class="form-input textarea"
+          rows="100"
+          maxlength="4000">
+        </textarea>
+      </div>
     </script>
   </section>
 </body>

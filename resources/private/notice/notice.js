@@ -5,19 +5,41 @@ LUPAPISTE.NoticeModel = function() {
 
   self.applicationId = null;
   self.urgent = ko.observable();
-  self.text = ko.observable();
+  self.authorityNotice = ko.observable();
 
-  self.urgent.subscribe(function(value) {
-    console.log(value, self.applicationId);
-    ajax
-      .command("toggle-urgent", {
-        id: self.applicationId,
-        urgent: value})
-      .call();
-  })
+  var subscibtions = [];
+  var subscribe = function() {
+    subscibtions.push(self.urgent.subscribe(_.debounce(function(value) {
+      ajax
+        .command("toggle-urgent", {
+          id: self.applicationId,
+          urgent: value})
+        .call();
+    }, 500)));
+
+    subscibtions.push(self.authorityNotice.subscribe(_.debounce(function(value) {
+      ajax
+        .command("add-authority-notice", {
+          id: self.applicationId,
+          authorityNotice: value})
+        .call();
+    }, 500)));
+  };
+
+  var unsubscribe = function() {
+    while(subscibtions.length != 0) {
+      subscibtions.pop().dispose();
+    }
+  }
+
+  subscribe();
 
   self.refresh = function(application) {
+    // unsubscribe so that refresh does not trigger save
+    unsubscribe();
     self.applicationId = application.id;
     self.urgent(application.urgent);
+    self.authorityNotice(application.authorityNotice);
+    subscribe();
   };
 };
