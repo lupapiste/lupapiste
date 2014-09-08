@@ -92,7 +92,8 @@
   (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
 
 (facts "Add operation allowed"
-  (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen}
+  (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
+                          :tonttijaon-hakeminen :tontin-lohkominen :rasitetoimitus :tonttijaon-muutoksen-hakeminen :rajannayton-hakeminen :halkominen}
         error {:ok false :text "error.add-operation-not-allowed"}]
     (doseq [operation lupapalvelu.operations/operations]
       (let [op (first operation)
