@@ -733,7 +733,7 @@
             :approvable true
             :order 2
             :type :location}
-     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavaste")}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste")}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body aloitusoikeus}

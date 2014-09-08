@@ -15,17 +15,6 @@ kiinteiston-muodostus._group_label: Kuvas
 kiinteiston-muodostus.kuvaus: Kuvaus
 tonttijaon-hakeminen._group_label: Tontti jako
 kiinteisto._group_label: Kohteena oleva kiinteistö
-kiinteisto.hallintaperuste._group_label: Hallintaperuste
-kiinteisto.hallintaperuste.ei tiedossa: Ei tiedossa
-kiinteisto.hallintaperuste.oma: Oma
-kiinteisto.hallintaperuste.vuokra: Vuokrattu
-kiinteisto.kaavanaste._group_label: Kaavallinen valmiusaste
-kiinteisto.kaavanaste.asema: Asemakaava
-kiinteisto.kaavanaste.ei kaavaa: Ei kaavaa
-kiinteisto.kaavanaste.ei tiedossa: Ei tiedossa
-kiinteisto.kaavanaste.rakennus: Rakennuskaava
-kiinteisto.kaavanaste.ranta: Rantakaava
-kiinteisto.kaavanaste.yleis: Yleiskaava
 kiinteisto.kiinteisto._group_label: Kiinteistö
 kiinteisto.kiinteisto.kiinteistotunnus: Kiinteistötunnus
 kiinteisto.kiinteisto.kylaNimi: Kylän tai kaupunginosan nimi
