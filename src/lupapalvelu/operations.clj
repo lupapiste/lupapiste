@@ -135,7 +135,7 @@
   ["kiinteiston-muodostus"
    [["tonttijaon-hakeminen" :tonttijaon-hakeminen]
     ["tonttijaon-muutoksen-hakeminen" :tonttijaon-muutoksen-hakeminen]
-    ["tontin-lohkominen :tontin-lohkominen"]
+    ["tontin-lohkominen" :tontin-lohkominen ]
     ["tilan-rekisteroiminen-tontiksi" :tilan-rekisteroiminen-tontiksi]
     ["yhdistaminen" :yhdistaminen]
     ["halkominen" :halkominen]

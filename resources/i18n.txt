@@ -47,3 +47,10 @@ rasitetoimitus._group_label: Rasitetoimitus
 tilan-rekisteroiminen-tontiksi._group_label: Tilan rekisteröiminen tontikksi
 tonttijaon-muutoksen-hakeminen._group_label: Tonttijaon muutoksen hakeminen
 yhdistaminen._group_label: Yhdistäminen
+
+operations.tree.tontin-lohkominen: Tontin lohkominen
+operations.tontin-lohkominen: Tontin lohkominen
+operations.tontin-lohkominen.desc:
+operations.tree.tontin-lohkominen: Tontin lohkominen
+operations.tontin-lohkominen:  Tontin lohkominen
+tontin-lohkominen._group_label:
