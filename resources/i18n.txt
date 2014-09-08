@@ -11,8 +11,8 @@ operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
 operations.rajannayton-hakeminen: Rajanäytön hakeminen
 operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
 operations.tonttijaon-hakeminen: Tonttijaon hakeminen
-kiinteiston-muodostus._group_label: Kuvas
-kiinteiston-muodostus.kuvaus: Kuvaus
+kiinteiston-muodostus._group_label: Perustelut
+kiinteiston-muodostus.kuvaus: Perustelut
 tonttijaon-hakeminen._group_label: Tontti jako
 kiinteisto._group_label: Kohteena oleva kiinteistö
 kiinteisto.kiinteisto._group_label: Kiinteistö
