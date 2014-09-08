@@ -168,6 +168,7 @@
    :attachments              []
    :auth                     []
    :authority                {}
+   :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp
    :closedBy                 {}

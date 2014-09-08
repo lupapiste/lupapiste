@@ -11,3 +11,8 @@
   [command]
   (update-application command {$set {:urgent urgent}}))
 
+(defcommand add-authority-notice
+  {:parameters [id authorityNotice]
+   :roles [:authority]}
+  [command]
+  (update-application command {$set {:authorityNotice authorityNotice}}))
