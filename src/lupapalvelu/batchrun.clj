@@ -9,7 +9,7 @@
             [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.core :refer [now]]
+            [lupapalvelu.core :refer [now ok?]]
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.verdict-api :as verdict-api]
