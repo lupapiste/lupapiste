@@ -558,11 +558,27 @@
 
             <!--  ko if:  !hasIncorrectlyFilledRequiredFields() -->
               <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
+              <button class="btn btn-primary"
+                       data-test-id="application-submit-btn"
+                       data-bind="click: submitApplication,
+                                  visible: $root.authorization.ok('submit-application'),
+                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
+                 <span data-bind="ltext: 'application.submitApplication'"></span>
+                 <span class="icon send left-align"></span>
+               </button>
             <!-- /ko -->
 
             <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
-
+              <i data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() || hasIncorrectlyFilledRequiredFields()"></i><br>
+              <button class="btn btn-primary"
+                       data-test-id="application-submit-btn"
+                       data-bind="click: submitApplication,
+                                  visible: $root.authorization.ok('submit-application'),
+                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
+                 <span data-bind="ltext: 'application.submitApplication'"></span>
+                 <span class="icon send left-align"></span>
+               </button>
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
                   <div data-bind="with: $data[0]">
                     <h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3>
@@ -577,14 +593,7 @@
                 <!-- /ko -->
             <!-- /ko -->
 
-             <button class="btn btn-primary"
-                     data-test-id="application-submit-btn"
-                     data-bind="click: submitApplication,
-                                visible: $root.authorization.ok('submit-application'),
-                                enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
-               <span data-bind="ltext: 'application.submitApplication'"></span>
-               <span class="icon send left-align"></span>
-             </button>
+             
           </div>
 
           <div class="process-nav">
