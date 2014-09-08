@@ -587,39 +587,32 @@
           <div>
             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
 
-            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0 -->
+            <!--  ko if:  !hasIncorrectlyFilledRequiredFields() -->
               <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
             <!-- /ko -->
 
-            <!--  ko if:  incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length > 0 -->
+            <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
 
-              <table>
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
-                  <thead>
-                    <tr data-bind="with: $data[0]">
-                      <td colspan="3"><h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3></td>
-                    </tr>
-                  </thead>
+                  <div data-bind="with: $data[0]">
+                    <h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3>
+                  </div>
                   <!-- ko foreach: $data -->
-                  <tbody>
-                      <tr class="required-field-error-element-row">
-                        <td><span class="missing icon"></span></td>
-                        <td><span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span></td>
-                        <td>[<a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>]</td>
-                      </tr>
-                  </tbody>
+                  <div class="requiredField-line">
+                    <span class="missing icon"></span>
+                    <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                    <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+                  </div>
                   <!-- /ko -->
                 <!-- /ko -->
-              </table>
             <!-- /ko -->
 
              <button class="btn btn-primary"
                      data-test-id="application-submit-btn"
                      data-bind="click: submitApplication,
                                 visible: $root.authorization.ok('submit-application'),
-                                enable: !processing() && !showInviteButtons() && $root.authorization.ok('submit-application') &&
-                                        (!requiredFieldsFillingObligatory() || (incorrectlyFilledRequiredFields() && incorrectlyFilledRequiredFields().length == 0))">
+                                enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
                <span data-bind="ltext: 'application.submitApplication'"></span>
                <span class="icon send left-align"></span>
              </button>

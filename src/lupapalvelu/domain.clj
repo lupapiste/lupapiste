@@ -91,13 +91,19 @@
 
 (defn get-documents-by-name
   "returns document from application by schema name"
-  [application schema-name]
-  (filter (comp (partial = schema-name) :name :schema-info) (:documents application)))
+  [{documents :documents} schema-name]
+  (filter (comp (partial = schema-name) :name :schema-info) documents))
 
 (defn get-document-by-name
   "returns first document from application by schema name"
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
+
+(defn get-document-by-operation
+  "returns first document from application that is associated with the operation"
+  [{documents :documents} operation]
+  (let [op-id (if (map? operation) (:id operation) operation)]
+    (first (filter #(= op-id (get-in % [:schema-info :op :id])) documents))))
 
 (defn get-applicant-documents
   "returns applicant documents from application"

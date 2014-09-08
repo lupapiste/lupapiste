@@ -81,7 +81,7 @@
                                                 :default lammitystapa)
                                 :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
                                             :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
-                                            :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                                            :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
                                             :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
                                             :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
                                             :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
