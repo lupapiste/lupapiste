@@ -1,0 +1,60 @@
+operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
+operations.tree.tonttijaon-hakeminen: Tonttijaon hakeminen
+operations.tree.tonttijaon-muutoksen-hakeminen: Tonttijaon muutoksen hakeminen
+operations.tree.tilan-rekisteroiminen-tontiksi: Tilan rekisteröinti tontiksi
+operations.tree.yhdistaminen: Yhdistäminen
+operations.tree.halkominen: Halkominen
+operations.tree.rasitetoimitus: Rasitetoimitus
+operations.tree.rajankaynnin-hakeminen: Rajakäynnin hakeminen
+operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
+operations.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.tonttijaon-hakeminen: Tonttijaon hakeminen
+kiinteiston-muodostus._group_label: Kuvas
+kiinteiston-muodostus.kuvaus: Kuvaus
+tonttijaon-hakeminen._group_label: Tontti jako
+kiinteisto._group_label: Kohteena oleva kiinteistö
+kiinteisto.hallintaperuste._group_label: Hallintaperuste
+kiinteisto.hallintaperuste.ei tiedossa: Ei tiedossa
+kiinteisto.hallintaperuste.oma: Oma
+kiinteisto.hallintaperuste.vuokra: Vuokrattu
+kiinteisto.kaavanaste._group_label: Kaavallinen valmiusaste
+kiinteisto.kaavanaste.asema: Asemakaava
+kiinteisto.kaavanaste.ei kaavaa: Ei kaavaa
+kiinteisto.kaavanaste.ei tiedossa: Ei tiedossa
+kiinteisto.kaavanaste.rakennus: Rakennuskaava
+kiinteisto.kaavanaste.ranta: Rantakaava
+kiinteisto.kaavanaste.yleis: Yleiskaava
+kiinteisto.kiinteisto._group_label: Kiinteistö
+kiinteisto.kiinteisto.kiinteistotunnus: Kiinteistötunnus
+kiinteisto.kiinteisto.kylaNimi: Kylän tai kaupunginosan nimi
+kiinteisto.kiinteisto.maapintaala: Maapinta-ala
+kiinteisto.kiinteisto.maaraalaTunnus: Määräalan tunnus (jos kyseessä määräala)
+kiinteisto.kiinteisto.kiinteisto.huoneistonTyyppi._group_label: Huoneiston tyyppi
+kiinteisto.kiinteisto.rantaKytkin: kiinteisto sijaitsee rannalla
+kiinteisto.kiinteisto.rekisterointipvm: Rekisteröintipäivä
+kiinteisto.kiinteisto.tilanNimi: Tilan nimi
+kiinteisto.kiinteisto.vesipintaala: Vesipinta-ala
+halkominen._group_label: Halkominen
+operations.halkominen: Halkominen
+operations.halkominen.desc:
+operations.rajankaynnin-hakeminen: Rajakäynnin hakeminen
+operations.rajankaynnin-hakeminen.desc:
+operations.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.rajannayton-hakeminen.desc:
+operations.rasitetoimitus: Rasitetoimitus
+operations.rasitetoimitus.desc:
+operations.tilan-rekisteroiminen-tontiksi: Tilan rekisteröiminen tontiksi
+operations.tilan-rekisteroiminen-tontiksi.desc:
+operations.tonttijaon-hakeminen.desc:
+operations.tonttijaon-muutoksen-hakeminen: Tonttijaon hakeminen
+operations.tonttijaon-muutoksen-hakeminen.desc: Tonttijaon muutoksen hakeminen
+operations.yhdistaminen: Yhdistäminen
+operations.yhdistaminen.desc:
+rajankaynnin-hakeminen._group_label: Rajakäynnin hakeminen
+rajannayton-hakeminen._group_label: Rajanäytön hakeminen
+rasitetoimitus._group_label: Rasitetoimitus
+tilan-rekisteroiminen-tontiksi._group_label: Tilan rekisteröiminen tontikksi
+tonttijaon-muutoksen-hakeminen._group_label: Tonttijaon muutoksen hakeminen
+yhdistaminen._group_label: Yhdistäminen
