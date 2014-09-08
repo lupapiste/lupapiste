@@ -188,8 +188,8 @@
                 (if-not (s/blank? url)
 
                   (let [command (application->command app)
-                        verdicts-info (verdict-api/do-check-for-verdict command eraajo-user (now) (:application command))]
-                    (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
+                        resp (verdict-api/do-check-for-verdict command eraajo-user (now) (:application command))]
+                    (when (and (ok? resp) (:verdictCount resp) (pos? (:verdictCount resp)))
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
                       (notifications/notify! :application-verdict command)))
