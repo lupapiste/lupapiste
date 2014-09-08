@@ -230,8 +230,11 @@
              {:name "merkittavyys":type :group
               :body [{:name "rakentamisen_vaikutusten_merkittavyys" :type :text :max-len 4000 :layout :full-width}]}]})
 
-(def poikkeusasian-rakennuspaikka {:info {:name "poikkeusasian-rakennuspaikka" :i18name "rakennuspaikka" :approvable true
-                                          :order 2}
+(def poikkeusasian-rakennuspaikka {:info {:name "poikkeusasian-rakennuspaikka"
+                                          :i18name "rakennuspaikka"
+                                          :approvable true
+                                          :order 2
+                                          :type :location}
                                    :body rakennuspaikka})
 
 (defschemas
