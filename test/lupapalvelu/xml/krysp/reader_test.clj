@@ -197,7 +197,13 @@
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
-    (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
+    (fact "case has no verdicts" (-> cases last :paatokset count) => 0)
+
+    ; In verdict-api.clj
+    (testable-privates lupapalvelu.verdict-api get-verdicts-with-attachments)
+    (fact "No verdicts found in the attachemnt parsing phase"
+      (count (get-verdicts-with-attachments {} {} 123 xml)) => 0)
+    ))
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
