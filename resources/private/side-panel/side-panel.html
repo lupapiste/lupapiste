@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="side-panel-template">
+    <div id="side-panel-overlay" data-bind="click: hideSidePanel" class="hide-side-panel"></div>
+    <div id="side-panel" class="hide-side-panel">
+      <div class="buttons">
+        <button class="btn-conversation" data-bind="click: toggleConversationPanel">
+          <span data-bind="if: unseenComments">
+            <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
+          </span>
+          <span class="btn-title" data-bind="ltext: 'conversation.title'"></span>
+        </button>
+        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('toggle-urgent')">
+          <span class="btn-title" data-bind="ltext: 'notice.title'"></span>
+        </button>
+      </div>
+      <div class="content">
+        <div class="panel-content" data-bind="visible: showConversationPanel">
+          <div id="application-conversation-panel">
+            <h1 data-bind="ltext: 'application.tabConversation'"></h1>
+            <p data-bind="lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
+            <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: true}}"></div>
+            <div class="process-nav"></div>
+          </div>
+        </div>
+        <div class="panel-content" data-bind="visible: showNoticePanel">
+          <!-- ko if: authorization.ok('toggle-urgent') -->
+          <div id="application-notice-panel">
+            <div data-bind="template: {name: 'notice-template', data: notice}"></div>
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

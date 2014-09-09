@@ -126,7 +126,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites]
+   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "application-model.js" "application.js"]
@@ -178,8 +178,11 @@
 
    :admins       {:depends [:users]}
 
-   :notice      {:js ["notice.js"]
-                 :html ["notice.html"]}
+   :notice       {:js ["notice.js"]
+                  :html ["notice.html"]}
+   
+   :side-panel   {:js ["side-panel.js"]
+                  :html ["side-panel.html"]}
    
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
