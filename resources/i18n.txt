@@ -2,5 +2,5 @@ applications.urgent:
 notice.title: Huomiot
 notice.prompt: Viranomaisten huomiot
 notice.prompt.info: eivät näy hakijalla
-notice.urgent: Kiirreellinen hakemus
+notice.urgent: Kiireellinen hakemus
 conversation.title: Keskustelu
