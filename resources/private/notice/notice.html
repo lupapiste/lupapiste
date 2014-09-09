@@ -3,13 +3,14 @@
 <body>
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
+      <!-- ko if: $data.notice -->
       <div data-bind="with: $data.notice">
         <div class="urgent-toggle">
           <input type="checkbox" id="urgent-application" data-bind="checked: urgent"></input>
-          <label for="urgent-application">Kiireellinen hakemus</label>
+          <label for="urgent-application" data-bind="ltext: 'notice.urgent'"></label>
           <span class="icon urgent"></span>
         </div>
-        <h3>Viranomaisen huomiot (eivät näy hakijalle): </h3>
+        <h3><span data-bind="ltext: 'notice.prompt'"/> (<span data-bind="ltext: 'notice.prompt.info'"/>): </h3>
         <textarea
           data-bind="attr: {placeholder: loc('comment.placeholder')}, value: authorityNotice, valueUpdate: 'afterkeydown'"
           data-test-id="application-authority-notice"
@@ -18,6 +19,7 @@
           maxlength="4000">
         </textarea>
       </div>
+    <!-- /ko -->
     </script>
   </section>
 </body>
