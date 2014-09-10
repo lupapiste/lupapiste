@@ -30,7 +30,7 @@ var comments = (function() {
     };
 
     self.disabled = ko.computed(function() {
-      return self.processing() || _.isEmpty(self.text());
+      return self.processing() || _.isEmpty(_.trim(self.text()));
     });
 
 
