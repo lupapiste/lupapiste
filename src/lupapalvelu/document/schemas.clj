@@ -424,7 +424,7 @@
                               {:name "uuni"}
                               {:name "ei l\u00e4mmityst\u00e4"}
                               {:name "ei tiedossa"}]}
-                      {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
+                      {:name "lammonlahde" :type :select :other-key "muu-lammonlahde"
                        :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                               {:name "kevyt poltto\u00f6ljy"}
                               {:name "raskas poltto\u00f6ljy"}

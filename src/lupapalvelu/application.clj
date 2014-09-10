@@ -827,7 +827,8 @@
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
   [{application :application}]
-  (do-add-link-permit application (ss/trim linkPermitId)))
+  (do-add-link-permit application (ss/trim linkPermitId))
+  (ok))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
