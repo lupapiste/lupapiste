@@ -124,15 +124,11 @@ $(function() {
   // Help registering company:
 
   $("<div>")
-    .css("background", "#f88")
-    .css("padding", "12px")
+    .css("padding", "8px")
     .css("margin-top", "20px")
-    .append($("<span>")
-      .css("color", "white")
-      .html("DEBUG:"))
     .append($("<button>")
       .addClass("btn btn-decline")
-      .html("AUTO FILL")
+      .html("DEBUG: Auto fill")
       .click(function() {
         var form = $("#register-company .form-group"),
             fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); },
