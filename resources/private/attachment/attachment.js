@@ -230,7 +230,6 @@ var attachment = (function() {
     authorizationModel.refresh(application, {attachmentId: attachmentId});
 
     // Side Panel
-    console.log("refresh side panel from ataachment");
     sidePanelModel.refresh(application, applicationDetails.authorities, {comments: {type: "attachment", id: attachmentId}});
 
     pageutil.hideAjaxWait();

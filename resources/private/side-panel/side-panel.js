@@ -31,11 +31,9 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles
   }
 
   self.refresh = function(application, authorities, opts) {
-    console.log("refresh side-panel", application, authorizationModel, authorities, opts, newCommentRoles);
     self.applicationId(application.id);
     self.infoRequest(application.infoRequest);
     self.unseenComments(application.unseenComments);
-    // Notice
     if (self.notice().refresh) {
       self.notice().refresh(application);
     }

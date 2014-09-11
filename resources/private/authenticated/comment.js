@@ -15,17 +15,13 @@ var comments = (function() {
     self.showPreparationComments = ko.observable(false);
 
     self.refresh = function(application, target) {
-      console.log("refresh comments", target);
       self.applicationId = application.id;
       self.target(target || {type: "application"}).text("");
-      console.log("target", self.target());
       var filteredComments =
         _.filter(application.comments,
-            function(comment) {
-              console.log("filter", self.target().type === comment.target.type, self.target().id === comment.target.id, takeAll);
-              return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
-            });
-      console.log("commentsit", filteredComments);
+          function(comment) {
+            return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
+          });
       self.comments(ko.mapping.fromJS(filteredComments));
     };
 

@@ -161,7 +161,6 @@
       // commentModel.refresh(app);
 
       // Side Panel
-      console.log("refresh side panel from application");
       sidePanelModel.refresh(app, applicationDetails.authorities);
 
       // Verdict details
