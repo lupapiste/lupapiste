@@ -20,6 +20,8 @@
   var model = new Model();
   var editModel = new EditModel();
   var ownersModel = new OwnersModel();
+  var authorizationModel = authorization.create();
+  var sidePanelModel = new LUPAPISTE.SidePanelModel(authorizationModel);
 
   function Model() {
     var self = this;
@@ -305,14 +307,19 @@
     repository.load(applicationId);
   });
 
-  repository.loaded(["neighbors"], function(application) {
-    if (applicationId === application.id) { model.init(application); }
+  repository.loaded(["neighbors"], function(application, applicationDetails) {
+    if (applicationId === application.id) {
+      model.init(application);
+      authorizationModel.refresh(application);
+      sidePanelModel.refresh(application, applicationDetails.authorities);
+    }
   });
 
   $(function() {
     $("#neighbors-content").applyBindings(model);
     $("#dialog-edit-neighbor").applyBindings(editModel).find("form").placeholderize();
     $("#dialog-select-owners").applyBindings(ownersModel);
+    $("#neighbors-side-panel").applyBindings({sidePanel: sidePanelModel});
   });
 
 })();

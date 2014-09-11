@@ -145,7 +145,7 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
-   :neighbors    {:depends [:common :repository]
+   :neighbors    {:depends [:common :repository :side-panel]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
 
